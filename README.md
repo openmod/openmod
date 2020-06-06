@@ -9,6 +9,7 @@ OpenMod is based on modern C# code and best practices.
 - Plugin installation with [NuGet](https://nuget.org)
 - Based on [.NET Generic Host](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host)
 - IoC and Dependency Injection using Autofac
+- [UniTask](https://github.com/Cysharp/UniTask) integration for Unity based games
 - Configure OpenMod and plugins with yaml configurations, environment variables, commandline arguments, etc.
 - Serilog for logging, including rich configuration options via logging.yml
 - Scripting (todo)
