@@ -3,7 +3,7 @@
 namespace OpenMod.API.Ioc
 {
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-    public class ServiceAttribute : Attribute
+    public sealed class ServiceAttribute : Attribute
     {
 
     }

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
-using Autofac;
 using Microsoft.Extensions.Hosting;
+using OpenMod.API.Ioc;
 using Semver;
 
 namespace OpenMod.API
@@ -11,6 +11,7 @@ namespace OpenMod.API
     /// <summary>
     ///     Defines the OpenMod Runtime. This class is responsible for initializing OpenMod.
     /// </summary>
+    [Service]
     public interface IRuntime
     {
         /// <summary>
@@ -28,6 +29,16 @@ namespace OpenMod.API
         ///     Gets the OpenMod runtime version.
         /// </summary>
         SemVersion Version { get; }
+
+        /// <summary>
+        ///    Path to the OpenMod directory.
+        /// </summary>
+        string WorkingDirectory { get; }
+
+        /// <summary>
+        ///    Commandline arguments.
+        /// </summary>
+        string[] CommandlineArgs { get; }
     }
 
     public struct RuntimeInitParameters

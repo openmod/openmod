@@ -5,7 +5,7 @@ using OpenMod.API.Helpers.Prioritization;
 namespace OpenMod.API.Ioc
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class ServiceImplementationAttribute : Attribute
+    public sealed class ServiceImplementationAttribute : Attribute
     {
         public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
 

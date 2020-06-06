@@ -7,6 +7,6 @@ namespace OpenMod.NuGet
     {
         public string AssemblyName { get; set; }
         public Version Version { get; set; }
-        public Assembly Assembly { get; set; }
+        public WeakReference Assembly { get; set; }
     }
 }

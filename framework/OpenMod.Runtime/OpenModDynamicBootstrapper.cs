@@ -14,7 +14,7 @@ namespace OpenMod.Runtime
     // OpenMod is not loaded at this sage.
     /// <summary>
     ///     This class is responsible for downloading OpenMod.Core, OpenMod.API, the host package and their dependencies. <br/>
-    ///     After download, it will boot RocketMod and then initialize the IHost interface.
+    ///     After download, it will boot OpenMod and then initialize the IOpenModHost interface.
     /// </summary>
     public class OpenModDynamicBootstrapper
     {
@@ -64,16 +64,16 @@ namespace OpenMod.Runtime
             foreach (var packageId in packageIds)
             {
                 PackageIdentity packageIdentity;
-                if (!await nugetInstaller.PackageExistsAsync(packageId))
+                if (!await nugetInstaller.IsPackageInstalledAsync(packageId))
                 {
                     logger.LogInformation("Searching for: " + packageId);
-                    var rocketPackage = await nugetInstaller.QueryPackageExactAsync(packageId, null, allowPrereleaseVersions);
+                    var openModPackage = await nugetInstaller.QueryPackageExactAsync(packageId, null, allowPrereleaseVersions);
 
-                    logger.LogInformation($"Downloading {rocketPackage.Identity.Id} v{rocketPackage.Identity.Version} via NuGet, this might take a while...");
-                    var installResult = await nugetInstaller.InstallAsync(rocketPackage.Identity, allowPrereleaseVersions);
+                    logger.LogInformation($"Downloading {openModPackage.Identity.Id} v{openModPackage.Identity.Version} via NuGet, this might take a while...");
+                    var installResult = await nugetInstaller.InstallAsync(openModPackage.Identity, allowPrereleaseVersions);
                     if (installResult.Code != NuGetInstallCode.Success)
                     {
-                        logger.LogInformation($"Downloading has failed for {rocketPackage.Identity.Id}: " + installResult.Code);
+                        logger.LogInformation($"Downloading has failed for {openModPackage.Identity.Id}: " + installResult.Code);
                         return;
                     }
 
@@ -96,7 +96,7 @@ namespace OpenMod.Runtime
         private async Task<IEnumerable<Assembly>> LoadPackageAsync(NuGetPackageManager packageManager, PackageIdentity identity)
         {
             var pkg = packageManager.GetNugetPackageFile(identity);
-            return await packageManager.LoadAssembliesFromNugetPackageAsync(pkg);
+            return await packageManager.LoadAssembliesFromNuGetPackageAsync(pkg);
         }
 
         private async Task InitializeRuntimeAsync(List<Assembly> hostAssemblies, string workingDirectory, string[] commandlineArgs)

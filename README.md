@@ -30,15 +30,15 @@ OpenMod is currently work-in-progress, hence a downloadable version does not exi
 - [x] Dynamic bootstrapping
 - [x] Projects
 - [x] Unturned Module
-- [ ] Plugins (dll / NuGet)
+- [x] Plugins (dll / NuGet)
 - [ ] Plugin configurations & translations
-- [ ] Scheduling (?)
+- [ ] Scheduling
 - [ ] Eventing
-- [ ] Economy
+- [ ] Economy interfaces
 - [ ] Permissions implementations
 - [ ] Command framework (CommandContext, CommandActor, etc.)
+- [ ] Players
 - [ ] RM 4 Bridge
-- [ ] Entities / Players
 - [ ] RCON
 - [ ] Scripting
 - [ ] Standalone console implementation

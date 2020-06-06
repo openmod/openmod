@@ -18,7 +18,7 @@ using NuGet.Resolver;
 
 namespace OpenMod.NuGet
 {
-    public class NuGetPackageManager
+    public class NuGetPackageManager : IDisposable
     {
         private readonly ILogger m_Logger;
         private readonly string m_PackagesDirectory;
@@ -118,7 +118,7 @@ namespace OpenMod.NuGet
             }
         }
 
-        public virtual async Task<bool> PackageExistsAsync(string packageId)
+        public virtual async Task<bool> IsPackageInstalledAsync(string packageId)
         {
             return (await GetLatestPackageIdentityAsync(packageId)) != null;
         }
@@ -211,13 +211,18 @@ namespace OpenMod.NuGet
                                       => PackageIdentityComparer.Default.Equals(x, p)));
         }
 
-        public virtual async Task<IEnumerable<Assembly>> LoadAssembliesFromNugetPackageAsync(string nupkgFile)
+        public virtual async Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageAsync(string nupkgFile)
         {
             var fullPath = Path.GetFullPath(nupkgFile).ToLower();
 
             if (m_LoadedPackageAssemblies.ContainsKey(fullPath))
             {
-                return m_LoadedPackageAssemblies[fullPath].Select(d => d.Assembly);
+                if (m_LoadedPackageAssemblies[fullPath].All(d => d.Assembly.IsAlive))
+                {
+                    return m_LoadedPackageAssemblies[fullPath].Select(d => d.Assembly.Target).Cast<Assembly>();
+                }
+
+                m_LoadedPackageAssemblies.Remove(fullPath);
             }
 
             List<CachedNuGetAssembly> assemblies = new List<CachedNuGetAssembly>();
@@ -243,7 +248,7 @@ namespace OpenMod.NuGet
                         nupkg = GetNugetPackageFile(latestInstalledVersion);
                     }
 
-                    await LoadAssembliesFromNugetPackageAsync(nupkg);
+                    await LoadAssembliesFromNuGetPackageAsync(nupkg);
                 }
             }
 
@@ -274,7 +279,7 @@ namespace OpenMod.NuGet
 
                             assemblies.Add(new CachedNuGetAssembly
                             {
-                                Assembly = asm,
+                                Assembly = new WeakReference(asm),
                                 AssemblyName = name,
                                 Version = parsedVersion
                             });
@@ -295,7 +300,7 @@ namespace OpenMod.NuGet
 
             m_LoadedPackageAssemblies.Add(fullPath, assemblies);
             packageReader.Dispose();
-            return assemblies.Select(d => d.Assembly);
+            return assemblies.Select(d => d.Assembly.Target).Cast<Assembly>();
         }
 
         public virtual async Task<PackageIdentity> GetLatestPackageIdentityAsync(string packageId)
@@ -379,32 +384,37 @@ namespace OpenMod.NuGet
             }
         }
 
-        private void InstallAssemblyResolver()
+        public void InstallAssemblyResolver()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += delegate (object sender, ResolveEventArgs args)
+            AppDomain.CurrentDomain.AssemblyResolve += OnAsssemlbyResolve;
+            m_AssemblyResolverInstalled = true;
+        }
+
+        private Assembly OnAsssemlbyResolve(object sender, ResolveEventArgs args)
+        {
+            var name = GetVersionIndependentName(args.Name, out string version);
+            var parsedVersion = new Version(version);
+
+            var exactMatch = m_LoadedPackageAssemblies
+                .Values.SelectMany(d => d)
+                .FirstOrDefault(d => d.Assembly.IsAlive && d.AssemblyName == name && d.Version == parsedVersion);
+
+            if (exactMatch != null)
             {
-                var name = GetVersionIndependentName(args.Name, out string version);
-                var parsedVersion = new Version(version);
+                return (Assembly)exactMatch.Assembly.Target;
+            }
 
-                var exactMatch = m_LoadedPackageAssemblies
-                                 .Values.SelectMany(d => d)
-                                 .FirstOrDefault(d => d.AssemblyName == name && d.Version == parsedVersion);
+            var matchingAssemblies =
+                m_LoadedPackageAssemblies.Values.SelectMany(d => d)
+                    .Where(d => d.Assembly.IsAlive && d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
+                    .OrderByDescending(d => d.Version);
 
-                if (exactMatch != null)
-                {
-                    return exactMatch.Assembly;
-                }
-
-                var matchingAssemblies =
-                    m_LoadedPackageAssemblies.Values.SelectMany(d => d)
-                        .Where(d => d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
-                        .OrderByDescending(d => d.Version);
-
-                return matchingAssemblies.FirstOrDefault()?.Assembly;
-            };
+            return (Assembly) matchingAssemblies.FirstOrDefault()?.Assembly.Target;
         }
 
         private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
+        private bool m_AssemblyResolverInstalled;
+
         protected static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
         {
             var match = s_VersionRegex.Match(fullAssemblyName);
@@ -412,16 +422,32 @@ namespace OpenMod.NuGet
             return s_VersionRegex.Replace(fullAssemblyName, "");
         }
 
-        public async Task<bool> RemoveAsync(PackageIdentity package)
+        public Task<bool> RemoveAsync(PackageIdentity package)
         {
             var installDir = m_PackagePathResolver.GetInstallPath(package);
             if (installDir == null || !Directory.Exists(installDir))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             Directory.Delete(installDir, true);
-            return true;
+            return Task.FromResult(true);
+        }
+
+        public void Dispose()
+        {
+            if (m_AssemblyResolverInstalled)
+            {
+                AppDomain.CurrentDomain.AssemblyResolve -= OnAsssemlbyResolve;
+                m_AssemblyResolverInstalled = false;
+            }
+
+            foreach (var kv in m_LoadedPackageAssemblies)
+            {
+                kv.Value?.Clear();
+            }
+
+            m_LoadedPackageAssemblies.Clear();
         }
     }
 }

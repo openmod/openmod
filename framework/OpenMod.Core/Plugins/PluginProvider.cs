@@ -1,7 +1,11 @@
-﻿namespace OpenMod.Core.Plugins
+﻿using System.Collections.Generic;
+using System.Reflection;
+using System.Threading.Tasks;
+
+namespace OpenMod.Core.Plugins
 {
-    public class PluginProvider
+    public abstract class PluginProvider
     {
-        
+        public abstract Task<ICollection<Assembly>> LoadPluginAssembliesAsync();
     }
 }

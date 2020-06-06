@@ -6,25 +6,24 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Autofac.Util;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json.Linq;
 using OpenMod.API;
 using OpenMod.Core.Helpers;
 using Semver;
 using Serilog;
-using Serilog.Events;
 
 namespace OpenMod.Runtime
 {
     [UsedImplicitly]
-    public sealed class Runtime : IRuntime
+    public sealed class Runtime : IRuntime, IOpenModComponent
     {
         public string WorkingDirectory { get; private set; }
+        public string[] CommandlineArgs { get; private set; }
+
         private IHost m_Host;
 
         public void Init(ICollection<Assembly> openModAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters)
@@ -35,7 +34,10 @@ namespace OpenMod.Runtime
 
         public async Task InitAsync(ICollection<Assembly> openModHostAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters)
         {
-            SetupSerilog("logging.yml", parameters.WorkingDirectory, parameters.CommandlineArgs);
+            WorkingDirectory = parameters.WorkingDirectory;
+            CommandlineArgs = parameters.CommandlineArgs;
+
+            SetupSerilog();
             Log.Information("OpenMod is starting...");
 
             try
@@ -46,8 +48,7 @@ namespace OpenMod.Runtime
                     Directory.CreateDirectory(parameters.WorkingDirectory);
                 }
 
-                WorkingDirectory = parameters.WorkingDirectory;
-                
+
                 hostBuilder
                     .UseContentRoot(parameters.WorkingDirectory)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
@@ -59,6 +60,7 @@ namespace OpenMod.Runtime
                     .ConfigureServices((hostContext, services) =>
                     {
                         services.AddHostedService<OpenModHostedService>();
+                        services.AddOptions();
                     })
                     .UseSerilog();
 
@@ -83,7 +85,7 @@ namespace OpenMod.Runtime
                 .As<IRuntime>()
                 .SingleInstance();
 
-            var registrator = new ContainerRegistrator(containerBuilder);
+            var registrator = new ContainerRegistrator(this, containerBuilder);
 
             // register from OpenMod.Core, should prob. use a different class than AsyncHelper
             registrator.RegisterServicesFromAssembly(typeof(AsyncHelper).Assembly);
@@ -93,15 +95,31 @@ namespace OpenMod.Runtime
             {
                 registrator.RegisterServicesFromAssembly(assembly);
             }
+            
+            AsyncHelper.RunSync(async () =>
+            {
+                await registrator.BootstrapAndRegisterPluginsAsync();
+            });
 
-            registrator.BootstrapAndRegisterPlugins();
-            registrator.CompleteRegistrations();
+            registrator.Complete();
         }
 
-        private void SetupSerilog(string serilogYaml, string basePath, string[] commandlineArgs)
+        private void SetupSerilog()
         {
+            var loggingPath = Path.Combine(WorkingDirectory, "logging.yml");
+            if (!File.Exists(loggingPath))
+            {
+                // First run, logging.yml doesn't exist yet. We can not wait for auto-copy as it would be too late.
+                using (Stream stream = typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yml"))
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string fileContent = reader.ReadToEnd();
+                    File.WriteAllText(loggingPath, fileContent);
+                }
+            }
+            
             var builder = new ConfigurationBuilder();
-            SetupConfiguration(builder, commandlineArgs, serilogYaml, basePath);
+            SetupConfiguration(builder, CommandlineArgs, "logging.yml", WorkingDirectory);
             var configuration = builder.Build();
 
             var loggerConfiguration = new LoggerConfiguration()
@@ -125,5 +143,9 @@ namespace OpenMod.Runtime
         }
 
         public SemVersion Version { get; } = new SemVersion(0, 1, 0);
+
+        public string OpenModComponentId { get; } = "OpenMod.Runtime";
+
+        public bool IsComponentAlive { get; } = true;
     }
 }
