@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
@@ -9,6 +12,8 @@ using OpenMod.UnityEngine;
 using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
 using SDG.Unturned;
+using Serilog;
+using UnityEngine.Experimental.LowLevel;
 
 namespace OpenMod.Unturned
 {
@@ -38,8 +43,18 @@ namespace OpenMod.Unturned
                     Dedicator.commandWindow.setIOHandler(new SerilogWindowsConsoleInputOutput());
                 }
 
-                m_Harmony.PatchAll();
+                m_Harmony.PatchAll(GetType().Assembly);
                 TlsWorkaround.Install();
+
+                Log.Information("Setting unitySynchronizationContetext and mainThreadId");
+                var unitySynchronizationContetextField = typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext", BindingFlags.Static | BindingFlags.NonPublic);
+                unitySynchronizationContetextField.SetValue(null, SynchronizationContext.Current);
+                var mainThreadIdField = typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
+                mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
+
+                Log.Information("Initializing player loop");
+                var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
+                PlayerLoopHelper.Initialize(ref playerLoop);
             });
         }
 

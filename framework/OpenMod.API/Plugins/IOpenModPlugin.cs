@@ -7,6 +7,8 @@ namespace OpenMod.API.Plugins
     {
         string DisplayName { get; }
 
+        string Author { get; }
+
         SemVersion Version { get; }
 
         Task LoadAsync();

@@ -107,7 +107,7 @@ namespace OpenMod.Runtime
 
         public async Task BootstrapAndRegisterPluginsAsync()
         {
-            var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
+            var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "assemblies");
             if (!Directory.Exists(pluginsDirectory))
             {
                 Directory.CreateDirectory(pluginsDirectory);
@@ -119,10 +119,10 @@ namespace OpenMod.Runtime
                 Directory.CreateDirectory(packagesDirectory);
             }
 
-            var pluginAssemblyStore = new PluginAssemblyStore(new List<PluginProvider>
+            var pluginAssemblyStore = new PluginAssemblyStore(new List<PluginAssembliesSource>
             {
-                new DllPluginProvider(pluginsDirectory),
-                new NuGetPluginProvider(packagesDirectory)
+                new FileSystemPluginAssembliesSource(pluginsDirectory),
+                new NuGetPluginAssembliesSource(packagesDirectory)
             });
 
             m_ContainerBuilder.Register(context => pluginAssemblyStore)

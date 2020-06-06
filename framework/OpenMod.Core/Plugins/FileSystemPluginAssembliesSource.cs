@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace OpenMod.Core.Plugins
 {
-    public class DllPluginProvider : PluginProvider
+    public class FileSystemPluginAssembliesSource : PluginAssembliesSource
     {
         private readonly string m_PluginsDirectory;
 
-        public DllPluginProvider(string pluginsDirectory)
+        public FileSystemPluginAssembliesSource(string pluginsDirectory)
         {
             m_PluginsDirectory = pluginsDirectory;
         }
@@ -24,6 +24,14 @@ namespace OpenMod.Core.Plugins
                     byte[] data = new byte[stream.Length];
                     await stream.ReadAsync(data, 0, (int)stream.Length);
                     var pluginAssembly = Assembly.Load(data);
+
+                    var pluginMetadata = pluginAssembly.GetCustomAttribute<PluginMetadataAttribute>();
+                    if (pluginMetadata == null)
+                    {
+                        // not a plugin, but could be a library
+                        continue;
+                    }
+
                     assemblyList.Add(pluginAssembly);
                 }
             }

@@ -10,12 +10,12 @@ using OpenMod.NuGet;
 
 namespace OpenMod.Core.Plugins.NuGet
 {
-    public class NuGetPluginProvider : PluginProvider, IDisposable
+    public class NuGetPluginAssembliesSource : PluginAssembliesSource, IDisposable
     {
         public NuGetPackageManager NuGetPackageManager { get; }
         private readonly string m_PackagesDirectory;
 
-        public NuGetPluginProvider(string packagesDirectory)
+        public NuGetPluginAssembliesSource(string packagesDirectory)
         {
             m_PackagesDirectory = packagesDirectory;
 

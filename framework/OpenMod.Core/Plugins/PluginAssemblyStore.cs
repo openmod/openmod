@@ -11,7 +11,7 @@ namespace OpenMod.Core.Plugins
 {
     public class PluginAssemblyStore : IPluginAssemblyStore, IDisposable
     {
-        public IReadOnlyCollection<PluginProvider> PluginProviders { get; }
+        public IReadOnlyCollection<PluginAssembliesSource> PluginProviders { get; }
 
         private List<WeakReference> m_LoadedPluginAssemblies;
         public IReadOnlyCollection<Assembly> LoadedPluginAssemblies
@@ -26,7 +26,7 @@ namespace OpenMod.Core.Plugins
             }
         }
 
-        public PluginAssemblyStore(ICollection<PluginProvider> pluginProviders)
+        public PluginAssemblyStore(ICollection<PluginAssembliesSource> pluginProviders)
         {
             PluginProviders = pluginProviders.ToList();
         }
@@ -42,14 +42,16 @@ namespace OpenMod.Core.Plugins
                     var pluginMetadata = providerAssembly.GetCustomAttribute<PluginMetadataAttribute>();
                     if (pluginMetadata == null)
                     {
-                        Log.Debug($"No plugin metadata attribute found in assembly: {providerAssemblies}; skipping loading of this assembly as plugin");
+                        Log.Warning($"No plugin metadata attribute found in assembly: {providerAssemblies}; skipping loading of this assembly as plugin");
                         providerAssemblies.Remove(providerAssembly);
+                        continue;
                     }
 
                     if (!providerAssembly.FindTypes<IOpenModPlugin>(false).Any())
                     {
-                        Log.Debug($"No IOpenModPlugin implementation found in assembly: {providerAssemblies}; skipping loading of this assembly as plugin");
+                        Log.Warning($"No IOpenModPlugin implementation found in assembly: {providerAssemblies}; skipping loading of this assembly as plugin");
                         providerAssemblies.Remove(providerAssembly);
+                        continue;
                     }
                 }
 

@@ -23,6 +23,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "unityengine", "unityengine"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "framework", "framework", "{42C946B3-E1EF-4278-A983-E99AA3F73527}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3C310527-DC5D-4E38-B4EA-6C3FBBC48AA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Unturned.SamplePlugin", "samples\OpenMod.Unturned.SamplePlugin\OpenMod.Unturned.SamplePlugin.csproj", "{E0C4B65D-34B0-4BB6-83E6-C09B89051D44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,10 @@ Global
 		{240462E7-3DD3-4E0D-A443-54E224E89700}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{240462E7-3DD3-4E0D-A443-54E224E89700}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{240462E7-3DD3-4E0D-A443-54E224E89700}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0C4B65D-34B0-4BB6-83E6-C09B89051D44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0C4B65D-34B0-4BB6-83E6-C09B89051D44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0C4B65D-34B0-4BB6-83E6-C09B89051D44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0C4B65D-34B0-4BB6-83E6-C09B89051D44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +77,7 @@ Global
 		{7BDA94BC-D46C-4BC9-A560-0C023E1D9D52} = {A45C0DAE-A4FF-437A-BB89-0223F19FB84F}
 		{71386B9A-7882-44CD-9854-C8CFCEF9EC6C} = {F6737FCE-E6A4-4970-A6AC-0D7061B820FB}
 		{240462E7-3DD3-4E0D-A443-54E224E89700} = {42C946B3-E1EF-4278-A983-E99AA3F73527}
+		{E0C4B65D-34B0-4BB6-83E6-C09B89051D44} = {3C310527-DC5D-4E38-B4EA-6C3FBBC48AA8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5384DBB4-E799-40C6-BD98-4C90698BE085}

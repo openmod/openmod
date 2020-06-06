@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace OpenMod.Core.Plugins
 {
-    public abstract class PluginProvider
+    public abstract class PluginAssembliesSource
     {
         public abstract Task<ICollection<Assembly>> LoadPluginAssembliesAsync();
     }
