@@ -1,5 +1,6 @@
 # OpenMod
 OpenMod is a modding framework for .NET. It is the successor of RocketMod 5.
+
 It's main purpose is to add plugin functionality to Unity games, but it could be used with any .NET host.
 
 ## Features
@@ -15,28 +16,29 @@ OpenMod is based on modern C# code and best practices.
 
 ## Supported Games
 Currently Unturned is the only supported game. More games might follow in the future.
+
 A RocketMod 4 bridge is also planned that allows to run legacy plugins.
 
 ## Status
 OpenMod is currently work-in-progress, hence a downloadable version does not exist.
 
 ## ToDo
-[x] IoC
-[x] Logging
-[x] Yaml Configurations
-[x] Runtime
-[x] Dynamic bootstrapping
-[x] Projects
-[x] Unturned Module
-[ ] Plugins (dll / NuGet)
-[ ] Plugin configurations & translations
-[ ] Scheduling (?)
-[ ] Eventing
-[ ] Economy
-[ ] Permissions implementations
-[ ] Command framework (CommandContext, CommandActor, etc.)
-[ ] RM 4 Bridge
-[ ] Entities / Players
-[ ] RCON
-[ ] Scripting
-[ ] Standalone console implementation
+- [x] IoC
+- [x] Logging
+- [x] Yaml Configurations
+- [x] Runtime
+- [x] Dynamic bootstrapping
+- [x] Projects
+- [x] Unturned Module
+- [ ] Plugins (dll / NuGet)
+- [ ] Plugin configurations & translations
+- [ ] Scheduling (?)
+- [ ] Eventing
+- [ ] Economy
+- [ ] Permissions implementations
+- [ ] Command framework (CommandContext, CommandActor, etc.)
+- [ ] RM 4 Bridge
+- [ ] Entities / Players
+- [ ] RCON
+- [ ] Scripting
+- [ ] Standalone console implementation
