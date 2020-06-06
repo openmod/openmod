@@ -5,22 +5,24 @@ It's main purpose is to add plugin functionality to Unity games, but it could be
 
 ## Features
 OpenMod is based on modern C# code and best practices.
-- Modern API for plugin development
-- Plugin installation with NuGet
+- Modern API for plugin development with C# and Unity best practices
+- Plugin installation with [NuGet](https://nuget.org)
+- Based on [.NET Generic Host](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host)
 - IoC and Dependency Injection using Autofac
-- Yml configurations
-- Based on .NET Generic Host
-- Serilog for logging, with rich configuration options
+- Configure OpenMod and plugins with yaml configurations, environment variables, commandline arguments, etc.
+- Serilog for logging, including rich configuration options via logging.yml
 - Scripting (todo)
-- Proper RCON implementation (todo)
+- RCON (todo)
 
 ## Supported Games
 Currently Unturned is the only supported game. More games might follow in the future.
 
-A RocketMod 4 bridge is also planned that allows to run legacy plugins.
+A RocketMod 4 bridge plugin is also planned which allows to run legacy rm4 plugins.
 
 ## Status
 OpenMod is currently work-in-progress, hence a downloadable version does not exist.
+
+Development will be fast since most of the code already exists in RocketMod 5. However, RocketMod 5 code is not ported 1:1, instead it gets refactored.
 
 ## ToDo
 - [x] IoC
