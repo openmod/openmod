@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\framework\OpenMod.Runtime\OpenMod.Runtime.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="$(Configuration) == 'Debug'">
+    <NuGetBootstrap>false</NuGetBootstrap>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration) == 'Release'">
+    <NuGetBootstrap>true</NuGetBootstrap>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants Condition="$(NuGetBootstrap) == 'true'">NUGET_BOOTSTRAP</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(NuGetBootstrap) != 'true'">
+    <ProjectReference Include="..\OpenMod.Unturned\OpenMod.Unturned.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <Target Name="CopyModuleFiles" AfterTargets="AfterBuild">
+    <ItemGroup>
+      <ModuleFiles Include="$(MSBuildThisFileDirectory)Module\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(ModuleFiles)" DestinationFolder="$(OutDir)" Condition="@(ModuleFiles-&gt;Count()) != 0" />
+  </Target>
+
+  <Target Name="CopyRuntimeLibraries" AfterTargets="AfterBuild">
+    <ItemGroup>
+      <DependencyFiles Include="$(MSBuildThisFileDirectory)runtimelibs\*.dll" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(DependencyFiles)" DestinationFolder="$(OutDir)" Condition="@(DependencyFiles-&gt;Count()) != 0" />
+  </Target>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\OpenMod.Unturned\libs\Assembly-CSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

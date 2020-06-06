@@ -1,0 +1,31 @@
+﻿# Configuration for serilog
+# This is the yaml equivalent of this: https://github.com/serilog/serilog-settings-configuration
+Serilog:
+  Using:
+  - Serilog
+  - Serilog.Sinks.Console
+  - Serilog.Sinks.File
+  - Serilog.Sinks.Async
+  WriteTo:
+  - Name: Async
+    Args:
+      configure:
+      - Name: Console
+        Args:
+          theme: "Serilog.Sinks.SystemConsole.Themes.SystemConsoleTheme::Literate, Serilog.Sinks.Console"
+          outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+      - Name: File
+        Args:
+          path: Logs/logs.txt
+          rollingInterval: Day
+          rollOnFileSizeLimit: true
+          outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}"
+  Enrich:
+  - FromLogContext
+  MinimumLevel:
+    Default: Information
+    Override:
+      Microsoft.EntityFrameworkCore.Database.Command: Warning
+      Microsoft.EntityFrameworkCore.Infrastructure: Warning
+      Microsoft.EntityFrameworkCore.Database.Connection: Warning
+      Microsoft.EntityFrameworkCore.Query: Warning
