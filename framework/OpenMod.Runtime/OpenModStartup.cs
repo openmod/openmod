@@ -140,19 +140,22 @@ namespace OpenMod.Runtime
             var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(pluginsDirectory);
             m_ContainerBuilder.Register(context => fileSystemPluginAssembliesSource)
                 .AsSelf()
-                .SingleInstance();
+                .SingleInstance()
+                .OwnedByLifetimeScope();
             
             var nugetPluginAssembliesSource = new NuGetPluginAssembliesSource(m_NuGetPackageManager);
             m_ContainerBuilder.Register(context => nugetPluginAssembliesSource)
                 .AsSelf()
-                .SingleInstance();
+                .SingleInstance()
+                .OwnedByLifetimeScope();
 
             await RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
             await RegisterPluginAssembliesAsync(nugetPluginAssembliesSource);
 
             m_ContainerBuilder.Register(context => m_PluginAssemblyStore)
                 .As<IPluginAssemblyStore>()
-                .SingleInstance();
+                .SingleInstance()
+                .OwnedByLifetimeScope();
         }
 
         internal async Task ConfigureServicesAsync(IServiceCollection services)

@@ -6,10 +6,12 @@
 
   <ItemGroup>
     <None Remove="config.yml" />
+    <None Remove="translations.yml" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="config.yml" />
+    <EmbeddedResource Include="translations.yml" />
   </ItemGroup>
 
   <ItemGroup>

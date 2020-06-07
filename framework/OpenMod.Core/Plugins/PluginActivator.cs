@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -7,11 +8,13 @@ using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Localization;
 
 namespace OpenMod.Core.Plugins
 {
@@ -68,8 +71,10 @@ namespace OpenMod.Core.Plugins
             {
                 var lifetimeScope = m_LifetimeScope.BeginLifetimeScope(containerBuilder =>
                 {
+                    var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
+
                     var confiugration = new ConfigurationBuilder()
-                        .SetBasePath(PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id))
+                        .SetBasePath(workingDirectory)
                         .AddYamlFile("config.yml", optional: true)
                         .AddEnvironmentVariables(pluginMetadata.Id.Replace(".", "_") + "_")
                         .Build();
@@ -77,11 +82,26 @@ namespace OpenMod.Core.Plugins
                     containerBuilder.Register(context => confiugration)
                         .As<IConfigurationRoot>()
                         .As<IConfiguration>()
-                        .SingleInstance();
+                        .SingleInstance()
+                        .OwnedByLifetimeScope();
 
                     containerBuilder.RegisterType(pluginType)
                         .As(pluginType)
                         .SingleInstance();
+
+                    if (File.Exists(Path.Combine(workingDirectory, "translations.yml")))
+                    {
+                        var translations = new ConfigurationBuilder()
+                            .SetBasePath(workingDirectory)
+                            .AddYamlFile("translations.yml")
+                            .Build();
+
+                        var stringLocalizer = new ConfigurationStringLocalizer(translations);
+                        containerBuilder.Register(context => stringLocalizer)
+                            .As<IStringLocalizer>()
+                            .SingleInstance()
+                            .OwnedByLifetimeScope();
+                    }
                 });
 
                 pluginInstance = (IOpenModPlugin) lifetimeScope.Resolve(pluginType);

@@ -100,7 +100,8 @@ namespace OpenMod.Runtime
 
             containerBuilder.Register(context => this)
                 .As<IRuntime>()
-                .SingleInstance();
+                .SingleInstance()
+                .OwnedByLifetimeScope();
 
             var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
             var nuGetPackageManager = new NuGetPackageManager(packagesDirectory);
@@ -109,7 +110,8 @@ namespace OpenMod.Runtime
 
             containerBuilder.Register(context => nuGetPackageManager)
                 .AsSelf()
-                .SingleInstance();
+                .SingleInstance()
+                .OwnedByLifetimeScope();
 
             var startupContext = new OpenModStartupContext
             {
@@ -138,7 +140,8 @@ namespace OpenMod.Runtime
             containerBuilder.Register(context => Configuration)
                 .As<IConfiguration>()
                 .As<IConfigurationRoot>()
-                .SingleInstance();
+                .SingleInstance()
+                .OwnedByLifetimeScope();
 
             m_Startup.Complete();
         }

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Autofac;
 using Semver;
 
 namespace OpenMod.API.Plugins
@@ -14,5 +15,7 @@ namespace OpenMod.API.Plugins
         Task LoadAsync();
 
         Task UnloadAsync();
+
+        ILifetimeScope LifetimeScope { get; }
     }
 }

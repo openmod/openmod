@@ -35,7 +35,7 @@ Development will be fast since most of the code already exists in RocketMod 5. H
 - [x] Unturned Module
 - [x] Unitask integration
 - [x] Plugins (dll / NuGet)
-- [ ] Plugin configurations & translations
+- [x] Plugin configurations & translations
 - [ ] Scheduling
 - [ ] Eventing
 - [ ] Economy interfaces

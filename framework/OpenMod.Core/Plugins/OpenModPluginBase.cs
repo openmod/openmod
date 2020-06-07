@@ -21,11 +21,11 @@ namespace OpenMod.Core.Plugins
         public SemVersion Version { get; }
         public IRuntime Runtime { get; }
 
-        private readonly ILifetimeScope m_LifetimeScope;
+        public ILifetimeScope LifetimeScope { get; }
 
         protected OpenModPluginBase(IServiceProvider serviceProvider)
         {
-            m_LifetimeScope = serviceProvider.GetRequiredService<ILifetimeScope>();
+            LifetimeScope = serviceProvider.GetRequiredService<ILifetimeScope>();
             Configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
             Runtime = serviceProvider.GetRequiredService<IRuntime>();
@@ -47,7 +47,7 @@ namespace OpenMod.Core.Plugins
         public void Dispose()
         {
             AsyncHelper.RunSync(UnloadAsync);
-            m_LifetimeScope?.Dispose();
+            LifetimeScope?.Dispose();
             OnDispose();
         }
 

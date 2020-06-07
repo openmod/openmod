@@ -6,11 +6,13 @@
 
   <ItemGroup>
     <None Remove="logging.yml" />
+    <None Remove="openmod.translations.yml" />
     <None Remove="openmod.yml" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="logging.yml" />
+    <EmbeddedResource Include="openmod.translations.yml" />
     <EmbeddedResource Include="openmod.yml" />
   </ItemGroup>
 
@@ -20,10 +22,12 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Yaml" Version="2.0.0-preview2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="3.1.4" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.4" />
     <PackageReference Include="Nito.AsyncEx.Context" Version="5.0.0" />
     <PackageReference Include="Nito.AsyncEx.Tasks" Version="5.0.0" />
     <PackageReference Include="Serilog" Version="2.8.0" />
+    <PackageReference Include="SmartFormat.NET" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
