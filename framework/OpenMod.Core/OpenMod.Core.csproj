@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <Folder Include="Eventing\" />
+    <Folder Include="Prioritization\" />
   </ItemGroup>
 
 </Project>

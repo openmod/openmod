@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using OpenMod.API.Prioritization;
+using OpenMod.Core.Helpers.Prioritization;
 
-namespace OpenMod.Core.Helpers.Prioritization
+namespace OpenMod.Core.Prioritization
 {
-    public class PriorityComparer : Comparer<API.Helpers.Prioritization.Priority>
+    public class PriorityComparer : Comparer<Priority>
     {
         private readonly PriortyComparisonMode m_ComparisonMode;
 
@@ -12,7 +14,7 @@ namespace OpenMod.Core.Helpers.Prioritization
             m_ComparisonMode = comparisonMode;
         }
 
-        public override int Compare(API.Helpers.Prioritization.Priority x, API.Helpers.Prioritization.Priority y)
+        public override int Compare(Priority x, Priority y)
         {
             switch (m_ComparisonMode)
             {

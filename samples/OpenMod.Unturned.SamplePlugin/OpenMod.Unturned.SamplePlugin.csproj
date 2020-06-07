@@ -5,6 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="config.yml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="config.yml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\unturned\OpenMod.Unturned\OpenMod.Unturned.csproj" />
   </ItemGroup>
 

@@ -2,19 +2,25 @@
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using OpenMod.API.Plugins;
 
 namespace OpenMod.Core.Plugins
 {
-    public class FileSystemPluginAssembliesSource : PluginAssembliesSource
+    public class FileSystemPluginAssembliesSource : IPluginAssembliesSource
     {
         private readonly string m_PluginsDirectory;
 
         public FileSystemPluginAssembliesSource(string pluginsDirectory)
         {
+            if (!Directory.Exists(pluginsDirectory))
+            {
+                Directory.CreateDirectory(pluginsDirectory);
+            }
+
             m_PluginsDirectory = pluginsDirectory;
         }
 
-        public override async Task<ICollection<Assembly>> LoadPluginAssembliesAsync()
+        public virtual async Task<ICollection<Assembly>> LoadPluginAssembliesAsync()
         {
             var assemblyList = new List<Assembly>();
             foreach (var file in Directory.GetFiles(m_PluginsDirectory, "*.dll"))

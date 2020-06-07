@@ -4,33 +4,30 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using NuGet.Common;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
+using OpenMod.API.Plugins;
 using OpenMod.NuGet;
 
 namespace OpenMod.Core.Plugins.NuGet
 {
-    public class NuGetPluginAssembliesSource : PluginAssembliesSource, IDisposable
+    public class NuGetPluginAssembliesSource : IPluginAssembliesSource, IDisposable
     {
-        public NuGetPackageManager NuGetPackageManager { get; }
-        private readonly string m_PackagesDirectory;
+        private readonly NuGetPackageManager m_NuGetPackageManager;
 
-        public NuGetPluginAssembliesSource(string packagesDirectory)
+        public NuGetPluginAssembliesSource(NuGetPackageManager packageManager)
         {
-            m_PackagesDirectory = packagesDirectory;
-
-            var adapter = new NuGetSerilogLogger();
-            NuGetPackageManager = new NuGetPackageManager(adapter, packagesDirectory);
-            NuGetPackageManager.InstallAssemblyResolver();
+            m_NuGetPackageManager = packageManager;
         }
 
-        public override async Task<ICollection<Assembly>> LoadPluginAssembliesAsync()
+        public virtual async Task<ICollection<Assembly>> LoadPluginAssembliesAsync()
         {
             List<Assembly> assemblies = new List<Assembly>();
             
-            foreach (var nupkgFile in Directory.GetFiles(m_PackagesDirectory, "*.nupkg"))
+            foreach (var nupkgFile in Directory.GetFiles(m_NuGetPackageManager.PackagesDirectory, "*.nupkg"))
             {
-                var nupkgAssemblies = await NuGetPackageManager.LoadAssembliesFromNuGetPackageAsync(nupkgFile);
+                var nupkgAssemblies = await m_NuGetPackageManager.LoadAssembliesFromNuGetPackageAsync(nupkgFile);
                 assemblies.AddRange(nupkgAssemblies.Where(d => d.GetCustomAttribute<PluginMetadataAttribute>() != null));
             }
 
@@ -39,7 +36,7 @@ namespace OpenMod.Core.Plugins.NuGet
 
         public async Task<NuGetInstallResult> InstallPackageAsync(string packageName, string version = null, bool isPreRelease = false)
         {
-            bool exists = await NuGetPackageManager.IsPackageInstalledAsync(packageName);
+            bool exists = await m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
             return await InstallOrUpdateAsync(packageName, version, isPreRelease, exists);
         }
 
@@ -50,30 +47,30 @@ namespace OpenMod.Core.Plugins.NuGet
 
         public async Task<bool> UninstallPackageAsync(string packageName)
         {
-            var package = await NuGetPackageManager.GetLatestPackageIdentityAsync(packageName);
+            var package = await m_NuGetPackageManager.GetLatestPackageIdentityAsync(packageName);
             if (package == null)
             {
                 return false;
             }
 
-            return await NuGetPackageManager.RemoveAsync(package);
+            return await m_NuGetPackageManager.RemoveAsync(package);
         }
 
         public virtual async Task<bool> IsPackageInstalledAsync(string packageName)
         {
-            return await NuGetPackageManager.IsPackageInstalledAsync(packageName);
+            return await m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
         }
 
         private async Task<NuGetInstallResult> InstallOrUpdateAsync(string packageName, string version = null, bool isPreRelease = false, bool isUpdate = false)
         {
-            PackageIdentity previousVersion = await NuGetPackageManager.GetLatestPackageIdentityAsync(packageName);
+            PackageIdentity previousVersion = await m_NuGetPackageManager.GetLatestPackageIdentityAsync(packageName);
 
             if (isUpdate && previousVersion == null)
             {
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
             }
 
-            var package = (await NuGetPackageManager.QueryPackageExactAsync(packageName, version, isPreRelease));
+            var package = (await m_NuGetPackageManager.QueryPackageExactAsync(packageName, version, isPreRelease));
             if (package == null)
             {
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
@@ -86,7 +83,7 @@ namespace OpenMod.Core.Plugins.NuGet
 
             var packageIdentity = new PackageIdentity(package.Identity.Id, new NuGetVersion(version));
 
-            var result = await NuGetPackageManager.InstallAsync(packageIdentity, isPreRelease);
+            var result = await m_NuGetPackageManager.InstallAsync(packageIdentity, isPreRelease);
             if (result.Code != NuGetInstallCode.Success)
             {
                 return result;
@@ -94,14 +91,14 @@ namespace OpenMod.Core.Plugins.NuGet
 
             if (isUpdate)
             {
-                await NuGetPackageManager.RemoveAsync(previousVersion);
+                await m_NuGetPackageManager.RemoveAsync(previousVersion);
             }
             return result;
         }
 
         public void Dispose()
         {
-            NuGetPackageManager?.Dispose();
+            m_NuGetPackageManager?.Dispose();
         }
     }
 }

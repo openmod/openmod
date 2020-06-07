@@ -14,6 +14,8 @@
 
   <ItemGroup>
     <Folder Include="Eventing\" />
+    <Folder Include="NuGet\" />
+    <Folder Include="Prioritization\" />
   </ItemGroup>
 
 </Project>

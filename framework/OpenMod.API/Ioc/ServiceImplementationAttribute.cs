@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using OpenMod.API.Helpers.Prioritization;
+using OpenMod.API.Prioritization;
 
 namespace OpenMod.API.Ioc
 {

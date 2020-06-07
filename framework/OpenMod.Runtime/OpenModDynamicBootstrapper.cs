@@ -58,7 +58,8 @@ namespace OpenMod.Runtime
                 Directory.CreateDirectory(packagesDirectory);
             }
 
-            var nugetInstaller = new NuGetPackageManager(logger, packagesDirectory);
+            var nugetInstaller = new NuGetPackageManager(packagesDirectory);
+            nugetInstaller.Logger = logger;
 
             List<Assembly> hostAssemblies = new List<Assembly>();
             foreach (var packageId in packageIds)

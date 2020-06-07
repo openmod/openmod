@@ -1,11 +1,21 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NuGet.Common;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+using LogLevel = NuGet.Common.LogLevel;
 
 namespace OpenMod.Core.Plugins.NuGet
 {
-    public class NuGetSerilogLogger : LoggerBase
+    public class OpenModNuGetLogger : LoggerBase
     {
+        private readonly ILogger m_Logger;
+
+        public OpenModNuGetLogger(ILogger logger)
+        {
+            m_Logger = logger;
+        }
+
         public override void Log(ILogMessage message)
         {
             var level = message.Level;
@@ -15,22 +25,22 @@ namespace OpenMod.Core.Plugins.NuGet
             switch (level)
             {
                 case LogLevel.Debug:
-                    Serilog.Log.Debug(text);
+                    m_Logger.LogDebug(text);
                     break;
                 case LogLevel.Verbose:
-                    Serilog.Log.Debug(text);
+                    m_Logger.LogTrace(text);
                     break;
                 case LogLevel.Information:
-                    Serilog.Log.Information(text);
+                    m_Logger.LogInformation(text);
                     break;
                 case LogLevel.Minimal:
-                    Serilog.Log.Information(text);
+                    m_Logger.LogInformation(text);
                     break;
                 case LogLevel.Warning:
-                    Serilog.Log.Warning(text);
+                    m_Logger.LogWarning(text);
                     break;
                 case LogLevel.Error:
-                    Serilog.Log.Error(text);
+                    m_Logger.LogError(text);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(level), level, null);

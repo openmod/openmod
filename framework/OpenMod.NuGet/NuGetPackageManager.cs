@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -20,8 +21,15 @@ namespace OpenMod.NuGet
 {
     public class NuGetPackageManager : IDisposable
     {
-        private readonly ILogger m_Logger;
-        private readonly string m_PackagesDirectory;
+        private ILogger m_Logger;
+        public ILogger Logger
+        {
+            get { return m_Logger; }
+            set { m_Logger = value ?? new NullLogger(); }
+        }
+
+        public string PackagesDirectory { get; }
+
         private readonly List<Lazy<INuGetResourceProvider>> m_Providers;
         private readonly ISettings m_NugetSettings;
         private readonly NuGetFramework m_CurrentFramework;
@@ -30,14 +38,22 @@ namespace OpenMod.NuGet
         private readonly PackageResolver m_PackageResolver;
         private readonly Dictionary<string, List<CachedNuGetAssembly>> m_LoadedPackageAssemblies;
 
-        public NuGetPackageManager(ILogger logger, string packagesDirectory)
+        private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
+        private bool m_AssemblyResolverInstalled;
+
+        public NuGetPackageManager(string packagesDirectory)
         {
-            m_Logger = logger;
-            m_PackagesDirectory = packagesDirectory;
+            Logger = new NullLogger();
+            PackagesDirectory = packagesDirectory;
             m_Providers = new List<Lazy<INuGetResourceProvider>>();
             m_Providers.AddRange(Repository.Provider.GetCoreV3()); // Add v3 API support
 
             const string nugetFile = "NuGet.Config";
+
+            if (!Directory.Exists(packagesDirectory))
+            {
+                Directory.CreateDirectory(packagesDirectory);
+            }
 
             var nugetConfig = Path.Combine(packagesDirectory, nugetFile);
             if (!File.Exists(nugetConfig))
@@ -83,15 +99,15 @@ namespace OpenMod.NuGet
                 }
                 catch (NuGetResolverInputException ex)
                 {
-                    m_Logger.LogDebug(ex.ToString());
+                    Logger.LogDebug(ex.ToString());
                     return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
                 }
 
                 var packageExtractionContext = new PackageExtractionContext(
                     PackageSaveMode.Nupkg,
                     XmlDocFileSaveMode.None,
-                    ClientPolicyContext.GetClientPolicy(m_NugetSettings, m_Logger),
-                    m_Logger);
+                    ClientPolicyContext.GetClientPolicy(m_NugetSettings, Logger),
+                    Logger);
 
                 foreach (var packageToInstall in packagesToInstall)
                 {
@@ -103,7 +119,7 @@ namespace OpenMod.NuGet
                             packageToInstall,
                             new PackageDownloadContext(cacheContext),
                             SettingsUtility.GetGlobalPackagesFolder(m_NugetSettings),
-                            m_Logger, CancellationToken.None);
+                            Logger, CancellationToken.None);
 
                         await PackageExtractor.ExtractPackageAsync(
                             downloadResult.PackageSource,
@@ -133,7 +149,7 @@ namespace OpenMod.NuGet
         {
             var matches = new List<IPackageSearchMetadata>();
 
-            m_Logger.LogInformation("Searching repository for package: " + packageId);
+            Logger.LogInformation("Searching repository for package: " + packageId);
 
             PackageSourceProvider packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
             var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, m_Providers);
@@ -152,18 +168,18 @@ namespace OpenMod.NuGet
                 IEnumerable<IPackageSearchMetadata> searchResult;
                 try
                 {
-                    searchResult = (await searchResource.SearchAsync(packageId, searchFilter, 0, 10, m_Logger, CancellationToken.None)).ToList();
+                    searchResult = (await searchResource.SearchAsync(packageId, searchFilter, 0, 10, Logger, CancellationToken.None)).ToList();
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogDebug("Could not find package: ");
-                    m_Logger.LogDebug(ex.ToString());
+                    Logger.LogDebug("Could not find package: ");
+                    Logger.LogDebug(ex.ToString());
                     continue;
                 }
 
                 if (version == null)
                 {
-                    m_Logger.LogDebug("version == null, adding searchResult: " + searchResult.Count());
+                    Logger.LogDebug("version == null, adding searchResult: " + searchResult.Count());
                     matches.AddRange(searchResult);
                     continue;
                 }
@@ -174,7 +190,7 @@ namespace OpenMod.NuGet
                     if (versions.Any(d
                         => d.Version.OriginalVersion.Equals(version, StringComparison.OrdinalIgnoreCase)))
                     {
-                        m_Logger.LogDebug("adding packageMeta: "
+                        Logger.LogDebug("adding packageMeta: "
                             + packageMeta.Identity.Id
                             + ":"
                             + packageMeta.Identity.Version);
@@ -204,7 +220,7 @@ namespace OpenMod.NuGet
                 Enumerable.Empty<PackageIdentity>(),
                 availablePackages,
                 sourceRepositoryProvider.GetRepositories().Select(s => s.PackageSource),
-                m_Logger);
+                Logger);
 
             return m_PackageResolver.Resolve(resolverContext, CancellationToken.None)
                                   .Select(p => availablePackages.Single(x
@@ -241,7 +257,7 @@ namespace OpenMod.NuGet
                         var latestInstalledVersion = await GetLatestPackageIdentityAsync(dependency.Id);
                         if (latestInstalledVersion == null)
                         {
-                            m_Logger.LogWarning("Failed to resolve: " + dependency.Id);
+                            Logger.LogWarning("Failed to resolve: " + dependency.Id);
                             continue;
                         }
 
@@ -286,8 +302,8 @@ namespace OpenMod.NuGet
                         }
                         catch (Exception ex)
                         {
-                            m_Logger.LogError("Failed to load assembly: " + item);
-                            m_Logger.LogError(ex.ToString());
+                            Logger.LogError("Failed to load assembly: " + item);
+                            Logger.LogError(ex.ToString());
                         }
                         finally
                         {
@@ -305,13 +321,13 @@ namespace OpenMod.NuGet
 
         public virtual async Task<PackageIdentity> GetLatestPackageIdentityAsync(string packageId)
         {
-            if (!Directory.Exists(m_PackagesDirectory))
+            if (!Directory.Exists(PackagesDirectory))
             {
                 return null;
             }
 
             List<PackageIdentity> packageIdentities = new List<PackageIdentity>();
-            foreach (var dir in Directory.GetDirectories(m_PackagesDirectory))
+            foreach (var dir in Directory.GetDirectories(PackagesDirectory))
             {
                 var dirName = new DirectoryInfo(dir).Name;
                 if (dirName.StartsWith(packageId + ".", StringComparison.OrdinalIgnoreCase))
@@ -356,24 +372,24 @@ namespace OpenMod.NuGet
                 return;
             }
 
-            m_Logger.LogDebug("GetPackageDependencies: " + package);
+            Logger.LogDebug("GetPackageDependencies: " + package);
             var repos = repositories.ToList();
-            m_Logger.LogDebug($"Repos for {package}: " + repos.Count);
+            Logger.LogDebug($"Repos for {package}: " + repos.Count);
 
             foreach (var sourceRepository in repos)
             {
-                m_Logger.LogDebug("GetResourceAsync for " + sourceRepository.PackageSource.SourceUri);
+                Logger.LogDebug("GetResourceAsync for " + sourceRepository.PackageSource.SourceUri);
                 var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
 
-                m_Logger.LogDebug("ResolvePackage");
-                var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFramework, cacheContext, m_Logger, CancellationToken.None);
+                Logger.LogDebug("ResolvePackage");
+                var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFramework, cacheContext, Logger, CancellationToken.None);
 
                 if (dependencyInfo == null)
                 {
-                    m_Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
+                    Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
                     continue;
                 }
-                m_Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
+                Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
 
                 availablePackages.Add(dependencyInfo);
                 foreach (var dependency in dependencyInfo.Dependencies)
@@ -411,9 +427,6 @@ namespace OpenMod.NuGet
 
             return (Assembly) matchingAssemblies.FirstOrDefault()?.Assembly.Target;
         }
-
-        private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
-        private bool m_AssemblyResolverInstalled;
 
         protected static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
         {

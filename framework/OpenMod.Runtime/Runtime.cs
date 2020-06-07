@@ -11,10 +11,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Plugins.NuGet;
+using OpenMod.NuGet;
 using Semver;
 using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace OpenMod.Runtime
 {
@@ -26,10 +30,11 @@ namespace OpenMod.Runtime
         public IConfigurationRoot Configuration { get; private set; }
 
         private IHost m_Host;
-        private ContainerRegistrator m_Registrator;
+        private OpenModStartup m_Startup;
+        private SerilogLoggerFactory m_LoggerFactory;
+        private ILogger<Runtime> m_Logger;
 
-        public void Init(ICollection<Assembly> openModAssemblies, IHostBuilder hostBuilder,
-            RuntimeInitParameters parameters)
+        public void Init(ICollection<Assembly> openModAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters)
         {
             var thread = new Thread(o => { InitAsync(openModAssemblies, hostBuilder, parameters).Forget(); });
             thread.Start();
@@ -43,7 +48,9 @@ namespace OpenMod.Runtime
             CommandlineArgs = parameters.CommandlineArgs;
 
             SetupSerilog();
-            Log.Information("OpenMod is starting...");
+
+
+            m_Logger.LogInformation("OpenMod is starting...");
 
             try
             {
@@ -60,20 +67,21 @@ namespace OpenMod.Runtime
                     {
                         services.AddHostedService<OpenModHostedService>();
                         services.AddOptions();
-                        m_Registrator.ConfigureServices(services);
+                        services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
+                        // m_Startup.ConfigureServices(services);
                     })
                     .UseSerilog();
 
                 m_Host = hostBuilder.Build();
                 Status = RuntimeStatus.Initialized;
                 await m_Host.RunAsync();
-                Log.Information("OpenMod has shut down.");
+                m_Logger.LogInformation("OpenMod has shut down.");
                 Status = RuntimeStatus.Unloaded;
             }
             catch (Exception ex)
             {
                 Status = RuntimeStatus.Crashed;
-                Log.Fatal(ex, "OpenMod has crashed.");
+                m_Logger.LogCritical(ex, "OpenMod has crashed.");
                 throw;
             }
             finally
@@ -94,20 +102,37 @@ namespace OpenMod.Runtime
                 .As<IRuntime>()
                 .SingleInstance();
 
-            m_Registrator = new ContainerRegistrator(this, containerBuilder, configurationBuilder);
+            var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
+            var nuGetPackageManager = new NuGetPackageManager(packagesDirectory);
+            nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger<OpenModNuGetLogger>());
+            nuGetPackageManager.InstallAssemblyResolver();
+
+            containerBuilder.Register(context => nuGetPackageManager)
+                .AsSelf()
+                .SingleInstance();
+
+            var startupContext = new OpenModStartupContext
+            {
+                Runtime = this,
+                Configuration = Configuration,
+                LoggerFactory = m_LoggerFactory
+            };
+
+            startupContext.DataStore.Add("nugetPackageManager", nuGetPackageManager);
+
+            m_Startup = new OpenModStartup(startupContext, nuGetPackageManager, containerBuilder);
+            startupContext.OpenModStartup = m_Startup;
 
             // register from OpenMod.Core, should prob. use a different class than AsyncHelper
-            m_Registrator.CopyAssemblyResources(typeof(AsyncHelper).Assembly);
-            m_Registrator.RegisterServicesFromAssembly(typeof(AsyncHelper).Assembly);
+            m_Startup.RegisterServiceFromAssemblyWithResources(typeof(AsyncHelper).Assembly, string.Empty);
 
             // register from assemblies such as OpenMod.UnityEngine, OpenMod.Unturned, etc.
             foreach (var assembly in openModHostAssemblies)
             {
-                m_Registrator.CopyAssemblyResources(assembly);
-                m_Registrator.RegisterServicesFromAssembly(assembly);
+                m_Startup.RegisterServiceFromAssemblyWithResources(assembly, string.Empty);
             }
 
-            AsyncHelper.RunSync(async () => { await m_Registrator.BootstrapAndRegisterPluginsAsync(); });
+            AsyncHelper.RunSync(async () => { await m_Startup.BootstrapAndRegisterPluginsAsync(); });
 
             Configuration = configurationBuilder.Build();
             containerBuilder.Register(context => Configuration)
@@ -115,8 +140,7 @@ namespace OpenMod.Runtime
                 .As<IConfigurationRoot>()
                 .SingleInstance();
 
-
-            m_Registrator.Complete();
+            m_Startup.Complete();
         }
 
         private void SetupSerilog()
@@ -144,7 +168,9 @@ namespace OpenMod.Runtime
             var loggerConfiguration = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration);
 
-            Log.Logger = loggerConfiguration.CreateLogger();
+            var serilogLogger = Log.Logger = loggerConfiguration.CreateLogger();
+            m_LoggerFactory = new SerilogLoggerFactory(serilogLogger);
+            m_Logger = m_LoggerFactory.CreateLogger<Runtime>();
         }
 
         public async Task ShutdownAsync()

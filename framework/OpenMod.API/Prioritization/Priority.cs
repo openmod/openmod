@@ -1,4 +1,4 @@
-﻿namespace OpenMod.API.Helpers.Prioritization
+﻿namespace OpenMod.API.Prioritization
 {
     public enum Priority
     {

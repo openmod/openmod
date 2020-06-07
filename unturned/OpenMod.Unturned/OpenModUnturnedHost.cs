@@ -46,13 +46,11 @@ namespace OpenMod.Unturned
                 m_Harmony.PatchAll(GetType().Assembly);
                 TlsWorkaround.Install();
 
-                Log.Information("Setting unitySynchronizationContetext and mainThreadId");
                 var unitySynchronizationContetextField = typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext", BindingFlags.Static | BindingFlags.NonPublic);
                 unitySynchronizationContetextField.SetValue(null, SynchronizationContext.Current);
                 var mainThreadIdField = typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
                 mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
 
-                Log.Information("Initializing player loop");
                 var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
                 PlayerLoopHelper.Initialize(ref playerLoop);
             });

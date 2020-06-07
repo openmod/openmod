@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Helpers;
 using Serilog;
@@ -11,9 +12,14 @@ namespace OpenMod.Core.Plugins
 {
     public class PluginAssemblyStore : IPluginAssemblyStore, IDisposable
     {
-        public IReadOnlyCollection<PluginAssembliesSource> PluginProviders { get; }
+        private readonly ILogger<PluginAssemblyStore> m_Logger;
 
-        private List<WeakReference> m_LoadedPluginAssemblies;
+        public PluginAssemblyStore(ILogger<PluginAssemblyStore> logger)
+        {
+            m_Logger = logger;
+        }
+
+        private readonly List<WeakReference> m_LoadedPluginAssemblies = new List<WeakReference>();
         public IReadOnlyCollection<Assembly> LoadedPluginAssemblies
         {
             get
@@ -26,53 +32,35 @@ namespace OpenMod.Core.Plugins
             }
         }
 
-        public PluginAssemblyStore(ICollection<PluginAssembliesSource> pluginProviders)
+        public async Task<ICollection<Assembly>> LoadPluginAssembliesAsync(IPluginAssembliesSource source)
         {
-            PluginProviders = pluginProviders.ToList();
-        }
-
-        public async Task LoadPluginAssembliesAsync()
-        {
-            var assemblies = new List<Assembly>();
-            foreach (var pluginProvider in PluginProviders)
+            var providerAssemblies = await source.LoadPluginAssembliesAsync();
+            foreach (var providerAssembly in providerAssemblies.ToList())
             {
-                var providerAssemblies = await pluginProvider.LoadPluginAssembliesAsync();
-                foreach (var providerAssembly in providerAssemblies.ToList())
+                var pluginMetadata = providerAssembly.GetCustomAttribute<PluginMetadataAttribute>();
+                if (pluginMetadata == null)
                 {
-                    var pluginMetadata = providerAssembly.GetCustomAttribute<PluginMetadataAttribute>();
-                    if (pluginMetadata == null)
-                    {
-                        Log.Warning($"No plugin metadata attribute found in assembly: {providerAssemblies}; skipping loading of this assembly as plugin");
-                        providerAssemblies.Remove(providerAssembly);
-                        continue;
-                    }
-
-                    if (!providerAssembly.FindTypes<IOpenModPlugin>(false).Any())
-                    {
-                        Log.Warning($"No IOpenModPlugin implementation found in assembly: {providerAssemblies}; skipping loading of this assembly as plugin");
-                        providerAssemblies.Remove(providerAssembly);
-                        continue;
-                    }
+                    m_Logger.LogWarning($"No plugin metadata attribute found in assembly: {providerAssemblies}; skipping loading of this assembly as plugin");
+                    providerAssemblies.Remove(providerAssembly);
+                    continue;
                 }
 
-                assemblies.AddRange(providerAssemblies);
+                if (!providerAssembly.FindTypes<IOpenModPlugin>(false).Any())
+                {
+                    m_Logger.LogWarning($"No IOpenModPlugin implementation found in assembly: {providerAssemblies}; skipping loading of this assembly as plugin");
+                    providerAssemblies.Remove(providerAssembly);
+                    continue;
+                }
             }
 
-            m_LoadedPluginAssemblies = assemblies.Select(d => new WeakReference(d)).ToList();
+            m_LoadedPluginAssemblies.AddRange(providerAssemblies.Select(d => new WeakReference(d)));
+            return providerAssemblies;
         }
 
         public void Dispose()
         {
             // Clear assembly references
             m_LoadedPluginAssemblies.Clear();
-
-            foreach (var provider in PluginProviders)
-            {
-                if (provider is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
-            }
         }
     }
 }
