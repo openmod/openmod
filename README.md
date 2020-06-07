@@ -33,6 +33,7 @@ Development will be fast since most of the code already exists in RocketMod 5. H
 - [x] Dynamic bootstrapping
 - [x] Projects
 - [x] Unturned Module
+- [x] Unitask integration
 - [x] Plugins (dll / NuGet)
 - [ ] Plugin configurations & translations
 - [ ] Scheduling

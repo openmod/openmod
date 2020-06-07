@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Util;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Ioc;
@@ -23,29 +25,23 @@ namespace OpenMod.Runtime
     {
         private readonly IRuntime m_Runtime;
         private readonly ContainerBuilder m_ContainerBuilder;
+        private readonly IConfigurationBuilder m_ConfigurationBuilder;
         private readonly List<ServiceRegistration> m_ServiceRegistrations;
         private readonly HashSet<AssemblyName> m_RegisteredAssemblies;
+        private PluginAssemblyStore m_PluginAssemblyStore;
 
-        public ContainerRegistrator(
-            IRuntime runtime,
-            ContainerBuilder containerBuilder)
+        public ContainerRegistrator(IRuntime runtime,
+            ContainerBuilder containerBuilder, IConfigurationBuilder configurationBuilder)
         {
             m_Runtime = runtime;
             m_ContainerBuilder = containerBuilder;
+            m_ConfigurationBuilder = configurationBuilder;
             m_ServiceRegistrations = new List<ServiceRegistration>();
             m_RegisteredAssemblies = new HashSet<AssemblyName>();
         }
 
-        public void RegisterServicesFromAssembly(Assembly assembly, string relativePath = null)
+        public void CopyAssemblyResources(Assembly assembly, string relativePath = null)
         {
-            var assemblyName = assembly.GetName();
-            if (m_RegisteredAssemblies.Contains(assembly.GetName()))
-            {
-                Log.Debug("Skipping already registered assembly: " + assemblyName);
-                return;
-            }
-
-            m_ServiceRegistrations.AddRange(GetServicesFromAssembly(assembly));
             if (relativePath == null)
             {
                 relativePath = string.Empty;
@@ -55,9 +51,9 @@ namespace OpenMod.Runtime
 
             foreach (var resourceName in resourceNames)
             {
-                var regex = new Regex(Regex.Escape(assemblyName.Name + "."));
+                var regex = new Regex(Regex.Escape(assembly.GetName().Name + "."));
                 var fileName = regex.Replace(resourceName, string.Empty, 1);
-                
+
                 var filePath = Path.Combine(m_Runtime.WorkingDirectory, relativePath, fileName);
                 if (File.Exists(filePath))
                 {
@@ -71,7 +67,18 @@ namespace OpenMod.Runtime
                     File.WriteAllText(filePath, fileContent);
                 }
             }
+        }
 
+        public void RegisterServicesFromAssembly(Assembly assembly)
+        {
+            var assemblyName = assembly.GetName();
+            if (m_RegisteredAssemblies.Contains(assembly.GetName()))
+            {
+                Log.Debug("Skipping already registered assembly: " + assemblyName);
+                return;
+            }
+
+            m_ServiceRegistrations.AddRange(GetServicesFromAssembly(assembly));
             m_RegisteredAssemblies.Add(assemblyName);
         }
 
@@ -119,36 +126,42 @@ namespace OpenMod.Runtime
                 Directory.CreateDirectory(packagesDirectory);
             }
 
-            var pluginAssemblyStore = new PluginAssemblyStore(new List<PluginAssembliesSource>
+            m_PluginAssemblyStore = new PluginAssemblyStore(new List<PluginAssembliesSource>
             {
                 new FileSystemPluginAssembliesSource(pluginsDirectory),
                 new NuGetPluginAssembliesSource(packagesDirectory)
             });
 
-            m_ContainerBuilder.Register(context => pluginAssemblyStore)
+            m_ContainerBuilder.Register(context => m_PluginAssemblyStore)
                 .As<IPluginAssemblyStore>()
                 .SingleInstance();
 
-            await pluginAssemblyStore.LoadPluginAssembliesAsync();
-            foreach (var assembly in pluginAssemblyStore.LoadedPluginAssemblies)
+            await m_PluginAssemblyStore.LoadPluginAssembliesAsync();
+            foreach (var assembly in m_PluginAssemblyStore.LoadedPluginAssemblies)
             {
                 // PluginAssemblyStore checks if this attribute exists
                 var pluginMetadata = assembly.GetCustomAttribute<PluginMetadataAttribute>();
-                var pluginDirectory = Path.Combine(m_Runtime.WorkingDirectory, "configuration", pluginMetadata.Id);
+                var pluginDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
+
                 if (!Directory.Exists(pluginDirectory))
                 {
                     Directory.CreateDirectory(pluginDirectory);
                 }
 
-                // Auto register services with [Service] and [ServiceImplementation] attributes
-                RegisterServicesFromAssembly(assembly, Path.Combine("configuration", pluginMetadata.Id));
+                CopyAssemblyResources(assembly, Path.Combine("plugins", pluginMetadata.Id));
+            }
 
-                // Auto create IPluginStartup classes for more advanced scenarios
+            foreach (var assembly in m_PluginAssemblyStore.LoadedPluginAssemblies)
+            {
+                // Auto register services with [Service] and [ServiceImplementation] attributes
+                RegisterServicesFromAssembly(assembly);
+
+                // Auto create IContainerConfigurator classes for more advanced scenarios
                 var containerConfiugratorTypes = assembly.FindTypes<IContainerConfigurator>(false);
                 foreach (var containerConfiguratorType in containerConfiugratorTypes)
                 {
                     var instance = (IContainerConfigurator) Activator.CreateInstance(containerConfiguratorType);
-                    instance.ConfigureContainer(m_ContainerBuilder);
+                    instance.ConfigureContainer(m_Runtime, m_ContainerBuilder);
                 }
             }
         }
@@ -183,6 +196,20 @@ namespace OpenMod.Runtime
                     ServiceTypes = interfaces,
                     ServiceImplementationAttribute = attribute
                 };
+            }
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            foreach (var assembly in m_PluginAssemblyStore.LoadedPluginAssemblies)
+            {
+                // Auto create IContainerConfigurator classes for more advanced scenarios
+                var containerConfiugratorTypes = assembly.FindTypes<IServiceConfigurator>(false);
+                foreach (var containerConfiguratorType in containerConfiugratorTypes)
+                {
+                    var instance = (IServiceConfigurator)Activator.CreateInstance(containerConfiguratorType);
+                    instance.ConfigureServices(m_Runtime, services);
+                }
             }
         }
     }

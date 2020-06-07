@@ -23,17 +23,22 @@ namespace OpenMod.Runtime
     {
         public string WorkingDirectory { get; private set; }
         public string[] CommandlineArgs { get; private set; }
+        public IConfigurationRoot Configuration { get; private set; }
 
         private IHost m_Host;
+        private ContainerRegistrator m_Registrator;
 
-        public void Init(ICollection<Assembly> openModAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters)
+        public void Init(ICollection<Assembly> openModAssemblies, IHostBuilder hostBuilder,
+            RuntimeInitParameters parameters)
         {
             var thread = new Thread(o => { InitAsync(openModAssemblies, hostBuilder, parameters).Forget(); });
             thread.Start();
         }
 
-        public async Task InitAsync(ICollection<Assembly> openModHostAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters)
+        public async Task InitAsync(ICollection<Assembly> openModHostAssemblies, IHostBuilder hostBuilder,
+            RuntimeInitParameters parameters)
         {
+            Status = RuntimeStatus.Initializing;
             WorkingDirectory = parameters.WorkingDirectory;
             CommandlineArgs = parameters.CommandlineArgs;
 
@@ -42,34 +47,32 @@ namespace OpenMod.Runtime
 
             try
             {
-
                 if (!Directory.Exists(parameters.WorkingDirectory))
                 {
                     Directory.CreateDirectory(parameters.WorkingDirectory);
                 }
 
-
                 hostBuilder
                     .UseContentRoot(parameters.WorkingDirectory)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-                    .ConfigureAppConfiguration(builder =>
-                    {
-                        SetupConfiguration(builder, parameters.CommandlineArgs, "openmod.yml", parameters.WorkingDirectory);
-                    })
                     .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, openModHostAssemblies))
                     .ConfigureServices((hostContext, services) =>
                     {
                         services.AddHostedService<OpenModHostedService>();
                         services.AddOptions();
+                        m_Registrator.ConfigureServices(services);
                     })
                     .UseSerilog();
 
                 m_Host = hostBuilder.Build();
+                Status = RuntimeStatus.Initialized;
                 await m_Host.RunAsync();
                 Log.Information("OpenMod has shut down.");
+                Status = RuntimeStatus.Unloaded;
             }
             catch (Exception ex)
             {
+                Status = RuntimeStatus.Crashed;
                 Log.Fatal(ex, "OpenMod has crashed.");
                 throw;
             }
@@ -81,27 +84,39 @@ namespace OpenMod.Runtime
 
         private void SetupContainer(ContainerBuilder containerBuilder, ICollection<Assembly> openModHostAssemblies)
         {
+            var configurationBuilder = new ConfigurationBuilder()
+                .SetBasePath(WorkingDirectory)
+                .AddYamlFile("openmod.yml")
+                .AddCommandLine(CommandlineArgs)
+                .AddEnvironmentVariables("OpenMod_");
+
             containerBuilder.Register(context => this)
                 .As<IRuntime>()
                 .SingleInstance();
 
-            var registrator = new ContainerRegistrator(this, containerBuilder);
+            m_Registrator = new ContainerRegistrator(this, containerBuilder, configurationBuilder);
 
             // register from OpenMod.Core, should prob. use a different class than AsyncHelper
-            registrator.RegisterServicesFromAssembly(typeof(AsyncHelper).Assembly);
+            m_Registrator.CopyAssemblyResources(typeof(AsyncHelper).Assembly);
+            m_Registrator.RegisterServicesFromAssembly(typeof(AsyncHelper).Assembly);
 
             // register from assemblies such as OpenMod.UnityEngine, OpenMod.Unturned, etc.
             foreach (var assembly in openModHostAssemblies)
             {
-                registrator.RegisterServicesFromAssembly(assembly);
+                m_Registrator.CopyAssemblyResources(assembly);
+                m_Registrator.RegisterServicesFromAssembly(assembly);
             }
-            
-            AsyncHelper.RunSync(async () =>
-            {
-                await registrator.BootstrapAndRegisterPluginsAsync();
-            });
 
-            registrator.Complete();
+            AsyncHelper.RunSync(async () => { await m_Registrator.BootstrapAndRegisterPluginsAsync(); });
+
+            Configuration = configurationBuilder.Build();
+            containerBuilder.Register(context => Configuration)
+                .As<IConfiguration>()
+                .As<IConfigurationRoot>()
+                .SingleInstance();
+
+
+            m_Registrator.Complete();
         }
 
         private void SetupSerilog()
@@ -110,17 +125,21 @@ namespace OpenMod.Runtime
             if (!File.Exists(loggingPath))
             {
                 // First run, logging.yml doesn't exist yet. We can not wait for auto-copy as it would be too late.
-                using (Stream stream = typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yml"))
+                using (Stream stream =
+                    typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yml"))
                 using (StreamReader reader = new StreamReader(stream))
                 {
                     string fileContent = reader.ReadToEnd();
                     File.WriteAllText(loggingPath, fileContent);
                 }
             }
-            
-            var builder = new ConfigurationBuilder();
-            SetupConfiguration(builder, CommandlineArgs, "logging.yml", WorkingDirectory);
-            var configuration = builder.Build();
+
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(WorkingDirectory)
+                .AddYamlFile("logging.yml")
+                .AddCommandLine(CommandlineArgs)
+                .AddEnvironmentVariables()
+                .Build();
 
             var loggerConfiguration = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration);
@@ -128,24 +147,21 @@ namespace OpenMod.Runtime
             Log.Logger = loggerConfiguration.CreateLogger();
         }
 
-        private void SetupConfiguration(IConfigurationBuilder configBuilder, string[] commandlineArgs, string file, string basePath)
-        {
-            configBuilder
-                .SetBasePath(basePath)
-                .AddYamlFile(file, true)
-                .AddCommandLine(commandlineArgs)
-                .AddEnvironmentVariables();
-        }
-
         public async Task ShutdownAsync()
         {
             await m_Host.StopAsync();
+            Status = RuntimeStatus.Unloaded;
         }
 
         public SemVersion Version { get; } = new SemVersion(0, 1, 0);
 
         public string OpenModComponentId { get; } = "OpenMod.Runtime";
 
-        public bool IsComponentAlive { get; } = true;
+        public bool IsComponentAlive
+        {
+            get { return Status != RuntimeStatus.Unloaded && Status != RuntimeStatus.Crashed; }
+        }
+
+        public RuntimeStatus Status { get; private set; } = RuntimeStatus.Unloaded;
     }
 }

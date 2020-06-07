@@ -6,6 +6,9 @@
     public interface IOpenModComponent
     {
         string OpenModComponentId { get; }
+ 
+        string WorkingDirectory { get; }
+        
         bool IsComponentAlive { get; }
     }
 }

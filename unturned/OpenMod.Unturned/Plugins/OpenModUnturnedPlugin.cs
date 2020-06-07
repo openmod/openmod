@@ -1,29 +1,12 @@
-﻿using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
-using OpenMod.Core.Plugins;
+﻿using System;
+using OpenMod.UnityEngine.Plugins;
 
 namespace OpenMod.Unturned.Plugins
 {
-    public abstract class OpenModUnturnedPlugin : OpenModPluginBase
+    public abstract class OpenModUnturnedPlugin : OpenModUnityEnginePlugin
     {
-        public sealed override async Task LoadAsync()
+        protected OpenModUnturnedPlugin(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            await OnLoadAsync();
-        }
-
-        protected virtual UniTask OnLoadAsync()
-        {
-            return UniTask.CompletedTask;
-        }
-
-        public sealed override async Task UnloadAsync()
-        {
-            await OnUnloadAsync();
-        }
-
-        protected virtual UniTask OnUnloadAsync()
-        {
-            return UniTask.CompletedTask;
         }
     }
 }

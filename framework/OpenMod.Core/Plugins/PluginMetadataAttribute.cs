@@ -15,6 +15,16 @@ namespace OpenMod.Core.Plugins
             get { return m_Id; }
             set
             {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new Exception($"Invalid plugin ID: \"{value}\". Plugin IDs can not be empty.");
+                }
+
+                if (!char.IsLetter(value[0]))
+                {
+                    throw new Exception($"Invalid plugin ID: \"{value}\". Plugin IDs must start with a letter.");
+                }
+
                 if (!value.All(d => char.IsLetterOrDigit(d) || d == '.'))
                 {
                     throw new Exception($"Invalid plugin ID: \"{value}\". Plugin IDs can only consists of alphanumeric characters including dots.");

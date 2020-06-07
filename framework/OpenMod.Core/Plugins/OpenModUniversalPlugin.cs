@@ -1,9 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace OpenMod.Core.Plugins
 {
     public class OpenModUniversalPlugin : OpenModPluginBase
     {
+        public OpenModUniversalPlugin(IServiceProvider serviceProvider) : base(serviceProvider)
+        {
+        }
+
         public sealed override Task LoadAsync()
         {
             return OnLoadAsync();

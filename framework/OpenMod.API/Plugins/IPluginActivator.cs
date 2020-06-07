@@ -10,6 +10,6 @@ namespace OpenMod.API.Plugins
     {
         IReadOnlyCollection<IOpenModPlugin> ActivatedPlugins { get; }
 
-        Task<IOpenModPlugin> ActivatePluginAsync(Assembly assembly);
+        Task<IOpenModPlugin> TryActivatePluginAsync(Assembly assembly);
     }
 }

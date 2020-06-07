@@ -42,7 +42,7 @@ namespace OpenMod.Runtime
             m_Logger.LogInformation("Loading plugins...");
             foreach (var pluginAssembly in m_PluginAssemblyStore.LoadedPluginAssemblies)
             {
-                await m_PluginActivator.ActivatePluginAsync(pluginAssembly);
+                await m_PluginActivator.TryActivatePluginAsync(pluginAssembly);
             }
 
             m_Logger.LogInformation("All plugins loaded.");

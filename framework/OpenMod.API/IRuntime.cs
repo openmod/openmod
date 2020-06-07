@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using OpenMod.API.Ioc;
 using Semver;
@@ -39,6 +40,25 @@ namespace OpenMod.API
         ///    Commandline arguments.
         /// </summary>
         string[] CommandlineArgs { get; }
+
+        /// <summary>
+        ///     The OpenMod configuration.
+        /// </summary>
+        IConfigurationRoot Configuration { get; }
+
+        /// <summary>
+        ///    The runtime status.
+        /// </summary>
+        RuntimeStatus Status { get; }
+
+    }
+
+    public enum RuntimeStatus
+    {
+        Initializing,
+        Initialized,
+        Unloaded,
+        Crashed
     }
 
     public struct RuntimeInitParameters

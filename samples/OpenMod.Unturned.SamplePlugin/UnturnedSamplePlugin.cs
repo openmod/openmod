@@ -3,10 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenMod.Core.Plugins;
 using OpenMod.Unturned.Plugins;
-using Semver;
 
 [assembly: PluginMetadata(Author = "OpenMod", DisplayName = "Unturned Sample Plugin", Id = "UnturnedSamplePlugin", Version = "1.0.0")]
 
@@ -16,15 +16,21 @@ namespace OpenMod.Unturned.SamplePlugin
     public class UnturnedSamplePlugin : OpenModUnturnedPlugin
     {
         private readonly ILogger<UnturnedSamplePlugin> m_Logger;
+        private readonly IConfiguration m_Configuration;
 
-        public UnturnedSamplePlugin(ILogger<UnturnedSamplePlugin> logger)
+        public UnturnedSamplePlugin(
+            ILogger<UnturnedSamplePlugin> logger, 
+            IConfiguration configuration,
+            IServiceProvider serviceProvider) : base(serviceProvider)
         {
             m_Logger = logger;
+            m_Configuration = configuration;
         }
 
         protected override async UniTask OnLoadAsync()
         {
             m_Logger.LogInformation("SampleUnturnedPlugin has been loaded.");
+            m_Logger.LogInformation($"Configuration value: {m_Configuration["somevalue"]}");
 
             await UniTask.SwitchToThreadPool();
             m_Logger.LogInformation($"SwitchToThreadPool Thread: {Thread.CurrentThread.ManagedThreadId}");
