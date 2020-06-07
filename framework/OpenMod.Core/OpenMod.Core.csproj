@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
   </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
     <None Remove="logging.yml" />

@@ -7,7 +7,7 @@ namespace OpenMod.API
     ///    Represents a game or anything else that hosts OpenMod
     /// </summary>
     [Service]
-    public interface IOpenModHost
+    public interface IOpenModHost : IOpenModComponent
     {
         /// <summary>
         ///     Initializes the host
@@ -18,7 +18,7 @@ namespace OpenMod.API
         /// <summary>
         ///     The name of the host. E.g. the game's name.
         /// </summary>
-        string Name { get; }
+        string DisplayName { get; }
 
         /// <summary>
         ///    The version of the host. Version format depends on the host.

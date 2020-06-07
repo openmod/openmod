@@ -40,9 +40,16 @@ namespace OpenMod.Runtime
             thread.Start();
         }
 
-        public async Task InitAsync(ICollection<Assembly> openModHostAssemblies, IHostBuilder hostBuilder,
+        public async Task InitAsync(
+            ICollection<Assembly> openModHostAssemblies,
+            IHostBuilder hostBuilder,
             RuntimeInitParameters parameters)
         {
+            if (!Directory.Exists(parameters.WorkingDirectory))
+            {
+                Directory.CreateDirectory(parameters.WorkingDirectory);
+            }
+
             Status = RuntimeStatus.Initializing;
             WorkingDirectory = parameters.WorkingDirectory;
             CommandlineArgs = parameters.CommandlineArgs;
@@ -54,11 +61,6 @@ namespace OpenMod.Runtime
 
             try
             {
-                if (!Directory.Exists(parameters.WorkingDirectory))
-                {
-                    Directory.CreateDirectory(parameters.WorkingDirectory);
-                }
-
                 hostBuilder
                     .UseContentRoot(parameters.WorkingDirectory)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())

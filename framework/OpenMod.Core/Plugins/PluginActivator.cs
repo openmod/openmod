@@ -20,7 +20,7 @@ namespace OpenMod.Core.Plugins
 {
     [UsedImplicitly]
     [ServiceImplementation]
-    public class PluginActivator : IPluginActivator
+    public class PluginActivator : IPluginActivator, IAsyncDisposable
     {
         private readonly IRuntime m_Runtime;
         private readonly ILogger<PluginActivator> m_Logger;
@@ -126,6 +126,23 @@ namespace OpenMod.Core.Plugins
 
             m_ActivatedPlugins.Add(new WeakReference(pluginInstance));
             return pluginInstance;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            m_Logger.LogInformation("Unloading all plugins...");
+
+            foreach (var plugin in m_ActivatedPlugins)
+            {
+                if (plugin.IsAlive)
+                {
+                    var instance = (IOpenModPlugin) plugin.Target;
+                    await instance.UnloadAsync();
+                }
+            }
+
+            m_ActivatedPlugins.Clear();
+            m_Logger.LogInformation("Plugins unloaded.");
         }
     }
 }

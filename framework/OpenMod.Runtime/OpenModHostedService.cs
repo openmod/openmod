@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Plugins;
+using SmartFormat;
 
 namespace OpenMod.Runtime
 {
@@ -34,8 +35,9 @@ namespace OpenMod.Runtime
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             //await m_PermissionProvider.LoadAsync();
+            Smart.Default.Parser.UseAlternativeEscapeChar('\\');
 
-            m_Logger.LogInformation($"Initializing for host: {m_Host.Name} v{m_Host.Version}");
+            m_Logger.LogInformation($"Initializing for host: {m_Host.DisplayName} v{m_Host.Version}");
             await m_Host.InitAsync();
             m_Logger.LogInformation("OpenMod has been initialized.");
 
@@ -45,7 +47,7 @@ namespace OpenMod.Runtime
                 await m_PluginActivator.TryActivatePluginAsync(pluginAssembly);
             }
 
-            m_Logger.LogInformation("All plugins loaded.");
+            m_Logger.LogInformation("Plugins loaded.");
         }
     }
 }

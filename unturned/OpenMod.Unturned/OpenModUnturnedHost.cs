@@ -20,18 +20,18 @@ namespace OpenMod.Unturned
     [ServiceImplementation]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
-        private readonly ILogger<OpenModUnturnedHost> m_Logger;
         private readonly Harmony m_Harmony;
         private const string HarmonyInstanceId = "com.get-openmod.unturned";
-        
-        public OpenModUnturnedHost(ILogger<OpenModUnturnedHost> logger)
+
+        public OpenModUnturnedHost(IRuntime runtime)
         {
             m_Harmony = new Harmony(HarmonyInstanceId);
-            m_Logger = logger;
+            WorkingDirectory = runtime.WorkingDirectory;
         }
 
         public Task InitAsync()
         {
+            IsComponentAlive = true;
             return UnityMainThreadDispatcher.Instance.EnqueueAsync(() =>
             {
                 if (PlatformHelper.IsLinux)
@@ -56,13 +56,18 @@ namespace OpenMod.Unturned
             });
         }
 
-        public string Name { get; } = Provider.APP_NAME;
+        public string DisplayName { get; } = Provider.APP_NAME;
 
         public string Version { get; } = Provider.APP_VERSION;
 
         public void Dispose()
         {
+            IsComponentAlive = false;
             m_Harmony.UnpatchAll(HarmonyInstanceId);
         }
+
+        public string OpenModComponentId { get; } = "OpenMod.Unturned";
+        public string WorkingDirectory { get; }
+        public bool IsComponentAlive { get; private set; }
     }
 }
