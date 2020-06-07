@@ -6,12 +6,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Plugins;
-using OpenMod.Core.Helpers;
 using Semver;
 
 namespace OpenMod.Core.Plugins
 {
-    public abstract class OpenModPluginBase : IOpenModPlugin, IDisposable
+    public abstract class OpenModPluginBase : IOpenModPlugin, IAsyncDisposable
     {
         public string OpenModComponentId { get; }
         public string WorkingDirectory { get; }
@@ -44,16 +43,19 @@ namespace OpenMod.Core.Plugins
 
         public abstract Task UnloadAsync();
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            AsyncHelper.RunSync(UnloadAsync);
+            if (!await OnDispose())
+            {
+                await UnloadAsync();
+            }
+
             LifetimeScope?.Dispose();
-            OnDispose();
         }
 
-        protected virtual void OnDispose()
+        protected virtual ValueTask<bool> OnDispose()
         {
-
+            return new ValueTask<bool>(false);
         }
     }
 }
