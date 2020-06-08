@@ -13,10 +13,10 @@ using OpenMod.NuGet;
 namespace OpenMod.Bootstrapper
 {
     // NOTE TO DEVELOPER: THIS CLASS SHOULD NOT REFERENCE *ANY* OTHER OPENMOD CODE!
-    // OpenMod is not loaded at this sage.
+    // OpenMod is not loaded at this stage (except for OpenMod.NuGet, which has no dependencies).
     /// <summary>
     ///     This class is responsible for downloading OpenMod.Core, OpenMod.API, the host package and their dependencies. <br/>
-    ///     After download, it will boot OpenMod and then initialize the IOpenModHost interface.
+    ///     After download, it will boot OpenMod and then initialize the IRuntime implementation.
     /// </summary>
     public class OpenModDynamicBootstrapper
     {
