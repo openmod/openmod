@@ -18,7 +18,7 @@
       <Private Condition="$(NuGetBootstrap) == 'true'">false</Private>
       <ExcludeAssets Condition="$(NuGetBootstrap) == 'true'">all</ExcludeAssets>
     </ProjectReference>
-    <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj">
+    <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj" >
       <Private Condition="$(NuGetBootstrap) == 'true'">false</Private>
       <ExcludeAssets Condition="$(NuGetBootstrap) == 'true'">all</ExcludeAssets>
     </ProjectReference>

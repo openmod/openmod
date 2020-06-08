@@ -54,7 +54,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
-        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        tag_name: ${{ steps.get_version.outputs.VERSION }}_standalone
         release_name: Standalone Release v${{ steps.get_version.outputs.VERSION }}
         draft: false
         prerelease: false   
