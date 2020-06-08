@@ -7,14 +7,14 @@ on:
       - 'framework/OpenMod.Runtime/**'
       - 'framework/OpenMod.Core/**'
       - 'framework/OpenMod.NuGet/**'
-      - 'framework/OpenMod.API/**      
+      - 'framework/OpenMod.API/**'      
   pull_request:
     branches: [ master ]
     paths:
       - 'framework/OpenMod.Runtime/**'
       - 'framework/OpenMod.Core/**'
       - 'framework/OpenMod.NuGet/**'
-      - 'framework/OpenMod.API/**'
+      - 'framework/OpenMod.API/**' 
 jobs:
   build:
     name: "Build"
