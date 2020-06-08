@@ -4,11 +4,15 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'unturned/OpenMod.Unturned.Module/**'
+      - 'framework/**'
+      - 'unityengine/**'
+      - 'unturned/**'
   pull_request:
     branches: [ master ]
     paths:
-      - 'unturned/OpenMod.Unturned.Module/**'
+      - 'framework/**'
+      - 'unityengine/**'
+      - 'unturned/**'
 
 jobs:
   build:
