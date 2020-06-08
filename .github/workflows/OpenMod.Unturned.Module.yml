@@ -41,11 +41,12 @@ jobs:
       run: dotnet build unturned/OpenMod.Unturned.Module --configuration Release --no-restore
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
+    - name: Install zip
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      run: sudo apt-get install zip
     - name: Zip artifacts
       if: github.event_name == 'create' && github.event.ref_type == 'tag'
-      uses: montudor/action-zip@v0.1.0
-      with:
-         args: cd ./unturned/OpenMod.Unturned.Module/bin/Release/net461 && zip -qq -r ./release.zip *
+      run: "cd ./unturned/OpenMod.Unturned.Module/bin/Release/net461 && zip -qq -r ./release.zip *"
     - name: Create release
       if: github.event_name == 'create' && github.event.ref_type == 'tag'
       id: create_release
