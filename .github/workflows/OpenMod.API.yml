@@ -1,4 +1,4 @@
-name: .NET Core
+name: OpenMod.API
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
       id: wait-for-build
       with:
         token: ${{ secrets.GH_TOKEN }}
-        checkName: "Bump version"
+        checkName: "BumpVersion"
         owner: 'openmod'
         repo: 'OpenMod'
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
