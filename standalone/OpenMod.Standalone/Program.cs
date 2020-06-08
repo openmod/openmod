@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 #if NUGET_BOOTSTRAP
+using System;
 using OpenMod.Runtime;
 using System.Linq;
 #else
@@ -20,6 +21,7 @@ namespace OpenMod.Standalone
             var path = Path.GetFullPath("openmod");
 
 #if NUGET_BOOTSTRAP
+            Console.WriteLine("Downloading OpenMod packages via NuGet, this can take a while...");
             await new OpenModDynamicBootstrapper().BootstrapAsync(path, args, "OpenMod.Core", args.Contains("-Pre"));
 #else
             await new Runtime.Runtime().InitAsync(new List<Assembly> { typeof(Program).Assembly }, new HostBuilder(), new RuntimeInitParameters
