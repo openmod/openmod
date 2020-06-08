@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Nito.AsyncEx;
 using NuGet.Common;
 using NuGet.Packaging.Core;
 using OpenMod.NuGet;
@@ -36,7 +37,7 @@ namespace OpenMod.Bootstrapper
                               bool allowPrereleaseVersions = false,
                               ILogger logger = null)
         {
-            BootstrapAsync(openModFolder, commandLineArgs, packageIds, allowPrereleaseVersions, logger).GetAwaiter().GetResult();
+            AsyncContext.Run(() => BootstrapAsync(openModFolder, commandLineArgs, packageIds, allowPrereleaseVersions, logger));
         }
 
         public async Task BootstrapAsync(
@@ -46,9 +47,7 @@ namespace OpenMod.Bootstrapper
             bool allowPrereleaseVersions = false,
             ILogger logger = null)
         {
-            logger = logger ?? new NuGetConsoleLogger();
-            logger.LogInformation("Bootstrap has started.");
-
+            logger ??= new NuGetConsoleLogger();
             openModFolder = Path.GetFullPath(openModFolder);
             
             var packagesDirectory = Path.Combine(openModFolder, "packages");
@@ -102,8 +101,8 @@ namespace OpenMod.Bootstrapper
 
         private Task InitializeRuntimeAsync(List<Assembly> hostAssemblies, string workingDirectory, string[] commandlineArgs)
         {
-            var runtimeAssembly = hostAssemblies.FirstOrDefault(d => d.GetName().Name.Equals("OpenMod.Runtime"));
-            var apiAssembly = hostAssemblies.FirstOrDefault(d => d.GetName().Name.Equals("OpenMod.API"));
+            var runtimeAssembly = FindAssemblyInCurrentDomain("OpenMod.Runtime");
+            var apiAssembly = FindAssemblyInCurrentDomain("OpenMod.API");
             var runtimeType = runtimeAssembly.GetType("OpenMod.Runtime.Runtime");
             var runtime = Activator.CreateInstance(runtimeType);
 
@@ -114,6 +113,12 @@ namespace OpenMod.Bootstrapper
             
             var initMethod = runtimeType.GetMethod("InitAsync", BindingFlags.Instance | BindingFlags.Public);
             return (Task) initMethod.Invoke(runtime, new object[] {  hostAssemblies, null /* hostBuilder */, parameters});
+        }
+
+        private Assembly FindAssemblyInCurrentDomain(string name)
+        {
+            return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(d => d.GetName().Name.Equals(name)) ??
+                   throw new Exception($"Failed to find assembly: {name}");
         }
 
         private void SetParameter(object parametersObject, string name, object value)
