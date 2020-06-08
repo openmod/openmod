@@ -3,12 +3,15 @@
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'== 'net461'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Lib.Harmony" Version="2.0.1" />
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.0.1" />
+  </ItemGroup>
 
   <PropertyGroup Condition="$(Configuration) == 'Debug'">
     <NuGetBootstrap>false</NuGetBootstrap>
