@@ -4,14 +4,10 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'framework/**'
-      - 'unityengine/**'
       - 'standalone/**'
   pull_request:
     branches: [ master ]
     paths:
-      - 'framework/**'
-      - 'unityengine/**'
       - 'standalone/**'
 
 jobs:
@@ -54,18 +50,18 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
-        tag_name: ${{ steps.get_version.outputs.VERSION }}_standalone
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
         release_name: Standalone Release v${{ steps.get_version.outputs.VERSION }}
         draft: false
         prerelease: false   
     - name: Zip net461 artifacts
       uses: montudor/action-zip@v0.1.0
       with:
-        args: zip -qq -r ./release-net461.zip ./standalone/OpenMod.Standalone/bin/Release/net461  
+        args: zip -b ./standalone/OpenMod.Standalone/bin/Release/net461 -r ./release-net461.zip * 
     - name: Zip netcoreapp3.1 artifacts
       uses: montudor/action-zip@v0.1.0
       with:
-        args: zip -qq -r ./release-netcoreapp3.1.zip ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1        
+        args: zip -b ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1 -r ./release-netcoreapp3.1.zip *
     - name: Upload net461 release asset
       if: github.event_name != 'pull_request'
       uses: actions/upload-release-asset@v1

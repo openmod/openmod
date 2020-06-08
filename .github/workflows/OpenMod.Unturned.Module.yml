@@ -4,14 +4,10 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'framework/**'
-      - 'unityengine/**'
       - 'unturned/**'
   pull_request:
     branches: [ master ]
     paths:
-      - 'framework/**'
-      - 'unityengine/**'
       - 'unturned/**'
 
 jobs:
@@ -50,7 +46,7 @@ jobs:
     - name: Zip artifacts
       uses: montudor/action-zip@v0.1.0
       with:
-        args: zip -qq -r ./release.zip ./unturned/OpenMod.Unturned.Module/bin/Release/net461
+        args: zip -b ./unturned/OpenMod.Unturned.Module/bin/Release/net461 -r ./release.zip *
     - name: Create release
       if: github.event_name != 'pull_request'
       id: create_release
@@ -58,7 +54,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
-        tag_name: ${{ steps.get_version.outputs.VERSION }}_unturned
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
         release_name: Unturned Release v${{ steps.get_version.outputs.VERSION }}
         draft: false
         prerelease: false   
