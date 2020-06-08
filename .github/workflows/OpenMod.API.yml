@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Update version
-      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>$(git describe --tags)</Version>#\" props\\SharedProjectProps.props"  
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>$(git describe --tags)</Version>#\" props/SharedProjectProps.props"  
     - name: Build
       run: dotnet build --configuration Release --no-restore
 #    - name: Test
