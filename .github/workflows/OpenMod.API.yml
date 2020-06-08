@@ -26,6 +26,7 @@ jobs:
         repo: 'OpenMod'
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - uses: actions/checkout@v2
+      name: Checkout Repository
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
