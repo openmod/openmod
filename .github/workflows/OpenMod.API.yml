@@ -15,6 +15,13 @@ jobs:
     name: "Build"
     runs-on: ubuntu-latest
     steps:
+    - name: Wait version tag
+      uses: fountainhead/action-wait-for-check@v1.0.0
+      id: wait-for-build
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        checkName: "Bump version"
+        ref: github.event.pull_request.head.sha || github.sha     
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
@@ -28,12 +35,8 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
-  deploy:
-    name: "Deploy to nuget.org"
-    if: github.event_name != 'pull_request'
-    runs-on: any
-    steps:
     - name: Push to NuGet
+      if: github.event_name != 'pull_request'
       run: dotnet nuget push framework/OpenMod.API/bin/Release/*.nupkg
              --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
-             --source https://api.nuget.org/v3/index.json 
+             --source https://api.nuget.org/v3/index.json
