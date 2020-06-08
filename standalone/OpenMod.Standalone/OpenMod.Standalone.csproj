@@ -6,26 +6,9 @@
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
-  <PropertyGroup Condition="$(Configuration) == 'Debug'">
-    <NuGetBootstrap>false</NuGetBootstrap>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration) == 'Release'">
-    <NuGetBootstrap>true</NuGetBootstrap>
-  </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\..\framework\OpenMod.API\OpenMod.API.csproj">
-      <Private Condition="$(NuGetBootstrap) == 'true'">false</Private>
-      <ExcludeAssets Condition="$(NuGetBootstrap) == 'true'">all</ExcludeAssets>
-    </ProjectReference>
-    <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj" >
-      <Private Condition="$(NuGetBootstrap) == 'true'">false</Private>
-      <ExcludeAssets Condition="$(NuGetBootstrap) == 'true'">all</ExcludeAssets>
-    </ProjectReference>
+    <ProjectReference Include="..\..\framework\OpenMod.API\OpenMod.API.csproj"/>
+    <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj"/>
     <ProjectReference Include="..\..\framework\OpenMod.Runtime\OpenMod.Runtime.csproj" />
   </ItemGroup>
-  <PropertyGroup>
-    <DefineConstants Condition="$(NuGetBootstrap) == 'true'">NUGET_BOOTSTRAP</DefineConstants>
-  </PropertyGroup>
-
 </Project>

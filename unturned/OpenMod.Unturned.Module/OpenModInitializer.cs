@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-using NuGet.Common;
-using OpenMod.API;
-using OpenMod.NuGet;
-using OpenMod.Runtime;
+
 using SDG.Unturned;
+
+#if NUGET_BOOTSTRAP
+using OpenMod.Bootstrapper;
+using OpenMod.NuGet;
+#else
+using System.Reflection;
+using Microsoft.Extensions.Hosting;
+using OpenMod.API;
+#endif
+
 
 namespace OpenMod.Unturned.Module
 {

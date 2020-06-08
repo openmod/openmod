@@ -11,6 +11,7 @@
     <Company>OpenMod</Company>
     <Copyright>Enes Sadık Özbek &lt;esozbek.me&gt;</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(TargetFramework)'== 'net461'">

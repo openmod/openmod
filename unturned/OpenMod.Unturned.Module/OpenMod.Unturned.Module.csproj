@@ -9,10 +9,6 @@
     <PackageReference Include="Lib.Harmony" Version="2.0.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\framework\OpenMod.Runtime\OpenMod.Runtime.csproj" />
-  </ItemGroup>
-
   <PropertyGroup Condition="$(Configuration) == 'Debug'">
     <NuGetBootstrap>false</NuGetBootstrap>
   </PropertyGroup>
@@ -20,13 +16,15 @@
     <NuGetBootstrap>true</NuGetBootstrap>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Condition="$(NuGetBootstrap) == 'true'" Include="..\..\framework\OpenMod.Bootstrapper\OpenMod.Bootstrapper.csproj" />
+    <ProjectReference Condition="$(NuGetBootstrap) != 'true'" Include="..\OpenMod.Unturned\OpenMod.Unturned.csproj" />
+
+  </ItemGroup>
+
   <PropertyGroup>
     <DefineConstants Condition="$(NuGetBootstrap) == 'true'">NUGET_BOOTSTRAP</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup Condition="$(NuGetBootstrap) != 'true'">
-    <ProjectReference Include="..\OpenMod.Unturned\OpenMod.Unturned.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">

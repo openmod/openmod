@@ -43,9 +43,11 @@ namespace OpenMod.Runtime
 
         public async Task InitAsync(
             ICollection<Assembly> openModHostAssemblies,
-            IHostBuilder hostBuilder,
+            [CanBeNull] IHostBuilder hostBuilder,
             RuntimeInitParameters parameters)
         {
+            hostBuilder ??= new HostBuilder();
+
             if (!Directory.Exists(parameters.WorkingDirectory))
             {
                 Directory.CreateDirectory(parameters.WorkingDirectory);

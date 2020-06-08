@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-using Nito.AsyncEx;
 using NuGet.Common;
 using NuGet.Packaging.Core;
 using OpenMod.NuGet;
 
-namespace OpenMod.Runtime
+namespace OpenMod.Bootstrapper
 {
     // NOTE TO DEVELOPER: THIS CLASS SHOULD NOT REFERENCE *ANY* OTHER OPENMOD CODE!
     // OpenMod is not loaded at this sage.
@@ -36,7 +36,7 @@ namespace OpenMod.Runtime
                               bool allowPrereleaseVersions = false,
                               ILogger logger = null)
         {
-            AsyncContext.Run(() => BootstrapAsync(openModFolder, commandLineArgs, packageIds, allowPrereleaseVersions, logger));
+            BootstrapAsync(openModFolder, commandLineArgs, packageIds, allowPrereleaseVersions, logger).GetAwaiter().GetResult();
         }
 
         public async Task BootstrapAsync(
@@ -100,14 +100,26 @@ namespace OpenMod.Runtime
             return await packageManager.LoadAssembliesFromNuGetPackageAsync(pkg);
         }
 
-        private async Task InitializeRuntimeAsync(List<Assembly> hostAssemblies, string workingDirectory, string[] commandlineArgs)
+        private Task InitializeRuntimeAsync(List<Assembly> hostAssemblies, string workingDirectory, string[] commandlineArgs)
         {
-            var runtime = new Runtime();
-            await runtime.InitAsync(hostAssemblies, new HostBuilder(), new OpenMod.API.RuntimeInitParameters
-            {
-                WorkingDirectory = workingDirectory,
-                CommandlineArgs = commandlineArgs
-            });
+            var runtimeAssembly = hostAssemblies.FirstOrDefault(d => d.GetName().Name.Equals("OpenMod.Runtime"));
+            var apiAssembly = hostAssemblies.FirstOrDefault(d => d.GetName().Name.Equals("OpenMod.API"));
+            var runtimeType = runtimeAssembly.GetType("OpenMod.Runtime.Runtime");
+            var runtime = Activator.CreateInstance(runtimeType);
+
+            var parametersType = apiAssembly.GetType("OpenMod.API.RuntimeInitParameters");
+            var parameters = Activator.CreateInstance(parametersType);
+            SetParameter(parameters, "WorkingDirectory", workingDirectory);
+            SetParameter(parameters, "CommandlineArgs", commandlineArgs);
+            
+            var initMethod = runtimeType.GetMethod("InitAsync", BindingFlags.Instance | BindingFlags.Public);
+            return (Task) initMethod.Invoke(runtime, new object[] {  hostAssemblies, null /* hostBuilder */, parameters});
+        }
+
+        private void SetParameter(object parametersObject, string name, object value)
+        {
+            var field = parametersObject.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
+            field.SetValue(parametersObject, value);
         }
     }
 }

@@ -10,11 +10,9 @@ using System.Threading.Tasks;
 using NuGet.Common;
 using SDG.Framework.Modules;
 using HarmonyLib;
-using JetBrains.Annotations;
 
 namespace OpenMod.Unturned.Module
 {
-    [UsedImplicitly]
     public class OpenModUnturnedModule : IModuleNexus
     {
         private const string HarmonyInstanceId = "com.get-openmod.unturned.module";
