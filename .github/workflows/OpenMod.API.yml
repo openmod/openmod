@@ -13,7 +13,7 @@ on:
 jobs:
   build:
     name: "Build"
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
@@ -22,6 +22,8 @@ jobs:
         dotnet-version: 3.1.101
     - name: Install dependencies
       run: dotnet restore
+    - name: Update version
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>$(git describe --tags)</Version>#\" props\\SharedProjectProps.props"  
     - name: Build
       run: dotnet build --configuration Release --no-restore
 #    - name: Test
