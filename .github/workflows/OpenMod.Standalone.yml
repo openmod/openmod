@@ -4,11 +4,15 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'standalone/OpenMod.Standalone/**'
+      - 'framework/**'
+      - 'unityengine/**'
+      - 'standalone/**'
   pull_request:
     branches: [ master ]
     paths:
-      - 'standalone/OpenMod.Standalone/**'
+      - 'framework/**'
+      - 'unityengine/**'
+      - 'standalone/**'
 
 jobs:
   build:
@@ -40,3 +44,42 @@ jobs:
       run: dotnet build standalone/OpenMod.Standalone --configuration Release --no-restore
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
+    - name: Create release
+      if: github.event_name != 'pull_request'
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        release_name: Standalone Release v${{ steps.get_version.outputs.VERSION }}
+        draft: false
+        prerelease: false   
+    - name: Zip net461 artifacts
+      uses: montudor/action-zip@v0.1.0
+      with:
+        args: zip -qq -r ./release-net461.zip ./standalone/OpenMod.Standalone/bin/Release/net461  
+    - name: Zip netcoreapp3.1 artifacts
+      uses: montudor/action-zip@v0.1.0
+      with:
+        args: zip -qq -r ./release-netcoreapp3.1.zip ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1        
+    - name: Upload net461 release asset
+      if: github.event_name != 'pull_request'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release-net461.zip
+        asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-net461.zip
+        asset_content_type: application/zip
+    - name: Upload netcoreapp3.1 release asset
+      if: github.event_name != 'pull_request'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release-netcoreapp3.1.zip
+        asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-netcoreapp3.1.zip
+        asset_content_type: application/zip        

@@ -59,10 +59,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
         tag_name: ${{ steps.get_version.outputs.VERSION }}
-        release_name: Release v${{ steps.get_version.outputs.VERSION }}
+        release_name: Unturned Release v${{ steps.get_version.outputs.VERSION }}
         draft: false
         prerelease: false   
-    - name: Upload Release Asset
+    - name: Upload release asset
       if: github.event_name != 'pull_request'
       uses: actions/upload-release-asset@v1
       env:
