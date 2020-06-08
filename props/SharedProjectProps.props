@@ -3,7 +3,7 @@
     <PackageId>$(AssemblyName)</PackageId>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageTags>RocketMod Rocket UnityEngine UnrealEngine Plugin Framework</PackageTags>
-    <PackageLicenseUrl>https://github.com/openmod/OpenMod/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
     <PackageProjectUrl>https://get-openmod.com/</PackageProjectUrl>
     <PackageOwners>Enes Sadık Özbek&lt;esozbek.me&gt;</PackageOwners>
     <Authors>Enes Sadık Özbek &lt;esozbek.me&gt;</Authors>
