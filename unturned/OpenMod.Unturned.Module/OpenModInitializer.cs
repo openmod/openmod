@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-
 using SDG.Unturned;
 
 #if NUGET_BOOTSTRAP
@@ -29,7 +28,7 @@ namespace OpenMod.Unturned.Module
             }
 
 #if NUGET_BOOTSTRAP
-            UnturnedLog.info("Bootstrapping OpenMod for Unturned, this might take a while...");
+            Console.WriteLine("Bootstrapping OpenMod for Unturned, this might take a while...");
 
             var bootrapper = new OpenModDynamicBootstrapper();
 
