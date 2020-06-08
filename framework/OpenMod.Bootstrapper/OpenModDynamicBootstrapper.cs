@@ -93,7 +93,7 @@ namespace OpenMod.Bootstrapper
                     var installResult = await nugetInstaller.InstallAsync(openModPackage.Identity, allowPrereleaseVersions);
                     if (installResult.Code != NuGetInstallCode.Success)
                     {
-                        logger.LogError($"Downloading has failed for {openModPackage.Identity.Id}: " + installResult.Code);
+                        logger.LogError($"Downloading has failed for {openModPackage.Identity.Id} v{openModPackage.Identity.Version.OriginalVersion}: " + installResult.Code);
                         return;
                     }
 
