@@ -5,10 +5,14 @@ on:
     branches: [ master ]
     paths:
       - 'framework/OpenMod.Core/**'
+      - 'framework/OpenMod.NuGet/**'
+      - 'framework/OpenMod.API/**'
   pull_request:
     branches: [ master ]
     paths:
       - 'framework/OpenMod.Core/**'
+      - 'framework/OpenMod.NuGet/**'
+      - 'framework/OpenMod.API/**'
 
 jobs:
   build:

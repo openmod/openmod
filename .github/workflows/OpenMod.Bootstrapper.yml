@@ -5,11 +5,12 @@ on:
     branches: [ master ]
     paths:
       - 'framework/OpenMod.Bootstrapper/**'
+      - 'framework/OpenMod.NuGet/**'
   pull_request:
     branches: [ master ]
     paths:
       - 'framework/OpenMod.Bootstrapper/**'
-
+      - 'framework/OpenMod.NuGet/**'
 jobs:
   build:
     name: "Build"
