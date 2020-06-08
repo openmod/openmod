@@ -50,7 +50,7 @@ jobs:
     - name: Zip artifacts
       uses: montudor/action-zip@v0.1.0
       with:
-      args: zip -qq -r ./release.zip ./unturned/OpenMod.Unturned.Module/bin/Release/net461
+        args: zip -qq -r ./release.zip ./unturned/OpenMod.Unturned.Module/bin/Release/net461
     - name: Create release
       if: github.event_name != 'pull_request'
       id: create_release
