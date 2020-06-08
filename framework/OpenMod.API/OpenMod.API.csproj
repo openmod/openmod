@@ -12,6 +12,10 @@
     </PackageReference>
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)'== 'net461'">
+    <FrameworkPathOverride>$(NuGetPackageRoot)microsoft.targetingpack.netframework.v4.6.1/1.0.1/lib/net461/</FrameworkPathOverride>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Autofac" Version="5.2.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
