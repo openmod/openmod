@@ -21,7 +21,7 @@ jobs:
       id: wait-for-build
       with:
         token: ${{ secrets.GH_TOKEN }}
-        checkName: "bump"
+        checkName: "bumpVersion"
         owner: 'openmod'
         repo: 'OpenMod'
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
