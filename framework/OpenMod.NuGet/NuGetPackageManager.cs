@@ -92,10 +92,10 @@ namespace OpenMod.NuGet
         {
             using (var cacheContext = new SourceCacheContext())
             {
-                IEnumerable<SourcePackageDependencyInfo> packagesToInstall;
+                IEnumerable<SourcePackageDependencyInfo> dependencyPackages;
                 try
                 {
-                    packagesToInstall = await GetDependenciesAsync(packageIdentity, cacheContext);
+                    dependencyPackages = await GetDependenciesAsync(packageIdentity, cacheContext);
                 }
                 catch (NuGetResolverInputException ex)
                 {
@@ -109,16 +109,16 @@ namespace OpenMod.NuGet
                     ClientPolicyContext.GetClientPolicy(m_NugetSettings, Logger),
                     Logger);
 
-                foreach (var packageToInstall in packagesToInstall)
+                foreach (var dependencyPackage in dependencyPackages)
                 {
-                    var installedPath = m_PackagePathResolver.GetInstalledPath(packageToInstall);
+                    var installedPath = m_PackagePathResolver.GetInstalledPath(dependencyPackage);
                     if (installedPath == null)
                     {
-                        Logger.LogInformation($"Downloading: {packageToInstall.Id} v{packageToInstall.Version.OriginalVersion}");
+                        Logger.LogInformation($"Downloading: {dependencyPackage.Id} v{dependencyPackage.Version.OriginalVersion}");
 
-                        var downloadResource = await packageToInstall.Source.GetResourceAsync<DownloadResource>(CancellationToken.None);
+                        var downloadResource = await dependencyPackage.Source.GetResourceAsync<DownloadResource>(CancellationToken.None);
                         var downloadResult = await downloadResource.GetDownloadResourceResultAsync(
-                            packageToInstall,
+                            dependencyPackage,
                             new PackageDownloadContext(cacheContext),
                             SettingsUtility.GetGlobalPackagesFolder(m_NugetSettings),
                             Logger, CancellationToken.None);
@@ -130,6 +130,8 @@ namespace OpenMod.NuGet
                             packageExtractionContext,
                             CancellationToken.None);
                     }
+
+                    await LoadAssembliesFromNuGetPackageAsync(GetNugetPackageFile(dependencyPackage));
                 }
 
                 return new NuGetInstallResult(packageIdentity);
@@ -404,12 +406,18 @@ namespace OpenMod.NuGet
 
         public void InstallAssemblyResolver()
         {
+            if (m_AssemblyResolverInstalled)
+            {
+                return;
+            }
+
             AppDomain.CurrentDomain.AssemblyResolve += OnAsssemlbyResolve;
             m_AssemblyResolverInstalled = true;
         }
 
         private Assembly OnAsssemlbyResolve(object sender, ResolveEventArgs args)
         {
+            m_Logger.LogDebug($"Resolving assembly from NuGet: {args.Name}");
             var name = GetVersionIndependentName(args.Name, out string version);
             var parsedVersion = new Version(version);
 
@@ -427,7 +435,7 @@ namespace OpenMod.NuGet
                     .Where(d => d.Assembly.IsAlive && d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     .OrderByDescending(d => d.Version);
 
-            return (Assembly) matchingAssemblies.FirstOrDefault()?.Assembly.Target;
+            return (Assembly)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
         }
 
         protected static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
