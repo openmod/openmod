@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -25,6 +26,14 @@ namespace OpenMod.Runtime
     [UsedImplicitly]
     public sealed class Runtime : IRuntime, IOpenModComponent
     {
+        public Runtime()
+        {
+            Assembly runtimeAssembly = typeof(Runtime).Assembly;
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(runtimeAssembly.Location);
+            string version = fileVersionInfo.ProductVersion;
+            Version = SemVersion.Parse(version);
+        }
+
         public string WorkingDirectory { get; private set; }
         public string[] CommandlineArgs { get; private set; }
         public IConfigurationRoot Configuration { get; private set; }
@@ -60,7 +69,7 @@ namespace OpenMod.Runtime
             SetupSerilog();
 
 
-            m_Logger.LogInformation("OpenMod is starting...");
+            m_Logger.LogInformation($"OpenMod v{Version} is starting...");
 
             try
             {
@@ -187,7 +196,7 @@ namespace OpenMod.Runtime
             Status = RuntimeStatus.Unloaded;
         }
 
-        public SemVersion Version { get; } = new SemVersion(0, 1, 0);
+        public SemVersion Version { get; }
 
         public string OpenModComponentId { get; } = "OpenMod.Runtime";
 
