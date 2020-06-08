@@ -4,11 +4,11 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'framework/OpenMod.Unturned.Module/**'
+      - 'unturned/OpenMod.Unturned.Module/**'
   pull_request:
     branches: [ master ]
     paths:
-      - 'framework/OpenMod.Unturned.Module/**'
+      - 'unturned/OpenMod.Unturned.Module/**'
 
 jobs:
   build:
@@ -18,7 +18,6 @@ jobs:
     - name: Wait version tag
       if: github.event_name != 'pull_request'
       uses: fountainhead/action-wait-for-check@v1.0.0
-      id: wait-for-build
       with:
         token: ${{ secrets.GH_TOKEN }}
         checkName: "bumpVersion"
@@ -37,18 +36,19 @@ jobs:
       with:
         dotnet-version: 3.1.101
     - name: Install dependencies
-      run: dotnet restore framework/OpenMod.Unturned.Module
+      run: dotnet restore unturned/OpenMod.Unturned.Module
     - name: Update version
       run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"  
     - name: Build
-      run: dotnet build framework/OpenMod.Unturned.Module --configuration Release --no-restore
+      run: dotnet build unturned/OpenMod.Unturned.Module --configuration Release --no-restore
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
     - name: Zip artifacts
       uses: montudor/action-zip@v0.1.0
       with:
-      args: zip -qq -r ./release.zip ./framework/OpenMod.Unturned.Module/bin/Release/net461
+      args: zip -qq -r ./release.zip ./unturned/OpenMod.Unturned.Module/bin/Release/net461
     - name: Create release
+      if: github.event_name != 'pull_request'
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -59,6 +59,7 @@ jobs:
         draft: false
         prerelease: false   
     - name: Upload Release Asset
+      if: github.event_name != 'pull_request'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

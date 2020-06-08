@@ -18,7 +18,6 @@ jobs:
     - name: Wait version tag
       if: github.event_name != 'pull_request'
       uses: fountainhead/action-wait-for-check@v1.0.0
-      id: wait-for-build
       with:
         token: ${{ secrets.GH_TOKEN }}
         checkName: "bumpVersion"
