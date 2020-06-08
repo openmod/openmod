@@ -51,7 +51,7 @@ namespace OpenMod.Runtime
 
             openModFolder = Path.GetFullPath(openModFolder);
             
-            var packagesDirectory = Path.Combine(openModFolder, "Packages");
+            var packagesDirectory = Path.Combine(openModFolder, "packages");
 
             if (!Directory.Exists(packagesDirectory))
             {
