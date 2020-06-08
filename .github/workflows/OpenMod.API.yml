@@ -16,12 +16,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Wait version tag
+      if: github.event_name != 'pull_request'
       uses: fountainhead/action-wait-for-check@v1.0.0
       id: wait-for-build
       with:
         token: ${{ secrets.GH_TOKEN }}
         checkName: "Bump version"
-        ref: github.event.pull_request.head.sha || github.sha     
+        owner: 'openmod'
+        repo: 'OpenMod'
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
