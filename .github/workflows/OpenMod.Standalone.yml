@@ -37,6 +37,9 @@ jobs:
       run: dotnet build standalone/OpenMod.Standalone --configuration Release --no-restore
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
+    - name: Install zip
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      run: sudo apt-get install zip
     - name: Create release
       if: github.event_name == 'create' && github.event.ref_type == 'tag'
       id: create_release
@@ -49,13 +52,8 @@ jobs:
         draft: false
         prerelease: false   
     - name: Zip net461 artifacts
-      uses: montudor/action-zip@v0.1.0
-      with:
-        args: cd ./standalone/OpenMod.Standalone/bin/Release/net461 && zip -qq -r ./release.zip *
-    - name: Zip netcoreapp3.1 artifacts
-      uses: montudor/action-zip@v0.1.0
-      with:
-        args: cd ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1 && zip -qq -r ./release.zip *
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      run: "cd ./standalone/OpenMod.Standalone/bin/Release/net461 && zip -qq -r ./release.zip *"      
     - name: Upload net461 release asset
       if: github.event_name == 'create' && github.event.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
@@ -66,6 +64,9 @@ jobs:
         asset_path: ./standalone/OpenMod.Standalone/bin/Release/net461/release.zip
         asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-net461.zip
         asset_content_type: application/zip
+    - name: Zip netcoreapp3.1 artifacts
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      run: "cd ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1 && zip -qq -r ./release.zip *"          
     - name: Upload netcoreapp3.1 release asset
       if: github.event_name == 'create' && github.event.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
