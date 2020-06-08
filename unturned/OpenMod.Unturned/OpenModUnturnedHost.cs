@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
 using SDG.Unturned;
 using Serilog;
+using UnityEngine;
 using UnityEngine.Experimental.LowLevel;
 
 namespace OpenMod.Unturned
@@ -43,6 +45,9 @@ namespace OpenMod.Unturned
                     Dedicator.commandWindow.setIOHandler(new SerilogWindowsConsoleInputOutput());
                 }
 
+                var logCallbackField = typeof(Application).GetField("s_LogCallbackHandler", BindingFlags.Static | BindingFlags.Instance);              
+                logCallbackField.SetValue(null, (Application.LogCallback)DummyLogCallback);
+
                 m_Harmony.PatchAll(GetType().Assembly);
                 TlsWorkaround.Install();
 
@@ -55,6 +60,12 @@ namespace OpenMod.Unturned
                 PlayerLoopHelper.Initialize(ref playerLoop);
             });
         }
+
+        private void DummyLogCallback(string condition, string stacktrace, LogType type)
+        {
+            // do nothing
+        }
+
 
         public string DisplayName { get; } = Provider.APP_NAME;
 
