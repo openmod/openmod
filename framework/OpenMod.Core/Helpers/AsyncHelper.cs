@@ -2,13 +2,14 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
+using Serilog;
 
 namespace OpenMod.Core.Helpers
 {
     public static class AsyncHelper
     {
         /// <summary>
-        /// Checks if given method is an async method.
+        ///     Checks if given method is an async method.
         /// </summary>
         /// <param name="method">A method to check</param>
         public static bool IsAsync(this MethodInfo method)
@@ -22,7 +23,7 @@ namespace OpenMod.Core.Helpers
         }
 
         /// <summary>
-        /// Returns void if given type is Task.
+        ///     Returns void if given type is Task.
         /// Return T, if given type is Task{T}.
         /// Returns given type otherwise.
         /// </summary>
@@ -42,7 +43,7 @@ namespace OpenMod.Core.Helpers
         }
 
         /// <summary>
-        /// Runs a async method synchronously.
+        ///     Runs a async method synchronously.
         /// </summary>
         /// <param name="func">A function that returns a result</param>
         /// <typeparam name="TResult">Result type</typeparam>
@@ -53,7 +54,7 @@ namespace OpenMod.Core.Helpers
         }
 
         /// <summary>
-        /// Runs a async method synchronously.
+        ///     Runs a async method synchronously.
         /// </summary>
         /// <param name="action">An async action</param>
         public static void RunSync(Func<Task> action)
@@ -61,33 +62,32 @@ namespace OpenMod.Core.Helpers
             AsyncContext.Run(action);
         }
 
-        public static void Forget(this Task task)
+        /// <summary>
+        ///    Schedules a task on a different thread (fire and forget)
+        /// </summary>
+        /// <param name="name">The name of the task.</param>
+        /// <param name="task">The task to run.</param>
+        /// <param name="exceptionHandler">The optional exception handler.</param>
+        public static void Schedule(string name, Task task, Action<Exception> exceptionHandler = null)
         {
-            // note: this code is inspired by a tweet from Ben Adams: https://twitter.com/ben_a_adams/status/1045060828700037125
-            // Only care about tasks that may fault (not completed) or are faulted,
-            // so fast-path for SuccessfullyCompleted and Canceled tasks.
-            if (!task.IsCompleted || task.IsFaulted)
-            {
-                // use "_" (Discard operation) to remove the warning IDE0058: Because this call is not awaited, execution of the current method continues before the call is completed
-                // https://docs.microsoft.com/en-us/dotnet/csharp/discards#a-standalone-discard
-                _ = ForgetAwaited(task);
-            }
-
-            // Allocate the async/await state machine only when needed for performance reason.
-            // More info about the state machine: https://blogs.msdn.microsoft.com/seteplia/2017/11/30/dissecting-the-async-methods-in-c/
-            async Task ForgetAwaited(Task task1)
+            Task.Run(async () =>
             {
                 try
                 {
-                    // No need to resume on the original SynchronizationContext, so use ConfigureAwait(false)
-                    await Task.Yield();
-                    await task1.ConfigureAwait(false);
+                    await task;
                 }
-                catch
+                catch (Exception e)
                 {
-                    // Nothing to do here
+                    if (exceptionHandler != null)
+                    {
+                        exceptionHandler(e);
+                    }
+                    else
+                    {
+                        Log.Error(e, $"Exception occured in task \"{name}\"");
+                    }
                 }
-            }
+            });
         }
     }
 }

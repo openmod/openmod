@@ -36,7 +36,8 @@ namespace OpenMod.Runtime
 
         public void Init(ICollection<Assembly> openModAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters)
         {
-            var thread = new Thread(o => { InitAsync(openModAssemblies, hostBuilder, parameters).Forget(); });
+            var thread = new Thread(o => AsyncHelper.Schedule("OpenMod Init", InitAsync(openModAssemblies, hostBuilder, parameters)));
+            thread.IsBackground = true;
             thread.Start();
         }
 

@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
+﻿using System.IO;
 using System.Threading.Tasks;
-using Autofac;
+
+#if NUGET_BOOTSTRAP
+using OpenMod.Runtime;
+using System.Linq;
+#else
+using System.Collections.Generic;
 using Microsoft.Extensions.Hosting;
 using OpenMod.API;
-using OpenMod.Runtime;
+using System.Reflection;
+#endif
 
 namespace OpenMod.Standalone
 {
