@@ -10,11 +10,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Configuration" Version="4.9.4" />
-    <PackageReference Include="NuGet.Frameworks" Version="4.9.4" />
-    <PackageReference Include="NuGet.Packaging" Version="4.9.4" />
-    <PackageReference Include="NuGet.Protocol" Version="4.9.4" />
-    <PackageReference Include="NuGet.Resolver" Version="4.9.4" />
+    <PackageReference Include="NuGet.Configuration" Version="5.6.0" />
+    <PackageReference Include="NuGet.Frameworks" Version="5.6.0" />
+    <PackageReference Include="NuGet.Packaging" Version="5.6.0" />
+    <PackageReference Include="NuGet.Protocol" Version="5.6.0" />
+    <PackageReference Include="NuGet.Resolver" Version="5.6.0" />
   </ItemGroup>
 
 </Project>
