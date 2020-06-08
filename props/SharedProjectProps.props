@@ -14,13 +14,6 @@
   </PropertyGroup>
   
   <ItemGroup Condition="'$(TargetFramework)'== 'net461'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)'== 'net461'">
-    <FrameworkPathOverride>$(NuGetPackageRoot)microsoft.targetingpack.netframework.v4.6.1/1.0.1/lib/net461/</FrameworkPathOverride>
-  </PropertyGroup>
 </Project>
