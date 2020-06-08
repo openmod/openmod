@@ -61,7 +61,7 @@ namespace OpenMod.API
         Crashed
     }
 
-    public struct RuntimeInitParameters
+    public class RuntimeInitParameters
     {
         public string WorkingDirectory;
         public string[] CommandlineArgs;
