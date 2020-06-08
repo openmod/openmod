@@ -38,7 +38,7 @@ jobs:
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
     - name: Create release
-      if: github.event_name == 'created' && github.event.ref_type == 'tag'
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -57,7 +57,7 @@ jobs:
       with:
         args: zip -b ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1 -r ./release-netcoreapp3.1.zip *
     - name: Upload net461 release asset
-      if: github.event_name == 'created' && github.event.ref_type == 'tag'
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -67,7 +67,7 @@ jobs:
         asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-net461.zip
         asset_content_type: application/zip
     - name: Upload netcoreapp3.1 release asset
-      if: github.event_name == 'created' && github.event.ref_type == 'tag'
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}

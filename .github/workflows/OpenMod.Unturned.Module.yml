@@ -42,12 +42,12 @@ jobs:
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
     - name: Zip artifacts
-      if: github.event_name == 'created' && github.event.ref_type == 'tag'
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
       uses: montudor/action-zip@v0.1.0
       with:
         args: zip -b ./unturned/OpenMod.Unturned.Module/bin/Release/net461 -r ./release.zip *
     - name: Create release
-      if: github.event_name == 'created' && github.event.ref_type == 'tag'
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -58,7 +58,7 @@ jobs:
         draft: false
         prerelease: false   
     - name: Upload release asset
-      if: github.event_name == 'created' && github.event.ref_type == 'tag'
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
