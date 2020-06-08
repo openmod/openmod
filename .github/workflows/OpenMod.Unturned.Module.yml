@@ -1,13 +1,20 @@
 name: OpenMod.Unturned.Module
 
 on:
+  create:
+    tags:
+      - *
   push:
     branches: [ master ]
     paths:
+      - 'framework/**'
+      - 'unityengine/**'      
       - 'unturned/**'
   pull_request:
     branches: [ master ]
     paths:
+      - 'framework/**'
+      - 'unityengine/**'      
       - 'unturned/**'
 
 jobs:
@@ -15,15 +22,6 @@ jobs:
     name: "Build"
     runs-on: ubuntu-latest
     steps:    
-    - name: Wait version tag
-      if: github.event_name != 'pull_request'
-      uses: fountainhead/action-wait-for-check@v1.0.0
-      with:
-        token: ${{ secrets.GH_TOKEN }}
-        checkName: "bumpVersion"
-        owner: 'openmod'
-        repo: 'OpenMod'
-        ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - uses: actions/checkout@v2
       name: Checkout Repository
       with:
@@ -44,25 +42,26 @@ jobs:
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
     - name: Zip artifacts
+      if: github.event_name == 'created' && github.event.ref_type == 'tag'
       uses: montudor/action-zip@v0.1.0
       with:
         args: zip -b ./unturned/OpenMod.Unturned.Module/bin/Release/net461 -r ./release.zip *
     - name: Create release
-      if: github.event_name != 'pull_request'
+      if: github.event_name == 'created' && github.event.ref_type == 'tag'
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
-        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        tag_name: ${{ steps.get_version.outputs.VERSION }}_unturned
         release_name: Unturned Release v${{ steps.get_version.outputs.VERSION }}
         draft: false
         prerelease: false   
     - name: Upload release asset
-      if: github.event_name != 'pull_request'
+      if: github.event_name == 'created' && github.event.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./release.zip

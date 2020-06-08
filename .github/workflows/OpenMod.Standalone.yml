@@ -1,6 +1,9 @@
 name: OpenMod.Standalone
 
 on:
+  create:
+    tags:
+      - *
   push:
     branches: [ master ]
     paths:
@@ -15,15 +18,6 @@ jobs:
     name: "Build"
     runs-on: ubuntu-latest
     steps:
-    - name: Wait version tag
-      if: github.event_name != 'pull_request'
-      uses: fountainhead/action-wait-for-check@v1.0.0
-      with:
-        token: ${{ secrets.GH_TOKEN }}
-        checkName: "bumpVersion"
-        owner: 'openmod'
-        repo: 'OpenMod'
-        ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - uses: actions/checkout@v2
       name: Checkout Repository
       with:
@@ -44,13 +38,13 @@ jobs:
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
     - name: Create release
-      if: github.event_name != 'pull_request'
+      if: github.event_name == 'created' && github.event.ref_type == 'tag'
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
-        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        tag_name: ${{ steps.get_version.outputs.VERSION }}_standalone
         release_name: Standalone Release v${{ steps.get_version.outputs.VERSION }}
         draft: false
         prerelease: false   
@@ -63,20 +57,20 @@ jobs:
       with:
         args: zip -b ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1 -r ./release-netcoreapp3.1.zip *
     - name: Upload net461 release asset
-      if: github.event_name != 'pull_request'
+      if: github.event_name == 'created' && github.event.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./release-net461.zip
         asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-net461.zip
         asset_content_type: application/zip
     - name: Upload netcoreapp3.1 release asset
-      if: github.event_name != 'pull_request'
+      if: github.event_name == 'created' && github.event.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./release-netcoreapp3.1.zip
