@@ -6,17 +6,6 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)'== 'net461'">
-    <FrameworkPathOverride>$(NuGetPackageRoot)microsoft.targetingpack.netframework.v4.6.1/1.0.1/lib/net461/</FrameworkPathOverride>
-  </PropertyGroup>
-
-  <ItemGroup>
     <PackageReference Include="NuGet.Configuration" Version="4.9.4" />
     <PackageReference Include="NuGet.Frameworks" Version="4.9.4" />
     <PackageReference Include="NuGet.Packaging" Version="4.9.4" />
