@@ -13,6 +13,7 @@ jobs:
     - name: Bump version and push tag
       uses: anothrNick/github-tag-action@1.17.2
       env:
+        INITIAL_VERSION: 0.1.0
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         WITH_V: false
         DEFAULT_BUMP: patch
