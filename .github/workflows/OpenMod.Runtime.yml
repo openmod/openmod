@@ -3,7 +3,7 @@ name: OpenMod.Runtime
 on:
   create:
     tags:
-      - *
+      - "*"
   push:
     branches: [ master ]
     paths:

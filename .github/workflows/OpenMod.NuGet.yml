@@ -3,7 +3,7 @@ name: OpenMod.NuGet
 on:
   create:
     tags:
-      - *
+      - "*"
   push:
     branches: [ master ]
     paths:

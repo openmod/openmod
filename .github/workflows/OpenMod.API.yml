@@ -3,7 +3,7 @@ name: OpenMod.API
 on:
   create:
     tags:
-      - *
+      - "*"
   push:
     branches: [ master ]
     paths:

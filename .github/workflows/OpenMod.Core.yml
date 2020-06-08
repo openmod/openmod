@@ -3,7 +3,7 @@ name: OpenMod.Core
 on:
   create:
     tags:
-      - *
+      - "*"
   push:
     branches: [ master ]
     paths:
