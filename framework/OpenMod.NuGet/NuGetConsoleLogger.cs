@@ -17,9 +17,10 @@ namespace OpenMod.NuGet
             Console.WriteLine($"[{message.Level}] [NuGet] {message.Message}");
         }
 
-        public override async Task LogAsync(ILogMessage message)
+        public override Task LogAsync(ILogMessage message)
         {
             Log(message);
+            return Task.CompletedTask;
         }
     }
 }
