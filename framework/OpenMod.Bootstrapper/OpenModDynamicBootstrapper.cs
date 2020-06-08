@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using NuGet.Common;
 using NuGet.Packaging.Core;
+using NuGet.Protocol.Core.Types;
 using OpenMod.NuGet;
 
 namespace OpenMod.Bootstrapper
@@ -47,6 +48,13 @@ namespace OpenMod.Bootstrapper
             bool allowPrereleaseVersions = false,
             ILogger logger = null)
         {
+            if (!bool.TryParse(Environment.GetEnvironmentVariable("OpenMod__AutoUpdate"), out var envUpdate))
+            {
+                envUpdate = true;
+            }
+
+            bool shouldAutoUpdate = commandLineArgs.All(d => !d.Equals("-NoOpenModAutoUpdate")) && envUpdate;
+
             logger ??= new NuGetConsoleLogger();
             openModFolder = Path.GetFullPath(openModFolder);
             
@@ -64,21 +72,33 @@ namespace OpenMod.Bootstrapper
             foreach (var packageId in packageIds)
             {
                 PackageIdentity packageIdentity;
-                if (!await nugetInstaller.IsPackageInstalledAsync(packageId))
-                {
-                    logger.LogInformation("Searching for: " + packageId);
-                    var openModPackage = await nugetInstaller.QueryPackageExactAsync(packageId, null, allowPrereleaseVersions);
+                var installedPackage = await nugetInstaller.GetLatestPackageIdentityAsync(packageId);
+                var shouldInstallOrUpdate = installedPackage == null;
 
-                    logger.LogInformation($"Downloading {openModPackage.Identity.Id} v{openModPackage.Identity.Version} via NuGet, this might take a while...");
+                IPackageSearchMetadata openModPackage = null;
+                if (installedPackage == null || shouldAutoUpdate)
+                {
+                    openModPackage = await nugetInstaller.QueryPackageExactAsync(packageId, null, allowPrereleaseVersions);
+                }
+
+                if (installedPackage != null && shouldAutoUpdate)
+                {
+                    var availableVersions = await openModPackage.GetVersionsAsync();
+                    shouldInstallOrUpdate = availableVersions.Any(d => d.Version > installedPackage.Version);
+                }
+
+                if (shouldInstallOrUpdate)
+                {
+                    logger.LogInformation($"Downloading {openModPackage.Identity.Id} v{openModPackage.Identity.Version} via NuGet");
                     var installResult = await nugetInstaller.InstallAsync(openModPackage.Identity, allowPrereleaseVersions);
                     if (installResult.Code != NuGetInstallCode.Success)
                     {
-                        logger.LogInformation($"Downloading has failed for {openModPackage.Identity.Id}: " + installResult.Code);
+                        logger.LogError($"Downloading has failed for {openModPackage.Identity.Id}: " + installResult.Code);
                         return;
                     }
 
                     packageIdentity = installResult.Identity;
-                    logger.LogInformation($"Finished downloading \"{packageId}\"");
+                    logger.LogInformation($"Finished downloading \"{packageId}\".");
                 }
                 else
                 {
