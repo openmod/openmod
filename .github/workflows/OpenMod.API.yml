@@ -1,0 +1,37 @@
+name: .NET Core
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'framework/OpenMod.API/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'framework/OpenMod.API/**'
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+#    - name: Test
+#      run: dotnet test --no-restore --verbosity normal
+  deploy:
+    name: "Deploy to nuget.org"
+    if: github.event_name != 'pull_request'
+    runs-on: any
+    steps:
+    - name: Push to NuGet
+      run: dotnet nuget push framework/OpenMod.API/bin/Release/*.nupkg
+             --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
+             --source https://api.nuget.org/v3/index.json 
