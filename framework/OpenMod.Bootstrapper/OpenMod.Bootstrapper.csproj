@@ -6,10 +6,6 @@
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
-  <ItemGroup Condition="'$(TargetFramework)'== 'net461'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Nito.AsyncEx.Context" Version="5.0.0" />
   </ItemGroup>
