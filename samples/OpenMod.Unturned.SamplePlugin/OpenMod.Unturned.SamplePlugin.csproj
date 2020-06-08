@@ -3,6 +3,10 @@
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)'== 'net461'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Remove="config.yml" />
     <None Remove="translations.yml" />
