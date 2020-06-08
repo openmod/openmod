@@ -114,6 +114,8 @@ namespace OpenMod.NuGet
                     var installedPath = m_PackagePathResolver.GetInstalledPath(packageToInstall);
                     if (installedPath == null)
                     {
+                        Logger.LogInformation($"Downloading: {packageToInstall.Id} v{packageToInstall.Version.OriginalVersion}");
+
                         var downloadResource = await packageToInstall.Source.GetResourceAsync<DownloadResource>(CancellationToken.None);
                         var downloadResult = await downloadResource.GetDownloadResourceResultAsync(
                             packageToInstall,

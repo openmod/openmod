@@ -8,11 +8,20 @@ namespace OpenMod.NuGet
     {
         public override void Log(ILogMessage message)
         {
-            if (message.Level < LogLevel.Minimal)
+            if (message.Level < LogLevel.Information)
+            {
                 return;
+            }
 
             if (message.Message.Contains("Resolving dependency information took"))
+            {
                 return;
+            }
+
+            if (message.Message.Trim().StartsWith("CACHE"))
+            {
+                return;
+            }
 
             Console.WriteLine($"[{message.Level}] [NuGet] {message.Message}");
         }
