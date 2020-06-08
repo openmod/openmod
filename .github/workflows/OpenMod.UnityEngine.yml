@@ -1,0 +1,48 @@
+name: OpenMod.UnityEngine
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'framework/OpenMod.UnityEngine/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'framework/OpenMod.UnityEngine/**'
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Wait version tag
+      if: github.event_name != 'pull_request'
+      uses: fountainhead/action-wait-for-check@v1.0.0
+      id: wait-for-build
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        checkName: "bumpVersion"
+        owner: 'openmod'
+        repo: 'OpenMod'
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - uses: actions/checkout@v2
+      name: Checkout Repository
+      with:
+        fetch-depth: 0
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Install dependencies
+      run: dotnet restore framework/OpenMod.UnityEngine
+    - name: Update version
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>$(git describe --tags)</Version>#\" props/SharedProjectProps.props"  
+    - name: Build
+      run: dotnet build framework/OpenMod.UnityEngine --configuration Release --no-restore
+#    - name: Test
+#      run: dotnet test --no-restore --verbosity normal
+    - name: Push to NuGet
+      if: github.event_name != 'pull_request'
+      run: dotnet nuget push framework/OpenMod.API/bin/Release/*.nupkg
+             --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
+             --source https://api.nuget.org/v3/index.json
