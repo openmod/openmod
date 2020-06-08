@@ -51,11 +51,11 @@ jobs:
     - name: Zip net461 artifacts
       uses: montudor/action-zip@v0.1.0
       with:
-        args: zip -b ./standalone/OpenMod.Standalone/bin/Release/net461 -r ./release-net461.zip * 
+        args: cd ./standalone/OpenMod.Standalone/bin/Release/net461 && zip -qq -r ./release.zip *
     - name: Zip netcoreapp3.1 artifacts
       uses: montudor/action-zip@v0.1.0
       with:
-        args: zip -b ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1 -r ./release-netcoreapp3.1.zip *
+        args: cd ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1 && zip -qq -r ./release.zip *
     - name: Upload net461 release asset
       if: github.event_name == 'create' && github.event.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
@@ -63,7 +63,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release-net461.zip
+        asset_path: ./standalone/OpenMod.Standalone/bin/Release/net461/release.zip
         asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-net461.zip
         asset_content_type: application/zip
     - name: Upload netcoreapp3.1 release asset
@@ -73,6 +73,6 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release-netcoreapp3.1.zip
+        asset_path: ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1/release.zip
         asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-netcoreapp3.1.zip
         asset_content_type: application/zip        
