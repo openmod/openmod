@@ -15,5 +15,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         WITH_V: false
-        DEFAULT_BUMP: minor
+        DEFAULT_BUMP: patch
         RELEASE_BRANCHES: master
