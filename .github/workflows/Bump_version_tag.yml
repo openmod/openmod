@@ -3,6 +3,11 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'framework/**'
+      - 'unityengine/**'
+      - 'standalone/**'
+      - 'unturned/**'
 jobs:
   bumpVersion:
     runs-on: ubuntu-latest
