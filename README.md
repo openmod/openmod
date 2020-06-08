@@ -36,6 +36,7 @@ Development will be fast since most of the code already exists in RocketMod 5. H
 - [x] Unitask integration
 - [x] Plugins (dll / NuGet)
 - [x] Plugin configurations & translations
+- [x] GitHub actions (auto releases & nuget deployments)
 - [ ] Eventing
 - [ ] Economy interfaces
 - [ ] Permissions implementations
