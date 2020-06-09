@@ -8,6 +8,7 @@ using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
@@ -19,7 +20,7 @@ using OpenMod.Core.Localization;
 namespace OpenMod.Core.Plugins
 {
     [UsedImplicitly]
-    [ServiceImplementation]
+    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton)]
     public class PluginActivator : IPluginActivator, IAsyncDisposable
     {
         private readonly IRuntime m_Runtime;

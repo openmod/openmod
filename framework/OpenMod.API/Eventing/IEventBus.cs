@@ -1,0 +1,106 @@
+﻿using System;
+using System.Threading.Tasks;
+using OpenMod.API.Ioc;
+
+namespace OpenMod.API.Eventing
+{
+    /// <summary>
+    ///     The type safe callback for event notifications.
+    /// </summary>
+    /// <typeparam name="TEvent">The event type.</typeparam>
+    /// <param name="sender">The event emitter.</param>
+    /// <param name="event">The event instance.</param>
+    public delegate Task EventCallback<in TEvent>(object sender, TEvent @event) where TEvent : IEvent;
+
+    /// <summary>
+    ///     The callback for event notifications.
+    /// </summary>
+    /// <param name="sender">The event emitter.</param>
+    /// <param name="event">The event instance.</param>
+    public delegate Task EventCallback(object sender, IEvent @event);
+
+    /// <summary>
+    ///     The emit callback for events that have finished and notified all listeners.
+    /// </summary>
+    /// <param name="event"></param>
+    public delegate Task EventExecutedCallback(IEvent @event);
+
+    /// <summary>
+    ///     The event manager is responsible for emitting events and for managing their subscriptions.
+    /// </summary>
+    [Service]
+    public interface IEventBus
+    {
+        /// <summary>
+        ///     Subscribe to an event.
+        /// </summary>
+        /// <param name="object">The component.</param>
+        /// <param name="eventName">The event to subscribe to.</param>
+        /// <param name="callback">The action to execute. See <see cref="EventCallback" /></param>
+        void Subscribe(IOpenModComponent @object, string eventName, EventCallback callback);
+
+        /// <summary>
+        ///     <inheritdoc cref="Subscribe(IOpenModComponent,string,EventCallback)" />
+        /// </summary>
+        /// <param name="object">The component.</param>
+        /// <param name="callback">The action to execute after all listeners were notified.</param>
+        /// <typeparam name="TEvent">The event to subscribe to.</typeparam>
+        void Subscribe<TEvent>(IOpenModComponent @object, EventCallback<TEvent> callback)
+            where TEvent : IEvent;
+
+        /// <summary>
+        ///     <inheritdoc cref="Subscribe(IOpenModComponent,string,EventCallback)" />
+        /// </summary>
+        /// <param name="object">The component.</param>
+        /// <param name="callback">The action to execute after all listeners were notified.</param>
+        /// <param name="eventType">The event to subscribe to.</param>
+        void Subscribe(IOpenModComponent @object, Type eventType, EventCallback callback);
+
+        /// <summary>
+        ///     Unsubscribe all listener subscriptions of the given component.
+        /// </summary>
+        /// <param name="object">The component.</param>
+        void Unsubscribe(IOpenModComponent @object);
+
+        /// <summary>
+        ///     Unsubscribe all subscriptions for the given event type of the given component.
+        /// </summary>
+        /// <param name="object">The component.</param>
+        /// <param name="eventName">The event to unsubscribe from. Will unsubscribe globally if emitterName is null.</param>
+        void Unsubscribe(IOpenModComponent @object, string eventName);
+
+        /// <summary>
+        ///     Unsubscribe the event from this component type-safe
+        /// </summary>
+        /// <param name="object">The component.</param>
+        void Unsubscribe<TEvent>(IOpenModComponent @object) where TEvent : IEvent;
+
+        /// <summary>
+        ///     Unsubscribe all subscriptions for the given event type of the given component.
+        /// </summary>
+        /// <param name="object">The component.</param>
+        /// <param name="eventType">The event to unsubscribe from.</param>
+        void Unsubscribe(IOpenModComponent @object, Type eventType);
+
+        /// <summary>
+        ///     Register an event listener instance.
+        /// </summary>
+        /// <param name="object">The component.</param>
+        /// <param name="eventListener">The event listener to register.</param>
+        void AddEventListener<TEvent>(IOpenModComponent @object, IEventListener<TEvent> eventListener) where TEvent : IEvent;
+
+        /// <summary>
+        ///     Remove an event listeners subscription.
+        /// </summary>
+        /// <param name="eventListener">The event listener to remove.</param>
+        void RemoveEventListener<TEvent>(IEventListener<TEvent> eventListener) where TEvent : IEvent;
+
+        /// <summary>
+        ///     Emits an event and optionally handles the result
+        /// </summary>
+        /// <param name="sender">The event emitter.</param>
+        /// <param name="event">The event instance.</param>
+        /// <param name="callback">The event finish callback. See <see cref="EventExecutedCallback" />.</param>
+        Task EmitAsync(object sender, IEvent @event, EventExecutedCallback callback = null);
+    }
+}

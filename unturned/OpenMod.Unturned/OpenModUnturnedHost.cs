@@ -1,11 +1,10 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.Core.Helpers;
@@ -13,13 +12,12 @@ using OpenMod.UnityEngine;
 using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
 using SDG.Unturned;
-using Serilog;
 using UnityEngine;
 using UnityEngine.Experimental.LowLevel;
 
 namespace OpenMod.Unturned
 {
-    [ServiceImplementation]
+    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
         private readonly Harmony m_Harmony;

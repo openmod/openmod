@@ -2,13 +2,14 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.Standalone
 {
     [UsedImplicitly]
-    [ServiceImplementation]
+    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton)]
     public class StandaloneHost : IOpenModHost
     {
         private readonly IRuntime m_Runtime;

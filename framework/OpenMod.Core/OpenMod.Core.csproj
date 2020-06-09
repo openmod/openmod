@@ -37,7 +37,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Eventing\" />
     <Folder Include="Prioritization\" />
   </ItemGroup>
 

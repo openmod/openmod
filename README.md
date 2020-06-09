@@ -45,11 +45,11 @@ framework | standalone | unityengine | unturned
 - [x] Plugins (dll / NuGet)
 - [x] Plugin configurations & translations
 - [x] GitHub actions (auto releases & nuget deployments)
-- [ ] Eventing
-- [ ] Economy interfaces
+- [x] Eventing
 - [ ] Permissions implementations
-- [ ] Command framework (CommandContext, CommandActor, etc.)
 - [ ] Players
+- [ ] Economy interfaces
+- [ ] Command framework (CommandContext, CommandActor, etc.)
 - [ ] RM 4 Bridge
 - [ ] RCON
 - [ ] Scripting
