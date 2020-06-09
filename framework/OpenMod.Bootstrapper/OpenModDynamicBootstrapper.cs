@@ -48,12 +48,13 @@ namespace OpenMod.Bootstrapper
             bool allowPrereleaseVersions = false,
             ILogger logger = null)
         {
-            if (!bool.TryParse(Environment.GetEnvironmentVariable("OpenMod__AutoUpdate"), out var envUpdate))
+            bool shouldAutoUpdate = false;
+            if (!commandLineArgs.Any(arg => arg.Equals("-NoOpenModAutoUpdate", StringComparison.InvariantCultureIgnoreCase)))
             {
-                envUpdate = true;
+                if (!bool.TryParse(Environment.GetEnvironmentVariable("OpenMod__AutoUpdate"), out shouldAutoUpdate))
+                    shouldAutoUpdate = true;
             }
 
-            bool shouldAutoUpdate = commandLineArgs.All(d => !d.Equals("-NoOpenModAutoUpdate")) && envUpdate;
 
             logger ??= new NuGetConsoleLogger();
             openModFolder = Path.GetFullPath(openModFolder);
