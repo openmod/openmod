@@ -10,41 +10,41 @@ namespace OpenMod.Core.Eventing
     internal class EventSubscription
     {
         public EventSubscription(
-            IOpenModComponent owner,
+            IOpenModComponent ownerComponent,
             EventCallback callback,
-            EventHandlerAttribute attribute,
+            EventListenerAttribute attribute,
             string eventName)
         {
-            Owner = new WeakReference(owner);
+            Owner = new WeakReference(ownerComponent);
             Callback = callback;
-            EventHandlerAttribute = attribute;
+            EventListenerAttribute = attribute;
             EventName = eventName;
         }
 
         public EventSubscription(
-            IOpenModComponent owner,
+            IOpenModComponent ownerComponent,
             IEventListener listener,
             MethodInfo method,
-            EventHandlerAttribute attribute, 
+            EventListenerAttribute attribute, 
             Type eventType)
         {
-            Owner = new WeakReference(owner);
+            Owner = new WeakReference(ownerComponent);
             Listener = listener;
             Callback = (sender, @event) => method.InvokeWithTaskSupport(listener, new[] { sender, @event });
-            EventHandlerAttribute = attribute;
+            EventListenerAttribute = attribute;
             EventName = eventType.Name;
             EventType = eventType;
         }
 
         public EventSubscription(
-            IOpenModComponent owner,
+            IOpenModComponent ownerComponent,
             EventCallback callback,
-            EventHandlerAttribute attribute, 
+            EventListenerAttribute attribute, 
             Type eventType)
         {
-            Owner = new WeakReference(owner);
+            Owner = new WeakReference(ownerComponent);
             Callback = callback;
-            EventHandlerAttribute = attribute;
+            EventListenerAttribute = attribute;
             EventName = eventType.Name;
             EventType = eventType;
         }
@@ -58,7 +58,7 @@ namespace OpenMod.Core.Eventing
 
         public EventCallback Callback { get; }
 
-        public EventHandlerAttribute EventHandlerAttribute { get; }
+        public EventListenerAttribute EventListenerAttribute { get; }
 
         [CanBeNull]
         public IEventListener Listener { get; }

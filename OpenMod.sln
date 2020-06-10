@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "framework", "framework", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3C310527-DC5D-4E38-B4EA-6C3FBBC48AA8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Unturned.SamplePlugin", "samples\OpenMod.Unturned.SamplePlugin\OpenMod.Unturned.SamplePlugin.csproj", "{E0C4B65D-34B0-4BB6-83E6-C09B89051D44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnturnedSamplePlugin", "samples\UnturnedSamplePlugin\UnturnedSamplePlugin.csproj", "{E0C4B65D-34B0-4BB6-83E6-C09B89051D44}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "standalone", "standalone", "{4DB6B030-41B8-4B7A-83C9-0CEFA79BD0A7}"
 EndProject

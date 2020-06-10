@@ -13,28 +13,34 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
+using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
+using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Localization;
+using OpenMod.Core.Persistence;
 
 namespace OpenMod.Core.Plugins
 {
     [UsedImplicitly]
-    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton)]
+    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class PluginActivator : IPluginActivator, IAsyncDisposable
     {
         private readonly IRuntime m_Runtime;
         private readonly ILogger<PluginActivator> m_Logger;
         private readonly ILifetimeScope m_LifetimeScope;
+        private readonly IDataStoreFactory m_DataStoreFactory;
 
         public PluginActivator(
             IRuntime runtime,
             ILogger<PluginActivator> logger,
-            ILifetimeScope lifetimeScope)
+            ILifetimeScope lifetimeScope,
+            IDataStoreFactory dataStoreFactory)
         {
             m_Runtime = runtime;
             m_Logger = logger;
             m_LifetimeScope = lifetimeScope;
+            m_DataStoreFactory = dataStoreFactory;
         }
 
         private readonly List<WeakReference> m_ActivatedPlugins = new List<WeakReference>();
@@ -74,13 +80,13 @@ namespace OpenMod.Core.Plugins
                 {
                     var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
 
-                    var confiugration = new ConfigurationBuilder()
+                    var configuration = new ConfigurationBuilder()
                         .SetBasePath(workingDirectory)
                         .AddYamlFile("config.yml", optional: true)
                         .AddEnvironmentVariables(pluginMetadata.Id.Replace(".", "_") + "_")
                         .Build();
 
-                    containerBuilder.Register(context => confiugration)
+                    containerBuilder.Register(context => configuration)
                         .As<IConfigurationRoot>()
                         .As<IConfiguration>()
                         .SingleInstance()
@@ -89,6 +95,11 @@ namespace OpenMod.Core.Plugins
                     containerBuilder.RegisterType(pluginType)
                         .As(pluginType)
                         .SingleInstance();
+
+                    containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(workingDirectory))
+                        .As<IDataStore>()
+                        .SingleInstance()
+                        .OwnedByLifetimeScope();
 
                     if (File.Exists(Path.Combine(workingDirectory, "translations.yml")))
                     {

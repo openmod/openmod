@@ -5,6 +5,7 @@ using Autofac;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
+using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
 using Semver;
 
@@ -19,14 +20,15 @@ namespace OpenMod.Core.Plugins
         public string Author { get; }
         public SemVersion Version { get; }
         public IRuntime Runtime { get; }
-
+        public IDataStore DataStore { get; }
         public ILifetimeScope LifetimeScope { get; }
+        public IConfiguration Configuration { get; set; }
 
         protected OpenModPluginBase(IServiceProvider serviceProvider)
         {
             LifetimeScope = serviceProvider.GetRequiredService<ILifetimeScope>();
             Configuration = serviceProvider.GetRequiredService<IConfiguration>();
-
+            DataStore = serviceProvider.GetRequiredService<IDataStore>();
             Runtime = serviceProvider.GetRequiredService<IRuntime>();
 
             var metadata = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>();
@@ -37,7 +39,6 @@ namespace OpenMod.Core.Plugins
             WorkingDirectory = PluginHelper.GetWorkingDirectory(Runtime, metadata.Id);
         }
 
-        public IConfiguration Configuration { get; set; }
 
         public abstract Task LoadAsync();
 

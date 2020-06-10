@@ -1,26 +1,36 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Permissions
 {
+    /// <summary>
+    ///     Checks if an actor is authorized to do an action.
+    /// </summary>
+    [Service]
     public interface IPermissionChecker
     {
         /// <summary>
-        ///     Defines if the given target is supported by this provider.
+        ///    Permission check providers.
         /// </summary>
-        /// <param name="target">The target to check.</param>
-        /// <returns><b>true</b> if the given target is supported; otherwise, <b>false</b>.</returns>
-        bool SupportsTarget(IPermissionActor target);
+        IReadOnlyCollection<IPermissionCheckProvider> PermissionCheckProviders { get; }
 
         /// <summary>
-        ///     Check if the target has the given permission.
+        ///   Permission sources.
         /// </summary>
-        /// <param name="target">The target to check.</param>
+        IReadOnlyCollection<IPermissionStore> PermissionStores { get; }
+
+        /// <summary>
+        ///     Checks if an actor has permission to execute an action.
+        /// </summary>
+        /// <param name="actor">The actor.</param>
         /// <param name="permission">The permission to check.</param>
-        /// <returns>
-        ///     <see cref="PermissionResult.Grant" /> if the target explicity has the permission,
-        ///     <see cref="PermissionResult.Deny" /> if the target explicitly does not have the permission; otherwise,
-        ///     <see cref="PermissionResult.Default" />
-        /// </returns>
-        Task<PermissionStatus> CheckPermissionAsync(IPermissionActor target, string permission);
+        /// <returns></returns>
+        Task<PermissionGrantResult> CheckPermissionAsync(IPermissionActor actor, string permission);
+
+        /// <summary>
+        ///     Initializes the permission checker.
+        /// </summary>
+        Task InitAsync();
     }
 }

@@ -44,13 +44,17 @@ framework | standalone | unityengine | unturned
 - [x] Unitask integration
 - [x] Plugins (dll / NuGet)
 - [x] Plugin configurations & translations
+- [x] Standalone console implementation
 - [x] GitHub actions (auto releases & nuget deployments)
 - [x] Eventing
-- [ ] Permissions implementations
-- [ ] Players
+- [x] Persistent Datastore
+- [x] Permissions implementations
+- [ ] Users
 - [ ] Economy interfaces
 - [ ] Command framework (CommandContext, CommandActor, etc.)
+- [ ] Players / Entities
+- [ ] Framework and Unturned events implementation
 - [ ] RM 4 Bridge
-- [ ] RCON
-- [ ] Scripting
-- [ ] Standalone console implementation
+- [ ] Release
+- [ ] RCON Plugin
+- [ ] Scripting Plugin

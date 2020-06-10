@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using OpenMod.API.Plugins;
 
@@ -6,8 +7,10 @@ namespace OpenMod.API.Ioc
 {
     public interface IOpenModStartup
     {
-        void RegisterServiceFromAssemblyWithResources(Assembly assembly, string relativeDir);
+        IOpenModStartupContext Context { get; }
 
-        Task RegisterPluginAssembliesAsync(IPluginAssembliesSource source);
+        void RegisterIocAssemblyAndCopyResources(Assembly assembly, string assemblyDir);
+
+        Task<ICollection<Assembly>> RegisterPluginAssembliesAsync(IPluginAssembliesSource source);
     }
 }

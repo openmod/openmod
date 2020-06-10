@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
+using OpenMod.NuGet;
 
 namespace OpenMod.Runtime
 {
@@ -12,6 +13,7 @@ namespace OpenMod.Runtime
         public IConfigurationRoot Configuration { get; internal set; }
         public IOpenModStartup OpenModStartup { get; internal set; }
         public ILoggerFactory LoggerFactory { get; internal set; }
-        public Dictionary<string, object> DataStore { get; } = new Dictionary<string, object>();
+        public NuGetPackageManager NuGetPackageManager { get; internal set; }
+        public Dictionary<string, object> DataStore { get; internal set; }
     }
 }

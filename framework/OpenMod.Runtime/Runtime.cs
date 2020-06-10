@@ -36,25 +36,27 @@ namespace OpenMod.Runtime
 
         public string WorkingDirectory { get; private set; }
         public string[] CommandlineArgs { get; private set; }
-        public IConfigurationRoot Configuration { get; private set; }
 
         private IHost m_Host;
-        private OpenModStartup m_Startup;
         private SerilogLoggerFactory m_LoggerFactory;
         private ILogger<Runtime> m_Logger;
 
-        public void Init(ICollection<Assembly> openModAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters)
+        public void Init(List<Assembly> openModAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters)
         {
-            var thread = new Thread(o => AsyncHelper.Schedule("OpenMod Init", InitAsync(openModAssemblies, hostBuilder, parameters)));
-            thread.IsBackground = true;
-            thread.Start();
+            AsyncHelper.RunSync(() => InitAsync(openModAssemblies, hostBuilder, parameters));
         }
 
         public async Task InitAsync(
-            ICollection<Assembly> openModHostAssemblies,
+            List<Assembly> openModHostAssemblies,
             [CanBeNull] IHostBuilder hostBuilder,
             RuntimeInitParameters parameters)
         {
+            var openModCoreAssembly = typeof(AsyncHelper).Assembly;
+            if (!openModHostAssemblies.Contains(openModCoreAssembly))
+            {
+                openModHostAssemblies.Insert(0, openModCoreAssembly);
+            }
+
             hostBuilder ??= new HostBuilder();
 
             if (!Directory.Exists(parameters.WorkingDirectory))
@@ -68,22 +70,42 @@ namespace OpenMod.Runtime
 
             SetupSerilog();
 
-
             m_Logger.LogInformation($"OpenMod v{Version} is starting...");
+
+            var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
+            var nuGetPackageManager = new NuGetPackageManager(packagesDirectory)
+            {
+                Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger<OpenModNuGetLogger>())
+            };
+            nuGetPackageManager.InstallAssemblyResolver();
+
+            var startupContext = new OpenModStartupContext
+            {
+                Runtime = this,
+                LoggerFactory = m_LoggerFactory,
+                NuGetPackageManager = nuGetPackageManager,
+                DataStore = new Dictionary<string, object>()
+            };
+
+            var startup = new OpenModStartup(startupContext);
+            foreach (var assembly in openModHostAssemblies)
+            {
+                startup.RegisterIocAssemblyAndCopyResources(assembly, string.Empty);
+            }
 
             try
             {
                 hostBuilder
                     .UseContentRoot(parameters.WorkingDirectory)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-                    .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, openModHostAssemblies))
-                    .ConfigureServices((hostContext, services) =>
+                    .ConfigureHostConfiguration(builder =>
                     {
-                        services.AddHostedService<OpenModHostedService>();
-                        services.AddOptions();
-                        services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
-                        // m_Startup.ConfigureServices(services);
+                        ConfigureConfiguration(builder);
+                        ((OpenModStartupContext)startup.Context).Configuration = builder.Build();
                     })
+                    .ConfigureAppConfiguration(ConfigureConfiguration)
+                    .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, startup))
+                    .ConfigureServices(services => SetupServices(services, startup))
                     .UseSerilog();
 
                 m_Host = hostBuilder.Build();
@@ -104,60 +126,29 @@ namespace OpenMod.Runtime
             }
         }
 
-        private void SetupContainer(ContainerBuilder containerBuilder, ICollection<Assembly> openModHostAssemblies)
+        private void ConfigureConfiguration(IConfigurationBuilder builder)
         {
-            var configurationBuilder = new ConfigurationBuilder()
+            builder
                 .SetBasePath(WorkingDirectory)
                 .AddYamlFile("openmod.yml")
                 .AddCommandLine(CommandlineArgs)
                 .AddEnvironmentVariables("OpenMod_");
+        }
 
-            containerBuilder.Register(context => this)
-                .As<IRuntime>()
-                .SingleInstance()
-                .OwnedByLifetimeScope();
+        private void SetupServices(IServiceCollection services, OpenModStartup startup)
+        {
+            services.AddSingleton<IRuntime>(this);
+            services.AddHostedService<OpenModHostedService>();
+            services.AddOptions();
+            services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
+            services.AddSingleton(((OpenModStartupContext)startup.Context).NuGetPackageManager);
 
-            var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
-            var nuGetPackageManager = new NuGetPackageManager(packagesDirectory);
-            nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger<OpenModNuGetLogger>());
-            nuGetPackageManager.InstallAssemblyResolver();
+            AsyncHelper.RunSync(async () => { await startup.CompleteServiceRegistrationsAsync(services); });
+        }
 
-            containerBuilder.Register(context => nuGetPackageManager)
-                .AsSelf()
-                .SingleInstance()
-                .OwnedByLifetimeScope();
-
-            var startupContext = new OpenModStartupContext
-            {
-                Runtime = this,
-                Configuration = Configuration,
-                LoggerFactory = m_LoggerFactory
-            };
-
-            startupContext.DataStore.Add("nugetPackageManager", nuGetPackageManager);
-
-            m_Startup = new OpenModStartup(startupContext, nuGetPackageManager, containerBuilder);
-            startupContext.OpenModStartup = m_Startup;
-
-            // register from OpenMod.Core, should prob. use a different class than AsyncHelper
-            m_Startup.RegisterServiceFromAssemblyWithResources(typeof(AsyncHelper).Assembly, string.Empty);
-
-            // register from assemblies such as OpenMod.UnityEngine, OpenMod.Unturned, etc.
-            foreach (var assembly in openModHostAssemblies)
-            {
-                m_Startup.RegisterServiceFromAssemblyWithResources(assembly, string.Empty);
-            }
-
-            AsyncHelper.RunSync(async () => { await m_Startup.BootstrapAndRegisterPluginsAsync(); });
-
-            Configuration = configurationBuilder.Build();
-            containerBuilder.Register(context => Configuration)
-                .As<IConfiguration>()
-                .As<IConfigurationRoot>()
-                .SingleInstance()
-                .OwnedByLifetimeScope();
-
-            m_Startup.Complete();
+        private void SetupContainer(ContainerBuilder containerBuilder, OpenModStartup startup)
+        {
+            AsyncHelper.RunSync(async () => { await startup.CompleteContainerRegistrationAsync(containerBuilder); });
         }
 
         private void SetupSerilog()
@@ -166,13 +157,11 @@ namespace OpenMod.Runtime
             if (!File.Exists(loggingPath))
             {
                 // First run, logging.yml doesn't exist yet. We can not wait for auto-copy as it would be too late.
-                using (Stream stream =
-                    typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yml"))
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    string fileContent = reader.ReadToEnd();
-                    File.WriteAllText(loggingPath, fileContent);
-                }
+                using Stream stream = typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yml");
+                using StreamReader reader = new StreamReader(stream);
+                
+                string fileContent = reader.ReadToEnd();
+                File.WriteAllText(loggingPath, fileContent);
             }
 
             var configuration = new ConfigurationBuilder()

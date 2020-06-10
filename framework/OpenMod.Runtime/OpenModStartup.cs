@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Plugins;
+using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Helpers.Prioritization;
 using OpenMod.Core.Plugins;
@@ -23,39 +24,35 @@ namespace OpenMod.Runtime
     public class OpenModStartup : IOpenModStartup
     {
         private readonly IRuntime m_Runtime;
-        private readonly IOpenModStartupContext m_OpenModStartupContext;
         private readonly NuGetPackageManager m_NuGetPackageManager;
-        private readonly ContainerBuilder m_ContainerBuilder;
         private readonly List<ServiceRegistration> m_ServiceRegistrations;
         private readonly HashSet<AssemblyName> m_RegisteredAssemblies;
         private readonly PluginAssemblyStore m_PluginAssemblyStore;
         private readonly ILogger<OpenModStartup> m_Logger;
-
-        public OpenModStartup(
-            IOpenModStartupContext openModStartupContext,
-            NuGetPackageManager nuGetPackageManager,
-            ContainerBuilder containerBuilder)
+        private readonly List<Assembly> m_Assemblies;
+        public OpenModStartup(IOpenModStartupContext openModStartupContext)
         {
-            m_OpenModStartupContext = openModStartupContext;
-            m_NuGetPackageManager = nuGetPackageManager;
+            Context = openModStartupContext;
+            m_NuGetPackageManager = ((OpenModStartupContext)openModStartupContext).NuGetPackageManager;
             m_Logger = openModStartupContext.LoggerFactory.CreateLogger<OpenModStartup>();
             m_Runtime = openModStartupContext.Runtime;
-            m_ContainerBuilder = containerBuilder;
+            m_Assemblies = new List<Assembly>();
             m_ServiceRegistrations = new List<ServiceRegistration>();
             m_RegisteredAssemblies = new HashSet<AssemblyName>();
             m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>());
-
         }
 
-        public void RegisterServiceFromAssemblyWithResources(Assembly assembly, string relativeDir)
+        public IOpenModStartupContext Context { get; }
+
+        public void RegisterIocAssemblyAndCopyResources(Assembly assembly, string assemblyDir)
         {
             RegisterServicesFromAssembly(assembly);
-            if (string.IsNullOrWhiteSpace(relativeDir))
+            if (string.IsNullOrWhiteSpace(assemblyDir))
             {
-                relativeDir = string.Empty;
+                assemblyDir = string.Empty;
             }
 
-            AssemblyHelper.CopyAssemblyResources(assembly, Path.Combine(m_Runtime.WorkingDirectory, relativeDir));
+            AssemblyHelper.CopyAssemblyResources(assembly, Path.Combine(m_Runtime.WorkingDirectory, assemblyDir));
         }
 
         public void RegisterServicesFromAssembly(Assembly assembly)
@@ -67,11 +64,12 @@ namespace OpenMod.Runtime
                 return;
             }
 
-            m_ServiceRegistrations.AddRange(GetServicesFromAssembly(assembly));
+            m_ServiceRegistrations.AddRange(GetServiceRegistrationsFromAssembly(assembly));
             m_RegisteredAssemblies.Add(assemblyName);
+            m_Assemblies.Add(assembly);
         }
 
-        public async Task RegisterPluginAssembliesAsync(IPluginAssembliesSource source)
+        public async Task<ICollection<Assembly>> RegisterPluginAssembliesAsync(IPluginAssembliesSource source)
         {
             var assemblies = await m_PluginAssemblyStore.LoadPluginAssembliesAsync(source);
             foreach (var assembly in assemblies)
@@ -92,87 +90,70 @@ namespace OpenMod.Runtime
             {
                 // Auto register services with [Service] and [ServiceImplementation] attributes
                 RegisterServicesFromAssembly(assembly);
+            }
 
-                // Auto create IContainerConfigurator classes for more advanced scenarios
-                var containerConfiugratorTypes = assembly.FindTypes<IContainerConfigurator>(false);
-                foreach (var containerConfiguratorType in containerConfiugratorTypes)
-                {
-                    var instance = (IContainerConfigurator)Activator.CreateInstance(containerConfiguratorType);
-                    await instance.ConfigureContainerAsync(m_OpenModStartupContext, m_ContainerBuilder);
-                }
+            m_Assemblies.AddRange(assemblies);
+            return assemblies;
+        }
+
+        internal async Task CompleteContainerRegistrationAsync(ContainerBuilder containerBuilder)
+        {
+            var containerConfiguratorTypes = m_Assemblies
+                .SelectMany(d => d.FindTypes<IContainerConfigurator>(false))
+                .OrderBy(d => d.GetPriority(), new PriorityComparer(PriortyComparisonMode.LowestFirst));
+
+            foreach (var containerConfiguratorType in containerConfiguratorTypes)
+            {
+                var instance = (IContainerConfigurator)Activator.CreateInstance(containerConfiguratorType);
+                await instance.ConfigureContainerAsync(Context, containerBuilder);
             }
         }
 
-        internal void Complete()
+        internal async Task CompleteServiceRegistrationsAsync(IServiceCollection serviceCollection)
         {
-            var servicesRegistrations = m_ServiceRegistrations
-                .OrderBy(d => d.ServiceImplementationAttribute.Priority, new PriorityComparer(PriortyComparisonMode.LowestFirst));
+            await BootstrapAndRegisterPluginsAsync(serviceCollection);
+
+            var serviceConfiguratorTypes = m_Assemblies
+                .SelectMany(d => d.FindTypes<IServiceConfigurator>(false))
+                .OrderBy(d => d.GetPriority(), new PriorityComparer(PriortyComparisonMode.LowestFirst));
+
+            foreach (var serviceConfiguratorType in serviceConfiguratorTypes)
+            {
+                var instance = (IServiceConfigurator)Activator.CreateInstance(serviceConfiguratorType);
+                await instance.ConfigureServicesAsync(Context, serviceCollection);
+            }
+
+            var servicesRegistrations = m_ServiceRegistrations.OrderBy(d => d.Priority, new PriorityComparer(PriortyComparisonMode.LowestFirst));
 
             foreach (var servicesRegistration in servicesRegistrations)
             {
-                var builder = m_ContainerBuilder.RegisterType(servicesRegistration.ServiceImplementationType);
-                foreach (var serviceType in servicesRegistration.ServiceTypes)
-                {
-                    builder.As(serviceType);
+                var implementationType = servicesRegistration.ServiceImplementationType;
+                serviceCollection.Add(new ServiceDescriptor(implementationType, implementationType, servicesRegistration.Lifetime));
 
-                    switch (servicesRegistration.ServiceImplementationAttribute.Lifetime)
-                    {
-                        case ServiceLifetime.Singleton:
-                            builder.SingleInstance();
-                            break;
-                        case ServiceLifetime.Scoped:
-                            builder.InstancePerLifetimeScope();
-                            break;
-                        case ServiceLifetime.Transient:
-                            builder.InstancePerDependency();
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                foreach (var service in servicesRegistration.ServiceTypes)
+                {
+                    serviceCollection.Add(new ServiceDescriptor(service, provider => provider.GetService(implementationType), servicesRegistration.Lifetime));
                 }
             }
         }
 
-        internal async Task BootstrapAndRegisterPluginsAsync()
+        private async Task BootstrapAndRegisterPluginsAsync(IServiceCollection serviceCollection)
         {
             var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
 
             var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(pluginsDirectory);
-            m_ContainerBuilder.Register(context => fileSystemPluginAssembliesSource)
-                .AsSelf()
-                .SingleInstance()
-                .OwnedByLifetimeScope();
-            
+            serviceCollection.AddSingleton(fileSystemPluginAssembliesSource);
+
             var nugetPluginAssembliesSource = new NuGetPluginAssembliesSource(m_NuGetPackageManager);
-            m_ContainerBuilder.Register(context => nugetPluginAssembliesSource)
-                .AsSelf()
-                .SingleInstance()
-                .OwnedByLifetimeScope();
+            serviceCollection.AddSingleton(nugetPluginAssembliesSource);
 
             await RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
             await RegisterPluginAssembliesAsync(nugetPluginAssembliesSource);
 
-            m_ContainerBuilder.Register(context => m_PluginAssemblyStore)
-                .As<IPluginAssemblyStore>()
-                .SingleInstance()
-                .OwnedByLifetimeScope();
+            serviceCollection.AddSingleton<IPluginAssemblyStore>(m_PluginAssemblyStore);
         }
 
-        internal async Task ConfigureServicesAsync(IServiceCollection services)
-        {
-            foreach (var assembly in m_PluginAssemblyStore.LoadedPluginAssemblies)
-            {
-                // Auto create IContainerConfigurator classes for more advanced scenarios
-                var containerConfiugratorTypes = assembly.FindTypes<IServiceConfigurator>(false);
-                foreach (var containerConfiguratorType in containerConfiugratorTypes)
-                {
-                    var instance = (IServiceConfigurator)Activator.CreateInstance(containerConfiguratorType);
-                    await instance.ConfigureServicesAsync(m_OpenModStartupContext, services);
-                }
-            }
-        }
-
-        private IEnumerable<ServiceRegistration> GetServicesFromAssembly(Assembly assembly)
+        private IEnumerable<ServiceRegistration> GetServiceRegistrationsFromAssembly(Assembly assembly)
         {
             var types = assembly.GetLoadableTypes()
                 .Where(d => d.IsClass && !d.IsInterface && !d.IsAbstract)
@@ -198,9 +179,10 @@ namespace OpenMod.Runtime
 
                 yield return new ServiceRegistration
                 {
+                    Priority = attribute.Priority,
                     ServiceImplementationType = type,
                     ServiceTypes = interfaces,
-                    ServiceImplementationAttribute = attribute
+                    Lifetime = attribute.Lifetime
                 };
             }
         }
@@ -208,11 +190,12 @@ namespace OpenMod.Runtime
 
     internal class ServiceRegistration
     {
+        public Priority Priority { get; set; }
+
         public Type ServiceImplementationType { get; set; }
 
         public Type[] ServiceTypes { get; set; }
 
-        public ServiceImplementationAttribute ServiceImplementationAttribute { get; set; }
+        public ServiceLifetime Lifetime { get; set; }
     }
-
 }

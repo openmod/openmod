@@ -3,7 +3,7 @@
     /// <summary>
     ///     Result of a permission check.
     /// </summary>
-    public enum PermissionStatus
+    public enum PermissionGrantResult
     {
         /// <summary>
         ///     The permission was neither denied nor granted. Default action (which is usually the same as deny) should be

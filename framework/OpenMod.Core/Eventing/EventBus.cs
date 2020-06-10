@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Ioc;
+using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers.Prioritization;
 using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Eventing
 {
-    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton)]
+    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class EventBus : IEventBus, IDisposable
     {
         private readonly ILogger<EventBus> m_Logger;
@@ -26,69 +26,68 @@ namespace OpenMod.Core.Eventing
             m_EventSubscriptions = new List<EventSubscription>();
         }
 
-
-        public void Subscribe(IOpenModComponent @object, string eventName, EventCallback callback)
+        public void Subscribe(IOpenModComponent component, string eventName, EventCallback callback)
         {
-            if (!@object.IsComponentAlive)
+            if (!component.IsComponentAlive)
                 return;
 
-            var handler = GetEventHandlerAttribute(callback.Method);
-            m_EventSubscriptions.Add(new EventSubscription(@object, callback.Invoke, handler, eventName));
+            var attribute = GetEventListenerAttribute(callback.Method);
+            m_EventSubscriptions.Add(new EventSubscription(component, callback.Invoke, attribute, eventName));
         }
 
-        public void Subscribe<TEvent>(IOpenModComponent @object, EventCallback<TEvent> callback) where TEvent : IEvent
+        public void Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback) where TEvent : IEvent
         {
-            if (!@object.IsComponentAlive)
+            if (!component.IsComponentAlive)
                 return;
 
-            var handler = GetEventHandlerAttribute(callback.Method);
-            m_EventSubscriptions.Add(new EventSubscription(@object, (sender, @event) => callback.Invoke(sender, (TEvent)@event), handler, typeof(TEvent)));
+            var attribute = GetEventListenerAttribute(callback.Method);
+            m_EventSubscriptions.Add(new EventSubscription(component, (sender, @event) => callback.Invoke(sender, (TEvent)@event), attribute, typeof(TEvent)));
         }
 
-        public void Subscribe(IOpenModComponent @object, Type eventType, EventCallback callback)
+        public void Subscribe(IOpenModComponent component, Type eventType, EventCallback callback)
         {
-            if (!@object.IsComponentAlive)
+            if (!component.IsComponentAlive)
                 return;
 
-            var handler = GetEventHandlerAttribute(callback.Method);
-            m_EventSubscriptions.Add(new EventSubscription(@object, callback.Invoke, handler, eventType));
+            var attribute = GetEventListenerAttribute(callback.Method);
+            m_EventSubscriptions.Add(new EventSubscription(component, callback.Invoke, attribute, eventType));
         }
 
-        public void Unsubscribe(IOpenModComponent @object)
+        public void Unsubscribe(IOpenModComponent component)
         {
-            if (!@object.IsComponentAlive)
+            if (!component.IsComponentAlive)
                 return;
 
-            m_EventSubscriptions.RemoveAll(c => !c.Owner.IsAlive || c.Owner.Target == @object);
+            m_EventSubscriptions.RemoveAll(c => !c.Owner.IsAlive || c.Owner.Target == component);
         }
 
-        public void Unsubscribe(IOpenModComponent @object, string eventName)
+        public void Unsubscribe(IOpenModComponent component, string eventName)
         {
-            if (!@object.IsComponentAlive)
+            if (!component.IsComponentAlive)
                 return;
 
-            m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == @object) && c.EventName.Equals(eventName, StringComparison.OrdinalIgnoreCase));
+            m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && c.EventName.Equals(eventName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public void Unsubscribe<TEvent>(IOpenModComponent @object) where TEvent : IEvent
+        public void Unsubscribe<TEvent>(IOpenModComponent component) where TEvent : IEvent
         {
-            if (!@object.IsComponentAlive)
+            if (!component.IsComponentAlive)
                 return;
 
-            m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == @object) && (c.EventType == typeof(TEvent) || c.EventName.Equals(typeof(TEvent).Name, StringComparison.OrdinalIgnoreCase)));
+            m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == typeof(TEvent) || c.EventName.Equals(typeof(TEvent).Name, StringComparison.OrdinalIgnoreCase)));
         }
 
-        public void Unsubscribe(IOpenModComponent @object, Type eventType)
+        public void Unsubscribe(IOpenModComponent component, Type eventType)
         {
-            if (!@object.IsComponentAlive)
+            if (!component.IsComponentAlive)
                 return;
 
-            m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == @object) && (c.EventType == eventType || c.EventName.Equals(eventType.Name, StringComparison.OrdinalIgnoreCase)));
+            m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == eventType || c.EventName.Equals(eventType.Name, StringComparison.OrdinalIgnoreCase)));
         }
 
-        public void AddEventListener<TEvent>(IOpenModComponent @object, IEventListener<TEvent> eventListener) where TEvent : IEvent
+        public void AddEventListener<TEvent>(IOpenModComponent component, IEventListener<TEvent> eventListener) where TEvent : IEvent
         {
-            if (!@object.IsComponentAlive)
+            if (!component.IsComponentAlive)
                 return;
 
             if (m_EventSubscriptions.Any(c => c.Listener?.GetType() == eventListener.GetType()))
@@ -103,10 +102,10 @@ namespace OpenMod.Core.Eventing
             {
                 foreach (var method in @interface.GetMethods())
                 {
-                    var handler = GetEventHandlerAttribute(method);
+                    var handler = GetEventListenerAttribute(method);
                     var eventType = @interface.GetGenericArguments()[0];
 
-                    m_EventSubscriptions.Add(new EventSubscription(@object, eventListener, method, handler, eventType));
+                    m_EventSubscriptions.Add(new EventSubscription(component, eventListener, method, handler, eventType));
                 }
             }
         }
@@ -141,7 +140,7 @@ namespace OpenMod.Core.Eventing
             }
 
             var comparer = new PriorityComparer(PriortyComparisonMode.LowestFirst);
-            eventSubscriptions.Sort((a, b) => comparer.Compare(a.EventHandlerAttribute.Priority, b.EventHandlerAttribute.Priority));
+            eventSubscriptions.Sort((a, b) => comparer.Compare(a.EventListenerAttribute.Priority, b.EventListenerAttribute.Priority));
 
             foreach (var subscription in eventSubscriptions)
             {
@@ -154,7 +153,7 @@ namespace OpenMod.Core.Eventing
 
                 if (@event is ICancellableEvent cancellableEvent 
                     && cancellableEvent.IsCancelled 
-                    && !subscription.EventHandlerAttribute.IgnoreCancelled)
+                    && !subscription.EventListenerAttribute.IgnoreCancelled)
                 {
                     continue;
                 }
@@ -165,9 +164,9 @@ namespace OpenMod.Core.Eventing
             Complete();
         }
 
-        private EventHandlerAttribute GetEventHandlerAttribute(MethodInfo target)
+        private EventListenerAttribute GetEventListenerAttribute(MethodInfo method)
         {
-            return target.GetCustomAttribute<EventHandlerAttribute>() ?? new EventHandlerAttribute();
+            return method.GetCustomAttribute<EventListenerAttribute>() ?? new EventListenerAttribute();
         }
 
         public void Dispose()

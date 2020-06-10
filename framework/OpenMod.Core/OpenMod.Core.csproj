@@ -36,8 +36,4 @@
     <ProjectReference Include="..\OpenMod.NuGet\OpenMod.NuGet.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Prioritization\" />
-  </ItemGroup>
-
 </Project>

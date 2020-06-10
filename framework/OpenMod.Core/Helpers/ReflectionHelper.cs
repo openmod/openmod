@@ -29,7 +29,7 @@ namespace OpenMod.Core.Helpers
             skipList.Add(typeof(ReflectionExtensions));
 
             StackTrace st = new StackTrace();
-            StackFrame target = null;
+            StackFrame frameTarget = null;
             for (int i = 0; i < st.FrameCount; i++)
             {
                 StackFrame frame = st.GetFrame(i);
@@ -72,27 +72,27 @@ namespace OpenMod.Core.Helpers
 
                 if (skipMethods?.Any(c => c == frameMethod) ?? false)
                     continue;
-                target = frame;
+                frame = frame;
                 break;
             }
 
-            return target?.GetMethod();
+            return frameTarget?.GetMethod();
         }
 
         public static MethodBase GetCallingMethod(params Assembly[] skipAssemblies)
         {
             StackTrace st = new StackTrace();
-            StackFrame target = null;
+            StackFrame frameTarget = null;
             for (int i = 0; i < st.FrameCount; i++)
             {
                 StackFrame frame = st.GetFrame(i);
                 if (skipAssemblies.Any(c => Equals(c, frame.GetMethod()?.DeclaringType?.Assembly)))
                     continue;
 
-                target = frame;
+                frameTarget = frame;
             }
 
-            return target?.GetMethod();
+            return frameTarget?.GetMethod();
         }
 
         public static IEnumerable<Type> GetTypeHierarchy(this Type type)
@@ -105,19 +105,6 @@ namespace OpenMod.Core.Helpers
 
             return types;
         }
-
-        internal static T GetPrivateProperty<T>(this object o, string property)
-        {
-            var prop = o.GetType()
-                        .GetProperty(property, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
-
-            if (prop == null)
-                throw new Exception("Property not found!");
-
-            return (T)prop.GetGetMethod(true)
-                    .Invoke(o, new object[0]);
-        }
-
         public static IEnumerable<Type> FindAllTypes(this object @object,
                                                      bool includeAbstractAndInterfaces = false)
             => @object.GetType().Assembly.FindAllTypes(includeAbstractAndInterfaces);

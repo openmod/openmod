@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
+using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
 using SmartFormat;
 
@@ -12,21 +13,21 @@ namespace OpenMod.Runtime
     public class OpenModHostedService : BackgroundService
     {
         private readonly ILogger<OpenModHostedService> m_Logger;
-        //private readonly IPermissionStore m_PermissionProvider;
+        private readonly IPermissionChecker m_PermissionChecker;
         private readonly IOpenModHost m_Host;
         private readonly IPluginAssemblyStore m_PluginAssemblyStore;
         private readonly IPluginActivator m_PluginActivator;
 
         public OpenModHostedService(
             ILogger<OpenModHostedService> logger,
-            //IPermissionStore permissionProvider,
+            IPermissionChecker permissionChecker,
             IOpenModHost host,
             IPluginAssemblyStore pluginAssemblyStore,
             IPluginActivator pluginActivator
         )
         {
             m_Logger = logger;
-            //m_PermissionProvider = permissionProvider;
+            m_PermissionChecker = permissionChecker;
             m_Host = host;
             m_PluginAssemblyStore = pluginAssemblyStore;
             m_PluginActivator = pluginActivator;
@@ -34,7 +35,7 @@ namespace OpenMod.Runtime
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //await m_PermissionProvider.LoadAsync();
+            await m_PermissionChecker.InitAsync();
             Smart.Default.Parser.UseAlternativeEscapeChar('\\');
 
             m_Logger.LogInformation($"Initializing for host: {m_Host.DisplayName} v{m_Host.Version}");

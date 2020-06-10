@@ -1,4 +1,6 @@
-﻿namespace OpenMod.API.Permissions
+﻿using System.Collections.Generic;
+
+namespace OpenMod.API.Permissions
 {
     /// <summary>
     ///     A permission group contains a collection of permissions.
@@ -8,11 +10,16 @@
         /// <summary>
         ///     The permission priority of this group.
         /// </summary>
-        int Priority { get; }
+        int Priority { get; set; }
 
         /// <summary>
-        ///     The human readable name of the permission group
+        ///     Parents of the group
         /// </summary>
-        string DisplayName { get; }
+        ICollection<string> Parents { get; }
+
+        /// <summary>
+        ///    If true, this group automatically gets assigned to new users
+        /// </summary>
+        bool IsAutoAssigned { get; set; }
     }
 }

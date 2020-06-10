@@ -5,11 +5,12 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Ioc;
+using OpenMod.API.Prioritization;
 
 namespace OpenMod.Standalone
 {
     [UsedImplicitly]
-    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton)]
+    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class StandaloneHost : IOpenModHost
     {
         private readonly IRuntime m_Runtime;

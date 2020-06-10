@@ -14,10 +14,11 @@ using OpenMod.Unturned.Logging;
 using SDG.Unturned;
 using UnityEngine;
 using UnityEngine.Experimental.LowLevel;
+using Priority = OpenMod.API.Prioritization.Priority;
 
 namespace OpenMod.Unturned
 {
-    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton)]
+    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
         private readonly Harmony m_Harmony;
