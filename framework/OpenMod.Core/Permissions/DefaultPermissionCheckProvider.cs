@@ -17,9 +17,9 @@ namespace OpenMod.Core.Permissions
             m_PermissionChecker = permissionChecker;
         }
 
-        public bool SupportsActor(object actor)
+        public bool SupportsActor(IPermissionActor actor)
         {
-            return actor is IPermissionActor;
+            return true;
         }
 
         public async Task<PermissionGrantResult> CheckPermissionAsync(IPermissionActor actor, string permission)
@@ -50,7 +50,8 @@ namespace OpenMod.Core.Permissions
             return PermissionGrantResult.Default;
         }
 
-        private static bool CheckPermissionEquals(string input, string permission)
+        // ReSharper disable once MemberCanBeMadeStatic.Local
+        private bool CheckPermissionEquals(string input, string permission)
         {
             return input.Equals(permission, StringComparison.OrdinalIgnoreCase);
         }

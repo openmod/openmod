@@ -9,7 +9,7 @@ namespace OpenMod.API.Permissions
         /// </summary>
         /// <param name="actor">The actor to check.</param>
         /// <returns><b>true</b> if the given actor is supported; otherwise, <b>false</b>.</returns>
-        bool SupportsActor(object actor);
+        bool SupportsActor(IPermissionActor actor);
 
         /// <summary>
         ///     Check if an actor has permission to execute an action.

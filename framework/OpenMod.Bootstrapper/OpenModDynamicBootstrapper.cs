@@ -113,7 +113,8 @@ namespace OpenMod.Bootstrapper
             await InitializeRuntimeAsync(hostAssemblies, openModFolder, commandLineArgs);
         }
 
-        private static Task<IEnumerable<Assembly>> LoadPackageAsync(NuGetPackageManager packageManager, PackageIdentity identity)
+        // ReSharper disable once MemberCanBeMadeStatic.Local
+        private Task<IEnumerable<Assembly>> LoadPackageAsync(NuGetPackageManager packageManager, PackageIdentity identity)
         {
             var pkg = packageManager.GetNugetPackageFile(identity);
             return packageManager.LoadAssembliesFromNuGetPackageAsync(pkg);
@@ -135,13 +136,15 @@ namespace OpenMod.Bootstrapper
             return (Task) initMethod?.Invoke(runtime, new[] {  hostAssemblies, null /* hostBuilder */, parameters});
         }
 
+        // ReSharper disable once MemberCanBeMadeStatic.Local
         private Assembly FindAssemblyInCurrentDomain(string name)
         {
             return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(d => d.GetName().Name.Equals(name)) ??
                    throw new Exception($"Failed to find assembly: {name}");
         }
 
-        private static void SetParameter(object parametersObject, string name, object value)
+        // ReSharper disable once MemberCanBeMadeStatic.Local
+        private void SetParameter(object parametersObject, string name, object value)
         {
             var field = parametersObject.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
             field?.SetValue(parametersObject, value);

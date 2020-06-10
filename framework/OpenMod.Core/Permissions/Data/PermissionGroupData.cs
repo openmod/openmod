@@ -17,6 +17,7 @@ namespace OpenMod.Core.Permissions.Data
 
         public PermissionGroupData()
         {
+            Data = new Dictionary<string, object>();
             Parents = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
         }
