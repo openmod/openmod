@@ -72,7 +72,8 @@ namespace OpenMod.Core.Helpers
 
                 if (skipMethods?.Any(c => c == frameMethod) ?? false)
                     continue;
-                frame = frame;
+                    
+                frameTarget = frame;
                 break;
             }
 

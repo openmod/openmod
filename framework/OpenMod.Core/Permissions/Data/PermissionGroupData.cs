@@ -8,10 +8,17 @@ namespace OpenMod.Core.Permissions.Data
     {
         public string Id { get; set; }
         public int Priority { get; set; }
-        public List<string> Parents { get; set; }
-        public List<string> Permissions { get; set; }
+        public HashSet<string> Parents { get; set; }
+        public HashSet<string> Permissions { get; set; }
         public string DisplayName { get; set; }
         public Dictionary<string, object> Data { get; set; }
         public bool IsAutoAssigned { get; set; }
+
+
+        public PermissionGroupData()
+        {
+            Parents = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+        }
     }
 }

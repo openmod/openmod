@@ -21,30 +21,65 @@ namespace OpenMod.Core.Permissions
             m_PermissionFileManager = permissionFileManager;
         }
         
-        public virtual async Task<IReadOnlyCollection<IPermissionGroup>> GetGroupsAsync(IPermissionActor actor)
+        public virtual async Task<IReadOnlyCollection<IPermissionGroup>> GetGroupsAsync(IPermissionActor actor, bool inherit = true)
         {
             var groups = new List<IPermissionGroup>();
+            var groupsIds = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+
             if (actor is IPermissionGroup group)
             {
+                groups.Add(group);
+                groupsIds.Add(group.Id);
+
+                if (!inherit)
+                    return groups;
+
+                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var parentGroupId in group.Parents)
                 {
+                    if (groupsIds.Contains(parentGroupId))
+                        continue;
+
                     var parentGroup = await GetGroupAsync(parentGroupId);
-                    if (parentGroup != null)
-                    {
-                        groups.Add(parentGroup);
-                    }
+                    if (parentGroup == null) 
+                        continue;
+
+                    groups.Add(parentGroup);
+                    groupsIds.Add(parentGroupId);
                 }
 
                 return groups;
             }
 
             var user = await GetOrCreateUserDataAsync(actor);
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var groupId in user.Groups)
             {
+                if (groupsIds.Contains(groupId)) //prevent add group that was already by parent for example
+                    continue;
+                
                 var userGroup = await GetGroupAsync(groupId);
-                if (userGroup!= null)
+                if (userGroup == null)
+                    continue;
+
+                groups.Add(userGroup);
+                groupsIds.Add(groupId);
+
+                if (!inherit)
+                    continue;
+
+                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+                foreach (var parentGroupId in userGroup.Parents)
                 {
-                    groups.Add(userGroup);
+                    if (groupsIds.Contains(parentGroupId))
+                        continue;
+
+                    var parentGroup = await GetGroupAsync(parentGroupId);
+                    if (parentGroup == null) 
+                        continue;
+
+                    groups.Add(parentGroup);
+                    groupsIds.Add(parentGroupId);
                 }
             }
 
@@ -58,7 +93,7 @@ namespace OpenMod.Core.Permissions
                 throw new Exception("Can not auto assignment on permission groups.");
             }
 
-            var user = m_PermissionFileManager.UsersData.Users.FirstOrDefault(d => d.Id == actor.Id);
+            var user = m_PermissionFileManager.UsersData.Users.FirstOrDefault(d => d.Id.Equals(actor.Id, StringComparison.InvariantCultureIgnoreCase));
             if (user == null)
             {
                 // CreateUser will assign groups itself
@@ -66,10 +101,11 @@ namespace OpenMod.Core.Permissions
                 return;
             }
 
-            var userGroups = user.Groups.ToList();
+            foreach (var group in GetAutoAssignPermissionGroups().Where(gp => !user.Groups.Contains(gp.Id)))
+            {
+                user.Groups.Add(group.Id);
+            }
 
-            userGroups.AddRange(GetAutoAssignPermissionGroups().Select(d => d.Id));
-            user.Groups = userGroups.Distinct().ToList();
             await m_PermissionFileManager.SaveUsersAsync();
         }
 
@@ -88,9 +124,9 @@ namespace OpenMod.Core.Permissions
                 FirstSeen = DateTime.Now,
                 LastDisplayName = actor.DisplayName,
                 LastSeen = DateTime.Now,
-                Data = new Dictionary<string, object>(),
-                Permissions = new List<string>(),
-                Groups = GetAutoAssignPermissionGroups().Select(d => d.Id).ToList()
+                Groups = new HashSet<string>(
+                    GetAutoAssignPermissionGroups().Select(d => d.Id), 
+                    StringComparer.InvariantCultureIgnoreCase)
             };
 
             m_PermissionFileManager.UsersData.Users.Add(userData);
@@ -100,56 +136,51 @@ namespace OpenMod.Core.Permissions
 
         public virtual Task<IReadOnlyCollection<IPermissionGroup>> GetGroupsAsync()
         {
-            // yes, the double casting here is necessary :^)
-            return Task.FromResult((IReadOnlyCollection<IPermissionGroup>)m_PermissionFileManager.PermissionGroupsData.PermissionGroups.Select(e => (IPermissionGroup)(PermissionGroup)e).ToList());
+            return Task.FromResult((IReadOnlyCollection<IPermissionGroup>)m_PermissionFileManager.PermissionGroupsData.PermissionGroups.OfType<IPermissionGroup>().ToList());
         }
 
         public virtual Task<IPermissionGroup> GetGroupAsync(string id)
         {
-            // same double casting professionalism here
-            return Task.FromResult((IPermissionGroup)(PermissionGroup)m_PermissionFileManager.PermissionGroupsData.PermissionGroups.FirstOrDefault(d => d.Id.Equals(id, StringComparison.OrdinalIgnoreCase)));
+            return Task.FromResult(m_PermissionFileManager.PermissionGroupsData.PermissionGroups.OfType<IPermissionGroup>().FirstOrDefault(d => d.Id.Equals(id, StringComparison.OrdinalIgnoreCase)));
         }
 
-        public virtual async Task<bool> UpdateGroupAsync(IPermissionGroup @group)
+        public virtual async Task<bool> UpdateGroupAsync(IPermissionGroup group)
         {
-            if (await GetGroupAsync(@group.Id) == null)
+            if (await GetGroupAsync(group.Id) == null)
             {
                 return false;
             }
 
-            m_PermissionFileManager.PermissionGroupsData.PermissionGroups.RemoveAll(d => d.Id == @group.Id);
-            m_PermissionFileManager.PermissionGroupsData.PermissionGroups.Add((PermissionGroup)@group);
+            m_PermissionFileManager.PermissionGroupsData.PermissionGroups.RemoveAll(d => d.Id.Equals(group.Id, StringComparison.OrdinalIgnoreCase));
+            m_PermissionFileManager.PermissionGroupsData.PermissionGroups.Add((PermissionGroup)group);
 
             await m_PermissionFileManager.SavePermissionGroupsAsync();
             return true;
         }
 
-        public virtual async Task<bool> AddGroupAsync(IPermissionActor actor, IPermissionGroup @group)
+        public virtual async Task<bool> AddGroupToActorAsync(IPermissionActor actor, string groupId)
         {
             var user = await GetOrCreateUserDataAsync(actor);
-            if (user.Groups.Any(d => d.Equals(@group.Id, StringComparison.OrdinalIgnoreCase)))
+            if (user.Groups.Contains(groupId))
             {
                 return true;
             }
 
-            user.Groups.Add(@group.Id);
-            user.Groups = user.Groups.Distinct().ToList();
-
+            user.Groups.Add(groupId);
             await m_PermissionFileManager.SaveUsersAsync();
             return true;
         }
 
-        public virtual async Task<bool> RemoveGroupAsync(IPermissionActor actor, IPermissionGroup @group)
+        public virtual async Task<bool> RemoveGroupFromActorAsync(IPermissionActor actor, string groupId)
         {
             var user = await GetOrCreateUserDataAsync(actor);
-            user.Groups.RemoveAll(d => d.Equals(@group.Id, StringComparison.OrdinalIgnoreCase));
+            user.Groups.Remove(groupId);
 
-            user.Groups = user.Groups.Distinct().ToList();
             await m_PermissionFileManager.SaveUsersAsync();
             return true;
         }
 
-        public virtual async Task<bool> CreateGroupAsync(IPermissionGroup @group)
+        public virtual async Task<bool> CreateGroupAsync(IPermissionGroup group)
         {
             if (await GetGroupAsync(group.Id) != null)
             {
@@ -158,22 +189,22 @@ namespace OpenMod.Core.Permissions
 
             m_PermissionFileManager.PermissionGroupsData.PermissionGroups.Add(new PermissionGroupData
             {
-                Priority = @group.Priority,
-                Id = @group.Id,
-                DisplayName = @group.DisplayName,
-                Data = @group.Data ?? new Dictionary<string, object>(),
-                Parents = @group.Parents?.ToList() ?? new List<string>(),
-                Permissions = new List<string>(),
-                IsAutoAssigned = @group.IsAutoAssigned
+                Priority = group.Priority,
+                Id = group.Id,
+                DisplayName = group.DisplayName,
+                Data = group.Data ?? new Dictionary<string, object>(),
+                Parents = new HashSet<string>(group.Parents, StringComparer.InvariantCultureIgnoreCase),
+                Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase),
+                IsAutoAssigned = group.IsAutoAssigned
             });
 
             await m_PermissionFileManager.SavePermissionGroupsAsync();
             return true;
         }
 
-        public virtual async Task<bool> DeleteGroupAsync(IPermissionGroup @group)
+        public virtual async Task<bool> DeleteGroupAsync(string groupId)
         {
-            if (m_PermissionFileManager.PermissionGroupsData.PermissionGroups.RemoveAll(c => @group.Id.Equals(c.Id, StringComparison.OrdinalIgnoreCase)) == 0)
+            if (m_PermissionFileManager.PermissionGroupsData.PermissionGroups.RemoveAll(c => groupId.Equals(c.Id, StringComparison.OrdinalIgnoreCase)) == 0)
             {
                 return false;
             }
@@ -182,12 +213,11 @@ namespace OpenMod.Core.Permissions
             return true;
         }
 
-        protected List<PermissionGroup> GetAutoAssignPermissionGroups()
+        protected IEnumerable<IPermissionGroup> GetAutoAssignPermissionGroups()
         {
             return m_PermissionFileManager.PermissionGroupsData.PermissionGroups
-                .Where(d => d.IsAutoAssigned)
-                .Select(d => (PermissionGroup)d)
-                .ToList();
+                .OfType<IPermissionGroup>()
+                .Where(d => d.IsAutoAssigned);
         }
     }
 }

@@ -14,9 +14,10 @@ namespace OpenMod.Core.Permissions
         {
             m_ActorPredicate = actorPredicate;
         }
-        public bool SupportsActor(IPermissionActor actor)
+        
+        public bool SupportsActor(object actor)
         {
-            return m_ActorPredicate(actor);
+            return actor is IPermissionActor act && m_ActorPredicate(act);
         }
 
         public Task<PermissionGrantResult> CheckPermissionAsync(IPermissionActor actor, string permission)

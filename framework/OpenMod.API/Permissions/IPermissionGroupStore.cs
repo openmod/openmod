@@ -11,8 +11,9 @@ namespace OpenMod.API.Permissions
         ///     Gets all groups inherited by the actor.
         /// </summary>
         /// <param name="actor">The actor.</param>
+        /// <param name="inherit">Defines if the parent groups permissions should be included.</param>
         /// <returns>the inherited groups of the actor.</returns>
-        Task<IReadOnlyCollection<IPermissionGroup>> GetGroupsAsync(IPermissionActor actor);
+        Task<IReadOnlyCollection<IPermissionGroup>> GetGroupsAsync(IPermissionActor actor, bool inherit = true);
 
         /// <summary>
         ///     Gets all permission groups.
@@ -37,17 +38,17 @@ namespace OpenMod.API.Permissions
         ///     Adds a group to a user.
         /// </summary>
         /// <param name="actor">The actor to add the group to.</param>
-        /// <param name="group">The group to add.</param>
+        /// <param name="groupId">The groupId to add.</param>
         /// <returns><b>true</b> if the group was successfully added or already exists; otherwise, <b>false</b>.</returns>
-        Task<bool> AddGroupAsync(IPermissionActor actor, IPermissionGroup group);
+        Task<bool> AddGroupToActorAsync(IPermissionActor actor, string groupId);
 
         /// <summary>
         ///     Removes a group from a user.
         /// </summary>
         /// <param name="actor">The actor to add the group to.</param>
-        /// <param name="group">The group to remove.</param>
+        /// <param name="groupId">The groupId to remove.</param>
         /// <returns><b>true</b> if the group was successfully removed or doesn't exist; otherwise, <b>false</b>.</returns>
-        Task<bool> RemoveGroupAsync(IPermissionActor actor, IPermissionGroup group);
+        Task<bool> RemoveGroupFromActorAsync(IPermissionActor actor, string groupId);
 
         /// <summary>
         ///     Creates a new permission group.
@@ -59,9 +60,9 @@ namespace OpenMod.API.Permissions
         /// <summary>
         ///     Deletes a permission group.
         /// </summary>
-        /// <param name="group">The group to delete.</param>
+        /// <param name="groupId">The groupId to delete.</param>
         /// <returns><b>true</b> if the group was successfully deleted or doesn't exist; otherwise, <b>false</b>.</returns>
-        Task<bool> DeleteGroupAsync(IPermissionGroup group);
+        Task<bool> DeleteGroupAsync(string groupId);
 
         /// <summary>
         ///     Assigns the user to all permission groups that have IsAutoAssigned set to true.
