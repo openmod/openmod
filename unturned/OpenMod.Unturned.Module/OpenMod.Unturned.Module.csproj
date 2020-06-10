@@ -16,13 +16,15 @@
     <NuGetBootstrap>true</NuGetBootstrap>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Condition="$(NuGetBootstrap) == 'true'" Include="..\..\framework\OpenMod.Bootstrapper\OpenMod.Bootstrapper.csproj" />
-    <ProjectReference Condition="$(NuGetBootstrap) != 'true'" Include="..\OpenMod.Unturned\OpenMod.Unturned.csproj" />
+  <ItemGroup Condition="$(NuGetBootstrap) == 'true'">
+    <ProjectReference Include="..\..\framework\OpenMod.Bootstrapper\OpenMod.Bootstrapper.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$(NuGetBootstrap) != 'true'">
+    <ProjectReference  Include="..\OpenMod.Unturned\OpenMod.Unturned.csproj" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <DefineConstants Condition="$(NuGetBootstrap) == 'true'">NUGET_BOOTSTRAP</DefineConstants>
+  <PropertyGroup Condition="$(NuGetBootstrap) == 'true'">
+    <DefineConstants>NUGET_BOOTSTRAP</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

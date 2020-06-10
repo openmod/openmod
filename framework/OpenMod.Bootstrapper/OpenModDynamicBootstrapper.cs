@@ -106,7 +106,7 @@ namespace OpenMod.Bootstrapper
                     packageIdentity = await nugetInstaller.GetLatestPackageIdentityAsync(packageId);
                 }
 
-                logger.LogInformation($"Loading {packageId}.");
+                logger.LogInformation($"Loading {packageIdentity.Id} v{packageIdentity.Version}");
                 var packageAssemblies = await LoadPackageAsync(nugetInstaller, packageIdentity);
                 hostAssemblies.AddRange(packageAssemblies);
             }
