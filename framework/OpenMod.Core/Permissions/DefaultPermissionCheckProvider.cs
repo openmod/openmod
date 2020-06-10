@@ -33,8 +33,8 @@ namespace OpenMod.Core.Permissions
                 deniedPermissions.AddRange(await permissionSource.GetDeniedPermissionsAsync(actor));
             }
 
-            IEnumerable<string> permissionTree = BuildPermissionTree(permission);
-            foreach (string permissionNode in permissionTree)
+            var permissionTree = BuildPermissionTree(permission);
+            foreach (var permissionNode in permissionTree)
             {
                 if (deniedPermissions.Any(c => CheckPermissionEquals(permissionNode, c)))
                 {
@@ -50,6 +50,7 @@ namespace OpenMod.Core.Permissions
             return PermissionGrantResult.Default;
         }
 
+        // ReSharper disable once MemberCanBeMadeStatic.Local
         private bool CheckPermissionEquals(string input, string permission)
         {
             return input.Equals(permission, StringComparison.OrdinalIgnoreCase);
@@ -76,13 +77,14 @@ namespace OpenMod.Core.Permissions
         /// <returns>The collection of all parent permission nodes</returns>
         public static IEnumerable<string> BuildPermissionTree(string permission)
         {
-            List<string> permissions = new List<string>
+            var permissions = new List<string>
             {
                 "*"
             };
 
-            string parentPath = "";
-            foreach (string childPath in permission.Split('.'))
+
+            var parentPath = string.Empty;
+            foreach (var childPath in permission.Split('.'))
             {
                 permissions.Add(parentPath + childPath + ".*");
                 parentPath += childPath + ".";

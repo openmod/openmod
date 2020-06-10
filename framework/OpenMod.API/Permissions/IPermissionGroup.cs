@@ -15,7 +15,7 @@ namespace OpenMod.API.Permissions
         /// <summary>
         ///     Parents of the group
         /// </summary>
-        ICollection<string> Parents { get; }
+        HashSet<string> Parents { get; }
 
         /// <summary>
         ///    If true, this group automatically gets assigned to new users

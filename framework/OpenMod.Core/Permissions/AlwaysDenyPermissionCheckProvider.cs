@@ -14,6 +14,7 @@ namespace OpenMod.Core.Permissions
         {
             m_ActorPredicate = actorPredicate;
         }
+        
         public bool SupportsActor(IPermissionActor actor)
         {
             return m_ActorPredicate(actor);

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using OpenMod.API.Permissions;
 using OpenMod.Core.Permissions.Data;
 
@@ -9,7 +9,7 @@ namespace OpenMod.Core.Permissions
     {
         public PermissionGroup()
         {
-            Parents = new List<string>();
+            Parents = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             Data = new Dictionary<string, object>();
         }
         public PermissionGroup(PermissionGroupData data)
@@ -35,7 +35,7 @@ namespace OpenMod.Core.Permissions
                 Id = group.Id,
                 Priority = group.Priority,
                 DisplayName = group.DisplayName,
-                Parents = (List<string>) @group.Parents,
+                Parents = group.Parents,
                 Data = group.Data,
                 IsAutoAssigned = group.IsAutoAssigned,
                 Permissions = group.Permissions
@@ -45,8 +45,8 @@ namespace OpenMod.Core.Permissions
         public string Id { get; }
         public int Priority { get; set; }
         public string DisplayName { get; }
-        public ICollection<string> Parents { get; }
-        public List<string> Permissions { get; }
+        public HashSet<string> Parents { get; }
+        public HashSet<string> Permissions { get; }
         public bool IsAutoAssigned { get; set; }
         public Dictionary<string, object> Data { get; }
         public string Type { get; } = "group";
