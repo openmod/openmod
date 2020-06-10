@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
-using OpenMod.Core.Helpers;
 using OpenMod.Core.Permissions.Data;
 
 namespace OpenMod.Core.Permissions
@@ -20,39 +19,55 @@ namespace OpenMod.Core.Permissions
             m_PermissionFileManager = permissionFileManager;
             m_PermissionGroupStore = permissionGroupStore;
         }
-        public virtual async Task<IReadOnlyCollection<string>> GetGrantedPermissionsAsync(IPermissionActor actor, bool inherit = true)
+        public virtual Task<IReadOnlyCollection<string>> GetGrantedPermissionsAsync(IPermissionActor actor, bool inherit = true)
         {
-            return (await GetPermissions(actor, inherit))
-                .Where(d => !d.StartsWith("!"))
-                .ToList();
+            return GetGrantDenyPermissionsAsync(actor, inherit, true);
         }
 
-        public virtual async Task<IReadOnlyCollection<string>> GetDeniedPermissionsAsync(IPermissionActor actor, bool inherit = true)
+        public virtual Task<IReadOnlyCollection<string>> GetDeniedPermissionsAsync(IPermissionActor actor, bool inherit = true)
         {
-            return (await GetPermissions(actor, inherit))
-                .Where(d => d.StartsWith("!"))
-                .ToList();
+            return GetGrantDenyPermissionsAsync(actor, inherit, false);
         }
 
-        protected async Task<List<string>> GetPermissions(IPermissionActor actor, bool inherit = true)
+        protected virtual async Task<IReadOnlyCollection<string>> GetGrantDenyPermissionsAsync(IPermissionActor actor, bool inherit, bool isGrant)
         {
-            var permissions = new List<string>();
-            if (actor is IPermissionGroup permissionGroup)
-            {
-                permissions.AddRange(((PermissionGroup)permissionGroup).Permissions);
-            }
-            else
-            {
-                var user = await GetOrCreateUserDataAsync(actor);
-                permissions.AddRange(user.Permissions);
-            }
+            var deniedPerms = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            var grantedPerms = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
-            if (inherit)
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+            foreach (var permission in await GetPermissionsAsync(actor, inherit)) //Linq is Ugly
             {
-                foreach (var parent in await m_PermissionGroupStore.GetGroupsAsync(actor))
+                var isDeny = permission.StartsWith("!");
+                var trimmedPermission = permission.TrimStart('!');
+
+                if (grantedPerms.Contains(trimmedPermission) || deniedPerms.Contains(trimmedPermission)) //if already added or if is denied by priority
+                    continue;
+
+                if (isDeny)
                 {
-                    permissions.AddRange(await GetPermissions(parent));
+                    deniedPerms.Add(trimmedPermission);
                 }
+                else
+                {
+                    grantedPerms.Add(trimmedPermission);
+                }
+            }
+
+            return isGrant ? grantedPerms : deniedPerms;
+        }
+
+        protected async Task<HashSet<string>> GetPermissionsAsync(IPermissionActor actor, bool inherit = true) //order by descending priority
+        {
+            var permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            var user = GetUserData(actor);
+            if (user != null)
+            {
+                permissions.UnionWith(user.Permissions);
+            }
+
+            foreach (var group in (await m_PermissionGroupStore.GetGroupsAsync(actor, inherit)).OrderByDescending(gp => gp.Priority))
+            {
+                permissions.UnionWith(((PermissionGroup)group).Permissions);
             }
 
             return permissions;
@@ -86,7 +101,6 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task<bool> RemovePermissionAsync(IPermissionActor actor, string permission)
         {
-            bool result;
             if (actor is IPermissionGroup)
             {
                 var groupData = m_PermissionFileManager.PermissionGroupsData.PermissionGroups.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
@@ -95,23 +109,19 @@ namespace OpenMod.Core.Permissions
                     return false;
                 }
 
-                result = groupData.Permissions.RemoveAll(c => c.Equals(permission, StringComparison.OrdinalIgnoreCase)) > 0;
-                if (result)
-                {
-                    await m_PermissionFileManager.SavePermissionGroupsAsync();
-                }
-                
-                return result;
+                if (!groupData.Permissions.Remove(permission)) 
+                    return false;
+
+                await m_PermissionFileManager.SavePermissionGroupsAsync();
+                return true;
             }
 
             var user = await GetOrCreateUserDataAsync(actor);
-            result = user.Permissions.RemoveAll(c => c.Equals(permission, StringComparison.OrdinalIgnoreCase)) > 0;
+            if (!user.Permissions.Remove(permission))
+                return false;
 
-            if (result)
-            {
-                await m_PermissionFileManager.SaveUsersAsync();
-            }
-            return result;
+            await m_PermissionFileManager.SaveUsersAsync();
+            return true;
         }
 
         public virtual Task<bool> RemoveDeniedPermissionAsync(IPermissionActor actor, string permission)
@@ -119,9 +129,14 @@ namespace OpenMod.Core.Permissions
             return RemovePermissionAsync(actor, "!" + permission);
         }
 
+        protected virtual UserData GetUserData(IPermissionActor actor)
+        {
+            return m_PermissionFileManager.UsersData.Users.FirstOrDefault(d => d.Id.Equals(actor.Id, StringComparison.InvariantCultureIgnoreCase));
+        }
+
         protected virtual async Task<UserData> GetOrCreateUserDataAsync(IPermissionActor actor)
         {
-            var user = m_PermissionFileManager.UsersData.Users.FirstOrDefault(d => d.Id == actor.Id);
+            var user = GetUserData(actor);
             if (user != null)
             {
                 return user;
@@ -135,7 +150,7 @@ namespace OpenMod.Core.Permissions
                 LastDisplayName = actor.DisplayName,
                 LastSeen = DateTime.Now,
                 Data = new Dictionary<string, object>(),
-                Permissions = new List<string>(),
+                Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
             };
 
             m_PermissionFileManager.UsersData.Users.Add(userData);

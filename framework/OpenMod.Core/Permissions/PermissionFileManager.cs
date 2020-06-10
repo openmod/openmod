@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,27 +37,24 @@ namespace OpenMod.Core.Permissions
                                 Id = "default",
                                 DisplayName = "Default",
                                 Priority = 0,
-                                Parents = new List<string>(),
-                                Permissions = new List<string>
+                                Permissions = new HashSet<string>
                                 {
                                     "help"
                                 },
-                                Data = new Dictionary<string, object>(),
                                 IsAutoAssigned = true
                             },
                             new PermissionGroupData
                             {
                                 Id = "vip",
                                 Priority = 1,
-                                Parents = new List<string>
+                                Parents = new HashSet<string>
                                 {
                                     "default"
                                 },
-                                Permissions = new List<string>
+                                Permissions = new HashSet<string>
                                 {
                                     "kit"
                                 },
-                                Data = new Dictionary<string, object>(),
                                 IsAutoAssigned = false
                             }
                         }

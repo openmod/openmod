@@ -30,15 +30,9 @@ namespace OpenMod.Core.Permissions
             m_PermissionCheckProviders = new List<IPermissionCheckProvider>();
         }
 
-        public IReadOnlyCollection<IPermissionCheckProvider> PermissionCheckProviders
-        {
-            get { return m_PermissionCheckProviders; }
-        }
+        public IReadOnlyCollection<IPermissionCheckProvider> PermissionCheckProviders => m_PermissionCheckProviders;
 
-        public IReadOnlyCollection<IPermissionStore> PermissionStores
-        {
-            get { return m_PermissionSources; }
-        }
+        public IReadOnlyCollection<IPermissionStore> PermissionStores => m_PermissionSources;
 
         public async Task<PermissionGrantResult> CheckPermissionAsync(IPermissionActor actor, string permission)
         {
@@ -73,25 +67,29 @@ namespace OpenMod.Core.Permissions
         {
             foreach (var permissionCheckProvider in m_PermissionCheckProviders)
             {
-                if (permissionCheckProvider is IAsyncDisposable asyncDisposable)
+                switch (permissionCheckProvider)
                 {
-                    await asyncDisposable.DisposeAsync();
-                }
-                else if (permissionCheckProvider is IDisposable disposable)
-                {
-                    disposable.Dispose();
+                    case IAsyncDisposable asyncDisposable:
+                        await asyncDisposable.DisposeAsync();
+                        break;
+
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
                 }
             }
 
             foreach (var permissionSource in m_PermissionSources)
             {
-                if (permissionSource is IAsyncDisposable asyncDisposable)
+                switch (permissionSource)
                 {
-                    await asyncDisposable.DisposeAsync();
-                }
-                else if (permissionSource is IDisposable disposable)
-                {
-                    disposable.Dispose();
+                    case IAsyncDisposable asyncDisposable:
+                        await asyncDisposable.DisposeAsync();
+                        break;
+
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
                 }
             }
         }

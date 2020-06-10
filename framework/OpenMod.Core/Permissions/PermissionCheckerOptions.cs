@@ -19,15 +19,9 @@ namespace OpenMod.Core.Permissions
             m_PriorityComparer = new PriorityComparer(PriortyComparisonMode.HighestFirst);
         }
 
-        public IReadOnlyCollection<Type> PermissionCheckProviders
-        {
-            get { return m_PermissionCheckProviderTypes; }
-        }
+        public IReadOnlyCollection<Type> PermissionCheckProviders => m_PermissionCheckProviderTypes;
 
-        public IReadOnlyCollection<Type> PermissionSources
-        {
-            get { return m_PermissionSourceTypes; }
-        }
+        public IReadOnlyCollection<Type> PermissionSources => m_PermissionSourceTypes;
 
         public void AddPermissionCheckProvider<TProvider>() where TProvider: IPermissionCheckProvider
         {

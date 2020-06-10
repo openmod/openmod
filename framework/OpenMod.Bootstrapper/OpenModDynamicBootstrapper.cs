@@ -22,14 +22,14 @@ namespace OpenMod.Bootstrapper
     {
         public const string DefaultNugetRepository = "https://api.nuget.org/v3/index.json";
 
-        public async Task BootstrapAsync(
+        public Task BootstrapAsync(
             string openModFolder,
             string[] commandLineArgs,
             string packageId,
             bool allowPrereleaseVersions = false,
             ILogger logger = null)
         {
-            await BootstrapAsync(openModFolder, commandLineArgs, new List<string> { packageId }, allowPrereleaseVersions, logger);
+            return BootstrapAsync(openModFolder, commandLineArgs, new List<string> { packageId }, allowPrereleaseVersions, logger);
         }
 
         public void Bootstrap(string openModFolder,
@@ -48,7 +48,7 @@ namespace OpenMod.Bootstrapper
             bool allowPrereleaseVersions = false,
             ILogger logger = null)
         {
-            bool shouldAutoUpdate = false;
+            var shouldAutoUpdate = false;
             if (!commandLineArgs.Any(arg => arg.Equals("-NoOpenModAutoUpdate", StringComparison.InvariantCultureIgnoreCase)))
             {
                 if (!bool.TryParse(Environment.GetEnvironmentVariable("OpenMod__AutoUpdate"), out shouldAutoUpdate))
@@ -66,10 +66,9 @@ namespace OpenMod.Bootstrapper
                 Directory.CreateDirectory(packagesDirectory);
             }
 
-            var nugetInstaller = new NuGetPackageManager(packagesDirectory);
-            nugetInstaller.Logger = logger;
+            var nugetInstaller = new NuGetPackageManager(packagesDirectory) {Logger = logger};
 
-            List<Assembly> hostAssemblies = new List<Assembly>();
+            var hostAssemblies = new List<Assembly>();
             foreach (var packageId in packageIds)
             {
                 PackageIdentity packageIdentity;
@@ -114,10 +113,11 @@ namespace OpenMod.Bootstrapper
             await InitializeRuntimeAsync(hostAssemblies, openModFolder, commandLineArgs);
         }
 
-        private async Task<IEnumerable<Assembly>> LoadPackageAsync(NuGetPackageManager packageManager, PackageIdentity identity)
+        // ReSharper disable once MemberCanBeMadeStatic.Local
+        private Task<IEnumerable<Assembly>> LoadPackageAsync(NuGetPackageManager packageManager, PackageIdentity identity)
         {
             var pkg = packageManager.GetNugetPackageFile(identity);
-            return await packageManager.LoadAssembliesFromNuGetPackageAsync(pkg);
+            return packageManager.LoadAssembliesFromNuGetPackageAsync(pkg);
         }
 
         private Task InitializeRuntimeAsync(List<Assembly> hostAssemblies, string workingDirectory, string[] commandlineArgs)
@@ -133,19 +133,21 @@ namespace OpenMod.Bootstrapper
             SetParameter(parameters, "CommandlineArgs", commandlineArgs);
             
             var initMethod = runtimeType.GetMethod("InitAsync", BindingFlags.Instance | BindingFlags.Public);
-            return (Task) initMethod.Invoke(runtime, new object[] {  hostAssemblies, null /* hostBuilder */, parameters});
+            return (Task) initMethod?.Invoke(runtime, new[] {  hostAssemblies, null /* hostBuilder */, parameters});
         }
 
+        // ReSharper disable once MemberCanBeMadeStatic.Local
         private Assembly FindAssemblyInCurrentDomain(string name)
         {
             return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(d => d.GetName().Name.Equals(name)) ??
                    throw new Exception($"Failed to find assembly: {name}");
         }
 
+        // ReSharper disable once MemberCanBeMadeStatic.Local
         private void SetParameter(object parametersObject, string name, object value)
         {
             var field = parametersObject.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
-            field.SetValue(parametersObject, value);
+            field?.SetValue(parametersObject, value);
         }
     }
 }

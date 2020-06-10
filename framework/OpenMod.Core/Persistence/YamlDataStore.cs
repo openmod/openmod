@@ -18,11 +18,7 @@ namespace OpenMod.Core.Persistence
 
         public YamlDataStore(string basePath, string suffix = ".data")
         {
-            if (string.IsNullOrEmpty(suffix))
-            {
-                suffix = string.Empty;
-            }
-
+            suffix ??= string.Empty;
             m_BasePath = basePath;
             m_Suffix = suffix;
             m_Serializer = new SerializerBuilder()
@@ -34,15 +30,15 @@ namespace OpenMod.Core.Persistence
                 .Build();
         }
 
-        public virtual async Task SaveAsync<T>(string key, T data) where T : class
+        public virtual Task SaveAsync<T>(string key, T data) where T : class
         {
             CheckKeyValid(key);
             
             var serializedYaml = m_Serializer.Serialize(data);
-            byte[] encodedData = Encoding.UTF8.GetBytes(serializedYaml);
+            var encodedData = Encoding.UTF8.GetBytes(serializedYaml);
             var filePath = GetFilePathForKey(key);
-            using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
-            await fileStream.WriteAsync(encodedData, 0, encodedData.Length);
+            using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
+            return fileStream.WriteAsync(encodedData, 0, encodedData.Length);
         }
 
         public Task<bool> ExistsAsync(string key)
@@ -74,17 +70,17 @@ namespace OpenMod.Core.Persistence
         {
             if (string.IsNullOrEmpty(key))
             {
-                throw new Exception(message: $"Invalid data store key: {key}. Key can not be null or empty.");
+                throw new Exception($"Invalid data store key: {key}. Key can not be null or empty.");
             }
 
             if (!char.IsLetter(key[0]))
             {
-                throw new Exception(message: $"Invalid data store key: {key}. Key must begin with a letter.");
+                throw new Exception($"Invalid data store key: {key}. Key must begin with a letter.");
             }
 
             if (!key.All(d => char.IsLetterOrDigit(d) || d == '.'))
             {
-                throw new Exception(message: $"Invalid data store key: {key}. Key can only consist of alphanumeric characters and dot");
+                throw new Exception($"Invalid data store key: {key}. Key can only consist of alphanumeric characters and dot");
             }
         }
 
