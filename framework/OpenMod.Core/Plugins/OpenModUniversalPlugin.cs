@@ -11,6 +11,7 @@ namespace OpenMod.Core.Plugins
 
         public sealed override Task LoadAsync()
         {
+            base.LoadAsync();
             return OnLoadAsync();
         }
 
@@ -21,6 +22,7 @@ namespace OpenMod.Core.Plugins
 
         public sealed override Task UnloadAsync()
         {
+            base.UnloadAsync();
             return OnUnloadAsync();
         }
 

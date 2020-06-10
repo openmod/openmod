@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,10 +25,11 @@ namespace OpenMod.Unturned
         private readonly Harmony m_Harmony;
         private const string HarmonyInstanceId = "com.get-openmod.unturned";
 
-        public OpenModUnturnedHost(IRuntime runtime)
+        public OpenModUnturnedHost(IRuntime runtime, ILifetimeScope lifetimeScope)
         {
             m_Harmony = new Harmony(HarmonyInstanceId);
             WorkingDirectory = runtime.WorkingDirectory;
+            LifetimeScope = lifetimeScope;
         }
 
         public Task InitAsync()
@@ -79,5 +81,6 @@ namespace OpenMod.Unturned
         public string OpenModComponentId { get; } = "OpenMod.Unturned";
         public string WorkingDirectory { get; }
         public bool IsComponentAlive { get; private set; }
+        public ILifetimeScope LifetimeScope { get; }
     }
 }

@@ -11,7 +11,7 @@ namespace OpenMod.API
     ///     Defines the OpenMod Runtime. This class is responsible for initializing OpenMod.
     /// </summary>
     [Service]
-    public interface IRuntime
+    public interface IRuntime : IOpenModComponent
     {
         /// <summary>
         ///     Initializes the runtime.
@@ -30,11 +30,6 @@ namespace OpenMod.API
         SemVersion Version { get; }
 
         /// <summary>
-        ///    Path to the OpenMod directory.
-        /// </summary>
-        string WorkingDirectory { get; }
-
-        /// <summary>
         ///    Commandline arguments.
         /// </summary>
         string[] CommandlineArgs { get; }
@@ -43,7 +38,6 @@ namespace OpenMod.API
         ///    The runtime status.
         /// </summary>
         RuntimeStatus Status { get; }
-
     }
 
     public enum RuntimeStatus

@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 using Autofac;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
+using OpenMod.Core.Commands;
 using Semver;
 
 namespace OpenMod.Core.Plugins
@@ -24,13 +26,16 @@ namespace OpenMod.Core.Plugins
         public ILifetimeScope LifetimeScope { get; }
         public IConfiguration Configuration { get; set; }
 
+        private readonly IOptions<CommandExecutorOptions> m_CommandExecutorOptions;
+        private OpenModComponentCommandSource m_CommandSource;
         protected OpenModPluginBase(IServiceProvider serviceProvider)
         {
             LifetimeScope = serviceProvider.GetRequiredService<ILifetimeScope>();
             Configuration = serviceProvider.GetRequiredService<IConfiguration>();
             DataStore = serviceProvider.GetRequiredService<IDataStore>();
             Runtime = serviceProvider.GetRequiredService<IRuntime>();
-
+            m_CommandExecutorOptions = serviceProvider.GetRequiredService<IOptions<CommandExecutorOptions>>();
+            
             var metadata = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>();
             OpenModComponentId = metadata.Id;
             Version = metadata.Version;
@@ -39,10 +44,19 @@ namespace OpenMod.Core.Plugins
             WorkingDirectory = PluginHelper.GetWorkingDirectory(Runtime, metadata.Id);
         }
 
+        public virtual Task LoadAsync()
+        {
+            m_CommandSource = new OpenModComponentCommandSource(this);
+            m_CommandExecutorOptions.Value.AddCommandSource(m_CommandSource);
 
-        public abstract Task LoadAsync();
+            return Task.CompletedTask;
+        }
 
-        public abstract Task UnloadAsync();
+        public virtual Task UnloadAsync()
+        {
+            m_CommandExecutorOptions.Value.RemoveCommandSource(m_CommandSource);
+            return Task.CompletedTask;
+        }
 
         public async ValueTask DisposeAsync()
         {

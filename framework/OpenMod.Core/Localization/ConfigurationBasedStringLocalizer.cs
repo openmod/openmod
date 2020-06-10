@@ -1,17 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.Localization;
 using SmartFormat;
 
 namespace OpenMod.Core.Localization
 {
-    public class ConfigurationStringLocalizer : IStringLocalizer
+    public class ConfigurationBasedStringLocalizerFactory : IStringLocalizerFactory
+    {
+        public IStringLocalizer Create(Type resourceSource)
+        {
+            throw new NotSupportedException("Please use Create(baseName, location) instead!");
+        }
+
+        public IStringLocalizer Create(string baseName, string location)
+        {
+            var translations = new ConfigurationBuilder()
+                .SetBasePath(location)
+                .AddYamlFile(baseName + ".yml", true)
+                .Build();
+
+            return new ConfigurationBasedStringLocalizer(translations);
+        }
+    }
+
+    public class ConfigurationBasedStringLocalizer : IStringLocalizer
     {
         private readonly IConfiguration m_Configuration;
 
-        public ConfigurationStringLocalizer(IConfiguration configuration)
+        public ConfigurationBasedStringLocalizer(IConfiguration configuration)
         {
             m_Configuration = configuration;
         }

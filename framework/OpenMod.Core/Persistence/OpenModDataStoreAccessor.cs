@@ -13,7 +13,7 @@ namespace OpenMod.Core.Persistence
     {
         public OpenModDataStoreAccessor(IDataStoreFactory dataStoreFactory, IRuntime runtime)
         {
-            DataStore = dataStoreFactory.CreateDataStore(runtime.WorkingDirectory);
+            DataStore = dataStoreFactory.CreateDataStore(runtime.OpenModComponentId, runtime.WorkingDirectory);
         }
 
         public IDataStore DataStore { get; }

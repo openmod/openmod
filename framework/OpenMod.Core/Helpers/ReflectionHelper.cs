@@ -124,12 +124,12 @@ namespace OpenMod.Core.Helpers
 
         public static IEnumerable<Type> FindTypes<T>(this Assembly @object, bool includeAbstractAndInterfaces = false)
         {
-            return FindAllTypes(@object).Where(c => typeof(T).IsAssignableFrom(c));
+            return FindAllTypes(@object, includeAbstractAndInterfaces).Where(c => typeof(T).IsAssignableFrom(c));
         }
 
-        public static IEnumerable<Type> GetTypesWithInterface<TInterface>(this Assembly assembly)
+        public static IEnumerable<Type> GetTypesWithInterface<TInterface>(this Assembly assembly, bool includeAbstractAndInterfaces)
         {
-            return assembly.FindAllTypes().Where(t => typeof(TInterface).IsAssignableFrom(t));
+            return assembly.FindAllTypes(includeAbstractAndInterfaces).Where(t => typeof(TInterface).IsAssignableFrom(t));
         }
 
         public static Dictionary<string, string> GetAssembliesFromDirectory(

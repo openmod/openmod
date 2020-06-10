@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -17,8 +16,6 @@ using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
-using OpenMod.Core.Localization;
-using OpenMod.Core.Persistence;
 
 namespace OpenMod.Core.Plugins
 {
@@ -28,17 +25,20 @@ namespace OpenMod.Core.Plugins
     {
         private readonly IRuntime m_Runtime;
         private readonly ILogger<PluginActivator> m_Logger;
+        private readonly IStringLocalizerFactory m_StringLocalizerFactory;
         private readonly ILifetimeScope m_LifetimeScope;
         private readonly IDataStoreFactory m_DataStoreFactory;
 
         public PluginActivator(
             IRuntime runtime,
             ILogger<PluginActivator> logger,
+            IStringLocalizerFactory stringLocalizerFactory,
             ILifetimeScope lifetimeScope,
             IDataStoreFactory dataStoreFactory)
         {
             m_Runtime = runtime;
             m_Logger = logger;
+            m_StringLocalizerFactory = stringLocalizerFactory;
             m_LifetimeScope = lifetimeScope;
             m_DataStoreFactory = dataStoreFactory;
         }
@@ -94,26 +94,19 @@ namespace OpenMod.Core.Plugins
 
                     containerBuilder.RegisterType(pluginType)
                         .As(pluginType)
+                        .As<IOpenModPlugin>()
                         .SingleInstance();
 
-                    containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(workingDirectory))
+                    containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(pluginMetadata.Id, workingDirectory))
                         .As<IDataStore>()
                         .SingleInstance()
                         .OwnedByLifetimeScope();
 
-                    if (File.Exists(Path.Combine(workingDirectory, "translations.yml")))
-                    {
-                        var translations = new ConfigurationBuilder()
-                            .SetBasePath(workingDirectory)
-                            .AddYamlFile("translations.yml")
-                            .Build();
-
-                        var stringLocalizer = new ConfigurationStringLocalizer(translations);
-                        containerBuilder.Register(context => stringLocalizer)
-                            .As<IStringLocalizer>()
-                            .SingleInstance()
-                            .OwnedByLifetimeScope();
-                    }
+                    var stringLocalizer = m_StringLocalizerFactory.Create("translations", workingDirectory);
+                    containerBuilder.Register(context => stringLocalizer)
+                        .As<IStringLocalizer>()
+                        .SingleInstance()
+                        .OwnedByLifetimeScope();
                 });
 
                 pluginInstance = (IOpenModPlugin) lifetimeScope.Resolve(pluginType);

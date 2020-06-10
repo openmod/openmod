@@ -1,4 +1,6 @@
-﻿namespace OpenMod.API
+﻿using Autofac;
+
+namespace OpenMod.API
 {
     /// <summary>
     ///     Defines an OpenMod component
@@ -10,5 +12,7 @@
         string WorkingDirectory { get; }
         
         bool IsComponentAlive { get; }
+
+        ILifetimeScope LifetimeScope { get; }
     }
 }

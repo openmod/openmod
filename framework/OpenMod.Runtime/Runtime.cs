@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -29,8 +28,8 @@ namespace OpenMod.Runtime
         public Runtime()
         {
             Assembly runtimeAssembly = typeof(Runtime).Assembly;
-            string version = runtimeAssembly.GetName().Version.ToString();
-            Version = SemVersion.Parse(version);
+            var version = runtimeAssembly.GetName().Version;
+            Version = new SemVersion(version.Major, version.Minor, version.Build, build: version.Revision != 0 ? version.Revision.ToString() : "");
         }
 
         public string WorkingDirectory { get; private set; }
@@ -109,6 +108,7 @@ namespace OpenMod.Runtime
 
                 m_Host = hostBuilder.Build();
                 Status = RuntimeStatus.Initialized;
+                LifetimeScope = m_Host.Services.GetRequiredService<ILifetimeScope>();
                 await m_Host.RunAsync();
                 m_Logger.LogInformation("OpenMod has shut down.");
                 Status = RuntimeStatus.Unloaded;
@@ -192,6 +192,8 @@ namespace OpenMod.Runtime
         {
             get { return Status != RuntimeStatus.Unloaded && Status != RuntimeStatus.Crashed; }
         }
+
+        public ILifetimeScope LifetimeScope { get; private set; }
 
         public RuntimeStatus Status { get; private set; } = RuntimeStatus.Unloaded;
     }

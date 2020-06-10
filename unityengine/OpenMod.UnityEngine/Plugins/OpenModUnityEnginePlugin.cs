@@ -14,6 +14,7 @@ namespace OpenMod.UnityEngine.Plugins
 
         public sealed override async Task LoadAsync()
         {
+            await base.LoadAsync();
             await OnLoadAsync();
         }
 
@@ -24,6 +25,7 @@ namespace OpenMod.UnityEngine.Plugins
 
         public sealed override async Task UnloadAsync()
         {
+            await base.UnloadAsync();
             await OnUnloadAsync();
         }
 

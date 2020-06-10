@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
+using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 
@@ -13,13 +16,21 @@ namespace OpenMod.Standalone
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class StandaloneHost : IOpenModHost
     {
+        private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly IRuntime m_Runtime;
+        private readonly ICommandExecutor m_CommandExecutor;
 
-        // todo: add commandhandler
-        public StandaloneHost(IRuntime runtime)
+        public StandaloneHost(
+            IConsoleActorAccessor consoleActorAccessor,
+            IRuntime runtime, 
+            ICommandExecutor commandExecutor,
+            ILifetimeScope lifetimeScope)
         {
+            m_ConsoleActorAccessor = consoleActorAccessor;
             m_Runtime = runtime;
+            m_CommandExecutor = commandExecutor;
             WorkingDirectory = runtime.WorkingDirectory;
+            LifetimeScope = lifetimeScope;
         }
 
         public Task InitAsync()
@@ -43,9 +54,7 @@ namespace OpenMod.Standalone
 
                 try
                 {
-                    // todo: handle commands
-                    //if (!await cmdHandler.HandleCommandAsync(Console, line, ""))
-                    //    Console.WriteLine("Command not found: " + line);
+                    await m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, line.Split(' ').ToArray(), string.Empty);
                     Console.ForegroundColor = ConsoleColor.Gray;
                     Console.Write("> ");
                     Console.ForegroundColor = ConsoleColor.White;
@@ -66,5 +75,6 @@ namespace OpenMod.Standalone
         public string OpenModComponentId { get; } = "OpenMod.Standalone";
         public string WorkingDirectory { get; }
         public bool IsComponentAlive { get; private set; }
+        public ILifetimeScope LifetimeScope { get; }
     }
 }
