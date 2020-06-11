@@ -26,6 +26,7 @@ namespace OpenMod.Core.Commands
 
         public OpenModComponentBoundCommandRegistration(IOpenModComponent component, MethodInfo methodInfo)
         {
+            Component = component;
             CommandMethod = methodInfo;
             ReadAttributes(methodInfo);
         }
@@ -48,7 +49,7 @@ namespace OpenMod.Core.Commands
             else
             {
                 // method based command
-                Id = CommandMethod.DeclaringType.FullName + "#" + Name;
+                Id = $"{CommandMethod.DeclaringType.FullName}.{CommandMethod.Name}";
             }
 
             m_CommandActorTypes = memberInfo.GetCustomAttribute<CommandActorAttribute>()?.CommandActorTypes ?? new[] {typeof(ICommandActor)};
@@ -58,13 +59,15 @@ namespace OpenMod.Core.Commands
             {
                 if (parent.CommandType != null)
                 {
-                    Id = parent.CommandType.FullName;
+                    ParentId = parent.CommandType.FullName;
                 }
                 else
                 {
-                    Id = parent.DeclaringType.FullName + "::" + Name;
+                    ParentId = $"{parent.DeclaringType.FullName}.{parent.MethodName}";
                 }
             }
+
+            Permission = Id;
         }
 
         public ILifetimeScope OwnerLifetimeScope
@@ -78,17 +81,17 @@ namespace OpenMod.Core.Commands
         public string Summary { get; set; }
         public string Description { get; set; }
         public Priority Priority { get; set; }
-        public ICollection<string> Aliases { get; set; }
+        public IReadOnlyCollection<string> Aliases { get; set; }
         public string ParentId { get; set; }
+        public string Permission { get; set; }
 
         public bool SupportsActor(ICommandActor actor)
         {
             return m_CommandActorTypes.Any(d => d.IsInstanceOfType(actor));
         }
 
-        public ICommand Instantiate(ILifetimeScope lifetimeScope)
+        public ICommand Instantiate(IServiceProvider serviceProvider)
         {
-            var serviceProvider = lifetimeScope.Resolve<IServiceProvider>();
             if (CommandType != null)
             {
                 return (ICommand)ActivatorUtilities.CreateInstance(serviceProvider, CommandType);

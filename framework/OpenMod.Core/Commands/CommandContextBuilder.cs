@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using Autofac;
+using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API.Commands;
+using OpenMod.API.Ioc;
+using OpenMod.API.Localization;
+using OpenMod.API.Prioritization;
+
+namespace OpenMod.Core.Commands
+{
+    [UsedImplicitly]
+    [ServiceImplementation(Lifetime = ServiceLifetime.Transient, Priority = Priority.Lowest)]
+    public class CommandContextBuilder : ICommandContextBuilder
+    {
+        private readonly IOpenModStringLocalizer m_StringLocalizer;
+        private readonly ILifetimeScope m_LifetimeScope;
+
+        public CommandContextBuilder(
+            IOpenModStringLocalizer stringLocalizer,
+            ILifetimeScope lifetimeScope)
+        {
+            m_StringLocalizer = stringLocalizer;
+            m_LifetimeScope = lifetimeScope;
+        }
+
+        public virtual CommandContext BuildContextTree(CommandContext currentContext, ICollection<ICommandRegistration> commandRegistrations)
+        {
+            if (currentContext.Parameters.Count == 0)
+            {
+                return currentContext;
+            }
+
+            var childCommandName = currentContext.Parameters.First();
+            var children = CommandRegistrationHelper.GetChildren(currentContext.CommandRegistration, commandRegistrations);
+            var childCommand = GetCommandRegistration(currentContext.Actor, childCommandName, children);
+            if (childCommand == null)
+            {
+                return currentContext;
+            }
+
+            var scope = childCommand.OwnerLifetimeScope.BeginLifetimeScope();
+            var childContext = new CommandContext(childCommand, scope, currentContext) { CommandRegistration = childCommand };
+            currentContext.ChildContext = childContext;
+
+            return BuildContextTree(childContext, commandRegistrations);
+        }
+
+        public ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, ICollection<ICommandRegistration> commandRegistrations)
+        {
+            var rootCommand = GetCommandRegistration(actor, args[0], commandRegistrations.Where(d => d.ParentId == null));
+            if (rootCommand == null)
+            {
+                var exceptionContext = new CommandContext(null, actor, args.First(), prefix,  args.Skip(1).ToList(), m_LifetimeScope.BeginLifetimeScope());
+                var localizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
+                exceptionContext.Exception = new CommandNotFoundException(localizer["commands:errors:not_found", new { CommandName = args[0], Args = args }]);
+                //await actor.PrintMessageAsync(Color.Red, exceptionContext.Exception.Message);
+                return exceptionContext;
+            }
+
+            var scope = rootCommand.OwnerLifetimeScope.BeginLifetimeScope();
+            var rootContext = new CommandContext(rootCommand, actor, args.First(), prefix, args.Skip(1).ToList(), scope);
+
+            return BuildContextTree(rootContext, commandRegistrations);
+        }
+
+        private ICommandRegistration GetCommandRegistration(ICommandActor actor, string name, IEnumerable<ICommandRegistration> commandRegistrations)
+        {
+            return commandRegistrations.FirstOrDefault(d => d.SupportsActor(actor) && d.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+}

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Autofac.Util;
+using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.Core.Helpers;
@@ -10,13 +10,20 @@ namespace OpenMod.Core.Commands
 {
     public class OpenModComponentCommandSource : ICommandSource
     {
+        private readonly ILogger m_Logger;
         private readonly IOpenModComponent m_OpenModComponent;
 
-        public OpenModComponentCommandSource(IOpenModComponent openModComponent)
+        public OpenModComponentCommandSource(ILogger logger, IOpenModComponent openModComponent) : this(logger, openModComponent, openModComponent.GetType().Assembly)
         {
+
+        }
+
+        public OpenModComponentCommandSource(ILogger logger, IOpenModComponent openModComponent, Assembly assembly)
+        {
+            m_Logger = logger;
             m_OpenModComponent = openModComponent;
             Commands = new List<ICommandRegistration>();
-            ScanAssemblyForCommmmands(openModComponent.GetType().Assembly);
+            ScanAssemblyForCommmmands(assembly);
         }
 
         private void ScanAssemblyForCommmmands(Assembly assembly)
@@ -24,6 +31,18 @@ namespace OpenMod.Core.Commands
             var types = assembly.GetTypesWithInterface<ICommand>(false);
             foreach (var type in types)
             {
+                if (type.GetCustomAttribute<IgnoreCommandAttribute>(false) != null)
+                {
+                    continue;
+                }
+
+                var commandAttribute = type.GetCustomAttribute<CommandAttribute>();
+                if (commandAttribute == null)
+                {
+                    m_Logger.LogWarning($"Type {type} is missing the [Command(string name)] attribute. Command will not be registered.");
+                    continue;
+                }
+
                 Commands.Add(new OpenModComponentBoundCommandRegistration(m_OpenModComponent, type));
             }
 

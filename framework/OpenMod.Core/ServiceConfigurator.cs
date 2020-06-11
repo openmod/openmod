@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using OpenMod.API.Ioc;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Localization;
@@ -22,7 +23,8 @@ namespace OpenMod.Core
 
             serviceCollection.Configure<CommandExecutorOptions>(options =>
             {
-                options.AddCommandSource(new OpenModComponentCommandSource(openModStartupContext.Runtime));
+                var logger = openModStartupContext.LoggerFactory.CreateLogger<OpenModComponentCommandSource>();
+                options.AddCommandSource(new OpenModComponentCommandSource(logger, openModStartupContext.Runtime, GetType().Assembly));
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();

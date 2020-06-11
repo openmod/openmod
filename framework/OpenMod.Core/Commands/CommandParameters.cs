@@ -46,7 +46,7 @@ namespace OpenMod.Core.Commands
 
             if (Length <= index)
             {
-                throw new CommandIndexOutOfRangeException(m_OpenModStringLocalizer["command:out_of_range_error", new { Index = index, Type = type, Length }], index, Length);
+                throw new CommandIndexOutOfRangeException(m_OpenModStringLocalizer["commands:errors:out_of_range_error", new { Index = index, Type = type, Length }], index, Length);
             }
 
             if (index < 0)
@@ -92,7 +92,7 @@ namespace OpenMod.Core.Commands
                 return converter.ConvertFromWithServiceContext(m_ServiceProvider, arg);
             }
 
-            throw new CommandParameterParseException(m_OpenModStringLocalizer["command:parse_error", new { Value = arg , Type = type}], arg, type);
+            throw new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:parse_error", new { Value = arg , Type = type}], arg, type);
         }
 
         /// <inheritdoc />
@@ -110,7 +110,15 @@ namespace OpenMod.Core.Commands
         public bool TryGet<T>(int index, out T value)
         {
             bool result = TryGet(index, typeof(T), out object tmp);
-            value = (T)tmp;
+            if (result)
+            {
+                value = (T) tmp;
+            }
+            else
+            {
+                value = default;
+            }
+
             return result;
         }
 

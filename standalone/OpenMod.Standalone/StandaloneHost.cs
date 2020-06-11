@@ -9,6 +9,7 @@ using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
+using OpenMod.Core.Helpers;
 
 namespace OpenMod.Standalone
 {
@@ -37,13 +38,17 @@ namespace OpenMod.Standalone
         {
             IsComponentAlive = true;
 
-            Task.Factory.StartNew(InputLoop);
+            //todo: listen for host ready event and dont use a separate thread
+            AsyncHelper.Schedule("InputLoop", InputLoop);
 
             return Task.CompletedTask;
         }
 
         private async Task InputLoop()
         {
+            //Console.WriteLine("Ready. Type \"help\" for help.");
+            //Console.Write("> ");
+
             string line;
             while (!(line = Console.ReadLine())?.Equals("exit", StringComparison.OrdinalIgnoreCase) ?? false)
             {
@@ -60,7 +65,6 @@ namespace OpenMod.Standalone
                     Console.ForegroundColor = ConsoleColor.White;
                 }
                 catch (Exception ex)
-
                 {
                     Console.WriteLine(ex.ToString(), Color.DarkRed);
                 }

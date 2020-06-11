@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.API.Persistence;
@@ -27,13 +28,16 @@ namespace OpenMod.Core.Plugins
         public IConfiguration Configuration { get; set; }
 
         private readonly IOptions<CommandExecutorOptions> m_CommandExecutorOptions;
+        private readonly ILoggerFactory m_LoggerFactory;
         private OpenModComponentCommandSource m_CommandSource;
+
         protected OpenModPluginBase(IServiceProvider serviceProvider)
         {
             LifetimeScope = serviceProvider.GetRequiredService<ILifetimeScope>();
             Configuration = serviceProvider.GetRequiredService<IConfiguration>();
             DataStore = serviceProvider.GetRequiredService<IDataStore>();
             Runtime = serviceProvider.GetRequiredService<IRuntime>();
+            m_LoggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
             m_CommandExecutorOptions = serviceProvider.GetRequiredService<IOptions<CommandExecutorOptions>>();
             
             var metadata = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>();
@@ -46,7 +50,8 @@ namespace OpenMod.Core.Plugins
 
         public virtual Task LoadAsync()
         {
-            m_CommandSource = new OpenModComponentCommandSource(this);
+            var logger = m_LoggerFactory.CreateLogger<OpenModComponentCommandSource>();
+            m_CommandSource = new OpenModComponentCommandSource(logger, this);
             m_CommandExecutorOptions.Value.AddCommandSource(m_CommandSource);
 
             return Task.CompletedTask;

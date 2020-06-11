@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace OpenMod.API.Commands
 {
-    public interface ICommandContext
+    public interface ICommandContext : IAsyncDisposable
     {
         /// <summary>
         ///     The parent command context for Child Commands.
@@ -72,15 +72,12 @@ namespace OpenMod.API.Commands
         /// </summary>
         ICommandParameters Parameters { get; }
 
-        /// <summary>
-        ///     Prints the command usage to the actor.
-        /// </summary>
-        Task PrintCommandUsageAsync();
-
         ICommandRegistration CommandRegistration { get; }
 
-        Exception Exception { get; }
+        Exception Exception { get; set; }
 
         Dictionary<string, object> Data { get; }
+
+        IServiceProvider ServiceProvider { get; }
     }
 }

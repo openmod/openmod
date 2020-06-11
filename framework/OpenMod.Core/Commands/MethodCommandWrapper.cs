@@ -5,6 +5,7 @@ using OpenMod.API.Commands;
 
 namespace OpenMod.Core.Commands
 {
+    [IgnoreCommand]
     public class MethodCommandWrapper : ICommand
     {
         private readonly MethodInfo m_MethodInfo;

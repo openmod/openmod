@@ -9,7 +9,7 @@ namespace OpenMod.API.Ioc
         IRuntime Runtime { get; }
         IConfigurationRoot Configuration { get; }
         IOpenModStartup OpenModStartup { get; }
-        ILoggerFactory LoggerFactory { get; }
         Dictionary<string, object> DataStore { get; }
+        ILoggerFactory LoggerFactory { get; }
     }
 }

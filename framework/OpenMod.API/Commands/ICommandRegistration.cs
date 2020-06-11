@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Autofac;
 using JetBrains.Annotations;
 using OpenMod.API.Prioritization;
@@ -30,7 +31,8 @@ namespace OpenMod.API.Commands
         /// <example>
         ///     If the aliases are "h" and "he", the command will be callable using "/h" or "/he".
         /// </example>
-        ICollection<string> Aliases { get; }
+        [CanBeNull]
+        IReadOnlyCollection<string> Aliases { get; }
 
         /// <summary>
         ///     The command summary.
@@ -39,6 +41,7 @@ namespace OpenMod.API.Commands
         /// <example>
         ///     <c>"This command heals you or someone else."</c>
         /// </example>
+        [CanBeNull]
         string Summary { get; }
 
         /// <summary>
@@ -47,6 +50,7 @@ namespace OpenMod.API.Commands
         ///         <b>This proprty can return null</b>.
         ///     </para>
         /// </summary>
+        [CanBeNull]
         string Description { get; }
 
         /// <summary>
@@ -64,15 +68,22 @@ namespace OpenMod.API.Commands
         /// <example>
         ///     <c>"[player] &lt;amount&gt;"</c>
         /// </example>
+        ///
+        [CanBeNull]
         string Syntax { get; }
 
-        string Id { get; set; }
+        string Id { get; }
+
         Priority Priority { get; set; }
 
         [CanBeNull]
         string ParentId { get; set; }
 
+        [CanBeNull]
+        string Permission { get; }
+
         bool SupportsActor(ICommandActor actor);
-        ICommand Instantiate(ILifetimeScope lifetimeScope);
+        
+        ICommand Instantiate(IServiceProvider serviceProvider);
     }
 }

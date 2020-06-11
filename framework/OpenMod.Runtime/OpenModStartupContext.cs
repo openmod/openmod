@@ -12,8 +12,8 @@ namespace OpenMod.Runtime
         public IRuntime Runtime { get; internal set; }
         public IConfigurationRoot Configuration { get; internal set; }
         public IOpenModStartup OpenModStartup { get; internal set; }
-        public ILoggerFactory LoggerFactory { get; internal set; }
         public NuGetPackageManager NuGetPackageManager { get; internal set; }
         public Dictionary<string, object> DataStore { get; internal set; }
+        public ILoggerFactory LoggerFactory { get; internal set; }
     }
 }

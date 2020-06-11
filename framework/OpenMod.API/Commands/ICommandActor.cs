@@ -6,6 +6,7 @@ namespace OpenMod.API.Commands
 {
     public interface ICommandActor : IPermissionActor
     {
-        Task PrintMessageAsync(Color color, string message);
+        Task PrintMessageAsync(string message);
+        Task PrintMessageAsync(string message, Color color);
     }
 }
