@@ -7,6 +7,7 @@ It's main purpose is to add plugin functionality to Unity games, but it could be
 OpenMod is based on modern C# code and best practices.
 - Modern API for plugin development with C# and Unity best practices
 - Plugin installation with [NuGet](https://nuget.org)
+- Can self update with NuGet
 - Based on [.NET Generic Host](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host)
 - IoC and Dependency Injection using Autofac
 - [UniTask](https://github.com/Cysharp/UniTask) integration for Unity based games
