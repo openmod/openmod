@@ -17,8 +17,10 @@ namespace OpenMod.Core.Users
     public class UsersDataStore : IUsersDataStore
     {
         public const string UsersKey = "users";
-
+        public List<UserData> Users { get; private set; }
+        
         private readonly IDataStore m_DataStore;
+        
         public UsersDataStore(IOpenModDataStoreAccessor dataStoreAccessor)
         {
             m_DataStore = dataStoreAccessor.DataStore;
@@ -29,7 +31,6 @@ namespace OpenMod.Core.Users
         {
             if (!await ExistsAsync())
             {
-                // no need for default users data
                 Users = new List<UserData>();
                 await SaveChangesAsync();
             }
@@ -39,8 +40,6 @@ namespace OpenMod.Core.Users
             }
         }
 
-        public List<UserData> Users { get; private set; }
-
         public async Task ReloadAsync()
         {
             Users = (await m_DataStore.LoadAsync<UsersData>(UsersKey))?.Users ?? new List<UserData>();
@@ -48,7 +47,7 @@ namespace OpenMod.Core.Users
 
         public Task SaveChangesAsync()
         {
-            return m_DataStore.SaveAsync(UsersKey, new UsersData() {  Users = Users });
+            return m_DataStore.SaveAsync(UsersKey, new UsersData {  Users = Users });
         }
 
         public Task<bool> ExistsAsync()

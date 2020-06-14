@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using OpenMod.API.Persistence;
+using Serilog;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -52,8 +53,13 @@ namespace OpenMod.Core.Persistence
             var serializedYaml = m_Serializer.Serialize(data);
             var encodedData = Encoding.UTF8.GetBytes(serializedYaml);
             var filePath = GetFilePathForKey(key);
-            using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
-            return fileStream.WriteAsync(encodedData, 0, encodedData.Length);
+
+            File.WriteAllBytes(filePath, encodedData);
+            return Task.CompletedTask;
+
+            //bug: the follow lines work on .NET Core / Framework but not on mono 
+            //using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
+            //return fileStream.WriteAsync(encodedData, 0, encodedData.Length);
         }
 
         public Task<bool> ExistsAsync(string key)
@@ -64,7 +70,7 @@ namespace OpenMod.Core.Persistence
             return Task.FromResult(File.Exists(filePath));
         }
 
-        public virtual async Task<T> LoadAsync<T>(string key) where T : class
+        public virtual Task<T> LoadAsync<T>(string key) where T : class
         {
             CheckKeyValid(key);
 
@@ -74,11 +80,14 @@ namespace OpenMod.Core.Persistence
                 return default;
             }
 
-            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize: 4096, useAsync: true);
-            var encodedData = new byte[stream.Length];
-            await stream.ReadAsync(encodedData, 0, (int)stream.Length);
+            // see SaveAsync for why this is commented
+            //using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize: 4096, useAsync: true);
+            //var encodedData = new byte[stream.Length];
+            //await stream.ReadAsync(encodedData, 0, (int)stream.Length);
+
+            var encodedData = File.ReadAllBytes(filePath);
             var serializedYaml = Encoding.UTF8.GetString(encodedData);
-            return m_Deserializer.Deserialize<T>(serializedYaml);
+            return Task.FromResult(m_Deserializer.Deserialize<T>(serializedYaml));
         }
 
         protected virtual void CheckKeyValid(string key)

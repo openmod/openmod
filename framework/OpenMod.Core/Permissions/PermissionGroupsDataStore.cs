@@ -74,7 +74,7 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task ReloadAsync()
         {
-            PermissionGroups = (await m_DataStore.LoadAsync<PermissionGroupsData>(GroupsKey)).PermissionGroups ?? new List<PermissionGroupData>();
+            PermissionGroups = (await m_DataStore.LoadAsync<PermissionGroupsData>(GroupsKey))?.PermissionGroups ?? new List<PermissionGroupData>();
         }
 
         public virtual Task SaveChangesAsync()
