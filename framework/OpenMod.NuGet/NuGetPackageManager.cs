@@ -22,8 +22,8 @@ namespace OpenMod.NuGet
         private ILogger m_Logger;
         public ILogger Logger
         {
-            get => m_Logger;
-            set => m_Logger = value ?? new NullLogger();
+            get { return m_Logger; }
+            set { m_Logger = value ?? new NullLogger(); }
         }
 
         public string PackagesDirectory { get; }
@@ -37,7 +37,7 @@ namespace OpenMod.NuGet
         private readonly Dictionary<string, List<CachedNuGetAssembly>> m_LoadedPackageAssemblies;
 
 
-        private static readonly Regex VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
+        private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
 
         public NuGetPackageManager(string packagesDirectory)
@@ -433,9 +433,9 @@ namespace OpenMod.NuGet
 
         protected static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
         {
-            var match = VersionRegex.Match(fullAssemblyName);
+            var match = s_VersionRegex.Match(fullAssemblyName);
             extractedVersion = match.Groups[1].Value;
-            return VersionRegex.Replace(fullAssemblyName, string.Empty);
+            return s_VersionRegex.Replace(fullAssemblyName, string.Empty);
         }
 
         public Task<bool> RemoveAsync(PackageIdentity package)

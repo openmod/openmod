@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using SDG.Framework.Modules;
 using HarmonyLib;
+using JetBrains.Annotations;
 
 namespace OpenMod.Unturned.Module
 {
@@ -28,10 +29,12 @@ namespace OpenMod.Unturned.Module
             InstallTlsWorkaround();
             InstallAssemblyResolver();
 
-            var assemblyLocation = selfAssembly.Location;
+            var assemblyLocation = selfAssembly.Location; 
             var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
 
-            foreach (var file in Directory.GetFiles(assemblyDirectory ?? throw new InvalidOperationException()))
+
+            // ReSharper disable once AssignNullToNotNullAttribute
+            foreach (var file in Directory.GetFiles(assemblyDirectory))
             {
                 if (file.EndsWith(".dll"))
                 {
@@ -42,15 +45,17 @@ namespace OpenMod.Unturned.Module
             OpenModInitializer.Initialize();
         }
 
-        // ReSharper disable once MemberCanBeMadeStatic.Local
+        
         private void InstallNewtonsoftJson()
         {
             var managedDir = Path.GetDirectoryName(typeof(IModuleNexus).Assembly.Location);
             var openModDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            var unturnedNewtonsoftFile = Path.GetFullPath(Path.Combine(managedDir ?? throw new InvalidOperationException(), "Newtonsoft.Json.dll"));
+            // ReSharper disable once AssignNullToNotNullAttribute
+            var unturnedNewtonsoftFile = Path.GetFullPath(Path.Combine(managedDir, "Newtonsoft.Json.dll"));
             var newtonsoftBackupFile = unturnedNewtonsoftFile + ".bak";
-            var openModNewtonsoftFile = Path.GetFullPath(Path.Combine(openModDir ?? throw new InvalidOperationException(), "Newtonsoft.Json.dll"));
+            var openModNewtonsoftFile = Path.GetFullPath(Path.Combine(openModDir, "Newtonsoft.Json.dll"));
+            // ReSharper restore once AssignNullToNotNullAttribute
 
             const string runtimeSerialization = "System.Runtime.Serialization.dll";
             var unturnedRuntimeSerialization = Path.GetFullPath(Path.Combine(managedDir, runtimeSerialization));
@@ -139,13 +144,13 @@ namespace OpenMod.Unturned.Module
         }
 
 
-        private static readonly Regex VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
+        private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
 
         protected static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
         {
-            var match = VersionRegex.Match(fullAssemblyName);
+            var match = s_VersionRegex.Match(fullAssemblyName);
             extractedVersion = match.Groups[1].Value;
-            return VersionRegex.Replace(fullAssemblyName, string.Empty);
+            return s_VersionRegex.Replace(fullAssemblyName, string.Empty);
         }
 
         public void LoadAssembly(string dllName)

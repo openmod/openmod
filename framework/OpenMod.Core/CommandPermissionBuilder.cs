@@ -48,10 +48,16 @@ namespace OpenMod.Core
             return permission;
         }
 
-        // ReSharper disable once MemberCanBeMadeStatic.Local
+
         private ICommandRegistration GetParentCommand(ICommandRegistration registration, IEnumerable<ICommandRegistration> commands)
         {
-            return !string.IsNullOrWhiteSpace(registration.ParentId) ? commands.FirstOrDefault(d => d.Id.Equals(registration.ParentId, StringComparison.OrdinalIgnoreCase)) : null;
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (registration.ParentId == null)
+            {
+                return null;
+            }
+
+            return commands.FirstOrDefault(d => d.Id.Equals(registration.ParentId, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

@@ -16,8 +16,14 @@ namespace OpenMod.Unturned.Commands
         public string DisplayName { get; }
 
 
-        public string Id => SteamId.ToString();
-        public string Type => KnownUserTypes.Player;
+        public string Id
+        {
+            get { return SteamId.ToString(); }
+        }
+        public string Type
+        {
+            get { return KnownActorTypes.Player; }
+        }
 
 
         public Dictionary<string, object> Data { get; } = new Dictionary<string, object>();

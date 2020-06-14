@@ -1,6 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
+using System.Resources;
 using System.Text.RegularExpressions;
 
 namespace OpenMod.Core.Helpers
@@ -24,7 +24,7 @@ namespace OpenMod.Core.Helpers
                 }
 
                 using var stream = assembly.GetManifestResourceStream(resourceName);
-                using var reader = new StreamReader(stream ?? throw new InvalidOperationException());
+                using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException($"Couldn't find resource: {resourceName}"));
 
                 var fileContent = reader.ReadToEnd();
                 File.WriteAllText(filePath, fileContent);

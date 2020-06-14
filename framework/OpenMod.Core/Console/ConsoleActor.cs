@@ -2,12 +2,12 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using OpenMod.API.Console;
+using OpenMod.API.Commands;
 using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Console
 {
-    public class ConsoleActor : IConsoleActor
+    public class ConsoleActor : ICommandActor
     {
         public bool IsGameConsole { get; }
 
@@ -22,7 +22,7 @@ namespace OpenMod.Core.Console
         }
 
         public string Id { get; }
-        public string Type { get; } = KnownUserTypes.Console;
+        public string Type { get; } = KnownActorTypes.Console;
         public Dictionary<string, object> Data { get; } = new Dictionary<string, object>();
         public string DisplayName { get; } = "Console";
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
@@ -171,7 +172,7 @@ namespace OpenMod.Runtime
             AsyncHelper.RunSync(() => startup.CompleteServiceRegistrationsAsync(services));
         }
 
-        // ReSharper disable once MemberCanBeMadeStatic.Local
+        
         private void SetupContainer(ContainerBuilder containerBuilder, OpenModStartup startup)
         {
             AsyncHelper.RunSync(() => startup.CompleteContainerRegistrationAsync(containerBuilder));
@@ -184,7 +185,7 @@ namespace OpenMod.Runtime
             {
                 // First run, logging.yml doesn't exist yet. We can not wait for auto-copy as it would be too late.
                 using var stream = typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yml");
-                using var reader = new StreamReader(stream ?? throw new InvalidOperationException());
+                using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException("Couldn't find resource: OpenMod.Core.logging.yml"));
 
                 var fileContent = reader.ReadToEnd();
                 File.WriteAllText(loggingPath, fileContent);
