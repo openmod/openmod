@@ -51,9 +51,6 @@ framework | standalone | unityengine | unturned
 - [x] Persistent Datastore
 - [x] Permissions implementations
 - [x] Command framework
-- [ ] Users
-- [ ] Economy interfaces
-- [ ] Players / Entities
 - [ ] Framework and Unturned events implementation
 - [ ] RM 4 Bridge
 - [ ] Release
