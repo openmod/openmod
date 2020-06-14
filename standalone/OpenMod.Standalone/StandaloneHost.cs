@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +7,7 @@ using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
+using OpenMod.Core.Console;
 using OpenMod.Core.Helpers;
 using Semver;
 
@@ -20,6 +17,7 @@ namespace OpenMod.Standalone
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class StandaloneHost : IOpenModHost
     {
+        //todo remove if not used
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly IRuntime m_Runtime;
         private readonly ICommandExecutor m_CommandExecutor;

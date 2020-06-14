@@ -7,6 +7,6 @@ namespace OpenMod.API.Commands
     public interface ICommandPermissionBuilder
     {
         string GetPermission(ICommandRegistration registration);
-        string GetPermission(ICommandRegistration registration, IEnumerable<ICommandRegistration> commands);
+        string GetPermission(ICommandRegistration registration, IReadOnlyCollection<ICommandRegistration> commands);
     }
 }

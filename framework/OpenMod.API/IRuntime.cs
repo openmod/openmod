@@ -41,18 +41,4 @@ namespace OpenMod.API
         /// </summary>
         RuntimeStatus Status { get; }
     }
-
-    public enum RuntimeStatus
-    {
-        Initializing,
-        Initialized,
-        Unloaded,
-        Crashed
-    }
-
-    public class RuntimeInitParameters
-    {
-        public string WorkingDirectory;
-        public string[] CommandlineArgs;
-    }
 }

@@ -50,7 +50,7 @@ namespace OpenMod.Core.Permissions
             return PermissionGrantResult.Default;
         }
 
-        // ReSharper disable once MemberCanBeMadeStatic.Local
+        
         private bool CheckPermissionEquals(string input, string permission)
         {
             return input.Equals(permission, StringComparison.OrdinalIgnoreCase);

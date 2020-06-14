@@ -44,7 +44,7 @@ namespace OpenMod.API.Commands
         /// <summary>
         ///     The full description of the command.
         ///     <para>
-        ///         <b>This proprty can return null</b>.
+        ///         <b>This property can return null</b>.
         ///     </para>
         /// </summary>
         [CanBeNull]

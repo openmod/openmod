@@ -25,14 +25,13 @@ namespace OpenMod.Core.Helpers
 
         public static MethodBase GetCallingMethod(Type[] skipTypes = null, MethodBase[] skipMethods = null, bool applyAsyncMethodPatch = true)
         {
-            var skipList = new List<Type>(skipTypes ?? new Type[0]);
-            skipList.Add(typeof(ReflectionExtensions));
+            var skipList = new List<Type>(skipTypes ?? new Type[0]) {typeof(ReflectionExtensions)};
 
-            StackTrace st = new StackTrace();
-            StackFrame frameTarget = null;
-            for (int i = 0; i < st.FrameCount; i++)
+            var st = new StackTrace();
+            var frameTarget = (StackFrame)null;
+            for (var i = 0; i < st.FrameCount; i++)
             {
-                StackFrame frame = st.GetFrame(i);
+                var frame = st.GetFrame(i);
                 var frameMethod = frame.GetMethod();
                 if (frameMethod == null)
                     continue;
@@ -82,11 +81,11 @@ namespace OpenMod.Core.Helpers
 
         public static MethodBase GetCallingMethod(params Assembly[] skipAssemblies)
         {
-            StackTrace st = new StackTrace();
-            StackFrame frameTarget = null;
-            for (int i = 0; i < st.FrameCount; i++)
+            var st = new StackTrace();
+            var frameTarget = (StackFrame)null;
+            for (var i = 0; i < st.FrameCount; i++)
             {
-                StackFrame frame = st.GetFrame(i);
+                var frame = st.GetFrame(i);
                 if (skipAssemblies.Any(c => Equals(c, frame.GetMethod()?.DeclaringType?.Assembly)))
                     continue;
 
@@ -98,7 +97,7 @@ namespace OpenMod.Core.Helpers
 
         public static IEnumerable<Type> GetTypeHierarchy(this Type type)
         {
-            List<Type> types = new List<Type> { type };
+            var types = new List<Type> { type };
             while ((type = type.BaseType) != null)
             {
                 types.Add(type);
@@ -136,18 +135,17 @@ namespace OpenMod.Core.Helpers
         public static Dictionary<string, string> GetAssembliesFromDirectory(
             string directory, string extension = "*.dll")
         {
-            Dictionary<string, string> l = new Dictionary<string, string>();
-            IEnumerable<FileInfo> assemblyFiles =
-                new DirectoryInfo(directory).GetFiles(extension, SearchOption.AllDirectories);
-            foreach (FileInfo assemblyFile in assemblyFiles)
+            var l = new Dictionary<string, string>();
+            IEnumerable<FileInfo> assemblyFiles = new DirectoryInfo(directory).GetFiles(extension, SearchOption.AllDirectories);
+            foreach (var assemblyFile in assemblyFiles)
                 try
                 {
-                    AssemblyName assemblyName = AssemblyName.GetAssemblyName(assemblyFile.FullName);
+                    var assemblyName = AssemblyName.GetAssemblyName(assemblyFile.FullName);
                     l.Add(GetVersionIndependentName(assemblyName.FullName), assemblyFile.FullName);
                 }
                 catch
                 {
-
+                    // ignored
                 }
 
             return l;
@@ -158,12 +156,12 @@ namespace OpenMod.Core.Helpers
             return GetVersionIndependentName(name, out _);
         }
 
-        private static readonly Regex versionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
+        private static readonly Regex VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
         public static string GetVersionIndependentName(string name, out string extractedVersion)
         {
-            var match = versionRegex.Match(name);
+            var match = VersionRegex.Match(name);
             extractedVersion = match.Groups[1].Value;
-            return versionRegex.Replace(name, "");
+            return VersionRegex.Replace(name, string.Empty);
         }
 
         public static string GetDebugName(this MethodBase mb)
@@ -173,9 +171,9 @@ namespace OpenMod.Core.Helpers
             return "<anonymous>#" + mb.Name;
         }
 
-        public static async Task InvokeWithTaskSupport(this MethodBase method, object instance, object[] @params)
+        public static async Task InvokeWithTaskSupportAsync(this MethodBase method, object instance, object[] @params)
         {
-            bool isAsync = false;
+            var isAsync = false;
             if (method is MethodInfo methodInfo)
             {
                 var returntype = methodInfo.ReturnType;

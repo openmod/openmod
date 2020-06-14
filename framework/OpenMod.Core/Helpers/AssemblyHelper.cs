@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
+using System.Resources;
 using System.Text.RegularExpressions;
 
 namespace OpenMod.Core.Helpers
@@ -8,13 +9,9 @@ namespace OpenMod.Core.Helpers
     {
         public static void CopyAssemblyResources(Assembly assembly, string baseDir, bool overwrite = false)
         {
-            if (baseDir == null)
-            {
-                baseDir = string.Empty;
-            }
+            baseDir ??= string.Empty;
 
             var resourceNames = assembly.GetManifestResourceNames();
-
             foreach (var resourceName in resourceNames)
             {
                 var regex = new Regex(Regex.Escape(assembly.GetName().Name + "."));
@@ -26,12 +23,11 @@ namespace OpenMod.Core.Helpers
                     continue;
                 }
 
-                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    string fileContent = reader.ReadToEnd();
-                    File.WriteAllText(filePath, fileContent);
-                }
+                using var stream = assembly.GetManifestResourceStream(resourceName);
+                using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException($"Couldn't find resource: {resourceName}"));
+
+                var fileContent = reader.ReadToEnd();
+                File.WriteAllText(filePath, fileContent);
             }
         }
     }

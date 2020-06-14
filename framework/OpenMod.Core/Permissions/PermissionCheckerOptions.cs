@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenMod.API.Permissions;
-using OpenMod.Core.Helpers.Prioritization;
 using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Permissions

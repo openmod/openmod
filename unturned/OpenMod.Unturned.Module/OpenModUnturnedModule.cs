@@ -6,10 +6,9 @@ using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using NuGet.Common;
 using SDG.Framework.Modules;
 using HarmonyLib;
+using JetBrains.Annotations;
 
 namespace OpenMod.Unturned.Module
 {
@@ -30,9 +29,11 @@ namespace OpenMod.Unturned.Module
             InstallTlsWorkaround();
             InstallAssemblyResolver();
 
-            var assemblyLocation = selfAssembly.Location;
+            var assemblyLocation = selfAssembly.Location; 
             var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
 
+
+            // ReSharper disable once AssignNullToNotNullAttribute
             foreach (var file in Directory.GetFiles(assemblyDirectory))
             {
                 if (file.EndsWith(".dll"))
@@ -44,14 +45,17 @@ namespace OpenMod.Unturned.Module
             OpenModInitializer.Initialize();
         }
 
+        
         private void InstallNewtonsoftJson()
         {
-            string managedDir = Path.GetDirectoryName(typeof(IModuleNexus).Assembly.Location);
-            string openModDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var managedDir = Path.GetDirectoryName(typeof(IModuleNexus).Assembly.Location);
+            var openModDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            string unturnedNewtonsoftFile = Path.GetFullPath(Path.Combine(managedDir, "Newtonsoft.Json.dll"));
-            string newtonsoftBackupFile = unturnedNewtonsoftFile + ".bak";
-            string openModNewtonsoftFile = Path.GetFullPath(Path.Combine(openModDir, "Newtonsoft.Json.dll"));
+            // ReSharper disable once AssignNullToNotNullAttribute
+            var unturnedNewtonsoftFile = Path.GetFullPath(Path.Combine(managedDir, "Newtonsoft.Json.dll"));
+            var newtonsoftBackupFile = unturnedNewtonsoftFile + ".bak";
+            var openModNewtonsoftFile = Path.GetFullPath(Path.Combine(openModDir, "Newtonsoft.Json.dll"));
+            // ReSharper restore once AssignNullToNotNullAttribute
 
             const string runtimeSerialization = "System.Runtime.Serialization.dll";
             var unturnedRuntimeSerialization = Path.GetFullPath(Path.Combine(managedDir, runtimeSerialization));
@@ -74,18 +78,18 @@ namespace OpenMod.Unturned.Module
             }
 
             // Copy Newtonsoft.Json
-            AssemblyName asm = AssemblyName.GetAssemblyName(unturnedNewtonsoftFile);
+            var asm = AssemblyName.GetAssemblyName(unturnedNewtonsoftFile);
             GetVersionIndependentName(asm.FullName, out var version);
-            if (version.StartsWith("7.", StringComparison.OrdinalIgnoreCase))
-            {
-                if (File.Exists(newtonsoftBackupFile))
-                {
-                    File.Delete(newtonsoftBackupFile);
-                }
+            if (!version.StartsWith("7.", StringComparison.OrdinalIgnoreCase)) 
+                return;
 
-                File.Move(unturnedNewtonsoftFile, newtonsoftBackupFile);
-                File.Copy(openModNewtonsoftFile, unturnedNewtonsoftFile);
+            if (File.Exists(newtonsoftBackupFile))
+            {
+                File.Delete(newtonsoftBackupFile);
             }
+
+            File.Move(unturnedNewtonsoftFile, newtonsoftBackupFile);
+            File.Copy(openModNewtonsoftFile, unturnedNewtonsoftFile);
         }
 
         private void InstallAssemblyResolver()
@@ -146,14 +150,14 @@ namespace OpenMod.Unturned.Module
         {
             var match = s_VersionRegex.Match(fullAssemblyName);
             extractedVersion = match.Groups[1].Value;
-            return s_VersionRegex.Replace(fullAssemblyName, "");
+            return s_VersionRegex.Replace(fullAssemblyName, string.Empty);
         }
 
         public void LoadAssembly(string dllName)
         {
             //Load the dll from the same directory as this assembly
             var selfLocation = typeof(OpenModUnturnedModule).Assembly.Location;
-            var currentPath = Path.GetDirectoryName(selfLocation) ?? "";
+            var currentPath = Path.GetDirectoryName(selfLocation) ?? string.Empty;
             var dllFullPath = Path.GetFullPath(Path.Combine(currentPath, dllName));
 
             if (string.Equals(selfLocation, dllFullPath, StringComparison.OrdinalIgnoreCase))
