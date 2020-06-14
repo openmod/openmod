@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +9,7 @@ using OpenMod.Unturned.Plugins;
 
 [assembly: PluginMetadata(Author = "OpenMod", DisplayName = "Unturned Sample Plugin", Id = "UnturnedSamplePlugin", Version = "1.0.0")]
 
-namespace OpenMod.Unturned.SamplePlugin
+namespace UnturnedSamplePlugin
 {
     [UsedImplicitly]
     public class UnturnedSamplePlugin : OpenModUnturnedPlugin

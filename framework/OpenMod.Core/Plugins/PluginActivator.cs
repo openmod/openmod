@@ -97,7 +97,7 @@ namespace OpenMod.Core.Plugins
                         .As<IOpenModPlugin>()
                         .SingleInstance();
 
-                    containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(pluginMetadata.Id, workingDirectory))
+                    containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(null, workingDirectory))
                         .As<IDataStore>()
                         .SingleInstance()
                         .OwnedByLifetimeScope();

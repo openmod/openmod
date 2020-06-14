@@ -9,7 +9,6 @@ namespace OpenMod.Core.Persistence
     [ServiceImplementation(Priority = Priority.Lowest)]
     public class YamlDataStoreFactory : IDataStoreFactory
     {
-        /* id is ignored on purpose */
         public IDataStore CreateDataStore(string id, string basePath)
         {
             return new YamlDataStore(id, basePath);
