@@ -11,6 +11,7 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Commands;
+using OpenMod.Core.Helpers;
 using Semver;
 
 namespace OpenMod.Core.Plugins
@@ -46,10 +47,15 @@ namespace OpenMod.Core.Plugins
             
             var metadata = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>();
             OpenModComponentId = metadata.Id;
-            Version = metadata.Version;
+            Version = GetPluginVersion();
             DisplayName = metadata.DisplayName;
             Author = metadata.Author;
             WorkingDirectory = PluginHelper.GetWorkingDirectory(Runtime, metadata.Id);
+        }
+
+        protected virtual SemVersion GetPluginVersion()
+        {
+            return VersionHelper.ParseAssemblyVersion(GetType().Assembly);
         }
 
         public virtual Task LoadAsync()

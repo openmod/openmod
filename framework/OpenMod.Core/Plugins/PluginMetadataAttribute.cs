@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Semver;
 
 namespace OpenMod.Core.Plugins
 {
@@ -8,7 +7,6 @@ namespace OpenMod.Core.Plugins
     public sealed class PluginMetadataAttribute : Attribute
     {
         private string m_Id;
-        private string m_Version;
 
         public string Id
         {
@@ -37,18 +35,5 @@ namespace OpenMod.Core.Plugins
         public string DisplayName { get; set; }
      
         public string Author { get; set; }
-
-        public string Version
-        {
-            get { return m_Version; }
-            set
-            {
-                if (!SemVersion.TryParse(value, out _, strict: false))
-                {
-                    throw new Exception($"Invalid semver \"{Version}\" in metadata for plugin: {Id}");
-                }
-                m_Version = value;
-            }
-        }
     }
 }

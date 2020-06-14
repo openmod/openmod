@@ -28,9 +28,7 @@ namespace OpenMod.Runtime
     {
         public Runtime()
         {
-            Assembly runtimeAssembly = typeof(Runtime).Assembly;
-            var version = runtimeAssembly.GetName().Version;
-            Version = new SemVersion(version.Major, version.Minor, version.Build, build: version.Revision != 0 ? version.Revision.ToString() : "");
+            Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
         }
 
         public string WorkingDirectory { get; private set; }
