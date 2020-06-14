@@ -9,15 +9,10 @@ namespace OpenMod.Core.Console
 {
     public class ConsoleActor : ICommandActor
     {
-        public bool IsGameConsole { get; }
-
-
         private readonly ILogger<ConsoleActor> m_Logger;
-        public ConsoleActor(ILogger<ConsoleActor> logger, string consoleId, bool isGameConsole)
+        public ConsoleActor(ILogger<ConsoleActor> logger, string consoleId)
         {
             m_Logger = logger;
-
-            IsGameConsole = isGameConsole;
             Id = consoleId;
         }
 

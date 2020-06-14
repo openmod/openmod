@@ -1,7 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
-using OpenMod.API.Console;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Console;
@@ -14,9 +13,9 @@ namespace OpenMod.Standalone
     {
         public ConsoleActorAccessor(IServiceProvider serviceProvider)
         {
-            Actor = ActivatorUtilities.CreateInstance<ConsoleActor>(serviceProvider, "openmod-standalone-console", true);
+            Actor = ActivatorUtilities.CreateInstance<ConsoleActor>(serviceProvider, "openmod-standalone-console");
         }
 
-        public IConsoleActor Actor { get; } 
+        public ConsoleActor Actor { get; } 
     }
 }

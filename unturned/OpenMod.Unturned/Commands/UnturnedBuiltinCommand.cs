@@ -1,10 +1,9 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 using OpenMod.API.Commands;
-using OpenMod.API.Console;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Ioc;
-using OpenMod.Unturned.API;
+using OpenMod.Core.Users;
 using Steamworks;
 
 namespace OpenMod.Unturned.Commands
@@ -26,13 +25,13 @@ namespace OpenMod.Unturned.Commands
             var cmd = m_CommandRegistration.Cmd;
             CSteamID id;
 
-            switch (Context.Actor)
+            switch (Context.Actor.Type)
             {
-                case IUnturnedPlayerActor unturnedPlayerActor:
-                    id = unturnedPlayerActor.SteamId;
+                case KnownActorTypes.Player:
+                    id = new CSteamID(ulong.Parse(Context.Actor.Id));
                     break;
 
-                case IConsoleActor _:
+                case KnownActorTypes.Console:
                     id = CSteamID.Nil;
                     break;
 
