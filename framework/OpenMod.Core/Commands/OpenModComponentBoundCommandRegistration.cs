@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Commands;
@@ -41,38 +40,19 @@ namespace OpenMod.Core.Commands
             Aliases = memberInfo.GetCustomAttributes<CommandAliasAttribute>().Select(d => d.Alias).ToList();
             Syntax = memberInfo.GetCustomAttribute<CommandSyntaxAttribute>()?.Syntax;
 
-            if (CommandType != null)
-            {
-                // class based command
-                Id = CommandType.FullName;
-            }
-            else
-            {
-                // method based command
-                Id = $"{CommandMethod.DeclaringType.FullName}.{CommandMethod.Name}";
-            }
+            Id = CommandType != null 
+                ? CommandType.FullName 
+                : $"{CommandMethod.DeclaringType.FullName}.{CommandMethod.Name}";
 
             m_CommandActorTypes = memberInfo.GetCustomAttribute<CommandActorAttribute>()?.CommandActorTypes ?? new[] {typeof(ICommandActor)};
 
             var parent = memberInfo.GetCustomAttribute<CommandParentAttribute>();
             if (parent != null)
             {
-                if (parent.CommandType != null)
-                {
-                    ParentId = parent.CommandType.FullName;
-                }
-                else
-                {
-                    ParentId = $"{parent.DeclaringType.FullName}.{parent.MethodName}";
-                }
+                ParentId = parent.CommandType != null 
+                    ? parent.CommandType.FullName 
+                    : $"{parent.DeclaringType.FullName}.{parent.MethodName}";
             }
-
-            Permission = Id;
-        }
-
-        public ILifetimeScope OwnerLifetimeScope
-        {
-            get { return Component.LifetimeScope; }
         }
 
         public string Syntax { get; private set; }
@@ -83,7 +63,6 @@ namespace OpenMod.Core.Commands
         public Priority Priority { get; set; }
         public IReadOnlyCollection<string> Aliases { get; set; }
         public string ParentId { get; set; }
-        public string Permission { get; set; }
 
         public bool SupportsActor(ICommandActor actor)
         {

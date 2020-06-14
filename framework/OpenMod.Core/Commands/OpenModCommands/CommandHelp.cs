@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
 using OpenMod.API.Commands;
 using OpenMod.API.Localization;
+using OpenMod.API.Permissions;
+
+// ReSharper disable PossibleMultipleEnumeration
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {
@@ -18,25 +19,33 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [CommandSyntax("[command | page number]")]
     public class CommandHelp : Command
     {
-        private readonly IOptions<CommandExecutorOptions> m_CommandExecutorOptions;
+        private readonly IPermissionChecker m_PermissionChecker;
+        private readonly ICommandStore m_CommandStore;
         private readonly IServiceProvider m_ServiceProvider;
+        private readonly ICommandPermissionBuilder m_CommandPermissionBuilder;
         private readonly ICommandContextBuilder m_CommandContextBuilder;
+        private readonly IOpenModStringLocalizer m_StringLocalizer;
 
         public CommandHelp(
             ICurrentCommandContextAccessor contextAccessor,
-            IOptions<CommandExecutorOptions> commandExecutorOptions,
+            IPermissionChecker permissionChecker,
+            ICommandStore commandStore,
             IServiceProvider serviceProvider,
-            ICommandContextBuilder commandContextBuilder) : base(contextAccessor)
+            ICommandPermissionBuilder commandPermissionBuilder,
+            ICommandContextBuilder commandContextBuilder,
+            IOpenModStringLocalizer stringLocalizer) : base(contextAccessor)
         {
-            m_CommandExecutorOptions = commandExecutorOptions;
+            m_PermissionChecker = permissionChecker;
+            m_CommandStore = commandStore;
             m_ServiceProvider = serviceProvider;
+            m_CommandPermissionBuilder = commandPermissionBuilder;
             m_CommandContextBuilder = commandContextBuilder;
+            m_StringLocalizer = stringLocalizer;
         }
 
         protected override async Task OnExecuteAsync()
         {
-            var commandSources = m_CommandExecutorOptions.Value.CreateCommandSources(m_ServiceProvider);
-            var commands = commandSources.SelectMany(d => d.Commands).ToList();
+            var commands = m_CommandStore.Commands;
 
             const int amountPerPage = 10;
 
@@ -58,11 +67,24 @@ namespace OpenMod.Core.Commands.OpenModCommands
             else if (Context.Parameters.Length > 0)
             {
                 var context = m_CommandContextBuilder.CreateContext(Context.Actor, Context.Parameters.ToArray(), Context.CommandPrefix, commands);
-                await PrintCommandHelpAsync(context, commands);
+                var permission = context.CommandRegistration == null ? null : m_CommandPermissionBuilder.GetPermission(context.CommandRegistration, commands);
+
+                if (context.CommandRegistration == null)
+                {
+                    await Context.Actor.PrintMessageAsync(m_StringLocalizer["commands:errors:not_found", new { CommandName = context.GetCommandLine(false) }], Color.Red);
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(permission) && await m_PermissionChecker.CheckPermissionAsync(Context.Actor, permission) != PermissionGrantResult.Grant)
+                {
+                    throw new NotEnoughPermissionException(permission, m_StringLocalizer);
+                }
+                
+                await PrintCommandHelpAsync(context, permission, commands);
             }
         }
 
-        private async Task PrintCommandHelpAsync(ICommandContext context, List<ICommandRegistration> commands)
+        private async Task PrintCommandHelpAsync(ICommandContext context, string permission, IEnumerable<ICommandRegistration> commands)
         {
             await PrintAsync($"Name: {context.CommandRegistration.Name}");
             var aliases = context.CommandRegistration.Aliases;
@@ -78,12 +100,12 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 await PrintAsync($"Description: {context.CommandRegistration.Description}");
             }
 
-            await PrintAsync($"Permission: {context.CommandRegistration.Permission ?? "<none>"}");
+            await PrintAsync($"Permission: {permission ?? "<none>"}");
             await PrintAsync("Command structure:");
             await PrintChildrenAsync(context.CommandRegistration, commands, "", true);
         }
 
-        private async Task PrintChildrenAsync(ICommandRegistration registration, ICollection<ICommandRegistration> commands, string intent, bool isLast)
+        private async Task PrintChildrenAsync(ICommandRegistration registration, IEnumerable<ICommandRegistration> commands, string intent, bool isLast)
         {
             var children = commands
                 .Where(d => d.ParentId != null && d.ParentId.Equals(registration.Id, StringComparison.OrdinalIgnoreCase))

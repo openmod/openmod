@@ -21,7 +21,7 @@ namespace OpenMod.Core
                 options.AddPermissionSource<DefaultPermissionStore>();
             });
 
-            serviceCollection.Configure<CommandExecutorOptions>(options =>
+            serviceCollection.Configure<CommandStoreOptions>(options =>
             {
                 var logger = openModStartupContext.LoggerFactory.CreateLogger<OpenModComponentCommandSource>();
                 options.AddCommandSource(new OpenModComponentCommandSource(logger, openModStartupContext.Runtime, GetType().Assembly));

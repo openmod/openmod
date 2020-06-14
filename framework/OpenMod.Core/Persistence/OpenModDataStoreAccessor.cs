@@ -11,11 +11,16 @@ namespace OpenMod.Core.Persistence
     [ServiceImplementation(Priority = Priority.Lowest, Lifetime = ServiceLifetime.Singleton)]
     public class OpenModDataStoreAccessor : IOpenModDataStoreAccessor
     {
-        public OpenModDataStoreAccessor(IDataStoreFactory dataStoreFactory, IRuntime runtime)
+        private readonly IRuntime m_Runtime;
+
+        public OpenModDataStoreAccessor(IRuntime runtime)
         {
-            DataStore = dataStoreFactory.CreateDataStore(runtime.OpenModComponentId, runtime.WorkingDirectory);
+            m_Runtime = runtime;
         }
 
-        public IDataStore DataStore { get; }
+        public IDataStore DataStore
+        {
+            get { return m_Runtime.DataStore; }
+        }
     }
 }

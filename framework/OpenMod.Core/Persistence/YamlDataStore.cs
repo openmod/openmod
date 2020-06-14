@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using OpenMod.API.Persistence;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -11,16 +12,30 @@ namespace OpenMod.Core.Persistence
 {
     public class YamlDataStore : IDataStore
     {
+        [CanBeNull]
+        private readonly string m_Prefix;
         private readonly string m_BasePath;
+        
+        [CanBeNull]
         private readonly string m_Suffix;
         private readonly Serializer m_Serializer;
         private readonly Deserializer m_Deserializer;
 
-        public YamlDataStore(string basePath, string suffix = ".data")
+        public YamlDataStore([CanBeNull] string prefix, string basePath, string suffix = "data")
         {
             suffix ??= string.Empty;
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                m_Prefix = $"{prefix}.";
+            }
+
             m_BasePath = basePath;
-            m_Suffix = suffix;
+
+            if (!string.IsNullOrEmpty(m_Suffix))
+            {
+                m_Suffix = $".{suffix}";
+            }
+
             m_Serializer = new SerializerBuilder()
                 .WithNamingConvention(new CamelCaseNamingConvention())
                 .Build();
@@ -86,7 +101,7 @@ namespace OpenMod.Core.Persistence
 
         protected virtual string GetFilePathForKey(string key)
         {
-            return Path.Combine(m_BasePath, $"{key}{m_Suffix}.yml");
+            return Path.Combine(m_BasePath, $"{m_Prefix ?? ""}{key}{m_Suffix ?? ""}.yml");
         }
     }
 }

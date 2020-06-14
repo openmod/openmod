@@ -21,14 +21,17 @@ namespace OpenMod.Core.Commands
     public class CommandExecutor : ICommandExecutor
     {
         private readonly ILifetimeScope m_LifetimeScope;
-        private readonly IOptions<CommandExecutorOptions> m_CommandExecutorOptions;
+        private readonly ICommandStore m_CommandStore;
+        private readonly ICommandPermissionBuilder m_CommandPermissionBuilder;
 
         public CommandExecutor(
             ILifetimeScope lifetimeScope,
-            IOptions<CommandExecutorOptions> commandExecutorOptions)
+            ICommandStore commandStore,
+            ICommandPermissionBuilder commandPermissionBuilder)
         {
             m_LifetimeScope = lifetimeScope;
-            m_CommandExecutorOptions = commandExecutorOptions;
+            m_CommandStore = commandStore;
+            m_CommandPermissionBuilder = commandPermissionBuilder;
         }
         public async Task<ICommandContext> ExecuteAsync(ICommandActor actor, string[] args, string prefix)
         {
@@ -38,9 +41,7 @@ namespace OpenMod.Core.Commands
             }
 
             var currentCommandAccessor = m_LifetimeScope.Resolve<ICurrentCommandContextAccessor>();
-            var serviceProvider = m_LifetimeScope.Resolve<IServiceProvider>();
-            var commandSources = m_CommandExecutorOptions.Value.CreateCommandSources(serviceProvider);
-            var commandsRegistrations = commandSources.SelectMany(d => d.Commands).ToList();
+            var commandsRegistrations = m_CommandStore.Commands;
             var logger = m_LifetimeScope.Resolve<ILogger<CommandExecutor>>();
             var commandContextBuilder = m_LifetimeScope.Resolve<ICommandContextBuilder>();
             var permissionChecker = m_LifetimeScope.Resolve<IPermissionChecker>();
@@ -57,12 +58,12 @@ namespace OpenMod.Core.Commands
                 }
 
                 currentCommandAccessor.Context = commandContext;
-                // todo: permissions don't work, they cause exceptions. Also it calls the wrong PermissionCheckProvider
-                // var permission = commandContext.CommandRegistration.Permission;
-                //if (!string.IsNullOrWhiteSpace(permission) && await permissionChecker.CheckPermissionAsync(actor, permission) != PermissionGrantResult.Grant)
-                //{
-                //    throw new NotEnoughPermissionException(permission, stringLocalizer);
-                //}
+
+                var permission = m_CommandPermissionBuilder.GetPermission(commandContext.CommandRegistration);
+                if (!string.IsNullOrWhiteSpace(permission) && await permissionChecker.CheckPermissionAsync(actor, permission) != PermissionGrantResult.Grant)
+                {
+                    throw new NotEnoughPermissionException(permission, stringLocalizer);
+                }
 
                 var command = commandContext.CommandRegistration.Instantiate(commandContext.ServiceProvider);
                 await command.ExecuteAsync();
@@ -79,6 +80,10 @@ namespace OpenMod.Core.Commands
                 await actor.PrintMessageAsync("An internal error occured during the command execution.", Color.DarkRed);
                 logger.LogError(ex, $"Exception occured on command \"{string.Join(" ", args)}\" by actor {actor.Type}/{actor.DisplayName} ({actor.Id})");
                 commandContext.Exception = ex;
+
+#if DEBUG
+                throw; // in debug mode we want to debug such exceptions instead of catching them
+#endif
             }
             finally
             {

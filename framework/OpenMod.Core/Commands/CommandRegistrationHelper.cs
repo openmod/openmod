@@ -6,7 +6,7 @@ namespace OpenMod.Core.Commands
 {
     public static class CommandRegistrationHelper
     {
-        public static List<ICommandRegistration> GetChildren(ICommandRegistration registration, ICollection<ICommandRegistration> commandRegistrations)
+        public static List<ICommandRegistration> GetChildren(ICommandRegistration registration, IEnumerable<ICommandRegistration> commandRegistrations)
         {
             var children = new List<ICommandRegistration>();
             foreach (var commandRegistration in commandRegistrations)

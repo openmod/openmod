@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
+using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
@@ -23,7 +24,7 @@ using Serilog.Extensions.Logging;
 namespace OpenMod.Runtime
 {
     [UsedImplicitly]
-    public sealed class Runtime : IRuntime, IOpenModComponent
+    public sealed class Runtime : IRuntime
     {
         public Runtime()
         {
@@ -34,6 +35,7 @@ namespace OpenMod.Runtime
 
         public string WorkingDirectory { get; private set; }
         public string[] CommandlineArgs { get; private set; }
+        public IDataStore DataStore { get; private set; }
 
         private IHost m_Host;
         private SerilogLoggerFactory m_LoggerFactory;
@@ -109,6 +111,7 @@ namespace OpenMod.Runtime
                 m_Host = hostBuilder.Build();
                 Status = RuntimeStatus.Initialized;
                 LifetimeScope = m_Host.Services.GetRequiredService<ILifetimeScope>();
+                DataStore = m_Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore("openmod", WorkingDirectory);
                 await m_Host.RunAsync();
                 m_Logger.LogInformation("OpenMod has shut down.");
                 Status = RuntimeStatus.Unloaded;
@@ -124,7 +127,7 @@ namespace OpenMod.Runtime
                 Log.CloseAndFlush();
             }
         }
-
+        
         private void ConfigureConfiguration(IConfigurationBuilder builder)
         {
             builder

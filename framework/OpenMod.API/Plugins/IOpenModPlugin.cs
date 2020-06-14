@@ -16,9 +16,5 @@ namespace OpenMod.API.Plugins
         Task LoadAsync();
 
         Task UnloadAsync();
-
-        IDataStore DataStore { get; }
-
-        ILifetimeScope LifetimeScope { get; }
     }
 }

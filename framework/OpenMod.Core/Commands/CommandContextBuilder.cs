@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
 using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,7 +26,7 @@ namespace OpenMod.Core.Commands
             m_LifetimeScope = lifetimeScope;
         }
 
-        public virtual CommandContext BuildContextTree(CommandContext currentContext, ICollection<ICommandRegistration> commandRegistrations)
+        public virtual CommandContext BuildContextTree(CommandContext currentContext, IEnumerable<ICommandRegistration> commandRegistrations)
         {
             if (currentContext.Parameters.Count == 0)
             {
@@ -43,14 +41,14 @@ namespace OpenMod.Core.Commands
                 return currentContext;
             }
 
-            var scope = childCommand.OwnerLifetimeScope.BeginLifetimeScope();
+            var scope = childCommand.Component.LifetimeScope.BeginLifetimeScope();
             var childContext = new CommandContext(childCommand, scope, currentContext) { CommandRegistration = childCommand };
             currentContext.ChildContext = childContext;
 
             return BuildContextTree(childContext, commandRegistrations);
         }
 
-        public ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, ICollection<ICommandRegistration> commandRegistrations)
+        public ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, IEnumerable<ICommandRegistration> commandRegistrations)
         {
             var rootCommand = GetCommandRegistration(actor, args[0], commandRegistrations.Where(d => d.ParentId == null));
             if (rootCommand == null)
@@ -62,7 +60,7 @@ namespace OpenMod.Core.Commands
                 return exceptionContext;
             }
 
-            var scope = rootCommand.OwnerLifetimeScope.BeginLifetimeScope();
+            var scope = rootCommand.Component.LifetimeScope.BeginLifetimeScope();
             var rootContext = new CommandContext(rootCommand, actor, args.First(), prefix, args.Skip(1).ToList(), scope);
 
             return BuildContextTree(rootContext, commandRegistrations);

@@ -27,7 +27,7 @@ namespace OpenMod.Core.Plugins
         public ILifetimeScope LifetimeScope { get; }
         public IConfiguration Configuration { get; set; }
 
-        private readonly IOptions<CommandExecutorOptions> m_CommandExecutorOptions;
+        private readonly IOptions<CommandStoreOptions> m_CommandStoreOptions;
         private readonly ILoggerFactory m_LoggerFactory;
         private OpenModComponentCommandSource m_CommandSource;
 
@@ -38,7 +38,7 @@ namespace OpenMod.Core.Plugins
             DataStore = serviceProvider.GetRequiredService<IDataStore>();
             Runtime = serviceProvider.GetRequiredService<IRuntime>();
             m_LoggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-            m_CommandExecutorOptions = serviceProvider.GetRequiredService<IOptions<CommandExecutorOptions>>();
+            m_CommandStoreOptions = serviceProvider.GetRequiredService<IOptions<CommandStoreOptions>>();
             
             var metadata = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>();
             OpenModComponentId = metadata.Id;
@@ -52,14 +52,14 @@ namespace OpenMod.Core.Plugins
         {
             var logger = m_LoggerFactory.CreateLogger<OpenModComponentCommandSource>();
             m_CommandSource = new OpenModComponentCommandSource(logger, this);
-            m_CommandExecutorOptions.Value.AddCommandSource(m_CommandSource);
+            m_CommandStoreOptions.Value.AddCommandSource(m_CommandSource);
 
             return Task.CompletedTask;
         }
 
         public virtual Task UnloadAsync()
         {
-            m_CommandExecutorOptions.Value.RemoveCommandSource(m_CommandSource);
+            m_CommandStoreOptions.Value.RemoveCommandSource(m_CommandSource);
             return Task.CompletedTask;
         }
 

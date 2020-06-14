@@ -57,7 +57,6 @@ namespace OpenMod.API.Commands
 
         /// <summary>
         ///     <para>The actor executing command.</para>
-        ///     <para>Is guaranteed to be a <see cref="ICommand.SupportsActor">supported actor</see>.</para>
         ///     <para>
         ///         <b>This property will never return null.</b>
         ///     </para>

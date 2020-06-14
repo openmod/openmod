@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using OpenMod.API.Persistence;
 
 namespace OpenMod.API
 {
@@ -14,5 +15,7 @@ namespace OpenMod.API
         bool IsComponentAlive { get; }
 
         ILifetimeScope LifetimeScope { get; }
+
+        IDataStore DataStore { get; }
     }
 }

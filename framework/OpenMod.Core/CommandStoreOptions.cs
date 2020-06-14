@@ -2,19 +2,18 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Commands;
-using OpenMod.API.Permissions;
 using OpenMod.Core.Helpers.Prioritization;
 using OpenMod.Core.Prioritization;
 
-namespace OpenMod.Core.Commands
+namespace OpenMod.Core
 {
-    public class CommandExecutorOptions
+    public class CommandStoreOptions
     {
         private readonly List<Type> m_CommandSourceTypes;
         private readonly List<ICommandSource> m_CommandSources;
         private readonly PriorityComparer m_PriorityComparer;
 
-        public CommandExecutorOptions()
+        public CommandStoreOptions()
         {
             m_CommandSourceTypes = new List<Type>();
             m_CommandSources = new List<ICommandSource>();
@@ -27,7 +26,7 @@ namespace OpenMod.Core.Commands
             sources.AddRange(m_CommandSources);
             foreach (var type in m_CommandSourceTypes)
             {
-                sources.Add((ICommandSource) ActivatorUtilities.CreateInstance(serviceProvider, type));
+                sources.Add((ICommandSource)ActivatorUtilities.CreateInstance(serviceProvider, type));
             }
 
             return sources;
@@ -43,16 +42,16 @@ namespace OpenMod.Core.Commands
             m_CommandSources.Remove(commandSource);
         }
 
-        public void AddCommandSource<TSource>() where TSource: ICommandSource
+        public void AddCommandSource<TSource>() where TSource : ICommandSource
         {
             AddCommandSource(typeof(TSource));
         }
 
         public void AddCommandSource(Type type)
         {
-            if (!typeof(IPermissionCheckProvider).IsAssignableFrom(type))
+            if (!typeof(ICommandSource).IsAssignableFrom(type))
             {
-                throw new Exception($"Type {type} must be an instance of IPermissionCheckProvider!");
+                throw new Exception($"Type {type} must be an instance of ICommandSource!");
             }
 
             if (m_CommandSourceTypes.Contains(type))

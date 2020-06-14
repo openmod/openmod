@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Autofac;
 using JetBrains.Annotations;
 using OpenMod.API.Prioritization;
 
@@ -8,7 +7,10 @@ namespace OpenMod.API.Commands
 {
     public interface ICommandRegistration
     {
-        ILifetimeScope OwnerLifetimeScope { get; }
+        /// <summary>
+        ///     The owner component of the command
+        /// </summary>
+        IOpenModComponent Component { get; }
 
         /// <summary>
         ///     <para>The primary name of the command, which will be used to execute it.</para>
@@ -78,9 +80,6 @@ namespace OpenMod.API.Commands
 
         [CanBeNull]
         string ParentId { get; set; }
-
-        [CanBeNull]
-        string Permission { get; }
 
         bool SupportsActor(ICommandActor actor);
         

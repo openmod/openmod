@@ -15,7 +15,7 @@ namespace OpenMod.Core.Permissions
     public class PermissionFileManager : IPermissionFileManager
     {
         public const string GroupsKey = "groups";
-        public const string PlayersKey = "players";
+        public const string UsersKey = "players";
 
         private readonly IDataStore m_DataStore;
         public PermissionFileManager(IOpenModDataStoreAccessor dataStoreAccessor)
@@ -69,7 +69,11 @@ namespace OpenMod.Core.Permissions
             if (!await UsersDataExistsAsync())
             {
                 // no need for default users data
-                UsersData = new UsersData();
+                UsersData = new UsersData()
+                {
+                    Users = new List<UserData>()
+                };
+
                 await SaveUsersAsync();
             }
             else
@@ -88,7 +92,7 @@ namespace OpenMod.Core.Permissions
 
         public async Task ReadUsersDataAsync()
         {
-            UsersData = await m_DataStore.LoadAsync<UsersData>(PlayersKey);
+            UsersData = await m_DataStore.LoadAsync<UsersData>(UsersKey);
         }
 
         public Task SavePermissionGroupsAsync()
@@ -98,7 +102,7 @@ namespace OpenMod.Core.Permissions
 
         public Task SaveUsersAsync()
         {
-            return m_DataStore.SaveAsync(PlayersKey, UsersData);
+            return m_DataStore.SaveAsync(UsersKey, UsersData);
         }
 
         public Task<bool> PermissionGroupsDataExistsAsync()
@@ -108,7 +112,7 @@ namespace OpenMod.Core.Permissions
 
         public Task<bool> UsersDataExistsAsync()
         {
-            return m_DataStore.ExistsAsync(PlayersKey);
+            return m_DataStore.ExistsAsync(UsersKey);
         }
     }
 }
