@@ -1,14 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using SDG.Unturned;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace OpenMod.Unturned.Logging
 {
-    public class SerilogConsoleInputOutput : ConsoleInputOutput
+    public class SerilogWindowsConsoleInputOutput : WindowsConsoleInputOutput
     {
         private readonly ILogger m_Logger;
 
-        public SerilogConsoleInputOutput(ILoggerFactory loggerFactory)
+        public SerilogWindowsConsoleInputOutput(ILoggerFactory loggerFactory)
         {
             m_Logger = loggerFactory.CreateLogger("SDG.Unturned");
         }

@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Commands;
 using OpenMod.Core.Users;
 
-namespace OpenMod.Standalone
+namespace OpenMod.Core.Console
 {
     public class ConsoleActor : ICommandActor
     {
         private readonly ILogger<ConsoleActor> m_Logger;
-        public ConsoleActor(ILogger<ConsoleActor> logger)
+        public ConsoleActor(ILogger<ConsoleActor> logger, string consoleId)
         {
             m_Logger = logger;
+            Id = consoleId;
         }
 
-        public string Id { get; } = "openmod-standalone-console";
-        public string Type { get; } = KnownUserTypes.Console;
+        public string Id { get; }
+        public string Type { get; } = KnownActorTypes.Console;
         public Dictionary<string, object> Data { get; } = new Dictionary<string, object>();
         public string DisplayName { get; } = "Console";
 

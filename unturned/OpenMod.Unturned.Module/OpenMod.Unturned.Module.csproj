@@ -64,7 +64,7 @@
       <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -1,6 +1,6 @@
 ﻿namespace OpenMod.Core.Users
 {
-    public static class KnownUserTypes
+    public static class KnownActorTypes
     {
         public const string Player = "player";
 

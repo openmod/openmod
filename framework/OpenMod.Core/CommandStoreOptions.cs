@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Commands;
-using OpenMod.Core.Helpers.Prioritization;
 using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core

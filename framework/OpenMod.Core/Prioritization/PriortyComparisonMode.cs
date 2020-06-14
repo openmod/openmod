@@ -1,4 +1,4 @@
-﻿namespace OpenMod.Core.Helpers.Prioritization
+﻿namespace OpenMod.Core.Prioritization
 {
     public enum PriortyComparisonMode
     {

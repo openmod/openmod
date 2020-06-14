@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using NuGet.Common;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using OpenMod.API.Plugins;
@@ -23,8 +22,8 @@ namespace OpenMod.Core.Plugins.NuGet
 
         public virtual async Task<ICollection<Assembly>> LoadPluginAssembliesAsync()
         {
-            List<Assembly> assemblies = new List<Assembly>();
-            
+            var assemblies = new List<Assembly>();
+
             foreach (var nupkgFile in Directory.GetFiles(m_NuGetPackageManager.PackagesDirectory, "*.nupkg"))
             {
                 var nupkgAssemblies = await m_NuGetPackageManager.LoadAssembliesFromNuGetPackageAsync(nupkgFile);
@@ -36,7 +35,7 @@ namespace OpenMod.Core.Plugins.NuGet
 
         public async Task<NuGetInstallResult> InstallPackageAsync(string packageName, string version = null, bool isPreRelease = false)
         {
-            bool exists = await m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
+            var exists = await m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
             return await InstallOrUpdateAsync(packageName, version, isPreRelease, exists);
         }
 
@@ -56,14 +55,14 @@ namespace OpenMod.Core.Plugins.NuGet
             return await m_NuGetPackageManager.RemoveAsync(package);
         }
 
-        public virtual async Task<bool> IsPackageInstalledAsync(string packageName)
+        public virtual Task<bool> IsPackageInstalledAsync(string packageName)
         {
-            return await m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
+            return m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
         }
 
         private async Task<NuGetInstallResult> InstallOrUpdateAsync(string packageName, string version = null, bool isPreRelease = false, bool isUpdate = false)
         {
-            PackageIdentity previousVersion = await m_NuGetPackageManager.GetLatestPackageIdentityAsync(packageName);
+            var previousVersion = await m_NuGetPackageManager.GetLatestPackageIdentityAsync(packageName);
 
             if (isUpdate && previousVersion == null)
             {
@@ -76,10 +75,7 @@ namespace OpenMod.Core.Plugins.NuGet
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
             }
 
-            if (version == null)
-            {
-                version = package.Identity.Version.OriginalVersion; // set to latest version
-            }
+            version ??= package.Identity.Version.OriginalVersion;
 
             var packageIdentity = new PackageIdentity(package.Identity.Id, new NuGetVersion(version));
 

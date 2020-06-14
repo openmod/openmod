@@ -11,9 +11,7 @@ using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Plugins;
-using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
-using OpenMod.Core.Helpers.Prioritization;
 using OpenMod.Core.Plugins;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.Core.Prioritization;
@@ -186,16 +184,5 @@ namespace OpenMod.Runtime
                 };
             }
         }
-    }
-
-    internal class ServiceRegistration
-    {
-        public Priority Priority { get; set; }
-
-        public Type ServiceImplementationType { get; set; }
-
-        public Type[] ServiceTypes { get; set; }
-
-        public ServiceLifetime Lifetime { get; set; }
     }
 }
