@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using OpenMod.API.Commands;
+﻿using System;
+using System.Threading.Tasks;
 using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Commands
@@ -7,7 +7,7 @@ namespace OpenMod.Core.Commands
     [DontAutoRegister]
     public abstract class Command : CommandBase
     {
-        protected Command(ICurrentCommandContextAccessor contextAccessor) : base(contextAccessor)
+        protected Command(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

@@ -21,23 +21,20 @@ namespace OpenMod.Core.Commands.OpenModCommands
     {
         private readonly IPermissionChecker m_PermissionChecker;
         private readonly ICommandStore m_CommandStore;
-        private readonly IServiceProvider m_ServiceProvider;
         private readonly ICommandPermissionBuilder m_CommandPermissionBuilder;
         private readonly ICommandContextBuilder m_CommandContextBuilder;
         private readonly IOpenModStringLocalizer m_StringLocalizer;
 
         public CommandHelp(
-            ICurrentCommandContextAccessor contextAccessor,
             IPermissionChecker permissionChecker,
             ICommandStore commandStore,
             IServiceProvider serviceProvider,
             ICommandPermissionBuilder commandPermissionBuilder,
             ICommandContextBuilder commandContextBuilder,
-            IOpenModStringLocalizer stringLocalizer) : base(contextAccessor)
+            IOpenModStringLocalizer stringLocalizer) : base(serviceProvider)
         {
             m_PermissionChecker = permissionChecker;
             m_CommandStore = commandStore;
-            m_ServiceProvider = serviceProvider;
             m_CommandPermissionBuilder = commandPermissionBuilder;
             m_CommandContextBuilder = commandContextBuilder;
             m_StringLocalizer = stringLocalizer;

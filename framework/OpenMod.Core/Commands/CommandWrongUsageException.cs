@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using OpenMod.API.Commands;
+using OpenMod.API.Localization;
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {
@@ -16,7 +17,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
         }
 
-        public CommandWrongUsageException(ICommandContext context) : this(context, context.ServiceProvider.GetRequiredService<IStringLocalizer>())
+        public CommandWrongUsageException(ICommandContext context) : this(context, context.ServiceProvider.GetRequiredService<IOpenModStringLocalizer>())
         {
 
         }

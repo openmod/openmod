@@ -1,6 +1,5 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
-using OpenMod.API.Commands;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Ioc;
 using OpenMod.Unturned.Console;
@@ -14,8 +13,8 @@ namespace OpenMod.Unturned.Commands
         private readonly UnturnedCommandRegistration m_CommandRegistration;
 
         public UnturnedBuiltinCommand(
-            ICurrentCommandContextAccessor contextAccessor,
-            UnturnedCommandRegistration commandRegistration) : base(contextAccessor)
+            IServiceProvider serviceProvider,
+            UnturnedCommandRegistration commandRegistration) : base(serviceProvider)
         {
             m_CommandRegistration = commandRegistration;
         }

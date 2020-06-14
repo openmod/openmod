@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.API.Commands;
 using OpenMod.Core.Commands;
@@ -9,7 +10,7 @@ namespace OpenMod.UnityEngine.Commands
     [DontAutoRegister]
     public abstract class UnityEngineCommand : CommandBase
     {
-        protected UnityEngineCommand(ICurrentCommandContextAccessor contextAccessor) : base(contextAccessor)
+        protected UnityEngineCommand(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
