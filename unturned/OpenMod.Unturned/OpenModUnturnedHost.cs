@@ -8,6 +8,7 @@ using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Ioc;
+using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
 using OpenMod.UnityEngine;
 using OpenMod.Unturned.Helpers;
@@ -22,14 +23,27 @@ namespace OpenMod.Unturned
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
-        private readonly Harmony m_Harmony;
-        private const string HarmonyInstanceId = "com.get-openmod.unturned";
+        public string DisplayName { get; } = Provider.APP_NAME;
+        public string Version { get; } = Provider.APP_VERSION;
+        public string OpenModComponentId { get; } = "OpenMod.Unturned";
+        public string WorkingDirectory { get; }
+        public bool IsComponentAlive { get; private set; }
+        public ILifetimeScope LifetimeScope { get; }
+        public IDataStore DataStore { get; }
 
-        public OpenModUnturnedHost(IRuntime runtime, ILifetimeScope lifetimeScope)
+        private const string HarmonyInstanceId = "com.get-openmod.unturned";
+        private readonly Harmony m_Harmony;
+        private bool m_IsDisposing;
+        private bool m_IsProviderShutdown;
+        
+        public OpenModUnturnedHost(IRuntime runtime, ILifetimeScope lifetimeScope, IDataStoreFactory dataStoreFactory)
         {
             m_Harmony = new Harmony(HarmonyInstanceId);
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
+            DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
+
+            Provider.onServerShutdown += OnServerShutdown;
         }
 
         public Task InitAsync()
@@ -46,7 +60,7 @@ namespace OpenMod.Unturned
                     Dedicator.commandWindow.setIOHandler(new SerilogWindowsConsoleInputOutput());
                 }
 
-                var logCallbackField = typeof(Application).GetField("s_LogCallbackHandler", BindingFlags.Static | BindingFlags.Instance);              
+                var logCallbackField = typeof(Application).GetField("s_LogCallbackHandler", BindingFlags.Static | BindingFlags.Instance);
                 logCallbackField.SetValue(null, (Application.LogCallback)DummyLogCallback);
 
                 m_Harmony.PatchAll(GetType().Assembly);
@@ -67,20 +81,30 @@ namespace OpenMod.Unturned
             // do nothing
         }
 
-
-        public string DisplayName { get; } = Provider.APP_NAME;
-
-        public string Version { get; } = Provider.APP_VERSION;
+        private void OnServerShutdown()
+        {
+            if (!m_IsDisposing)
+            {
+                m_IsProviderShutdown = true;
+            }
+        }
 
         public void Dispose()
         {
-            IsComponentAlive = false;
-            m_Harmony.UnpatchAll(HarmonyInstanceId);
-        }
+            if (m_IsDisposing)
+            {
+                return;
+            }
 
-        public string OpenModComponentId { get; } = "OpenMod.Unturned";
-        public string WorkingDirectory { get; }
-        public bool IsComponentAlive { get; private set; }
-        public ILifetimeScope LifetimeScope { get; }
+            IsComponentAlive = false;
+            m_IsDisposing = true;
+            
+            m_Harmony.UnpatchAll(HarmonyInstanceId);
+            
+            if (!m_IsProviderShutdown)
+            {
+                Provider.shutdown();
+            }
+        }
     }
 }
