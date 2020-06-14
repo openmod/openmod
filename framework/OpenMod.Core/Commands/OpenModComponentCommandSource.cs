@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Commands
 {
@@ -31,7 +32,7 @@ namespace OpenMod.Core.Commands
             var types = assembly.GetTypesWithInterface<ICommand>(false);
             foreach (var type in types)
             {
-                if (type.GetCustomAttribute<IgnoreCommandAttribute>(false) != null)
+                if (type.GetCustomAttribute<DontAutoRegister>(false) != null)
                 {
                     continue;
                 }

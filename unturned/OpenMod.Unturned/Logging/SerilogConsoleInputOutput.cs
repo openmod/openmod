@@ -4,8 +4,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace OpenMod.Unturned.Logging
 {
-    // Serilog is already threaded, no need to make it ThreadedConsoleInputOutput
-    public class SerilogConsoleInputOutput : ThreadedConsoleInputOutput
+    public class SerilogConsoleInputOutput : ConsoleInputOutput
     {
         private readonly ILogger m_Logger;
 
@@ -30,7 +29,7 @@ namespace OpenMod.Unturned.Logging
         }
     }
 
-    public class SerilogWindowsConsoleInputOutput : ThreadedWindowsConsoleInputOutput
+    public class SerilogWindowsConsoleInputOutput : WindowsConsoleInputOutput
     {
         private readonly ILogger m_Logger;
 

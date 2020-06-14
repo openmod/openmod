@@ -1,10 +1,11 @@
 ﻿using OpenMod.API.Commands;
 using OpenMod.Core.Commands;
+using OpenMod.Core.Ioc;
 using OpenMod.UnityEngine.Commands;
 
 namespace OpenMod.Unturned.Commands
 {
-    [IgnoreCommand]
+    [DontAutoRegister]
     public abstract class UnturnedCommand : UnityEngineCommand
     {
         protected UnturnedCommand(ICurrentCommandContextAccessor contextAccessor) : base(contextAccessor)

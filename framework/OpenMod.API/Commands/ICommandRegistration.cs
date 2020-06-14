@@ -13,6 +13,11 @@ namespace OpenMod.API.Commands
         IOpenModComponent Component { get; }
 
         /// <summary>
+        ///    The unique ID of this command.
+        /// </summary>
+        string Id { get; }
+
+        /// <summary>
         ///     <para>The primary name of the command, which will be used to execute it.</para>
         ///     <para>The primary name overrides any <see cref="Aliases">aliases</see> of other commands by default.</para>
         ///     <para>
@@ -64,15 +69,25 @@ namespace OpenMod.API.Commands
         [CanBeNull]
         string Syntax { get; }
 
-        string Id { get; }
+        /// <summary>
+        ///    The priority for this command. In case of conflicting commands, the one with higher priority will be used.
+        /// </summary>
+        Priority Priority { get; }
 
-        Priority Priority { get; set; }
-
+        /// <summary>
+        ///    The ID of the parent command. Must be null if this is not a sub command.
+        /// </summary>
         [CanBeNull]
-        string ParentId { get; set; }
-
+        string ParentId { get; }
+        
+        /// <summary>
+        ///    Checks if the given actor can use this command.
+        /// </summary>
         bool SupportsActor(ICommandActor actor);
         
+        /// <summary>
+        ///    Creates a new command instance for execution.
+        /// </summary>
         ICommand Instantiate(IServiceProvider serviceProvider);
     }
 }

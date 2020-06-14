@@ -1,10 +1,11 @@
 ﻿using System.Drawing;
 using System.Threading.Tasks;
 using OpenMod.API.Commands;
+using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Commands
 {
-    [IgnoreCommand]
+    [DontAutoRegister]
     public abstract class CommandBase: ICommand
     {
         public ICommandContext Context { get; }

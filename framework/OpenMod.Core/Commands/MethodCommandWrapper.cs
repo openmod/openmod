@@ -2,10 +2,11 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using OpenMod.API.Commands;
+using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Commands
 {
-    [IgnoreCommand]
+    [DontAutoRegister]
     public class MethodCommandWrapper : ICommand
     {
         private readonly MethodInfo m_MethodInfo;

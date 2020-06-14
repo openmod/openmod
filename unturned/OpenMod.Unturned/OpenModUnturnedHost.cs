@@ -8,16 +8,18 @@ using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
+using OpenMod.Core;
 using OpenMod.Core.Helpers;
 using OpenMod.UnityEngine;
+using OpenMod.Unturned.Commands;
 using OpenMod.Unturned.Console;
 using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
-using OpenMod.Unturned.Players;
 using SDG.Unturned;
 using Semver;
 using UnityEngine;
@@ -136,7 +138,7 @@ namespace OpenMod.Unturned
                 shouldExecuteCommand = false;
                 shouldList = false;
 
-                var actor = new PlayerCommandActor(player.player);
+                var actor = new UnturnedPlayerCommandActor(player.player);
                 AsyncHelper.Schedule("Player command execution", () => m_CommandExecutor.ExecuteAsync(actor, text.Split(' '), string.Empty));
             };
         }

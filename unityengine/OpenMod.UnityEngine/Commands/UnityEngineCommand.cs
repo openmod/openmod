@@ -2,10 +2,11 @@
 using Cysharp.Threading.Tasks;
 using OpenMod.API.Commands;
 using OpenMod.Core.Commands;
+using OpenMod.Core.Ioc;
 
 namespace OpenMod.UnityEngine.Commands
 {
-    [IgnoreCommand]
+    [DontAutoRegister]
     public abstract class UnityEngineCommand : CommandBase
     {
         protected UnityEngineCommand(ICurrentCommandContextAccessor contextAccessor) : base(contextAccessor)

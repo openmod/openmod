@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
 using OpenMod.API.Commands;
+using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Commands
 {
-    [IgnoreCommand]
+    [DontAutoRegister]
     public abstract class Command : CommandBase
     {
         protected Command(ICurrentCommandContextAccessor contextAccessor) : base(contextAccessor)

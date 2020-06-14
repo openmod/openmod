@@ -6,9 +6,9 @@ using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
 
-namespace OpenMod.Unturned.Players
+namespace OpenMod.Unturned.Commands
 {
-    public class PlayerCommandActor : ICommandActor
+    public class UnturnedPlayerCommandActor : ICommandActor
     {
         public Player Player { get; }
 
@@ -34,7 +34,7 @@ namespace OpenMod.Unturned.Players
             get { return PlayerId.characterName; }
         }
 
-        public PlayerCommandActor(Player player)
+        public UnturnedPlayerCommandActor(Player player)
         {
             Player = player;
             SteamPlayer = Player.channel.owner;

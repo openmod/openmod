@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace OpenMod.Core.Commands
+namespace OpenMod.Core.Ioc
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    public sealed class IgnoreCommandAttribute : Attribute
+    public sealed class DontAutoRegister : Attribute
     {
         
     }
