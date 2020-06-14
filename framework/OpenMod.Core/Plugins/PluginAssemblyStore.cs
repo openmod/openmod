@@ -40,14 +40,14 @@ namespace OpenMod.Core.Plugins
                 var pluginMetadata = providerAssembly.GetCustomAttribute<PluginMetadataAttribute>();
                 if (pluginMetadata == null)
                 {
-                    m_Logger.LogWarning($"No plugin metadata attribute found in assembly: {providerAssemblies}; skipping loading of this assembly as plugin");
+                    m_Logger.LogWarning($"No plugin metadata attribute found in assembly: {providerAssembly}; skipping loading of this assembly as plugin");
                     providerAssemblies.Remove(providerAssembly);
                     continue;
                 }
 
                 if (!providerAssembly.FindTypes<IOpenModPlugin>(false).Any())
                 {
-                    m_Logger.LogWarning($"No IOpenModPlugin implementation found in assembly: {providerAssemblies}; skipping loading of this assembly as plugin");
+                    m_Logger.LogWarning($"No {nameof(IOpenModPlugin)} implementation found in assembly: {providerAssembly}; skipping loading of this assembly as plugin");
                     providerAssemblies.Remove(providerAssembly);
                     continue;
                 }
