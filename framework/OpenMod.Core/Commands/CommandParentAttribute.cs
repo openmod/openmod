@@ -16,14 +16,14 @@ namespace OpenMod.Core.Commands
             CommandType = type;
         }
 
-        public CommandParentAttribute(Type type, string methodName)
+        public CommandParentAttribute(Type declaringType, string methodName)
         {
-            DeclaringType = type;
+            DeclaringType = declaringType;
             MethodName = methodName;
         }
 
         public Type CommandType { get; }
-        public Type DeclaringType { get; set; }
-        public string MethodName { get; set; }
+        public Type DeclaringType { get; }
+        public string MethodName { get; }
     }
 }
