@@ -24,6 +24,6 @@ namespace OpenMod.Core.Helpers
 
         public IContainer Container { get; set; }
         public object Instance { get; set; }
-        public PropertyDescriptor PropertyDescriptor { get; }
+        public PropertyDescriptor PropertyDescriptor { get; }//todo implement or remove
     }
 }

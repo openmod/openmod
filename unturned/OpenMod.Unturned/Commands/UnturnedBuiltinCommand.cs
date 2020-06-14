@@ -1,9 +1,10 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 using OpenMod.API.Commands;
+using OpenMod.API.Console;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Ioc;
-using OpenMod.Unturned.Console;
+using OpenMod.Unturned.API;
 using Steamworks;
 
 namespace OpenMod.Unturned.Commands
@@ -27,12 +28,14 @@ namespace OpenMod.Unturned.Commands
 
             switch (Context.Actor)
             {
-                case UnturnedPlayerCommandActor unturnedPlayerActor:
+                case IUnturnedPlayerActor unturnedPlayerActor:
                     id = unturnedPlayerActor.SteamId;
                     break;
-                case ConsoleActor _:
+
+                case IConsoleActor _:
                     id = CSteamID.Nil;
                     break;
+
                 default:
                     throw new NotSupportedException($"Can not execute unturned commands from actor: {Context.Actor.GetType()}");
             }

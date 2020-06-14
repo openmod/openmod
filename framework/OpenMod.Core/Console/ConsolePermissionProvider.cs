@@ -1,11 +1,11 @@
-﻿using OpenMod.API.Permissions;
+﻿using OpenMod.API.Console;
 using OpenMod.Core.Permissions;
 
-namespace OpenMod.Standalone
+namespace OpenMod.Core.Console
 {
     public class ConsolePermissionProvider : AlwaysGrantPermissionCheckProvider
     {
-        public ConsolePermissionProvider() : base(actor => actor is ConsoleActor)
+        public ConsolePermissionProvider() : base(actor => actor is IConsoleActor)
         {
         }
     }

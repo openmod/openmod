@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Commands;
+using OpenMod.API.Console;
 using OpenMod.API.Prioritization;
-using OpenMod.Unturned.Console;
+using OpenMod.Unturned.API;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Commands
@@ -34,7 +35,7 @@ namespace OpenMod.Unturned.Commands
 
         public bool SupportsActor(ICommandActor actor)
         {
-            return actor is UnturnedPlayerCommandActor || actor is ConsoleActor;
+            return actor is IUnturnedPlayerActor || actor is IConsoleActor;
         }
 
         public ICommand Instantiate(IServiceProvider serviceProvider)

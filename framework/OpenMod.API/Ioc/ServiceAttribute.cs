@@ -2,9 +2,8 @@
 
 namespace OpenMod.API.Ioc
 {
-    [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Interface)]
     public class ServiceAttribute : Attribute
     {
-
     }
 }

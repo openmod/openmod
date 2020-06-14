@@ -1,5 +1,4 @@
 ﻿using OpenMod.API.Commands;
-using OpenMod.Core.Commands;
 using OpenMod.Core.Ioc;
 using OpenMod.UnityEngine.Commands;
 

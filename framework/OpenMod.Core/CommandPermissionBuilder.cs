@@ -23,15 +23,10 @@ namespace OpenMod.Core
         private readonly Dictionary<string, string> m_Cache = new Dictionary<string, string>();
         public virtual string GetPermission(ICommandRegistration registration)
         {
-            if (m_Cache.TryGetValue(registration.Id, out var cachedValue))
-            {
-                return cachedValue;
-            }
-
-            return GetPermission(registration, m_CommandStore.Commands);
+            return m_Cache.TryGetValue(registration.Id, out var cachedValue) ? cachedValue : GetPermission(registration, m_CommandStore.Commands);
         }
 
-        public virtual string GetPermission(ICommandRegistration registration, IEnumerable<ICommandRegistration> commands)
+        public virtual string GetPermission(ICommandRegistration registration, IReadOnlyCollection<ICommandRegistration> commands)
         {
             // todo: read the commands file and get permission from there if exists; otherwise build it
 
@@ -40,7 +35,7 @@ namespace OpenMod.Core
                 return cachedValue;
             }
 
-            string permission = registration.Name;
+            var permission = registration.Name;
             
             /* do reverse traversal from child to parent to build permission */
             var current = registration;
@@ -53,14 +48,10 @@ namespace OpenMod.Core
             return permission;
         }
 
+        // ReSharper disable once MemberCanBeMadeStatic.Local
         private ICommandRegistration GetParentCommand(ICommandRegistration registration, IEnumerable<ICommandRegistration> commands)
         {
-            if (registration.ParentId == null)
-            {
-                return null;
-            }
-
-            return commands.FirstOrDefault(d => d.Id.Equals(registration.ParentId, StringComparison.OrdinalIgnoreCase));
+            return !string.IsNullOrWhiteSpace(registration.ParentId) ? commands.FirstOrDefault(d => d.Id.Equals(registration.ParentId, StringComparison.OrdinalIgnoreCase)) : null;
         }
     }
 }

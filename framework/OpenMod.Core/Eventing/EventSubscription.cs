@@ -30,7 +30,7 @@ namespace OpenMod.Core.Eventing
         {
             Owner = new WeakReference(ownerComponent);
             Listener = listener;
-            Callback = (sender, @event) => method.InvokeWithTaskSupport(listener, new[] { sender, @event });
+            Callback = (sender, @event) => method.InvokeWithTaskSupportAsync(listener, new[] { sender, @event });
             EventListenerAttribute = attribute;
             EventName = eventType.Name;
             EventType = eventType;

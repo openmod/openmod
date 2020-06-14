@@ -9,7 +9,6 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
-using OpenMod.Core.Helpers.Prioritization;
 using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Eventing

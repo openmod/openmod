@@ -1,7 +1,9 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API.Console;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
+using OpenMod.Core.Console;
 
 namespace OpenMod.Unturned.Console
 {
@@ -10,9 +12,9 @@ namespace OpenMod.Unturned.Console
     {
         public ConsoleActorAccessor(IServiceProvider serviceProvider)
         {
-            Actor = ActivatorUtilities.CreateInstance<ConsoleActor>(serviceProvider);
+            Actor = ActivatorUtilities.CreateInstance<ConsoleActor>(serviceProvider, "openmod-unturned-console", true);
         }
 
-        public ConsoleActor Actor { get; } 
+        public IConsoleActor Actor { get; } 
     }
 }

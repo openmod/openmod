@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Localization;
 using OpenMod.API.Commands;
 
-namespace OpenMod.Core.Commands.OpenModCommands
+namespace OpenMod.Core.Commands
 {
     public class CommandWrongUsageException : UserFriendlyException
     {

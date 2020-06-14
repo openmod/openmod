@@ -10,6 +10,7 @@ using OpenMod.API;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Commands;
+using OpenMod.Core.Console;
 
 namespace OpenMod.Standalone
 {

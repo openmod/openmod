@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -36,10 +35,7 @@ namespace OpenMod.Runtime
 
         public string OpenModComponentId { get; } = "OpenMod.Runtime";
 
-        public bool IsComponentAlive
-        {
-            get { return Status != RuntimeStatus.Unloaded && Status != RuntimeStatus.Crashed; }
-        }
+        public bool IsComponentAlive => Status != RuntimeStatus.Unloaded && Status != RuntimeStatus.Crashed;
 
         public ILifetimeScope LifetimeScope { get; private set; }
 
@@ -172,12 +168,13 @@ namespace OpenMod.Runtime
             services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
             services.AddSingleton(((OpenModStartupContext)startup.Context).NuGetPackageManager);
 
-            AsyncHelper.RunSync(async () => { await startup.CompleteServiceRegistrationsAsync(services); });
+            AsyncHelper.RunSync(() => startup.CompleteServiceRegistrationsAsync(services));
         }
 
+        // ReSharper disable once MemberCanBeMadeStatic.Local
         private void SetupContainer(ContainerBuilder containerBuilder, OpenModStartup startup)
         {
-            AsyncHelper.RunSync(async () => { await startup.CompleteContainerRegistrationAsync(containerBuilder); });
+            AsyncHelper.RunSync(() => startup.CompleteContainerRegistrationAsync(containerBuilder));
         }
 
         private void SetupSerilog()
@@ -186,10 +183,10 @@ namespace OpenMod.Runtime
             if (!File.Exists(loggingPath))
             {
                 // First run, logging.yml doesn't exist yet. We can not wait for auto-copy as it would be too late.
-                using Stream stream = typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yml");
-                using StreamReader reader = new StreamReader(stream);
+                using var stream = typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yml");
+                using var reader = new StreamReader(stream ?? throw new InvalidOperationException());
 
-                string fileContent = reader.ReadToEnd();
+                var fileContent = reader.ReadToEnd();
                 File.WriteAllText(loggingPath, fileContent);
             }
 

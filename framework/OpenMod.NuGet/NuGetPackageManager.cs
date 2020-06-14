@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -13,7 +12,6 @@ using NuGet.Frameworks;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Packaging.Signing;
-using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Resolver;
 
@@ -24,8 +22,8 @@ namespace OpenMod.NuGet
         private ILogger m_Logger;
         public ILogger Logger
         {
-            get { return m_Logger; }
-            set { m_Logger = value ?? new NullLogger(); }
+            get => m_Logger;
+            set => m_Logger = value ?? new NullLogger();
         }
 
         public string PackagesDirectory { get; }
@@ -38,7 +36,8 @@ namespace OpenMod.NuGet
         private readonly PackageResolver m_PackageResolver;
         private readonly Dictionary<string, List<CachedNuGetAssembly>> m_LoadedPackageAssemblies;
 
-        private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
+
+        private static readonly Regex VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
 
         public NuGetPackageManager(string packagesDirectory)
@@ -66,7 +65,7 @@ namespace OpenMod.NuGet
                     + $"    <packageSources>{nl}"
                     + $"        <add key=\"nuget.org\" value=\"https://api.nuget.org/v3/index.json\" protocolVersion=\"3\" />{nl}"
                     + $"    </packageSources>{nl}"
-                    + $"</configuration>");
+                    + "</configuration>");
             }
 
             m_NugetSettings = Settings.LoadDefaultSettings(packagesDirectory, nugetFile, null);
@@ -90,52 +89,50 @@ namespace OpenMod.NuGet
 
         public virtual async Task<NuGetInstallResult> InstallAsync(PackageIdentity packageIdentity, bool allowPrereleaseVersions = false)
         {
-            using (var cacheContext = new SourceCacheContext())
+            using var cacheContext = new SourceCacheContext();
+            IEnumerable<SourcePackageDependencyInfo> dependencyPackages;
+            try
             {
-                IEnumerable<SourcePackageDependencyInfo> dependencyPackages;
-                try
-                {
-                    dependencyPackages = await GetDependenciesAsync(packageIdentity, cacheContext);
-                }
-                catch (NuGetResolverInputException ex)
-                {
-                    Logger.LogDebug(ex.ToString());
-                    return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
-                }
-
-                var packageExtractionContext = new PackageExtractionContext(
-                    PackageSaveMode.Nupkg,
-                    XmlDocFileSaveMode.None,
-                    ClientPolicyContext.GetClientPolicy(m_NugetSettings, Logger),
-                    Logger);
-
-                foreach (var dependencyPackage in dependencyPackages)
-                {
-                    var installedPath = m_PackagePathResolver.GetInstalledPath(dependencyPackage);
-                    if (installedPath == null)
-                    {
-                        Logger.LogInformation($"Downloading: {dependencyPackage.Id} v{dependencyPackage.Version.OriginalVersion}");
-
-                        var downloadResource = await dependencyPackage.Source.GetResourceAsync<DownloadResource>(CancellationToken.None);
-                        var downloadResult = await downloadResource.GetDownloadResourceResultAsync(
-                            dependencyPackage,
-                            new PackageDownloadContext(cacheContext),
-                            SettingsUtility.GetGlobalPackagesFolder(m_NugetSettings),
-                            Logger, CancellationToken.None);
-
-                        await PackageExtractor.ExtractPackageAsync(
-                            downloadResult.PackageSource,
-                            downloadResult.PackageStream,
-                            m_PackagePathResolver,
-                            packageExtractionContext,
-                            CancellationToken.None);
-                    }
-
-                    await LoadAssembliesFromNuGetPackageAsync(GetNugetPackageFile(dependencyPackage));
-                }
-
-                return new NuGetInstallResult(packageIdentity);
+                dependencyPackages = await GetDependenciesAsync(packageIdentity, cacheContext);
             }
+            catch (NuGetResolverInputException ex)
+            {
+                Logger.LogDebug(ex.ToString());
+                return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
+            }
+
+            var packageExtractionContext = new PackageExtractionContext(
+                PackageSaveMode.Nupkg,
+                XmlDocFileSaveMode.None,
+                ClientPolicyContext.GetClientPolicy(m_NugetSettings, Logger),
+                Logger);
+
+            foreach (var dependencyPackage in dependencyPackages)
+            {
+                var installedPath = m_PackagePathResolver.GetInstalledPath(dependencyPackage);
+                if (installedPath == null)
+                {
+                    Logger.LogInformation($"Downloading: {dependencyPackage.Id} v{dependencyPackage.Version.OriginalVersion}");
+
+                    var downloadResource = await dependencyPackage.Source.GetResourceAsync<DownloadResource>(CancellationToken.None);
+                    var downloadResult = await downloadResource.GetDownloadResourceResultAsync(
+                        dependencyPackage,
+                        new PackageDownloadContext(cacheContext),
+                        SettingsUtility.GetGlobalPackagesFolder(m_NugetSettings),
+                        Logger, CancellationToken.None);
+
+                    await PackageExtractor.ExtractPackageAsync(
+                        downloadResult.PackageSource,
+                        downloadResult.PackageStream,
+                        m_PackagePathResolver,
+                        packageExtractionContext,
+                        CancellationToken.None);
+                }
+
+                await LoadAssembliesFromNuGetPackageAsync(GetNugetPackageFile(dependencyPackage));
+            }
+
+            return new NuGetInstallResult(packageIdentity);
         }
 
         public virtual async Task<bool> IsPackageInstalledAsync(string packageId)
@@ -155,7 +152,7 @@ namespace OpenMod.NuGet
 
             Logger.LogInformation("Searching repository for package: " + packageId);
 
-            PackageSourceProvider packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
+            var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
             var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, m_Providers);
 
             var sourceRepositories = sourceRepositoryProvider.GetRepositories();
@@ -191,15 +188,15 @@ namespace OpenMod.NuGet
                 foreach (var packageMeta in searchResult)
                 {
                     var versions = (await packageMeta.GetVersionsAsync()).ToList();
-                    if (versions.Any(d
-                        => d.Version.OriginalVersion.Equals(version, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        Logger.LogDebug("adding packageMeta: "
-                            + packageMeta.Identity.Id
-                            + ":"
-                            + packageMeta.Identity.Version);
-                        matches.Add(packageMeta);
-                    }
+                    if (!versions.Any(d
+                        => d.Version.OriginalVersion.Equals(version, StringComparison.OrdinalIgnoreCase))) 
+                        continue;
+
+                    Logger.LogDebug("adding packageMeta: "
+                                    + packageMeta.Identity.Id
+                                    + ":"
+                                    + packageMeta.Identity.Version);
+                    matches.Add(packageMeta);
                 }
             }
 
@@ -208,7 +205,7 @@ namespace OpenMod.NuGet
 
         public virtual async Task<IEnumerable<SourcePackageDependencyInfo>> GetDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext)
         {
-            PackageSourceProvider packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
+            var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
             var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, m_Providers);
 
             var sourceRepositories = sourceRepositoryProvider.GetRepositories();
@@ -285,35 +282,33 @@ namespace OpenMod.NuGet
                     }
 
                     var entry = packageReader.GetEntry(item);
-                    using (var stream = entry.Open())
+                    using var stream = entry.Open();
+                    var ms = new MemoryStream();
+                    await stream.CopyToAsync(ms);
+
+                    try
                     {
-                        MemoryStream ms = new MemoryStream();
-                        await stream.CopyToAsync(ms);
+                        var asm = Assembly.Load(ms.ToArray());
 
-                        try
-                        {
-                            var asm = Assembly.Load(ms.ToArray());
+                        var name = GetVersionIndependentName(asm.FullName, out string extractedVersion);
+                        var parsedVersion = new Version(extractedVersion);
 
-                            var name = GetVersionIndependentName(asm.FullName, out string extractedVersion);
-                            var parsedVersion = new Version(extractedVersion);
-
-                            assemblies.Add(new CachedNuGetAssembly
-                            {
-                                Assembly = new WeakReference(asm),
-                                AssemblyName = name,
-                                Version = parsedVersion
-                            });
-                        }
-                        catch (Exception ex)
+                        assemblies.Add(new CachedNuGetAssembly
                         {
-                            Logger.LogError("Failed to load assembly: " + item);
-                            Logger.LogError(ex.ToString());
-                        }
-                        finally
-                        {
-                            ms.Close();
-                            stream.Close();
-                        }
+                            Assembly = new WeakReference(asm),
+                            AssemblyName = name,
+                            Version = parsedVersion
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError("Failed to load assembly: " + item);
+                        Logger.LogError(ex.ToString());
+                    }
+                    finally
+                    {
+                        ms.Close();
+                        stream.Close();
                     }
                 }
             }
@@ -330,28 +325,26 @@ namespace OpenMod.NuGet
                 return null;
             }
 
-            List<PackageIdentity> packageIdentities = new List<PackageIdentity>();
+            var packageIdentities = new List<PackageIdentity>();
             foreach (var dir in Directory.GetDirectories(PackagesDirectory))
             {
                 var dirName = new DirectoryInfo(dir).Name;
-                if (dirName.StartsWith(packageId + ".", StringComparison.OrdinalIgnoreCase))
+                if (!dirName.StartsWith(packageId + ".", StringComparison.OrdinalIgnoreCase)) 
+                    continue;
+
+                var directoryName = new DirectoryInfo(dir).Name;
+                var nupkgFile = Path.Combine(dir, directoryName + ".nupkg");
+                if (!File.Exists(nupkgFile))
                 {
-                    var directoryName = new DirectoryInfo(dir).Name;
-                    var nupkgFile = Path.Combine(dir, directoryName + ".nupkg");
-                    if (!File.Exists(nupkgFile))
-                    {
-                        return null;
-                    }
+                    return null;
+                }
 
-                    using (var reader = new PackageArchiveReader(nupkgFile))
-                    {
-                        var identity = await reader.GetIdentityAsync(CancellationToken.None);
+                using var reader = new PackageArchiveReader(nupkgFile);
+                var identity = await reader.GetIdentityAsync(CancellationToken.None);
 
-                        if (identity.Id.Equals(packageId))
-                        {
-                            packageIdentities.Add(identity);
-                        }
-                    }
+                if (identity.Id.Equals(packageId))
+                {
+                    packageIdentities.Add(identity);
                 }
             }
 
@@ -440,9 +433,9 @@ namespace OpenMod.NuGet
 
         protected static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
         {
-            var match = s_VersionRegex.Match(fullAssemblyName);
+            var match = VersionRegex.Match(fullAssemblyName);
             extractedVersion = match.Groups[1].Value;
-            return s_VersionRegex.Replace(fullAssemblyName, "");
+            return VersionRegex.Replace(fullAssemblyName, "");
         }
 
         public Task<bool> RemoveAsync(PackageIdentity package)

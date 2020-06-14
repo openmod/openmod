@@ -8,16 +8,14 @@ using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
-using OpenMod.Core;
+using OpenMod.Core.Console;
 using OpenMod.Core.Helpers;
 using OpenMod.UnityEngine;
 using OpenMod.Unturned.Commands;
-using OpenMod.Unturned.Console;
 using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
 using SDG.Unturned;
@@ -50,7 +48,7 @@ namespace OpenMod.Unturned
         private bool m_IsDisposing;
 
         public OpenModUnturnedHost(
-            IRuntime runtime,
+            IOpenModComponent openModComponent,
             ILifetimeScope lifetimeScope,
             IDataStoreFactory dataStoreFactory,
             ILoggerFactory loggerFactory,
@@ -65,7 +63,7 @@ namespace OpenMod.Unturned
             m_Host = host;
             m_Logger = logger;
             m_Harmony = new Harmony(HarmonyInstanceId);
-            WorkingDirectory = runtime.WorkingDirectory;
+            WorkingDirectory = openModComponent.WorkingDirectory;
             LifetimeScope = lifetimeScope;
             DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
@@ -88,16 +86,17 @@ namespace OpenMod.Unturned
 
                 /* Fix Unturned destroying console and breaking Serilog formatting and colors */
                 var shouldManageConsoleField = typeof(WindowsConsole).GetField("shouldManageConsole", BindingFlags.Static | BindingFlags.NonPublic);
+                // ReSharper disable PossibleNullReferenceException
                 var shouldManageConsole = (CommandLineFlag) shouldManageConsoleField.GetValue(null);
                 shouldManageConsole.value = false; 
 
                 if (PlatformHelper.IsLinux)
                 {
-                    Dedicator.commandWindow.setIOHandler(new SerilogConsoleInputOutput(m_LoggerFactory));
+                    Dedicator.commandWindow.addIOHandler(new SerilogConsoleInputOutput(m_LoggerFactory));
                 }
                 else
                 {
-                    Dedicator.commandWindow.setIOHandler(new SerilogWindowsConsoleInputOutput(m_LoggerFactory));
+                    Dedicator.commandWindow.addIOHandler(new SerilogWindowsConsoleInputOutput(m_LoggerFactory));
                 }
 
                 m_Logger.LogInformation($"OpenMod for Unturned v{Version} is initializing...");
@@ -107,8 +106,10 @@ namespace OpenMod.Unturned
 
                 var unitySynchronizationContetextField = typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext", BindingFlags.Static | BindingFlags.NonPublic);
                 unitySynchronizationContetextField.SetValue(null, SynchronizationContext.Current);
+
                 var mainThreadIdField = typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
                 mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
+                // ReSharper restore PossibleNullReferenceException
 
                 var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
                 PlayerLoopHelper.Initialize(ref playerLoop);
@@ -123,6 +124,9 @@ namespace OpenMod.Unturned
         {
             CommandWindow.onCommandWindowInputted += (string text, ref bool shouldExecuteCommand) =>
             {
+                if (!shouldExecuteCommand)
+                    return;
+
                 var actor = m_ConsoleActorAccessor.Actor;
                 AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, text.Split(' '), string.Empty));
                 shouldExecuteCommand = false;
@@ -130,7 +134,7 @@ namespace OpenMod.Unturned
 
             ChatManager.onCheckPermissions += (SteamPlayer player, string text, ref bool shouldExecuteCommand, ref bool shouldList) =>
             {
-                if (!text.StartsWith("/"))
+                if (!shouldExecuteCommand || !text.StartsWith("/"))
                 {
                     return;
                 }

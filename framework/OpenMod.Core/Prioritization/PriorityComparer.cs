@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenMod.API.Prioritization;
-using OpenMod.Core.Helpers.Prioritization;
 
 namespace OpenMod.Core.Prioritization
 {

@@ -2,9 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Ioc;
 using OpenMod.Core;
+using OpenMod.Core.Console;
 using OpenMod.Core.Permissions;
 using OpenMod.Unturned.Commands;
-using OpenMod.Unturned.Console;
 
 namespace OpenMod.Unturned
 {

@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
-using OpenMod.Core.Helpers.Prioritization;
 using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core
