@@ -19,9 +19,9 @@ namespace OpenMod.Core.Prioritization
             switch (m_ComparisonMode)
             {
                 case PriortyComparisonMode.LowestFirst:
-                    return ((int)y).CompareTo((int)x);
-                case PriortyComparisonMode.HighestFirst:
                     return ((int)x).CompareTo((int)y);
+                case PriortyComparisonMode.HighestFirst:
+                    return ((int)y).CompareTo((int)x);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
