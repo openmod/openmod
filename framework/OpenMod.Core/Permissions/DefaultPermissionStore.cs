@@ -5,18 +5,24 @@ using System.Threading.Tasks;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Permissions.Data;
+using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Permissions
 {
     [Priority(Priority = Priority.Lowest)]
     public class DefaultPermissionStore : IPermissionStore
     {
-        private readonly IPermissionFileManager m_PermissionFileManager;
+        private readonly IUsersDataStore m_UsersDataStore;
+        private readonly IPermissionGroupsDataStore m_PermissionGroupsDataStore;
         private readonly IPermissionGroupStore m_PermissionGroupStore;
 
-        public DefaultPermissionStore(IPermissionFileManager permissionFileManager, IPermissionGroupStore permissionGroupStore)
+        public DefaultPermissionStore(
+            IUsersDataStore usersDataStore,
+            IPermissionGroupsDataStore permissionGroupsDataStore,
+            IPermissionGroupStore permissionGroupStore)
         {
-            m_PermissionFileManager = permissionFileManager;
+            m_UsersDataStore = usersDataStore;
+            m_PermissionGroupsDataStore = permissionGroupsDataStore;
             m_PermissionGroupStore = permissionGroupStore;
         }
         public virtual Task<IReadOnlyCollection<string>> GetGrantedPermissionsAsync(IPermissionActor actor, bool inherit = true)
@@ -77,20 +83,20 @@ namespace OpenMod.Core.Permissions
         {
             if (actor is IPermissionGroup)
             {
-                var groupData = m_PermissionFileManager.PermissionGroupsData.PermissionGroups.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
+                var groupData = m_PermissionGroupsDataStore.PermissionGroups.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
                 if (groupData == null)
                 {
                     return false;
                 }
 
                 groupData.Permissions.Add(permission);
-                await m_PermissionFileManager.SavePermissionGroupsAsync();
+                await m_PermissionGroupsDataStore.SaveChangesAsync();
                 return true;
             }
 
             var user = await GetOrCreateUserDataAsync(actor);
             user.Permissions.Add(permission);
-            await m_PermissionFileManager.SaveUsersAsync();
+            await m_UsersDataStore.SaveChangesAsync();
             return true;
         }
 
@@ -103,7 +109,7 @@ namespace OpenMod.Core.Permissions
         {
             if (actor is IPermissionGroup)
             {
-                var groupData = m_PermissionFileManager.PermissionGroupsData.PermissionGroups.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
+                var groupData = m_PermissionGroupsDataStore.PermissionGroups.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
                 if (groupData == null)
                 {
                     return false;
@@ -112,7 +118,7 @@ namespace OpenMod.Core.Permissions
                 if (!groupData.Permissions.Remove(permission)) 
                     return false;
 
-                await m_PermissionFileManager.SavePermissionGroupsAsync();
+                await m_PermissionGroupsDataStore.SaveChangesAsync();
                 return true;
             }
 
@@ -120,7 +126,7 @@ namespace OpenMod.Core.Permissions
             if (!user.Permissions.Remove(permission))
                 return false;
 
-            await m_PermissionFileManager.SaveUsersAsync();
+            await m_UsersDataStore.SaveChangesAsync();
             return true;
         }
 
@@ -131,7 +137,7 @@ namespace OpenMod.Core.Permissions
 
         protected virtual UserData GetUserData(IPermissionActor actor)
         {
-            return m_PermissionFileManager.UsersData.Users.FirstOrDefault(d => d.Id.Equals(actor.Id, StringComparison.InvariantCultureIgnoreCase));
+            return m_UsersDataStore.Users.FirstOrDefault(d => d.Id.Equals(actor.Id, StringComparison.InvariantCultureIgnoreCase));
         }
 
         protected virtual async Task<UserData> GetOrCreateUserDataAsync(IPermissionActor actor)
@@ -153,8 +159,8 @@ namespace OpenMod.Core.Permissions
                 Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
             };
 
-            m_PermissionFileManager.UsersData.Users.Add(userData);
-            await m_PermissionFileManager.SaveUsersAsync();
+            m_UsersDataStore.Users.Add(userData);
+            await m_UsersDataStore.SaveChangesAsync();
             await m_PermissionGroupStore.AssignAutoGroupsToUserAsync(actor);
             return userData;
         }

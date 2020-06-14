@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenMod.API;
+using OpenMod.API.Eventing;
 using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Commands;
@@ -16,16 +17,18 @@ namespace OpenMod.Core.Plugins
 {
     public abstract class OpenModPluginBase : IOpenModPlugin, IAsyncDisposable
     {
-        public string OpenModComponentId { get; }
-        public string WorkingDirectory { get; }
-        public bool IsComponentAlive { get; protected set; }
-        public string DisplayName { get; }
-        public string Author { get; }
-        public SemVersion Version { get; }
+        public virtual string OpenModComponentId { get; }
+        public virtual string WorkingDirectory { get; }
+        public virtual bool IsComponentAlive { get; protected set; }
+        public virtual string DisplayName { get; }
+        public virtual string Author { get; }
+        public virtual SemVersion Version { get; }
+        public virtual IDataStore DataStore { get; }
+        public virtual ILifetimeScope LifetimeScope { get; }
+        public virtual IConfiguration Configuration { get; protected set; }
         public IRuntime Runtime { get; }
-        public IDataStore DataStore { get; }
-        public ILifetimeScope LifetimeScope { get; }
-        public IConfiguration Configuration { get; set; }
+        public IEventBus EventBus { get; }
+        protected ILogger Logger { get; set; }
 
         private readonly IOptions<CommandStoreOptions> m_CommandStoreOptions;
         private readonly ILoggerFactory m_LoggerFactory;
@@ -37,6 +40,7 @@ namespace OpenMod.Core.Plugins
             Configuration = serviceProvider.GetRequiredService<IConfiguration>();
             DataStore = serviceProvider.GetRequiredService<IDataStore>();
             Runtime = serviceProvider.GetRequiredService<IRuntime>();
+            EventBus = serviceProvider.GetRequiredService<IEventBus>();
             m_LoggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
             m_CommandStoreOptions = serviceProvider.GetRequiredService<IOptions<CommandStoreOptions>>();
             
@@ -50,9 +54,11 @@ namespace OpenMod.Core.Plugins
 
         public virtual Task LoadAsync()
         {
-            var logger = m_LoggerFactory.CreateLogger<OpenModComponentCommandSource>();
-            m_CommandSource = new OpenModComponentCommandSource(logger, this);
+            Logger = m_LoggerFactory.CreateLogger(GetType());
+            Logger.LogInformation($"[loading] {DisplayName} v{Version}");
+            m_CommandSource = new OpenModComponentCommandSource(Logger, this);
             m_CommandStoreOptions.Value.AddCommandSource(m_CommandSource);
+            IsComponentAlive = true;
 
             return Task.CompletedTask;
         }
@@ -60,6 +66,9 @@ namespace OpenMod.Core.Plugins
         public virtual Task UnloadAsync()
         {
             m_CommandStoreOptions.Value.RemoveCommandSource(m_CommandSource);
+            EventBus.Unsubscribe(this);
+            IsComponentAlive = false;
+
             return Task.CompletedTask;
         }
 

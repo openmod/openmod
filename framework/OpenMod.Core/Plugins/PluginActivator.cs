@@ -117,8 +117,6 @@ namespace OpenMod.Core.Plugins
                 return null;
             }
 
-            m_Logger.LogInformation($"Loading plugin: {pluginInstance.DisplayName} v{pluginInstance.Version}");
-
             try
             {
                 await pluginInstance.LoadAsync();

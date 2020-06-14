@@ -8,6 +8,7 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Permissions.Data;
+using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Permissions
 {
@@ -15,10 +16,14 @@ namespace OpenMod.Core.Permissions
     [ServiceImplementation(Priority = Priority.Lowest, Lifetime = ServiceLifetime.Singleton)]
     public class DefaultPermissionGroupStore : IPermissionGroupStore
     {
-        private readonly IPermissionFileManager m_PermissionFileManager;
-        public DefaultPermissionGroupStore(IPermissionFileManager permissionFileManager)
+        private readonly IPermissionGroupsDataStore m_PermissionGroupsDataStore;
+        private readonly IUsersDataStore m_UsersDataStore;
+        public DefaultPermissionGroupStore(
+            IPermissionGroupsDataStore permissionGroupsDataStore, 
+            IUsersDataStore usersDataStore)
         {
-            m_PermissionFileManager = permissionFileManager;
+            m_PermissionGroupsDataStore = permissionGroupsDataStore;
+            m_UsersDataStore = usersDataStore;
         }
         
         public virtual async Task<IReadOnlyCollection<IPermissionGroup>> GetGroupsAsync(IPermissionActor actor, bool inherit = true)
@@ -93,7 +98,7 @@ namespace OpenMod.Core.Permissions
                 throw new Exception("Can not auto assignment on permission groups.");
             }
 
-            var user = m_PermissionFileManager.UsersData.Users.FirstOrDefault(d => d.Id.Equals(actor.Id, StringComparison.InvariantCultureIgnoreCase));
+            var user = m_UsersDataStore.Users.FirstOrDefault(d => d.Id.Equals(actor.Id, StringComparison.InvariantCultureIgnoreCase));
             if (user == null)
             {
                 // CreateUser will assign groups itself
@@ -106,12 +111,12 @@ namespace OpenMod.Core.Permissions
                 user.Groups.Add(group.Id);
             }
 
-            await m_PermissionFileManager.SaveUsersAsync();
+            await m_UsersDataStore.SaveChangesAsync();
         }
 
         protected virtual async Task<UserData> GetOrCreateUserDataAsync(IPermissionActor actor)
         {
-            var user = m_PermissionFileManager.UsersData.Users.FirstOrDefault(d => d.Id == actor.Id);
+            var user = m_UsersDataStore.Users.FirstOrDefault(d => d.Id == actor.Id);
             if (user != null)
             {
                 return user;
@@ -129,19 +134,25 @@ namespace OpenMod.Core.Permissions
                     StringComparer.InvariantCultureIgnoreCase)
             };
 
-            m_PermissionFileManager.UsersData.Users.Add(userData);
-            await m_PermissionFileManager.SaveUsersAsync();
+            m_UsersDataStore.Users.Add(userData);
+            await m_UsersDataStore.SaveChangesAsync();
             return userData;
         }
 
         public virtual Task<IReadOnlyCollection<IPermissionGroup>> GetGroupsAsync()
         {
-            return Task.FromResult((IReadOnlyCollection<IPermissionGroup>)m_PermissionFileManager.PermissionGroupsData.PermissionGroups.OfType<IPermissionGroup>().ToList());
+            //cast is neccessary, OfType<> or Cast<> does not work with cast operators
+            return Task.FromResult((IReadOnlyCollection<IPermissionGroup>)m_PermissionGroupsDataStore.PermissionGroups
+                .Select(d => (IPermissionGroup)(PermissionGroup)d)
+                .ToList());
         }
 
         public virtual Task<IPermissionGroup> GetGroupAsync(string id)
         {
-            return Task.FromResult(m_PermissionFileManager.PermissionGroupsData.PermissionGroups.OfType<IPermissionGroup>().FirstOrDefault(d => d.Id.Equals(id, StringComparison.OrdinalIgnoreCase)));
+            //cast is neccessary, OfType<> or Cast<> does not work with cast operators
+            return Task.FromResult(m_PermissionGroupsDataStore.PermissionGroups
+                .Select(d => (IPermissionGroup)(PermissionGroup)d)
+                .FirstOrDefault(d => d.Id.Equals(id, StringComparison.OrdinalIgnoreCase)));
         }
 
         public virtual async Task<bool> UpdateGroupAsync(IPermissionGroup group)
@@ -151,10 +162,10 @@ namespace OpenMod.Core.Permissions
                 return false;
             }
 
-            m_PermissionFileManager.PermissionGroupsData.PermissionGroups.RemoveAll(d => d.Id.Equals(group.Id, StringComparison.OrdinalIgnoreCase));
-            m_PermissionFileManager.PermissionGroupsData.PermissionGroups.Add((PermissionGroup)group);
+            m_PermissionGroupsDataStore.PermissionGroups.RemoveAll(d => d.Id.Equals(group.Id, StringComparison.OrdinalIgnoreCase));
+            m_PermissionGroupsDataStore.PermissionGroups.Add((PermissionGroup)group);
 
-            await m_PermissionFileManager.SavePermissionGroupsAsync();
+            await m_PermissionGroupsDataStore.SaveChangesAsync();
             return true;
         }
 
@@ -167,7 +178,7 @@ namespace OpenMod.Core.Permissions
             }
 
             user.Groups.Add(groupId);
-            await m_PermissionFileManager.SaveUsersAsync();
+            await m_UsersDataStore.SaveChangesAsync();
             return true;
         }
 
@@ -176,7 +187,7 @@ namespace OpenMod.Core.Permissions
             var user = await GetOrCreateUserDataAsync(actor);
             user.Groups.Remove(groupId);
 
-            await m_PermissionFileManager.SaveUsersAsync();
+            await m_UsersDataStore.SaveChangesAsync();
             return true;
         }
 
@@ -187,7 +198,7 @@ namespace OpenMod.Core.Permissions
                 return false;
             }
 
-            m_PermissionFileManager.PermissionGroupsData.PermissionGroups.Add(new PermissionGroupData
+            m_PermissionGroupsDataStore.PermissionGroups.Add(new PermissionGroupData
             {
                 Priority = group.Priority,
                 Id = group.Id,
@@ -198,25 +209,26 @@ namespace OpenMod.Core.Permissions
                 IsAutoAssigned = group.IsAutoAssigned
             });
 
-            await m_PermissionFileManager.SavePermissionGroupsAsync();
+            await m_PermissionGroupsDataStore.SaveChangesAsync();
             return true;
         }
 
         public virtual async Task<bool> DeleteGroupAsync(string groupId)
         {
-            if (m_PermissionFileManager.PermissionGroupsData.PermissionGroups.RemoveAll(c => groupId.Equals(c.Id, StringComparison.OrdinalIgnoreCase)) == 0)
+            if (m_PermissionGroupsDataStore.PermissionGroups.RemoveAll(c => groupId.Equals(c.Id, StringComparison.OrdinalIgnoreCase)) == 0)
             {
                 return false;
             }
 
-            await m_PermissionFileManager.SavePermissionGroupsAsync();
+            await m_PermissionGroupsDataStore.SaveChangesAsync();
             return true;
         }
 
         protected IEnumerable<IPermissionGroup> GetAutoAssignPermissionGroups()
         {
-            return m_PermissionFileManager.PermissionGroupsData.PermissionGroups
-                .OfType<IPermissionGroup>()
+            //cast is neccessary, OfType<> or Cast<> does not work with cast operators
+            return m_PermissionGroupsDataStore.PermissionGroups
+                .Select(d => (PermissionGroup)d)
                 .Where(d => d.IsAutoAssigned);
         }
     }
