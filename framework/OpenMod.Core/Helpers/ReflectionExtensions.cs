@@ -161,7 +161,7 @@ namespace OpenMod.Core.Helpers
         {
             var match = VersionRegex.Match(name);
             extractedVersion = match.Groups[1].Value;
-            return VersionRegex.Replace(name, "");
+            return VersionRegex.Replace(name, string.Empty);
         }
 
         public static string GetDebugName(this MethodBase mb)

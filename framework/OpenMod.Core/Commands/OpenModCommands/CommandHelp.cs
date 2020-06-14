@@ -102,7 +102,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
             await PrintAsync($"Permission: {permission ?? "<none>"}");
             await PrintAsync("Command structure:");
-            await PrintChildrenAsync(context.CommandRegistration, commands, "", true);
+            await PrintChildrenAsync(context.CommandRegistration, commands, string.Empty, true);
         }
 
         private async Task PrintChildrenAsync(ICommandRegistration registration, IEnumerable<ICommandRegistration> commands, string intent, bool isLast)
@@ -164,8 +164,8 @@ namespace OpenMod.Core.Commands.OpenModCommands
         {
             return prefix
                    + command.Name.ToLower()
-                   + (string.IsNullOrEmpty(command.Syntax) ? "" : " " + command.Syntax)
-                   + (string.IsNullOrEmpty(command.Description) ? "" : ": " + command.Description);
+                   + (string.IsNullOrEmpty(command.Syntax) ? string.Empty : " " + command.Syntax)
+                   + (string.IsNullOrEmpty(command.Description) ? string.Empty : ": " + command.Description);
         }
     }
 }

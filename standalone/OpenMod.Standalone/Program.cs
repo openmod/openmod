@@ -14,9 +14,9 @@ using OpenMod.Core.Console;
 
 namespace OpenMod.Standalone
 {
-    class Program
+    internal class Program
     {
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -31,27 +31,31 @@ namespace OpenMod.Standalone
             var commandExecutor = host.Services.GetRequiredService<ICommandExecutor>();
             var consoleActorAccessor = host.Services.GetRequiredService<IConsoleActorAccessor>();
 
-            string line;
-            while (!(line = Console.ReadLine())?.Equals("exit", StringComparison.OrdinalIgnoreCase) ?? false)
+
+            do
             {
-                if (string.IsNullOrEmpty(line))
+                var line = Console.ReadLine();
+                if (!string.IsNullOrEmpty(line))
                 {
-                    continue;
+                    if (line.Equals("exit", StringComparison.OrdinalIgnoreCase))
+                        break;
+
+                    try
+                    {
+                        await commandExecutor.ExecuteAsync(consoleActorAccessor.Actor, line.Split(' ').ToArray(), string.Empty);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString(), Color.DarkRed);
+                        Debugger.Break();
+                    }
                 }
 
-                try
-                {
-                    await commandExecutor.ExecuteAsync(consoleActorAccessor.Actor, line.Split(' ').ToArray(), string.Empty);
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.Write("> ");
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString(), Color.DarkRed);
-                    Debugger.Break();
-                }
-            }
+
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.Write("> ");
+                Console.ForegroundColor = ConsoleColor.White;
+            } while (true);
         }
     }
 }

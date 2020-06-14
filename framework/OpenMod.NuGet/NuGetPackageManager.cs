@@ -435,7 +435,7 @@ namespace OpenMod.NuGet
         {
             var match = VersionRegex.Match(fullAssemblyName);
             extractedVersion = match.Groups[1].Value;
-            return VersionRegex.Replace(fullAssemblyName, "");
+            return VersionRegex.Replace(fullAssemblyName, string.Empty);
         }
 
         public Task<bool> RemoveAsync(PackageIdentity package)
