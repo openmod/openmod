@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Commands;
 using OpenMod.Core.Users;
 
-namespace OpenMod.Standalone
+namespace OpenMod.Unturned.Console
 {
     public class ConsoleActor : ICommandActor
     {
@@ -16,7 +15,7 @@ namespace OpenMod.Standalone
             m_Logger = logger;
         }
 
-        public string Id { get; } = "openmod-standalone-console";
+        public string Id { get; } = "openmod-unturned-console";
         public string Type { get; } = KnownUserTypes.Console;
         public Dictionary<string, object> Data { get; } = new Dictionary<string, object>();
         public string DisplayName { get; } = "Console";

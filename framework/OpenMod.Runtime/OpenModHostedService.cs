@@ -14,6 +14,7 @@ namespace OpenMod.Runtime
     {
         private readonly ILogger<OpenModHostedService> m_Logger;
         private readonly IPermissionChecker m_PermissionChecker;
+        private readonly IRuntime m_Runtime;
         private readonly IOpenModHost m_Host;
         private readonly IPluginAssemblyStore m_PluginAssemblyStore;
         private readonly IPluginActivator m_PluginActivator;
@@ -21,6 +22,7 @@ namespace OpenMod.Runtime
         public OpenModHostedService(
             ILogger<OpenModHostedService> logger,
             IPermissionChecker permissionChecker,
+            IRuntime runtime,
             IOpenModHost host,
             IPluginAssemblyStore pluginAssemblyStore,
             IPluginActivator pluginActivator
@@ -28,6 +30,7 @@ namespace OpenMod.Runtime
         {
             m_Logger = logger;
             m_PermissionChecker = permissionChecker;
+            m_Runtime = runtime;
             m_Host = host;
             m_PluginAssemblyStore = pluginAssemblyStore;
             m_PluginActivator = pluginActivator;
@@ -49,6 +52,11 @@ namespace OpenMod.Runtime
             }
 
             m_Logger.LogInformation("Plugins loaded.");
+         
+            if (m_Runtime is Runtime openModRuntime)
+            {
+                openModRuntime.NotifyHostReady();
+            }
         }
     }
 }

@@ -41,44 +41,9 @@ namespace OpenMod.Standalone
         public Task InitAsync()
         {
             IsComponentAlive = true;
-
-            //todo: listen for host ready event and dont use a separate thread
-            AsyncHelper.Schedule("InputLoop", InputLoop);
-
             return Task.CompletedTask;
         }
-
-        private async Task InputLoop()
-        {
-            //Console.WriteLine("Ready. Type \"help\" for help.");
-            //Console.Write("> ");
-
-            string line;
-            while (!(line = Console.ReadLine())?.Equals("exit", StringComparison.OrdinalIgnoreCase) ?? false)
-            {
-                if (string.IsNullOrEmpty(line))
-                {
-                    continue;
-                }
-
-                try
-                {
-                    await m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, line.Split(' ').ToArray(), string.Empty);
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.Write("> ");
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString(), Color.DarkRed);
-                    Debugger.Break();
-                }
-            }
-
-            IsComponentAlive = false;
-            await m_Runtime.ShutdownAsync();
-        }
-
+        
         public string DisplayName { get; } = "OpenMod Standalone Host";
         public string Version { get; } = "0.1.0";
         public string OpenModComponentId { get; } = "OpenMod.Standalone";

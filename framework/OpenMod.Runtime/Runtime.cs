@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -31,20 +32,36 @@ namespace OpenMod.Runtime
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
         }
 
+        public SemVersion Version { get; }
+
+        public string OpenModComponentId { get; } = "OpenMod.Runtime";
+
+        public bool IsComponentAlive
+        {
+            get { return Status != RuntimeStatus.Unloaded && Status != RuntimeStatus.Crashed; }
+        }
+
+        public ILifetimeScope LifetimeScope { get; private set; }
+
+        public RuntimeStatus Status { get; private set; } = RuntimeStatus.Unloaded;
+
         public string WorkingDirectory { get; private set; }
+
         public string[] CommandlineArgs { get; private set; }
+
         public IDataStore DataStore { get; private set; }
 
         private IHost m_Host;
         private SerilogLoggerFactory m_LoggerFactory;
         private ILogger<Runtime> m_Logger;
+        private readonly EventWaitHandle m_HostReadyEventHandle = new ManualResetEvent(false);
 
         public void Init(List<Assembly> openModAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters)
         {
             AsyncHelper.RunSync(() => InitAsync(openModAssemblies, hostBuilder, parameters));
         }
 
-        public async Task InitAsync(
+        public Task<IHost> InitAsync(
             List<Assembly> openModHostAssemblies,
             [CanBeNull] IHostBuilder hostBuilder,
             RuntimeInitParameters parameters)
@@ -91,41 +108,53 @@ namespace OpenMod.Runtime
                 startup.RegisterIocAssemblyAndCopyResources(assembly, string.Empty);
             }
 
-            try
-            {
-                hostBuilder
-                    .UseContentRoot(parameters.WorkingDirectory)
-                    .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-                    .ConfigureHostConfiguration(builder =>
-                    {
-                        ConfigureConfiguration(builder);
-                        ((OpenModStartupContext)startup.Context).Configuration = builder.Build();
-                    })
-                    .ConfigureAppConfiguration(ConfigureConfiguration)
-                    .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, startup))
-                    .ConfigureServices(services => SetupServices(services, startup))
-                    .UseSerilog();
+            hostBuilder
+                .UseContentRoot(parameters.WorkingDirectory)
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .ConfigureHostConfiguration(builder =>
+                {
+                    ConfigureConfiguration(builder);
+                    ((OpenModStartupContext)startup.Context).Configuration = builder.Build();
+                })
+                .ConfigureAppConfiguration(ConfigureConfiguration)
+                .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, startup))
+                .ConfigureServices(services => SetupServices(services, startup))
+                .UseSerilog();
 
-                m_Host = hostBuilder.Build();
-                Status = RuntimeStatus.Initialized;
-                LifetimeScope = m_Host.Services.GetRequiredService<ILifetimeScope>();
-                DataStore = m_Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore("openmod", WorkingDirectory);
-                await m_Host.RunAsync();
-                m_Logger.LogInformation("OpenMod has shut down.");
-                Status = RuntimeStatus.Unloaded;
-            }
-            catch (Exception ex)
+            m_Host = hostBuilder.Build();
+            Status = RuntimeStatus.Initialized;
+            LifetimeScope = m_Host.Services.GetRequiredService<ILifetimeScope>();
+            DataStore = m_Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore("openmod", WorkingDirectory);
+
+            Exception exception = null;
+            AsyncHelper.Schedule("OpenMod start", StartHostAsync, ex =>
             {
                 Status = RuntimeStatus.Crashed;
                 m_Logger.LogCritical(ex, "OpenMod has crashed.");
-                throw;
+                exception = ex;
+                m_HostReadyEventHandle.Set();
+            });
+
+            m_HostReadyEventHandle.WaitOne();
+            return exception == null 
+                ? Task.FromResult(m_Host) 
+                : Task.FromException<IHost>(exception);
+        }
+
+        private async Task StartHostAsync()
+        {
+            try
+            {
+                await m_Host.RunAsync();
+                m_Logger.LogInformation("OpenMod has shut down.");
+                Status = RuntimeStatus.Unloaded;
             }
             finally
             {
                 Log.CloseAndFlush();
             }
         }
-        
+
         private void ConfigureConfiguration(IConfigurationBuilder builder)
         {
             builder
@@ -159,7 +188,7 @@ namespace OpenMod.Runtime
                 // First run, logging.yml doesn't exist yet. We can not wait for auto-copy as it would be too late.
                 using Stream stream = typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yml");
                 using StreamReader reader = new StreamReader(stream);
-                
+
                 string fileContent = reader.ReadToEnd();
                 File.WriteAllText(loggingPath, fileContent);
             }
@@ -185,17 +214,9 @@ namespace OpenMod.Runtime
             Status = RuntimeStatus.Unloaded;
         }
 
-        public SemVersion Version { get; }
-
-        public string OpenModComponentId { get; } = "OpenMod.Runtime";
-
-        public bool IsComponentAlive
+        internal void NotifyHostReady()
         {
-            get { return Status != RuntimeStatus.Unloaded && Status != RuntimeStatus.Crashed; }
+            m_HostReadyEventHandle.Set();
         }
-
-        public ILifetimeScope LifetimeScope { get; private set; }
-
-        public RuntimeStatus Status { get; private set; } = RuntimeStatus.Unloaded;
     }
 }

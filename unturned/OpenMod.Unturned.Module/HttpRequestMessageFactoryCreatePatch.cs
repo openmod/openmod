@@ -14,7 +14,7 @@ namespace OpenMod.Unturned.Module
         public static void Create(HttpMethod method, ref string requestUri, HttpRequestMessageConfiguration configuration)
         {
 #if DEBUG
-            Console.WriteLine("HttpRequestMessageFactory: Creating from string: " + requestUri);
+            System.Console.WriteLine("HttpRequestMessageFactory: Creating from string: " + requestUri);
 #endif
             requestUri = requestUri.Replace("https://", "http://");
         }
@@ -29,7 +29,7 @@ namespace OpenMod.Unturned.Module
         public static void Create(HttpMethod method, ref Uri requestUri, HttpRequestMessageConfiguration configuration)
         {
 #if DEBUG
-            Console.WriteLine("HttpRequestMessageFactory: Creating from URI: " + requestUri);
+            System.Console.WriteLine("HttpRequestMessageFactory: Creating from URI: " + requestUri);
 #endif
             requestUri = new Uri(requestUri.ToString().Replace("https://", "http://"));
         }

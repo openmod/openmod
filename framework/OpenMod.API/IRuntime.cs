@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -18,7 +19,7 @@ namespace OpenMod.API
         ///     Initializes the runtime.
         /// </summary>
         /// <returns></returns>
-        Task InitAsync(List<Assembly> openModHostAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters);
+        Task<IHost> InitAsync(List<Assembly> openModHostAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters);
 
         /// <summary>
         ///     Shuts down OpenMod and disposes all services.
