@@ -1,10 +1,11 @@
-﻿using OpenMod.API.Ioc;
+﻿using OpenMod.API.Commands;
+using OpenMod.API.Ioc;
 
 namespace OpenMod.Core.Console
 {
     [Service]
     public interface IConsoleActorAccessor
     {
-        ConsoleActor Actor { get; }
+        ICommandActor Actor { get; }
     }
 }
