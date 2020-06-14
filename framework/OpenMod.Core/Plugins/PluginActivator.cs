@@ -58,7 +58,7 @@ namespace OpenMod.Core.Plugins
                 m_Logger.LogError($"Failed to load plugin from assembly {assembly}: couldn't find any plugin metadata");
                 return null;
             }
-            
+
             var pluginTypes = assembly.FindTypes<IOpenModPlugin>(false).ToList();
             if (pluginTypes.Count == 0)
             {
@@ -82,7 +82,7 @@ namespace OpenMod.Core.Plugins
 
                     var configuration = new ConfigurationBuilder()
                         .SetBasePath(workingDirectory)
-                        .AddYamlFile("config.yml", optional: true)
+                        .AddYamlFile("config.yml", optional: true, reloadOnChange: true)
                         .AddEnvironmentVariables(pluginMetadata.Id.Replace(".", "_") + "_")
                         .Build();
 
@@ -109,7 +109,7 @@ namespace OpenMod.Core.Plugins
                         .OwnedByLifetimeScope();
                 });
 
-                pluginInstance = (IOpenModPlugin) lifetimeScope.Resolve(pluginType);
+                pluginInstance = (IOpenModPlugin)lifetimeScope.Resolve(pluginType);
             }
             catch (Exception ex)
             {
@@ -135,17 +135,27 @@ namespace OpenMod.Core.Plugins
         {
             m_Logger.LogInformation("Unloading all plugins...");
 
+            int i = 0;
             foreach (var plugin in m_ActivatedPlugins)
             {
                 if (plugin.IsAlive)
                 {
-                    var instance = (IOpenModPlugin) plugin.Target;
-                    await instance.UnloadAsync();
+                    var instance = (IOpenModPlugin)plugin.Target;
+
+                    try
+                    {
+                        await instance.UnloadAsync();
+                        i++;
+                    }
+                    catch (Exception ex)
+                    {
+                        m_Logger.LogError(ex, $"An exception occured while unloading {instance.DisplayName}");
+                    }
                 }
             }
 
             m_ActivatedPlugins.Clear();
-            m_Logger.LogInformation("Plugins unloaded.");
+            m_Logger.LogInformation($"{i} plugins unloaded.");
         }
     }
 }

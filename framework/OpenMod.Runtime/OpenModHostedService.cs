@@ -41,17 +41,21 @@ namespace OpenMod.Runtime
             await m_PermissionChecker.InitAsync();
             Smart.Default.Parser.UseAlternativeEscapeChar('\\');
 
-            m_Logger.LogInformation($"Initializing for host: {m_Host.DisplayName} v{m_Host.Version}");
+            m_Logger.LogInformation($"Initializing for host: {m_Host.HostDisplayName} v{m_Host.HostVersion}");
             await m_Host.InitAsync();
-            m_Logger.LogInformation("OpenMod has been initialized.");
 
             m_Logger.LogInformation("Loading plugins...");
+
+            int i = 0;
             foreach (var pluginAssembly in m_PluginAssemblyStore.LoadedPluginAssemblies)
             {
-                await m_PluginActivator.TryActivatePluginAsync(pluginAssembly);
+                if (await m_PluginActivator.TryActivatePluginAsync(pluginAssembly) != null)
+                {
+                    i++;
+                }
             }
 
-            m_Logger.LogInformation("Plugins loaded.");
+            m_Logger.LogInformation($"{i} plugins loaded.");
          
             if (m_Runtime is Runtime openModRuntime)
             {

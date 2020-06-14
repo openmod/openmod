@@ -15,7 +15,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
 {
     [UsedImplicitly]
     [Command("help")]
-    [CommandSummary("Get help on commands")]
+    [CommandDescription("Get help on commands")]
     [CommandSyntax("[command | page number]")]
     public class CommandHelp : Command
     {
@@ -88,7 +88,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
         {
             await PrintAsync($"Name: {context.CommandRegistration.Name}");
             var aliases = context.CommandRegistration.Aliases;
-            if (aliases != null)
+            if (aliases != null && aliases.Count > 0)
             {
                 await PrintAsync($"Aliases: {string.Join(", ", aliases)}");
             }
@@ -126,9 +126,9 @@ namespace OpenMod.Core.Commands.OpenModCommands
             }
 
             sb.Append(registration.Name);
-            if (!string.IsNullOrEmpty(registration.Summary))
+            if (!string.IsNullOrEmpty(registration.Description))
             {
-                sb.Append($": {registration.Summary}");
+                sb.Append($": {registration.Description}");
             }
 
             await PrintAsync(sb.ToString());
@@ -165,7 +165,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
             return prefix
                    + command.Name.ToLower()
                    + (string.IsNullOrEmpty(command.Syntax) ? "" : " " + command.Syntax)
-                   + (string.IsNullOrEmpty(command.Summary) ? "" : ": " + command.Summary);
+                   + (string.IsNullOrEmpty(command.Description) ? "" : ": " + command.Description);
         }
     }
 }

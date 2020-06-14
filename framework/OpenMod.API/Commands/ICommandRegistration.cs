@@ -37,16 +37,6 @@ namespace OpenMod.API.Commands
         IReadOnlyCollection<string> Aliases { get; }
 
         /// <summary>
-        ///     The command summary.
-        ///     <para><b>This proprty must not return null.</b>.</para>
-        /// </summary>
-        /// <example>
-        ///     <c>"This command heals you or someone else."</c>
-        /// </example>
-        [CanBeNull]
-        string Summary { get; }
-
-        /// <summary>
         ///     The full description of the command.
         ///     <para>
         ///         <b>This proprty can return null</b>.

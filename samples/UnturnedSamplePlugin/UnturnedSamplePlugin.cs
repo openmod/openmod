@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using OpenMod.Core.Plugins;
 using OpenMod.Unturned.Plugins;
 
-[assembly: PluginMetadata(Author = "OpenMod", DisplayName = "Unturned Sample Plugin", Id = "UnturnedSamplePlugin", Version = "1.0.0")]
+[assembly: PluginMetadata(Author = "OpenMod", DisplayName = "Unturned Sample Plugin", Id = "UnturnedSamplePlugin")]
 
 namespace UnturnedSamplePlugin
 {

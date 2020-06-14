@@ -34,8 +34,7 @@ namespace OpenMod.Core.Commands
         {
             var commandAttribute = memberInfo.GetCustomAttribute<CommandAttribute>();
             Name = commandAttribute.Name;
-            Summary = memberInfo.GetCustomAttribute<CommandSummaryAttribute>()?.Summary;
-            Description = memberInfo.GetCustomAttribute<CommandSummaryAttribute>()?.Summary;
+            Description = memberInfo.GetCustomAttribute<CommandDescriptionAttribute>()?.Description;
             Priority = commandAttribute.Priority;
             Aliases = memberInfo.GetCustomAttributes<CommandAliasAttribute>().Select(d => d.Alias).ToList();
             Syntax = memberInfo.GetCustomAttribute<CommandSyntaxAttribute>()?.Syntax;
@@ -58,7 +57,6 @@ namespace OpenMod.Core.Commands
         public string Syntax { get; private set; }
         public string Id { get; set; }
         public string Name { get; set; }
-        public string Summary { get; set; }
         public string Description { get; set; }
         public Priority Priority { get; set; }
         public IReadOnlyCollection<string> Aliases { get; set; }

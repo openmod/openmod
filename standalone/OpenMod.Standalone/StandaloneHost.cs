@@ -12,6 +12,7 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
+using Semver;
 
 namespace OpenMod.Standalone
 {
@@ -30,6 +31,7 @@ namespace OpenMod.Standalone
             ILifetimeScope lifetimeScope,
             IDataStoreFactory dataStoreFactory)
         {
+            Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_Runtime = runtime;
             m_CommandExecutor = commandExecutor;
@@ -44,8 +46,9 @@ namespace OpenMod.Standalone
             return Task.CompletedTask;
         }
         
-        public string DisplayName { get; } = "OpenMod Standalone Host";
-        public string Version { get; } = "0.1.0";
+        public string HostDisplayName { get; } = "OpenMod Standalone Host";
+        public string HostVersion { get; } = "0.1.0";
+        public SemVersion Version { get; }
         public string OpenModComponentId { get; } = "OpenMod.Standalone";
         public string WorkingDirectory { get; }
         public bool IsComponentAlive { get; private set; }

@@ -6,6 +6,7 @@ using Autofac;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Commands;
@@ -18,6 +19,7 @@ using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
+using Semver;
 using UnityEngine;
 using UnityEngine.Experimental.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
@@ -30,8 +32,11 @@ namespace OpenMod.Unturned
         private readonly ILoggerFactory m_LoggerFactory;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly ICommandExecutor m_CommandExecutor;
-        public string DisplayName { get; } = Provider.APP_NAME;
-        public string Version { get; } = Provider.APP_VERSION;
+        private readonly IHost m_Host;
+        private readonly ILogger<OpenModUnturnedHost> m_Logger;
+        public string HostDisplayName { get; } = Provider.APP_NAME;
+        public string HostVersion { get; } = Provider.APP_VERSION;
+        public SemVersion Version { get; }
         public string OpenModComponentId { get; } = "OpenMod.Unturned";
         public string WorkingDirectory { get; }
         public bool IsComponentAlive { get; private set; }
@@ -41,7 +46,6 @@ namespace OpenMod.Unturned
         private const string HarmonyInstanceId = "com.get-openmod.unturned";
         private readonly Harmony m_Harmony;
         private bool m_IsDisposing;
-        private bool m_IsProviderShutdown;
 
         public OpenModUnturnedHost(
             IRuntime runtime,
@@ -49,16 +53,20 @@ namespace OpenMod.Unturned
             IDataStoreFactory dataStoreFactory,
             ILoggerFactory loggerFactory,
             IConsoleActorAccessor consoleActorAccessor,
-            ICommandExecutor commandExecutor)
+            ICommandExecutor commandExecutor,
+            IHost host,
+            ILogger<OpenModUnturnedHost> logger)
         {
             m_LoggerFactory = loggerFactory;
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
+            m_Host = host;
+            m_Logger = logger;
             m_Harmony = new Harmony(HarmonyInstanceId);
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
             DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
-
+            Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
             Provider.onServerShutdown += OnServerShutdown;
         }
 
@@ -73,16 +81,26 @@ namespace OpenMod.Unturned
             {
                 BindUnturnedEvents();
 
-                //if (PlatformHelper.IsLinux)
-                //{
-                //    Dedicator.commandWindow.setIOHandler(new SerilogConsoleInputOutput(m_LoggerFactory));
-                //}
-                //else
-                //{
-                //    Dedicator.commandWindow.setIOHandler(new SerilogWindowsConsoleInputOutput(m_LoggerFactory));
-                //}
-                
-                m_Harmony.PatchAll(GetType().Assembly);
+                /* Disable Unity logs as they are more annoying than helpful */
+                Debug.unityLogger.filterLogType = LogType.Exception;
+
+                /* Fix Unturned destroying console and breaking Serilog formatting and colors */
+                var shouldManageConsoleField = typeof(WindowsConsole).GetField("shouldManageConsole", BindingFlags.Static | BindingFlags.NonPublic);
+                var shouldManageConsole = (CommandLineFlag) shouldManageConsoleField.GetValue(null);
+                shouldManageConsole.value = false; 
+
+                if (PlatformHelper.IsLinux)
+                {
+                    Dedicator.commandWindow.setIOHandler(new SerilogConsoleInputOutput(m_LoggerFactory));
+                }
+                else
+                {
+                    Dedicator.commandWindow.setIOHandler(new SerilogWindowsConsoleInputOutput(m_LoggerFactory));
+                }
+
+                m_Logger.LogInformation($"OpenMod for Unturned v{Version} is initializing...");
+
+                m_Harmony.PatchAll(typeof(OpenModUnturnedHost).Assembly);
                 TlsWorkaround.Install();
 
                 var unitySynchronizationContetextField = typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext", BindingFlags.Static | BindingFlags.NonPublic);
@@ -92,6 +110,8 @@ namespace OpenMod.Unturned
 
                 var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
                 PlayerLoopHelper.Initialize(ref playerLoop);
+
+                m_Logger.LogInformation("OpenMod for Unturned is ready.");
             });
 
             return Task.CompletedTask;
@@ -123,10 +143,7 @@ namespace OpenMod.Unturned
 
         private void OnServerShutdown()
         {
-            if (!m_IsDisposing)
-            {
-                m_IsProviderShutdown = true;
-            }
+            AsyncHelper.RunSync(() => m_Host.StopAsync());
         }
 
         public void Dispose()
@@ -140,11 +157,6 @@ namespace OpenMod.Unturned
             m_IsDisposing = true;
 
             m_Harmony.UnpatchAll(HarmonyInstanceId);
-
-            if (!m_IsProviderShutdown)
-            {
-                Provider.shutdown();
-            }
         }
     }
 }

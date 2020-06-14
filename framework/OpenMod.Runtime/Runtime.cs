@@ -159,7 +159,7 @@ namespace OpenMod.Runtime
         {
             builder
                 .SetBasePath(WorkingDirectory)
-                .AddYamlFile("openmod.yml")
+                .AddYamlFile("openmod.yml", optional: false, reloadOnChange: true)
                 .AddCommandLine(CommandlineArgs)
                 .AddEnvironmentVariables("OpenMod_");
         }

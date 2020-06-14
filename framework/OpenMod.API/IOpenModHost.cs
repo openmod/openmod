@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using OpenMod.API.Ioc;
-using OpenMod.API.Prioritization;
+using Semver;
 
 namespace OpenMod.API
 {
@@ -19,11 +19,16 @@ namespace OpenMod.API
         /// <summary>
         ///     The name of the host. E.g. the game's name.
         /// </summary>
-        string DisplayName { get; }
+        string HostDisplayName { get; }
 
         /// <summary>
-        ///    The version of the host. Version format depends on the host.
+        ///    The version of the host. E.g. the game's version.
         /// </summary>
-        string Version { get; }
+        string HostVersion { get; }
+
+        /// <summary>
+        ///   Version of the OpenMod host implementation.
+        /// </summary>
+        SemVersion Version { get; }
     }
 }

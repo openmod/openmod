@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
@@ -21,7 +20,7 @@ namespace OpenMod.Core.Localization
         {
             var translations = new ConfigurationBuilder()
                 .SetBasePath(location)
-                .AddYamlFile(baseName + ".yml", true)
+                .AddYamlFile(baseName + ".yml", true, reloadOnChange: true)
                 .Build();
 
             return new ConfigurationBasedStringLocalizer(translations);
