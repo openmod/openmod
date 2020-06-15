@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using OpenMod.Core.Users;
 using OpenMod.Unturned.API;
+using OpenMod.Unturned.API.Player;
+using OpenMod.Unturned.World;
 using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
@@ -13,9 +15,15 @@ namespace OpenMod.Unturned.Commands
         public Player Player { get; }
         public SteamPlayer SteamPlayer { get; }
         public CSteamID SteamId { get; }
+        
+        public PlayerDeath LastDeath { get; set; }
+
+        /// <inheritdoc />
+        public async Task<float> GetDistanceFrom(Vector3 point) => Vector3.Distance(Player.transform.position, point);
+        
         public string DisplayName { get; }
-
-
+        
+        
         public string Id
         {
             get { return SteamId.ToString(); }

@@ -4,6 +4,7 @@ using OpenMod.Core.Commands;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Users;
 using OpenMod.Unturned.API;
+using OpenMod.Unturned.API.Player;
 using Steamworks;
 
 namespace OpenMod.Unturned.Commands
