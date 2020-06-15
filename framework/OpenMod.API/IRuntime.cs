@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace OpenMod.API
         ///     Initializes the runtime.
         /// </summary>
         /// <returns></returns>
-        Task<IHost> InitAsync(List<Assembly> openModHostAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters);
+        Task<IHost> InitAsync(List<Assembly> openModHostAssemblies, RuntimeInitParameters parameters, Func<IHostBuilder> hostBuilder);
 
         /// <summary>
         ///     Shuts down OpenMod and disposes all services.
@@ -40,5 +41,11 @@ namespace OpenMod.API
         ///    The runtime status.
         /// </summary>
         RuntimeStatus Status { get; }
+
+        /// <summary>
+        ///   Reloads all plugins, configurations, etc. and rebuilds the DI container
+        /// </summary>
+        /// <returns></returns>
+        Task ReloadAsync();
     }
 }

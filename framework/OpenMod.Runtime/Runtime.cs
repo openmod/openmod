@@ -22,6 +22,8 @@ using Semver;
 using Serilog;
 using Serilog.Extensions.Logging;
 
+#pragma warning disable CS4014
+
 namespace OpenMod.Runtime
 {
     [UsedImplicitly]
@@ -51,17 +53,21 @@ namespace OpenMod.Runtime
         private IHost m_Host;
         private SerilogLoggerFactory m_LoggerFactory;
         private ILogger<Runtime> m_Logger;
-        private readonly EventWaitHandle m_HostReadyEventHandle = new ManualResetEvent(false);
 
-        public void Init(List<Assembly> openModAssemblies, IHostBuilder hostBuilder, RuntimeInitParameters parameters)
+        // these variables are used for runtime restart
+        private List<Assembly> m_OpenModHostAssemblies;
+        private Func<IHostBuilder> m_HostBuilderFunc;
+        private RuntimeInitParameters m_RuntimeInitParameters; private IHostApplicationLifetime m_AppLifeTime;
+
+        public void Init(List<Assembly> openModAssemblies, RuntimeInitParameters parameters, Func<IHostBuilder> hostBuilderFunc = null)
         {
-            AsyncHelper.RunSync(() => InitAsync(openModAssemblies, hostBuilder, parameters));
+            AsyncHelper.RunSync(() => InitAsync(openModAssemblies, parameters, hostBuilderFunc));
         }
 
-        public Task<IHost> InitAsync(
+        public async Task<IHost> InitAsync(
             List<Assembly> openModHostAssemblies,
-            [CanBeNull] IHostBuilder hostBuilder,
-            RuntimeInitParameters parameters)
+            RuntimeInitParameters parameters,
+            Func<IHostBuilder> hostBuilderFunc = null)
         {
             var openModCoreAssembly = typeof(AsyncHelper).Assembly;
             if (!openModHostAssemblies.Contains(openModCoreAssembly))
@@ -69,7 +75,11 @@ namespace OpenMod.Runtime
                 openModHostAssemblies.Insert(0, openModCoreAssembly);
             }
 
-            hostBuilder ??= new HostBuilder();
+            m_OpenModHostAssemblies = openModHostAssemblies;
+            m_HostBuilderFunc = hostBuilderFunc;
+            m_RuntimeInitParameters = parameters;
+
+            var hostBuilder = hostBuilderFunc == null ? new HostBuilder() : hostBuilderFunc();
 
             if (!Directory.Exists(parameters.WorkingDirectory))
             {
@@ -119,37 +129,30 @@ namespace OpenMod.Runtime
                 .UseSerilog();
 
             m_Host = hostBuilder.Build();
+            m_AppLifeTime = m_Host.Services.GetRequiredService<IHostApplicationLifetime>();
+            m_AppLifeTime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
+
             Status = RuntimeStatus.Initialized;
             LifetimeScope = m_Host.Services.GetRequiredService<ILifetimeScope>();
             DataStore = m_Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore("openmod", WorkingDirectory);
 
-            Exception exception = null;
-            AsyncHelper.Schedule("OpenMod start", StartHostAsync, ex =>
+            try
+            {
+                await m_Host.StartAsync();
+            }
+            catch (Exception ex)
             {
                 Status = RuntimeStatus.Crashed;
                 m_Logger.LogCritical(ex, "OpenMod has crashed.");
-                exception = ex;
-                m_HostReadyEventHandle.Set();
-            });
-
-            m_HostReadyEventHandle.WaitOne();
-            return exception == null 
-                ? Task.FromResult(m_Host) 
-                : Task.FromException<IHost>(exception);
-        }
-
-        private async Task StartHostAsync()
-        {
-            try
-            {
-                await m_Host.RunAsync();
-                m_Logger.LogInformation("OpenMod has shut down.");
-                Status = RuntimeStatus.Unloaded;
-            }
-            finally
-            {
                 Log.CloseAndFlush();
             }
+            return m_Host;
+        }
+        
+        public async Task ReloadAsync()
+        {
+            await ShutdownAsync();
+            await InitAsync(m_OpenModHostAssemblies, m_RuntimeInitParameters, m_HostBuilderFunc);
         }
 
         private void ConfigureConfiguration(IConfigurationBuilder builder)
@@ -172,7 +175,6 @@ namespace OpenMod.Runtime
             AsyncHelper.RunSync(() => startup.CompleteServiceRegistrationsAsync(services));
         }
 
-        
         private void SetupContainer(ContainerBuilder containerBuilder, OpenModStartup startup)
         {
             AsyncHelper.RunSync(() => startup.CompleteContainerRegistrationAsync(containerBuilder));
@@ -206,15 +208,13 @@ namespace OpenMod.Runtime
             m_Logger = m_LoggerFactory.CreateLogger<Runtime>();
         }
 
-        public async Task ShutdownAsync()
+        public Task ShutdownAsync()
         {
-            await m_Host.StopAsync();
+            m_Logger.LogInformation("OpenMod is shutting down...");
+            m_Host.Dispose();
             Status = RuntimeStatus.Unloaded;
-        }
-
-        internal void NotifyHostReady()
-        {
-            m_HostReadyEventHandle.Set();
+            Log.CloseAndFlush();
+            return Task.CompletedTask;
         }
     }
 }

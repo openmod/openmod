@@ -18,9 +18,9 @@ namespace OpenMod.Core.Commands
         protected CommandBase(IServiceProvider serviceProvider)
         {
             var contextAccessor = serviceProvider.GetRequiredService<ICurrentCommandContextAccessor>();
+            Context = contextAccessor.Context;
             m_CommandPermission = serviceProvider.GetRequiredService<ICommandPermissionBuilder>().GetPermission(Context.CommandRegistration);
             m_PermissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
-            Context = contextAccessor.Context;
         }
 
         public abstract Task ExecuteAsync();
