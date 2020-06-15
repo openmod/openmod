@@ -19,7 +19,7 @@ namespace OpenMod.Unturned.API.Player
 
         public IUnturnedPlayerActor Player;
         public TimeSpan Time { get; set; }
-        internal PlayerDeathLocation PlayerDeathLocation { get; set; } 
+        public PlayerDeathLocation PlayerDeathLocation { get; set; } 
         
         public async Task<LocationNode> NearestLocation()
         {
