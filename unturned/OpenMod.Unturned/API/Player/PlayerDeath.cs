@@ -11,10 +11,19 @@ namespace OpenMod.Unturned.API.Player
 {
     public class PlayerDeath : IDeath
     {
-        public Vector3 Location { get; set; }
+        public IDeathLocation Location
+        {
+            get => Location;
+            set
+            {
+                PlayerDeathLocation = (PlayerDeathLocation) value;
+                Location = value;
+            }
+        }
 
         public IUnturnedPlayerActor Player;
         public TimeSpan Time { get; set; }
+        public PlayerDeathLocation PlayerDeathLocation { get; set; } 
 
         
         public async Task<LocationNode> NearestLocation()

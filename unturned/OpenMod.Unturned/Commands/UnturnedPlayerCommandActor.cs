@@ -19,7 +19,7 @@ namespace OpenMod.Unturned.Commands
         public PlayerDeath LastDeath { get; set; }
 
         /// <inheritdoc />
-        public async Task<float> GetDistanceFrom(Vector3 point) => Vector3.Distance(Player.transform.position, point);
+        public async Task<float> GetDistanceFromAsync(Vector3 point) => Vector3.Distance(Player.transform.position, point);
         
         public string DisplayName { get; }
         

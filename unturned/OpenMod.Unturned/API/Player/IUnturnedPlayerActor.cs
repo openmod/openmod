@@ -15,7 +15,7 @@ namespace OpenMod.Unturned.API.Player
         public CSteamID SteamId { get; }
         public PlayerDeath LastDeath { get;  }
         
-        Task<float> GetDistanceFrom(Vector3 point); 
+        Task<float> GetDistanceFromAsync(Vector3 point); 
 
         
         

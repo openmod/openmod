@@ -7,7 +7,7 @@ namespace OpenMod.Unturned.World
 {
     public interface IDeath
     {
-        public Vector3 Location {get;}
+        public IDeathLocation Location {get;}
         public TimeSpan Time { get; }
         Task<LocationNode> NearestLocation();
 

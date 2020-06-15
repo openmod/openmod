@@ -4,6 +4,7 @@ using OpenMod.API.Eventing;
 using OpenMod.Core.Eventing;
 using OpenMod.Unturned.API.Player;
 using OpenMod.Unturned.Commands;
+using OpenMod.Unturned.World;
 using SDG.Unturned;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace OpenMod.Unturned.EventHandling.Player
         {
             player.LastDeath = new PlayerDeath()
             {
-                Location = location,
+                Location = new PlayerDeathLocation(){Location = location, Player = player},
                 Player = player,
                 Time = DateTime.Now.TimeOfDay,
                 Cause = cause
