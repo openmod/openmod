@@ -18,7 +18,8 @@ namespace OpenMod.Standalone
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class StandaloneHost : IOpenModHost, IDisposable
     {
-        public string HostDisplayName { get; } = "OpenMod Standalone Host";
+        public string HostDisplayName { get; } = "Standalone";
+        public string Name { get; } = "OpenMod Standalone Host";
         public string HostVersion { get; } = "0.1.0";
         public SemVersion Version { get; }
         public string OpenModComponentId { get; } = "OpenMod.Standalone";

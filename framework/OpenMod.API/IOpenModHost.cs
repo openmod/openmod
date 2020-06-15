@@ -30,5 +30,10 @@ namespace OpenMod.API
         ///   Version of the OpenMod host implementation.
         /// </summary>
         SemVersion Version { get; }
+
+        /// <summary>
+        ///    Name of the host implementation. E.g. OpenMod for Unturned
+        /// </summary>
+        string Name { get; }
     }
 }

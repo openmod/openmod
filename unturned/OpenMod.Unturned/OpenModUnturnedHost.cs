@@ -40,13 +40,14 @@ namespace OpenMod.Unturned
         public string HostDisplayName { get; } = Provider.APP_NAME;
         public string HostVersion { get; } = Provider.APP_VERSION;
         public SemVersion Version { get; }
+        public string Name { get; } = "OpenMod for Unturned";
         public string OpenModComponentId { get; } = "OpenMod.Unturned";
         public string WorkingDirectory { get; }
         public bool IsComponentAlive { get; private set; }
         public ILifetimeScope LifetimeScope { get; }
         public IDataStore DataStore { get; }
 
-        private const string HarmonyInstanceId = "com.get-openmod.unturned";
+        private const string c_HarmonyInstanceId = "com.get-openmod.unturned";
         private readonly Harmony m_Harmony;
         private bool m_IsDisposing;
 
@@ -67,7 +68,7 @@ namespace OpenMod.Unturned
             m_CommandExecutor = commandExecutor;
             m_Host = host;
             m_Logger = logger;
-            m_Harmony = new Harmony(HarmonyInstanceId);
+            m_Harmony = new Harmony(c_HarmonyInstanceId);
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
             DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
@@ -184,7 +185,7 @@ namespace OpenMod.Unturned
             IsComponentAlive = false;
             m_IsDisposing = true;
 
-            m_Harmony.UnpatchAll(HarmonyInstanceId);
+            m_Harmony.UnpatchAll(c_HarmonyInstanceId);
             UnbindUnturnedEvents();
         }
     }

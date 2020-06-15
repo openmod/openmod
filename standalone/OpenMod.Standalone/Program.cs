@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using OpenMod.API;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace OpenMod.Standalone
 {
@@ -15,11 +17,14 @@ namespace OpenMod.Standalone
 
             var path = Path.GetFullPath("openmod");
             var runtime = new Runtime.Runtime();
-            await runtime.InitAsync(new List<Assembly> { typeof(Program).Assembly }, new RuntimeInitParameters
+            var host = await runtime.InitAsync(new List<Assembly> { typeof(Program).Assembly }, new RuntimeInitParameters
             {
                 CommandlineArgs = args,
                 WorkingDirectory = path
             });
+
+            var applifecycle = host.Services.GetRequiredService<IHostApplicationLifetime>();
+            applifecycle.ApplicationStopped.Register(StandaloneConsoleIo.StopListening);
 
             StandaloneConsoleIo.StartListening();
         }
