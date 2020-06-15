@@ -8,13 +8,12 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using SDG.Framework.Modules;
 using HarmonyLib;
-using JetBrains.Annotations;
 
 namespace OpenMod.Unturned.Module
 {
     public class OpenModUnturnedModule : IModuleNexus
     {
-        private const string HarmonyInstanceId = "com.get-openmod.unturned.module";
+        private const string c_HarmonyInstanceId = "com.get-openmod.unturned.module";
         private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new Dictionary<string, Assembly>();
         private Harmony m_HarmonyInstance;
 
@@ -22,7 +21,7 @@ namespace OpenMod.Unturned.Module
         {
             var selfAssembly = typeof(OpenModUnturnedModule).Assembly;
 
-            m_HarmonyInstance = new Harmony(HarmonyInstanceId);
+            m_HarmonyInstance = new Harmony(c_HarmonyInstanceId);
             m_HarmonyInstance.PatchAll(selfAssembly);
 
             InstallNewtonsoftJson();
@@ -109,7 +108,7 @@ namespace OpenMod.Unturned.Module
 
         public void shutdown()
         {
-            m_HarmonyInstance.UnpatchAll(HarmonyInstanceId);
+            m_HarmonyInstance.UnpatchAll(c_HarmonyInstanceId);
         }
 
         private void InstallTlsWorkaround()
@@ -142,7 +141,6 @@ namespace OpenMod.Unturned.Module
             }
             return isOk;
         }
-
 
         private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
 

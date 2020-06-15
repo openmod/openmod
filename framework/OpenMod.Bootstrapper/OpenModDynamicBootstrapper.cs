@@ -133,7 +133,7 @@ namespace OpenMod.Bootstrapper
             SetParameter(parameters, "CommandlineArgs", commandlineArgs);
             
             var initMethod = runtimeType.GetMethod("InitAsync", BindingFlags.Instance | BindingFlags.Public);
-            return (Task) initMethod?.Invoke(runtime, new[] {  hostAssemblies, null /* hostBuilder */, parameters});
+            return (Task) initMethod?.Invoke(runtime, new[] {  hostAssemblies, parameters, null /* hostBuilderFunc */});
         }
 
         

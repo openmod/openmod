@@ -7,12 +7,13 @@ namespace OpenMod.Unturned.Commands
 {
     public class UnturnedCommandSource : ICommandSource
     {
-        public UnturnedCommandSource(IOpenModComponent openModComponent)
+        // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */
+        public UnturnedCommandSource(IRuntime runtime)
         {
             Commands = new List<ICommandRegistration>();
             foreach (var cmd in Commander.commands)
             {
-                Commands.Add(new UnturnedCommandRegistration(openModComponent, cmd));
+                Commands.Add(new UnturnedCommandRegistration(runtime, cmd));
             }
         }
 

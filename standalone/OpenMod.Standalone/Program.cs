@@ -2,15 +2,8 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using Microsoft.Extensions.Hosting;
 using OpenMod.API;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using OpenMod.API.Commands;
-using OpenMod.Core.Console;
 
 namespace OpenMod.Standalone
 {
@@ -22,40 +15,13 @@ namespace OpenMod.Standalone
 
             var path = Path.GetFullPath("openmod");
             var runtime = new Runtime.Runtime();
-            var host = await runtime.InitAsync(new List<Assembly> { typeof(Program).Assembly }, new HostBuilder(), new RuntimeInitParameters
+            await runtime.InitAsync(new List<Assembly> { typeof(Program).Assembly }, new RuntimeInitParameters
             {
                 CommandlineArgs = args,
                 WorkingDirectory = path
             });
 
-            var commandExecutor = host.Services.GetRequiredService<ICommandExecutor>();
-            var consoleActorAccessor = host.Services.GetRequiredService<IConsoleActorAccessor>();
-
-
-            do
-            {
-                var line = Console.ReadLine();
-                if (!string.IsNullOrEmpty(line))
-                {
-                    if (line.Equals("exit", StringComparison.OrdinalIgnoreCase))
-                        break;
-
-                    try
-                    {
-                        await commandExecutor.ExecuteAsync(consoleActorAccessor.Actor, line.Split(' ').ToArray(), string.Empty);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString(), Color.DarkRed);
-                        Debugger.Break();
-                    }
-                }
-
-
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write("> ");
-                Console.ForegroundColor = ConsoleColor.White;
-            } while (true);
+            StandaloneConsoleIo.StartListening();
         }
     }
 }

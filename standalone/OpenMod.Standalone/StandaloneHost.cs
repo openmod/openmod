@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,35 +16,8 @@ namespace OpenMod.Standalone
 {
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class StandaloneHost : IOpenModHost
+    public class StandaloneHost : IOpenModHost, IDisposable
     {
-        //todo remove if not used
-        private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
-        private readonly IRuntime m_Runtime;
-        private readonly ICommandExecutor m_CommandExecutor;
-
-        public StandaloneHost(
-            IConsoleActorAccessor consoleActorAccessor,
-            IRuntime runtime, 
-            ICommandExecutor commandExecutor,
-            ILifetimeScope lifetimeScope,
-            IDataStoreFactory dataStoreFactory)
-        {
-            Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
-            m_ConsoleActorAccessor = consoleActorAccessor;
-            m_Runtime = runtime;
-            m_CommandExecutor = commandExecutor;
-            WorkingDirectory = runtime.WorkingDirectory;
-            LifetimeScope = lifetimeScope;
-            DataStore = dataStoreFactory.CreateDataStore("openmod.console", WorkingDirectory);
-        }
-
-        public Task InitAsync()
-        {
-            IsComponentAlive = true;
-            return Task.CompletedTask;
-        }
-        
         public string HostDisplayName { get; } = "OpenMod Standalone Host";
         public string HostVersion { get; } = "0.1.0";
         public SemVersion Version { get; }
@@ -52,5 +26,41 @@ namespace OpenMod.Standalone
         public bool IsComponentAlive { get; private set; }
         public ILifetimeScope LifetimeScope { get; }
         public IDataStore DataStore { get; }
+
+        private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
+        private readonly ICommandExecutor m_CommandExecutor;
+
+        public StandaloneHost(
+            IRuntime runtime, 
+            ILifetimeScope lifetimeScope,
+            IDataStoreFactory dataStoreFactory,
+            IConsoleActorAccessor consoleActorAccessor,
+            ICommandExecutor commandExecutor)
+        {
+            m_ConsoleActorAccessor = consoleActorAccessor;
+            m_CommandExecutor = commandExecutor;
+            Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
+            WorkingDirectory = runtime.WorkingDirectory;
+            LifetimeScope = lifetimeScope;
+            DataStore = dataStoreFactory.CreateDataStore("openmod.standalone", WorkingDirectory);
+        }
+
+        public Task InitAsync()
+        {
+            IsComponentAlive = true;
+            StandaloneConsoleIo.OnCommandExecute += OnCommandExecute;
+
+            return Task.CompletedTask;
+        }
+
+        private void OnCommandExecute(string commandline)
+        {
+            AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, commandline.Split(' '), string.Empty));
+        }
+        
+        public void Dispose()
+        {
+            StandaloneConsoleIo.OnCommandExecute -= OnCommandExecute;
+        }
     }
 }

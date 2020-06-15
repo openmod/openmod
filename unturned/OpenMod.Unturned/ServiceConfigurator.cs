@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OpenMod.API.Ioc;
 using OpenMod.Core;
 using OpenMod.Core.Console;

@@ -40,7 +40,6 @@ namespace OpenMod.Unturned.Module
                 new NuGetConsoleLogger());
 
 #else
-            var hostBuilder = new HostBuilder();
             var parameters = new RuntimeInitParameters
             {
                 CommandlineArgs = Environment.GetCommandLineArgs(),
@@ -54,7 +53,7 @@ namespace OpenMod.Unturned.Module
             };
 
             var runtime = new Runtime.Runtime();
-            runtime.Init(assemblies, hostBuilder, parameters);
+            runtime.Init(assemblies, parameters);
 #endif
         }
     }

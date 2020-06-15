@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -10,7 +11,7 @@ using SmartFormat;
 
 namespace OpenMod.Runtime
 {
-    public class OpenModHostedService : BackgroundService
+    public class OpenModHostedService : IHostedService
     {
         private readonly ILogger<OpenModHostedService> m_Logger;
         private readonly IPermissionChecker m_PermissionChecker;
@@ -35,8 +36,8 @@ namespace OpenMod.Runtime
             m_PluginAssemblyStore = pluginAssemblyStore;
             m_PluginActivator = pluginActivator;
         }
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+ 
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             await m_PermissionChecker.InitAsync();
             Smart.Default.Parser.UseAlternativeEscapeChar('\\');
@@ -55,12 +56,12 @@ namespace OpenMod.Runtime
                 }
             }
 
-            m_Logger.LogInformation($"{i} plugins loaded.");
-         
-            if (m_Runtime is Runtime openModRuntime)
-            {
-                openModRuntime.NotifyHostReady();
-            }
+            m_Logger.LogInformation($"> {i} plugins loaded.");
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
     }
 }

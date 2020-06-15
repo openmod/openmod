@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +31,7 @@ namespace OpenMod.Unturned
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
+        private readonly IRuntime m_Runtime;
         private readonly ILoggerFactory m_LoggerFactory;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly ICommandExecutor m_CommandExecutor;
@@ -47,8 +50,9 @@ namespace OpenMod.Unturned
         private readonly Harmony m_Harmony;
         private bool m_IsDisposing;
 
+        // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */
         public OpenModUnturnedHost(
-            IOpenModComponent openModComponent,
+            IRuntime runtime,
             ILifetimeScope lifetimeScope,
             IDataStoreFactory dataStoreFactory,
             ILoggerFactory loggerFactory,
@@ -57,99 +61,117 @@ namespace OpenMod.Unturned
             IHost host,
             ILogger<OpenModUnturnedHost> logger)
         {
+            m_Runtime = runtime;
             m_LoggerFactory = loggerFactory;
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
             m_Host = host;
             m_Logger = logger;
             m_Harmony = new Harmony(HarmonyInstanceId);
-            WorkingDirectory = openModComponent.WorkingDirectory;
+            WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
             DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
-            Provider.onServerShutdown += OnServerShutdown;
         }
 
         public Task InitAsync()
         {
+            // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
 
-            // the following code *must* run on main thread
-            // we can not use UniTask because it is not set up yet
-            // we can also not wait for it to complete or it will cause a deadlock (main thread is already waiting for this method to complete)
-            UnityMainThreadDispatcher.Instance.EnqueueAsync(() =>
+            BindUnturnedEvents();
+
+            var ioHandlers = (List<ICommandInputOutput>) typeof(CommandWindow)
+                .GetField("ioHandlers", BindingFlags.NonPublic | BindingFlags.Instance)
+                .GetValue(Dedicator.commandWindow);
+
+            /* Fix Unturned destroying console and breaking Serilog formatting and colors */
+            var shouldManageConsoleField = typeof(WindowsConsole).GetField("shouldManageConsole", BindingFlags.Static | BindingFlags.NonPublic);
+            var shouldManageConsole = (CommandLineFlag)shouldManageConsoleField.GetValue(null);
+            shouldManageConsole.value = false;
+
+            // unturned built-in io handlers
+            var defaultIoHandlers = ioHandlers.Where(c => c.GetType() == typeof(ThreadedWindowsConsoleInputOutput)
+                                      || c.GetType() == typeof(WindowsConsoleInputOutput)
+                                      || c.GetType() == typeof(ThreadedConsoleInputOutput)
+                                      || c.GetType() == typeof(ConsoleInputOutput)).ToList();
+
+            foreach (var ioHandler in defaultIoHandlers)
             {
-                BindUnturnedEvents();
+                Dedicator.commandWindow.removeIOHandler(ioHandler);
+            }
 
-                /* Disable Unity logs as they are more annoying than helpful */
-                Debug.unityLogger.filterLogType = LogType.Exception;
+            if (PlatformHelper.IsLinux)
+            {
+                Dedicator.commandWindow.addIOHandler(new SerilogConsoleInputOutput(m_LoggerFactory));
+            }
+            else
+            {
+                Dedicator.commandWindow.addIOHandler(new SerilogWindowsConsoleInputOutput(m_LoggerFactory));
+            }
 
-                /* Fix Unturned destroying console and breaking Serilog formatting and colors */
-                var shouldManageConsoleField = typeof(WindowsConsole).GetField("shouldManageConsole", BindingFlags.Static | BindingFlags.NonPublic);
-                // ReSharper disable PossibleNullReferenceException
-                var shouldManageConsole = (CommandLineFlag) shouldManageConsoleField.GetValue(null);
-                shouldManageConsole.value = false; 
+            m_Logger.LogInformation($"OpenMod for Unturned v{Version} is initializing...");
 
-                if (PlatformHelper.IsLinux)
-                {
-                    Dedicator.commandWindow.addIOHandler(new SerilogConsoleInputOutput(m_LoggerFactory));
-                }
-                else
-                {
-                    Dedicator.commandWindow.addIOHandler(new SerilogWindowsConsoleInputOutput(m_LoggerFactory));
-                }
+            m_Harmony.PatchAll(typeof(OpenModUnturnedHost).Assembly);
+            TlsWorkaround.Install();
 
-                m_Logger.LogInformation($"OpenMod for Unturned v{Version} is initializing...");
+            var unitySynchronizationContetextField = typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext", BindingFlags.Static | BindingFlags.NonPublic);
+            unitySynchronizationContetextField.SetValue(null, SynchronizationContext.Current);
 
-                m_Harmony.PatchAll(typeof(OpenModUnturnedHost).Assembly);
-                TlsWorkaround.Install();
+            var mainThreadIdField = typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
+            mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
 
-                var unitySynchronizationContetextField = typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext", BindingFlags.Static | BindingFlags.NonPublic);
-                unitySynchronizationContetextField.SetValue(null, SynchronizationContext.Current);
+            var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
+            PlayerLoopHelper.Initialize(ref playerLoop);
 
-                var mainThreadIdField = typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
-                mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
-                // ReSharper restore PossibleNullReferenceException
-
-                var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
-                PlayerLoopHelper.Initialize(ref playerLoop);
-
-                m_Logger.LogInformation("OpenMod for Unturned is ready.");
-            });
-
+            m_Logger.LogInformation("OpenMod for Unturned is ready.");
             return Task.CompletedTask;
+            // ReSharper restore PossibleNullReferenceException
         }
 
         protected virtual void BindUnturnedEvents()
         {
-            CommandWindow.onCommandWindowInputted += (string text, ref bool shouldExecuteCommand) =>
+            Provider.onServerShutdown += OnServerShutdown;
+            CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
+            ChatManager.onCheckPermissions += OnCheckCommandPermissions;
+        }
+
+        protected virtual void UnbindUnturnedEvents()
+        {
+            // ReSharper disable DelegateSubtraction
+            Provider.onServerShutdown -= OnServerShutdown;
+            CommandWindow.onCommandWindowInputted -= OnCommandWindowInputted;
+            ChatManager.onCheckPermissions -= OnCheckCommandPermissions;
+            // ReSharper restore DelegateSubtraction
+        }
+
+        private void OnCheckCommandPermissions(SteamPlayer player, string text, ref bool shouldExecuteCommand, ref bool shouldList)
+        {
+            if(!shouldExecuteCommand || !text.StartsWith("/"))
             {
-                if (!shouldExecuteCommand)
-                    return;
+                return;
+            }
 
-                var actor = m_ConsoleActorAccessor.Actor;
-                AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, text.Split(' '), string.Empty));
-                shouldExecuteCommand = false;
-            };
+            shouldExecuteCommand = false;
+            shouldList = false;
 
-            ChatManager.onCheckPermissions += (SteamPlayer player, string text, ref bool shouldExecuteCommand, ref bool shouldList) =>
-            {
-                if (!shouldExecuteCommand || !text.StartsWith("/"))
-                {
-                    return;
-                }
+            var actor = new UnturnedPlayerCommandActor(player.player);
+            AsyncHelper.Schedule("Player command execution", () => m_CommandExecutor.ExecuteAsync(actor, text.Split(' '), string.Empty));
+        }
 
-                shouldExecuteCommand = false;
-                shouldList = false;
+        private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
+        {
+            if (!shouldExecuteCommand)
+                return;
 
-                var actor = new UnturnedPlayerCommandActor(player.player);
-                AsyncHelper.Schedule("Player command execution", () => m_CommandExecutor.ExecuteAsync(actor, text.Split(' '), string.Empty));
-            };
+            var actor = m_ConsoleActorAccessor.Actor;
+            AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, text.Split(' '), string.Empty));
+            shouldExecuteCommand = false;
         }
 
         private void OnServerShutdown()
         {
-            AsyncHelper.RunSync(() => m_Host.StopAsync());
+            AsyncHelper.RunSync(() => m_Runtime.ShutdownAsync());
         }
 
         public void Dispose()
@@ -163,6 +185,7 @@ namespace OpenMod.Unturned
             m_IsDisposing = true;
 
             m_Harmony.UnpatchAll(HarmonyInstanceId);
+            UnbindUnturnedEvents();
         }
     }
 }

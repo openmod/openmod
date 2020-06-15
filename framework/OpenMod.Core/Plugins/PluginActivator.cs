@@ -28,6 +28,7 @@ namespace OpenMod.Core.Plugins
         private readonly IStringLocalizerFactory m_StringLocalizerFactory;
         private readonly ILifetimeScope m_LifetimeScope;
         private readonly IDataStoreFactory m_DataStoreFactory;
+        private bool m_IsDisposing;
 
         public PluginActivator(
             IRuntime runtime,
@@ -46,12 +47,25 @@ namespace OpenMod.Core.Plugins
         private readonly List<WeakReference> m_ActivatedPlugins = new List<WeakReference>();
         public IReadOnlyCollection<IOpenModPlugin> ActivatedPlugins
         {
-            get { return m_ActivatedPlugins.Where(d => d.IsAlive).Select(d => d.Target).Cast<IOpenModPlugin>().ToList(); }
+            get
+            {
+                if (m_IsDisposing)
+                {
+                    throw new ObjectDisposedException(nameof(PluginActivator));
+                }
+
+                return m_ActivatedPlugins.Where(d => d.IsAlive).Select(d => d.Target).Cast<IOpenModPlugin>().ToList();
+            }
         }
 
         [CanBeNull]
         public async Task<IOpenModPlugin> TryActivatePluginAsync(Assembly assembly)
         {
+            if (m_IsDisposing)
+            {
+                throw new ObjectDisposedException(nameof(PluginActivator));
+            }
+
             var pluginMetadata = assembly.GetCustomAttribute<PluginMetadataAttribute>();
             if (pluginMetadata == null)
             {
@@ -133,6 +147,12 @@ namespace OpenMod.Core.Plugins
 
         public async ValueTask DisposeAsync()
         {
+            if (m_IsDisposing)
+            {
+                return;
+            }
+
+            m_IsDisposing = true;
             m_Logger.LogInformation("Unloading all plugins...");
 
             int i = 0;
@@ -155,7 +175,7 @@ namespace OpenMod.Core.Plugins
             }
 
             m_ActivatedPlugins.Clear();
-            m_Logger.LogInformation($"{i} plugins unloaded.");
+            m_Logger.LogInformation($"> {i} plugins unloaded.");
         }
     }
 }
