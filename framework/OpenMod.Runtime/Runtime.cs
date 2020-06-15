@@ -159,7 +159,7 @@ namespace OpenMod.Runtime
         {
             builder
                 .SetBasePath(WorkingDirectory)
-                .AddYamlFile("openmod.yml", optional: false, reloadOnChange: true)
+                .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
                 .AddCommandLine(CommandlineArgs)
                 .AddEnvironmentVariables("OpenMod_");
         }
@@ -182,12 +182,12 @@ namespace OpenMod.Runtime
 
         private void SetupSerilog()
         {
-            var loggingPath = Path.Combine(WorkingDirectory, "logging.yml");
+            var loggingPath = Path.Combine(WorkingDirectory, "logging.yaml");
             if (!File.Exists(loggingPath))
             {
-                // First run, logging.yml doesn't exist yet. We can not wait for auto-copy as it would be too late.
-                using var stream = typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yml");
-                using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException("Couldn't find resource: OpenMod.Core.logging.yml"));
+                // First run, logging.yaml doesn't exist yet. We can not wait for auto-copy as it would be too late.
+                using var stream = typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yaml");
+                using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException("Couldn't find resource: OpenMod.Core.logging.yaml"));
 
                 var fileContent = reader.ReadToEnd();
                 File.WriteAllText(loggingPath, fileContent);
@@ -195,7 +195,7 @@ namespace OpenMod.Runtime
 
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(WorkingDirectory)
-                .AddYamlFile("logging.yml")
+                .AddYamlFile("logging.yaml")
                 .AddCommandLine(CommandlineArgs)
                 .AddEnvironmentVariables()
                 .Build();
