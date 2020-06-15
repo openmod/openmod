@@ -19,7 +19,7 @@ namespace OpenMod.Unturned.EventHandling.Player
         {
             player.LastDeath = new PlayerDeath()
             {
-                Location = new PlayerDeathLocation(){Location = location, Player = player},
+                PlayerDeathLocation = new PlayerDeathLocation(){Location = location, Player = player},
                 Player = player,
                 Time = DateTime.Now.TimeOfDay,
                 Cause = cause
