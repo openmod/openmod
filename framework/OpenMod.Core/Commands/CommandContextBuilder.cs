@@ -68,7 +68,9 @@ namespace OpenMod.Core.Commands
 
         private ICommandRegistration GetCommandRegistration(ICommandActor actor, string name, IEnumerable<ICommandRegistration> commandRegistrations)
         {
-            return commandRegistrations.FirstOrDefault(d => d.SupportsActor(actor) && d.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return commandRegistrations.FirstOrDefault(d => d.SupportsActor(actor) 
+                                                            && (d.Name.Equals(name, StringComparison.OrdinalIgnoreCase) 
+                                                            || (d.Aliases != null && d.Aliases.Any(e => e.Equals(name, StringComparison.OrdinalIgnoreCase)))));
         }
     }
 }

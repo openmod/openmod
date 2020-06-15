@@ -57,9 +57,10 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 var pageCommands = commands
                     .Where(d => d.ParentId == null)
                     .Skip(amountPerPage * (currentPage - 1))
-                    .Take(amountPerPage);
+                    .Take(amountPerPage)
+                    .ToList();
 
-                await PrintPageAsync(currentPage, (int)Math.Ceiling((double)commands.Count / amountPerPage), pageCommands);
+                await PrintPageAsync(currentPage, (int)Math.Ceiling((double)pageCommands.Count / amountPerPage), pageCommands);
             }
             else if (Context.Parameters.Length > 0)
             {
@@ -83,14 +84,18 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
         private async Task PrintCommandHelpAsync(ICommandContext context, string permission, IEnumerable<ICommandRegistration> commands)
         {
-            await PrintAsync($"Name: {context.CommandRegistration.Name}");
+            string usage = $"Usage: {context.CommandRegistration.Name}";
+            if (!string.IsNullOrEmpty(context.CommandRegistration.Syntax))
+            {
+                usage += $" {context.CommandRegistration.Syntax}";
+            }
+
+            await PrintAsync(usage);
             var aliases = context.CommandRegistration.Aliases;
             if (aliases != null && aliases.Count > 0)
             {
                 await PrintAsync($"Aliases: {string.Join(", ", aliases)}");
             }
-
-            await PrintAsync($"Syntax: {context.CommandRegistration.Syntax}");
 
             if (!string.IsNullOrEmpty(context.CommandRegistration.Description))
             {
@@ -141,17 +146,16 @@ namespace OpenMod.Core.Commands.OpenModCommands
             }
         }
 
-        private async Task PrintPageAsync(int pageNumber, int pageCount, IEnumerable<ICommandRegistration> page)
+        private async Task PrintPageAsync(int pageNumber, int pageCount, ICollection<ICommandRegistration> page)
         {
-            var commandRegistrations = page.ToList();
-            if (commandRegistrations.Count == 0)
+            if (page.Count == 0)
             {
                 await PrintAsync("No commands found.", Color.Red);
                 return;
             }
 
             await PrintAsync($"[{pageNumber}/{pageCount}] Commands", Color.CornflowerBlue);
-            foreach (var command in commandRegistrations)
+            foreach (var command in page)
             {
                 await PrintAsync(GetCommandUsage(command, Context.CommandPrefix));
             }

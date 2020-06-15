@@ -6,6 +6,8 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("permissiongroup")]
     [CommandAlias("pg")]
     [CommandDescription("Manage permission groups")]
+    [CommandSyntax("<add/remove> <player | group> <name> <permission group>")]
+
     public class CommandPermissionGroup : Command
     {
         public CommandPermissionGroup(IServiceProvider serviceProvider) : base(serviceProvider)

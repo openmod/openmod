@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Prioritization;
 
@@ -10,6 +9,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("openmod", Priority = Priority.Highest)]
     [CommandAlias("om")]
     [CommandDescription("Get information about OpenMod and manage it")]
+    [CommandSyntax("[reload | <install/uninstall/update> <package id> [version] [-Pre]]")]
     public class CommandOpenMod : Command
     {
         private readonly IRuntime m_Runtime;
