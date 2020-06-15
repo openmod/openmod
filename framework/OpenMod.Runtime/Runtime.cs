@@ -115,15 +115,17 @@ namespace OpenMod.Runtime
                 startup.RegisterIocAssemblyAndCopyResources(assembly, string.Empty);
             }
 
+            await startup.LoadPluginAssembliesAsync();
+
             hostBuilder
                 .UseContentRoot(parameters.WorkingDirectory)
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureHostConfiguration(builder =>
                 {
-                    ConfigureConfiguration(builder);
+                    ConfigureConfiguration(builder, startup);
                     ((OpenModStartupContext)startup.Context).Configuration = builder.Build();
                 })
-                .ConfigureAppConfiguration(ConfigureConfiguration)
+                .ConfigureAppConfiguration(builder => ConfigureConfiguration(builder, startup))
                 .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, startup))
                 .ConfigureServices(services => SetupServices(services, startup))
                 .UseSerilog();
@@ -155,13 +157,14 @@ namespace OpenMod.Runtime
             await InitAsync(m_OpenModHostAssemblies, m_RuntimeInitParameters, m_HostBuilderFunc);
         }
 
-        private void ConfigureConfiguration(IConfigurationBuilder builder)
+        private void ConfigureConfiguration(IConfigurationBuilder builder, OpenModStartup startup)
         {
             builder
                 .SetBasePath(WorkingDirectory)
                 .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
                 .AddCommandLine(CommandlineArgs)
                 .AddEnvironmentVariables("OpenMod_");
+            AsyncHelper.RunSync(() => startup.CompleteConfigurationAsync(builder));
         }
 
         private void SetupServices(IServiceCollection services, OpenModStartup startup)

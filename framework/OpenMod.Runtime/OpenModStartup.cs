@@ -6,11 +6,13 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Util;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Plugins;
+using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Plugins;
 using OpenMod.Core.Plugins.NuGet;
@@ -28,6 +30,7 @@ namespace OpenMod.Runtime
         private readonly PluginAssemblyStore m_PluginAssemblyStore;
         private readonly ILogger<OpenModStartup> m_Logger;
         private readonly List<Assembly> m_Assemblies;
+        private readonly List<IPluginAssembliesSource> m_PluginAssembliesSources;
         public OpenModStartup(IOpenModStartupContext openModStartupContext)
         {
             Context = openModStartupContext;
@@ -38,6 +41,7 @@ namespace OpenMod.Runtime
             m_ServiceRegistrations = new List<ServiceRegistration>();
             m_RegisteredAssemblies = new HashSet<AssemblyName>();
             m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>());
+            m_PluginAssembliesSources = new List<IPluginAssembliesSource>();
         }
 
         public IOpenModStartupContext Context { get; }
@@ -69,6 +73,7 @@ namespace OpenMod.Runtime
 
         public async Task<ICollection<Assembly>> RegisterPluginAssembliesAsync(IPluginAssembliesSource source)
         {
+            m_PluginAssembliesSources.Add(source);
             var assemblies = await m_PluginAssemblyStore.LoadPluginAssembliesAsync(source);
             foreach (var assembly in assemblies)
             {
@@ -94,6 +99,19 @@ namespace OpenMod.Runtime
             return assemblies;
         }
 
+        internal async Task CompleteConfigurationAsync(IConfigurationBuilder builder)
+        {
+            var containerConfiguratorTypes = m_Assemblies
+                .SelectMany(d => d.FindTypes<IConfigurationConfigurator>(false))
+                .OrderBy(d => d.GetPriority(), new PriorityComparer(PriortyComparisonMode.LowestFirst));
+
+            foreach (var configurationConfigurator in containerConfiguratorTypes)
+            {
+                var instance = (IConfigurationConfigurator)Activator.CreateInstance(configurationConfigurator);
+                await instance.ConfigureConfigurationAsync(Context, builder);
+            }
+        }
+
         internal async Task CompleteContainerRegistrationAsync(ContainerBuilder containerBuilder)
         {
             var containerConfiguratorTypes = m_Assemblies
@@ -109,8 +127,17 @@ namespace OpenMod.Runtime
 
         internal async Task CompleteServiceRegistrationsAsync(IServiceCollection serviceCollection)
         {
-            await BootstrapAndRegisterPluginsAsync(serviceCollection);
+            var sortedSources = m_PluginAssembliesSources
+                .OrderBy(d => d.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Priority ?? Priority.Normal
+                    , new PriorityComparer(PriortyComparisonMode.LowestFirst));
 
+            foreach (var source in sortedSources)
+            {
+                var lifetime = source.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Lifetime ?? ServiceLifetime.Singleton;
+                serviceCollection.Add(new ServiceDescriptor(source.GetType(), source.GetType(), lifetime));
+            }
+
+            serviceCollection.AddSingleton<IPluginAssemblyStore>(m_PluginAssemblyStore);
             var serviceConfiguratorTypes = m_Assemblies
                 .SelectMany(d => d.FindTypes<IServiceConfigurator>(false))
                 .OrderBy(d => d.GetPriority(), new PriorityComparer(PriortyComparisonMode.LowestFirst));
@@ -135,20 +162,15 @@ namespace OpenMod.Runtime
             }
         }
 
-        private async Task BootstrapAndRegisterPluginsAsync(IServiceCollection serviceCollection)
+        internal async Task LoadPluginAssembliesAsync()
         {
             var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
 
             var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(pluginsDirectory);
-            serviceCollection.AddSingleton(fileSystemPluginAssembliesSource);
-
-            var nugetPluginAssembliesSource = new NuGetPluginAssembliesSource(m_NuGetPackageManager);
-            serviceCollection.AddSingleton(nugetPluginAssembliesSource);
-
             await RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
+            
+            var nugetPluginAssembliesSource = new NuGetPluginAssembliesSource(m_NuGetPackageManager);
             await RegisterPluginAssembliesAsync(nugetPluginAssembliesSource);
-
-            serviceCollection.AddSingleton<IPluginAssemblyStore>(m_PluginAssemblyStore);
         }
 
         private IEnumerable<ServiceRegistration> GetServiceRegistrationsFromAssembly(Assembly assembly)
