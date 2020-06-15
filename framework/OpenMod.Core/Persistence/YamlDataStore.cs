@@ -110,7 +110,7 @@ namespace OpenMod.Core.Persistence
 
         protected virtual string GetFilePathForKey(string key)
         {
-            return Path.Combine(m_BasePath, $"{m_Prefix ?? string.Empty}{key}{m_Suffix ?? string.Empty}.yml");
+            return Path.Combine(m_BasePath, $"{m_Prefix ?? string.Empty}{key}{m_Suffix ?? string.Empty}.yaml");
         }
     }
 }

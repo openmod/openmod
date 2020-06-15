@@ -16,7 +16,7 @@ namespace OpenMod.Core.Localization
         {
             var translations = new ConfigurationBuilder()
                 .SetBasePath(location)
-                .AddYamlFile(baseName + ".yml", true, reloadOnChange: true)
+                .AddYamlFile(baseName + ".yaml", true, reloadOnChange: true)
                 .Build();
 
             return new ConfigurationBasedStringLocalizer(translations);

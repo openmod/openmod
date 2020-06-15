@@ -96,7 +96,7 @@ namespace OpenMod.Core.Plugins
 
                     var configuration = new ConfigurationBuilder()
                         .SetBasePath(workingDirectory)
-                        .AddYamlFile("config.yml", optional: true, reloadOnChange: true)
+                        .AddYamlFile("config.yaml", optional: true, reloadOnChange: true)
                         .AddEnvironmentVariables(pluginMetadata.Id.Replace(".", "_") + "_")
                         .Build();
 

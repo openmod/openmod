@@ -6,15 +6,15 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
-    <None Remove="logging.yml" />
-    <None Remove="openmod.translations.yml" />
-    <None Remove="openmod.yml" />
+    <None Remove="logging.yaml" />
+    <None Remove="openmod.translations.yaml" />
+    <None Remove="openmod.yaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="logging.yml" />
-    <EmbeddedResource Include="openmod.translations.yml" />
-    <EmbeddedResource Include="openmod.yml" />
+    <EmbeddedResource Include="logging.yaml" />
+    <EmbeddedResource Include="openmod.translations.yaml" />
+    <EmbeddedResource Include="openmod.yaml" />
   </ItemGroup>
 
   <ItemGroup>

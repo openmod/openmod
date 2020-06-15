@@ -6,13 +6,13 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
-    <None Remove="config.yml" />
-    <None Remove="translations.yml" />
+    <None Remove="config.yaml" />
+    <None Remove="translations.yaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="config.yml" />
-    <EmbeddedResource Include="translations.yml" />
+    <EmbeddedResource Include="config.yaml" />
+    <EmbeddedResource Include="translations.yaml" />
   </ItemGroup>
 
   <ItemGroup>
