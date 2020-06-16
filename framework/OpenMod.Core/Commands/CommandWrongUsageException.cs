@@ -12,7 +12,7 @@ namespace OpenMod.Core.Commands
             
         }
 
-        public CommandWrongUsageException(ICommandContext context, IStringLocalizer localizer) : base(localizer["commands:errors:wrong_usage", new { CommandLine = context.GetCommandLine(), CommandPrefix = context.CommandPrefix + context.CommandAlias, context.CommandRegistration.Syntax }])
+        public CommandWrongUsageException(ICommandContext context, IStringLocalizer localizer) : base(localizer["commands:errors:wrong_usage", new { CommandPrefix = (context.ParentContext != null ? context.ParentContext.CommandAlias : context.CommandAlias) + context.CommandPrefix, context.CommandRegistration.Syntax }])
         {
 
         }
