@@ -22,6 +22,11 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
         protected override async Task OnExecuteAsync()
         {
+            if(Context.Parameters.Count == 0)
+            {
+                throw new CommandWrongUsageException(Context);
+            }
+
             var args = Context.Parameters.ToList();
 
             string packageName = Context.Parameters[0];

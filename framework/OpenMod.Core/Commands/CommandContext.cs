@@ -32,7 +32,7 @@ namespace OpenMod.Core.Commands
             Actor = parent.Actor;
             Parameters = new CommandParameters(this, parent.Parameters.Skip(1).ToList());
             CommandAlias = parent.Parameters[0];
-            CommandPrefix = $"{parent.CommandPrefix} {CommandAlias} ";
+            CommandPrefix = $"{parent.CommandPrefix}{parent.CommandAlias} ";
             Data = parent.Data;
         }
 
