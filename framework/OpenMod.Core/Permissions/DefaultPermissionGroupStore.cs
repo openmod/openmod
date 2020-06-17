@@ -162,8 +162,13 @@ namespace OpenMod.Core.Permissions
                 return false;
             }
 
-            m_PermissionGroupsDataStore.PermissionGroups.RemoveAll(d => d.Id.Equals(group.Id, StringComparison.OrdinalIgnoreCase));
-            m_PermissionGroupsDataStore.PermissionGroups.Add((PermissionGroup)group);
+            var groupData = m_PermissionGroupsDataStore.PermissionGroups.First(d => d.Id.EndsWith(group.Id));
+            groupData.DisplayName = group.DisplayName;
+            groupData.IsAutoAssigned = group.IsAutoAssigned;
+            groupData.Parents = group.Parents;
+            groupData.Permissions = group.Parents;
+            groupData.Priority = group.Priority;
+            groupData.Data ??= new Dictionary<string, object>();
 
             await m_PermissionGroupsDataStore.SaveChangesAsync();
             return true;
@@ -203,7 +208,6 @@ namespace OpenMod.Core.Permissions
                 Priority = group.Priority,
                 Id = group.Id,
                 DisplayName = group.DisplayName,
-                Data = group.Data ?? new Dictionary<string, object>(),
                 Parents = new HashSet<string>(group.Parents, StringComparer.InvariantCultureIgnoreCase),
                 Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase),
                 IsAutoAssigned = group.IsAutoAssigned

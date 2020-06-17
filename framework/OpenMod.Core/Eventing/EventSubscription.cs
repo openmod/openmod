@@ -28,7 +28,7 @@ namespace OpenMod.Core.Eventing
         public EventSubscription(
             IOpenModComponent ownerComponent,
             Type eventListener,
-            MethodInfo method,
+            MethodBase method,
             EventListenerAttribute attribute, 
             Type eventType,
             ILifetimeScope scope)

@@ -10,7 +10,6 @@ namespace OpenMod.Core.Permissions
         public PermissionGroup()
         {
             Parents = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            Data = new Dictionary<string, object>();
         }
         public PermissionGroup(PermissionGroupData data)
         {
@@ -18,7 +17,6 @@ namespace OpenMod.Core.Permissions
             Priority = data.Priority;
             DisplayName = data.DisplayName;
             Parents = data.Parents;
-            Data = data.Data;
             IsAutoAssigned = data.IsAutoAssigned;
             Permissions = data.Permissions;
         }
@@ -28,7 +26,7 @@ namespace OpenMod.Core.Permissions
             return new PermissionGroup(data);
         }
 
-        public static implicit operator PermissionGroupData(PermissionGroup group)
+        public static explicit operator PermissionGroupData(PermissionGroup group)
         {
             return new PermissionGroupData
             {
@@ -36,7 +34,6 @@ namespace OpenMod.Core.Permissions
                 Priority = group.Priority,
                 DisplayName = group.DisplayName,
                 Parents = group.Parents,
-                Data = group.Data,
                 IsAutoAssigned = group.IsAutoAssigned,
                 Permissions = group.Permissions
             };
@@ -48,7 +45,6 @@ namespace OpenMod.Core.Permissions
         public HashSet<string> Parents { get; }
         public HashSet<string> Permissions { get; }
         public bool IsAutoAssigned { get; set; }
-        public Dictionary<string, object> Data { get; }
         public string Type { get; } = "group";
     }
 }

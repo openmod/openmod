@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace OpenMod.API.Permissions
+﻿namespace OpenMod.API.Permissions
 {
     /// <summary>
     ///   Represents an actor that can be checked for permissions.
@@ -16,11 +14,6 @@ namespace OpenMod.API.Permissions
         ///   The type of the actor.
         /// </summary>
         string Type { get; }
-
-        /// <summary>
-        ///    Persistent data for the actor
-        /// </summary>
-        Dictionary<string, object> Data { get; }
 
         /// <summary>
         ///     The human readable name
