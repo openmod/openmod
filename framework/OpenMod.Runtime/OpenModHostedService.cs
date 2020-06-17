@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
+using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
 using SmartFormat;

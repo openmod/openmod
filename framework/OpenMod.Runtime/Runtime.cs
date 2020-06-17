@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
+using OpenMod.API.Eventing;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Plugins.NuGet;
@@ -137,6 +138,12 @@ namespace OpenMod.Runtime
             Status = RuntimeStatus.Initialized;
             LifetimeScope = m_Host.Services.GetRequiredService<ILifetimeScope>();
             DataStore = m_Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore("openmod", WorkingDirectory);
+
+            var eventBus = m_Host.Services.GetRequiredService<IEventBus>();
+            foreach (var assembly in openModHostAssemblies)
+            {
+                eventBus.Subscribe(this, assembly);
+            }
 
             try
             {

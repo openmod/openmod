@@ -66,8 +66,11 @@ namespace OpenMod.Core.Plugins
             m_CommandStoreOptions.Value.AddCommandSource(m_CommandSource);
             IsComponentAlive = true;
 
+            EventBus.Subscribe(this, GetType().Assembly);
+
             return Task.CompletedTask;
         }
+
 
         public virtual Task UnloadAsync()
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
@@ -11,14 +12,14 @@ namespace OpenMod.API.Eventing
     /// <typeparam name="TEvent">The event type.</typeparam>
     /// <param name="sender">The event emitter.</param>
     /// <param name="event">The event instance.</param>
-    public delegate Task EventCallback<in TEvent>(object sender, TEvent @event) where TEvent : IEvent;
+    public delegate Task EventCallback<in TEvent>(IServiceProvider serviceProvider, object sender, TEvent @event) where TEvent : IEvent;
 
     /// <summary>
     ///     The callback for event notifications.
     /// </summary>
     /// <param name="sender">The event emitter.</param>
     /// <param name="event">The event instance.</param>
-    public delegate Task EventCallback(object sender, IEvent @event);
+    public delegate Task EventCallback(IServiceProvider serviceProvider, object sender, IEvent @event);
 
     /// <summary>
     ///     The emit callback for events that have finished and notified all listeners.
@@ -58,6 +59,11 @@ namespace OpenMod.API.Eventing
         void Subscribe(IOpenModComponent component, Type eventType, EventCallback callback);
 
         /// <summary>
+        ///    Automatically finds and registers IEventListeners for the component
+        /// </summary>
+        void Subscribe(IOpenModComponent component, Assembly assembly);
+
+        /// <summary>
         ///     Unsubscribe all listener subscriptions of the given component.
         /// </summary>
         /// <param name="component">The component.</param>
@@ -67,7 +73,7 @@ namespace OpenMod.API.Eventing
         ///     Unsubscribe all subscriptions for the given event type of the given component.
         /// </summary>
         /// <param name="component">The component.</param>
-        /// <param name="eventName">The event to unsubscribe from. Will unsubscribe globally if emitterName is null.</param>
+        /// <param name="eventName">The event to unsubscribe from.</param>
         void Unsubscribe(IOpenModComponent component, string eventName);
 
         /// <summary>
@@ -84,22 +90,9 @@ namespace OpenMod.API.Eventing
         void Unsubscribe(IOpenModComponent component, Type eventType);
 
         /// <summary>
-        ///     Register an event listener instance.
-        /// </summary>
-        /// <param name="component">The component.</param>
-        /// <param name="eventListener">The event listener to register.</param>
-        void AddEventListener<TEvent>(IOpenModComponent component, IEventListener<TEvent> eventListener) where TEvent : IEvent;
-
-        /// <summary>
-        ///     Remove an event listeners subscription.
-        /// </summary>
-        /// <param name="eventListener">The event listener to remove.</param>
-        void RemoveEventListener<TEvent>(IEventListener<TEvent> eventListener) where TEvent : IEvent;
-
-        /// <summary>
         ///     Emits an event and optionally handles the result
         /// </summary>
-        /// <param name="sender">The event emitter.</param>
+        /// <param name="sender">The event sender.</param>
         /// <param name="event">The event instance.</param>
         /// <param name="callback">The event finish callback. See <see cref="EventExecutedCallback" />.</param>
         Task EmitAsync(object sender, IEvent @event, EventExecutedCallback callback = null);
