@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,22 +26,19 @@ namespace OpenMod.Core.Eventing
 
         public EventSubscription(
             IOpenModComponent ownerComponent,
-            Type eventListener,
-            MethodBase method,
-            EventListenerAttribute attribute, 
-            Type eventType,
+            EventListenerData eventListenerData,
             ILifetimeScope scope)
         {
             Owner = new WeakReference(ownerComponent);
-            EventListener = eventListener;
+            EventListener = eventListenerData.EventListenerType;
             Callback = (serviceProvider, sender, @event) =>
             {
-                var listener = serviceProvider.GetRequiredService(eventListener);
-                return method.InvokeWithTaskSupportAsync(listener, new[] {sender, @event});
+                var listener = serviceProvider.GetRequiredService(eventListenerData.EventListenerType);
+                return eventListenerData.Method.InvokeWithTaskSupportAsync(listener, new[] {sender, @event});
             };
-            EventListenerAttribute = attribute;
-            EventName = eventType.Name;
-            EventType = eventType;
+            EventListenerAttribute = eventListenerData.EventListenerAttribute;
+            EventName = eventListenerData.EventListenerType.Name;
+            EventType = eventListenerData.EventListenerType;
             Scope = scope;
         }
 

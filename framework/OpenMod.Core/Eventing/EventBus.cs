@@ -61,10 +61,10 @@ namespace OpenMod.Core.Eventing
                 return;
             }
 
-            List<(Type eventListenerType, MethodInfo method, EventListenerAttribute eventListenerAttribute, Type eventType)> eventListeners = new List<(Type, MethodInfo, EventListenerAttribute, Type)>();
+            var eventListeners = new List<EventListenerData>();
             var scope = component.LifetimeScope.BeginLifetimeScope((builder =>
             {
-                foreach (var type in assembly.FindTypes<IEventListener>(false))
+                foreach (var type in assembly.FindTypes<IEventListener>())
                 {
                     if (m_EventSubscriptions.Any(c => c.EventListener == type))
                     {
@@ -72,12 +72,15 @@ namespace OpenMod.Core.Eventing
                         return;
                     }
 
+                    // ReSharper disable once LoopCanBeConvertedToQuery
                     foreach (var @interface in type.GetInterfaces().Where(c => typeof(IEventListener<>).IsAssignableFrom(c) && c.GetGenericArguments().Length >= 1))
                     {
                         var method = @interface.GetMethods().Single();
-                        var handler = GetEventListenerAttribute(method);
-                        var eventType = @interface.GetGenericArguments()[0];
-                        eventListeners.Add((type, method, handler, eventType));
+                        eventListeners.Add(new EventListenerData(
+                            type,
+                            method,
+                            GetEventListenerAttribute(method),
+                            @interface.GetGenericArguments()[0]));
                     }
 
                     var lifetime = type.GetCustomAttribute<EventListenerLifetimeAttribute>()?.Lifetime ?? ServiceLifetime.Transient;
@@ -105,7 +108,7 @@ namespace OpenMod.Core.Eventing
 
             foreach (var eventListener in eventListeners)
             {
-                m_EventSubscriptions.Add(new EventSubscription(component, eventListener.eventListenerType, eventListener.method, eventListener.eventListenerAttribute, eventListener.eventType, scope));
+                m_EventSubscriptions.Add(new EventSubscription(component, eventListener, scope));
             }
         }
 
