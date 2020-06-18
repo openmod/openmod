@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using OpenMod.API.Localization;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 
@@ -13,10 +17,17 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [CommandParent(typeof(CommandOpenMod))]
     public class CommandOpenModUpdate : Command
     {
+        private readonly IConfiguration m_Configuration;
+        private readonly IOpenModStringLocalizer m_StringLocalizer;
         private readonly NuGetPluginAssembliesSource m_NuGetPlugins;
 
-        public CommandOpenModUpdate(IServiceProvider serviceProvider, NuGetPluginAssembliesSource nuGetPlugins) : base(serviceProvider)
+        public CommandOpenModUpdate(
+            IConfiguration configuration,
+            IOpenModStringLocalizer stringLocalizer,
+            IServiceProvider serviceProvider, NuGetPluginAssembliesSource nuGetPlugins) : base(serviceProvider)
         {
+            m_Configuration = configuration;
+            m_StringLocalizer = stringLocalizer;
             m_NuGetPlugins = nuGetPlugins;
         }
 
@@ -25,6 +36,12 @@ namespace OpenMod.Core.Commands.OpenModCommands
             if(Context.Parameters.Count == 0)
             {
                 throw new CommandWrongUsageException(Context);
+            }
+
+            var allowedActors = m_Configuration.GetValue<List<string>>("nuget:update:allowedActors");
+            if (allowedActors.All(d => d.Trim() != "*" && !Context.Actor.Type.Equals(d.Trim(), StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new UserFriendlyException(m_StringLocalizer["commands:openmod:restricted"]);
             }
 
             var args = Context.Parameters.ToList();

@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using OpenMod.API.Localization;
 using OpenMod.Core.Plugins.NuGet;
 
 namespace OpenMod.Core.Commands.OpenModCommands
@@ -14,10 +18,18 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [CommandParent(typeof(CommandOpenMod))]
     public class CommandOpenModRemove : Command
     {
+        private readonly IOpenModStringLocalizer m_StringLocalizer;
+        private readonly IConfiguration m_Configuration;
         private readonly NuGetPluginAssembliesSource m_NuGetPlugis;
 
-        public CommandOpenModRemove(IServiceProvider serviceProvider, NuGetPluginAssembliesSource nuGetPlugis) : base(serviceProvider)
+        public CommandOpenModRemove(
+            IOpenModStringLocalizer stringLocalizer,
+            IConfiguration configuration,
+            IServiceProvider serviceProvider, 
+            NuGetPluginAssembliesSource nuGetPlugis) : base(serviceProvider)
         {
+            m_StringLocalizer = stringLocalizer;
+            m_Configuration = configuration;
             m_NuGetPlugis = nuGetPlugis;
         }
 
@@ -26,6 +38,12 @@ namespace OpenMod.Core.Commands.OpenModCommands
             if (Context.Parameters.Length != 1)
             {
                 throw new CommandWrongUsageException(Context);
+            }
+
+            var allowedActors = m_Configuration.GetValue<List<string>>("nuget:remove:allowedActors");
+            if (allowedActors.All(d => d.Trim() != "*" && !Context.Actor.Type.Equals(d.Trim(), StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new UserFriendlyException(this.m_StringLocalizer["commands:openmod:restricted"]);
             }
 
             string packageName = Context.Parameters[0];
