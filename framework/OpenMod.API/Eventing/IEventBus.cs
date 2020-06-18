@@ -95,6 +95,6 @@ namespace OpenMod.API.Eventing
         /// <param name="sender">The event sender.</param>
         /// <param name="event">The event instance.</param>
         /// <param name="callback">The event finish callback. See <see cref="EventExecutedCallback" />.</param>
-        Task EmitAsync(object sender, IEvent @event, EventExecutedCallback callback = null);
+        Task EmitAsync(IOpenModComponent component, object sender, IEvent @event, EventExecutedCallback callback = null);
     }
 }

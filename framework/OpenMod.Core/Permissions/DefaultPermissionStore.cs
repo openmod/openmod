@@ -4,24 +4,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
-using OpenMod.Core.Permissions.Data;
-using OpenMod.Core.Users;
+using OpenMod.API.Users;
 
 namespace OpenMod.Core.Permissions
 {
     [Priority(Priority = Priority.Lowest)]
     public class DefaultPermissionStore : IPermissionStore
     {
-        private readonly IUsersDataStore m_UsersDataStore;
+        private readonly IUserDataStore m_UserDataStore;
         private readonly IPermissionGroupsDataStore m_PermissionGroupsDataStore;
         private readonly IPermissionGroupStore m_PermissionGroupStore;
 
         public DefaultPermissionStore(
-            IUsersDataStore usersDataStore,
+            IUserDataStore userDataStore,
             IPermissionGroupsDataStore permissionGroupsDataStore,
             IPermissionGroupStore permissionGroupStore)
         {
-            m_UsersDataStore = usersDataStore;
+            m_UserDataStore = userDataStore;
             m_PermissionGroupsDataStore = permissionGroupsDataStore;
             m_PermissionGroupStore = permissionGroupStore;
         }
@@ -65,7 +64,7 @@ namespace OpenMod.Core.Permissions
         protected async Task<HashSet<string>> GetPermissionsAsync(IPermissionActor actor, bool inherit = true) //order by descending priority
         {
             var permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            var user = GetUserData(actor);
+            var user = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
             if (user != null)
             {
                 permissions.UnionWith(user.Permissions);
@@ -79,7 +78,7 @@ namespace OpenMod.Core.Permissions
             return permissions;
         }
 
-        public virtual async Task<bool> AddPermissionAsync(IPermissionActor actor, string permission)
+        public virtual async Task<bool> AddGrantedPermissionAsync(IPermissionActor actor, string permission)
         {
             if (actor is IPermissionGroup)
             {
@@ -94,18 +93,18 @@ namespace OpenMod.Core.Permissions
                 return true;
             }
 
-            var user = await GetOrCreateUserDataAsync(actor);
-            user.Permissions.Add(permission);
-            await m_UsersDataStore.SaveChangesAsync();
+            var userData = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
+            userData.Permissions.Add(permission);
+            await m_UserDataStore.SaveUserDataAsync(userData);
             return true;
         }
 
         public virtual Task<bool> AddDeniedPermissionAsync(IPermissionActor actor, string permission)
         {
-            return AddPermissionAsync(actor, "!" + permission);
+            return AddGrantedPermissionAsync(actor, "!" + permission);
         }
 
-        public virtual async Task<bool> RemovePermissionAsync(IPermissionActor actor, string permission)
+        public virtual async Task<bool> RemoveGrantedPermissionAsync(IPermissionActor actor, string permission)
         {
             if (actor is IPermissionGroup)
             {
@@ -122,47 +121,17 @@ namespace OpenMod.Core.Permissions
                 return true;
             }
 
-            var user = await GetOrCreateUserDataAsync(actor);
-            if (!user.Permissions.Remove(permission))
+            var userData = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
+            if (!userData.Permissions.Remove(permission))
                 return false;
 
-            await m_UsersDataStore.SaveChangesAsync();
+            await m_UserDataStore.SaveUserDataAsync(userData);
             return true;
         }
 
         public virtual Task<bool> RemoveDeniedPermissionAsync(IPermissionActor actor, string permission)
         {
-            return RemovePermissionAsync(actor, "!" + permission);
-        }
-
-        protected virtual UserData GetUserData(IPermissionActor actor)
-        {
-            return m_UsersDataStore.Users.FirstOrDefault(d => d.Id.Equals(actor.Id, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        protected virtual async Task<UserData> GetOrCreateUserDataAsync(IPermissionActor actor)
-        {
-            var user = GetUserData(actor);
-            if (user != null)
-            {
-                return user;
-            }
-
-            var userData = new UserData
-            {
-                Id = actor.Id,
-                Type = actor.Type,
-                FirstSeen = DateTime.Now,
-                LastDisplayName = actor.DisplayName,
-                LastSeen = DateTime.Now,
-                Data = new Dictionary<string, object>(),
-                Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
-            };
-
-            m_UsersDataStore.Users.Add(userData);
-            await m_UsersDataStore.SaveChangesAsync();
-            await m_PermissionGroupStore.AssignAutoGroupsToUserAsync(actor);
-            return userData;
+            return RemoveGrantedPermissionAsync(actor, "!" + permission);
         }
     }
 }

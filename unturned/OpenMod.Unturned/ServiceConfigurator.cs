@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using OpenMod.API.Ioc;
 using OpenMod.Core;
 using OpenMod.Core.Console;
 using OpenMod.Core.Permissions;
 using OpenMod.Unturned.Commands;
+using OpenMod.Unturned.Users;
 
 namespace OpenMod.Unturned
 {
@@ -17,11 +17,13 @@ namespace OpenMod.Unturned
             {
                 options.AddPermissionCheckProvider<ConsolePermissionProvider>();
             });
-
+            
             serviceCollection.Configure<CommandStoreOptions>(options =>
             {
                 options.AddCommandSource<UnturnedCommandSource>();
             });
+
+            serviceCollection.AddSingleton<UnturnedPlayerEventsHandler>();
 
             return Task.CompletedTask;
         }

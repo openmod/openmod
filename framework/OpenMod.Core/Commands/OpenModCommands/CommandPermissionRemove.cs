@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.API.Permissions;
+using OpenMod.API.Users;
+using OpenMod.Core.Permissions;
 using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Commands.OpenModCommands
@@ -13,19 +16,27 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [CommandParent(typeof(CommandPermission))]
     public class CommandPermissionRemove : CommandPermissionAction
     {
-        private readonly IUsersDataStore m_UsersDataStore;
+        private readonly IPermissionChecker m_PermissionChecker;
 
-        public CommandPermissionRemove(IServiceProvider serviceProvider, IPermissionGroupStore permissionGroupStore, IUsersDataStore usersDataStore) : base(serviceProvider, permissionGroupStore, usersDataStore)
+        public CommandPermissionRemove(IServiceProvider serviceProvider, 
+            IPermissionGroupStore permissionGroupStore, 
+            IUserDataStore usersDataStore, 
+            IPermissionChecker permissionChecker) : base(serviceProvider, permissionGroupStore, usersDataStore)
         {
-            m_UsersDataStore = usersDataStore;
+            m_PermissionChecker = permissionChecker;
         }
 
         protected override async Task ExecuteUpdateAsync(IPermissionActor target, string permissionToUpdate)
         {
-            var user = await m_UsersDataStore.GetUserAsync(target.Type, target.Id);
-            if (user.Permissions.Remove(permissionToUpdate))
+            var defaultPermissionStore = m_PermissionChecker.PermissionStores.FirstOrDefault(d => d is DefaultPermissionStore);
+            if (defaultPermissionStore == null)
             {
-                await m_UsersDataStore.SaveChangesAsync();
+                await Context.Actor.PrintMessageAsync($"Failed to remove \"{permissionToUpdate}\" from \"{target.DisplayName}\": Built-in permission store not found.", Color.Red);
+                return;
+            }
+
+            if (await defaultPermissionStore.RemoveGrantedPermissionAsync(target, permissionToUpdate))
+            {
                 await Context.Actor.PrintMessageAsync($"Removed \"{permissionToUpdate}\" from \"{target.DisplayName}\".", Color.DarkGreen);
             }
             else

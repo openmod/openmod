@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using OpenMod.API.Permissions;
+using OpenMod.API.Users;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Users;
 
@@ -10,14 +11,14 @@ namespace OpenMod.Core.Commands.OpenModCommands
     public abstract class CommandPermissionAction : Command
     {
         private readonly IPermissionGroupStore m_PermissionGroupStore;
-        private readonly IUsersDataStore m_UsersDataStore;
+        private readonly IUserDataStore m_UserDataStore;
 
         protected CommandPermissionAction(IServiceProvider serviceProvider,
             IPermissionGroupStore permissionGroupStore,
-            IUsersDataStore usersDataStore) : base(serviceProvider)
+            IUserDataStore userDataStore) : base(serviceProvider)
         {
             m_PermissionGroupStore = permissionGroupStore;
-            m_UsersDataStore = usersDataStore;
+            m_UserDataStore = userDataStore;
         }
 
         protected override async Task OnExecuteAsync()
@@ -53,7 +54,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 case "player":
                     permission = "Manage.Players";
                     var id = await Context.Parameters.GetAsync<string>(1);
-                    var user = await m_UsersDataStore.GetUserAsync(actorType, id);
+                    var user = await m_UserDataStore.GetUserDataAsync(actorType, id);
 
                     if (user == null)
                     {

@@ -27,7 +27,7 @@ namespace OpenMod.API.Permissions
         /// <param name="actor">The actor.</param>
         /// <param name="permission">The permission to add.</param>
         /// <returns><b>true</b> if the permission was successfully added or exists already; otherwise, <b>false</b>.</returns>
-        Task<bool> AddPermissionAsync(IPermissionActor actor, string permission);
+        Task<bool> AddGrantedPermissionAsync(IPermissionActor actor, string permission);
 
         /// <summary>
         ///     Adds an explicitly denied permission to the actor.
@@ -43,7 +43,7 @@ namespace OpenMod.API.Permissions
         /// <param name="actor">The actor.</param>
         /// <param name="permission">The permission to remove.</param>
         /// <returns><b>true</b> if the permission was successfully removed or doesn't exist; otherwise, <b>false</b>.</returns>
-        Task<bool> RemovePermissionAsync(IPermissionActor actor, string permission);
+        Task<bool> RemoveGrantedPermissionAsync(IPermissionActor actor, string permission);
 
         /// <summary>
         ///     Removes an explicitly denied permission from the actor.

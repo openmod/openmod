@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace OpenMod.Core.Permissions.Data
+namespace OpenMod.API.Users
 {
     [Serializable]
     public class UserData

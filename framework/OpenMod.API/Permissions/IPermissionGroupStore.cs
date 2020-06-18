@@ -65,9 +65,8 @@ namespace OpenMod.API.Permissions
         Task<bool> DeleteGroupAsync(string groupId);
 
         /// <summary>
-        ///     Assigns the user to all permission groups that have IsAutoAssigned set to true.
+        ///     Gets the groups that will be auto assigned for the actor.
         /// </summary>
-        /// <param name="actor">The user to assign</param>
-        Task AssignAutoGroupsToUserAsync(IPermissionActor actor);
+        Task<IReadOnlyCollection<string>> GetAssignAutoGroupsAsync(string actorId, string actorType);
     }
 }

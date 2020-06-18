@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using OpenMod.API.Permissions;
+using OpenMod.API.Users;
 using OpenMod.Core.Permissions.Data;
 
 namespace OpenMod.Core.Permissions

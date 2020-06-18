@@ -141,8 +141,13 @@ namespace OpenMod.Core.Eventing
             m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == eventType || c.EventName.Equals(eventType.Name, StringComparison.OrdinalIgnoreCase)));
         }
 
-        public virtual async Task EmitAsync(object sender, IEvent @event, EventExecutedCallback callback = null)
+        public virtual async Task EmitAsync(IOpenModComponent component, object sender, IEvent @event, EventExecutedCallback callback = null)
         {
+            if (!component.IsComponentAlive)
+            {
+                return;
+            }
+
             m_Logger.LogTrace($"Emitting event: {@event.Name}");
             var eventSubscriptions
                 = m_EventSubscriptions

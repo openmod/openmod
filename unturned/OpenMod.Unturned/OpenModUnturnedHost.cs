@@ -20,6 +20,7 @@ using OpenMod.UnityEngine;
 using OpenMod.Unturned.Commands;
 using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
+using OpenMod.Unturned.Users;
 using SDG.Unturned;
 using Semver;
 using UnityEngine;
@@ -37,6 +38,7 @@ namespace OpenMod.Unturned
         private readonly ICommandExecutor m_CommandExecutor;
         private readonly IHost m_Host;
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
+        private readonly UnturnedPlayerEventsHandler m_UnturnedPlayerEventsHandler;
         public string HostDisplayName { get; } = Provider.APP_NAME;
         public string HostVersion { get; } = Provider.APP_VERSION;
         public SemVersion Version { get; }
@@ -60,7 +62,8 @@ namespace OpenMod.Unturned
             IConsoleActorAccessor consoleActorAccessor,
             ICommandExecutor commandExecutor,
             IHost host,
-            ILogger<OpenModUnturnedHost> logger)
+            ILogger<OpenModUnturnedHost> logger,
+            UnturnedPlayerEventsHandler unturnedPlayerEventsHandler)
         {
             m_Runtime = runtime;
             m_LoggerFactory = loggerFactory;
@@ -68,6 +71,7 @@ namespace OpenMod.Unturned
             m_CommandExecutor = commandExecutor;
             m_Host = host;
             m_Logger = logger;
+            m_UnturnedPlayerEventsHandler = unturnedPlayerEventsHandler;
             m_Harmony = new Harmony(c_HarmonyInstanceId);
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
@@ -80,6 +84,7 @@ namespace OpenMod.Unturned
             // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
 
+            m_UnturnedPlayerEventsHandler.Subscribe();
             BindUnturnedEvents();
 
             var ioHandlers = (List<ICommandInputOutput>) typeof(CommandWindow)
@@ -124,7 +129,7 @@ namespace OpenMod.Unturned
 
             var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
             PlayerLoopHelper.Initialize(ref playerLoop);
-
+            
             m_Logger.LogInformation("OpenMod for Unturned is ready.");
             return Task.CompletedTask;
             // ReSharper restore PossibleNullReferenceException
@@ -134,7 +139,6 @@ namespace OpenMod.Unturned
         {
             Provider.onServerShutdown += OnServerShutdown;
             CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
-            ChatManager.onCheckPermissions += OnCheckCommandPermissions;
         }
 
         protected virtual void UnbindUnturnedEvents()
@@ -142,23 +146,9 @@ namespace OpenMod.Unturned
             // ReSharper disable DelegateSubtraction
             Provider.onServerShutdown -= OnServerShutdown;
             CommandWindow.onCommandWindowInputted -= OnCommandWindowInputted;
-            ChatManager.onCheckPermissions -= OnCheckCommandPermissions;
             // ReSharper restore DelegateSubtraction
         }
 
-        private void OnCheckCommandPermissions(SteamPlayer player, string text, ref bool shouldExecuteCommand, ref bool shouldList)
-        {
-            if(!shouldExecuteCommand || !text.StartsWith("/"))
-            {
-                return;
-            }
-
-            shouldExecuteCommand = false;
-            shouldList = false;
-
-            var actor = new UnturnedPlayerCommandActor(player.player);
-            AsyncHelper.Schedule("Player command execution", () => m_CommandExecutor.ExecuteAsync(actor, text.Split(' '), string.Empty));
-        }
 
         private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
         {

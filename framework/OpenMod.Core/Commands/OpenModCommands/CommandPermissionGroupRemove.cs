@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using OpenMod.API.Permissions;
+using OpenMod.API.Users;
 using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Commands.OpenModCommands
@@ -15,7 +16,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
     {
         private readonly IPermissionGroupStore m_PermissionGroupStore;
 
-        public CommandPermissionGroupRemove(IServiceProvider serviceProvider, IPermissionGroupStore permissionGroupStore, IUsersDataStore usersDataStore) : base(serviceProvider, permissionGroupStore, usersDataStore)
+        public CommandPermissionGroupRemove(IServiceProvider serviceProvider, IPermissionGroupStore permissionGroupStore, IUserDataStore userDataStore) : base(serviceProvider, permissionGroupStore, userDataStore)
         {
             m_PermissionGroupStore = permissionGroupStore;
         }
@@ -25,7 +26,6 @@ namespace OpenMod.Core.Commands.OpenModCommands
             if (await m_PermissionGroupStore.RemoveGroupFromActorAsync(target, permissionGroup.Id))
             {
                 await Context.Actor.PrintMessageAsync($"Removed \"{target.DisplayName}\" from \"{permissionGroup.DisplayName}\".", Color.DarkGreen);
-
             }
             else
             {
