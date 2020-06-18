@@ -60,9 +60,9 @@ namespace OpenMod.Unturned.Users
             return Task.CompletedTask;
         }
 
-        public Task DisconnectAsync(string reason = null)
+        public Task DisconnectAsync(string reason = "")
         {
-            Provider.kick(SteamId, reason);
+            Provider.kick(SteamId, reason ?? string.Empty);
             return Task.CompletedTask;
         }
 
