@@ -7,6 +7,7 @@ on:
       
 jobs:
   gitHubRelease:
+    if: github.event_name == 'create' && github.event.ref_type == 'tag'
     name: "GitHub Release"
     runs-on: ubuntu-latest
     steps:
@@ -18,7 +19,6 @@ jobs:
       id: get_version
       run: echo ::set-output name=VERSION::$(git describe --tags)      
     - name: Create release
-      if: github.event_name == 'create' && github.event.ref_type == 'tag'
       id: create_release
       uses: sondreb/action-release@master
       with:
