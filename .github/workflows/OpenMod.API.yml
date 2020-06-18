@@ -15,7 +15,7 @@ on:
 
 jobs:
   build:
-    name: "Build"
+    name: "OpenMod.API Build"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

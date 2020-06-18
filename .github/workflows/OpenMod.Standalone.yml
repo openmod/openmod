@@ -15,7 +15,7 @@ on:
 
 jobs:
   build:
-    name: "Build"
+    name: "OpenMod.Standalone Build"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -37,20 +37,21 @@ jobs:
       run: dotnet build standalone/OpenMod.Standalone --configuration Release --no-restore
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
+    - name: Wait for GitHub release
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      uses: fountainhead/action-wait-for-check@v1.0.0
+      with:
+        token: ${{ github.token }}
+        checkName: 'gitHubRelease'
+        owner: 'openmod'
+        repo: 'OpenMod'
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - name: Get Release
+      id: get-release
+      uses: bruceadams/get-release@v1       
     - name: Install zip
       if: github.event_name == 'create' && github.event.ref_type == 'tag'
       run: sudo apt-get install zip
-    - name: Create release
-      if: github.event_name == 'create' && github.event.ref_type == 'tag'
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        tag_name: ${{ steps.get_version.outputs.VERSION }}_standalone
-        release_name: Standalone Release v${{ steps.get_version.outputs.VERSION }}
-        draft: false
-        prerelease: false   
     - name: Zip net461 artifacts
       if: github.event_name == 'create' && github.event.ref_type == 'tag'
       run: "cd ./standalone/OpenMod.Standalone/bin/Release/net461 && zip -qq -r ./release.zip *"      
@@ -60,7 +61,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ steps.get-release.outputs.upload_url }}
         asset_path: ./standalone/OpenMod.Standalone/bin/Release/net461/release.zip
         asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-net461.zip
         asset_content_type: application/zip
@@ -73,7 +74,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ steps.get-release.outputs.upload_url }}
         asset_path: ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1/release.zip
         asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-netcoreapp3.1.zip
         asset_content_type: application/zip        

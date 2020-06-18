@@ -16,7 +16,7 @@ on:
       - 'framework/OpenMod.NuGet/**'
 jobs:
   build:
-    name: "Build"
+    name: "OpenMod.Bootstrapper Build"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

@@ -20,7 +20,7 @@ on:
       - 'framework/OpenMod.API/**' 
 jobs:
   build:
-    name: "Build"
+    name: "OpenMod.Runtime Build"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

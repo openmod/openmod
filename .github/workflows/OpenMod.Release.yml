@@ -1,0 +1,30 @@
+name: OpenMod.Release
+
+on:
+  create:
+    tags:
+      - "*"
+      
+jobs:
+  gitHubRelease:
+    name: "GitHub Release"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      name: Checkout Repository
+      with:
+        fetch-depth: 0
+    - name: Extract version
+      id: get_version
+      run: echo ::set-output name=VERSION::$(git describe --tags)      
+    - name: Create release
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        release_name: OpenMod Release v${{ steps.get_version.outputs.VERSION }}
+        draft: false
+        prerelease: false

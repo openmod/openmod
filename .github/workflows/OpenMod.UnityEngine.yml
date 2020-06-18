@@ -17,7 +17,7 @@ on:
 
 jobs:
   build:
-    name: "Build"
+    name: "OpenMod.UnityEngine Build"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

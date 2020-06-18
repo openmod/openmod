@@ -19,7 +19,7 @@ on:
 
 jobs:
   build:
-    name: "Build"
+    name: "OpenMod.Unturned Build"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
