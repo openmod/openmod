@@ -29,7 +29,7 @@ namespace OpenMod.API.Users
         ///   Disconnects the user.
         /// </summary>
         /// <param name="reason">Disconnect reason.</param>
-        Task DisconnectAsync(string reason = null);
+        Task DisconnectAsync(string reason = "");
 
         /// <summary>
         ///   Data for this session.

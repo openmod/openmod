@@ -48,9 +48,9 @@ namespace OpenMod.Unturned.Users
         }
 
 
-        public Task DisconnectAsync(string reason = null)
+        public Task DisconnectAsync(string reason = "")
         {
-            Provider.reject(SteamId, ESteamRejection.PLUGIN, reason);
+            Provider.reject(SteamId, ESteamRejection.PLUGIN, reason ?? string.Empty);
             return Task.CompletedTask;
         }
 
