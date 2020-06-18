@@ -53,7 +53,7 @@ framework | standalone | unityengine | unturned
 - [x] Command framework
 - [x] Unturned Command Wrappers
 - [x] Built-in OpenMod Commands
-- [ ] Framework events implementation
+- [x] Framework events implementation
 - [ ] RM 4 Bridge
 - [ ] Documentation
 - [ ] Release
