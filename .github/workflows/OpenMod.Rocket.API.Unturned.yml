@@ -1,0 +1,48 @@
+name: OpenMod.Rocket.Core
+
+on:
+  create:
+    tags:
+      - "*"
+  push:
+    branches: [ master ]
+    paths:
+      - 'unturned/rocketmod/Rocket.API/**'    
+      - 'unturned/rocketmod/Rocket.Core/**'
+      - 'unturned/rocketmod/Rocket.Unturned/**'      
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'unturned/rocketmod/Rocket.API/**' 
+      - 'unturned/rocketmod/Rocket.Core/**'      
+      - 'unturned/rocketmod/Rocket.Unturned/**'
+
+jobs:
+  build:
+    name: "OpenMod.Rocket.Unturned Build"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      name: Checkout Repository
+      with:
+        fetch-depth: 0
+    - name: Extract version
+      id: get_version
+      run: echo ::set-output name=VERSION::$(git describe --tags)        
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Install dependencies
+      run: dotnet restore unturned/rocketmod/Rocket.Unturned
+    - name: Update version
+      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" unturned/rocketmod/Rocket.Unturned/Rocket.Unturned.csproj 
+    - name: Build
+      run: dotnet build unturned/rocketmod/Rocket.Unturned --configuration Release --no-restore
+#    - name: Test
+#      run: dotnet test --no-restore --verbosity normal
+    - name: Push to NuGet
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      run: dotnet nuget push unturned/rocketmod/Rocket.Unturned/bin/Release/*.nupkg
+             --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
+             --source https://api.nuget.org/v3/index.json
