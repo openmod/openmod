@@ -1,0 +1,11 @@
+{
+	"Name": "OpenMod.Unturned.Dev",
+	"Version": "0.0.0.0",
+	"Assemblies":
+	[
+		{
+			"Path": "/OpenMod.Unturned.Module.Dev.dll",
+			"Role": "Server"
+		}
+	]
+}
