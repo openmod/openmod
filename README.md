@@ -20,7 +20,8 @@ OpenMod is based on modern C# code and best practices.
 ## Supported Games
 Currently Unturned is the only supported game. More games might follow in the future.
 
-A RocketMod 4 bridge plugin is also planned which allows to run legacy RM4 plugins.
+A RocketMod 4 bridge has been made, which allows to run legacy RM4 plugins.
+The configs for RM4 are yet to be decided to be seperate, or to be proxied.
 
 ## Status
 OpenMod is currently work-in-progress, hence a downloadable version does not exist.
