@@ -53,8 +53,9 @@ framework | standalone | unityengine | unturned
 - [x] Command framework
 - [x] Unturned Command Wrappers
 - [x] Built-in OpenMod Commands
-- [ ] Framework and Unturned events implementation
+- [ ] Framework events implementation
 - [ ] RM 4 Bridge
+- [ ] Documentation
 - [ ] Release
 - [ ] RCON Plugin
 - [ ] Scripting Plugin
