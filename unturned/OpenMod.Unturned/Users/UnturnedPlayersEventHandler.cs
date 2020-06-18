@@ -19,7 +19,7 @@ namespace OpenMod.Unturned.Users
 
         private readonly IEventBus m_EventBus;
         private readonly ICommandExecutor m_CommandExecutor;
-        private readonly IOpenModHost m_Host;
+        private readonly IRuntime m_Runtime;
         private readonly IUserDataSeeder m_DataSeeder;
         private readonly IUserDataStore m_UserDataStore;
         private bool m_Subscribed;
@@ -27,13 +27,13 @@ namespace OpenMod.Unturned.Users
         public UnturnedPlayerEventsHandler(
             IEventBus eventBus,
             ICommandExecutor commandExecutor,
-            IOpenModHost host,
+            IRuntime runtime,
             IUserDataSeeder dataSeeder,
             IUserDataStore userDataStore)
         {
             m_EventBus = eventBus;
             m_CommandExecutor = commandExecutor;
-            m_Host = host;
+            m_Runtime = runtime;
             m_DataSeeder = dataSeeder;
             m_UserDataStore = userDataStore;
             m_UnturnedUsers = new HashSet<UnturnedUser>();
@@ -80,7 +80,7 @@ namespace OpenMod.Unturned.Users
                 m_PendingUsers.Add(pendingUser);
 
                 var userConnectingEvent = new UserConnectingEvent(pendingUser);
-                await m_EventBus.EmitAsync(m_Host, this, userConnectingEvent);
+                await m_EventBus.EmitAsync(m_Runtime, this, userConnectingEvent);
 
                 if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))
                 {
@@ -117,7 +117,7 @@ namespace OpenMod.Unturned.Users
                 m_UnturnedUsers.Add(user);
 
                 var connectedEvent = new UserConnectedEvent(user);
-                await m_EventBus.EmitAsync(m_Host, this, connectedEvent);
+                await m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
             });
         }
 
@@ -135,7 +135,7 @@ namespace OpenMod.Unturned.Users
                 user.SessionEndTime = DateTime.Now;
                 var disconnectedEvent = new UserDisconnectedEvent(user);
 
-                await m_EventBus.EmitAsync(m_Host, this, disconnectedEvent);
+                await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
                 m_UnturnedUsers.Remove(user);
 
                 var userData = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
