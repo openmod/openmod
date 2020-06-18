@@ -3,7 +3,7 @@ using System.Net.Http;
 using HarmonyLib;
 using NuGet.Protocol;
 
-namespace OpenMod.Unturned.Module
+namespace OpenMod.Unturned.Module.Shared
 {
     [HarmonyPatch(typeof(HttpRequestMessageFactory))]
     [HarmonyPatch(nameof(HttpRequestMessageFactory.Create))]

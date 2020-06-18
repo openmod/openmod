@@ -1,25 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
+using System.Reflection;
+using OpenMod.API;
+using OpenMod.NuGet;
+using OpenMod.Unturned.Module.Shared;
 using SDG.Unturned;
 
-#if NUGET_BOOTSTRAP
-using OpenMod.Bootstrapper;
-using OpenMod.NuGet;
-#else
-using System.Reflection;
-using Microsoft.Extensions.Hosting;
-using OpenMod.API;
-#endif
-
-
-namespace OpenMod.Unturned.Module
+namespace OpenMod.Unturned.Module.Dev
 {
-    public class OpenModInitializer
+    public class OpenModUnturnedModule : OpenModUnturnedModuleBase
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void Initialize()
+        protected override void Initialize()
         {
             string openModDirectory = Path.GetFullPath($"Servers/{Dedicator.serverID}/OpenMod/");
             if (!Directory.Exists(openModDirectory))
@@ -27,19 +19,6 @@ namespace OpenMod.Unturned.Module
                 Directory.CreateDirectory(openModDirectory);
             }
 
-#if NUGET_BOOTSTRAP
-            Console.WriteLine("Bootstrapping OpenMod for Unturned, this might take a while...");
-
-            var bootrapper = new OpenModDynamicBootstrapper();
-
-            bootrapper.Bootstrap(
-                openModDirectory,
-                Environment.GetCommandLineArgs(),
-                new List<string> { "OpenMod.Unturned" },
-                false,
-                new NuGetConsoleLogger());
-
-#else
             var parameters = new RuntimeInitParameters
             {
                 CommandlineArgs = Environment.GetCommandLineArgs(),
@@ -49,12 +28,11 @@ namespace OpenMod.Unturned.Module
             var assemblies = new List<Assembly>
             {
                 typeof(OpenMod.UnityEngine.UnityMainThreadDispatcher).Assembly,
-                typeof(OpenMod.Unturned.OpenModUnturnedHost).Assembly
+                typeof(OpenModUnturnedHost).Assembly
             };
 
             var runtime = new Runtime.Runtime();
             runtime.Init(assemblies, parameters);
-#endif
         }
     }
 }
