@@ -79,13 +79,6 @@ namespace OpenMod.Runtime
             {
                 // PluginAssemblyStore checks if this attribute exists
                 var pluginMetadata = assembly.GetCustomAttribute<PluginMetadataAttribute>();
-                var pluginDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
-
-                if (!Directory.Exists(pluginDirectory))
-                {
-                    Directory.CreateDirectory(pluginDirectory);
-                }
-
                 AssemblyHelper.CopyAssemblyResources(assembly, Path.Combine(m_Runtime.WorkingDirectory, "plugins", pluginMetadata.Id));
             }
 

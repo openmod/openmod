@@ -12,6 +12,12 @@ namespace OpenMod.Core.Helpers
             baseDir ??= string.Empty;
 
             var resourceNames = assembly.GetManifestResourceNames();
+
+            if (resourceNames.Length > 0 && !Directory.Exists(baseDir))
+            {
+                Directory.CreateDirectory(baseDir);
+            }
+
             foreach (var resourceName in resourceNames)
             {
                 var regex = new Regex(Regex.Escape(assembly.GetName().Name + "."));
