@@ -1,9 +1,9 @@
 name: OpenMod.Unturned.Module
 
 on:
-  create:
-    tags:
-      - "*"
+  release:
+    types:
+      - created
   push:
     branches: [ master ]
     paths:
@@ -41,26 +41,18 @@ jobs:
       run: dotnet build unturned/OpenMod.Unturned.Module --configuration Release --no-restore
 #    - name: Test
 #      run: dotnet test --no-restore --verbosity normal
-    - name: Wait for GitHub release
-      if: github.event_name == 'create' && github.event.ref_type == 'tag'
-      uses: fountainhead/action-wait-for-check@v1.0.0
-      with:
-        token: ${{ github.token }}
-        checkName: 'gitHubRelease'
-        owner: 'openmod'
-        repo: 'OpenMod'
-        ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - name: Get Release
+      if: github.event_name == 'release'
       id: get-release
       uses: bruceadams/get-release@v1.2.0
     - name: Install zip
-      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      if: github.event_name == 'release'
       run: sudo apt-get install zip
     - name: Zip artifacts
-      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      if: github.event_name == 'release'
       run: "cd ./unturned/OpenMod.Unturned.Module/bin/Release/net461 && zip -qq -r ./release.zip *"
     - name: Upload release asset
-      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ github.token }}
