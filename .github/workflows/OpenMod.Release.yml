@@ -20,11 +20,10 @@ jobs:
     - name: Create release
       if: github.event_name == 'create' && github.event.ref_type == 'tag'
       id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+      uses: sondreb/action-release@master
       with:
-        tag_name: ${{ steps.get_version.outputs.VERSION }}
-        release_name: OpenMod Release v${{ steps.get_version.outputs.VERSION }}
+        token: ${{ github.token }}
+        tag: ${{ steps.get_version.outputs.VERSION }}
+        name: OpenMod Release v${{ steps.get_version.outputs.VERSION }}
         draft: false
         prerelease: false
