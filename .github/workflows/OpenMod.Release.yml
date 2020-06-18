@@ -22,7 +22,7 @@ jobs:
       id: create_release
       uses: sondreb/action-release@master
       with:
-        token: ${{ github.token }}
+        token: ${{ secrets.RELEASE_TOKEN }}
         tag: ${{ steps.get_version.outputs.VERSION }}
         name: OpenMod Release v${{ steps.get_version.outputs.VERSION }}
         draft: false
