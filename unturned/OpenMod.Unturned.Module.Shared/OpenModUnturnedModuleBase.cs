@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Reflection;
@@ -16,10 +17,19 @@ namespace OpenMod.Unturned.Module.Shared
         private const string c_HarmonyInstanceId = "com.get-openmod.unturned.module";
         private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new Dictionary<string, Assembly>();
         private Harmony m_HarmonyInstance;
+        private readonly string[] c_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
+        private readonly string[] c_CompatibleModules = { };
 
         public void initialize()
         {
             var selfAssembly = typeof(OpenModUnturnedModuleBase).Assembly;
+            var assemblyLocation = selfAssembly.Location;
+            var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+
+            if (HasIncompatibleModules(assemblyDirectory))
+            {
+                return;
+            }
 
             m_HarmonyInstance = new Harmony(c_HarmonyInstanceId);
             m_HarmonyInstance.PatchAll(selfAssembly);
@@ -27,10 +37,6 @@ namespace OpenMod.Unturned.Module.Shared
             InstallNewtonsoftJson();
             InstallTlsWorkaround();
             InstallAssemblyResolver();
-
-            var assemblyLocation = selfAssembly.Location; 
-            var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
-
 
             // ReSharper disable once AssignNullToNotNullAttribute
             foreach (var file in Directory.GetFiles(assemblyDirectory))
@@ -42,8 +48,57 @@ namespace OpenMod.Unturned.Module.Shared
             }
         }
 
+        private bool HasIncompatibleModules(string assemblyDirectory)
+        {
+            var modulesDirectory = Directory.GetParent(assemblyDirectory).FullName;
+            foreach (var modulePath in Directory.GetDirectories(modulesDirectory))
+            {
+                var moduleName = Path.GetDirectoryName(modulePath);
+
+                if (moduleName.Equals(Path.GetDirectoryName(assemblyDirectory)))
+                {
+                    continue; // OpenMod's own directory
+                }
+
+                if (c_CompatibleModules.Any(d => d.Equals(moduleName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+                
+                var previousColor = Console.ForegroundColor;
+                if (c_IncompatibleModules.Any(d => d.Equals(moduleName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("================================================================");
+                    Console.WriteLine($"Incompatible module detected: {moduleName}");
+
+                    //if (moduleName.Equals("Rocket.Unturned", StringComparison.OrdinalIgnoreCase))
+                    //{
+                        //todo: add documentation link for migration from Rocket.Unturned
+                    //}
+                    //else
+                    //{
+                    Console.WriteLine("Please remove the module in order to use OpenMod.");
+                    //}
+
+                    Console.WriteLine("OpenMod will not load.");
+                    Console.WriteLine("================================================================");
+                    Console.ForegroundColor = previousColor;
+                    return true;
+                }
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Unknown module detected: {moduleName}");
+                Console.WriteLine("This module may conflict with OpenMod.");
+                Console.WriteLine("OpenMod may not work correctly.");
+                Console.ForegroundColor = previousColor;
+            }
+
+            return false;
+        }
+
         protected abstract void Initialize();
-        
+
         private void InstallNewtonsoftJson()
         {
             var managedDir = Path.GetDirectoryName(typeof(IModuleNexus).Assembly.Location);
@@ -78,7 +133,7 @@ namespace OpenMod.Unturned.Module.Shared
             // Copy Newtonsoft.Json
             var asm = AssemblyName.GetAssemblyName(unturnedNewtonsoftFile);
             GetVersionIndependentName(asm.FullName, out var version);
-            if (!version.StartsWith("7.", StringComparison.OrdinalIgnoreCase)) 
+            if (!version.StartsWith("7.", StringComparison.OrdinalIgnoreCase))
                 return;
 
             if (File.Exists(newtonsoftBackupFile))
