@@ -7,7 +7,7 @@ using OpenMod.Unturned.Plugins;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-[assembly: PluginMetadata(Author = "OpenMod", DisplayName = "OpenMod RocketMod Plugin", Id = "OpenMod.Rocket.Unturned")]
+[assembly: PluginMetadata(Author = "OpenMod", DisplayName = "OpenMod RocketMod Plugin", Id = "Rocket.Unturned")]
 
 namespace Rocket.Unturned
 {
