@@ -51,7 +51,7 @@ jobs:
       run: sudo apt-get install zip
     - name: Zip artifacts
       if: github.event_name == 'release'
-      run: "cd ./unturned/OpenMod.Unturned.Module/bin/Release/net461 && zip -qq -r ./release.zip *"
+      run: "mkdir ./release && mkdir./release/OpenMod.Unturned/ && mv ./unturned/OpenMod.Unturned.Module/bin/Release/net461/* ./release/OpenMod.Unturned/ && mv ./release/OpenMod.Unturned/Readme.txt ./release && cd ./release && zip -qq -r ./release.zip *"
     - name: Upload release asset
       if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
@@ -59,6 +59,6 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.get-release.outputs.upload_url }}
-        asset_path: ./unturned/OpenMod.Unturned.Module/bin/Release/net461/release.zip
+        asset_path: ./release/release.zip
         asset_name: OpenMod.Unturned.Module-v${{ steps.get_version.outputs.VERSION }}.zip
         asset_content_type: application/zip
