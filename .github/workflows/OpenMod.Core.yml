@@ -36,7 +36,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore framework/OpenMod.Core
     - name: Update version
-      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"  
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"
     - name: Build
       run: dotnet build framework/OpenMod.Core --configuration Release --no-restore
 #    - name: Test
