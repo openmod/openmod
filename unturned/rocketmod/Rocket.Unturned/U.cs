@@ -21,6 +21,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using UnityEngine;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -31,7 +32,15 @@ namespace Rocket.Unturned
         private static GameObject rocketGameObject;
         public static U Instance;
         public static RocketUnturnedOpenModPlugin PluginInstance;
-        public static ILogger Logger;
+
+        public static ILogger Logger
+        {
+            get
+            {
+                return Core.Logging.Logger.StandardLogger;
+            }
+            set { Core.Logging.Logger.StandardLogger = value; }
+        }
 
         private static readonly TranslationList defaultTranslations = new TranslationList(){
             { "command_generic_failed_find_player","Failed to find player"},
@@ -149,9 +158,7 @@ namespace Rocket.Unturned
                     Console = rocketGameObject.AddComponent<UnturnedConsole>();
 #pragma warning restore CS0618
 
-                System.Console.Clear();
-                System.Console.ForegroundColor = ConsoleColor.Cyan;
-                System.Console.WriteLine("Rocket Unturned v" + Assembly.GetExecutingAssembly().GetName().Version.ToString() + " for Unturned v" + Provider.APP_VERSION + "\n");
+                Logger.LogInformation("Rocket Unturned v" + Assembly.GetExecutingAssembly().GetName().Version.ToString() + " for Unturned v" + Provider.APP_VERSION + "\n");
 
                 // OPENMOD PATCH: extracted callbacks to methods
                 R.OnRockedInitialized += OnRocketInitialized;

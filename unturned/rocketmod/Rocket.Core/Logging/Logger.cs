@@ -3,11 +3,14 @@ using System.Collections;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace Rocket.Core.Logging
 {
     public partial class Logger
     {
+        public static ILogger StandardLogger;
+
         private static string lastAssembly = "";
 
         [Obsolete("Log(string message,bool sendToConsole) is obsolete, use Log(string message,ConsoleColor color) instead",true)]
@@ -176,14 +179,19 @@ namespace Rocket.Core.Logging
             switch (type)
             {
                 case ELogType.Info:
+                    StandardLogger?.LogInformation(message);
                     break;
                 case ELogType.Error:
+                    StandardLogger?.LogError(message);
                     break;
                 case ELogType.Exception:
+                    StandardLogger?.LogError(message);
                     break;
                 case ELogType.Warning:
+                    StandardLogger?.LogWarning(message);
                     break;
                 case ELogType.Undefined:
+                    StandardLogger?.LogInformation(message);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
