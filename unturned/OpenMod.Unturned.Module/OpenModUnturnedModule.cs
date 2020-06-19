@@ -17,7 +17,7 @@ namespace OpenMod.Unturned.Module
         public void initialize()
         {
             m_SharedModule = new OpenModSharedUnturnedModule();
-            m_SharedModule.Initialize();
+            m_SharedModule.Initialize(GetType().Assembly);
             OnInitialize();
         }
 

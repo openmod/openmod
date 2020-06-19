@@ -20,13 +20,14 @@ namespace OpenMod.Unturned.Module.Shared
         private readonly string[] c_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
         private readonly string[] c_CompatibleModules = { };
 
-        public void Initialize()
+        public void Initialize(Assembly moduleAssembly)
         {
             var selfAssembly = typeof(OpenModSharedUnturnedModule).Assembly;
-            var assemblyLocation = selfAssembly.Location;
-            var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+            var moduleAssemblyLocation = moduleAssembly.Location;
+            var openModDirectory = Path.GetDirectoryName(moduleAssemblyLocation);
+            var modulesDirectory = Directory.GetParent(openModDirectory).FullName;
 
-            if (HasIncompatibleModules(assemblyDirectory))
+            if (HasIncompatibleModules(modulesDirectory))
             {
                 return;
             }
@@ -34,28 +35,28 @@ namespace OpenMod.Unturned.Module.Shared
             m_HarmonyInstance = new Harmony(c_HarmonyInstanceId);
             m_HarmonyInstance.PatchAll(selfAssembly);
 
-            InstallNewtonsoftJson();
+            InstallNewtonsoftJson(openModDirectory);
             InstallTlsWorkaround();
             InstallAssemblyResolver();
 
             // ReSharper disable once AssignNullToNotNullAttribute
-            foreach (var file in Directory.GetFiles(assemblyDirectory))
+            foreach (var file in Directory.GetFiles(openModDirectory))
             {
                 if (file.EndsWith(".dll"))
                 {
-                    LoadAssembly(file);
+                    LoadAssembly(openModDirectory, file);
                 }
             }
         }
 
-        private bool HasIncompatibleModules(string assemblyDirectory)
+        private bool HasIncompatibleModules(string modulesDirectory)
         {
-            var modulesDirectory = Directory.GetParent(assemblyDirectory).FullName;
+            var openModModuleName = Path.GetDirectoryName(modulesDirectory);
             foreach (var modulePath in Directory.GetDirectories(modulesDirectory))
             {
                 var moduleName = Path.GetDirectoryName(modulePath);
 
-                if (moduleName.Equals(Path.GetDirectoryName(assemblyDirectory)))
+                if (moduleName.Equals(openModModuleName))
                 {
                     continue; // OpenMod's own directory
                 }
@@ -97,10 +98,10 @@ namespace OpenMod.Unturned.Module.Shared
             return false;
         }
         
-        private void InstallNewtonsoftJson()
+        private void InstallNewtonsoftJson(string openModDir)
         {
+            Console.WriteLine("Location: " + typeof(IModuleNexus).Assembly.Location);
             var managedDir = Path.GetDirectoryName(typeof(IModuleNexus).Assembly.Location);
-            var openModDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             // ReSharper disable once AssignNullToNotNullAttribute
             var unturnedNewtonsoftFile = Path.GetFullPath(Path.Combine(managedDir, "Newtonsoft.Json.dll"));
@@ -203,14 +204,12 @@ namespace OpenMod.Unturned.Module.Shared
             return s_VersionRegex.Replace(fullAssemblyName, string.Empty);
         }
 
-        public void LoadAssembly(string dllName)
+        public void LoadAssembly(string baseDirectory, string dllName)
         {
             //Load the dll from the same directory as this assembly
-            var selfLocation = typeof(OpenModSharedUnturnedModule).Assembly.Location;
-            var currentPath = Path.GetDirectoryName(selfLocation) ?? string.Empty;
-            var dllFullPath = Path.GetFullPath(Path.Combine(currentPath, dllName));
+            var dllFullPath = Path.GetFullPath(Path.Combine(baseDirectory, dllName));
 
-            if (string.Equals(selfLocation, dllFullPath, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(baseDirectory, dllFullPath, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
