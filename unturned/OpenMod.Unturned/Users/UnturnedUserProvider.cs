@@ -154,9 +154,21 @@ namespace OpenMod.Unturned.Users
             return userType.Equals(KnownActorTypes.Player, StringComparison.OrdinalIgnoreCase);
         }
 
-        public Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
+        public async Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
         {
-            throw new NotImplementedException();
+            switch (searchMode)
+            {
+                case UserSearchMode.Id:
+                    return m_UnturnedUsers.FirstOrDefault(d => d.Id.Equals(searchString, StringComparison.OrdinalIgnoreCase));
+                case UserSearchMode.Name:
+                    return m_UnturnedUsers.FirstOrDefault(d => d.DisplayName.Equals(searchString, StringComparison.OrdinalIgnoreCase))
+                        ?? m_UnturnedUsers.FirstOrDefault(d => d.DisplayName.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+                case UserSearchMode.NameOrId:
+                    return await FindUserAsync(userType, searchString, UserSearchMode.Id) ??
+                           await FindUserAsync(userType, searchString, UserSearchMode.Name);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(searchMode), searchMode, null);
+            }
         }
 
         public Task<IReadOnlyCollection<IUser>> GetUsers(string userType)
