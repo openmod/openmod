@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Eventing;
+using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
@@ -81,7 +82,7 @@ namespace OpenMod.Unturned.Users
 
         protected virtual void OnPlayerConnected(SteamPlayer player)
         {
-            AsyncHelper.RunSync(async () =>
+            AsyncHelper.RunSync(() =>
             {
                 var pending = m_PendingUsers.First(d => d.SteamId == player.playerID.steamID);
                 FinishSession(pending);
@@ -90,25 +91,26 @@ namespace OpenMod.Unturned.Users
                 m_UnturnedUsers.Add(user);
 
                 var connectedEvent = new UserConnectedEvent(user);
-                await m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
+                return m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
             });
         }
 
         // todo: memory leak, m_PendingUsers does not get cleared up when pending user gets rejected
         // pending player session also does not end on rejections.
         // Unturned does not have an event for handling rejections yet.
-        protected virtual void OnPendingPlayerConnected(ValidateAuthTicketResponse_t callback, ref bool isvalid, ref string explanation)
+        protected virtual void OnPendingPlayerConnected(ValidateAuthTicketResponse_t callback, ref bool isValid, ref string explanation)
         {
-            var isvalid_ = isvalid;
-            var explanation_ = explanation;
+            if (!isValid)
+            {
+                return;
+            }
+
+            //todo check if it is working, if not this should be patched
+            var isPendingValid = isValid;
+            var rejectExplanation = explanation;
 
             AsyncHelper.RunSync(async () =>
             {
-                if (!isvalid_)
-                {
-                    return;
-                }
-
                 var steamPending = Provider.pending.First(d => d.playerID.steamID == callback.m_SteamID);
                 var pendingUser = new UnturnedPendingUser(m_UserDataStore, steamPending);
                 await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
@@ -125,18 +127,18 @@ namespace OpenMod.Unturned.Users
 
                 if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))
                 {
-                    isvalid_ = false;
-                    explanation_ = userConnectingEvent.RejectionReason;
+                    isPendingValid = false;
+                    rejectExplanation = userConnectingEvent.RejectionReason;
                 }
 
                 if (userConnectingEvent.IsCancelled)
                 {
-                    isvalid_ = false;
+                    isPendingValid = false;
                 }
             });
 
-            isvalid = isvalid_;
-            explanation = explanation_;
+            isValid = isPendingValid;
+            explanation = rejectExplanation;
         }
 
         protected virtual void FinishSession(UnturnedPendingUser pending)
@@ -171,7 +173,7 @@ namespace OpenMod.Unturned.Users
             }
         }
 
-        public Task<IReadOnlyCollection<IUser>> GetUsers(string userType)
+        public Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType)
         {
             return Task.FromResult<IReadOnlyCollection<IUser>>(m_UnturnedUsers);
         }
