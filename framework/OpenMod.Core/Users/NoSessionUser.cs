@@ -4,7 +4,7 @@ using OpenMod.API.Users;
 
 namespace OpenMod.Core.Users
 {
-    public sealed class OfflineUser : UserBase
+    public class OfflineUser : UserBase
     {
         private readonly UserData m_Data;//todo
 
