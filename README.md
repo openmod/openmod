@@ -31,29 +31,3 @@ The configs for RM4 are yet to be decided to be separate, or to be proxied.
 | [![OpenMod.Core](https://github.com/openmod/OpenMod/workflows/OpenMod.Core/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Core)                         |                                                                                                                                                                                  |                                                                                                                                                                                     | [![OpenMod.Rocket.API](https://github.com/openmod/OpenMod/workflows/OpenMod.Rocket.API/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Rocket.API)                |
 | [![OpenMod.NuGet](https://github.com/openmod/OpenMod/workflows/OpenMod.NuGet/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.NuGet)                      |                                                                                                                                                                                  |                                                                                                                                                                                     | [![OpenMod.Rocket.Core](https://github.com/openmod/OpenMod/workflows/OpenMod.Rocket.Core/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Rocket.Core)             |
 | [![OpenMod.Runtime](https://github.com/openmod/OpenMod/workflows/OpenMod.Runtime/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Runtime)                |                                                                                                                                                                                  |                                                                                                                                                                                     | [![OpenMod.Rocket.Unturned](https://github.com/openmod/OpenMod/workflows/OpenMod.Rocket.Unturned/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Rocket.Unturned) |
-
-## ToDo
-- [x] IoC
-- [x] Logging
-- [x] Yaml Configurations
-- [x] Runtime
-- [x] Dynamic bootstrapping
-- [x] Projects
-- [x] Unturned Module
-- [x] Unitask integration
-- [x] Plugins (dll / NuGet)
-- [x] Plugin configurations & translations
-- [x] Standalone console implementation
-- [x] GitHub actions (auto releases & nuget deployments)
-- [x] Eventing
-- [x] Persistent Datastore
-- [x] Permissions implementations
-- [x] Command framework
-- [x] Unturned Command Wrappers
-- [x] Built-in OpenMod Commands
-- [x] Framework events implementation
-- [x] RM 4 Bridge
-- [ ] Documentation
-- [ ] Release
-- [ ] RCON Plugin
-- [ ] Scripting Plugin
