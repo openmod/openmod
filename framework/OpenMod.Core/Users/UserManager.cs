@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenMod.Core.Users
 {
@@ -19,7 +19,7 @@ namespace OpenMod.Core.Users
             m_UserProviders = new List<IUserProvider>();
             foreach (var provider in options.Value.UserProviderTypes)
             {
-                m_UserProviders.Add((IUserProvider) ActivatorUtilities.CreateInstance(serviceProvider, provider));
+                m_UserProviders.Add((IUserProvider)ActivatorUtilities.CreateInstance(serviceProvider, provider));
             }
         }
 
@@ -28,13 +28,13 @@ namespace OpenMod.Core.Users
             get { return m_UserProviders; }
         }
 
-        public async Task<IReadOnlyCollection<IUser>> GetUsers(string type)
+        public async Task<IReadOnlyCollection<IUser>> GetUsersAsync(string type)
         {
             var list = new List<IUser>();
 
             foreach (var userProvider in UserProviders.Where(d => d.SupportsUserType(type)))
             {
-                list.AddRange(await userProvider.GetUsers(type));
+                list.AddRange(await userProvider.GetUsersAsync(type));
             }
 
             return list;
@@ -58,13 +58,15 @@ namespace OpenMod.Core.Users
         {
             foreach (var userProvider in UserProviders)
             {
-                if (userProvider is IAsyncDisposable asyncDisposable)
+                switch (userProvider)
                 {
-                    await asyncDisposable.DisposeAsync();
-                }
-                else if (userProvider is IDisposable disposable)
-                {
-                    disposable.Dispose();
+                    case IAsyncDisposable asyncDisposable:
+                        await asyncDisposable.DisposeAsync();
+                        break;
+
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
                 }
             }
         }

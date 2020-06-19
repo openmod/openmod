@@ -9,7 +9,7 @@ namespace OpenMod.API.Users
     {
         IReadOnlyCollection<IUserProvider> UserProviders { get; }
 
-        Task<IReadOnlyCollection<IUser>> GetUsers(string type);
+        Task<IReadOnlyCollection<IUser>> GetUsersAsync(string type);
 
         Task<IUser> FindUserAsync(string type, string searchString, UserSearchMode searchMode);
     }

@@ -29,7 +29,6 @@ namespace OpenMod.Unturned.Users
             }
 
             ChatManager.onCheckPermissions += OnCheckCommandPermissions;
-
             m_Subscribed = true;
         }
 

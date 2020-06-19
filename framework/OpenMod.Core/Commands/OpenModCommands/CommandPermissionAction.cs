@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using OpenMod.API.Permissions;
 using OpenMod.API.Users;
 using OpenMod.Core.Permissions;
-using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {
@@ -31,9 +30,9 @@ namespace OpenMod.Core.Commands.OpenModCommands
             IPermissionActor target;
             string permission;
 
-            string actorType = Context.Parameters[0].ToLower();
-            string targetName = Context.Parameters[1];
-            string permissionToUpdate = Context.Parameters[2];
+            var actorType = Context.Parameters[0].ToLower();
+            var targetName = Context.Parameters[1];
+            var permissionToUpdate = Context.Parameters[2];
 
             switch (actorType)
             {

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace OpenMod.Core.Plugins
 {
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Assembly)]
     public sealed class PluginMetadataAttribute : Attribute
     {
         private string m_Id;

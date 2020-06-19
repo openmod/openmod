@@ -8,6 +8,7 @@ namespace OpenMod.Core.Helpers
     {
         public static TypeConverter GetConverter(Type type)
         {
+            //todo ??
             //if (typeof(IPlayer).IsAssignableFrom(type))
             //    return new PlayerTypeConverter();
             return TypeDescriptor.GetConverter(type);

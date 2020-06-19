@@ -63,17 +63,12 @@ namespace OpenMod.Unturned.Users
 
         public override bool Equals(object obj)
         {
-            if (obj is UnturnedUser other)
+            return obj switch
             {
-                return Equals(other);
-            }
-
-            if (obj is UnturnedPendingUser otherPending)
-            {
-                return Equals(otherPending);
-            }
-
-            return false;
+                UnturnedUser other => Equals(other),
+                UnturnedPendingUser otherPending => Equals(otherPending),
+                _ => false
+            };
         }
 
         public override int GetHashCode()
