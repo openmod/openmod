@@ -12,7 +12,7 @@ using SDG.Framework.Modules;
 
 namespace OpenMod.Unturned.Module.Shared
 {
-    public abstract class OpenModUnturnedModuleBase : IModuleNexus
+    public sealed class OpenModSharedUnturnedModule 
     {
         private const string c_HarmonyInstanceId = "com.get-openmod.unturned.module";
         private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new Dictionary<string, Assembly>();
@@ -20,9 +20,9 @@ namespace OpenMod.Unturned.Module.Shared
         private readonly string[] c_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
         private readonly string[] c_CompatibleModules = { };
 
-        public void initialize()
+        public void Initialize()
         {
-            var selfAssembly = typeof(OpenModUnturnedModuleBase).Assembly;
+            var selfAssembly = typeof(OpenModSharedUnturnedModule).Assembly;
             var assemblyLocation = selfAssembly.Location;
             var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
 
@@ -96,9 +96,7 @@ namespace OpenMod.Unturned.Module.Shared
 
             return false;
         }
-
-        protected abstract void Initialize();
-
+        
         private void InstallNewtonsoftJson()
         {
             var managedDir = Path.GetDirectoryName(typeof(IModuleNexus).Assembly.Location);
@@ -160,7 +158,7 @@ namespace OpenMod.Unturned.Module.Shared
             };
         }
 
-        public void shutdown()
+        public void Shutdown()
         {
             m_HarmonyInstance.UnpatchAll(c_HarmonyInstanceId);
         }
@@ -208,7 +206,7 @@ namespace OpenMod.Unturned.Module.Shared
         public void LoadAssembly(string dllName)
         {
             //Load the dll from the same directory as this assembly
-            var selfLocation = typeof(OpenModUnturnedModuleBase).Assembly.Location;
+            var selfLocation = typeof(OpenModSharedUnturnedModule).Assembly.Location;
             var currentPath = Path.GetDirectoryName(selfLocation) ?? string.Empty;
             var dllFullPath = Path.GetFullPath(Path.Combine(currentPath, dllName));
 

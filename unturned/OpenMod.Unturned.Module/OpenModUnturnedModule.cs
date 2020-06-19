@@ -5,14 +5,29 @@ using System.Runtime.CompilerServices;
 using OpenMod.Bootstrapper;
 using OpenMod.NuGet;
 using OpenMod.Unturned.Module.Shared;
+using SDG.Framework.Modules;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Module
 {
-    public class OpenModUnturnedModule : OpenModUnturnedModuleBase
+    public class OpenModUnturnedModule : IModuleNexus
     {
+        private OpenModSharedUnturnedModule m_SharedModule;
+
+        public void initialize()
+        {
+            m_SharedModule = new OpenModSharedUnturnedModule();
+            m_SharedModule.Initialize();
+            OnInitialize();
+        }
+
+        public void shutdown()
+        {
+            m_SharedModule.Shutdown();
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
-        protected override void Initialize()
+        private void OnInitialize()
         {
             string openModDirectory = Path.GetFullPath($"Servers/{Dedicator.serverID}/OpenMod/");
             if (!Directory.Exists(openModDirectory))
