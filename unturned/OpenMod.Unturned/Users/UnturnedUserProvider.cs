@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Eventing;
-using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
@@ -156,21 +155,66 @@ namespace OpenMod.Unturned.Users
             return userType.Equals(KnownActorTypes.Player, StringComparison.OrdinalIgnoreCase);
         }
 
-        public async Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
+        public Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
         {
-            switch (searchMode)
+            var confidence = 0;
+            var unturnedUser = (IUser) null;
+
+            foreach (var user in m_UnturnedUsers)
             {
-                case UserSearchMode.Id:
-                    return m_UnturnedUsers.FirstOrDefault(d => d.Id.Equals(searchString, StringComparison.OrdinalIgnoreCase));
-                case UserSearchMode.Name:
-                    return m_UnturnedUsers.FirstOrDefault(d => d.DisplayName.Equals(searchString, StringComparison.OrdinalIgnoreCase))
-                        ?? m_UnturnedUsers.FirstOrDefault(d => d.DisplayName.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
-                case UserSearchMode.NameOrId:
-                    return await FindUserAsync(userType, searchString, UserSearchMode.Id) ??
-                           await FindUserAsync(userType, searchString, UserSearchMode.Name);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(searchMode), searchMode, null);
+                switch (searchMode)
+                {
+                    case UserSearchMode.NameOrId:
+                    case UserSearchMode.Id:
+                        if (user.Id.Equals(searchString, StringComparison.OrdinalIgnoreCase))
+                            Task.FromResult(user);
+
+                        if (searchMode == UserSearchMode.NameOrId)
+                            goto case UserSearchMode.Name;
+                        break;
+
+                    case UserSearchMode.Name:
+                        var currentConfidence = NameConfidence(user.DisplayName, searchString, confidence);
+                        if (currentConfidence > confidence)
+                        {
+                            unturnedUser = user;
+                            confidence = currentConfidence;
+                        }
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(searchMode), searchMode, null);
+                }
             }
+
+            return Task.FromResult(unturnedUser);
+        }
+
+        // ReSharper disable once MemberCanBeMadeStatic.Local
+        private int NameConfidence(string userName, string searchName, int currentConfidence = -1)
+        {
+            switch (currentConfidence)
+            {
+                case 2:
+                    if (userName.Equals(searchName, StringComparison.OrdinalIgnoreCase))
+                        return 3;
+                    goto case 1;
+
+                case 1:
+                    if (userName.StartsWith(searchName, StringComparison.OrdinalIgnoreCase))
+                        return 2;
+                    goto case 0;
+
+                case 0:
+                    if (userName.IndexOf(searchName, StringComparison.OrdinalIgnoreCase) != -1)
+                        return 1;
+                    break;
+
+                default:
+                    goto case 2;
+            }
+
+            return -1;
         }
 
         public Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType)
