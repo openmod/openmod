@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -188,6 +189,34 @@ namespace OpenMod.Core.Helpers
             }
 
             method.Invoke(instance, @params.ToArray());
+        }
+
+        public static T ToObject<T>(this Dictionary<string, object> dict)
+        {
+            Type type = typeof(T);
+            var obj = Activator.CreateInstance(type);
+
+            foreach (var kv in dict)
+            {
+                type.GetProperty(kv.Key).SetValue(obj, kv.Value);
+            }
+            return (T)obj;
+        }
+
+        public static bool HasConversionOperator(this Type from, Type to)
+        {
+            UnaryExpression BodyFunction(Expression body) => Expression.Convert(body, to);
+            ParameterExpression inp = Expression.Parameter(from, "inp");
+            try
+            {
+                // If this succeeds then we can cast 'from' type to 'to' type using implicit coercion
+                Expression.Lambda(BodyFunction(inp), inp).Compile();
+                return true;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
         }
     }
 }

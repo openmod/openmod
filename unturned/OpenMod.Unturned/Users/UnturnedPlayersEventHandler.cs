@@ -1,43 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using OpenMod.API;
 using OpenMod.API.Commands;
-using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
-using OpenMod.Core.Users.Events;
+using OpenMod.Core.Users;
 using SDG.Unturned;
-using Steamworks;
 
 namespace OpenMod.Unturned.Users
 {
-    public class UnturnedPlayerEventsHandler : IDisposable
+    public class UnturnedCommandHandler : IDisposable
     {
-        private readonly HashSet<UnturnedUser> m_UnturnedUsers;
-        private readonly HashSet<UnturnedPendingUser> m_PendingUsers;
-
-        private readonly IEventBus m_EventBus;
         private readonly ICommandExecutor m_CommandExecutor;
-        private readonly IRuntime m_Runtime;
-        private readonly IUserDataSeeder m_DataSeeder;
-        private readonly IUserDataStore m_UserDataStore;
+        private readonly IUserManager m_UserManager;
         private bool m_Subscribed;
 
-        public UnturnedPlayerEventsHandler(
-            IEventBus eventBus,
+        public UnturnedCommandHandler(
             ICommandExecutor commandExecutor,
-            IRuntime runtime,
-            IUserDataSeeder dataSeeder,
-            IUserDataStore userDataStore)
+            IUserManager userManager)
         {
-            m_EventBus = eventBus;
             m_CommandExecutor = commandExecutor;
-            m_Runtime = runtime;
-            m_DataSeeder = dataSeeder;
-            m_UserDataStore = userDataStore;
-            m_UnturnedUsers = new HashSet<UnturnedUser>();
-            m_PendingUsers = new HashSet<UnturnedPendingUser>();
+            m_UserManager = userManager;
         }
 
         public virtual void Subscribe()
@@ -47,102 +28,21 @@ namespace OpenMod.Unturned.Users
                 return;
             }
 
-            Provider.onCheckValidWithExplanation += OnPendingPlayerConnected;
-            Provider.onEnemyConnected += OnPlayerConnected;
-            Provider.onEnemyDisconnected += OnEnemyDisconnected;
             ChatManager.onCheckPermissions += OnCheckCommandPermissions;
 
             m_Subscribed = true;
         }
 
-        protected virtual void OnPendingPlayerConnected(ValidateAuthTicketResponse_t callback, ref bool isvalid, ref string explanation)
+        public virtual void Unsubscribe()
         {
-            var isvalid_ = isvalid;
-            var explanation_ = explanation;
-
-            AsyncHelper.RunSync(async () =>
+            if (!m_Subscribed)
             {
-                if (!isvalid_)
-                {
-                    return;
-                }
+                return;
+            }
 
-                var steamPending = Provider.pending.First(d => d.playerID.steamID == callback.m_SteamID);
-                var pendingUser = new UnturnedPendingUser(steamPending);
-                await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
-
-                var userData = await m_UserDataStore.GetUserDataAsync(pendingUser.Type, pendingUser.Id);
-                userData.LastSeen = DateTime.Now;
-                userData.LastDisplayName = pendingUser.DisplayName;
-                await m_UserDataStore.SaveUserDataAsync(userData);
-
-                pendingUser.PersistentData = userData.Data;
-                m_PendingUsers.Add(pendingUser);
-
-                var userConnectingEvent = new UserConnectingEvent(pendingUser);
-                await m_EventBus.EmitAsync(m_Runtime, this, userConnectingEvent);
-
-                if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))
-                {
-                    isvalid_ = false;
-                    explanation_ = userConnectingEvent.RejectionReason;
-                }
-
-                if (userConnectingEvent.IsCancelled)
-                {
-                    isvalid_ = false;
-                }
-            });
-
-            isvalid = isvalid_;
-            explanation = explanation_;
-        }
-
-        // todo: memory leak, m_PendingUsers does not get cleared up when pending user gets rejected
-        // Unturned does not have an event for handling rejections yet.
-
-
-        protected virtual void OnPlayerConnected(SteamPlayer player)
-        {
-            AsyncHelper.RunSync(async () =>
-            {
-                var pending = m_PendingUsers.First(d => d.SteamId == player.playerID.steamID);
-                FinishSession(pending);
-
-                var user = new UnturnedUser(player.player, pending)
-                {
-                    SessionStartTime = DateTime.Now,
-                };
-
-                m_UnturnedUsers.Add(user);
-
-                var connectedEvent = new UserConnectedEvent(user);
-                await m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
-            });
-        }
-
-        protected virtual void FinishSession(UnturnedPendingUser pending)
-        {
-            pending.SessionEndTime = DateTime.Now;
-            m_PendingUsers.Remove(pending);
-        }
-
-        protected virtual void OnEnemyDisconnected(SteamPlayer player)
-        {
-            AsyncHelper.RunSync(async () =>
-            {
-                var user = GetUser(player);
-                user.SessionEndTime = DateTime.Now;
-                var disconnectedEvent = new UserDisconnectedEvent(user);
-
-                await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
-                m_UnturnedUsers.Remove(user);
-
-                var userData = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
-                userData.Data = user.PersistentData;
-                userData.LastSeen = DateTime.Now;
-                await m_UserDataStore.SaveUserDataAsync(userData);
-            });
+            // ReSharper disable once DelegateSubtraction
+            ChatManager.onCheckPermissions -= OnCheckCommandPermissions;
+            m_Subscribed = false;
         }
 
         protected virtual void OnCheckCommandPermissions(SteamPlayer player, string text, ref bool shouldExecuteCommand, ref bool shouldList)
@@ -155,46 +55,21 @@ namespace OpenMod.Unturned.Users
             shouldExecuteCommand = false;
             shouldList = false;
 
-            var actor = GetUser(player);
-            AsyncHelper.Schedule("Player command execution", () => m_CommandExecutor.ExecuteAsync(actor, text.Split(' '), string.Empty));
-        }
-
-
-        public virtual void Unsubscribe()
-        {
-            if (!m_Subscribed)
+            AsyncHelper.Schedule("Player command execution", async () =>
             {
-                return;
-            }
+                var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, player.playerID.steamID.ToString(), UserSearchMode.Id);
+                if (user == null)
+                {
+                    return;
+                }
 
-            // ReSharper disable DelegateSubtraction
-            Provider.onEnemyConnected -= OnPlayerConnected;
-            Provider.onEnemyDisconnected -= OnEnemyDisconnected;
-            ChatManager.onCheckPermissions -= OnCheckCommandPermissions;
-            Provider.onCheckValidWithExplanation -= OnPendingPlayerConnected;
-            // ReSharper restore DelegateSubtraction
-
-            m_Subscribed = false;
+                await m_CommandExecutor.ExecuteAsync(user, text.Split(' '), string.Empty);
+            });
         }
 
-        public virtual void Dispose()
+        public void Dispose()
         {
             Unsubscribe();
-        }
-
-        protected virtual UnturnedUser GetUser(Player player)
-        {
-            return GetUser(player.channel.owner);
-        }
-
-        protected virtual UnturnedUser GetUser(SteamPlayer player)
-        {
-            return GetUser(player.playerID.steamID);
-        }
-
-        protected virtual UnturnedUser GetUser(CSteamID id)
-        {
-            return m_UnturnedUsers.FirstOrDefault(d => d.SteamId == id);
         }
     }
 }

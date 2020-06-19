@@ -4,6 +4,7 @@ using OpenMod.API.Ioc;
 using OpenMod.Core;
 using OpenMod.Core.Console;
 using OpenMod.Core.Permissions;
+using OpenMod.Core.Users;
 using OpenMod.Unturned.Commands;
 using OpenMod.Unturned.Users;
 
@@ -23,7 +24,12 @@ namespace OpenMod.Unturned
                 options.AddCommandSource<UnturnedCommandSource>();
             });
 
-            serviceCollection.AddSingleton<UnturnedPlayerEventsHandler>();
+            serviceCollection.Configure<UserManagerOptions>(options =>
+            {
+                options.AddUserProvider<UnturnedUserProvider>();
+            });
+
+            serviceCollection.AddSingleton<UnturnedCommandHandler>();
 
             return Task.CompletedTask;
         }

@@ -36,9 +36,8 @@ namespace OpenMod.Unturned
         private readonly ILoggerFactory m_LoggerFactory;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly ICommandExecutor m_CommandExecutor;
-        private readonly IHost m_Host;
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
-        private readonly UnturnedPlayerEventsHandler m_UnturnedPlayerEventsHandler;
+        private readonly UnturnedCommandHandler m_UnturnedCommandHandler;
         public string HostDisplayName { get; } = Provider.APP_NAME;
         public string HostVersion { get; } = Provider.APP_VERSION;
         public SemVersion Version { get; }
@@ -61,17 +60,15 @@ namespace OpenMod.Unturned
             ILoggerFactory loggerFactory,
             IConsoleActorAccessor consoleActorAccessor,
             ICommandExecutor commandExecutor,
-            IHost host,
             ILogger<OpenModUnturnedHost> logger,
-            UnturnedPlayerEventsHandler unturnedPlayerEventsHandler)
+            UnturnedCommandHandler unturnedCommandHandler)
         {
             m_Runtime = runtime;
             m_LoggerFactory = loggerFactory;
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
-            m_Host = host;
             m_Logger = logger;
-            m_UnturnedPlayerEventsHandler = unturnedPlayerEventsHandler;
+            m_UnturnedCommandHandler = unturnedCommandHandler;
             m_Harmony = new Harmony(c_HarmonyInstanceId);
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
@@ -84,7 +81,7 @@ namespace OpenMod.Unturned
             // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
 
-            m_UnturnedPlayerEventsHandler.Subscribe();
+            m_UnturnedCommandHandler.Subscribe();
             BindUnturnedEvents();
 
             var ioHandlers = (List<ICommandInputOutput>) typeof(CommandWindow)

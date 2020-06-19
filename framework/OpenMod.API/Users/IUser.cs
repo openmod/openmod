@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using OpenMod.API.Commands;
 
 namespace OpenMod.API.Users
@@ -11,34 +11,19 @@ namespace OpenMod.API.Users
     public interface IUser : ICommandActor
     {
         /// <summary>
-        ///    Checks if the user is currently online.
+        ///   Saves persistent data. T must be serializable.
         /// </summary>
-        bool IsOnline { get; }
+        Task SavePersistentDataAsync<T>(string key, T data) where T : class;
 
         /// <summary>
-        ///   The time the users session has begun (e.g. when the user joined the server).
+        ///   Gets persistent data. T must be serializable.
         /// </summary>
-        DateTime? SessionStartTime { get; }
+        Task<T> GetPersistentDataAsync<T>(string key) where T : class;
 
         /// <summary>
-        ///   The time the users session has stopped (e.g. when the user left the server).
+        ///    Represents the current user session. <b>Can be null</b> if the user is not online.
         /// </summary>
-        DateTime? SessionEndTime { get; }
-        
-        /// <summary>
-        ///   Disconnects the user.
-        /// </summary>
-        /// <param name="reason">Disconnect reason.</param>
-        Task DisconnectAsync(string reason = "");
-
-        /// <summary>
-        ///   Data for this session.
-        /// </summary>
-        Dictionary<string, object> SessionData { get; }
-
-        /// <summary>
-        ///    Persistent user data.
-        /// </summary>
-        Dictionary<string, object> PersistentData { get; }
+        [CanBeNull]
+        IUserSession Session { get; }
     }
 }

@@ -30,6 +30,12 @@ namespace OpenMod.Core.Users
                                                && d.Id.Equals(userId, StringComparison.OrdinalIgnoreCase));
             return user;
         }
+        
+        public async Task<IReadOnlyCollection<UserData>> GetUsersDataAsync(string type)
+        {
+            var usersData = await GetUsersDataAsync();
+            return usersData.Users.Where(d => d.Type.Equals(type, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
 
         public async Task SaveUserDataAsync(UserData userData)
         {

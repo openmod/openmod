@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
@@ -9,14 +8,12 @@ using UnityEngine;
 
 namespace OpenMod.Unturned.Users
 {
-    public class UnturnedUser : IUser, IEquatable<UnturnedUser>, IEquatable<UnturnedPendingUser>
+    public class UnturnedUser : UserBase, IEquatable<UnturnedUser>, IEquatable<UnturnedPendingUser>
     {
-        public string Id
+        public override string Id
         {
             get { return SteamId.ToString(); }
         }
-
-        public string Type { get; } = KnownActorTypes.Player;
 
         public Player Player { get; }
 
@@ -24,16 +21,9 @@ namespace OpenMod.Unturned.Users
 
         public CSteamID SteamId { get; }
 
-        public string DisplayName { get; }
-
-        public bool IsOnline { get; internal set; }
-
-        public DateTime? SessionStartTime { get; internal set; }
-
-        public DateTime? SessionEndTime { get; internal set; }
-
-        public UnturnedUser(Player player, UnturnedPendingUser pending)
+        public UnturnedUser(IUserDataStore userDataStore, Player player, UnturnedPendingUser pending) : base(userDataStore)
         {
+            Type = KnownActorTypes.Player;
             Player = player;
             SteamPlayer = Player.channel.owner;
 
@@ -41,34 +31,22 @@ namespace OpenMod.Unturned.Users
             SteamId = steamPlayerIdId.steamID;
             DisplayName = SteamPlayer.playerID.characterName;
 
-            SessionData = pending.SessionData;
-            PersistentData = pending.PersistentData;
-            SessionStartTime = pending.SessionStartTime;
+            Session = new UnturnedUserSession(this, pending.Session);
         }
 
-        public Task PrintMessageAsync(string message)
+        public override Task PrintMessageAsync(string message)
         {
             ChatManager.serverSendMessage(message, Color.white, toPlayer: SteamPlayer, mode: EChatMode.GLOBAL, useRichTextFormatting: true);
             return Task.CompletedTask;
         }
 
-        public Task PrintMessageAsync(string message, System.Drawing.Color color)
+        public override Task PrintMessageAsync(string message, System.Drawing.Color color)
         {
             var convertedColor = new Color(color.R / 255f, color.G / 255f, color.B / 255f);
 
             ChatManager.serverSendMessage(message, convertedColor, toPlayer: SteamPlayer, mode: EChatMode.GLOBAL, useRichTextFormatting: true);
             return Task.CompletedTask;
         }
-
-        public Task DisconnectAsync(string reason = "")
-        {
-            Provider.kick(SteamId, reason ?? string.Empty);
-            return Task.CompletedTask;
-        }
-
-        public Dictionary<string, object> SessionData { get; internal set; }
-
-        public Dictionary<string, object> PersistentData { get; }
 
         public bool Equals(UnturnedUser other)
         {
