@@ -26,9 +26,8 @@ namespace OpenMod.Core.Users
         public async Task<UserData> GetUserDataAsync(string userId, string userType)
         {
             var usersData = await GetUsersDataAsync();
-            var user = usersData.Users.FirstOrDefault(d => d.Type.Equals(userType, StringComparison.OrdinalIgnoreCase)
+            return usersData.Users.FirstOrDefault(d => d.Type.Equals(userType, StringComparison.OrdinalIgnoreCase)
                                                && d.Id.Equals(userId, StringComparison.OrdinalIgnoreCase));
-            return user;
         }
         
         public async Task<IReadOnlyCollection<UserData>> GetUsersDataAsync(string type)

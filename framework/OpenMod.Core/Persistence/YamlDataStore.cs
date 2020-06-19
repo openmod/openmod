@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using OpenMod.API.Persistence;
-using Serilog;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -77,7 +76,7 @@ namespace OpenMod.Core.Persistence
             var filePath = GetFilePathForKey(key);
             if (!File.Exists(filePath))
             {
-                return default;
+                return Task.FromResult<T>(default);
             }
 
             // see SaveAsync for why this is commented
