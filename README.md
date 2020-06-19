@@ -32,9 +32,9 @@ framework | standalone | unityengine | unturned
 ----------|------------|-------------|---------
 ![OpenMod.Bootstrapper Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Bootstrapper/badge.svg) | ![OpenMod.Standalone Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Standalone/badge.svg) | ![OpenMod.UnityEngine Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.UnityEngine/badge.svg) | ![OpenMod.Unturned Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Unturned/badge.svg)
 ![OpenMod.API Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.API/badge.svg) | | | ![OpenMod.Unturned.Module Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Unturned.Module/badge.svg)
-![OpenMod.Core Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Core/badge.svg)
-![OpenMod.NuGet Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.NuGet/badge.svg)
-![OpenMod.Runtime Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Runtime/badge.svg)
+![OpenMod.Core Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Core/badge.svg) | | | ![OpenMod.Rocket.API Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Rocket.API/badge.svg)
+![OpenMod.NuGet Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.NuGet/badge.svg) | | | ![OpenMod.Rocket.Core Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Rocket.Core/badge.svg)
+![OpenMod.Runtime Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Runtime/badge.svg) | | | ![OpenMod.Rocket.Unturned Build Status](https://github.com/openmod/OpenMod/workflows/OpenMod.Rocket.Unturned/badge.svg)
 
 ## ToDo
 - [x] IoC
