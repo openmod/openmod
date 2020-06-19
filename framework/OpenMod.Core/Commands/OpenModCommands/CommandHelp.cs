@@ -60,7 +60,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                     .Take(amountPerPage)
                     .ToList();
 
-                await PrintPageAsync(currentPage, (int)Math.Ceiling((double)pageCommands.Count / amountPerPage), pageCommands);
+                await PrintPageAsync(currentPage, (int)Math.Ceiling((double)commands.Count / amountPerPage), pageCommands);
             }
             else if (Context.Parameters.Length > 0)
             {
