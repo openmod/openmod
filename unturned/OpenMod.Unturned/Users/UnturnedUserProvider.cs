@@ -21,20 +21,20 @@ namespace OpenMod.Unturned.Users
         private readonly HashSet<UnturnedPendingUser> m_PendingUsers;
 
         private readonly IEventBus m_EventBus;
-        private readonly IOpenModHost m_Host;
+        private readonly IRuntime m_Runtime;
         private readonly IUserDataSeeder m_DataSeeder;
         private readonly IUserDataStore m_UserDataStore;
 
         public UnturnedUserProvider(
             IEventBus eventBus, 
-            IOpenModHost host, 
             IUserDataSeeder dataSeeder, 
-            IUserDataStore userDataStore)
+            IUserDataStore userDataStore, 
+            IRuntime runtime)
         {
             m_EventBus = eventBus;
-            m_Host = host;
             m_DataSeeder = dataSeeder;
             m_UserDataStore = userDataStore;
+            m_Runtime = runtime;
             m_UnturnedUsers = new HashSet<UnturnedUser>();
             m_PendingUsers = new HashSet<UnturnedPendingUser>();
 
@@ -55,7 +55,7 @@ namespace OpenMod.Unturned.Users
 
                 var disconnectedEvent = new UserDisconnectedEvent(user);
 
-                await m_EventBus.EmitAsync(m_Host, this, disconnectedEvent);
+                await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
                 m_UnturnedUsers.Remove(user);
 
                 var userData = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
@@ -90,7 +90,7 @@ namespace OpenMod.Unturned.Users
                 m_UnturnedUsers.Add(user);
 
                 var connectedEvent = new UserConnectedEvent(user);
-                await m_EventBus.EmitAsync(m_Host, this, connectedEvent);
+                await m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
             });
         }
 
@@ -121,7 +121,7 @@ namespace OpenMod.Unturned.Users
                 m_PendingUsers.Add(pendingUser);
 
                 var userConnectingEvent = new UserConnectingEvent(pendingUser);
-                await m_EventBus.EmitAsync(m_Host, this, userConnectingEvent);
+                await m_EventBus.EmitAsync(m_Runtime, this, userConnectingEvent);
 
                 if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))
                 {
