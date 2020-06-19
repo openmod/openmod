@@ -29,12 +29,12 @@ namespace OpenMod.Unturned.Users
 
         public override Task PrintMessageAsync(string message)
         {
-            throw new NotSupportedException();
+            return Task.CompletedTask;
         }
 
         public override Task PrintMessageAsync(string message, System.Drawing.Color color)
         {
-            throw new NotSupportedException();
+            return Task.CompletedTask;
         }
 
         public bool Equals(UnturnedPendingUser other)
