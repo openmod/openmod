@@ -63,8 +63,6 @@ namespace OpenMod.Core.Commands
                 return commandExecutingEvent.CommandContext;
             }
 
-            logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
-
             try
             {
                 if (commandContext.Exception != null)
@@ -72,6 +70,8 @@ namespace OpenMod.Core.Commands
                     throw commandContext.Exception;
                 }
 
+                //The console entry was already logged, this fixes the wrong message when the command is not found
+                logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
                 currentCommandAccessor.Context = commandContext;
 
                 var permission = m_CommandPermissionBuilder.GetPermission(commandContext.CommandRegistration);

@@ -17,17 +17,18 @@ namespace OpenMod.Unturned.Module.Shared
         private const string c_HarmonyInstanceId = "com.get-openmod.unturned.module";
         private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new Dictionary<string, Assembly>();
         private Harmony m_HarmonyInstance;
-        private readonly string[] c_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
-        private readonly string[] c_CompatibleModules = { };
+        private readonly string[] m_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
+        private readonly string[] m_CompatibleModules = { };
 
         public void Initialize(Assembly moduleAssembly)
         {
             var selfAssembly = typeof(OpenModSharedUnturnedModule).Assembly;
             var moduleAssemblyLocation = moduleAssembly.Location;
             var openModDirectory = Path.GetDirectoryName(moduleAssemblyLocation);
+            var openModModuleName = Path.GetDirectoryName(openModDirectory);
             var modulesDirectory = Directory.GetParent(openModDirectory).FullName;
 
-            if (HasIncompatibleModules(modulesDirectory))
+            if (HasIncompatibleModules(openModModuleName, modulesDirectory))
             {
                 return;
             }
@@ -49,25 +50,24 @@ namespace OpenMod.Unturned.Module.Shared
             }
         }
 
-        private bool HasIncompatibleModules(string modulesDirectory)
+        private bool HasIncompatibleModules(string openModModuleName, string modulesDirectory)
         {
-            var openModModuleName = Path.GetDirectoryName(modulesDirectory);
             foreach (var modulePath in Directory.GetDirectories(modulesDirectory))
             {
                 var moduleName = Path.GetDirectoryName(modulePath);
-
+                // ReSharper disable once PossibleNullReferenceException
                 if (moduleName.Equals(openModModuleName))
                 {
                     continue; // OpenMod's own directory
                 }
 
-                if (c_CompatibleModules.Any(d => d.Equals(moduleName, StringComparison.OrdinalIgnoreCase)))
+                if (m_CompatibleModules.Any(d => d.Equals(moduleName, StringComparison.OrdinalIgnoreCase)))
                 {
                     continue;
                 }
                 
                 var previousColor = Console.ForegroundColor;
-                if (c_IncompatibleModules.Any(d => d.Equals(moduleName, StringComparison.OrdinalIgnoreCase)))
+                if (m_IncompatibleModules.Any(d => d.Equals(moduleName, StringComparison.OrdinalIgnoreCase)))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("================================================================");
@@ -197,7 +197,7 @@ namespace OpenMod.Unturned.Module.Shared
 
         private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
 
-        protected static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
+        private static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
         {
             var match = s_VersionRegex.Match(fullAssemblyName);
             extractedVersion = match.Groups[1].Value;
