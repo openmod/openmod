@@ -6,6 +6,10 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
+    <PackageReference Include="OpenMod.UniTask" Version="2.0.19" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj" />
   </ItemGroup>
 

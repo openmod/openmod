@@ -19,10 +19,4 @@
     <ProjectReference Include="..\..\unturned\OpenMod.Unturned\OpenMod.Unturned.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="UniTask">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UniTask.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

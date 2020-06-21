@@ -21,12 +21,6 @@
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>libs\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="UniTask">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UniTask.dll</HintPath>
-    </Reference>
-    <Reference Include="UniTask.Linq">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UniTask.Linq.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.dll</HintPath>
     </Reference>

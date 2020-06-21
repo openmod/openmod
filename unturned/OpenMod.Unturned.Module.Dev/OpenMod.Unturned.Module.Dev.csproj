@@ -58,14 +58,6 @@
       <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="UniTask">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UniTask.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="UniTask.Linq">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UniTask.Linq.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
   </ItemGroup>
 
 </Project>

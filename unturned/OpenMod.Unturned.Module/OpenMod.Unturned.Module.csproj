@@ -46,14 +46,6 @@
       <HintPath>..\OpenMod.Unturned\libs\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="UniTask">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UniTask.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="UniTask.Linq">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UniTask.Linq.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.dll</HintPath>
       <Private>false</Private>
