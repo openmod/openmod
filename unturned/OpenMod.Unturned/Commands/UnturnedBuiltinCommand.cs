@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Users;
-using OpenMod.Unturned.API;
 using OpenMod.Unturned.Users;
 using Steamworks;
 
