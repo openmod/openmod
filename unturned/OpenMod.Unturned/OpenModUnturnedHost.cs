@@ -151,6 +151,7 @@ namespace OpenMod.Unturned
         {
             if (!shouldExecuteCommand)
                 return;
+            text = text.Trim();
 
             var actor = m_ConsoleActorAccessor.Actor;
             AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, text.Split(' '), string.Empty));
