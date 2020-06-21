@@ -4,12 +4,12 @@ using Rocket.API.Serialisation;
 
 namespace Rocket.PermissionLink
 {
-    public class RocketPermissionGroupWrapper : IPermissionGroup
+    public class RocketPermissionRoleWrapper : IPermissionRole
     {
-        public RocketPermissionGroupWrapper(RocketPermissionsGroup @group)
+        public RocketPermissionRoleWrapper(RocketPermissionsGroup @group)
         {
             Id = group.Id;
-            Type = "group";
+            Type = "role";
             DisplayName = @group.DisplayName;
             Priority = 0;
             Parents = new HashSet<string>();

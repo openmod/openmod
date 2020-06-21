@@ -13,7 +13,7 @@
     <LangVersion>8</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="OpenMod.Unturned" Version="0.9.17" />
+    <PackageReference Include="OpenMod.Unturned" Version="0.9.18" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -29,12 +29,6 @@
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\OpenMod.Unturned\libs\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="UniTask">
-      <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UniTask.dll</HintPath>
-    </Reference>
-    <Reference Include="UniTask.Linq">
-      <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UniTask.Linq.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.dll</HintPath>

@@ -14,12 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="UniTask">
-      <HintPath>libs\UniTask.dll</HintPath>
-    </Reference>
-    <Reference Include="UniTask.Linq">
-      <HintPath>libs\UniTask.Linq.dll</HintPath>
-    </Reference>
+
     <Reference Include="UnityEngine">
       <HintPath>libs\UnityEngine.dll</HintPath>
     </Reference>

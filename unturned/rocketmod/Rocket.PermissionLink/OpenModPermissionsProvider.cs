@@ -12,15 +12,15 @@ namespace Rocket.PermissionLink
     public class OpenModPermissionsProvider : IRocketPermissionsProvider, IDisposable
     {
         private readonly IPermissionChecker m_PermissionChecker;
-        private readonly IPermissionGroupStore m_PermissionGroupStore;
+        private readonly IPermissionRoleStore m_PermissionRoleStore;
         private IRocketPermissionsProvider m_OriginalPermissionProvider;
 
         public OpenModPermissionsProvider(
             IPermissionChecker permissionChecker,
-            IPermissionGroupStore permissionGroupStore)
+            IPermissionRoleStore permissionRoleStore)
         {
             m_PermissionChecker = permissionChecker;
-            m_PermissionGroupStore = permissionGroupStore;
+            m_PermissionRoleStore = permissionRoleStore;
         }
 
         public bool HasPermission(IRocketPlayer player, List<string> requestedPermissions)
@@ -46,7 +46,7 @@ namespace Rocket.PermissionLink
             var result = new List<RocketPermissionsGroup>();
             AsyncHelper.RunSync(async () =>
             {
-                foreach (var group in await m_PermissionGroupStore.GetGroupsAsync(actor))
+                foreach (var group in await m_PermissionRoleStore.GetRolesAsync(actor))
                 {
                     result.Add(GetGroup(group.Id));
                 }
@@ -83,7 +83,7 @@ namespace Rocket.PermissionLink
             var actor = ConvertToActor(player);
             return AsyncHelper.RunSync(async () =>
             {
-                if (await m_PermissionGroupStore.AddGroupToActorAsync(actor, groupId))
+                if (await m_PermissionRoleStore.AddRoleToActorAsync(actor, groupId))
                 {
                     return RocketPermissionsProviderResult.Success;
                 }
@@ -97,7 +97,7 @@ namespace Rocket.PermissionLink
             var actor = ConvertToActor(player);
             return AsyncHelper.RunSync(async () =>
             {
-                if (await m_PermissionGroupStore.RemoveGroupFromActorAsync(actor, groupId))
+                if (await m_PermissionRoleStore.RemoveRoleFromActorAsync(actor, groupId))
                 {
                     return RocketPermissionsProviderResult.Success;
                 }
@@ -110,7 +110,7 @@ namespace Rocket.PermissionLink
         {
             return AsyncHelper.RunSync(async () =>
             {
-                var group = await m_PermissionGroupStore.GetGroupAsync(groupId);
+                var group = await m_PermissionRoleStore.GetRoleAsync(groupId);
                 return new RocketPermissionsGroup(group.Id, group.DisplayName, null, new List<string>(),  new List<Permission>());
             });
         }
@@ -120,7 +120,7 @@ namespace Rocket.PermissionLink
             var permissionGroup = ConvertToGroup(@group);
             return AsyncHelper.RunSync(async () =>
             {
-                if (await m_PermissionGroupStore.CreateGroupAsync(permissionGroup))
+                if (await m_PermissionRoleStore.CreateRoleAsync(permissionGroup))
                 {
                     return RocketPermissionsProviderResult.Success;
                 }
@@ -134,7 +134,7 @@ namespace Rocket.PermissionLink
             var permissionGroup = ConvertToGroup(@group);
             return AsyncHelper.RunSync(async () =>
             {
-                if (await m_PermissionGroupStore.UpdateGroupAsync(permissionGroup))
+                if (await m_PermissionRoleStore.UpdateRoleAsync(permissionGroup))
                 {
                     return RocketPermissionsProviderResult.Success;
                 }
@@ -147,7 +147,7 @@ namespace Rocket.PermissionLink
         {
             return AsyncHelper.RunSync(async () =>
             {
-                if (await m_PermissionGroupStore.DeleteGroupAsync(groupId))
+                if (await m_PermissionRoleStore.DeleteRoleAsync(groupId))
                 {
                     return RocketPermissionsProviderResult.Success;
                 }
@@ -177,9 +177,9 @@ namespace Rocket.PermissionLink
             return new RocketPlayerPermissionActorWrapper(player);
         }
 
-        private IPermissionGroup ConvertToGroup(RocketPermissionsGroup group)
+        private IPermissionRole ConvertToGroup(RocketPermissionsGroup group)
         {
-            return new RocketPermissionGroupWrapper(group);
+            return new RocketPermissionRoleWrapper(group);
         }
     }
 }
