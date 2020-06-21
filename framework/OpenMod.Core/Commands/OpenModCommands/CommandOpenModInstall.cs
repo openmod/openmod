@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,7 +38,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 throw new CommandWrongUsageException(Context);
             }
 
-            var allowedActors = m_Configuration.GetValue<List<string>>("nuget:install:allowedActors");
+            var allowedActors = m_Configuration.GetSection("nuget:install:allowedActors").Get<string[]>();
             if (allowedActors.All(d => d.Trim() != "*" && !Context.Actor.Type.Equals(d.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
                 throw new UserFriendlyException(m_StringLocalizer["commands:openmod:restricted"]);

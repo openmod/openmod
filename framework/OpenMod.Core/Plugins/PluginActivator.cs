@@ -110,6 +110,7 @@ namespace OpenMod.Core.Plugins
 
                     containerBuilder.Register(context => configuration)
                         .As<IConfiguration>()
+                        .As<IConfigurationRoot>()
                         .SingleInstance()
                         .OwnedByLifetimeScope();
 

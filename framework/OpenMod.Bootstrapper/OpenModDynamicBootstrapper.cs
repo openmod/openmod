@@ -60,12 +60,13 @@ namespace OpenMod.Bootstrapper
             openModFolder = Path.GetFullPath(openModFolder);
             
             var packagesDirectory = Path.Combine(openModFolder, "packages");
-
             if (!Directory.Exists(packagesDirectory))
             {
                 Directory.CreateDirectory(packagesDirectory);
             }
 
+            Environment.SetEnvironmentVariable("NUGET_COMMON_APPLICATION_DATA", Path.GetFullPath(packagesDirectory));
+            
             var nugetInstaller = new NuGetPackageManager(packagesDirectory) {Logger = logger};
 
             var hostAssemblies = new List<Assembly>();
