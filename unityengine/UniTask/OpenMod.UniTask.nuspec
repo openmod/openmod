@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>TestDemo</id>
+    <version>2.0.19</version>
+    <authors>Cysharp</authors>
+    <owners>OpenMod</owners>
+	<license type="expression">MIT</license>
+    <copyright>© Cysharp, Inc.</copyright>
+  </metadata>
+  <files>
+    <file src="*.dll" target="lib\net461" />
+  </files>
+</package>
