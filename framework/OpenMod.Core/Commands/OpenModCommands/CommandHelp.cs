@@ -43,8 +43,9 @@ namespace OpenMod.Core.Commands.OpenModCommands
         protected override async Task OnExecuteAsync()
         {
             var commands = m_CommandStore.Commands;
+            var totalCount = commands.Count;
 
-            const int amountPerPage = 10;
+            const int itemsPerPage = 10;
 
             int currentPage = 1;
             if (Context.Parameters.Length == 0 || Context.Parameters.TryGet(0, out currentPage))
@@ -56,11 +57,11 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
                 var pageCommands = commands
                     .Where(d => d.ParentId == null)
-                    .Skip(amountPerPage * (currentPage - 1))
-                    .Take(amountPerPage)
+                    .Skip(itemsPerPage * (currentPage - 1))
+                    .Take(itemsPerPage)
                     .ToList();
 
-                await PrintPageAsync(currentPage, (int)Math.Ceiling((double)commands.Count / amountPerPage), pageCommands);
+                await PrintPageAsync(currentPage, (int)Math.Ceiling((double)totalCount / itemsPerPage), pageCommands);
             }
             else if (Context.Parameters.Length > 0)
             {
@@ -148,13 +149,14 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
         private async Task PrintPageAsync(int pageNumber, int pageCount, ICollection<ICommandRegistration> page)
         {
+            await PrintAsync($"[{pageNumber}/{pageCount}] Commands", Color.CornflowerBlue);
+           
             if (page.Count == 0)
             {
                 await PrintAsync("No commands found.", Color.Red);
                 return;
             }
 
-            await PrintAsync($"[{pageNumber}/{pageCount}] Commands", Color.CornflowerBlue);
             foreach (var command in page)
             {
                 await PrintAsync(GetCommandUsage(command, Context.CommandPrefix));
