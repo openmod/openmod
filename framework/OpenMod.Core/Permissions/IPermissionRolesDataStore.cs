@@ -6,11 +6,11 @@ using OpenMod.Core.Permissions.Data;
 namespace OpenMod.Core.Permissions
 {
     [Service]
-    public interface IPermissionGroupsDataStore
+    public interface IPermissionRolesDataStore
     {
         Task ReloadAsync();
         Task SaveChangesAsync();
-        List<PermissionGroupData> PermissionGroups { get; }
-        Task<PermissionGroupData> GetGroupAsync(string id);
+        List<PermissionRoleData> Roles { get; }
+        Task<PermissionRoleData> GetRoleAsync(string id);
     }
 }

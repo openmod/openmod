@@ -5,13 +5,13 @@ using OpenMod.Core.Permissions.Data;
 
 namespace OpenMod.Core.Permissions
 {
-    public sealed class PermissionGroup : IPermissionGroup
+    public sealed class PermissionRole : IPermissionRole
     {
-        public PermissionGroup()
+        public PermissionRole()
         {
             Parents = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
         }
-        public PermissionGroup(PermissionGroupData data)
+        public PermissionRole(PermissionRoleData data)
         {
             Id = data.Id;
             Priority = data.Priority;
@@ -21,21 +21,21 @@ namespace OpenMod.Core.Permissions
             Permissions = data.Permissions;
         }
 
-        public static implicit operator PermissionGroup(PermissionGroupData data)
+        public static implicit operator PermissionRole(PermissionRoleData data)
         {
-            return new PermissionGroup(data);
+            return new PermissionRole(data);
         }
 
-        public static explicit operator PermissionGroupData(PermissionGroup group)
+        public static explicit operator PermissionRoleData(PermissionRole role)
         {
-            return new PermissionGroupData
+            return new PermissionRoleData
             {
-                Id = group.Id,
-                Priority = group.Priority,
-                DisplayName = group.DisplayName,
-                Parents = group.Parents,
-                IsAutoAssigned = group.IsAutoAssigned,
-                Permissions = group.Permissions
+                Id = role.Id,
+                Priority = role.Priority,
+                DisplayName = role.DisplayName,
+                Parents = role.Parents,
+                IsAutoAssigned = role.IsAutoAssigned,
+                Permissions = role.Permissions
             };
         }
 
@@ -45,6 +45,6 @@ namespace OpenMod.Core.Permissions
         public HashSet<string> Parents { get; }
         public HashSet<string> Permissions { get; }
         public bool IsAutoAssigned { get; set; }
-        public string Type { get; } = "group";
+        public string Type { get; } = "role";
     }
 }

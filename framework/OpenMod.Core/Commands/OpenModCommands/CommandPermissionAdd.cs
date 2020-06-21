@@ -22,23 +22,23 @@ namespace OpenMod.Core.Commands.OpenModCommands
         public CommandPermissionAdd(
             IPermissionChecker permissionChecker,
             IServiceProvider serviceProvider,
-            IPermissionGroupStore permissionGroupStore,
-            IUserDataStore usersDataStore) : base(serviceProvider, permissionGroupStore, usersDataStore)
+            IPermissionRoleStore permissionRoleStore,
+            IUserDataStore usersDataStore) : base(serviceProvider, permissionRoleStore, usersDataStore)
         {
             m_PermissionChecker = permissionChecker;
         }
 
-        protected override async Task ExecuteUpdateAsync(IPermissionActor target, string permissionToUpdate)
+        protected override async Task ExecuteUpdateAsync(IPermissionActor target, string roleId)
         {
             var defaultPermissionStore = m_PermissionChecker.PermissionStores.FirstOrDefault(d => d is DefaultPermissionStore);
             if (defaultPermissionStore == null)
             {
-                await Context.Actor.PrintMessageAsync($"Failed to add \"{permissionToUpdate}\" to \"{target.DisplayName}\": Built-in permission store not found.", Color.Red);
+                await Context.Actor.PrintMessageAsync($"Failed to add \"{roleId}\" to \"{target.DisplayName}\": Built-in permission store not found.", Color.Red);
                 return;
             }
 
-            await defaultPermissionStore.AddGrantedPermissionAsync(target, permissionToUpdate);
-            await Context.Actor.PrintMessageAsync($"Added \"{permissionToUpdate}\" to \"{target.DisplayName}\".", Color.DarkGreen);
+            await defaultPermissionStore.AddGrantedPermissionAsync(target, roleId);
+            await Context.Actor.PrintMessageAsync($"Added \"{roleId}\" to \"{target.DisplayName}\".", Color.DarkGreen);
         }
     }
 }

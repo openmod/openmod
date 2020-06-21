@@ -4,8 +4,8 @@ using System.Collections.Generic;
 namespace OpenMod.Core.Permissions.Data
 {
     [Serializable]
-    public class PermissionGroupsData
+    public class PermissionRolesData
     {
-        public List<PermissionGroupData> PermissionGroups { get; set; }
+        public List<PermissionRoleData> Roles { get; set; }
     }
 }

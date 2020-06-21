@@ -12,14 +12,14 @@ namespace OpenMod.API.Users
         public DateTime FirstSeen { get; set; }
         public DateTime LastSeen { get; set; }
         public HashSet<string> Permissions { get; set; }
-        public HashSet<string> Groups { get; set; }
+        public HashSet<string> Roles { get; set; }
         public Dictionary<string, object> Data { get; set; }
 
 
         public UserData()
         {
             Data = new Dictionary<string, object>();
-            Groups = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            Roles = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
         }
     }

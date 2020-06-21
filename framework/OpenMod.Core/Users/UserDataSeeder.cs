@@ -15,12 +15,12 @@ namespace OpenMod.Core.Users
     public class UserDataSeeder : IUserDataSeeder
     {
         private readonly IUserDataStore m_UserDataStore;
-        private readonly IPermissionGroupStore m_PermissionGroupStore;
+        private readonly IPermissionRoleStore m_PermissionRoleStore;
 
-        public UserDataSeeder(IUserDataStore userDataStore, IPermissionGroupStore permissionGroupStore)
+        public UserDataSeeder(IUserDataStore userDataStore, IPermissionRoleStore permissionRoleStore)
         {
             m_UserDataStore = userDataStore;
-            m_PermissionGroupStore = permissionGroupStore;
+            m_PermissionRoleStore = permissionRoleStore;
         }
 
         public async Task SeedUserDataAsync(string actorId, string actorType, string displayName, Dictionary<string, object> data = null)
@@ -31,7 +31,7 @@ namespace OpenMod.Core.Users
                 return; // no seeding
             }
 
-            var autoAssignGroups = new HashSet<string>(await m_PermissionGroupStore.GetAssignAutoGroupsAsync(actorId, actorType));
+            var autoAssignRoles = new HashSet<string>(await m_PermissionRoleStore.GetAutoAssignedRolesAsync(actorId, actorType));
 
             userData = new UserData
             {
@@ -41,7 +41,7 @@ namespace OpenMod.Core.Users
                 LastSeen = DateTime.Now,
                 FirstSeen = DateTime.Now,
                 Permissions = new HashSet<string>(),
-                Groups = autoAssignGroups,
+                Roles = autoAssignRoles,
                 LastDisplayName = displayName
             };
 

@@ -9,7 +9,7 @@ namespace OpenMod.API.Permissions
         ///     Gets the permissions of the given actor.
         /// </summary>
         /// <param name="actor">The actor to get permissions from.</param>
-        /// <param name="inherit">Defines if the parent groups permissions should be included.</param>
+        /// <param name="inherit">Defines if the parent roles permissions should be included.</param>
         /// <returns>A list of all permissions of the actor.</returns>
         Task<IReadOnlyCollection<string>> GetGrantedPermissionsAsync(IPermissionActor actor, bool inherit = true);
 
@@ -17,7 +17,7 @@ namespace OpenMod.API.Permissions
         ///     Gets the denied permissions of the given actor.
         /// </summary>
         /// <param name="actor">The actor to get denied permissions from.</param>
-        /// <param name="inherit">Defines if the parent groups denied permissions should be included.</param>
+        /// <param name="inherit">Defines if the parent roles denied permissions should be included.</param>
         /// <returns>A list of all denied permissions of the actor.</returns>
         Task<IReadOnlyCollection<string>> GetDeniedPermissionsAsync(IPermissionActor actor, bool inherit = true);
 

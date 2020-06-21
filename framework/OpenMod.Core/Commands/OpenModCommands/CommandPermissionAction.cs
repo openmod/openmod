@@ -10,14 +10,14 @@ namespace OpenMod.Core.Commands.OpenModCommands
 {
     public abstract class CommandPermissionAction : Command
     {
-        private readonly IPermissionGroupStore m_PermissionGroupStore;
+        private readonly IPermissionRoleStore m_PermissionRoleStore;
         private readonly IUserDataStore m_UserDataStore;
 
         protected CommandPermissionAction(IServiceProvider serviceProvider,
-            IPermissionGroupStore permissionGroupStore,
+            IPermissionRoleStore permissionRoleStore,
             IUserDataStore userDataStore) : base(serviceProvider)
         {
-            m_PermissionGroupStore = permissionGroupStore;
+            m_PermissionRoleStore = permissionRoleStore;
             m_UserDataStore = userDataStore;
         }
 
@@ -37,14 +37,14 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
             switch (actorType)
             {
-                case "g":
-                case "group":
-                    permission = "Manage.Groups." + targetName;
-                    target = await m_PermissionGroupStore.GetGroupAsync(targetName);
+                case "r":
+                case "role":
+                    permission = "Manage.Roles." + targetName;
+                    target = await m_PermissionRoleStore.GetRoleAsync(targetName);
 
                     if (target == null)
                     {
-                        await Context.Actor.PrintMessageAsync($"Group \"{targetName}\" was not found.", Color.Red);
+                        await Context.Actor.PrintMessageAsync($"Role \"{targetName}\" was not found.", Color.Red);
                         return;
                     }
 
@@ -77,6 +77,6 @@ namespace OpenMod.Core.Commands.OpenModCommands
             await ExecuteUpdateAsync(target, permissionToUpdate);
         }
 
-        protected abstract Task ExecuteUpdateAsync(IPermissionActor target, string param);
+        protected abstract Task ExecuteUpdateAsync(IPermissionActor target, string roleId);
     }
 }

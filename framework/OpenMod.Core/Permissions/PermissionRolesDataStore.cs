@@ -14,12 +14,12 @@ namespace OpenMod.Core.Permissions
 {
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class PermissionGroupsDataStore : IPermissionGroupsDataStore
+    public class PermissionRolesDataStore : IPermissionRolesDataStore
     {
-        public const string GroupsKey = "groups";
+        public const string RolesKey = "roles";
 
         private readonly IDataStore m_DataStore;
-        public PermissionGroupsDataStore(IOpenModDataStoreAccessor dataStoreAccessor)
+        public PermissionRolesDataStore(IOpenModDataStoreAccessor dataStoreAccessor)
         {
             m_DataStore = dataStoreAccessor.DataStore;
             AsyncHelper.RunSync(InitAsync);
@@ -29,9 +29,9 @@ namespace OpenMod.Core.Permissions
         {
             if (!await ExistsAsync())
             {
-                PermissionGroups = new List<PermissionGroupData>
+                Roles = new List<PermissionRoleData>
                 {
-                    new PermissionGroupData
+                    new PermissionRoleData
                     {
                         Id = "default",
                         DisplayName = "Default",
@@ -42,7 +42,7 @@ namespace OpenMod.Core.Permissions
                         },
                         IsAutoAssigned = true
                     },
-                    new PermissionGroupData
+                    new PermissionRoleData
                     {
                         Id = "vip",
                         Priority = 1,
@@ -65,26 +65,26 @@ namespace OpenMod.Core.Permissions
             }
         }
 
-        public List<PermissionGroupData> PermissionGroups { get; private set; }
-        public Task<PermissionGroupData> GetGroupAsync(string id)
+        public List<PermissionRoleData> Roles { get; private set; }
+        public Task<PermissionRoleData> GetRoleAsync(string id)
         {
-            var group = PermissionGroups.FirstOrDefault(d => d.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-            return Task.FromResult(group);
+            var role = Roles.FirstOrDefault(d => d.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+            return Task.FromResult(role);
         }
 
         public virtual async Task ReloadAsync()
         {
-            PermissionGroups = (await m_DataStore.LoadAsync<PermissionGroupsData>(GroupsKey))?.PermissionGroups ?? new List<PermissionGroupData>();
+            Roles = (await m_DataStore.LoadAsync<PermissionRolesData>(RolesKey))?.Roles ?? new List<PermissionRoleData>();
         }
 
         public virtual Task SaveChangesAsync()
         {
-            return m_DataStore.SaveAsync(GroupsKey, new PermissionGroupsData { PermissionGroups = PermissionGroups });
+            return m_DataStore.SaveAsync(RolesKey, new PermissionRolesData { Roles = Roles });
         }
 
         public virtual Task<bool> ExistsAsync()
         {
-            return m_DataStore.ExistsAsync(GroupsKey);
+            return m_DataStore.ExistsAsync(RolesKey);
         }
     }
 }

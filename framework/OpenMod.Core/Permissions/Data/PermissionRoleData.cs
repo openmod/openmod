@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace OpenMod.Core.Permissions.Data
 {
     [Serializable]
-    public class PermissionGroupData
+    public class PermissionRoleData
     {
         public string Id { get; set; }
         public int Priority { get; set; }
@@ -15,7 +15,7 @@ namespace OpenMod.Core.Permissions.Data
         public bool IsAutoAssigned { get; set; }
 
 
-        public PermissionGroupData()
+        public PermissionRoleData()
         {
             Data = new Dictionary<string, object>();
             Parents = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);

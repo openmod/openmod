@@ -19,29 +19,29 @@ namespace OpenMod.Core.Commands.OpenModCommands
         private readonly IPermissionChecker m_PermissionChecker;
 
         public CommandPermissionRemove(IServiceProvider serviceProvider, 
-            IPermissionGroupStore permissionGroupStore, 
+            IPermissionRoleStore permissionRoleStore, 
             IUserDataStore usersDataStore, 
-            IPermissionChecker permissionChecker) : base(serviceProvider, permissionGroupStore, usersDataStore)
+            IPermissionChecker permissionChecker) : base(serviceProvider, permissionRoleStore, usersDataStore)
         {
             m_PermissionChecker = permissionChecker;
         }
 
-        protected override async Task ExecuteUpdateAsync(IPermissionActor target, string permissionToUpdate)
+        protected override async Task ExecuteUpdateAsync(IPermissionActor target, string roleId)
         {
             var defaultPermissionStore = m_PermissionChecker.PermissionStores.FirstOrDefault(d => d is DefaultPermissionStore);
             if (defaultPermissionStore == null)
             {
-                await Context.Actor.PrintMessageAsync($"Failed to remove \"{permissionToUpdate}\" from \"{target.DisplayName}\": Built-in permission store not found.", Color.Red);
+                await Context.Actor.PrintMessageAsync($"Failed to remove \"{roleId}\" from \"{target.DisplayName}\": Built-in permission store not found.", Color.Red);
                 return;
             }
 
-            if (await defaultPermissionStore.RemoveGrantedPermissionAsync(target, permissionToUpdate))
+            if (await defaultPermissionStore.RemoveGrantedPermissionAsync(target, roleId))
             {
-                await Context.Actor.PrintMessageAsync($"Removed \"{permissionToUpdate}\" from \"{target.DisplayName}\".", Color.DarkGreen);
+                await Context.Actor.PrintMessageAsync($"Removed \"{roleId}\" from \"{target.DisplayName}\".", Color.DarkGreen);
             }
             else
             {
-                await Context.Actor.PrintMessageAsync($"\"{target.DisplayName}\" does not have permission \"{permissionToUpdate}\".", Color.DarkRed);
+                await Context.Actor.PrintMessageAsync($"\"{target.DisplayName}\" does not have permission \"{roleId}\".", Color.DarkRed);
             }
         }
     }

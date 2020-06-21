@@ -12,17 +12,17 @@ namespace OpenMod.Core.Permissions
     public class DefaultPermissionStore : IPermissionStore
     {
         private readonly IUserDataStore m_UserDataStore;
-        private readonly IPermissionGroupsDataStore m_PermissionGroupsDataStore;
-        private readonly IPermissionGroupStore m_PermissionGroupStore;
+        private readonly IPermissionRolesDataStore m_PermissionRolesDataStore;
+        private readonly IPermissionRoleStore m_PermissionRoleStore;
 
         public DefaultPermissionStore(
             IUserDataStore userDataStore,
-            IPermissionGroupsDataStore permissionGroupsDataStore,
-            IPermissionGroupStore permissionGroupStore)
+            IPermissionRolesDataStore permissionRolesDataStore,
+            IPermissionRoleStore permissionRoleStore)
         {
             m_UserDataStore = userDataStore;
-            m_PermissionGroupsDataStore = permissionGroupsDataStore;
-            m_PermissionGroupStore = permissionGroupStore;
+            m_PermissionRolesDataStore = permissionRolesDataStore;
+            m_PermissionRoleStore = permissionRoleStore;
         }
         public virtual Task<IReadOnlyCollection<string>> GetGrantedPermissionsAsync(IPermissionActor actor, bool inherit = true)
         {
@@ -70,9 +70,9 @@ namespace OpenMod.Core.Permissions
                 permissions.UnionWith(user.Permissions);
             }
 
-            foreach (var group in (await m_PermissionGroupStore.GetGroupsAsync(actor, inherit)).OrderByDescending(gp => gp.Priority))
+            foreach (var role in (await m_PermissionRoleStore.GetRolesAsync(actor, inherit)).OrderByDescending(gp => gp.Priority))
             {
-                permissions.UnionWith(((PermissionGroup)group).Permissions);
+                permissions.UnionWith(((PermissionRole)role).Permissions);
             }
 
             return permissions;
@@ -80,16 +80,16 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task<bool> AddGrantedPermissionAsync(IPermissionActor actor, string permission)
         {
-            if (actor is IPermissionGroup)
+            if (actor is IPermissionRole)
             {
-                var groupData = m_PermissionGroupsDataStore.PermissionGroups.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
-                if (groupData == null)
+                var roleData = m_PermissionRolesDataStore.Roles.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
+                if (roleData == null)
                 {
                     return false;
                 }
 
-                groupData.Permissions.Add(permission);
-                await m_PermissionGroupsDataStore.SaveChangesAsync();
+                roleData.Permissions.Add(permission);
+                await m_PermissionRolesDataStore.SaveChangesAsync();
                 return true;
             }
 
@@ -106,18 +106,18 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task<bool> RemoveGrantedPermissionAsync(IPermissionActor actor, string permission)
         {
-            if (actor is IPermissionGroup)
+            if (actor is IPermissionRole)
             {
-                var groupData = m_PermissionGroupsDataStore.PermissionGroups.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
-                if (groupData == null)
+                var roleData = m_PermissionRolesDataStore.Roles.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
+                if (roleData == null)
                 {
                     return false;
                 }
 
-                if (!groupData.Permissions.Remove(permission)) 
+                if (!roleData.Permissions.Remove(permission)) 
                     return false;
 
-                await m_PermissionGroupsDataStore.SaveChangesAsync();
+                await m_PermissionRolesDataStore.SaveChangesAsync();
                 return true;
             }
 
