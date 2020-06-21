@@ -16,7 +16,7 @@ namespace OpenMod.Unturned.Logging
 
         public override void outputInformation(string information)
         {
-            CheckCursor();
+            CheckCursor(information.Split('\n').Length);
             m_Logger.LogInformation(information);
             System.Console.CursorTop++;
             System.Console.CursorLeft = 0;
@@ -24,7 +24,7 @@ namespace OpenMod.Unturned.Logging
 
         public override void outputWarning(string warning)
         {
-            CheckCursor();
+            CheckCursor(warning.Split('\n').Length);
             m_Logger.LogWarning(warning);
             System.Console.CursorTop++;
             System.Console.CursorLeft = 0;
@@ -32,17 +32,17 @@ namespace OpenMod.Unturned.Logging
 
         public override void outputError(string error)
         {
-            CheckCursor();
+            CheckCursor(error.Split('\n').Length);
             m_Logger.LogError(error);
             System.Console.CursorTop++;
             System.Console.CursorLeft = 0;
         }
 
-        public void CheckCursor()
+        public void CheckCursor(int lineCount)
         {
             if (System.Console.CursorLeft != 0)
             {
-                System.Console.CursorTop++;
+                System.Console.CursorTop += lineCount;
                 System.Console.CursorLeft = 0;
             }
         }
