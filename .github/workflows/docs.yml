@@ -16,7 +16,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Build docs
-      run: cd docs && chmod +x install-prerequisites.sh && ./install-prerequisites.sh && chmod +x build.sh && ./build.sh 
+      run: sudo apt-get update && cd docs && chmod +x install-prerequisites.sh && sudo ./install-prerequisites.sh && chmod +x build.sh && ./build.sh 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
       with:
