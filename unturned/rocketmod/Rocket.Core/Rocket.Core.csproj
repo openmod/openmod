@@ -1,17 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk"> 
   <PropertyGroup>
     <PackageId>OpenMod.Rocket.Core</PackageId>
-    <PackageVersion>0.0.0</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <AssemblyVersion>2.4.8.0</AssemblyVersion>
-    <Version>2.4.8.0</Version>
     <TargetFramework>net461</TargetFramework>
     <Copyright>Sven Mawby</Copyright>
     <Authors>Sven Mawby;Enes Sadık Özbek &lt;esozbek.me&gt;</Authors>
     <Company>OpenMod</Company>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <LangVersion>8</LangVersion>
   </PropertyGroup>
+  
+  <Import Project="$(MSBuildThisFileDirectory)..\props\SharedProjectProps.props" /> 
+  
   <ItemGroup>
     <PackageReference Include="OpenMod.Core" Version="0.9.18" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
