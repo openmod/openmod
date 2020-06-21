@@ -72,6 +72,7 @@ namespace OpenMod.Core.Eventing
                         return;
                     }
 
+                    // ReSharper disable once LoopCanBeConvertedToQuery
                     foreach (var @interface in type.GetInterfaces().Where(c => typeof(IEventListener<>).IsAssignableFrom(c) && c.GetGenericArguments().Length >= 1))
                     {
                         var method = @interface.GetMethods().Single();

@@ -81,7 +81,7 @@ namespace OpenMod.Unturned.Users
 
         protected virtual void OnPlayerConnected(SteamPlayer player)
         {
-            AsyncHelper.RunSync(async () =>
+            AsyncHelper.RunSync(() =>
             {
                 var pending = m_PendingUsers.First(d => d.SteamId == player.playerID.steamID);
                 FinishSession(pending);
@@ -90,25 +90,26 @@ namespace OpenMod.Unturned.Users
                 m_UnturnedUsers.Add(user);
 
                 var connectedEvent = new UserConnectedEvent(user);
-                await m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
+                return m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
             });
         }
 
         // todo: memory leak, m_PendingUsers does not get cleared up when pending user gets rejected
         // pending player session also does not end on rejections.
         // Unturned does not have an event for handling rejections yet.
-        protected virtual void OnPendingPlayerConnected(ValidateAuthTicketResponse_t callback, ref bool isvalid, ref string explanation)
+        protected virtual void OnPendingPlayerConnected(ValidateAuthTicketResponse_t callback, ref bool isValid, ref string explanation)
         {
-            var isvalid_ = isvalid;
-            var explanation_ = explanation;
+            if (!isValid)
+            {
+                return;
+            }
+
+            //todo check if it is working, if not this should be patched
+            var isPendingValid = isValid;
+            var rejectExplanation = explanation;
 
             AsyncHelper.RunSync(async () =>
             {
-                if (!isvalid_)
-                {
-                    return;
-                }
-
                 var steamPending = Provider.pending.First(d => d.playerID.steamID == callback.m_SteamID);
                 var pendingUser = new UnturnedPendingUser(m_UserDataStore, steamPending);
                 await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
@@ -125,18 +126,18 @@ namespace OpenMod.Unturned.Users
 
                 if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))
                 {
-                    isvalid_ = false;
-                    explanation_ = userConnectingEvent.RejectionReason;
+                    isPendingValid = false;
+                    rejectExplanation = userConnectingEvent.RejectionReason;
                 }
 
                 if (userConnectingEvent.IsCancelled)
                 {
-                    isvalid_ = false;
+                    isPendingValid = false;
                 }
             });
 
-            isvalid = isvalid_;
-            explanation = explanation_;
+            isValid = isPendingValid;
+            explanation = rejectExplanation;
         }
 
         protected virtual void FinishSession(UnturnedPendingUser pending)
@@ -154,24 +155,69 @@ namespace OpenMod.Unturned.Users
             return userType.Equals(KnownActorTypes.Player, StringComparison.OrdinalIgnoreCase);
         }
 
-        public async Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
+        public Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
         {
-            switch (searchMode)
+            var confidence = 0;
+            var unturnedUser = (IUser) null;
+
+            foreach (var user in m_UnturnedUsers)
             {
-                case UserSearchMode.Id:
-                    return m_UnturnedUsers.FirstOrDefault(d => d.Id.Equals(searchString, StringComparison.OrdinalIgnoreCase));
-                case UserSearchMode.Name:
-                    return m_UnturnedUsers.FirstOrDefault(d => d.DisplayName.Equals(searchString, StringComparison.OrdinalIgnoreCase))
-                        ?? m_UnturnedUsers.FirstOrDefault(d => d.DisplayName.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
-                case UserSearchMode.NameOrId:
-                    return await FindUserAsync(userType, searchString, UserSearchMode.Id) ??
-                           await FindUserAsync(userType, searchString, UserSearchMode.Name);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(searchMode), searchMode, null);
+                switch (searchMode)
+                {
+                    case UserSearchMode.NameOrId:
+                    case UserSearchMode.Id:
+                        if (user.Id.Equals(searchString, StringComparison.OrdinalIgnoreCase))
+                            Task.FromResult(user);
+
+                        if (searchMode == UserSearchMode.NameOrId)
+                            goto case UserSearchMode.Name;
+                        break;
+
+                    case UserSearchMode.Name:
+                        var currentConfidence = NameConfidence(user.DisplayName, searchString, confidence);
+                        if (currentConfidence > confidence)
+                        {
+                            unturnedUser = user;
+                            confidence = currentConfidence;
+                        }
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(searchMode), searchMode, null);
+                }
             }
+
+            return Task.FromResult(unturnedUser);
         }
 
-        public Task<IReadOnlyCollection<IUser>> GetUsers(string userType)
+        // ReSharper disable once MemberCanBeMadeStatic.Local
+        private int NameConfidence(string userName, string searchName, int currentConfidence = -1)
+        {
+            switch (currentConfidence)
+            {
+                case 2:
+                    if (userName.Equals(searchName, StringComparison.OrdinalIgnoreCase))
+                        return 3;
+                    goto case 1;
+
+                case 1:
+                    if (userName.StartsWith(searchName, StringComparison.OrdinalIgnoreCase))
+                        return 2;
+                    goto case 0;
+
+                case 0:
+                    if (userName.IndexOf(searchName, StringComparison.OrdinalIgnoreCase) != -1)
+                        return 1;
+                    break;
+
+                default:
+                    goto case 2;
+            }
+
+            return -1;
+        }
+
+        public Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType)
         {
             return Task.FromResult<IReadOnlyCollection<IUser>>(m_UnturnedUsers);
         }

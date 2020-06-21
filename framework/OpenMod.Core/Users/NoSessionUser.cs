@@ -6,7 +6,7 @@ namespace OpenMod.Core.Users
 {
     public class OfflineUser : UserBase
     {
-        private readonly UserData m_Data;
+        private readonly UserData m_Data;//todo
 
         public OfflineUser(IUserDataStore userDataStore,  UserData data) : base(userDataStore)
         {

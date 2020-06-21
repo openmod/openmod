@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.API.Prioritization;
@@ -31,7 +32,7 @@ namespace OpenMod.Core.Users
             return new OfflineUser(m_UserDataStore, data);
         }
 
-        public async Task<IReadOnlyCollection<IUser>> GetUsers(string userType)
+        public async Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType)
         {
             var userDatas = await m_UserDataStore.GetUsersDataAsync(userType);
             return userDatas.Select(d => new OfflineUser(m_UserDataStore, d)).ToList();

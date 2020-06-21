@@ -6,6 +6,7 @@ namespace OpenMod.Core.Helpers
 {
     public class ServiceProviderTypeDescriptor : ITypeDescriptorContext
     {
+        //todo unimplemented stuff
         public ServiceProviderTypeDescriptor(IServiceProvider serviceProvider)
         {
             ServiceProvider = serviceProvider;
@@ -24,6 +25,6 @@ namespace OpenMod.Core.Helpers
 
         public IContainer Container { get; set; }
         public object Instance { get; set; }
-        public PropertyDescriptor PropertyDescriptor { get; }//todo implement or remove
+        public PropertyDescriptor PropertyDescriptor { get; }
     }
 }

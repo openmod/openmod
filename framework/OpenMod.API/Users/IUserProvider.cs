@@ -10,6 +10,6 @@ namespace OpenMod.API.Users
 
         Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode);
 
-        Task<IReadOnlyCollection<IUser>> GetUsers(string userType);
+        Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType);
     }
 }
