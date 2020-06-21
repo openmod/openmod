@@ -47,18 +47,38 @@ namespace OpenMod.Core.Commands
                 Commands.Add(new OpenModComponentBoundCommandRegistration(m_OpenModComponent, type));
             }
 
-            foreach (var type in assembly.GetLoadableTypes())
+            try
             {
-                foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Static))
+                foreach (var type in assembly.GetLoadableTypes())
                 {
-                    var commandAttribute = method.GetCustomAttribute<CommandAttribute>();
-                    if (commandAttribute == null)
+                    ScanTypeForCommands(type);
+                }
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                foreach (var type in ex.Types)
+                {
+                    if (type == null)
                     {
                         continue;
                     }
 
-                    Commands.Add(new OpenModComponentBoundCommandRegistration(m_OpenModComponent, method));
+                    ScanTypeForCommands(type);
                 }
+            }
+        }
+
+        private void ScanTypeForCommands(IReflect type)
+        {
+            foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Static))
+            {
+                var commandAttribute = method.GetCustomAttribute<CommandAttribute>();
+                if (commandAttribute == null)
+                {
+                    continue;
+                }
+
+                Commands.Add(new OpenModComponentBoundCommandRegistration(m_OpenModComponent, method));
             }
         }
 
