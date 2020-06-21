@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rocket.Core", "Rocket.Core\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rocket.API", "Rocket.API\Rocket.API.csproj", "{EADA87FF-33BF-4B76-8A60-FFE1CDBCAB8E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rocket.PermissionLink", "Rocket.PermissionLink\Rocket.PermissionLink.csproj", "{6ED931E7-031B-4289-8B7D-D77B8B8E7322}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{EADA87FF-33BF-4B76-8A60-FFE1CDBCAB8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EADA87FF-33BF-4B76-8A60-FFE1CDBCAB8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EADA87FF-33BF-4B76-8A60-FFE1CDBCAB8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ED931E7-031B-4289-8B7D-D77B8B8E7322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ED931E7-031B-4289-8B7D-D77B8B8E7322}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ED931E7-031B-4289-8B7D-D77B8B8E7322}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ED931E7-031B-4289-8B7D-D77B8B8E7322}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

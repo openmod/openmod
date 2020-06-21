@@ -1,35 +1,31 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <PackageId>OpenMod.Rocket.Unturned</PackageId>
+    <PackageId>OpenMod.Rocket.PermissionLink</PackageId>
     <PackageVersion>0.0.0</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <AssemblyVersion>4.9.3.2</AssemblyVersion>
-    <Version></Version>
     <TargetFramework>net461</TargetFramework>
-    <Copyright>Sven Mawby</Copyright>
-    <Authors>Sven Mawby;Enes Sadık Özbek &lt;esozbek.me&gt;</Authors>
+    <Copyright>Enes Sadık Özbek &lt;esozbek.me&gt;</Copyright>
     <Company>OpenMod</Company>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <LangVersion>8</LangVersion>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="OpenMod.Unturned" Version="0.9.17" />
+    <PackageReference Include="OpenMod.Core" Version="0.9.17" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="OpenMod.UnityEngine" Version="0.9.17" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Rocket.API\Rocket.API.csproj" />
     <ProjectReference Include="..\Rocket.Core\Rocket.Core.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\OpenMod.Unturned\libs\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\OpenMod.Unturned\libs\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
     <Reference Include="UniTask">
       <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UniTask.dll</HintPath>
     </Reference>
@@ -46,7 +42,5 @@
       <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+
 </Project>
