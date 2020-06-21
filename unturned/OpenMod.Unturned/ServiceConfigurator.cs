@@ -6,6 +6,7 @@ using OpenMod.Core.Console;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Users;
 using OpenMod.Unturned.Commands;
+using OpenMod.Unturned.Permissions;
 using OpenMod.Unturned.Users;
 
 namespace OpenMod.Unturned
@@ -16,7 +17,7 @@ namespace OpenMod.Unturned
         {
             serviceCollection.Configure<PermissionCheckerOptions>(options =>
             {
-                options.AddPermissionCheckProvider<ConsolePermissionProvider>();
+                options.AddPermissionCheckProvider<UnturnedAdminPermissionCheckProvider>();
             });
             
             serviceCollection.Configure<CommandStoreOptions>(options =>

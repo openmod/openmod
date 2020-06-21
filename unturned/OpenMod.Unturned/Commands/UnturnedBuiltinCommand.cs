@@ -5,6 +5,7 @@ using OpenMod.Core.Commands;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Users;
 using OpenMod.Unturned.API;
+using OpenMod.Unturned.Users;
 using Steamworks;
 
 namespace OpenMod.Unturned.Commands
@@ -29,7 +30,7 @@ namespace OpenMod.Unturned.Commands
             switch (Context.Actor.Type)
             {
                 case KnownActorTypes.Player:
-                    id = ((IUnturnedPlayerActor) Context.Actor).SteamId;
+                    id = ((UnturnedUser) Context.Actor).SteamId;
                     break;
 
                 case KnownActorTypes.Console:
