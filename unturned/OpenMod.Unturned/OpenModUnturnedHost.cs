@@ -134,14 +134,14 @@ namespace OpenMod.Unturned
 
         protected virtual void BindUnturnedEvents()
         {
-            Provider.onServerShutdown += OnServerShutdown;
+            Provider.onCommenceShutdown += OnServerShutdown;
             CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
         }
 
         protected virtual void UnbindUnturnedEvents()
         {
             // ReSharper disable DelegateSubtraction
-            Provider.onServerShutdown -= OnServerShutdown;
+            Provider.onCommenceShutdown -= OnServerShutdown;
             CommandWindow.onCommandWindowInputted -= OnCommandWindowInputted;
             // ReSharper restore DelegateSubtraction
         }
