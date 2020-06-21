@@ -171,7 +171,7 @@ namespace OpenMod.Runtime
                 .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
                 .AddCommandLine(CommandlineArgs)
                 .AddEnvironmentVariables("OpenMod_");
-            AsyncHelper.RunSync(() => startup.CompleteConfigurationAsync(builder));
+            startup.ConfigureConfiguration(builder);
         }
 
         private void SetupServices(IServiceCollection services, OpenModStartup startup)
@@ -181,13 +181,12 @@ namespace OpenMod.Runtime
             services.AddOptions();
             services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
             services.AddSingleton(((OpenModStartupContext)startup.Context).NuGetPackageManager);
-
-            AsyncHelper.RunSync(() => startup.CompleteServiceRegistrationsAsync(services));
+            startup.SetupServices(services);
         }
 
         private void SetupContainer(ContainerBuilder containerBuilder, OpenModStartup startup)
         {
-            AsyncHelper.RunSync(() => startup.CompleteContainerRegistrationAsync(containerBuilder));
+            startup.SetupContainer(containerBuilder);
         }
 
         private void SetupSerilog()

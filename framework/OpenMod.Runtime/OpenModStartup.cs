@@ -92,7 +92,7 @@ namespace OpenMod.Runtime
             return assemblies;
         }
 
-        internal async Task CompleteConfigurationAsync(IConfigurationBuilder builder)
+        internal void ConfigureConfiguration(IConfigurationBuilder builder)
         {
             var containerConfiguratorTypes = m_Assemblies
                 .SelectMany(d => d.FindTypes<IConfigurationConfigurator>(false))
@@ -101,11 +101,11 @@ namespace OpenMod.Runtime
             foreach (var configurationConfigurator in containerConfiguratorTypes)
             {
                 var instance = (IConfigurationConfigurator)Activator.CreateInstance(configurationConfigurator);
-                await instance.ConfigureConfigurationAsync(Context, builder);
+                instance.ConfigureConfiguration(Context, builder);
             }
         }
 
-        internal async Task CompleteContainerRegistrationAsync(ContainerBuilder containerBuilder)
+        internal void SetupContainer(ContainerBuilder containerBuilder)
         {
             var containerConfiguratorTypes = m_Assemblies
                 .SelectMany(d => d.FindTypes<IContainerConfigurator>(false))
@@ -114,11 +114,11 @@ namespace OpenMod.Runtime
             foreach (var containerConfiguratorType in containerConfiguratorTypes)
             {
                 var instance = (IContainerConfigurator)Activator.CreateInstance(containerConfiguratorType);
-                await instance.ConfigureContainerAsync(Context, containerBuilder);
+                instance.ConfigureContainer(Context, containerBuilder);
             }
         }
 
-        internal async Task CompleteServiceRegistrationsAsync(IServiceCollection serviceCollection)
+        internal void SetupServices(IServiceCollection serviceCollection)
         {
             var sortedSources = m_PluginAssembliesSources
                 .OrderBy(d => d.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Priority ?? Priority.Normal
@@ -138,7 +138,7 @@ namespace OpenMod.Runtime
             foreach (var serviceConfiguratorType in serviceConfiguratorTypes)
             {
                 var instance = (IServiceConfigurator)Activator.CreateInstance(serviceConfiguratorType);
-                await instance.ConfigureServicesAsync(Context, serviceCollection);
+                instance.ConfigureServices(Context, serviceCollection);
             }
 
             var servicesRegistrations = m_ServiceRegistrations.OrderBy(d => d.Priority, new PriorityComparer(PriortyComparisonMode.LowestFirst));

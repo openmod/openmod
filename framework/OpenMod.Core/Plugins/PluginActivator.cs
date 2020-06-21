@@ -91,6 +91,7 @@ namespace OpenMod.Core.Plugins
             IOpenModPlugin pluginInstance;
             try
             {
+                var serviceProvider = m_LifetimeScope.Resolve<IServiceProvider>();
                 var lifetimeScope = m_LifetimeScope.BeginLifetimeScope(containerBuilder =>
                 {
                     var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
@@ -128,6 +129,12 @@ namespace OpenMod.Core.Plugins
                         .As<IStringLocalizer>()
                         .SingleInstance()
                         .OwnedByLifetimeScope();
+
+                    foreach (var type in pluginType.Assembly.FindTypes<IPluginContainerConfigurator>())
+                    {
+                        var configurator = (IPluginContainerConfigurator) ActivatorUtilities.CreateInstance(serviceProvider, type);
+                        configurator.ConfigureContainer(containerBuilder);
+                    }
                 });
 
                 pluginInstance = (IOpenModPlugin)lifetimeScope.Resolve(pluginType);

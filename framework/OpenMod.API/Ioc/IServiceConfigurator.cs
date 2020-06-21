@@ -5,6 +5,6 @@ namespace OpenMod.API.Ioc
 {
     public interface IServiceConfigurator
     {
-        Task ConfigureServicesAsync(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection);
+        void ConfigureServices(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection);
     }
 }

@@ -12,7 +12,7 @@ namespace OpenMod.Unturned
 {
     public class ServiceConfigurator : IServiceConfigurator
     {
-        public Task ConfigureServicesAsync(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection)
+        public void ConfigureServices(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection)
         {
             serviceCollection.Configure<PermissionCheckerOptions>(options =>
             {
@@ -30,8 +30,6 @@ namespace OpenMod.Unturned
             });
 
             serviceCollection.AddSingleton<UnturnedCommandHandler>();
-
-            return Task.CompletedTask;
         }
     }
 }

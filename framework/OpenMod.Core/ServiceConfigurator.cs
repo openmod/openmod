@@ -14,7 +14,7 @@ namespace OpenMod.Core
     [UsedImplicitly]
     public class ServiceConfigurator : IServiceConfigurator
     {
-        public Task ConfigureServicesAsync(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection)
+        public void ConfigureServices(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection)
         {
             serviceCollection.Configure<PermissionCheckerOptions>(options =>
             {
@@ -34,8 +34,6 @@ namespace OpenMod.Core
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
-
-            return Task.CompletedTask;
         }
     }
 }

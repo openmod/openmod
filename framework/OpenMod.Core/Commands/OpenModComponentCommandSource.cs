@@ -29,7 +29,7 @@ namespace OpenMod.Core.Commands
 
         private void ScanAssemblyForCommmmands(Assembly assembly)
         {
-            var types = assembly.GetTypesWithInterface<ICommand>(false);
+            var types = assembly.FindTypes<ICommand>();
             foreach (var type in types)
             {
                 if (type.GetCustomAttribute<DontAutoRegister>(false) != null)

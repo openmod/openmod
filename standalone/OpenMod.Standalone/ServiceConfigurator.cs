@@ -10,14 +10,12 @@ namespace OpenMod.Standalone
     [UsedImplicitly]
     public class ServiceConfigurator : IServiceConfigurator
     {
-        public Task ConfigureServicesAsync(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection)
+        public void ConfigureServices(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection)
         {
             serviceCollection.Configure<PermissionCheckerOptions>(options =>
             {
                 options.AddPermissionCheckProvider<ConsolePermissionProvider>();
             });
-
-            return Task.CompletedTask;
         }
     }
 }

@@ -12,18 +12,6 @@ namespace OpenMod.Core.Helpers
 {
     public static class ReflectionExtensions
     {
-        public static IEnumerable<Type> FindTypes<T>(this object @object,
-                                                     bool includeAbstractAndInterfaces = true,
-                                                     Func<Type, bool> predicate = null)
-        {
-            IEnumerable<Type> filter = @object.FindAllTypes(includeAbstractAndInterfaces)
-                                              .Where(t => typeof(T).IsAssignableFrom(t));
-
-            if (predicate != null) filter = filter.Where(predicate);
-
-            return filter;
-        }
-
         public static MethodBase GetCallingMethod(Type[] skipTypes = null, MethodBase[] skipMethods = null, bool applyAsyncMethodPatch = true)
         {
             var skipList = new List<Type>(skipTypes ?? new Type[0]) {typeof(ReflectionExtensions)};
@@ -106,9 +94,6 @@ namespace OpenMod.Core.Helpers
 
             return types;
         }
-        public static IEnumerable<Type> FindAllTypes(this object @object,
-                                                     bool includeAbstractAndInterfaces = false)
-            => @object.GetType().Assembly.FindAllTypes(includeAbstractAndInterfaces);
 
         public static IEnumerable<Type> FindAllTypes(this Assembly @object, bool includeAbstractAndInterfaces = false)
         {
@@ -123,33 +108,9 @@ namespace OpenMod.Core.Helpers
             }
         }
 
-        public static IEnumerable<Type> FindTypes<T>(this Assembly @object, bool includeAbstractAndInterfaces = false)
+        public static IEnumerable<Type> FindTypes<T>(this Assembly assembly, bool includeAbstractAndInterfaces = false)
         {
-            return FindAllTypes(@object, includeAbstractAndInterfaces).Where(c => typeof(T).IsAssignableFrom(c));
-        }
-
-        public static IEnumerable<Type> GetTypesWithInterface<TInterface>(this Assembly assembly, bool includeAbstractAndInterfaces)
-        {
-            return assembly.FindAllTypes(includeAbstractAndInterfaces).Where(t => typeof(TInterface).IsAssignableFrom(t));
-        }
-
-        public static Dictionary<string, string> GetAssembliesFromDirectory(
-            string directory, string extension = "*.dll")
-        {
-            var l = new Dictionary<string, string>();
-            IEnumerable<FileInfo> assemblyFiles = new DirectoryInfo(directory).GetFiles(extension, SearchOption.AllDirectories);
-            foreach (var assemblyFile in assemblyFiles)
-                try
-                {
-                    var assemblyName = AssemblyName.GetAssemblyName(assemblyFile.FullName);
-                    l.Add(GetVersionIndependentName(assemblyName.FullName), assemblyFile.FullName);
-                }
-                catch
-                {
-                    // ignored
-                }
-
-            return l;
+            return assembly.FindAllTypes(includeAbstractAndInterfaces).Where(c => typeof(T).IsAssignableFrom(c));
         }
 
         public static string GetVersionIndependentName(string name)
