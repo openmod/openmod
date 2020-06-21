@@ -47,9 +47,11 @@ namespace OpenMod.Core.Commands
                 throw new Exception("Can not execute command with null or empty args");
             }
 
+            var logger = m_LifetimeScope.Resolve<ILogger<CommandExecutor>>();
+            logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
+            
             var currentCommandAccessor = m_LifetimeScope.Resolve<ICurrentCommandContextAccessor>();
             var commandsRegistrations = m_CommandStore.Commands;
-            var logger = m_LifetimeScope.Resolve<ILogger<CommandExecutor>>();
             var commandContextBuilder = m_LifetimeScope.Resolve<ICommandContextBuilder>();
             var permissionChecker = m_LifetimeScope.Resolve<IPermissionChecker>();
             var stringLocalizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
@@ -70,8 +72,6 @@ namespace OpenMod.Core.Commands
                     throw commandContext.Exception;
                 }
 
-                //The console entry was already logged, this fixes the wrong message when the command is not found
-                logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
                 currentCommandAccessor.Context = commandContext;
 
                 var permission = m_CommandPermissionBuilder.GetPermission(commandContext.CommandRegistration);
