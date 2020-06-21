@@ -8,6 +8,7 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
+using OpenMod.Core.Helpers;
 using OpenMod.Core.Permissions.Data;
 using OpenMod.Core.Users;
 
@@ -25,7 +26,7 @@ namespace OpenMod.Core.Permissions
             m_PermissionRolesDataStore = permissionRolesDataStore;
             m_UserDataStore = userDataStore;
         }
-        
+
         public virtual async Task<IReadOnlyCollection<IPermissionRole>> GetRolesAsync(IPermissionActor actor, bool inherit = true)
         {
             var roles = new List<IPermissionRole>();
@@ -46,7 +47,7 @@ namespace OpenMod.Core.Permissions
                         continue;
 
                     var parentRole = await GetRoleAsync(parentRoleId);
-                    if (parentRole == null) 
+                    if (parentRole == null)
                         continue;
 
                     roles.Add(parentRole);
@@ -62,7 +63,7 @@ namespace OpenMod.Core.Permissions
             {
                 if (roleIds.Contains(roleId)) //prevent add roles that was already by parent for example
                     continue;
-                
+
                 var userRole = await GetRoleAsync(roleId);
                 if (userRole == null)
                     continue;
@@ -80,7 +81,7 @@ namespace OpenMod.Core.Permissions
                         continue;
 
                     var parentRole = await GetRoleAsync(parentRoleId);
-                    if (parentRole == null) 
+                    if (parentRole == null)
                         continue;
 
                     roles.Add(parentRole);
@@ -90,7 +91,7 @@ namespace OpenMod.Core.Permissions
 
             return roles;
         }
-        
+
         public virtual Task<IReadOnlyCollection<IPermissionRole>> GetRolesAsync()
         {
             //cast is neccessary, OfType<> or Cast<> does not work with cast operators
@@ -181,8 +182,62 @@ namespace OpenMod.Core.Permissions
 
         public Task<IReadOnlyCollection<string>> GetAutoAssignedRolesAsync(string actorId, string actorType)
         {
-            IReadOnlyCollection<string> result =  GetAutoAssignRoles().Select(d => d.Id).ToList();
+            IReadOnlyCollection<string> result = GetAutoAssignRoles().Select(d => d.Id).ToList();
             return Task.FromResult(result);
+        }
+
+        public async Task SavePersistentDataAsync<T>(string roleId, string key, T data) where T : class
+        {
+            var roleData = m_PermissionRolesDataStore.Roles.FirstOrDefault(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase));
+            if (roleData == null)
+            {
+                throw new Exception($"Role does not exist: {roleId}");
+            }
+
+            if (roleData.Data.ContainsKey(key))
+            {
+                roleData.Data[key] = data;
+            }
+            else
+            {
+                roleData.Data.Add(key, data);
+            }
+
+            await m_PermissionRolesDataStore.SaveChangesAsync();
+        }
+
+        public Task<T> GetPersistentDataAsync<T>(string roleId, string key) where T : class
+        {
+            var roleData = m_PermissionRolesDataStore.Roles.FirstOrDefault(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase));
+            if (roleData == null)
+            {
+                return Task.FromException<T>(new Exception($"Role does not exist: {roleId}"));
+            }
+
+            if (!roleData.Data.ContainsKey(key))
+            {
+                return Task.FromResult<T>(null);
+            }
+
+            var dataObject = roleData.Data[key];
+
+            if (dataObject is T obj)
+            {
+                return Task.FromResult(obj);
+            }
+
+            if (dataObject.GetType().HasConversionOperator(typeof(T)))
+            {
+                // ReSharper disable once PossibleInvalidCastException
+                return Task.FromResult((T)dataObject);
+            }
+
+            if (dataObject is Dictionary<string, object> dict)
+            {
+                return Task.FromResult(dict.ToObject<T>());
+            }
+
+            throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
         }
 
         protected IEnumerable<IPermissionRole> GetAutoAssignRoles()

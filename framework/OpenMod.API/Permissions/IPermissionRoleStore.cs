@@ -68,5 +68,15 @@ namespace OpenMod.API.Permissions
         ///     Gets the roles that will be auto assigned for the actor.
         /// </summary>
         Task<IReadOnlyCollection<string>> GetAutoAssignedRolesAsync(string actorId, string actorType);
+
+        /// <summary>
+        ///   Saves persistent data. T must be serializable.
+        /// </summary>
+        Task SavePersistentDataAsync<T>(string roleId, string key, T data) where T : class;
+
+        /// <summary>
+        ///   Gets persistent data. T must be serializable.
+        /// </summary>
+        Task<T> GetPersistentDataAsync<T>(string roleId, string key) where T : class;
     }
 }

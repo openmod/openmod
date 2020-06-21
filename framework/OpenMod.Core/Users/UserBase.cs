@@ -32,7 +32,15 @@ namespace OpenMod.Core.Users
         {
             var userData = await m_UserDataStore.GetUserDataAsync(Id, Type);
             userData.Data ??= new Dictionary<string, object>();
-            userData.Data.Add(key, data);
+            if (userData.Data.ContainsKey(key))
+            {
+                userData.Data[key] = data;
+            }
+            else
+            {
+                userData.Data.Add(key, data);
+            }
+
             await m_UserDataStore.SaveUserDataAsync(userData);
         }
 
