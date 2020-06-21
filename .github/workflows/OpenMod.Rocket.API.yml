@@ -32,7 +32,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore unturned/rocketmod/Rocket.API
     - name: Update version
-      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" unturned/rocketmod/Rocket.API/Rocket.API.csproj"
+      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" unturned/rocketmod/props/SharedProjectProps.props"
     - name: Build
       run: dotnet build unturned/rocketmod/Rocket.API --configuration Release --no-restore
 #    - name: Test
