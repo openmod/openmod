@@ -114,7 +114,7 @@ namespace OpenMod.Unturned.Users
                 var pendingUser = new UnturnedPendingUser(m_UserDataStore, steamPending);
                 await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
 
-                var userData = await m_UserDataStore.GetUserDataAsync(pendingUser.Type, pendingUser.Id);
+                var userData = await m_UserDataStore.GetUserDataAsync(pendingUser.Id, pendingUser.Type);
                 userData.LastSeen = DateTime.Now;
                 userData.LastDisplayName = pendingUser.DisplayName;
                 await m_UserDataStore.SaveUserDataAsync(userData);
