@@ -1,0 +1,6 @@
+mkdocs
+mkdocs-material
+Pygments
+pymdown-extensions
+mkdocs-new-features-notifier
+git+https://github.com/pauloue/mkdocs-autoreflinks-plugin
