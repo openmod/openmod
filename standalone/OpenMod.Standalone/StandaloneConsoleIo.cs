@@ -15,7 +15,7 @@ namespace OpenMod.Standalone
             s_IsRunning = true;
             do
             {
-                var line = Console.ReadLine();
+                var line = Console.ReadLine().Trim();
                 if (!string.IsNullOrEmpty(line))
                 {
                     if (line.Equals("exit", StringComparison.OrdinalIgnoreCase))
