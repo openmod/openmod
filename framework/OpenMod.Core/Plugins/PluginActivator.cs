@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -94,14 +95,19 @@ namespace OpenMod.Core.Plugins
                 {
                     var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
 
-                    var configuration = new ConfigurationBuilder()
-                        .SetBasePath(workingDirectory)
-                        .AddYamlFile("config.yaml", optional: true, reloadOnChange: true)
+                    var configurationBuilder = new ConfigurationBuilder();
+                    if (Directory.Exists(workingDirectory))
+                    {
+                        configurationBuilder
+                            .SetBasePath(workingDirectory)
+                            .AddYamlFile("config.yaml", optional: true, reloadOnChange: true);
+                    }
+
+                    var configuration = configurationBuilder
                         .AddEnvironmentVariables(pluginMetadata.Id.Replace(".", "_") + "_")
                         .Build();
 
                     containerBuilder.Register(context => configuration)
-                        .As<IConfigurationRoot>()
                         .As<IConfiguration>()
                         .SingleInstance()
                         .OwnedByLifetimeScope();
@@ -109,7 +115,8 @@ namespace OpenMod.Core.Plugins
                     containerBuilder.RegisterType(pluginType)
                         .As(pluginType)
                         .As<IOpenModPlugin>()
-                        .SingleInstance();
+                        .SingleInstance()
+                        .ExternallyOwned();
 
                     containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(null, workingDirectory))
                         .As<IDataStore>()
