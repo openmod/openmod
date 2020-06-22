@@ -1,0 +1,40 @@
+site_name: OpenMod documentation
+coypright: 'OpenMod and the OpenMod docs are licensed under the terms of the EUPL-1.2 license.'
+docs_dir: 'content'
+repo_name: 'openmod/OpenMod'
+repo_url: 'https://github.com/openmod/OpenMod'
+edit_uri: 'https://github.com/openmod/OpenMod/edit/master/docs/content/'
+plugins:
+  - search
+  - autoreflinks
+theme:
+  name: 'material'
+  palette:
+    primary: 'cyan'
+    accent: 'light blue'
+  language: 'en'
+  feature:
+    tabs: true  
+markdown_extensions:
+  - admonition
+  - meta
+  - codehilite:
+      guess_lang: true
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde

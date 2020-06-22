@@ -1,15 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>OpenMod.Rocket.PermissionLink</PackageId>
-    <PackageVersion>0.0.0</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <TargetFramework>net461</TargetFramework>
     <Copyright>Enes Sadık Özbek &lt;esozbek.me&gt;</Copyright>
     <Company>OpenMod</Company>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <LangVersion>8</LangVersion>
   </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)..\props\SharedProjectProps.props" /> 
 
   <ItemGroup>
     <PackageReference Include="OpenMod.Core" Version="0.9.18" />

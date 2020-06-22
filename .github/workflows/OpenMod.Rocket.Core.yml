@@ -34,7 +34,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore unturned/rocketmod/Rocket.Core
     - name: Update version
-      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" unturned/rocketmod/Rocket.Core/Rocket.Core.csproj"
+      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" unturned/rocketmod/props/SharedProjectProps.props"
     - name: Build
       run: dotnet build unturned/rocketmod/Rocket.Core --configuration Release --no-restore
 #    - name: Test
