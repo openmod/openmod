@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.API;
@@ -26,9 +27,9 @@ namespace OpenMod.Unturned.Users
         private readonly IUserDataStore m_UserDataStore;
 
         public UnturnedUserProvider(
-            IEventBus eventBus, 
-            IUserDataSeeder dataSeeder, 
-            IUserDataStore userDataStore, 
+            IEventBus eventBus,
+            IUserDataSeeder dataSeeder,
+            IUserDataStore userDataStore,
             IRuntime runtime)
         {
             m_EventBus = eventBus;
@@ -41,6 +42,24 @@ namespace OpenMod.Unturned.Users
             Provider.onCheckValidWithExplanation += OnPendingPlayerConnected;
             Provider.onEnemyConnected += OnPlayerConnected;
             Provider.onEnemyDisconnected += OnEnemyDisconnected;
+            Provider.onRejectingPlayer += Provider_onRejectingPlayer;
+        }
+
+        private void Provider_onRejectingPlayer(CSteamID steamID, ESteamRejection rejection, string explanation)
+        {
+            AsyncHelper.RunSync(async () =>
+            {
+                var pending = m_PendingUsers.First(d => d.SteamId == steamID);
+
+                var disconnectedEvent = new UserDisconnectedEvent(pending);
+                await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
+
+                FinishSession(pending);
+
+                var userData = await m_UserDataStore.GetUserDataAsync(pending.Id, pending.Type);
+                userData.LastSeen = DateTime.Now;
+                await m_UserDataStore.SaveUserDataAsync(userData);
+            });
         }
 
         protected virtual void OnEnemyDisconnected(SteamPlayer player)
@@ -94,9 +113,6 @@ namespace OpenMod.Unturned.Users
             });
         }
 
-        // todo: memory leak, m_PendingUsers does not get cleared up when pending user gets rejected
-        // pending player session also does not end on rejections.
-        // Unturned does not have an event for handling rejections yet.
         protected virtual void OnPendingPlayerConnected(ValidateAuthTicketResponse_t callback, ref bool isValid, ref string explanation)
         {
             if (!isValid)
@@ -227,6 +243,7 @@ namespace OpenMod.Unturned.Users
             Provider.onCheckValidWithExplanation -= OnPendingPlayerConnected;
             Provider.onEnemyConnected -= OnPlayerConnected;
             Provider.onEnemyDisconnected -= OnEnemyDisconnected;
+            Provider.onRejectingPlayer -= Provider_onRejectingPlayer;
         }
     }
 }
