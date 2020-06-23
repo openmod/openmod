@@ -42,24 +42,7 @@ namespace OpenMod.Unturned.Users
             Provider.onCheckValidWithExplanation += OnPendingPlayerConnected;
             Provider.onEnemyConnected += OnPlayerConnected;
             Provider.onEnemyDisconnected += OnEnemyDisconnected;
-            Provider.onRejectingPlayer += Provider_onRejectingPlayer;
-        }
-
-        private void Provider_onRejectingPlayer(CSteamID steamID, ESteamRejection rejection, string explanation)
-        {
-            AsyncHelper.RunSync(async () =>
-            {
-                var pending = m_PendingUsers.First(d => d.SteamId == steamID);
-
-                var disconnectedEvent = new UserDisconnectedEvent(pending);
-                await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
-
-                FinishSession(pending);
-
-                var userData = await m_UserDataStore.GetUserDataAsync(pending.Id, pending.Type);
-                userData.LastSeen = DateTime.Now;
-                await m_UserDataStore.SaveUserDataAsync(userData);
-            });
+            Provider.onRejectingPlayer += OnRejectingPlayer;
         }
 
         protected virtual void OnEnemyDisconnected(SteamPlayer player)
@@ -110,6 +93,23 @@ namespace OpenMod.Unturned.Users
 
                 var connectedEvent = new UserConnectedEvent(user);
                 return m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
+            });
+        }
+
+        protected virtual void OnRejectingPlayer(CSteamID steamID, ESteamRejection rejection, string explanation)
+        {
+            AsyncHelper.RunSync(async () =>
+            {
+                var pending = m_PendingUsers.First(d => d.SteamId == steamID);
+
+                var disconnectedEvent = new UserDisconnectedEvent(pending);
+                await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
+
+                FinishSession(pending);
+
+                var userData = await m_UserDataStore.GetUserDataAsync(pending.Id, pending.Type);
+                userData.LastSeen = DateTime.Now;
+                await m_UserDataStore.SaveUserDataAsync(userData);
             });
         }
 
@@ -243,7 +243,7 @@ namespace OpenMod.Unturned.Users
             Provider.onCheckValidWithExplanation -= OnPendingPlayerConnected;
             Provider.onEnemyConnected -= OnPlayerConnected;
             Provider.onEnemyDisconnected -= OnEnemyDisconnected;
-            Provider.onRejectingPlayer -= Provider_onRejectingPlayer;
+            Provider.onRejectingPlayer -= OnRejectingPlayer;
         }
     }
 }
