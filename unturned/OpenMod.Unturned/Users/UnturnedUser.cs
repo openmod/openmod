@@ -36,7 +36,7 @@ namespace OpenMod.Unturned.Users
 
         public override Task PrintMessageAsync(string message)
         {
-            ChatManager.serverSendMessage(message, Color.white, toPlayer: SteamPlayer, mode: EChatMode.GLOBAL, useRichTextFormatting: true);
+            ChatManager.serverSendMessage(message, Color.white, toPlayer: SteamPlayer, mode: EChatMode.SAY, useRichTextFormatting: true);
             return Task.CompletedTask;
         }
 
@@ -44,7 +44,7 @@ namespace OpenMod.Unturned.Users
         {
             var convertedColor = new Color(color.R / 255f, color.G / 255f, color.B / 255f);
 
-            ChatManager.serverSendMessage(message, convertedColor, toPlayer: SteamPlayer, mode: EChatMode.GLOBAL, useRichTextFormatting: true);
+            ChatManager.serverSendMessage(message, convertedColor, toPlayer: SteamPlayer, mode: EChatMode.SAY, useRichTextFormatting: true);
             return Task.CompletedTask;
         }
 
