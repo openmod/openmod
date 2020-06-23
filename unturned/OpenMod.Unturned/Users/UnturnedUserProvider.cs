@@ -183,7 +183,7 @@ namespace OpenMod.Unturned.Users
                     case UserSearchMode.NameOrId:
                     case UserSearchMode.Id:
                         if (user.Id.Equals(searchString, StringComparison.OrdinalIgnoreCase))
-                            Task.FromResult(user);
+                            return Task.FromResult((IUser)user);
 
                         if (searchMode == UserSearchMode.NameOrId)
                             goto case UserSearchMode.Name;
