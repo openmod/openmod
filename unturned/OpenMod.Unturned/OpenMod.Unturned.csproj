@@ -7,29 +7,12 @@
 
   <ItemGroup>
     <PackageReference Include="Lib.Harmony" Version="2.0.1" />
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.5.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\framework\OpenMod.Runtime\OpenMod.Runtime.csproj" />
     <ProjectReference Include="..\..\unityengine\OpenMod.UnityEngine\OpenMod.UnityEngine.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>libs\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>libs\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

@@ -7,23 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="OpenMod.UniTask" Version="2.0.19" />
+    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2018.4.23" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-
-    <Reference Include="UnityEngine">
-      <HintPath>libs\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>libs\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>libs\UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

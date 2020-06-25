@@ -12,24 +12,11 @@
   <Import Project="$(MSBuildThisFileDirectory)..\props\SharedProjectProps.props" /> 
 
   <ItemGroup>
-    <PackageReference Include="OpenMod.UnityEngine" Version="0.9.18" />
+    <PackageReference Include="OpenMod.UnityEngine" Version="0.9.23" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
+    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2018.4.23" />
   </ItemGroup>
 </Project>

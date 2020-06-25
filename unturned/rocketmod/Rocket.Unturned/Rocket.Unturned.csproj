@@ -13,34 +13,15 @@
   <Import Project="$(MSBuildThisFileDirectory)..\props\SharedProjectProps.props" />
 	
   <ItemGroup>
-    <PackageReference Include="OpenMod.Unturned" Version="0.9.18" />
+    <PackageReference Include="OpenMod.Unturned" Version="0.9.23" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.5.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rocket.API\Rocket.API.csproj" />
     <ProjectReference Include="..\Rocket.Core\Rocket.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\OpenMod.Unturned\libs\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\OpenMod.Unturned\libs\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>

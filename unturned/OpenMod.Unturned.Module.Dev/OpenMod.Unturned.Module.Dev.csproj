@@ -37,27 +37,4 @@
     <Copy SourceFiles="@(DependencyFiles)" DestinationFolder="$(OutDir)" Condition="@(DependencyFiles-&gt;Count()) != 0" />
   </Target>
 
-  <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\OpenMod.Unturned\libs\Assembly-CSharp.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\OpenMod.Unturned\libs\Assembly-CSharp-firstpass.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.CoreModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\unityengine\OpenMod.UnityEngine\libs\UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-  </ItemGroup>
-
 </Project>
