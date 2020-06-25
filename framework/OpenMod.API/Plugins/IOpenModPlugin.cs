@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Autofac;
-using OpenMod.API.Persistence;
+using JetBrains.Annotations;
 using Semver;
 
 namespace OpenMod.API.Plugins
@@ -9,6 +8,7 @@ namespace OpenMod.API.Plugins
     {
         string DisplayName { get; }
 
+        [CanBeNull]
         string Author { get; }
 
         SemVersion Version { get; }

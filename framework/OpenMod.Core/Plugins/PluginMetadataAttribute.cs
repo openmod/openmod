@@ -8,10 +8,15 @@ namespace OpenMod.Core.Plugins
     {
         private string m_Id;
 
+        public PluginMetadataAttribute(string id)
+        {
+            Id = id;
+        }
+
         public string Id
         {
             get { return m_Id; }
-            set
+            private set
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {

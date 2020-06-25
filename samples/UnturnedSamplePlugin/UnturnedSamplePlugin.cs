@@ -1,17 +1,15 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.Core.Plugins;
 using OpenMod.Unturned.Plugins;
 
-[assembly: PluginMetadata(Author = "OpenMod", DisplayName = "Unturned Sample Plugin", Id = "UnturnedSamplePlugin")]
+[assembly: PluginMetadata("UnturnedSamplePlugin", Author = "OpenMod", DisplayName = "Unturned Sample Plugin")]
 
 namespace UnturnedSamplePlugin
 {
-    [UsedImplicitly]
     public class UnturnedSamplePlugin : OpenModUnturnedPlugin
     {
         private readonly IStringLocalizer m_StringLocalizer;

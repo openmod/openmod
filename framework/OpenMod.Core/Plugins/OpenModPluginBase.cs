@@ -48,7 +48,11 @@ namespace OpenMod.Core.Plugins
             var metadata = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>();
             OpenModComponentId = metadata.Id;
             Version = GetPluginVersion();
-            DisplayName = metadata.DisplayName;
+
+            DisplayName = !string.IsNullOrEmpty(metadata.DisplayName)
+                ? metadata.DisplayName
+                : GetType().Name;
+
             Author = metadata.Author;
             WorkingDirectory = PluginHelper.GetWorkingDirectory(Runtime, metadata.Id);
         }
