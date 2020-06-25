@@ -18,6 +18,16 @@ namespace OpenMod.Core.Plugins.NuGet
 
         public override void Log(ILogMessage message)
         {
+            if (message.Message.Contains("Resolving dependency information took"))
+            {
+                return;
+            }
+
+            if (message.Message.Trim().StartsWith("CACHE"))
+            {
+                return;
+            }
+
             var level = message.Level;
             string prefix = "[NuGet] ";
             var text = prefix + message.Message;
