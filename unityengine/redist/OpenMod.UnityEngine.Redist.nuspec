@@ -5,11 +5,11 @@
     <version>2018.4.23</version>
     <description>UnityEngine redistributables for OpenMod</description>
     <authors>Unity;OpenMod</authors>
-	<license type="file">LICENSE</license>
+	<license type="file">LICENSE.txt</license>
 	<requireLicenseAcceptance>true</requireLicenseAcceptance>
   </metadata>
   <files>
     <file src="*.dll" target="lib\net461" />
-    <file src="LICENSE" target="" />
+    <file src="LICENSE.txt" target="" />
   </files>
 </package>
