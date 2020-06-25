@@ -36,5 +36,6 @@ jobs:
       run: nuget pack unityengine/redist/OpenMod.UnityEngine.Redist.nuspec
     - name: Push to NuGet
       run: dotnet nuget push *.nupkg
+             --skip-duplicate
              --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
              --source https://api.nuget.org/v3/index.json
