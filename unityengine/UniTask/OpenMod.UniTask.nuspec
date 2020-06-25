@@ -3,7 +3,7 @@
   <metadata>
     <id>OpenMod.UniTask</id>
     <version>2.0.19</version>
-    <authors>Cysharp</authors>
+    <authors>Cysharp;OpenMod</authors>
     <owners>OpenMod</owners>
 	<description>UniTask for OpenMod</description>
 	<license type="expression">MIT</license>

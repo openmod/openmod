@@ -1,4 +1,5 @@
-name: OpenMod.UniTask
+
+name: OpenMod.Unturned.Redist
 
 on:
   create:
@@ -7,15 +8,15 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'unityengine/UniTask/**'        
+      - 'unturned/redist/**'        
   pull_request:
     branches: [ master ]
     paths:
-      - 'unityengine/UniTask/**' 
+      - 'unturned/redist/**' 
 
 jobs:
   build:
-    name: "OpenMod.UniTask Pack"
+    name: "OpenMod.Unturned.Redist"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -32,7 +33,7 @@ jobs:
         nuget-api-key: ${{ secrets.NUGET_DEPLOY_KEY }}
         nuget-version: '5.x'       
     - name: Pack
-      run: nuget pack unityengine/UniTask/OpenMod.UniTask.nuspec
+      run: nuget pack unturned/redist/OpenMod.Unturned.Redist.nuspec
     - name: Push to NuGet
       run: dotnet nuget push *.nupkg
              --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
