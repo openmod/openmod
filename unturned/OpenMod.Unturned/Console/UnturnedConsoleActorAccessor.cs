@@ -8,9 +8,9 @@ using OpenMod.Core.Console;
 namespace OpenMod.Unturned.Console
 {
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class ConsoleActorAccessor : IConsoleActorAccessor
+    public class UnturnedConsoleActorAccessor : IConsoleActorAccessor
     {
-        public ConsoleActorAccessor(IServiceProvider serviceProvider)
+        public UnturnedConsoleActorAccessor(IServiceProvider serviceProvider)
         {
             Actor = ActivatorUtilities.CreateInstance<ConsoleActor>(serviceProvider, "openmod-unturned-console");
         }
