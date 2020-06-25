@@ -159,7 +159,8 @@ namespace OpenMod.Runtime
         {
             var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
 
-            var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(pluginsDirectory);
+            var logger = Context.LoggerFactory.CreateLogger<FileSystemPluginAssembliesSource>();
+            var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(logger, pluginsDirectory);
             await RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
             
             var nugetPluginAssembliesSource = new NuGetPluginAssembliesSource(m_NuGetPackageManager);
