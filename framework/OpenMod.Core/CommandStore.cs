@@ -13,15 +13,20 @@ namespace OpenMod.Core
 {
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class CommandStore : ICommandStore
+    public class CommandStore : ICommandStore, IDisposable
     {
-        private readonly IReadOnlyCollection<ICommandSource> m_CommandSources;
         private readonly PriorityComparer m_Comparer;
+        private readonly IDisposable m_OptionsOnChange;
+        private IReadOnlyCollection<ICommandSource> m_CommandSources;
 
-        public CommandStore(IOptions<CommandStoreOptions> options, IServiceProvider serviceProvider)
+        public CommandStore(IOptionsMonitor<CommandStoreOptions> options, IServiceProvider serviceProvider)
         {
             m_Comparer = new PriorityComparer(PriortyComparisonMode.HighestFirst);
-            m_CommandSources = options.Value.CreateCommandSources(serviceProvider);
+            m_CommandSources = options.CurrentValue.CreateCommandSources(serviceProvider);
+            m_OptionsOnChange = options.OnChange((newOptions, name) =>
+            {
+                m_CommandSources = newOptions.CreateCommandSources(serviceProvider);
+            });
         }
 
         public IReadOnlyCollection<ICommandRegistration> Commands
@@ -34,6 +39,11 @@ namespace OpenMod.Core
                     .OrderBy(d => d.Priority, m_Comparer)
                     .ToList();
             }
+        }
+
+        public void Dispose()
+        {
+            m_OptionsOnChange.Dispose();
         }
     }
 }
