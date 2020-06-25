@@ -1,8 +1,9 @@
 # OpenMod [![Discord](https://img.shields.io/discord/666327627124047872?label=Discord )](https://discord.com/invite/jRrCJVm)
 
-OpenMod is a modding framework for .NET. It is the successor of RocketMod 5.
+OpenMod is a plugin framework for .NET. 
 
-It's main purpose is to add plugin functionality to Unity games, but it could be used with any .NET host.
+It supports authorization, plugin configurations, internalization, command handling and much more. OpenMod can be used for games, bot frameworks, web servers or anything else and has official implementations for Unturned and a standalone console. An implementation for a discord bot framework is also considered.
+
 
 ## Features
 OpenMod is based on modern C# code and best practices.
