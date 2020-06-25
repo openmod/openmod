@@ -46,7 +46,13 @@ namespace OpenMod.Core.Localization
         {
             get
             {
-                return new LocalizedString(name, m_Configuration[name] ?? name);
+                var configValue = m_Configuration.GetSection(name);
+                if (!configValue.Exists() || string.IsNullOrEmpty(configValue.Value))
+                {
+                    return new LocalizedString(name, name, true);
+                }
+
+                return new LocalizedString(name, configValue.Value);
             }
         }
 
@@ -54,8 +60,13 @@ namespace OpenMod.Core.Localization
         {
             get
             {
-                var configValue = m_Configuration[name];
-                return new LocalizedString(name, configValue != null ? Smart.Format(configValue, arguments) : name);
+                var configValue = m_Configuration.GetSection(name);
+                if (!configValue.Exists() || string.IsNullOrEmpty(configValue.Value))
+                {
+                    return new LocalizedString(name, name, true);
+                }
+
+                return new LocalizedString(name, Smart.Format(configValue.Value, arguments));
             }
         }
     }

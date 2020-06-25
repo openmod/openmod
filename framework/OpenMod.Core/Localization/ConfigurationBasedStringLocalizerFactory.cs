@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.Localization;
@@ -14,6 +15,11 @@ namespace OpenMod.Core.Localization
 
         public IStringLocalizer Create(string baseName, string location)
         {
+            if (!Directory.Exists(location))
+            {
+                Directory.CreateDirectory(location);
+            }
+
             var translations = new ConfigurationBuilder()
                 .SetBasePath(location)
                 .AddYamlFile(baseName + ".yaml", true, reloadOnChange: true)

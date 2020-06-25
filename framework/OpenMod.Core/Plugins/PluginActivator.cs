@@ -17,6 +17,7 @@ using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Localization;
 
 namespace OpenMod.Core.Plugins
 {
@@ -125,7 +126,10 @@ namespace OpenMod.Core.Plugins
                         .SingleInstance()
                         .OwnedByLifetimeScope();
 
-                    var stringLocalizer = m_StringLocalizerFactory.Create("translations", workingDirectory);
+                    var stringLocalizer = Directory.Exists(workingDirectory) 
+                        ? m_StringLocalizerFactory.Create("translations", workingDirectory) 
+                        : NullStringLocalizer.Instance;
+
                     containerBuilder.Register(context => stringLocalizer)
                         .As<IStringLocalizer>()
                         .SingleInstance()
