@@ -5,7 +5,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.Core.Plugins;
 
-[assembly: PluginMetadata("UnturnedSamplePlugin", Author = "OpenMod", DisplayName = "Unturned Sample Plugin")]
+[assembly: PluginMetadata("UniversalSamplePlugin", Author = "OpenMod", DisplayName = "Universal Sample Plugin")]
 
 namespace UniversalSamplePlugin
 {

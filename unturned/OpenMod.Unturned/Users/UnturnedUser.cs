@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
 using SDG.Unturned;
@@ -34,18 +35,18 @@ namespace OpenMod.Unturned.Users
             Session = new UnturnedUserSession(this, pending.Session);
         }
 
-        public override Task PrintMessageAsync(string message)
+        public override async Task PrintMessageAsync(string message)
         {
+            await UniTask.SwitchToMainThread();
             ChatManager.serverSendMessage(message, Color.white, toPlayer: SteamPlayer, mode: EChatMode.SAY, useRichTextFormatting: true);
-            return Task.CompletedTask;
         }
 
-        public override Task PrintMessageAsync(string message, System.Drawing.Color color)
+        public override async Task PrintMessageAsync(string message, System.Drawing.Color color)
         {
             var convertedColor = new Color(color.R / 255f, color.G / 255f, color.B / 255f);
 
+            await UniTask.SwitchToMainThread();
             ChatManager.serverSendMessage(message, convertedColor, toPlayer: SteamPlayer, mode: EChatMode.SAY, useRichTextFormatting: true);
-            return Task.CompletedTask;
         }
 
         public bool Equals(UnturnedUser other)
