@@ -6,7 +6,7 @@
     <AssemblyVersion>4.9.3.2</AssemblyVersion>
     <TargetFramework>net461</TargetFramework>
     <Copyright>Sven Mawby</Copyright>
-    <Authors>Sven Mawby;Enes Sadık Özbek &lt;esozbek.me&gt;</Authors>
+    <Authors>Sven Mawby;OpenMod</Authors>
     <Company>OpenMod</Company>
   </PropertyGroup>
 
@@ -18,7 +18,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.5.5" />
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.5.6" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rocket.API\Rocket.API.csproj" />

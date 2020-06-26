@@ -5,7 +5,7 @@
     <AssemblyVersion>2.4.6.0</AssemblyVersion>
     <TargetFramework>net461</TargetFramework>
     <Copyright>Sven Mawby</Copyright>
-    <Authors>Sven Mawby;Enes Sadık Özbek &lt;esozbek.me&gt;</Authors>
+    <Authors>Sven Mawby;OpenMod</Authors>
     <Company>OpenMod</Company>
   </PropertyGroup>
   

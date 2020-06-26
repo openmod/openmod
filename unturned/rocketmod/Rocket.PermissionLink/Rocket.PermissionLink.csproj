@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>OpenMod.Rocket.PermissionLink</PackageId>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
     <TargetFramework>net461</TargetFramework>
+	<Authors>OpenMod</Authors>
     <Copyright>Enes Sadık Özbek &lt;esozbek.me&gt;</Copyright>
     <Company>OpenMod</Company>
   </PropertyGroup>
