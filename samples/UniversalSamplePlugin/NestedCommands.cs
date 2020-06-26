@@ -2,7 +2,7 @@
 using OpenMod.API.Commands;
 using OpenMod.Core.Commands;
 
-namespace UnturnedSamplePlugin
+namespace UniversalSamplePlugin
 {
     public static class NestedCommands
     {

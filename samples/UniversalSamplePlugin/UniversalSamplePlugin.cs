@@ -1,24 +1,23 @@
 ﻿using System;
-using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.Core.Plugins;
-using OpenMod.Unturned.Plugins;
 
 [assembly: PluginMetadata("UnturnedSamplePlugin", Author = "OpenMod", DisplayName = "Unturned Sample Plugin")]
 
-namespace UnturnedSamplePlugin
+namespace UniversalSamplePlugin
 {
-    public class UnturnedSamplePlugin : OpenModUnturnedPlugin
+    public class UniversalSamplePlugin : OpenModUniversalPlugin
     {
         private readonly IStringLocalizer m_StringLocalizer;
-        private readonly ILogger<UnturnedSamplePlugin> m_Logger;
+        private readonly ILogger<UniversalSamplePlugin> m_Logger;
         private readonly IConfiguration m_Configuration;
 
-        public UnturnedSamplePlugin(
+        public UniversalSamplePlugin(
             IStringLocalizer stringLocalizer,
-            ILogger<UnturnedSamplePlugin> logger, 
+            ILogger<UniversalSamplePlugin> logger, 
             IConfiguration configuration,
             IServiceProvider serviceProvider) : base(serviceProvider)
         {
@@ -27,10 +26,9 @@ namespace UnturnedSamplePlugin
             m_Configuration = configuration;
         }
 
-        protected override async UniTask OnLoadAsync()
+        protected override async Task OnLoadAsync()
         {
-            await UniTask.SwitchToThreadPool();
-            m_Logger.LogInformation("SampleUnturnedPlugin has been loaded.");
+            m_Logger.LogInformation("UniversalSamplePlugin has been loaded.");
             m_Logger.LogInformation($"Configuration value: {m_Configuration["somevalue"]}");
             m_Logger.LogInformation($"String localizer value at somevalue: {m_StringLocalizer["somevalue"]}");
             m_Logger.LogInformation($"String localizer value at someothervalue:somenestedvalue: {m_StringLocalizer["someothervalue:somenestedvalue"]}");

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\unturned\OpenMod.Unturned\OpenMod.Unturned.csproj" />
+    <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj" />
   </ItemGroup>
 
 </Project>
