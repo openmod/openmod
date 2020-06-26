@@ -9,7 +9,7 @@ This repository includes a patched RocketMod that has been converted to an OpenM
 The following modifications have been done to add support for OpenMod
 - RocketMod is now a OpenMod plugin instead of an Unturned nexus module
 - Changed project style to .NET SDK project with net461 target
-- Command handling has been patched so that it does not conflict with OpenMod
+- Command handling has been patched so that it does not conflict with OpenMod. OpenMod will fallback to RocketMod commands when a command was not found, hence OpenMod commands will always have priority over RocketMod commands.
 
 
 The following are *not* planned:
