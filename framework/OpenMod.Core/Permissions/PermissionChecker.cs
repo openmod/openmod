@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
+using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Permissions
 {
@@ -65,33 +66,8 @@ namespace OpenMod.Core.Permissions
 
         public async ValueTask DisposeAsync()
         {
-            foreach (var permissionCheckProvider in m_PermissionCheckProviders)
-            {
-                switch (permissionCheckProvider)
-                {
-                    case IAsyncDisposable asyncDisposable:
-                        await asyncDisposable.DisposeAsync();
-                        break;
-
-                    case IDisposable disposable:
-                        disposable.Dispose();
-                        break;
-                }
-            }
-
-            foreach (var permissionSource in m_PermissionSources)
-            {
-                switch (permissionSource)
-                {
-                    case IAsyncDisposable asyncDisposable:
-                        await asyncDisposable.DisposeAsync();
-                        break;
-
-                    case IDisposable disposable:
-                        disposable.Dispose();
-                        break;
-                }
-            }
+            await m_PermissionCheckProviders.DisposeAllAsync();
+            await m_PermissionSources.DisposeAllAsync();
         }
     }
 }

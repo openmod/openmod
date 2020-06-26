@@ -4,10 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Commands;
 using OpenMod.Core.Prioritization;
 
-namespace OpenMod.Core
+namespace OpenMod.Core.Commands
 {
     public class CommandStoreOptions
     {
+        public delegate void CommandSourcesChanged();
+        public event CommandSourcesChanged OnCommandSourcesChanged;
+
         private readonly List<Type> m_CommandSourceTypes;
         private readonly List<ICommandSource> m_CommandSources;
         private readonly PriorityComparer m_PriorityComparer;
@@ -34,11 +37,13 @@ namespace OpenMod.Core
         public void AddCommandSource(ICommandSource commandSource)
         {
             m_CommandSources.Add(commandSource);
+            OnCommandSourcesChanged?.Invoke();
         }
 
         public void RemoveCommandSource(ICommandSource commandSource)
         {
             m_CommandSources.Remove(commandSource);
+            OnCommandSourcesChanged?.Invoke();
         }
 
         public void AddCommandSource<TSource>() where TSource : ICommandSource
@@ -60,6 +65,7 @@ namespace OpenMod.Core
 
             m_CommandSourceTypes.Add(type);
             m_CommandSourceTypes.Sort((a, b) => m_PriorityComparer.Compare(a.GetPriority(), b.GetPriority()));
+            OnCommandSourcesChanged?.Invoke();
         }
 
         public void RemoveCommandSource<TSource>() where TSource : ICommandSource
@@ -69,7 +75,9 @@ namespace OpenMod.Core
 
         public bool RemoveCommandSource(Type type)
         {
-            return m_CommandSourceTypes.RemoveAll(d => d == type) > 0;
+            var result = m_CommandSourceTypes.RemoveAll(d => d == type) > 0;
+            OnCommandSourcesChanged?.Invoke();
+            return result;
         }
     }
 }

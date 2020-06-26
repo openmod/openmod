@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Users
 {
@@ -56,19 +57,7 @@ namespace OpenMod.Core.Users
 
         public async ValueTask DisposeAsync()
         {
-            foreach (var userProvider in UserProviders)
-            {
-                switch (userProvider)
-                {
-                    case IAsyncDisposable asyncDisposable:
-                        await asyncDisposable.DisposeAsync();
-                        break;
-
-                    case IDisposable disposable:
-                        disposable.Dispose();
-                        break;
-                }
-            }
+            await UserProviders.DisposeAllAsync();
         }
     }
 }

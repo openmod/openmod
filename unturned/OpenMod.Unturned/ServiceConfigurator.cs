@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Ioc;
 using OpenMod.Core;
+using OpenMod.Core.Commands;
 using OpenMod.Core.Console;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Users;

@@ -44,7 +44,7 @@ namespace OpenMod.Core.Plugins
             EventBus = serviceProvider.GetRequiredService<IEventBus>();
             m_LoggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
             m_CommandStoreOptions = serviceProvider.GetRequiredService<IOptions<CommandStoreOptions>>();
-            
+
             var metadata = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>();
             OpenModComponentId = metadata.Id;
             Version = GetPluginVersion();

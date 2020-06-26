@@ -7,7 +7,7 @@ using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 
-namespace OpenMod.Core
+namespace OpenMod.Core.Commands
 {
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
