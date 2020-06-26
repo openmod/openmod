@@ -2,14 +2,11 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>OpenMod.Unturned.Redist</id>
-    <version>3.20.5.5</version>
+    <version>3.20.5.6</version>
     <description>Unturned 3 redistributables for OpenMod</description>
     <authors>SmartlyDressedGames;OpenMod</authors>
 	<license type="file">LICENSE.txt</license>
 	<requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <dependencies>
-      <dependency id="OpenMod.UnityEngine.Redist" version="[2018, )" include="contentFiles, build" />
-	</dependencies>
   </metadata>
   <files>
     <file src="*.dll" target="lib\net461" />
