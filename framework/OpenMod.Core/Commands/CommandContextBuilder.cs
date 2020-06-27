@@ -68,9 +68,13 @@ namespace OpenMod.Core.Commands
 
         private ICommandRegistration GetCommandRegistration(ICommandActor actor, string name, IEnumerable<ICommandRegistration> commandRegistrations)
         {
-            return commandRegistrations.FirstOrDefault(d => d.SupportsActor(actor) 
-                                                            && (d.Name.Equals(name, StringComparison.OrdinalIgnoreCase) 
-                                                            || (d.Aliases != null && d.Aliases.Any(e => e.Equals(name, StringComparison.OrdinalIgnoreCase)))));
+            var baseQuery = commandRegistrations.Where(d => d.SupportsActor(actor));
+
+            // todo: could be done in a single iteration
+            // ReSharper disable PossibleMultipleEnumeration
+            return baseQuery.FirstOrDefault(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                   ?? baseQuery.FirstOrDefault(d => d.Aliases != null && d.Aliases.Any(e => e.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            // ReSharper restore PossibleMultipleEnumeration
         }
     }
 }

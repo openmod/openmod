@@ -46,6 +46,7 @@ namespace OpenMod.Core.Commands
             }
             catch (ObjectDisposedException)
             {
+                // https://github.com/openmod/OpenMod/issues/61
                 m_CommandSources = new List<ICommandSource>();
             }
         }
