@@ -11,7 +11,7 @@ namespace OpenMod.Core.Commands
 {
     public class OpenModComponentBoundCommandRegistration : ICommandRegistration
     {
-        private Type[] m_CommandActorTypes;
+        private ICollection<Type> m_CommandActorTypes;
         public IOpenModComponent Component { get; }
         public Type CommandType { get; }
         public MethodInfo CommandMethod { get; }
@@ -43,7 +43,7 @@ namespace OpenMod.Core.Commands
                 ? CommandType.FullName 
                 : $"{CommandMethod.DeclaringType.FullName}.{CommandMethod.Name}";
 
-            m_CommandActorTypes = memberInfo.GetCustomAttribute<CommandActorAttribute>()?.CommandActorTypes ?? new[] {typeof(ICommandActor)};
+            m_CommandActorTypes = memberInfo.GetCustomAttributes<CommandActorAttribute>().Select(d => d.ActorType).ToList();
 
             var parent = memberInfo.GetCustomAttribute<CommandParentAttribute>();
             if (parent != null)
