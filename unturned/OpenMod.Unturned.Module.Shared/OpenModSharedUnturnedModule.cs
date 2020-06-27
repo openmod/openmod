@@ -39,10 +39,7 @@ namespace OpenMod.Unturned.Module.Shared
 
             // ReSharper disable once PossibleNullReferenceException
             var getFolderPathMethod = typeof(NuGetEnvironment)
-                .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
-                .First(d => d.Name.Equals("GetFolderPath") 
-                            && d.GetParameters().Length == 1 
-                            && d.GetParameters()[0].ParameterType.FullName.Contains("SpecialFolder "));
+                .GetMethod("GetFolderPath", BindingFlags.Static | BindingFlags.NonPublic);
 
             var patchedGetFolderMethod = typeof(NuGetEnvironmentGetFolderPathPatch)
                 .GetMethod(nameof(NuGetEnvironmentGetFolderPathPatch.GetFolderPath), BindingFlags.Public | BindingFlags.Static);
