@@ -39,6 +39,7 @@ namespace OpenMod.Unturned.Users
         {
             await UniTask.SwitchToMainThread();
             ChatManager.serverSendMessage(message, Color.white, toPlayer: SteamPlayer, mode: EChatMode.SAY, useRichTextFormatting: true);
+            await Task.Yield();
         }
 
         public override async Task PrintMessageAsync(string message, System.Drawing.Color color)
@@ -47,6 +48,7 @@ namespace OpenMod.Unturned.Users
 
             await UniTask.SwitchToMainThread();
             ChatManager.serverSendMessage(message, convertedColor, toPlayer: SteamPlayer, mode: EChatMode.SAY, useRichTextFormatting: true);
+            await Task.Yield();
         }
 
         public bool Equals(UnturnedUser other)

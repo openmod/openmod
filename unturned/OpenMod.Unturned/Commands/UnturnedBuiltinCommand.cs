@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Ioc;
@@ -10,7 +11,7 @@ using Steamworks;
 namespace OpenMod.Unturned.Commands
 {
     [DontAutoRegister]
-    public class UnturnedBuiltinCommand : UnturnedCommand
+    public class UnturnedBuiltinCommand : Command
     {
         private readonly UnturnedCommandRegistration m_CommandRegistration;
 
@@ -21,7 +22,7 @@ namespace OpenMod.Unturned.Commands
             m_CommandRegistration = commandRegistration;
         }
 
-        protected override async UniTask OnExecuteAsync()
+        protected override async Task OnExecuteAsync()
         {
             var cmd = m_CommandRegistration.Cmd;
             CSteamID id;
@@ -43,6 +44,7 @@ namespace OpenMod.Unturned.Commands
             // unturned builtin commands must run on main thread
             await UniTask.SwitchToMainThread();
             cmd.check(id, m_CommandRegistration.Name, string.Join(" ",Context.Parameters.Skip(1)));
+            await Task.Yield();
         }
     }
 }
