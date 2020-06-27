@@ -42,7 +42,7 @@ namespace OpenMod.Unturned.Module.Shared
                 .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
                 .First(d => d.Name.Equals("GetFolderPath") 
                             && d.GetParameters().Length == 1 
-                            && d.GetParameters()[0].ParameterType.FullName.Contains("SpecialFolder "));
+                            && d.GetParameters()[0].ParameterType.FullName.Contains("SpecialFolder"));
 
             var patchedGetFolderMethod = typeof(NuGetEnvironmentGetFolderPathPatch)
                 .GetMethod(nameof(NuGetEnvironmentGetFolderPathPatch.GetFolderPath), BindingFlags.Public | BindingFlags.Static);
