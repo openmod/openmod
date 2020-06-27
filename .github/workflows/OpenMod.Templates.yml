@@ -1,11 +1,9 @@
 name: OpenMod.Templates
 
 on:
-  release:
-  push:
-    branches: [ master ]
-    paths:
-      - 'templates/**'
+  create:
+    tags:
+      - "*"
 
 jobs:
   build:
