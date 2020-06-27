@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using OpenMod.API.Permissions;
 using OpenMod.Core.Plugins;
 using OpenMod.UnityEngine.Plugins;
 
-[assembly: PluginMetadata(Author = "OpenMod", DisplayName = "Rocket Permission Link", Id = "Rocket.PermissionLink")]
+[assembly: PluginMetadata("Rocket.PermissionLink", Author = "OpenMod", DisplayName = "Rocket Permission Link")]
 
 namespace Rocket.PermissionLink
 {
@@ -19,14 +19,14 @@ namespace Rocket.PermissionLink
             m_ServiceProvider = serviceProvider;
         }
 
-        protected override UniTask OnLoadAsync()
+        protected override Task OnLoadAsync()
         {
             m_PermissionProvider = ActivatorUtilities.CreateInstance<OpenModPermissionsProvider>(m_ServiceProvider);
             m_PermissionProvider.Install();
             return base.OnLoadAsync();
         }
 
-        protected override UniTask OnUnloadAsync()
+        protected override Task OnUnloadAsync()
         {
             m_PermissionProvider.Dispose();
             return base.OnUnloadAsync();
