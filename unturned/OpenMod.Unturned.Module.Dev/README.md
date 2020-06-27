@@ -1,0 +1,2 @@
+# OpenMod Unturned Dev Module
+This module is mainly used for developing and testing OpenMod for Unturned. Unlike the normal OpenMod Unturned Module, this module does not do any dynamic bootstrapping, which allows to see changes directly.

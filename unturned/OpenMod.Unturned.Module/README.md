@@ -1,0 +1,2 @@
+# OpenMod Unturned Module
+This module will bootstrap OpenMod for Unturned. It will automatically download the latest stable version from nuget.org. It has no OpenMod dependencies except for OpenMod.NuGet and the shared unturned module.
