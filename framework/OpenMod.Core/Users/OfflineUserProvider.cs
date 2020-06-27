@@ -29,6 +29,11 @@ namespace OpenMod.Core.Users
             }
 
             var data = await m_UserDataStore.GetUserDataAsync(searchString, userType);
+            if (data == null)
+            {
+            	return null;
+            }
+            
             return new OfflineUser(m_UserDataStore, data);
         }
 
