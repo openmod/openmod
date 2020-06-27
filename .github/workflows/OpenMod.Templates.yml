@@ -24,7 +24,7 @@ jobs:
       with:
         dotnet-version: 3.1.101
     - name: Install dependencies
-      run: dotnet restore standalone/OpenMod.Standalone
+      run: dotnet restore ./templates
     - name: Update OpenMod Templates version
       run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" templates/OpenMod.Templates.csproj"  
     - name: Update OpenMod Templates Universal version
