@@ -10,7 +10,7 @@ pages:
         - Installation:
             - Unturned: user-guide/installation/unturned.md
         - Migration:
-            - Migarting from RocketMod 4: user-guide/migration/rocketmod4.md         
+            - Migarting from RocketMod: user-guide/migration/rocketmod.md         
         - Plugins: 
             - Installing and Managing Plugins: user-guide/plugins/installation.md
         - OpenMod Concepts:
