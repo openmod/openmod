@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using OpenMod.API;
-using OpenMod.NuGet;
+using OpenMod.UnityEngine.Plugins;
 using OpenMod.Unturned.Module.Shared;
 using SDG.Framework.Modules;
 using SDG.Unturned;
@@ -42,7 +42,7 @@ namespace OpenMod.Unturned.Module.Dev
 
             var assemblies = new List<Assembly>
             {
-                typeof(OpenMod.UnityEngine.UnityMainThreadDispatcher).Assembly,
+                typeof(OpenModUnityEnginePlugin).Assembly,
                 typeof(OpenModUnturnedHost).Assembly
             };
 
