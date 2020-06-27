@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -21,20 +22,32 @@ namespace OpenMod.Core.Commands
         private readonly IOptions<CommandStoreOptions> m_Options;
         private readonly IServiceProvider m_ServiceProvider;
         private IReadOnlyCollection<ICommandSource> m_CommandSources;
+        private ILifetimeScope m_LifetimeScope;
 
-        public CommandStore(IOptions<CommandStoreOptions> options, IServiceProvider serviceProvider)
+        public CommandStore(IOptions<CommandStoreOptions> options, 
+            IServiceProvider serviceProvider, 
+            ILifetimeScope lifetimeScope)
         {
             m_Comparer = new PriorityComparer(PriortyComparisonMode.HighestFirst);
             m_CommandSources = options.Value.CreateCommandSources(serviceProvider);
             m_Options = options;
             m_ServiceProvider = serviceProvider;
+            m_LifetimeScope = lifetimeScope;
             options.Value.OnCommandSourcesChanged += OnCommandSourcesChanged;
         }
 
         private void OnCommandSourcesChanged()
         {
             AsyncHelper.RunSync(m_CommandSources.DisposeAllAsync);
-            m_CommandSources = m_Options.Value.CreateCommandSources(m_ServiceProvider);
+
+            try
+            {
+                m_CommandSources = m_Options.Value.CreateCommandSources(m_ServiceProvider);
+            }
+            catch (ObjectDisposedException)
+            {
+                m_CommandSources = new List<ICommandSource>();
+            }
         }
 
         public IReadOnlyCollection<ICommandRegistration> Commands
