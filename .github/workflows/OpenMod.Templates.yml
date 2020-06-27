@@ -1,0 +1,40 @@
+name: OpenMod.Templates
+
+on:
+  release:
+  push:
+    branches: [ master ]
+    paths:
+      - 'templates/**'
+
+jobs:
+  build:
+    name: "OpenMod.Templates Build"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      name: Checkout Repository
+      with:
+        fetch-depth: 0
+    - name: Extract version
+      id: get_version
+      run: echo ::set-output name=VERSION::$(git describe --tags)
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Install dependencies
+      run: dotnet restore standalone/OpenMod.Standalone
+    - name: Update OpenMod Templates version
+      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" templates/OpenMod.Templates.csproj"  
+    - name: Update OpenMod Templates Universal version
+      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" templates/templates/universal/PluginTemplate.csproj"  
+    - name: Update OpenMod Templates Unturned version
+      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" templates/templates/unturned/PluginTemplate.csproj"      
+    - name: Build
+      run: dotnet build ./templates --configuration Release --no-restore 
+    - name: Push to NuGet
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      run: dotnet nuget push templates/bin/Release/*.nupkg
+             --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
+             --source https://api.nuget.org/v3/index.json

@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "OpenMod",
+  "classifications": [
+    "Common",
+    "OpenMod",
+    "Plugin",
+	"Universal"
+  ],
+  "name": "OpenMod Universal Plugin",
+  "groupIdentity": "OpenMod.Templates.Plugins",
+  "identity": "OpenMod.Templates.Plugins.Universal",
+  "shortName": "openmod-universal-plugin",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "PluginTemplate",
+  "guids": [],
+  "preferNameDirectory": true,
+  "PrimaryOutputs": [
+    {
+      "path": "PluginTemplate.csproj"
+    }
+  ],
+  "symbols": {
+    "PluginId": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "Sets the ID of the plugin",
+      "defaultValue": "MyOpenModPlugin",
+      "replaces": "PLUGIN-ID"
+    },  
+    "FullPluginName": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "Sets the name of the plugin",
+      "defaultValue": "My OpenMod Plugin",
+      "replaces": "PLUGIN-NAME"
+    },
+    "FullPluginNameXmlEncoded": {
+      "type": "derived",
+      "replaces": "PLUGIN-NAME-XML",
+      "valueSource": "FullPluginName",
+      "valueTransform": "xmlEncode"
+    },
+    "SkipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Skips the execution of 'dotnet restore' on project creation.",
+      "defaultValue": "false"
+    }
+  },
+  "postActions": [
+    {
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "condition": "(!SkipRestore)",
+      "continueOnError": true,
+      "description": "Restore NuGet packages required by this project.",
+      "manualInstructions": [
+        {
+          "text": "Run 'dotnet restore' in the directory the template was created in."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
+	<RootNamespace>MyRocketPlugin</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateNugetPackage>true</GenerateNugetPackage>
+    <Product>PLUGIN-NAME-XML</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenMod.Unturned" Version="0.0.0" />
+	<PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.5.6" />
+	<PackageReference Include="OpenMod.UnityEngine.Redist" Version="2018.4.23" />
+  </ItemGroup>
+
+</Project>
