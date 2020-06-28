@@ -143,7 +143,7 @@ namespace OpenMod.NuGet
         public virtual async Task<IPackageSearchMetadata> QueryPackageExactAsync(string packageId, string version = null, bool includePreRelease = false)
         {
             var matches = await QueryPackagesAsync(packageId, version, includePreRelease);
-            return matches.FirstOrDefault(d => d.Identity.Id.Equals(packageId));
+            return matches.FirstOrDefault(d => d.Identity.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
         }
 
         public virtual async Task<IEnumerable<IPackageSearchMetadata>> QueryPackagesAsync(string packageId, string version = null, bool includePreRelease = false)
@@ -342,7 +342,7 @@ namespace OpenMod.NuGet
                 using var reader = new PackageArchiveReader(nupkgFile);
                 var identity = await reader.GetIdentityAsync(CancellationToken.None);
 
-                if (identity.Id.Equals(packageId))
+                if (identity.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase))
                 {
                     packageIdentities.Add(identity);
                 }
