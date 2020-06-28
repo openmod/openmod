@@ -64,6 +64,11 @@ namespace OpenMod.Core.Commands
 
         public bool SupportsActor(ICommandActor actor)
         {
+            if (m_CommandActorTypes.Count == 0)
+            {
+                return true;
+            }
+
             return m_CommandActorTypes.Any(d => d.IsInstanceOfType(actor));
         }
 

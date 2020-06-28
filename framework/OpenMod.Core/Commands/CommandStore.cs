@@ -33,6 +33,8 @@ namespace OpenMod.Core.Commands
             m_Options = options;
             m_ServiceProvider = serviceProvider;
             m_LifetimeScope = lifetimeScope;
+
+            OnCommandSourcesChanged();
             options.Value.OnCommandSourcesChanged += OnCommandSourcesChanged;
         }
 
