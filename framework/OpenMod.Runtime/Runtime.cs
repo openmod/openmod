@@ -96,10 +96,9 @@ namespace OpenMod.Runtime
             m_Logger.LogInformation($"OpenMod v{Version} is starting...");
 
             var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
-            var nuGetPackageManager = new NuGetPackageManager(packagesDirectory)
-            {
-                Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger<OpenModNuGetLogger>())
-            };
+            var nuGetPackageManager = parameters.PackageManager as NuGetPackageManager ?? new NuGetPackageManager(packagesDirectory);
+            
+            nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger<OpenModNuGetLogger>());
             nuGetPackageManager.InstallAssemblyResolver();
 
             var startupContext = new OpenModStartupContext
@@ -157,7 +156,7 @@ namespace OpenMod.Runtime
             }
             return m_Host;
         }
-        
+
         public async Task ReloadAsync()
         {
             await ShutdownAsync();

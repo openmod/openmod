@@ -111,7 +111,7 @@ namespace OpenMod.Bootstrapper
                 hostAssemblies.AddRange(packageAssemblies);
             }
 
-            await InitializeRuntimeAsync(hostAssemblies, openModFolder, commandLineArgs);
+            await InitializeRuntimeAsync(nugetInstaller, hostAssemblies, openModFolder, commandLineArgs);
         }
 
         
@@ -121,7 +121,7 @@ namespace OpenMod.Bootstrapper
             return packageManager.LoadAssembliesFromNuGetPackageAsync(pkg);
         }
 
-        private Task InitializeRuntimeAsync(List<Assembly> hostAssemblies, string workingDirectory, string[] commandlineArgs)
+        private Task InitializeRuntimeAsync(NuGetPackageManager packageManager, List<Assembly> hostAssemblies, string workingDirectory, string[] commandlineArgs)
         {
             var runtimeAssembly = FindAssemblyInCurrentDomain("OpenMod.Runtime");
             var apiAssembly = FindAssemblyInCurrentDomain("OpenMod.API");
@@ -132,6 +132,7 @@ namespace OpenMod.Bootstrapper
             var parameters = Activator.CreateInstance(parametersType);
             SetParameter(parameters, "WorkingDirectory", workingDirectory);
             SetParameter(parameters, "CommandlineArgs", commandlineArgs);
+            SetParameter(parameters, "PackageManager", packageManager);
             
             var initMethod = runtimeType.GetMethod("InitAsync", BindingFlags.Instance | BindingFlags.Public);
             return (Task) initMethod?.Invoke(runtime, new[] {  hostAssemblies, parameters, null /* hostBuilderFunc */});
