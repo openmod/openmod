@@ -32,6 +32,7 @@ namespace OpenMod.Unturned
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
+        private readonly Assembly m_SelfAssembly;
         private readonly IRuntime m_Runtime;
         private readonly ILoggerFactory m_LoggerFactory;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
@@ -48,8 +49,8 @@ namespace OpenMod.Unturned
         public ILifetimeScope LifetimeScope { get; }
         public IDataStore DataStore { get; }
 
-        private const string c_HarmonyInstanceId = "com.get-openmod.unturned";
-        private readonly Harmony m_Harmony;
+        /*private const string c_HarmonyInstanceId = "com.get-openmod.unturned";
+        private readonly Harmony m_Harmony;*/
         private bool m_IsDisposing;
 
         // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */
@@ -63,17 +64,18 @@ namespace OpenMod.Unturned
             ILogger<OpenModUnturnedHost> logger,
             UnturnedCommandHandler unturnedCommandHandler)
         {
+            m_SelfAssembly = GetType().Assembly;
             m_Runtime = runtime;
             m_LoggerFactory = loggerFactory;
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
             m_Logger = logger;
             m_UnturnedCommandHandler = unturnedCommandHandler;
-            m_Harmony = new Harmony(c_HarmonyInstanceId);
+            //m_Harmony = new Harmony(c_HarmonyInstanceId);
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
             DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
-            Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
+            Version = VersionHelper.ParseAssemblyVersion(m_SelfAssembly);
         }
 
         public Task InitAsync()
@@ -115,7 +117,7 @@ namespace OpenMod.Unturned
 
             m_Logger.LogInformation($"OpenMod for Unturned v{Version} is initializing...");
 
-            m_Harmony.PatchAll(typeof(OpenModUnturnedHost).Assembly);
+            //m_Harmony.PatchAll(m_SelfAssembly);
             TlsWorkaround.Install();
 
             var unitySynchronizationContetextField = typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext", BindingFlags.Static | BindingFlags.NonPublic);
@@ -173,7 +175,7 @@ namespace OpenMod.Unturned
             IsComponentAlive = false;
             m_IsDisposing = true;
 
-            m_Harmony.UnpatchAll(c_HarmonyInstanceId);
+            //m_Harmony.UnpatchAll(c_HarmonyInstanceId);
             UnbindUnturnedEvents();
         }
     }

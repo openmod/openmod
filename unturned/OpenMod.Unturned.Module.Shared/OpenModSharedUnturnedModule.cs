@@ -23,7 +23,7 @@ namespace OpenMod.Unturned.Module.Shared
 
         public void Initialize(Assembly moduleAssembly)
         {
-            var selfAssembly = typeof(OpenModSharedUnturnedModule).Assembly;
+            //var selfAssembly = GetType().Assembly;
             var moduleAssemblyLocation = moduleAssembly.Location;
             var openModDirectory = Path.GetDirectoryName(moduleAssemblyLocation);
             var openModModuleName = Path.GetDirectoryName(openModDirectory);
@@ -35,7 +35,7 @@ namespace OpenMod.Unturned.Module.Shared
             }
 
             m_HarmonyInstance = new Harmony(c_HarmonyInstanceId);
-            m_HarmonyInstance.PatchAll(selfAssembly);
+            //m_HarmonyInstance.PatchAll(selfAssembly);
 
             // ReSharper disable once PossibleNullReferenceException
             var getFolderPathMethod = typeof(NuGetEnvironment)
