@@ -51,7 +51,7 @@ namespace OpenMod.Bootstrapper
             var shouldAutoUpdate = false;
             if (!commandLineArgs.Any(arg => arg.Equals("-NoOpenModAutoUpdate", StringComparison.InvariantCultureIgnoreCase)))
             {
-                if (!bool.TryParse(Environment.GetEnvironmentVariable("OpenMod__AutoUpdate"), out shouldAutoUpdate))
+                if (!bool.TryParse(Environment.GetEnvironmentVariable("OpenMod__EnableAutoUpdate"), out shouldAutoUpdate))
                     shouldAutoUpdate = true;
             }
 
