@@ -43,7 +43,9 @@ namespace OpenMod.Unturned.Commands
 
             // unturned builtin commands must run on main thread
             await UniTask.SwitchToMainThread();
-            cmd.check(id, m_CommandRegistration.Name, string.Join(" ",Context.Parameters.Skip(1)));
+
+            var argsLine = string.Join(" ", Context.Parameters);
+            cmd.check(id, m_CommandRegistration.Name, argsLine);
             await Task.Yield();
         }
     }
