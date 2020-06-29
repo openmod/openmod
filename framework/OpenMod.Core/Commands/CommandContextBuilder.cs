@@ -26,18 +26,20 @@ namespace OpenMod.Core.Commands
             m_LifetimeScope = lifetimeScope;
         }
 
-        public virtual CommandContext BuildContextTree(CommandContext currentContext, IEnumerable<ICommandRegistration> commandRegistrations)
+        public virtual CommandContext BuildContextTree(ICommandActor actor, CommandContext currentContext, IEnumerable<ICommandRegistration> commandRegistrations)
         {
             if (currentContext.Parameters.Count == 0)
             {
+                CheckCommandActor(actor, ref currentContext);
                 return currentContext;
             }
 
             var childCommandName = currentContext.Parameters.First();
             var children = CommandRegistrationHelper.GetChildren(currentContext.CommandRegistration, commandRegistrations);
-            var childCommand = GetCommandRegistration(currentContext.Actor, childCommandName, children);
+            var childCommand = GetCommandRegistration(childCommandName, children);
             if (childCommand == null)
             {
+                CheckCommandActor(actor, ref currentContext);
                 return currentContext;
             }
 
@@ -45,15 +47,15 @@ namespace OpenMod.Core.Commands
             var childContext = new CommandContext(childCommand, scope, currentContext) { CommandRegistration = childCommand };
             currentContext.ChildContext = childContext;
 
-            return BuildContextTree(childContext, commandRegistrations);
+            return BuildContextTree(actor, childContext, commandRegistrations);
         }
 
         public ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, IEnumerable<ICommandRegistration> commandRegistrations)
         {
-            var rootCommand = GetCommandRegistration(actor, args[0], commandRegistrations.Where(d => d.ParentId == null));
+            var rootCommand = GetCommandRegistration(args[0], commandRegistrations.Where(d => d.ParentId == null));
             if (rootCommand == null)
             {
-                var exceptionContext = new CommandContext(null, actor, args.First(), prefix,  args.Skip(1).ToList(), m_LifetimeScope.BeginLifetimeScope());
+                var exceptionContext = new CommandContext(null, actor, args.First(), prefix, args.Skip(1).ToList(), m_LifetimeScope.BeginLifetimeScope());
                 var localizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
                 exceptionContext.Exception = new CommandNotFoundException(localizer["commands:errors:not_found", new { CommandName = args[0], Args = args }]);
                 //await actor.PrintMessageAsync(Color.Red, exceptionContext.Exception.Message);
@@ -63,18 +65,28 @@ namespace OpenMod.Core.Commands
             var scope = rootCommand.Component.LifetimeScope.BeginLifetimeScope($"Command context scope for \"{string.Join(" ", args)}\" by actor {actor.Type}/{actor.DisplayName} ({actor.Id})");
             var rootContext = new CommandContext(rootCommand, actor, args.First(), prefix, args.Skip(1).ToList(), scope);
 
-            return BuildContextTree(rootContext, commandRegistrations);
+            return BuildContextTree(actor, rootContext, commandRegistrations);
         }
 
-        private ICommandRegistration GetCommandRegistration(ICommandActor actor, string name, IEnumerable<ICommandRegistration> commandRegistrations)
+        private ICommandRegistration GetCommandRegistration(string name, IEnumerable<ICommandRegistration> commandRegistrations)
         {
-            var baseQuery = commandRegistrations.Where(d => d.SupportsActor(actor));
-
             // todo: could be done in a single iteration
             // ReSharper disable PossibleMultipleEnumeration
-            return baseQuery.FirstOrDefault(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                   ?? baseQuery.FirstOrDefault(d => d.Aliases != null && d.Aliases.Any(e => e.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            return commandRegistrations.FirstOrDefault(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                   ?? commandRegistrations.FirstOrDefault(d => d.Aliases != null && d.Aliases.Any(e => e.Equals(name, StringComparison.OrdinalIgnoreCase)));
             // ReSharper restore PossibleMultipleEnumeration
+        }
+
+        private void CheckCommandActor(ICommandActor actor, ref CommandContext currentContext)
+        {
+            if (currentContext.CommandRegistration.SupportsActor(actor))
+            {
+                return;
+            }
+            
+            var localizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
+            currentContext.Exception = new UserFriendlyException(localizer["commands:errors:bad_actor",
+                new {CommandName = currentContext.CommandAlias, ActorType = actor.Type}]);
         }
     }
 }
