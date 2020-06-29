@@ -26,11 +26,11 @@ namespace OpenMod.Core.Commands
             m_LifetimeScope = lifetimeScope;
         }
 
-        public virtual CommandContext BuildContextTree(ICommandActor actor, CommandContext currentContext, IEnumerable<ICommandRegistration> commandRegistrations)
+        public virtual CommandContext BuildContextTree(CommandContext currentContext, IEnumerable<ICommandRegistration> commandRegistrations)
         {
             if (currentContext.Parameters.Count == 0)
             {
-                CheckCommandActor(actor, ref currentContext);
+                CheckCommandActor(ref currentContext);
                 return currentContext;
             }
 
@@ -39,7 +39,7 @@ namespace OpenMod.Core.Commands
             var childCommand = GetCommandRegistration(childCommandName, children);
             if (childCommand == null)
             {
-                CheckCommandActor(actor, ref currentContext);
+                CheckCommandActor(ref currentContext);
                 return currentContext;
             }
 
@@ -47,7 +47,7 @@ namespace OpenMod.Core.Commands
             var childContext = new CommandContext(childCommand, scope, currentContext) { CommandRegistration = childCommand };
             currentContext.ChildContext = childContext;
 
-            return BuildContextTree(actor, childContext, commandRegistrations);
+            return BuildContextTree(childContext, commandRegistrations);
         }
 
         public ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, IEnumerable<ICommandRegistration> commandRegistrations)
@@ -65,7 +65,7 @@ namespace OpenMod.Core.Commands
             var scope = rootCommand.Component.LifetimeScope.BeginLifetimeScope($"Command context scope for \"{string.Join(" ", args)}\" by actor {actor.Type}/{actor.DisplayName} ({actor.Id})");
             var rootContext = new CommandContext(rootCommand, actor, args.First(), prefix, args.Skip(1).ToList(), scope);
 
-            return BuildContextTree(actor, rootContext, commandRegistrations);
+            return BuildContextTree(rootContext, commandRegistrations);
         }
 
         private ICommandRegistration GetCommandRegistration(string name, IEnumerable<ICommandRegistration> commandRegistrations)
@@ -77,16 +77,16 @@ namespace OpenMod.Core.Commands
             // ReSharper restore PossibleMultipleEnumeration
         }
 
-        private void CheckCommandActor(ICommandActor actor, ref CommandContext currentContext)
+        private void CheckCommandActor(ref CommandContext currentContext)
         {
-            if (currentContext.CommandRegistration.SupportsActor(actor))
+            if (currentContext.CommandRegistration.SupportsActor(currentContext.Actor))
             {
                 return;
             }
             
             var localizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
             currentContext.Exception = new UserFriendlyException(localizer["commands:errors:bad_actor",
-                new {CommandName = currentContext.CommandAlias, ActorType = actor.Type}]);
+                new {CommandName = currentContext.CommandAlias, ActorType = currentContext.Actor.Type}]);
         }
     }
 }
