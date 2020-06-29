@@ -85,10 +85,7 @@ namespace OpenMod.Unturned.Users
         {
             AsyncHelper.RunSync(() =>
             {
-                var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == player.playerID.steamID);
-                if (pending == null)
-                    return Task.CompletedTask;
-
+                var pending = m_PendingUsers.First(d => d.SteamId == player.playerID.steamID);
                 FinishSession(pending);
 
                 var user = new UnturnedUser(m_UserDataStore, player.player, pending);
@@ -99,13 +96,11 @@ namespace OpenMod.Unturned.Users
             });
         }
 
-        protected virtual void OnRejectingPlayer(CSteamID steamId, ESteamRejection rejection, string explanation)
+        protected virtual void OnRejectingPlayer(CSteamID steamID, ESteamRejection rejection, string explanation)
         {
             AsyncHelper.RunSync(async () =>
             {
-                var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == steamId);
-                if (pending == null)
-                    return;
+                var pending = m_PendingUsers.First(d => d.SteamId == steamID);
 
                 var disconnectedEvent = new UserDisconnectedEvent(pending);
                 await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
