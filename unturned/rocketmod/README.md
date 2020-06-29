@@ -16,7 +16,7 @@ The following are *not* planned:
 - Loading RocketMod plugins as OpenMod plugins
 - Loading RocketMod commands as OpenMod commands
 - Adding any kind of new features to RocketMod except for upstream changes from LDM
-- Integrating OpenMod services such as permissions. RocketMod will keep its own permission system.
+- Integrating OpenMod services such as permissions. RocketMod will keep its own permission system. See [Rocket.PermissionLink](https://github.com/openmod/openmod/tree/master/unturned/rocketmod/Rocket.PermissionLink).
 
 
 RocketMod keeps its own plugin system, config system, permission system etc.
