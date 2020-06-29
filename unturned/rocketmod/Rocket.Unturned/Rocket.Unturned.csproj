@@ -3,11 +3,13 @@
   <PropertyGroup>
     <PackageId>OpenMod.Rocket.Unturned</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageTags>openmod openmod-plugin unturned rocketmod</PackageTags>
     <AssemblyVersion>4.9.3.2</AssemblyVersion>
     <TargetFramework>net461</TargetFramework>
     <Copyright>Sven Mawby</Copyright>
     <Authors>Sven Mawby;OpenMod</Authors>
     <Company>OpenMod</Company>
+
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\props\SharedProjectProps.props" />

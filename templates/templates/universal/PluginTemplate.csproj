@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
+	<PackageTags>openmod openmod-plugin universal</PackageTags>
 	<RootNamespace>MyOpenModPlugin</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateNugetPackage>true</GenerateNugetPackage>
