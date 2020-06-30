@@ -93,8 +93,8 @@ namespace OpenMod.Unturned
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 /* Fix Unturned destroying console and breaking Serilog formatting and colors */
-                var windowsConsole = typeof(Provider).Assembly.GetType("WindowsConsole");
-                var shouldManageConsoleField = windowsConsole.GetField("shouldManageConsole", BindingFlags.Static | BindingFlags.NonPublic);
+                var windowsConsole = typeof(Provider).Assembly.GetType("SDG.Unturned.WindowsConsole");
+                var shouldManageConsoleField = windowsConsole?.GetField("shouldManageConsole", BindingFlags.Static | BindingFlags.NonPublic);
 
                 if (shouldManageConsoleField != null)
                 {
