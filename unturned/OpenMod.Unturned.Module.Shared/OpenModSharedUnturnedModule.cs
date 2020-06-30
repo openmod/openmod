@@ -34,18 +34,7 @@ namespace OpenMod.Unturned.Module.Shared
             }
 
             m_HarmonyInstance = new Harmony(c_HarmonyInstanceId);
-
-            // ReSharper disable once PossibleNullReferenceException
-            var getFolderPathMethod = typeof(NuGetEnvironment)
-                .GetMethods(BindingFlags.Static | BindingFlags.Public)
-                .First(d => d.Name.Equals("GetFolderPath") 
-                            && d.GetParameters().Length == 1 
-                            && d.GetParameters()[0].ParameterType == typeof(NuGetFolderPath));
-
-            var patchedGetFolderMethod = typeof(NuGetEnvironmentGetFolderPathPatch)
-                .GetMethod(nameof(NuGetEnvironmentGetFolderPathPatch.GetFolderPath), BindingFlags.Public | BindingFlags.Static);
-
-            m_HarmonyInstance.Patch(getFolderPathMethod, new HarmonyMethod(patchedGetFolderMethod));
+            m_HarmonyInstance.PatchAll(GetType().Assembly);
 
             InstallNewtonsoftJson(openModDirectory);
             InstallTlsWorkaround();
