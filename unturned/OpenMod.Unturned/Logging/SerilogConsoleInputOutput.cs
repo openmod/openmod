@@ -195,14 +195,14 @@ namespace OpenMod.Unturned.Logging
 
             if (input.Length == 0)
             {
-                System.Console.Write('>');
+                System.Console.Write("> ");
                 System.Console.CursorLeft = 0;
                 System.Console.CursorTop++;
                 return;
             }
 
             pendingInput = string.Empty;
-            outputInformation($">{input}");
+            outputInformation($"> {input}");
             notifyInputCommitted(input);
 
             if (m_InputHistoric.Count == 0 || !m_InputHistoric.Last().Equals(input))
@@ -255,8 +255,8 @@ namespace OpenMod.Unturned.Logging
             if (input.Length == 0)
                 return;
 
-            System.Console.Write($">{input}");
-            System.Console.CursorLeft = m_InputIndex + 1; // +1 to compense '>'
+            System.Console.Write($"> {input}");
+            System.Console.CursorLeft = m_InputIndex + 2; // +1 to compense '> '
         }
 
         #endregion
