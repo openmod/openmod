@@ -1,5 +1,6 @@
-﻿# Configuration for serilog
+﻿# Configuration for Serilog
 # This is the yaml equivalent of this: https://github.com/serilog/serilog-settings-configuration
+# For more, see https://openmod.github.io/openmod-docs/user-guide/logging/
 Serilog:
   Using:
   - Serilog
@@ -25,6 +26,8 @@ Serilog:
   MinimumLevel:
     Default: Information
     Override:
+      # You can configure when specific events should be logged
+      # In this example, the Microsoft.EntityFrameworkCore events below are only logged if Warning or higher
       Microsoft.EntityFrameworkCore.Database.Command: Warning
       Microsoft.EntityFrameworkCore.Infrastructure: Warning
       Microsoft.EntityFrameworkCore.Database.Connection: Warning
