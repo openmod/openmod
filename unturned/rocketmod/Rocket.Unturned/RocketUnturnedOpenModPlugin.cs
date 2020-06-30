@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -20,25 +19,27 @@ namespace Rocket.Unturned
             m_LoggerFactory = loggerFactory;
         }
 
-        protected override Task OnLoadAsync()
+        protected override async UniTask OnLoadAsync()
         {
+            await base.OnLoadAsync();
+            await UniTask.SwitchToMainThread();
+
             U.Logger = m_LoggerFactory.CreateLogger("RocketMod");
             U.PluginInstance = this;
 
             uComp = new U();
             uComp.initialize();
-            
-            return base.OnLoadAsync();
         }
 
-        protected override Task OnUnloadAsync()
+        protected override async UniTask OnUnloadAsync()
         {
+            await base.OnUnloadAsync();
+            await UniTask.SwitchToMainThread();
+            
             U.Logger = NullLogger.Instance;
             U.Instance.shutdown();
             U.PluginInstance = null;
             uComp.shutdown();
-
-            return base.OnUnloadAsync();
         }
     }
 }

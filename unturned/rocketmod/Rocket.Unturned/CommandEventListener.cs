@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Eventing;
 using OpenMod.API.Prioritization;
@@ -20,32 +21,40 @@ namespace Rocket.Unturned
     public class CommandEventListener : IEventListener<CommandExecutedEvent>
     {
         [EventListener(Priority = Priority.Highest)]
-        public async Task HandleEventAsync(object emitter, CommandExecutedEvent @event)
+        public Task HandleEventAsync(object emitter, CommandExecutedEvent @event)
         {
-            if (@event.CommandContext.Exception is CommandNotFoundException && R.Commands != null)
+            async UniTask Task()
             {
-                var text = @event.CommandContext.GetCommandLine();
+                // RocketMod commands must run on main thread
+                await UniTask.SwitchToMainThread();
 
-                IRocketPlayer rocketPlayer = null;
-                if (@event.Actor is UnturnedUser user)
+                if (@event.CommandContext.Exception is CommandNotFoundException && R.Commands != null)
                 {
-                    var player = user.SteamPlayer;
-                    if (UnturnedPermissions.CheckPermissions(player, text))
+                    var text = @event.CommandContext.GetCommandLine();
+
+                    IRocketPlayer rocketPlayer = null;
+                    if (@event.Actor is UnturnedUser user)
                     {
-                        rocketPlayer = UnturnedPlayer.FromSteamPlayer(player);
+                        var player = user.SteamPlayer;
+                        if (UnturnedPermissions.CheckPermissions(player, text))
+                        {
+                            rocketPlayer = UnturnedPlayer.FromSteamPlayer(player);
+                        }
+                    }
+                    else if (@event.Actor.Type.Equals(KnownActorTypes.Console, StringComparison.OrdinalIgnoreCase))
+                    {
+                        rocketPlayer = new ConsolePlayer();
+                    }
+
+                    if (rocketPlayer != null)
+                    {
+                        R.Commands.Execute(rocketPlayer, text);
+                        @event.CommandContext.Exception = null;
                     }
                 }
-                else if (@event.Actor.Type.Equals(KnownActorTypes.Console, StringComparison.OrdinalIgnoreCase))
-                {
-                    rocketPlayer = new ConsolePlayer();
-                }
-
-                if (rocketPlayer != null)
-                {
-                    R.Commands.Execute(rocketPlayer, text);
-                    @event.CommandContext.Exception = null;
-                }
             }
+
+            return Task().AsTask();
         }
     }
     // END OPENMOD PATCH: Hook OpenMod command processing
