@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Cysharp.Threading.Tasks;
 using OpenMod.Core.Plugins;
 using OpenMod.Unturned.Plugins;
 
@@ -16,16 +17,18 @@ namespace MyOpenModPlugin
             m_Logger = logger;
         }
 
-        protected override Task OnLoadAsync()
+        protected override async UniTask OnLoadAsync()
         {
+			// await UniTask.SwitchToMainThread(); uncomment if you have to access Unturned or UnityEngine APIs
             m_Logger.LogInformation("Hello World!");
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
 
-        protected override Task OnUnloadAsync()
+        protected override async UniTask OnUnloadAsync()
         {
+            // await UniTask.SwitchToMainThread(); uncomment if you have to access Unturned or UnityEngine APIs
             m_Logger.LogInformation("Good bye :(");
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
     }
 }

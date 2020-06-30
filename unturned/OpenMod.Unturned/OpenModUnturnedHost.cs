@@ -23,7 +23,6 @@ using OpenMod.Unturned.Logging;
 using OpenMod.Unturned.Users;
 using SDG.Unturned;
 using Semver;
-using UnityEngine;
 using UnityEngine.Experimental.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
 

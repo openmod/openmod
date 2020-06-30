@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using OpenMod.Core.Plugins;
 
 namespace OpenMod.UnityEngine.Plugins
@@ -11,26 +12,26 @@ namespace OpenMod.UnityEngine.Plugins
             
         }
 
-        public sealed override Task LoadAsync()
+        public sealed override async Task LoadAsync()
         {
-            base.LoadAsync();
-            return OnLoadAsync();
+            await base.LoadAsync();
+            await OnLoadAsync();
         }
 
-        protected virtual Task OnLoadAsync()
+        protected virtual UniTask OnLoadAsync()
         {
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
 
-        public sealed override Task UnloadAsync()
+        public sealed override async Task UnloadAsync()
         {
-            base.UnloadAsync();
-            return OnUnloadAsync();
+            await base.UnloadAsync();
+            await OnUnloadAsync();
         }
 
-        protected virtual Task OnUnloadAsync()
+        protected virtual UniTask OnUnloadAsync()
         {
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
     }
 }

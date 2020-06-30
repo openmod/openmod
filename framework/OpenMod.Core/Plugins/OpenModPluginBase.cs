@@ -51,7 +51,7 @@ namespace OpenMod.Core.Plugins
 
             DisplayName = !string.IsNullOrEmpty(metadata.DisplayName)
                 ? metadata.DisplayName
-                : GetType().Name;
+                : metadata.Id;
 
             Author = metadata.Author;
             WorkingDirectory = PluginHelper.GetWorkingDirectory(Runtime, metadata.Id);

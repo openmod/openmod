@@ -11,7 +11,7 @@ using Steamworks;
 namespace OpenMod.Unturned.Commands
 {
     [DontAutoRegister]
-    public class UnturnedBuiltinCommand : Command
+    public class UnturnedBuiltinCommand : UnturnedCommand
     {
         private readonly UnturnedCommandRegistration m_CommandRegistration;
 
@@ -22,7 +22,7 @@ namespace OpenMod.Unturned.Commands
             m_CommandRegistration = commandRegistration;
         }
 
-        protected override async Task OnExecuteAsync()
+        protected override async UniTask OnExecuteAsync()
         {
             var cmd = m_CommandRegistration.Cmd;
             CSteamID id;
@@ -46,7 +46,6 @@ namespace OpenMod.Unturned.Commands
 
             var argsLine = string.Join(" ", Context.Parameters);
             cmd.check(id, m_CommandRegistration.Name, argsLine);
-            await Task.Yield();
         }
     }
 }

@@ -35,20 +35,22 @@ namespace OpenMod.Unturned.Users
             Session = new UnturnedUserSession(this, pending.Session);
         }
 
-        public override async Task PrintMessageAsync(string message)
+        public override Task PrintMessageAsync(string message)
         {
-            await UniTask.SwitchToMainThread();
-            ChatManager.serverSendMessage(message, Color.white, toPlayer: SteamPlayer, mode: EChatMode.SAY, useRichTextFormatting: true);
-            await Task.Yield();
+            return PrintMessageAsync(message, System.Drawing.Color.White);
         }
 
-        public override async Task PrintMessageAsync(string message, System.Drawing.Color color)
+        public override Task PrintMessageAsync(string message, System.Drawing.Color color)
         {
-            var convertedColor = new Color(color.R / 255f, color.G / 255f, color.B / 255f);
+            async UniTask Task()
+            {
+                var convertedColor = new Color(color.R / 255f, color.G / 255f, color.B / 255f);
 
-            await UniTask.SwitchToMainThread();
-            ChatManager.serverSendMessage(message, convertedColor, toPlayer: SteamPlayer, mode: EChatMode.SAY, useRichTextFormatting: true);
-            await Task.Yield();
+                await UniTask.SwitchToMainThread();
+                ChatManager.serverSendMessage(message, convertedColor, toPlayer: SteamPlayer, mode: EChatMode.SAY, useRichTextFormatting: true);
+            }
+
+            return Task().AsTask();
         }
 
         public bool Equals(UnturnedUser other)
