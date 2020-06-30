@@ -1,32 +1,30 @@
-﻿using System;
-using NuGet.Common;
+﻿using NuGet.Common;
 
 namespace OpenMod.Unturned.Module.Shared
 {
-    // This patch uses some magic values because of this private enum:
-    // https://github.com/NuGet/NuGet.Client/blob/636570e/src/NuGet.Core/NuGet.Common/PathUtil/NuGetEnvironment.cs#L338
+    // Fix for https://github.com/openmod/openmod/issues/12#issuecomment-646818601
     public static class NuGetEnvironmentGetFolderPathPatch
     {
-        public static bool GetFolderPath(int folder /* private SpecialFolder enum */, ref string __result)
+        public static bool GetFolderPath(NuGetFolderPath folder, ref string __result)
         {
-            if (folder == 0x3 /* SpecialFolder.CommonApplicationData */ && !RuntimeEnvironmentHelper.IsWindows)
+            if (folder != NuGetFolderPath.MachineWideSettingsBaseDirectory || RuntimeEnvironmentHelper.IsWindows)
             {
-                if (RuntimeEnvironmentHelper.IsMacOSX)
-                {
-                    __result = @"/Library/Application Support";
-                }
-                else
-                {
-                    var commonApplicationDataOverride = Environment.GetEnvironmentVariable("NUGET_COMMON_APPLICATION_DATA");
+                return true;
+            }
 
-                    __result = !string.IsNullOrEmpty(commonApplicationDataOverride) 
-                        ? commonApplicationDataOverride 
-                        : @"/etc/opt";
-                }
-
+            if (RuntimeEnvironmentHelper.IsMacOSX)
+            {
+                __result = @"/Library/Application Support/NuGet";
+                return false;
+            }
+            
+            if (RuntimeEnvironmentHelper.IsLinux)
+            {
+                __result = @"/etc/opt/NuGet";
                 return false;
             }
 
+            // unknown OS, let NuGet handle it
             return true;
         }
     }

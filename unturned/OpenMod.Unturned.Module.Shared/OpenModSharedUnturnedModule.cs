@@ -23,7 +23,6 @@ namespace OpenMod.Unturned.Module.Shared
 
         public void Initialize(Assembly moduleAssembly)
         {
-            //var selfAssembly = GetType().Assembly;
             var moduleAssemblyLocation = moduleAssembly.Location;
             var openModDirectory = Path.GetDirectoryName(moduleAssemblyLocation);
             var openModModuleName = Path.GetDirectoryName(openModDirectory);
@@ -35,14 +34,13 @@ namespace OpenMod.Unturned.Module.Shared
             }
 
             m_HarmonyInstance = new Harmony(c_HarmonyInstanceId);
-            //m_HarmonyInstance.PatchAll(selfAssembly);
 
             // ReSharper disable once PossibleNullReferenceException
             var getFolderPathMethod = typeof(NuGetEnvironment)
-                .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
+                .GetMethods(BindingFlags.Static | BindingFlags.Public)
                 .First(d => d.Name.Equals("GetFolderPath") 
                             && d.GetParameters().Length == 1 
-                            && d.GetParameters()[0].ParameterType.FullName.Contains("SpecialFolder"));
+                            && d.GetParameters()[0].ParameterType == typeof(NuGetFolderPath));
 
             var patchedGetFolderMethod = typeof(NuGetEnvironmentGetFolderPathPatch)
                 .GetMethod(nameof(NuGetEnvironmentGetFolderPathPatch.GetFolderPath), BindingFlags.Public | BindingFlags.Static);
@@ -86,16 +84,17 @@ namespace OpenMod.Unturned.Module.Shared
                     Console.WriteLine("================================================================");
                     Console.WriteLine($"Incompatible module detected: {moduleName}");
 
-                    //if (moduleName.Equals("Rocket.Unturned", StringComparison.OrdinalIgnoreCase))
-                    //{
-                        //todo: add documentation link for migration from Rocket.Unturned
-                    //}
-                    //else
-                    //{
-                    Console.WriteLine("Please remove the module in order to use OpenMod.");
-                    //}
+                    if (moduleName.Equals("Rocket.Unturned", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine("RocketMod detected! Read how to migrate from RocketMod:");
+                        Console.WriteLine("https://openmod.github.io/openmod-docs/user-guide/migration/rocketmod/");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Please remove the module in order to use OpenMod.");
+                    }
 
-                    Console.WriteLine("OpenMod will not load.");
+                    Console.WriteLine("OpenMod will abort loading.");
                     Console.WriteLine("================================================================");
                     Console.ForegroundColor = previousColor;
                     return true;
