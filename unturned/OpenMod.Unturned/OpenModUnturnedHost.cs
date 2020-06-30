@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
@@ -89,10 +90,18 @@ namespace OpenMod.Unturned
                 .GetField("ioHandlers", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(Dedicator.commandWindow);
 
-            /* Fix Unturned destroying console and breaking Serilog formatting and colors */
-            var shouldManageConsoleField = typeof(WindowsConsole).GetField("shouldManageConsole", BindingFlags.Static | BindingFlags.NonPublic);
-            var shouldManageConsole = (CommandLineFlag)shouldManageConsoleField.GetValue(null);
-            shouldManageConsole.value = false;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                /* Fix Unturned destroying console and breaking Serilog formatting and colors */
+                var windowsConsole = typeof(Provider).Assembly.GetType("WindowsConsole");
+                var shouldManageConsoleField = windowsConsole.GetField("shouldManageConsole", BindingFlags.Static | BindingFlags.NonPublic);
+
+                if (shouldManageConsoleField != null)
+                {
+                    var shouldManageConsole = (CommandLineFlag) shouldManageConsoleField.GetValue(null);
+                    shouldManageConsole.value = false;
+                }
+            }
 
             // unturned built-in io handlers
             var defaultIoHandlers = ioHandlers.Where(c => 
@@ -106,14 +115,9 @@ namespace OpenMod.Unturned
                 Dedicator.commandWindow.removeIOHandler(ioHandler);
             }
 
-            if (PlatformHelper.IsLinux)
-            {
-                Dedicator.commandWindow.addIOHandler(new SerilogConsoleInputOutput(m_LoggerFactory));
-            }
-            else
-            {
-                Dedicator.commandWindow.addIOHandler(new SerilogWindowsConsoleInputOutput(m_LoggerFactory));
-            }
+            Dedicator.commandWindow.addIOHandler(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? new SerilogWindowsConsoleInputOutput(m_LoggerFactory)
+                : new SerilogConsoleInputOutput(m_LoggerFactory));
 
             m_Logger.LogInformation($"OpenMod for Unturned v{Version} is initializing...");
 
