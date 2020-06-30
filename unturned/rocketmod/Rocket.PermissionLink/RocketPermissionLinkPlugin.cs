@@ -19,17 +19,19 @@ namespace Rocket.PermissionLink
             m_ServiceProvider = serviceProvider;
         }
 
-        protected override Task OnLoadAsync()
+        protected override async UniTask OnLoadAsync()
         {
+            await base.OnLoadAsync();
+            await UniTask.SwitchToMainThread();
             m_PermissionProvider = ActivatorUtilities.CreateInstance<OpenModPermissionsProvider>(m_ServiceProvider);
             m_PermissionProvider.Install();
-            return base.OnLoadAsync();
         }
 
-        protected override Task OnUnloadAsync()
+        protected override async UniTask OnUnloadAsync()
         {
+            await base.OnUnloadAsync();
+            await UniTask.SwitchToMainThread();
             m_PermissionProvider.Dispose();
-            return base.OnUnloadAsync();
         }
     }
 }
