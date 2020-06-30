@@ -95,8 +95,9 @@ namespace OpenMod.Unturned
             shouldManageConsole.value = false;
 
             // unturned built-in io handlers
-            var defaultIoHandlers = ioHandlers.Where(c => c.GetType() == typeof(ThreadedWindowsConsoleInputOutput)
-                                      || c.GetType() == typeof(WindowsConsoleInputOutput)
+            var defaultIoHandlers = ioHandlers.Where(c => 
+                                         c.GetType().FullName.Equals("SDG.Unturned.ThreadedWindowsConsoleInputOutput") // type doesnt exist on Linux
+                                      || c.GetType().FullName.Equals("SDG.Unturned.WindowsConsoleInputOutput") // type doesnt exist on Linux
                                       || c.GetType() == typeof(ThreadedConsoleInputOutput)
                                       || c.GetType() == typeof(ConsoleInputOutput)).ToList();
 
