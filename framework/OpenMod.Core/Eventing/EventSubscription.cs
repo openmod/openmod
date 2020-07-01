@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +10,7 @@ using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Eventing
 {
-    internal class EventSubscription
+    internal class EventSubscription : IAsyncDisposable
     {
         public EventSubscription(
             IOpenModComponent ownerComponent,
@@ -76,5 +77,10 @@ namespace OpenMod.Core.Eventing
 
         [CanBeNull]
         public Type EventListener { get; }
+
+        public ValueTask DisposeAsync()
+        {
+            return Scope.DisposeAsync();
+        }
     }
 }

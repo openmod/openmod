@@ -16,7 +16,7 @@ using OpenMod.Core.Prioritization;
 namespace OpenMod.Core.Eventing
 {
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class EventBus : IEventBus, IDisposable
+    public class EventBus : IEventBus, IAsyncDisposable
     {
         private readonly ILogger<EventBus> m_Logger;
         private readonly List<EventSubscription> m_EventSubscriptions;
@@ -211,8 +211,13 @@ namespace OpenMod.Core.Eventing
             return method.GetCustomAttribute<EventListenerAttribute>() ?? new EventListenerAttribute();
         }
 
-        public virtual void Dispose()
+        public virtual async ValueTask DisposeAsync()
         {
+            await m_EventSubscriptions
+                .Select(d => d.Scope)
+                .Distinct()
+                .DisposeAllAsync();
+
             m_EventSubscriptions.Clear();
         }
     }

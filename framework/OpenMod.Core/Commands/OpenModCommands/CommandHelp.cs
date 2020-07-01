@@ -80,6 +80,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 }
                 
                 await PrintCommandHelpAsync(context, permission, commands);
+                await context.DisposeAsync();
             }
         }
 
