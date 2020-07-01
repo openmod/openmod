@@ -60,7 +60,7 @@ namespace OpenMod.Core.Commands
                 return exceptionContext;
             }
 
-            var scope = rootCommand.Component.LifetimeScope.BeginLifetimeScope($"Command context scope for \"{string.Join(" ", args)}\" by actor {actor.Type}/{actor.DisplayName} ({actor.Id})");
+            var scope = rootCommand.Component.LifetimeScope.BeginLifetimeScope("AutofacWebRequest");
             var rootContext = new CommandContext(rootCommand, actor, args.First(), prefix, args.Skip(1).ToList(), scope);
 
             return BuildContextTree(rootContext, commandRegistrations);

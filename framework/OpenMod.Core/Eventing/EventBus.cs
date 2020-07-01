@@ -73,9 +73,13 @@ namespace OpenMod.Core.Eventing
                     }
 
                     // ReSharper disable once LoopCanBeConvertedToQuery
-                    foreach (var @interface in type.GetInterfaces().Where(c => typeof(IEventListener<>).IsAssignableFrom(c) && c.GetGenericArguments().Length >= 1))
+                    foreach (var @interface in type.GetInterfaces().Where(c => typeof(IEventListener).IsAssignableFrom(c) && c.GetGenericArguments().Length > 0))
                     {
-                        var method = @interface.GetMethods().Single();
+                        var interfaceMethod = @interface.GetMethods().Single();
+                        var map = type.GetInterfaceMap(interfaceMethod.DeclaringType);
+                        var index = Array.IndexOf(map.InterfaceMethods, interfaceMethod);
+
+                        var method = map.TargetMethods[index];
                         var handler = GetEventListenerAttribute(method);
                         var eventType = @interface.GetGenericArguments()[0];
                         eventListeners.Add((type, method, handler, eventType));
@@ -174,24 +178,29 @@ namespace OpenMod.Core.Eventing
             var comparer = new PriorityComparer(PriortyComparisonMode.LowestFirst);
             eventSubscriptions.Sort((a, b) => comparer.Compare(a.EventListenerAttribute.Priority, b.EventListenerAttribute.Priority));
 
-            foreach (var subscription in eventSubscriptions)
+            foreach (var group in eventSubscriptions.GroupBy(e => e.Scope))
             {
-                var owner = subscription.Owner;
-                if (!owner.IsAlive || !((IOpenModComponent)owner.Target).IsComponentAlive)
+                await using var newScope = group.Key.BeginLifetimeScope("AutofacWebRequest");
+                foreach (var subscription in group)
                 {
-                    m_EventSubscriptions.Remove(subscription);
-                    continue;
-                }
+                    if (@event is ICancellableEvent cancellableEvent
+                        && cancellableEvent.IsCancelled
+                        && !subscription.EventListenerAttribute.IgnoreCancelled)
+                    {
+                        continue;
+                    }
 
-                if (@event is ICancellableEvent cancellableEvent
-                    && cancellableEvent.IsCancelled
-                    && !subscription.EventListenerAttribute.IgnoreCancelled)
-                {
-                    continue;
-                }
+                    var serviceProvider = newScope.Resolve<IServiceProvider>();
 
-                var serviceProvider = subscription.Scope.Resolve<IServiceProvider>();
-                await subscription.Callback.Invoke(serviceProvider, sender, @event);
+                    try
+                    {
+                        await subscription.Callback.Invoke(serviceProvider, sender, @event);
+                    }
+                    catch (Exception ex)
+                    {
+                        m_Logger.LogError(ex, $"Exception occured during event {@event.Name}");
+                    }
+                }
             }
 
             Complete();
