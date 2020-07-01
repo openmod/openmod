@@ -15,7 +15,7 @@ namespace OpenMod.Standalone
             s_IsRunning = true;
             do
             {
-                var line = Console.ReadLine().Trim();
+                var line = ReadLine.Read().Trim();
                 if (!string.IsNullOrEmpty(line))
                 {
                     if (line.Equals("exit", StringComparison.OrdinalIgnoreCase))
@@ -31,11 +31,6 @@ namespace OpenMod.Standalone
                         Debugger.Break();
                     }
                 }
-
-
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write("> ");
-                Console.ForegroundColor = ConsoleColor.White;
             } while (s_IsRunning);
         }
 

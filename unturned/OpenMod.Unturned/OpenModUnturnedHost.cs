@@ -32,8 +32,8 @@ namespace OpenMod.Unturned
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
-        private readonly Assembly m_SelfAssembly;
         private readonly IRuntime m_Runtime;
+        private readonly IServiceProvider m_ServiceProvider;
         private readonly ILoggerFactory m_LoggerFactory;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly ICommandExecutor m_CommandExecutor;
@@ -49,13 +49,12 @@ namespace OpenMod.Unturned
         public ILifetimeScope LifetimeScope { get; }
         public IDataStore DataStore { get; }
 
-        /*private const string c_HarmonyInstanceId = "com.get-openmod.unturned";
-        private readonly Harmony m_Harmony;*/
         private bool m_IsDisposing;
 
         // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */
         public OpenModUnturnedHost(
             IRuntime runtime,
+            IServiceProvider serviceProvider,
             ILifetimeScope lifetimeScope,
             IDataStoreFactory dataStoreFactory,
             ILoggerFactory loggerFactory,
@@ -64,18 +63,17 @@ namespace OpenMod.Unturned
             ILogger<OpenModUnturnedHost> logger,
             UnturnedCommandHandler unturnedCommandHandler)
         {
-            m_SelfAssembly = GetType().Assembly;
             m_Runtime = runtime;
+            m_ServiceProvider = serviceProvider;
             m_LoggerFactory = loggerFactory;
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
             m_Logger = logger;
             m_UnturnedCommandHandler = unturnedCommandHandler;
-            //m_Harmony = new Harmony(c_HarmonyInstanceId);
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
             DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
-            Version = VersionHelper.ParseAssemblyVersion(m_SelfAssembly);
+            Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
         }
 
         public Task InitAsync()
@@ -86,9 +84,12 @@ namespace OpenMod.Unturned
             m_UnturnedCommandHandler.Subscribe();
             BindUnturnedEvents();
 
-            var ioHandlers = (List<ICommandInputOutput>) typeof(CommandWindow)
+            var ioHandlers = (List<ICommandInputOutput>)typeof(CommandWindow)
                 .GetField("ioHandlers", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(Dedicator.commandWindow);
+
+            CommandLineFlag shouldManageConsole = null;
+            var previousShouldManageConsoleValue = true;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -98,13 +99,14 @@ namespace OpenMod.Unturned
 
                 if (shouldManageConsoleField != null)
                 {
-                    var shouldManageConsole = (CommandLineFlag) shouldManageConsoleField.GetValue(null);
+                    shouldManageConsole = (CommandLineFlag)shouldManageConsoleField.GetValue(null);
+                    previousShouldManageConsoleValue = shouldManageConsole.value;
                     shouldManageConsole.value = false;
                 }
             }
 
             // unturned built-in io handlers
-            var defaultIoHandlers = ioHandlers.Where(c => 
+            var defaultIoHandlers = ioHandlers.Where(c =>
                                          c.GetType().FullName.Equals("SDG.Unturned.ThreadedWindowsConsoleInputOutput") // type doesnt exist on Linux
                                       || c.GetType().FullName.Equals("SDG.Unturned.WindowsConsoleInputOutput") // type doesnt exist on Linux
                                       || c.GetType() == typeof(ThreadedConsoleInputOutput)
@@ -115,13 +117,17 @@ namespace OpenMod.Unturned
                 Dedicator.commandWindow.removeIOHandler(ioHandler);
             }
 
+            if (shouldManageConsole != null)
+            {
+                shouldManageConsole.value = previousShouldManageConsoleValue;
+            }
+
             Dedicator.commandWindow.addIOHandler(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? new SerilogWindowsConsoleInputOutput(m_LoggerFactory)
-                : new SerilogConsoleInputOutput(m_LoggerFactory));
+                ? ActivatorUtilities.CreateInstance<SerilogWindowsConsoleInputOutput>(m_ServiceProvider)
+                : ActivatorUtilities.CreateInstance<SerilogConsoleInputOutput>(m_ServiceProvider));
 
             m_Logger.LogInformation($"OpenMod for Unturned v{Version} is initializing...");
 
-            //m_Harmony.PatchAll(m_SelfAssembly);
             TlsWorkaround.Install();
 
             var unitySynchronizationContetextField = typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext", BindingFlags.Static | BindingFlags.NonPublic);
@@ -132,7 +138,7 @@ namespace OpenMod.Unturned
 
             var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
             PlayerLoopHelper.Initialize(ref playerLoop);
-            
+
             m_Logger.LogInformation("OpenMod for Unturned is ready.");
             return Task.CompletedTask;
             // ReSharper restore PossibleNullReferenceException

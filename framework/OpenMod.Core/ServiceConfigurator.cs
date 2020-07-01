@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
@@ -36,6 +37,7 @@ namespace OpenMod.Core
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
+            serviceCollection.AddSingleton<IAutoCompleteHandler, CommandAutoCompleteHandler>();
         }
     }
 }
