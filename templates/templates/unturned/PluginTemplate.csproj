@@ -16,4 +16,9 @@
 	<PackageReference Include="OpenMod.UnityEngine.Redist" Version="2018.4.23" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="config.yaml" />
+    <EmbeddedResource Include="translations.yaml" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,6 @@
+# See https://openmod.github.io/openmod-docs/development-guide/translations/
+# You can delete this file if you do not need translations
+
+plugin_events:
+  plugin_start: "Hello World"
+  plugin_stop: "Good bye :("
