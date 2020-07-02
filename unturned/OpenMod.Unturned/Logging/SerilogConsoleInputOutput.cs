@@ -62,11 +62,16 @@ namespace OpenMod.Unturned.Logging
         {
             while (m_IsAlive)
             {
-                string command = ReadLine.Read();
-                if (!string.IsNullOrWhiteSpace(command))
+                if (System.Console.KeyAvailable)
                 {
-                    m_CommandQueue.Enqueue(command); /* Enqueue command because inputCommitted is expected on main thread */
+                    string command = ReadLine.Read();
+                    if (!string.IsNullOrWhiteSpace(command))
+                    {
+                        m_CommandQueue.Enqueue(command); /* Enqueue command because inputCommitted is expected on main thread */
+                    }
                 }
+
+                Thread.Sleep(10);
             }
         }
 
