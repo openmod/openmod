@@ -13,6 +13,11 @@ namespace OpenMod.Unturned.Helpers
             ServicePointManager.ServerCertificateValidationCallback = CertificateValidationWorkaroundCallback;
         }
 
+        public static void Uninstalll()
+        {
+            ServicePointManager.ServerCertificateValidationCallback = null;
+        }
+
         private static bool CertificateValidationWorkaroundCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None) 

@@ -50,6 +50,7 @@ namespace OpenMod.Unturned
         public IDataStore DataStore { get; }
 
         private bool m_IsDisposing;
+        private static bool s_UniTaskInited;
 
         // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */
         public OpenModUnturnedHost(
@@ -130,14 +131,21 @@ namespace OpenMod.Unturned
 
             TlsWorkaround.Install();
 
-            var unitySynchronizationContetextField = typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext", BindingFlags.Static | BindingFlags.NonPublic);
-            unitySynchronizationContetextField.SetValue(null, SynchronizationContext.Current);
+            if (!s_UniTaskInited)
+            {
+                var unitySynchronizationContetextField =
+                    typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext",
+                        BindingFlags.Static | BindingFlags.NonPublic);
+                unitySynchronizationContetextField.SetValue(null, SynchronizationContext.Current);
 
-            var mainThreadIdField = typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
-            mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
+                var mainThreadIdField =
+                    typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
+                mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
 
-            var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
-            PlayerLoopHelper.Initialize(ref playerLoop);
+                var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
+                PlayerLoopHelper.Initialize(ref playerLoop);
+                s_UniTaskInited = true;
+            }
 
             m_Logger.LogInformation("OpenMod for Unturned is ready.");
             return Task.CompletedTask;
@@ -184,6 +192,7 @@ namespace OpenMod.Unturned
 
             IsComponentAlive = false;
             m_IsDisposing = true;
+            TlsWorkaround.Uninstalll();
 
             //m_Harmony.UnpatchAll(c_HarmonyInstanceId);
             UnbindUnturnedEvents();
