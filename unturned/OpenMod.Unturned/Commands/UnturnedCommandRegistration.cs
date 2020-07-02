@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
@@ -16,7 +17,7 @@ namespace OpenMod.Unturned.Commands
         {
             Component = component;
             Cmd = cmd;
-            Name = cmd.command;
+            Name = cmd.command.ToLower(CultureInfo.InvariantCulture);
             Syntax = string.Join(" ", cmd.info.Split(' ').Skip(1)); /* skip first word in info, which is the command */
             Description = cmd.help;
             Aliases = new List<string>();
