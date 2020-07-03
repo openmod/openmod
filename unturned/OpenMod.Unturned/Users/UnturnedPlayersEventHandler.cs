@@ -62,7 +62,7 @@ namespace OpenMod.Unturned.Users
                     return;
                 }
 
-                await m_CommandExecutor.ExecuteAsync(user, text.Split(' '), string.Empty);
+                await m_CommandExecutor.ExecuteAsync(user, ArgumentsParser.ParseArguments(text), string.Empty);
             });
         }
 

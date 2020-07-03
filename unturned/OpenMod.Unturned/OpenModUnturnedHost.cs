@@ -174,7 +174,7 @@ namespace OpenMod.Unturned
             text = text.Trim();
 
             var actor = m_ConsoleActorAccessor.Actor;
-            AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, text.Split(' '), string.Empty));
+            AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, ArgumentsParser.ParseArguments(text), string.Empty));
             shouldExecuteCommand = false;
         }
 

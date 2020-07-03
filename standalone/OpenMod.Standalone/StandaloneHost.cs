@@ -56,7 +56,7 @@ namespace OpenMod.Standalone
 
         private void OnCommandExecute(string commandline)
         {
-            AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, commandline.Split(' '), string.Empty));
+            AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, ArgumentsParser.ParseArguments(commandline), string.Empty));
         }
         
         public void Dispose()
