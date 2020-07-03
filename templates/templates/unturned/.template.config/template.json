@@ -44,6 +44,19 @@
       "valueSource": "FullPluginName",
       "valueTransform": "xmlEncode"
     },
+    "PluginNamespace": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "Sets the namespace for the plugin",
+      "defaultValue": "MyOpenModPlugin",
+      "replaces": "PLUGIN-NAMESPACE"
+    },
+    "PluginNamespaceXmlEncoded": {
+      "type": "derived",
+      "replaces": "PLUGIN-NAMESPACE-XML",
+      "valueSource": "PluginNamespace",
+      "valueTransform": "xmlEncode"
+    },	
     "SkipRestore": {
       "type": "parameter",
       "datatype": "bool",

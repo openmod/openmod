@@ -10,7 +10,7 @@ using OpenMod.Unturned.Plugins;
 // For more, visit https://openmod.github.io/openmod-docs/development-guide/making-your-first-plugin/
 
 [assembly: PluginMetadata("PLUGIN-ID", DisplayName = "PLUGIN-NAME")]
-namespace MyOpenModPlugin
+namespace PLUGIN-NAMESPACE
 {
     public class MyOpenModPlugin : OpenModUnturnedPlugin
     {

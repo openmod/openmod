@@ -4,7 +4,7 @@
     <TargetFramework>net461</TargetFramework>
     <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
 	<PackageTags>openmod openmod-plugin unturned</PackageTags>
-	<RootNamespace>MyRocketPlugin</RootNamespace>
+	<RootNamespace>PLUGIN-NAMESPACE-XML</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateNugetPackage>true</GenerateNugetPackage>
     <Product>PLUGIN-NAME-XML</Product>
