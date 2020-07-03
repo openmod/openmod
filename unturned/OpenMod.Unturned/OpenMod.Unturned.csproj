@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PackageDescription>Unturned integration for OpenMod</PackageDescription>
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 

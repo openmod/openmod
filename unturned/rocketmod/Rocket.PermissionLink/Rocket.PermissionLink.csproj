@@ -2,9 +2,10 @@
   <PropertyGroup>
     <PackageId>OpenMod.Rocket.PermissionLink</PackageId>
     <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
-	<PackageTags>openmod openmod-plugin unturned rocketmod</PackageTags>
+    <PackageTags>openmod openmod-plugin unturned rocketmod</PackageTags>
+    <PackageDescription>Rocket Permission Link to OpenMod</PackageDescription>
     <TargetFramework>net461</TargetFramework>
-	<Authors>OpenMod</Authors>
+    <Authors>OpenMod</Authors>
     <Copyright>Enes Sadık Özbek &lt;esozbek.me&gt;</Copyright>
     <Company>OpenMod</Company>
   </PropertyGroup>

@@ -2,6 +2,7 @@
   <PropertyGroup>
     <PackageId>OpenMod.Rocket.Core</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageDescription>Rocket.Core integration for OpenMod</PackageDescription>
     <AssemblyVersion>2.4.8.0</AssemblyVersion>
     <TargetFramework>net461</TargetFramework>
     <Copyright>Sven Mawby</Copyright>

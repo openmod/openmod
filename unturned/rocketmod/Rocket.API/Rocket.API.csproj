@@ -2,6 +2,7 @@
   <PropertyGroup>
     <PackageId>OpenMod.Rocket.API</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageDescription>Rocket.API integration for OpenMod</PackageDescription>
     <AssemblyVersion>2.4.6.0</AssemblyVersion>
     <TargetFramework>net461</TargetFramework>
     <Copyright>Sven Mawby</Copyright>
