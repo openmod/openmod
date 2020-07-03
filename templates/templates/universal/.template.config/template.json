@@ -8,7 +8,7 @@
 	"Universal"
   ],
   "name": "OpenMod Universal Plugin",
-  "groupIdentity": "OpenMod.Templates.Plugins",
+  "groupIdentity": "OpenMod.Templates.Plugins.Universal",
   "identity": "OpenMod.Templates.Plugins.Universal",
   "shortName": "openmod-universal-plugin",
   "tags": {

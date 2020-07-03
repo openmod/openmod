@@ -8,7 +8,7 @@
 	"Unturned"
   ],
   "name": "OpenMod Unturned Plugin",
-  "groupIdentity": "OpenMod.Templates.Plugins",
+  "groupIdentity": "OpenMod.Templates.Plugins.Unturned",
   "identity": "OpenMod.Templates.Plugins.Unturned",
   "shortName": "openmod-unturned-plugin",
   "tags": {
