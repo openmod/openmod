@@ -11,7 +11,7 @@ namespace OpenMod.Core.Commands
         {
         }
 
-        public NotEnoughPermissionException(ICommandContext context, string permission) : this(permission, context.ServiceProvider.GetRequiredService<IOpenModStringLocalizer>())
+        public NotEnoughPermissionException(ICommandContext context, string permission) : this(context.ServiceProvider.GetRequiredService<ICommandPermissionBuilder>().GetPermission(context.CommandRegistration) + "." + permission, context.ServiceProvider.GetRequiredService<IOpenModStringLocalizer>())
         {
 
         }
