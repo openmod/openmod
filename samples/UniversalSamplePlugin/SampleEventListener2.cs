@@ -20,7 +20,7 @@ namespace UniversalSamplePlugin
         }
 
         [EventListener(Priority = Priority.High, IgnoreCancelled =  true)]
-        public async Task HandleEventAsync(object emitter, SampleEvent @event)
+        public async Task HandleEventAsync(object sender, SampleEvent @event)
         {
             m_Logger.LogInformation($"SampleEventListener2: {@event.Value}, count: {++m_Count}");
         }

@@ -18,7 +18,7 @@ namespace UniversalSamplePlugin
         }
 
         [EventListener(Priority = Priority.Highest)]
-        public async Task HandleEventAsync(object emitter, SampleEvent @event)
+        public async Task HandleEventAsync(object sender, SampleEvent @event)
         {
             m_Logger.LogInformation($"SampleEventListener3 shouldn't be called!");
         }

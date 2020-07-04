@@ -15,8 +15,8 @@ namespace OpenMod.API.Eventing
         /// <summary>
         ///     Called when an event got emitted.
         /// </summary>
-        /// <param name="emitter">The event emitter.</param>
+        /// <param name="sender">The event sender.</param>
         /// <param name="event">The event instance.</param>
-        Task HandleEventAsync(object emitter, TEvent @event);
+        Task HandleEventAsync(object sender, TEvent @event);
     }
 }

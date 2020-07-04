@@ -10,14 +10,14 @@ namespace OpenMod.API.Eventing
     ///     The type safe callback for event notifications.
     /// </summary>
     /// <typeparam name="TEvent">The event type.</typeparam>
-    /// <param name="sender">The event emitter.</param>
+    /// <param name="sender">The event sender.</param>
     /// <param name="event">The event instance.</param>
     public delegate Task EventCallback<in TEvent>(IServiceProvider serviceProvider, object sender, TEvent @event) where TEvent : IEvent;
 
     /// <summary>
     ///     The callback for event notifications.
     /// </summary>
-    /// <param name="sender">The event emitter.</param>
+    /// <param name="sender">The event sender.</param>
     /// <param name="event">The event instance.</param>
     public delegate Task EventCallback(IServiceProvider serviceProvider, object sender, IEvent @event);
 
