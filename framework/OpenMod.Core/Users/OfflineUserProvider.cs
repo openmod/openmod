@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.API.Prioritization;
@@ -41,6 +42,16 @@ namespace OpenMod.Core.Users
         {
             var userDatas = await m_UserDataStore.GetUsersDataAsync(userType);
             return userDatas.Select(d => new OfflineUser(m_UserDataStore, d)).ToList();
+        }
+
+        public Task BroadcastAsync(string userType, string message, Color color)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task BroadcastAsync(string message, Color color)
+        {
+            return Task.CompletedTask;
         }
     }
 }

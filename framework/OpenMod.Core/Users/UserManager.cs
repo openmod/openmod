@@ -5,6 +5,7 @@ using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.Core.Helpers;
@@ -29,7 +30,7 @@ namespace OpenMod.Core.Users
             get { return m_UserProviders; }
         }
 
-        public async Task<IReadOnlyCollection<IUser>> GetUsersAsync(string type)
+        public virtual async Task<IReadOnlyCollection<IUser>> GetUsersAsync(string type)
         {
             var list = new List<IUser>();
 
@@ -41,7 +42,7 @@ namespace OpenMod.Core.Users
             return list;
         }
 
-        public async Task<IUser> FindUserAsync(string type, string searchString, UserSearchMode searchMode)
+        public virtual async Task<IUser> FindUserAsync(string type, string searchString, UserSearchMode searchMode)
         {
             foreach (var userProvider in UserProviders.Where(d => d.SupportsUserType(type)))
             {
@@ -55,7 +56,26 @@ namespace OpenMod.Core.Users
             return null;
         }
 
-        public async ValueTask DisposeAsync()
+        public virtual async Task BroadcastAsync(string message, Color color)
+        {
+            foreach (var provider in UserProviders)
+            {
+                await provider.BroadcastAsync(message, color);
+            }
+        }
+
+        public virtual async Task BroadcastAsync(string userType, string message, Color color)
+        {
+            var provider = UserProviders.FirstOrDefault(d => d.SupportsUserType(userType));
+            if (provider == null)
+            {
+                return;
+            }
+
+            await provider.BroadcastAsync(userType, message, color);
+        }
+
+        public virtual async ValueTask DisposeAsync()
         {
             await UserProviders.DisposeAllAsync();
         }

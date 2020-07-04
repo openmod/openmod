@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Prioritization;
@@ -11,6 +12,7 @@ using OpenMod.Core.Users;
 using OpenMod.Core.Users.Events;
 using SDG.Unturned;
 using Steamworks;
+using UnityEngine;
 
 namespace OpenMod.Unturned.Users
 {
@@ -244,6 +246,27 @@ namespace OpenMod.Unturned.Users
         public Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType)
         {
             return Task.FromResult<IReadOnlyCollection<IUser>>(m_UnturnedUsers);
+        }
+
+        public Task BroadcastAsync(string userType, string message, System.Drawing.Color color)
+        {
+            if (!KnownActorTypes.Player.Equals(userType, StringComparison.OrdinalIgnoreCase))
+            {
+                return Task.CompletedTask;
+            }
+
+            return BroadcastAsync(message, color);
+        }
+
+        public Task BroadcastAsync(string message, System.Drawing.Color color)
+        {
+            async UniTask BroadcastTask()
+            {
+                await UniTask.SwitchToMainThread();
+                ChatManager.serverSendMessage(text: message, color: new Color(color.R / 255f, color.G / 255f, color.B / 255f), useRichTextFormatting: true);
+            }
+
+            return BroadcastTask().AsTask();
         }
 
         public void Dispose()
