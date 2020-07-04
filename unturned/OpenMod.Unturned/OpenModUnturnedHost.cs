@@ -7,9 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Cysharp.Threading.Tasks;
-using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Commands;
@@ -17,8 +15,6 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Console;
 using OpenMod.Core.Helpers;
-using OpenMod.UnityEngine;
-using OpenMod.Unturned.Commands;
 using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
 using OpenMod.Unturned.Users;
@@ -32,41 +28,47 @@ namespace OpenMod.Unturned
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
-        private readonly IRuntime m_Runtime;
         private readonly IServiceProvider m_ServiceProvider;
-        private readonly ILoggerFactory m_LoggerFactory;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly ICommandExecutor m_CommandExecutor;
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
         private readonly UnturnedCommandHandler m_UnturnedCommandHandler;
+
         public string HostDisplayName { get; } = Provider.APP_NAME;
+
         public string HostVersion { get; } = Provider.APP_VERSION;
+
         public SemVersion Version { get; }
+
         public string Name { get; } = "OpenMod for Unturned";
+
         public string OpenModComponentId { get; } = "OpenMod.Unturned";
+
         public string WorkingDirectory { get; }
+
         public bool IsComponentAlive { get; private set; }
+
         public ILifetimeScope LifetimeScope { get; }
+
         public IDataStore DataStore { get; }
 
         private bool m_IsDisposing;
+
         private static bool s_UniTaskInited;
 
         // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */
+
         public OpenModUnturnedHost(
             IRuntime runtime,
             IServiceProvider serviceProvider,
             ILifetimeScope lifetimeScope,
             IDataStoreFactory dataStoreFactory,
-            ILoggerFactory loggerFactory,
             IConsoleActorAccessor consoleActorAccessor,
             ICommandExecutor commandExecutor,
             ILogger<OpenModUnturnedHost> logger,
             UnturnedCommandHandler unturnedCommandHandler)
         {
-            m_Runtime = runtime;
             m_ServiceProvider = serviceProvider;
-            m_LoggerFactory = loggerFactory;
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
             m_Logger = logger;
@@ -154,14 +156,12 @@ namespace OpenMod.Unturned
 
         protected virtual void BindUnturnedEvents()
         {
-            Provider.onCommenceShutdown += OnServerShutdown;
             CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
         }
 
         protected virtual void UnbindUnturnedEvents()
         {
             // ReSharper disable DelegateSubtraction
-            Provider.onCommenceShutdown -= OnServerShutdown;
             CommandWindow.onCommandWindowInputted -= OnCommandWindowInputted;
             // ReSharper restore DelegateSubtraction
         }
@@ -178,9 +178,10 @@ namespace OpenMod.Unturned
             shouldExecuteCommand = false;
         }
 
-        private void OnServerShutdown()
+        public Task ShutdownAsync()
         {
-            AsyncHelper.RunSync(() => m_Runtime.ShutdownAsync());
+            Provider.shutdown();
+            return Task.CompletedTask;
         }
 
         public void Dispose()

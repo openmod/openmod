@@ -19,16 +19,25 @@ namespace OpenMod.Standalone
     public class StandaloneHost : IOpenModHost, IDisposable
     {
         public string HostDisplayName { get; } = "Standalone";
+
         public string Name { get; } = "OpenMod Standalone Host";
+
         public string HostVersion { get; } = "0.1.0";
+
         public SemVersion Version { get; }
+
         public string OpenModComponentId { get; } = "OpenMod.Standalone";
+
         public string WorkingDirectory { get; }
+
         public bool IsComponentAlive { get; private set; }
+
         public ILifetimeScope LifetimeScope { get; }
+
         public IDataStore DataStore { get; }
 
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
+
         private readonly ICommandExecutor m_CommandExecutor;
 
         public StandaloneHost(
@@ -54,11 +63,17 @@ namespace OpenMod.Standalone
             return Task.CompletedTask;
         }
 
+        public Task ShutdownAsync()
+        {
+            Environment.Exit(0);
+            return Task.CompletedTask;
+        }
+
         private void OnCommandExecute(string commandline)
         {
             AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, ArgumentsParser.ParseArguments(commandline), string.Empty));
         }
-        
+
         public void Dispose()
         {
             StandaloneConsoleIo.OnCommandExecute -= OnCommandExecute;

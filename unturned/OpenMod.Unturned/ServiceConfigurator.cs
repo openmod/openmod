@@ -1,10 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Ioc;
-using OpenMod.Core;
 using OpenMod.Core.Commands;
-using OpenMod.Core.Console;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Users;
 using OpenMod.Unturned.Commands;
@@ -31,7 +27,7 @@ namespace OpenMod.Unturned
             {
                 options.AddUserProvider<UnturnedUserProvider>();
             });
-
+            
             serviceCollection.AddSingleton<UnturnedCommandHandler>();
         }
     }

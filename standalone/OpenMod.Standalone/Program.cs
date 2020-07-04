@@ -24,7 +24,7 @@ namespace OpenMod.Standalone
             });
 
             var applifecycle = host.Services.GetRequiredService<IHostApplicationLifetime>();
-            applifecycle.ApplicationStopped.Register(StandaloneConsoleIo.StopListening);
+            applifecycle.ApplicationStopping.Register(StandaloneConsoleIo.StopListening);
 
             var autoCompletionHandler = host.Services.GetRequiredService<IAutoCompleteHandler>();
             ReadLine.AutoCompletionHandler = autoCompletionHandler;

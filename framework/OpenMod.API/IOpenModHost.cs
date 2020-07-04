@@ -17,6 +17,11 @@ namespace OpenMod.API
         Task InitAsync();
 
         /// <summary>
+        ///    Gracefully exits the host.
+        /// </summary>
+        Task ShutdownAsync();
+
+        /// <summary>
         ///     The name of the host. E.g. the game's name.
         /// </summary>
         string HostDisplayName { get; }
