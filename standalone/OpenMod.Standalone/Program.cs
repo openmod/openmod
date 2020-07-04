@@ -28,6 +28,7 @@ namespace OpenMod.Standalone
 
             var autoCompletionHandler = host.Services.GetRequiredService<IAutoCompleteHandler>();
             ReadLine.AutoCompletionHandler = autoCompletionHandler;
+            ReadLine.HistoryEnabled = true;
 
             StandaloneConsoleIo.StartListening();
         }

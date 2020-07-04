@@ -33,6 +33,7 @@ namespace OpenMod.Unturned.Logging
                 return;
             }
 
+            ReadLine.HistoryEnabled = true;
             ReadLine.AutoCompletionHandler = m_AutoCompleteHandler;
             m_IsAlive = true;
             m_InputThread = new Thread(OnInputThreadStart);
@@ -48,6 +49,7 @@ namespace OpenMod.Unturned.Logging
 
             m_IsAlive = false;
             ReadLine.AutoCompletionHandler = null;
+            ReadLine.HistoryEnabled = false;
         }
 
         public void update()
