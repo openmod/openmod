@@ -1,4 +1,5 @@
-﻿using OpenMod.API.Commands;
+﻿using System;
+using OpenMod.API.Commands;
 using OpenMod.Core.Eventing;
 
 namespace OpenMod.Core.Commands.Events
@@ -7,7 +8,8 @@ namespace OpenMod.Core.Commands.Events
     {
         public ICommandActor Actor { get; }
         public ICommandContext CommandContext { get; }
-
+        public bool ExceptionHandled { get; set; }
+        
         public CommandExecutedEvent(ICommandActor actor, ICommandContext commandContext)
         {
             Actor = actor;

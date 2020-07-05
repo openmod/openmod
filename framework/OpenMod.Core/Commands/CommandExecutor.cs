@@ -51,7 +51,7 @@ namespace OpenMod.Core.Commands
 
             var logger = m_LifetimeScope.Resolve<ILogger<CommandExecutor>>();
             logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
-            
+
             var currentCommandAccessor = m_LifetimeScope.Resolve<ICurrentCommandContextAccessor>();
             var commandsRegistrations = m_CommandStore.Commands;
             var commandContextBuilder = m_LifetimeScope.Resolve<ICommandContextBuilder>();
@@ -89,15 +89,11 @@ namespace OpenMod.Core.Commands
             }
             catch (UserFriendlyException ex)
             {
-                await actor.PrintMessageAsync(ex.Message, Color.DarkRed);
                 commandContext.Exception = ex;
             }
             catch (Exception ex)
             {
-                await actor.PrintMessageAsync("An internal error occured during the command execution.", Color.DarkRed);
-                logger.LogError(ex, $"Exception occured on command \"{string.Join(" ", args)}\" by actor {actor.Type}/{actor.DisplayName} ({actor.Id})");
                 commandContext.Exception = ex;
-
 #if DEBUG
                 throw; // in debug mode we want to debug such exceptions instead of catching them
 #endif
@@ -106,6 +102,19 @@ namespace OpenMod.Core.Commands
             {
                 var commandExecutedEvent = new CommandExecutedEvent(actor, commandContext);
                 await m_EventBus.EmitAsync(m_Runtime, this, commandExecutedEvent);
+
+                if (!commandExecutedEvent.ExceptionHandled)
+                {
+                    if (commandContext.Exception is UserFriendlyException)
+                    {
+                        await actor.PrintMessageAsync(commandContext.Exception.Message, Color.DarkRed);
+                    }
+                    else
+                    {
+                        await actor.PrintMessageAsync("An internal error occured during the command execution.", Color.DarkRed);
+                        logger.LogError(commandContext.Exception, $"Exception occured on command \"{string.Join(" ", args)}\" by actor {actor.Type}/{actor.DisplayName} ({actor.Id})");
+                    }
+                }
 
                 await commandContext.DisposeAsync();
             }
