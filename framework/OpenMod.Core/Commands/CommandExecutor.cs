@@ -103,7 +103,7 @@ namespace OpenMod.Core.Commands
                 var commandExecutedEvent = new CommandExecutedEvent(actor, commandContext);
                 await m_EventBus.EmitAsync(m_Runtime, this, commandExecutedEvent);
 
-                if (!commandExecutedEvent.ExceptionHandled)
+                if (commandContext.Exception != null && !commandExecutedEvent.ExceptionHandled)
                 {
                     if (commandContext.Exception is UserFriendlyException)
                     {
