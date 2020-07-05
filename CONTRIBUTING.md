@@ -58,3 +58,4 @@ We use Resharper to enforce our coding and naming conventions. If you do not use
 
 **V. Misc**
 - a. Usage of the `global::` alias is forbidden.
+- b. Always use brackets, even for one liner if's, for, foreach, while etc.
