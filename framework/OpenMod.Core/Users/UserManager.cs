@@ -8,12 +8,11 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Users
 {
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class UserManager : IUserManager, IAsyncDisposable
+    public class UserManager : IUserManager, IDisposable
     {
         private readonly List<IUserProvider> m_UserProviders;
         public UserManager(IOptions<UserManagerOptions> options, IServiceProvider serviceProvider)
@@ -75,9 +74,9 @@ namespace OpenMod.Core.Users
             await provider.BroadcastAsync(userType, message, color);
         }
 
-        public virtual async ValueTask DisposeAsync()
+        public virtual void Dispose()
         {
-            await UserProviders.DisposeAllAsync();
+            m_UserProviders.Clear();
         }
     }
 }

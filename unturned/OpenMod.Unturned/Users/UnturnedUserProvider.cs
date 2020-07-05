@@ -271,10 +271,14 @@ namespace OpenMod.Unturned.Users
 
         public void Dispose()
         {
+            System.Console.WriteLine("UnturnedUserProvider: disposing");
+
+            // ReSharper disable DelegateSubtraction
             Provider.onCheckValidWithExplanation -= OnPendingPlayerConnected;
             Provider.onEnemyConnected -= OnPlayerConnected;
             Provider.onEnemyDisconnected -= OnEnemyDisconnected;
             Provider.onRejectingPlayer -= OnRejectingPlayer;
+            // ReSharper restore DelegateSubtraction
         }
     }
 }

@@ -16,7 +16,7 @@ namespace OpenMod.Core.Commands
 {
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class CommandStore : ICommandStore, IAsyncDisposable
+    public class CommandStore : ICommandStore
     {
         private readonly PriorityComparer m_Comparer;
         private readonly IOptions<CommandStoreOptions> m_Options;
@@ -68,11 +68,6 @@ namespace OpenMod.Core.Commands
         public void Dispose()
         {
             m_Options.Value.OnCommandSourcesChanged -= OnCommandSourcesChanged;
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await m_CommandSources.DisposeAllAsync();
         }
     }
 }
