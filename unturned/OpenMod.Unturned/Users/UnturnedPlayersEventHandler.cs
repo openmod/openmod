@@ -46,7 +46,7 @@ namespace OpenMod.Unturned.Users
 
         protected virtual void OnCheckCommandPermissions(SteamPlayer player, string text, ref bool shouldExecuteCommand, ref bool shouldList)
         {
-            if (!shouldExecuteCommand || !text.StartsWith("/"))
+            if (!text.StartsWith("/"))
             {
                 return;
             }
