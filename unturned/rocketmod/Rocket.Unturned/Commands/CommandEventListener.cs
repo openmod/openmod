@@ -40,7 +40,6 @@ namespace Rocket.Unturned.Commands
                         if (!UnturnedPermissions.CheckPermissions(steamPlayer, $"/{@event.CommandContext.CommandAlias}"))
                         {
                             // command doesnt exist or no permission
-                            Console.WriteLine("CheckPermissions failed");
                             return;
                         }
 
