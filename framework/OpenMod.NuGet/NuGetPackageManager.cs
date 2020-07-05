@@ -27,7 +27,6 @@ namespace OpenMod.NuGet
         }
 
         public string PackagesDirectory { get; }
-
         private readonly List<Lazy<INuGetResourceProvider>> m_Providers;
         private readonly ISettings m_NugetSettings;
         private readonly NuGetFramework m_CurrentFramework;
@@ -35,6 +34,7 @@ namespace OpenMod.NuGet
         private readonly PackagePathResolver m_PackagePathResolver;
         private readonly PackageResolver m_PackageResolver;
         private readonly Dictionary<string, List<CachedNuGetAssembly>> m_LoadedPackageAssemblies;
+        private readonly HashSet<string> m_IgnoredDependendencies;
 
 
         private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
@@ -84,6 +84,7 @@ namespace OpenMod.NuGet
             m_PackagePathResolver = new PackagePathResolver(packagesDirectory);
             m_PackageResolver = new PackageResolver();
             m_LoadedPackageAssemblies = new Dictionary<string, List<CachedNuGetAssembly>>();
+            m_IgnoredDependendencies = new HashSet<string>();
             InstallAssemblyResolver();
         }
 
@@ -203,6 +204,11 @@ namespace OpenMod.NuGet
             return matches;
         }
 
+        public void IgnoreDependencies(params string[] packageIds)
+        {
+            m_IgnoredDependendencies.AddRange(packageIds);
+        }
+
         public virtual async Task<IEnumerable<SourcePackageDependencyInfo>> GetDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext)
         {
             var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
@@ -225,7 +231,8 @@ namespace OpenMod.NuGet
 
             return m_PackageResolver.Resolve(resolverContext, CancellationToken.None)
                                   .Select(p => availablePackages.Single(x
-                                      => PackageIdentityComparer.Default.Equals(x, p)));
+                                      => PackageIdentityComparer.Default.Equals(x, p)))
+                                  .Where(d => !m_IgnoredDependendencies.Contains(d.Id));
         }
 
         public virtual async Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageAsync(string nupkgFile)

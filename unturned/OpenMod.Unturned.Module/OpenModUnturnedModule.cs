@@ -42,7 +42,8 @@ namespace OpenMod.Unturned.Module
             bootrapper.Bootstrap(
                 openModDirectory,
                 Environment.GetCommandLineArgs(),
-                new List<string> { "OpenMod.Unturned" },
+                new []{ "OpenMod.Unturned" },
+                new[] { "OpenMod.Unturned.Redist", "OpenMod.UnityEngine.Redist" },
                 false,
                 new NuGetConsoleLogger());
         }
