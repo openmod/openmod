@@ -16,7 +16,7 @@ namespace OpenMod.Core.Commands
 {
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class CommandStore : ICommandStore
+    public class CommandStore : ICommandStore, IDisposable
     {
         private readonly PriorityComparer m_Comparer;
         private readonly IOptions<CommandStoreOptions> m_Options;
