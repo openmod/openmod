@@ -33,6 +33,8 @@ namespace OpenMod.Unturned
         private readonly ICommandExecutor m_CommandExecutor;
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
         private readonly UnturnedCommandHandler m_UnturnedCommandHandler;
+        private List<ICommandInputOutput> m_IoHandlers;
+        private OpenModConsoleInputOutput m_OpenModIoHandler;
 
         public string HostDisplayName { get; } = Provider.APP_NAME;
 
@@ -108,6 +110,7 @@ namespace OpenMod.Unturned
                 }
             }
 
+            m_IoHandlers = ioHandlers.ToList(); // copy Unturneds IoHandlers
             // unturned built-in io handlers
             var defaultIoHandlers = ioHandlers.Where(c =>
                                          c.GetType().FullName.Equals("SDG.Unturned.ThreadedWindowsConsoleInputOutput") // type doesnt exist on Linux
@@ -125,9 +128,11 @@ namespace OpenMod.Unturned
                 shouldManageConsole.value = previousShouldManageConsoleValue;
             }
 
-            Dedicator.commandWindow.addIOHandler(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? ActivatorUtilities.CreateInstance<SerilogWindowsConsoleInputOutput>(m_ServiceProvider)
-                : ActivatorUtilities.CreateInstance<SerilogConsoleInputOutput>(m_ServiceProvider));
+            m_OpenModIoHandler = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? ActivatorUtilities.CreateInstance<OpenModWindowsConsoleInputOutput>(m_ServiceProvider)
+                : ActivatorUtilities.CreateInstance<OpenModConsoleInputOutput>(m_ServiceProvider);
+
+            Dedicator.commandWindow.addIOHandler(m_OpenModIoHandler);
 
             m_Logger.LogInformation($"OpenMod for Unturned v{Version} is initializing...");
 
@@ -190,6 +195,15 @@ namespace OpenMod.Unturned
             {
                 return;
             }
+
+            Dedicator.commandWindow.removeIOHandler(m_OpenModIoHandler);
+
+            m_IoHandlers.Reverse();
+            foreach (var ioHandler in m_IoHandlers)
+            {
+                Dedicator.commandWindow.addIOHandler(ioHandler);
+            }
+            m_IoHandlers.Clear();
 
             IsComponentAlive = false;
             m_IsDisposing = true;

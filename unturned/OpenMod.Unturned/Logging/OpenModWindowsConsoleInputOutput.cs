@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging;
 
 namespace OpenMod.Unturned.Logging
 {
-    public class SerilogWindowsConsoleInputOutput : SerilogConsoleInputOutput // at the moment they are equal
+    public class OpenModWindowsConsoleInputOutput : OpenModConsoleInputOutput // at the moment they are equal
     {
-        public SerilogWindowsConsoleInputOutput(
+        public OpenModWindowsConsoleInputOutput(
             ILoggerFactory loggerFactory,
             IAutoCompleteHandler autoCompleteHandler) : base(loggerFactory, autoCompleteHandler)
         {

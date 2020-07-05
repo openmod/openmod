@@ -8,7 +8,7 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Logging
 {
-    public class SerilogConsoleInputOutput : ICommandInputOutput
+    public class OpenModConsoleInputOutput : ICommandInputOutput
     {
         public event CommandInputHandler inputCommitted;
 
@@ -18,7 +18,7 @@ namespace OpenMod.Unturned.Logging
         private Thread m_InputThread;
         private bool m_IsAlive;
 
-        public SerilogConsoleInputOutput(
+        public OpenModConsoleInputOutput(
             ILoggerFactory loggerFactory,
             IAutoCompleteHandler autoCompleteHandler)
         {
