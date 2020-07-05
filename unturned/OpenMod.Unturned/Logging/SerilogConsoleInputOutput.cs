@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using SDG.Unturned;
@@ -32,6 +33,7 @@ namespace OpenMod.Unturned.Logging
             {
                 return;
             }
+            System.Console.OutputEncoding = new UTF8Encoding(false);
 
             ReadLine.HistoryEnabled = true;
             ReadLine.AutoCompletionHandler = m_AutoCompleteHandler;
