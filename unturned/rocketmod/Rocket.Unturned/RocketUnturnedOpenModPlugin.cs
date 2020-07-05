@@ -12,7 +12,7 @@ namespace Rocket.Unturned
     public class RocketUnturnedOpenModPlugin : OpenModUnturnedPlugin
     {
         private readonly ILoggerFactory m_LoggerFactory;
-        private U uComp;
+        private U m_RocketComponent;
 
         public RocketUnturnedOpenModPlugin(IServiceProvider serviceProvider, ILoggerFactory loggerFactory) : base(serviceProvider)
         {
@@ -27,8 +27,8 @@ namespace Rocket.Unturned
             U.Logger = m_LoggerFactory.CreateLogger("RocketMod");
             U.PluginInstance = this;
 
-            uComp = new U();
-            uComp.initialize();
+            m_RocketComponent = new U();
+            m_RocketComponent.initialize();
         }
 
         protected override async UniTask OnUnloadAsync()
@@ -37,9 +37,13 @@ namespace Rocket.Unturned
             await UniTask.SwitchToMainThread();
             
             U.Logger = NullLogger.Instance;
-            U.Instance.shutdown();
+            U.Instance?.shutdown();
             U.PluginInstance = null;
-            uComp.shutdown();
+
+            if (m_RocketComponent != null) // can not use ? null conditional operator on Unity components
+            {
+                m_RocketComponent.shutdown();
+            }
         }
     }
 }
