@@ -38,7 +38,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 throw new CommandWrongUsageException(Context);
             }
 
-            var allowedActors = m_Configuration.GetValue<List<string>>("nuget:update:allowedActors");
+            var allowedActors = m_Configuration.GetSection("nuget:update:allowedActors").Get<string[]>();
             if (allowedActors.All(d => d.Trim() != "*" && !Context.Actor.Type.Equals(d.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
                 throw new UserFriendlyException(m_StringLocalizer["commands:openmod:restricted"]);
