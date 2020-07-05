@@ -25,7 +25,7 @@ To get started, visit the [OpenMod Documentation](https://openmod.github.io/open
 If you would like to install OpenMod, installation guides for the following platforms are available:
 - [Unturned](https://openmod.github.io/openmod-docs/user-guide/installation/unturned/)
 
-If you want to make plugins for OpenMod, you can get started by reading the [Making your first plugin](https://openmod.github.io/openmod-docs/development-guide/getting-started/making-your-first-plugin/) page.
+If you want to make plugins for OpenMod, you can get started by reading the [Making your first plugin](https://openmod.github.io/openmod-docs/development-guide/making-your-first-plugin/) page.
 
 ## Supported Games
 Currently Unturned is the only supported game. More games might follow in the future.
