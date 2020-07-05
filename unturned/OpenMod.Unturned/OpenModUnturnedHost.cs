@@ -174,13 +174,16 @@ namespace OpenMod.Unturned
 
         private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
         {
-            if (!shouldExecuteCommand)
-                return;
+            shouldExecuteCommand = false;
+
             text = text.Trim();
+            if (string.IsNullOrEmpty(text))
+            {
+                return;
+            }
 
             var actor = m_ConsoleActorAccessor.Actor;
             AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, ArgumentsParser.ParseArguments(text), string.Empty));
-            shouldExecuteCommand = false;
         }
 
         public Task ShutdownAsync()
