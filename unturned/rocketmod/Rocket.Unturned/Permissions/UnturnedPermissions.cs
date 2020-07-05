@@ -49,8 +49,9 @@ namespace Rocket.Unturned.Permissions
             }
             else
             {
-                UnturnedChat.Say(player, U.Translate("command_not_found"), Color.red);
+                // OPENMOD PATCH: Remove command not found message
                 return false;
+                // END OPENMOD PATCH: Remove command not found message
             }
         }
 

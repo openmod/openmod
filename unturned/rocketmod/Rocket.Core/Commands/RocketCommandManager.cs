@@ -194,11 +194,9 @@ namespace Rocket.Core.Commands
             }
         }
 
-        public bool Execute(IRocketPlayer player, string command)
+        // OPENMOD PATCH: Add Execute overload for passing arguments directly
+        public bool Execute(IRocketPlayer player, string[] commandParts)
         {
-            command = command.TrimStart('/');
-            string[] commandParts = Regex.Matches(command, @"[\""](.+?)[\""]|([^ ]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture).Cast<Match>().Select(m => m.Value.Trim('"').Trim()).ToArray();
-
             if (commandParts.Length != 0)
             {
                 name = commandParts[0];
@@ -218,7 +216,7 @@ namespace Rocket.Core.Commands
                         Logging.Logger.Log("This command can only be called from console");
                         return false;
                     }
-                    if(cooldown != -1)
+                    if (cooldown != -1)
                     {
                         Logging.Logger.Log("This command is still on cooldown");
                         return false;
@@ -270,6 +268,15 @@ namespace Rocket.Core.Commands
             }
 
             return false;
+        }
+        // END OPENMOD PATCH: Add Execute overload for passing arguments directly
+
+        public bool Execute(IRocketPlayer player, string command)
+        {
+            command = command.TrimStart('/');
+            string[] commandParts = Regex.Matches(command, @"[\""](.+?)[\""]|([^ ]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture).Cast<Match>().Select(m => m.Value.Trim('"').Trim()).ToArray();
+
+            return Execute(player, commandParts);
         }
 
         public void RegisterFromAssembly(Assembly assembly)

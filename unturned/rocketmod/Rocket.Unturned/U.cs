@@ -241,7 +241,6 @@ namespace Rocket.Unturned
                 }
 
                 OnRocketImplementationInitialized.TryInvoke();
-
             }
             catch (Exception ex)
             {
@@ -252,8 +251,6 @@ namespace Rocket.Unturned
         private void bindDelegates()
         {
             // OPENMOD PATCH: Removed binding to Unturneds command processing, extracted callbacks to methods
-            CommandWindow.onCommandWindowInputted += CommandWindowInputted;
-
             CommandWindow.onCommandWindowOutputted += Core.Logging.Logger.ExternalLog;
 
             /*
@@ -279,9 +276,7 @@ namespace Rocket.Unturned
 
         private void CommandWindowInputted(string text, ref bool shouldExecuteCommand)
         {
-            if (text.StartsWith("/")) text.Substring(1);
-            if (R.Commands != null) R.Commands.Execute(new ConsolePlayer(), text);
-            shouldExecuteCommand = false;
+           
         }
 
         public void Reload()
@@ -301,7 +296,6 @@ namespace Rocket.Unturned
             R.Plugins.UnloadPlugins();
             R.OnRockedInitialized -= OnRocketInitialized;
             Provider.onServerHosted -= OnServerHosted;
-            CommandWindow.onCommandWindowInputted -= CommandWindowInputted;
             CommandWindow.onCommandWindowOutputted -= Core.Logging.Logger.ExternalLog;
             SteamChannel.onTriggerSend -= UnturnedPlayerEvents.TriggerSend;
             Provider.onCheckValid -= OnCheckValid;
