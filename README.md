@@ -20,7 +20,7 @@ OpenMod is based on modern C# code and best practices.
 - RCON (todo)
 
 ## Getting Started
-To get started, visit the [OpenMod Documentation](https://openmod.github.io/openmod-docs/user-guide/installation/unturned.md).
+To get started, visit the [OpenMod Documentation](https://openmod.github.io/openmod-docs/).
 
 If you would like to install OpenMod, installation guides for the following platforms are available:
 - [Unturned](https://openmod.github.io/openmod-docs/user-guide/installation/unturned/)
