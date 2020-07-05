@@ -11,6 +11,7 @@ using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
 using OpenMod.Core.Users.Events;
 using SDG.Unturned;
+using Serilog;
 using Steamworks;
 using UnityEngine;
 
@@ -25,6 +26,7 @@ namespace OpenMod.Unturned.Users
         private readonly IEventBus m_EventBus;
         private readonly IRuntime m_Runtime;
         private readonly IUserDataSeeder m_DataSeeder;
+
         private readonly IUserDataStore m_UserDataStore;
 
         public UnturnedUserProvider(
@@ -40,28 +42,69 @@ namespace OpenMod.Unturned.Users
             m_UnturnedUsers = new HashSet<UnturnedUser>();
             m_PendingUsers = new HashSet<UnturnedPendingUser>();
 
-            Provider.onCheckValidWithExplanation += OnPendingPlayerConnected;
+            // sync users in case of openmod reloads
+            foreach (var client in Provider.clients)
+            {
+                m_UnturnedUsers.Add(new UnturnedUser(userDataStore, client.player));
+            }
+
+            foreach (var pending in Provider.pending)
+            {
+                m_PendingUsers.Add(new UnturnedPendingUser(userDataStore, pending));
+            }
+
+            Provider.onCheckValidWithExplanation += OnPendingPlayerConnecting;
             Provider.onEnemyConnected += OnPlayerConnected;
-            Provider.onEnemyDisconnected += OnEnemyDisconnected;
+            Provider.onEnemyDisconnected += OnPlayerDisconnected;
             Provider.onRejectingPlayer += OnRejectingPlayer;
         }
 
-        protected virtual void OnEnemyDisconnected(SteamPlayer player)
+        protected virtual void OnPlayerConnected(SteamPlayer player)
         {
+            if (m_UnturnedUsers.Any(d => d.SteamPlayer.Equals(player)))
+            {
+                return;
+            }
+
+            var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == player.playerID.steamID);
+            if (pending == null)
+            {
+                return;
+            }
+
+            FinishSession(pending);
+
+            var user = new UnturnedUser(m_UserDataStore, player.player, pending);
+            m_UnturnedUsers.Add(user);
+
+            var connectedEvent = new UserConnectedEvent(user);
+
+            AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_Runtime, this, connectedEvent));
+        }
+
+        protected virtual void OnPlayerDisconnected(SteamPlayer player)
+        {
+            var user = GetUser(player);
+
+            if (user == null)
+            {
+                return;
+            }
+
+            if (user.Session is UnturnedUserSession session)
+            {
+                session.OnSessionEnd();
+            }
+
             AsyncHelper.RunSync(async () =>
             {
-                var user = GetUser(player);
-                if (user.Session is UnturnedUserSession session)
-                {
-                    session.OnSessionEnd();
-                }
-
                 var disconnectedEvent = new UserDisconnectedEvent(user);
-
                 await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
+
                 m_UnturnedUsers.Remove(user);
 
                 var userData = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
+
                 userData.LastSeen = DateTime.Now;
                 await m_UserDataStore.SaveUserDataAsync(userData);
             });
@@ -82,32 +125,16 @@ namespace OpenMod.Unturned.Users
             return m_UnturnedUsers.FirstOrDefault(d => d.SteamId == id);
         }
 
-        protected virtual void OnPlayerConnected(SteamPlayer player)
-        {
-            AsyncHelper.RunSync(() =>
-            {
-                var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == player.playerID.steamID);
-                if (pending == null)
-                    return Task.CompletedTask;
-
-                FinishSession(pending);
-
-                var user = new UnturnedUser(m_UserDataStore, player.player, pending);
-                m_UnturnedUsers.Add(user);
-
-                var connectedEvent = new UserConnectedEvent(user);
-                return m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
-            });
-        }
-
         protected virtual void OnRejectingPlayer(CSteamID steamId, ESteamRejection rejection, string explanation)
         {
+            var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == steamId);
+            if (pending == null)
+            {
+                return;
+            }
+
             AsyncHelper.RunSync(async () =>
             {
-                var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == steamId);
-                if (pending == null)
-                    return;
-
                 var disconnectedEvent = new UserDisconnectedEvent(pending);
                 await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
 
@@ -119,8 +146,13 @@ namespace OpenMod.Unturned.Users
             });
         }
 
-        protected virtual void OnPendingPlayerConnected(ValidateAuthTicketResponse_t callback, ref bool isValid, ref string explanation)
+        protected virtual void OnPendingPlayerConnecting(ValidateAuthTicketResponse_t callback, ref bool isValid, ref string explanation)
         {
+            if (m_PendingUsers.Any(d => d.SteamId == callback.m_SteamID))
+            {
+                return;
+            }
+
             if (!isValid)
             {
                 return;
@@ -134,8 +166,9 @@ namespace OpenMod.Unturned.Users
             {
                 var steamPending = Provider.pending.FirstOrDefault(d => d.playerID.steamID == callback.m_SteamID);
                 if (steamPending == null)
+                {
                     return;
-
+                }
 
                 var pendingUser = new UnturnedPendingUser(m_UserDataStore, steamPending);
                 await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
@@ -184,7 +217,7 @@ namespace OpenMod.Unturned.Users
         public Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
         {
             var confidence = 0;
-            var unturnedUser = (IUser) null;
+            var unturnedUser = (IUser)null;
 
             foreach (var user in m_UnturnedUsers)
             {
@@ -271,12 +304,13 @@ namespace OpenMod.Unturned.Users
 
         public void Dispose()
         {
+            m_UnturnedUsers.Clear();
             System.Console.WriteLine("UnturnedUserProvider: disposing");
 
             // ReSharper disable DelegateSubtraction
-            Provider.onCheckValidWithExplanation -= OnPendingPlayerConnected;
+            Provider.onCheckValidWithExplanation -= OnPendingPlayerConnecting;
             Provider.onEnemyConnected -= OnPlayerConnected;
-            Provider.onEnemyDisconnected -= OnEnemyDisconnected;
+            Provider.onEnemyDisconnected -= OnPlayerDisconnected;
             Provider.onRejectingPlayer -= OnRejectingPlayer;
             // ReSharper restore DelegateSubtraction
         }

@@ -12,7 +12,7 @@ namespace OpenMod.Unturned.Users
     {
         public UnturnedUser User { get; }
 
-        public UnturnedUserSession(UnturnedUser user, IUserSession baseSession)
+        public UnturnedUserSession(UnturnedUser user, IUserSession baseSession = null)
         {
             User = user;
             SessionData = baseSession?.SessionData ?? new Dictionary<string, object>();

@@ -22,7 +22,7 @@ namespace OpenMod.Unturned.Users
 
         public CSteamID SteamId { get; }
 
-        public UnturnedUser(IUserDataStore userDataStore, Player player, UnturnedPendingUser pending) : base(userDataStore)
+        public UnturnedUser(IUserDataStore userDataStore, Player player, UnturnedPendingUser pending = null) : base(userDataStore)
         {
             Type = KnownActorTypes.Player;
             Player = player;
@@ -32,7 +32,7 @@ namespace OpenMod.Unturned.Users
             SteamId = steamPlayerIdId.steamID;
             DisplayName = SteamPlayer.playerID.characterName;
 
-            Session = new UnturnedUserSession(this, pending.Session);
+            Session = new UnturnedUserSession(this, pending?.Session);
         }
 
         public override Task PrintMessageAsync(string message)
