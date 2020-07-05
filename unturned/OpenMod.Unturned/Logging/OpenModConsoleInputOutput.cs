@@ -33,12 +33,18 @@ namespace OpenMod.Unturned.Logging
             {
                 return;
             }
+
             System.Console.OutputEncoding = new UTF8Encoding(false);
 
             ReadLine.HistoryEnabled = true;
             ReadLine.AutoCompletionHandler = m_AutoCompleteHandler;
+
             m_IsAlive = true;
-            m_InputThread = new Thread(OnInputThreadStart);
+            m_InputThread = new Thread(OnInputThreadStart)
+            {
+                IsBackground = true
+            };
+
             m_InputThread.Start();
         }
 
