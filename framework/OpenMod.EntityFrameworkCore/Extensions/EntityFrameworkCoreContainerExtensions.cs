@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Plugins;
 
-namespace OpenMod.EntityFrameworkCore
+namespace OpenMod.EntityFrameworkCore.Extensions
 {
     public static class EntityFrameworkCoreContainerExtensions
     {
@@ -56,7 +56,6 @@ namespace OpenMod.EntityFrameworkCore
         {
             serviceLifetime ??= ServiceLifetime.Transient;
 
-
             containerBuilder.RegisterType<ConfigurationBasedConnectionStringAccessor>()
                 .As<ConfigurationBasedConnectionStringAccessor>()
                 .As<IConnectionStringAccessor>()
@@ -71,17 +70,15 @@ namespace OpenMod.EntityFrameworkCore
                 .Register(context =>
                 {
                     var connectionStringAccessor = context.Resolve<IConnectionStringAccessor>();
-                    
+                    var connectionString = connectionStringAccessor.GetConnectionString(connectionStringName);
+
                     var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
-                    optionsBuilder.UseMySql(
-                        connectionStringAccessor.GetConnectionString(connectionStringName),
-                        x => x.MigrationsHistoryTable(migrationTableName));
+                    optionsBuilder.UseMySql(connectionString, x => x.MigrationsHistoryTable(migrationTableName));
                     optionsBuilderAction?.Invoke(optionsBuilder);
 
                     optionsBuilder.UseApplicationServiceProvider(context.Resolve<IServiceProvider>());
 
-                    return ActivatorUtilities.CreateInstance(context.Resolve<IServiceProvider>(), dbContextType,
-                            optionsBuilder.Options);
+                    return ActivatorUtilities.CreateInstance(context.Resolve<IServiceProvider>(), dbContextType, optionsBuilder.Options);
                 })
                 .As(dbContextType)
                 .OwnedByLifetimeScope();
