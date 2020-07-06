@@ -82,6 +82,7 @@ namespace OpenMod.EntityFrameworkCore.Extensions
 
                     var serviceProivder = context.Resolve<IServiceProvider>();
                     optionsBuilder.UseApplicationServiceProvider(serviceProivder);
+                    optionsBuilder.UseInternalServiceProvider(serviceProivder);
 
                     return ActivatorUtilities.CreateInstance(serviceProivder, dbContextType, optionsBuilder.Options);
                 })
