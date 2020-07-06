@@ -20,6 +20,8 @@ namespace OpenMod.EntityFrameworkCore
         
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
+            base.OnConfiguring(options);
+
             var componentId = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>().Id;
             string migrationTableName = "__" + componentId.Replace(".", "_") + "_MigrationsHistory";
             options.UseMySql(
