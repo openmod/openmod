@@ -9,6 +9,11 @@ namespace OpenMod.EntityFrameworkCore
 
         public ConnectionStringAttribute(string name)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentException("Connectiong string name can not be null or empty", nameof(name));
+            }
+
             Name = name;
         }
     }
