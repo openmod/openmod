@@ -29,8 +29,7 @@ namespace OpenMod.Core.Plugins.NuGet
             }
 
             var level = message.Level;
-            string prefix = "[NuGet] ";
-            var text = prefix + message.Message;
+            var text = message.Message;
 
             switch (level)
             {

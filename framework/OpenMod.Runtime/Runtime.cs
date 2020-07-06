@@ -96,7 +96,7 @@ namespace OpenMod.Runtime
             var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
             var nuGetPackageManager = parameters.PackageManager as NuGetPackageManager ?? new NuGetPackageManager(packagesDirectory);
             
-            nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger<OpenModNuGetLogger>());
+            nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
             nuGetPackageManager.InstallAssemblyResolver();
 
             var startupContext = new OpenModStartupContext
