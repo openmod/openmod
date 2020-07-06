@@ -8,6 +8,7 @@ using OpenMod.API.Persistence;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
+
 namespace OpenMod.Core.Persistence
 {
     public class YamlDataStore : IDataStore
@@ -18,8 +19,8 @@ namespace OpenMod.Core.Persistence
         
         [CanBeNull]
         private readonly string m_Suffix;
-        private readonly Serializer m_Serializer;
-        private readonly Deserializer m_Deserializer;
+        private readonly ISerializer m_Serializer;
+        private readonly IDeserializer m_Deserializer;
 
         public YamlDataStore([CanBeNull] string prefix, string basePath, string suffix = "data")
         {

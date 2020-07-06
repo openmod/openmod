@@ -20,15 +20,15 @@ namespace UserDatabasePlugin
         }
         public Task HandleEventAsync(object sender, UserConnectedEvent @event)
         {
-            return OnUserEvent(@event.User, "connect");
+            return HandleUserEvent(@event.User, "connect");
         }
 
         public Task HandleEventAsync(object sender, UserDisconnectedEvent @event)
         {
-            return OnUserEvent(@event.User, "disconnect");
+            return HandleUserEvent(@event.User, "disconnect");
         }
 
-        private async Task OnUserEvent(IUser user, string @event)
+        private async Task HandleUserEvent(IUser user, string @eventName)
         {
             var userEntity = await m_DbContext.Users.FirstOrDefaultAsync(d => d.Id.Equals(user.Id));
             if (userEntity == null)
@@ -46,7 +46,7 @@ namespace UserDatabasePlugin
             await m_DbContext.AddAsync(new UserActivity
             {
                 Date = DateTime.UtcNow,
-                Type = @event,
+                Type = @eventName,
                 UserId = user.Id
             });
             await m_DbContext.SaveChangesAsync();

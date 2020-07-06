@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Reflection;
 using Autofac;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API.Plugins;
 
 namespace OpenMod.EntityFrameworkCore
 {
@@ -53,13 +55,20 @@ namespace OpenMod.EntityFrameworkCore
             ServiceLifetime? serviceLifetime)
         {
             serviceLifetime ??= ServiceLifetime.Transient;
-            var builder = new DbContextOptionsBuilder();
+            var builder = (DbContextOptionsBuilder) Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
 
             optionsBuilder?.Invoke(builder);
 
-            var regBuilder =  containerBuilder
+            containerBuilder.RegisterType<ConfigurationBasedConnectionStringAccessor>()
+                .As<ConfigurationBasedConnectionStringAccessor>()
+                .As<IConnectionStringAccessor>()
+                .OwnedByLifetimeScope()
+                .InstancePerDependency();
+
+            var regBuilder = containerBuilder
                 .RegisterType(dbContextType)
-                .WithParameter("options", builder.Options);
+                .WithParameter("options", builder.Options)
+                .OwnedByLifetimeScope();
 
             switch (serviceLifetime)
             {

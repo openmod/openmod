@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.Localization;
 
 namespace OpenMod.Core.Localization

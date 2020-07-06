@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace OpenMod.Core.Plugins
+namespace OpenMod.API.Plugins
 {
     [AttributeUsage(AttributeTargets.Assembly)]
     public sealed class PluginMetadataAttribute : Attribute
