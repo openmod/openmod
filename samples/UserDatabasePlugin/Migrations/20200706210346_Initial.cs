@@ -1,6 +1,6 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using MySql.Data.EntityFrameworkCore.Metadata;
 
 namespace UserDatabasePlugin.Migrations
 {
@@ -12,8 +12,8 @@ namespace UserDatabasePlugin.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
-                    Type = table.Column<string>(nullable: true)
+                    Id = table.Column<string>(maxLength: 36, nullable: false),
+                    Type = table.Column<string>(maxLength: 20, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -25,9 +25,9 @@ namespace UserDatabasePlugin.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Date = table.Column<DateTime>(nullable: false),
-                    Type = table.Column<string>(nullable: true),
+                    Type = table.Column<string>(maxLength: 32, nullable: true),
                     UserId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>

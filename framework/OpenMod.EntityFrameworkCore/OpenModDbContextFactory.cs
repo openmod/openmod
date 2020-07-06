@@ -32,7 +32,7 @@ namespace OpenMod.EntityFrameworkCore
             var migrationTableName = "__" + componentId.Replace(".", "_") + "_MigrationsHistory";
 
             var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
-            optionsBuilder.UseMySQL(connectionString, x => x.MigrationsHistoryTable(migrationTableName));
+            optionsBuilder.UseMySql(connectionString, x => x.MigrationsHistoryTable(migrationTableName));
 
             optionsBuilder.UseApplicationServiceProvider(serviceProvider);
             return (TDbContext) Activator.CreateInstance(typeof(TDbContext), optionsBuilder.Options);

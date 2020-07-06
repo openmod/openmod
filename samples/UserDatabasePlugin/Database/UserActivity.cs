@@ -13,6 +13,7 @@ namespace UserDatabasePlugin.Database
 
         public DateTime Date { get; set; }
 
+        [StringLength(32)]
         public string Type { get; set; }
 
         [NotNull]
