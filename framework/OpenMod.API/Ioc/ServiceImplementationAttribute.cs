@@ -7,7 +7,7 @@ namespace OpenMod.API.Ioc
 {
     [MeansImplicitUse]
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class ServiceImplementationAttribute : PriorityAttribute
+    public class ServiceImplementationAttribute : PriorityAttribute
     {
         public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
     }

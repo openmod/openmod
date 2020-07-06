@@ -2,9 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Prioritization;
 
-namespace OpenMod.Runtime
+namespace OpenMod.Core.Ioc
 {
-    internal class ServiceRegistration
+    public class ServiceRegistration
     {
         public Priority Priority { get; set; }
 

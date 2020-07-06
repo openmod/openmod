@@ -17,7 +17,9 @@ using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 using OpenMod.Core.Localization;
+using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Plugins
 {
@@ -126,8 +128,8 @@ namespace OpenMod.Core.Plugins
                         .SingleInstance()
                         .OwnedByLifetimeScope();
 
-                    var stringLocalizer = Directory.Exists(workingDirectory) 
-                        ? m_StringLocalizerFactory.Create("translations", workingDirectory) 
+                    var stringLocalizer = Directory.Exists(workingDirectory)
+                        ? m_StringLocalizerFactory.Create("translations", workingDirectory)
                         : NullStringLocalizer.Instance;
 
                     containerBuilder.Register(context => stringLocalizer)
@@ -135,9 +137,58 @@ namespace OpenMod.Core.Plugins
                         .SingleInstance()
                         .OwnedByLifetimeScope();
 
+                    var services = ServiceRegistrationHelper.FindFromAssembly<PluginServiceImplementationAttribute>(assembly, m_Logger);
+
+                    var servicesRegistrations = services.OrderBy(d => d.Priority, new PriorityComparer(PriortyComparisonMode.LowestFirst));
+
+                    foreach (var servicesRegistration in servicesRegistrations)
+                    {
+                        var implementationType = servicesRegistration.ServiceImplementationType;
+                        var builder = containerBuilder.RegisterType(implementationType)
+                            .As(implementationType)
+                            .OwnedByLifetimeScope();
+
+                        switch (servicesRegistration.Lifetime)
+                        {
+                            case ServiceLifetime.Singleton:
+                                builder.SingleInstance();
+                                break;
+                            case ServiceLifetime.Scoped:
+                                builder.InstancePerLifetimeScope();
+                                break;
+                            case ServiceLifetime.Transient:
+                                builder.InstancePerDependency();
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+
+                        foreach (var service in servicesRegistration.ServiceTypes)
+                        {
+                            var serviceBuilder = containerBuilder.Register(c => c.Resolve(implementationType))
+                                .As(service)
+                                .OwnedByLifetimeScope();
+
+                            switch (servicesRegistration.Lifetime)
+                            {
+                                case ServiceLifetime.Singleton:
+                                    serviceBuilder.SingleInstance();
+                                    break;
+                                case ServiceLifetime.Scoped:
+                                    serviceBuilder.InstancePerLifetimeScope();
+                                    break;
+                                case ServiceLifetime.Transient:
+                                    serviceBuilder.InstancePerDependency();
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException();
+                            }
+                        }
+                    }
+
                     foreach (var type in pluginType.Assembly.FindTypes<IPluginContainerConfigurator>())
                     {
-                        var configurator = (IPluginContainerConfigurator) ActivatorUtilities.CreateInstance(serviceProvider, type);
+                        var configurator = (IPluginContainerConfigurator)ActivatorUtilities.CreateInstance(serviceProvider, type);
                         configurator.ConfigureContainer(containerBuilder);
                     }
                 });
