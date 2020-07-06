@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Plugins;
@@ -55,12 +56,15 @@ namespace OpenMod.EntityFrameworkCore.Extensions
             ServiceLifetime? serviceLifetime)
         {
             serviceLifetime ??= ServiceLifetime.Transient;
-
             containerBuilder.RegisterType<ConfigurationBasedConnectionStringAccessor>()
                 .As<ConfigurationBasedConnectionStringAccessor>()
                 .As<IConnectionStringAccessor>()
                 .OwnedByLifetimeScope()
                 .InstancePerDependency();
+
+            ServiceCollection mysqlServices = new ServiceCollection();
+            mysqlServices.AddEntityFrameworkMySql();
+            containerBuilder.Populate(mysqlServices);
 
             var componentId = dbContextType.Assembly.GetCustomAttribute<PluginMetadataAttribute>().Id;
             var migrationTableName = "__" + componentId.Replace(".", "_") + "_MigrationsHistory";
@@ -76,9 +80,10 @@ namespace OpenMod.EntityFrameworkCore.Extensions
                     optionsBuilder.UseMySql(connectionString, x => x.MigrationsHistoryTable(migrationTableName));
                     optionsBuilderAction?.Invoke(optionsBuilder);
 
-                    optionsBuilder.UseApplicationServiceProvider(context.Resolve<IServiceProvider>());
+                    var serviceProivder = context.Resolve<IServiceProvider>();
+                    optionsBuilder.UseApplicationServiceProvider(serviceProivder);
 
-                    return ActivatorUtilities.CreateInstance(context.Resolve<IServiceProvider>(), dbContextType, optionsBuilder.Options);
+                    return ActivatorUtilities.CreateInstance(serviceProivder, dbContextType, optionsBuilder.Options);
                 })
                 .As(dbContextType)
                 .OwnedByLifetimeScope();

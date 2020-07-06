@@ -5,12 +5,12 @@ using OpenMod.EntityFrameworkCore;
 
 namespace UserDatabasePlugin.Database
 {
-    public class UserDatabaseDbContext : OpenModDbContext
+    public class UserDatabaseDbContext : OpenModDbContext<UserDatabaseDbContext>
     {
         public DbSet<User> Users { get; set; }
         public DbSet<UserActivity> UserActivities { get; set; }
 
-        public UserDatabaseDbContext(DbContextOptions options) : base(options)
+        public UserDatabaseDbContext(DbContextOptions<UserDatabaseDbContext> options) : base(options)
         {
         }
     }

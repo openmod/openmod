@@ -6,6 +6,13 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
+    <Compile Remove="Migrations\20200706210858_Initial2.cs" />
+    <Compile Remove="Migrations\20200706210858_Initial2.Designer.cs" />
+    <Compile Remove="Migrations\20200706211350_Initial2.cs" />
+    <Compile Remove="Migrations\20200706211350_Initial2.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="config.yaml" />
   </ItemGroup>
 
