@@ -189,7 +189,7 @@ namespace OpenMod.Core.Plugins
                     foreach (var type in pluginType.Assembly.FindTypes<IPluginContainerConfigurator>())
                     {
                         var configurator = (IPluginContainerConfigurator)ActivatorUtilities.CreateInstance(serviceProvider, type);
-                        configurator.ConfigureContainer(containerBuilder);
+                        configurator.ConfigureContainer(m_LifetimeScope, configuration, containerBuilder);
                     }
                 });
 

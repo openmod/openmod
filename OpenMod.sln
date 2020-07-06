@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Extensions.Games.Ab
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Extensions.Economy.Abstractions", "extensions\OpenMod.Extensions.Economy.Abstractions\OpenMod.Extensions.Economy.Abstractions.csproj", "{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.EntityFrameworkCore", "framework\OpenMod.EntityFrameworkCore\OpenMod.EntityFrameworkCore.csproj", "{F0977F53-9F1F-4B45-896D-961706B010D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,10 @@ Global
 		{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0977F53-9F1F-4B45-896D-961706B010D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0977F53-9F1F-4B45-896D-961706B010D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0977F53-9F1F-4B45-896D-961706B010D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0977F53-9F1F-4B45-896D-961706B010D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -124,6 +130,7 @@ Global
 		{29045A25-2395-49A9-98CC-99C1659FEFE8} = {F6737FCE-E6A4-4970-A6AC-0D7061B820FB}
 		{52734D17-E89D-4033-A964-00B7D99324E6} = {ABD3BB7D-EF57-4E28-BB66-422D2AFCEC8B}
 		{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0} = {ABD3BB7D-EF57-4E28-BB66-422D2AFCEC8B}
+		{F0977F53-9F1F-4B45-896D-961706B010D9} = {42C946B3-E1EF-4278-A983-E99AA3F73527}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5384DBB4-E799-40C6-BD98-4C90698BE085}
