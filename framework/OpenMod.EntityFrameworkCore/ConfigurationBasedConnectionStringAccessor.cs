@@ -8,7 +8,7 @@ namespace OpenMod.EntityFrameworkCore
 
         public ConfigurationBasedConnectionStringAccessor(IConfiguration configuration)
         {
-            m_Configuration = configuration;
+            m_Configuration = configuration.GetSection("database");
         }
 
         public string GetConnectionString(string name)

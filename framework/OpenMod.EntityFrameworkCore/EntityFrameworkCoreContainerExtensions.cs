@@ -9,22 +9,22 @@ namespace OpenMod.EntityFrameworkCore
 {
     public static class EntityFrameworkCoreContainerExtensions
     {
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder) where T: OpenModPluginDbContext
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder) where T : OpenModDbContext
         {
             return AddDbContextInternal(containerBuilder, typeof(T), null, null);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, ServiceLifetime serviceLifetime) where T : OpenModPluginDbContext
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext
         {
             return AddDbContextInternal(containerBuilder, typeof(T), null, serviceLifetime);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder> optionsBuilder) where T : OpenModPluginDbContext
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder> optionsBuilder) where T : OpenModDbContext
         {
             return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, null);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder> optionsBuilder, ServiceLifetime serviceLifetime) where T : OpenModPluginDbContext
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder> optionsBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext
         {
             return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, serviceLifetime);
         }
@@ -49,15 +49,13 @@ namespace OpenMod.EntityFrameworkCore
             return AddDbContextInternal(containerBuilder, dbContextType, optionsBuilder, serviceLifetime);
         }
 
-        private static ContainerBuilder AddDbContextInternal(this ContainerBuilder containerBuilder, 
-            Type dbContextType, 
-            Action<DbContextOptionsBuilder> optionsBuilder, 
+        private static ContainerBuilder AddDbContextInternal(this ContainerBuilder containerBuilder,
+            Type dbContextType,
+            Action<DbContextOptionsBuilder> optionsBuilderAction,
             ServiceLifetime? serviceLifetime)
         {
             serviceLifetime ??= ServiceLifetime.Transient;
-            var builder = (DbContextOptionsBuilder) Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
 
-            optionsBuilder?.Invoke(builder);
 
             containerBuilder.RegisterType<ConfigurationBasedConnectionStringAccessor>()
                 .As<ConfigurationBasedConnectionStringAccessor>()
@@ -65,9 +63,27 @@ namespace OpenMod.EntityFrameworkCore
                 .OwnedByLifetimeScope()
                 .InstancePerDependency();
 
+            var componentId = dbContextType.Assembly.GetCustomAttribute<PluginMetadataAttribute>().Id;
+            var migrationTableName = "__" + componentId.Replace(".", "_") + "_MigrationsHistory";
+            var connectionStringName = dbContextType.GetCustomAttribute<ConnectionStringAttribute>()?.Name ?? ConnectionStrings.Default;
+
             var regBuilder = containerBuilder
-                .RegisterType(dbContextType)
-                .WithParameter("options", builder.Options)
+                .Register(context =>
+                {
+                    var connectionStringAccessor = context.Resolve<IConnectionStringAccessor>();
+                    
+                    var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
+                    optionsBuilder.UseMySql(
+                        connectionStringAccessor.GetConnectionString(connectionStringName),
+                        x => x.MigrationsHistoryTable(migrationTableName));
+                    optionsBuilderAction?.Invoke(optionsBuilder);
+
+                    optionsBuilder.UseApplicationServiceProvider(context.Resolve<IServiceProvider>());
+
+                    return ActivatorUtilities.CreateInstance(context.Resolve<IServiceProvider>(), dbContextType,
+                            optionsBuilder.Options);
+                })
+                .As(dbContextType)
                 .OwnedByLifetimeScope();
 
             switch (serviceLifetime)
@@ -89,3 +105,6 @@ namespace OpenMod.EntityFrameworkCore
         }
     }
 }
+
+
+
