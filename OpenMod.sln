@@ -35,7 +35,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Bootstrapper", "fra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Unturned.Module.Dev", "unturned\OpenMod.Unturned.Module.Dev\OpenMod.Unturned.Module.Dev.csproj", "{0ED15B69-0240-42C9-BBA3-FB53BAB8EC84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Unturned.Module.Shared", "unturned\OpenMod.Unturned.Module.Shared\OpenMod.Unturned.Module.Shared.csproj", "{29045A25-2395-49A9-98CC-99C1659FEFE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Unturned.Module.Shared", "unturned\OpenMod.Unturned.Module.Shared\OpenMod.Unturned.Module.Shared.csproj", "{29045A25-2395-49A9-98CC-99C1659FEFE8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extensions", "extensions", "{ABD3BB7D-EF57-4E28-BB66-422D2AFCEC8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Extensions.Games.Abstractions", "extensions\OpenMod.Extensions.Games.Abstractions\OpenMod.Extensions.Games.Abstractions.csproj", "{52734D17-E89D-4033-A964-00B7D99324E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Extensions.Economy.Abstractions", "extensions\OpenMod.Extensions.Economy.Abstractions\OpenMod.Extensions.Economy.Abstractions.csproj", "{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +97,14 @@ Global
 		{29045A25-2395-49A9-98CC-99C1659FEFE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29045A25-2395-49A9-98CC-99C1659FEFE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29045A25-2395-49A9-98CC-99C1659FEFE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52734D17-E89D-4033-A964-00B7D99324E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52734D17-E89D-4033-A964-00B7D99324E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52734D17-E89D-4033-A964-00B7D99324E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52734D17-E89D-4033-A964-00B7D99324E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,6 +122,8 @@ Global
 		{415A8EA9-A04F-4F76-A89E-A77EA347A6AF} = {42C946B3-E1EF-4278-A983-E99AA3F73527}
 		{0ED15B69-0240-42C9-BBA3-FB53BAB8EC84} = {F6737FCE-E6A4-4970-A6AC-0D7061B820FB}
 		{29045A25-2395-49A9-98CC-99C1659FEFE8} = {F6737FCE-E6A4-4970-A6AC-0D7061B820FB}
+		{52734D17-E89D-4033-A964-00B7D99324E6} = {ABD3BB7D-EF57-4E28-BB66-422D2AFCEC8B}
+		{AF7CE55F-0DAE-4256-85AA-5CE6E2D40CB0} = {ABD3BB7D-EF57-4E28-BB66-422D2AFCEC8B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5384DBB4-E799-40C6-BD98-4C90698BE085}
