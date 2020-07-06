@@ -5,6 +5,7 @@ namespace OpenMod.EntityFrameworkCore
 {
     public abstract class OpenModDbContext : DbContext
     {
+
         protected OpenModDbContext([NotNull] DbContextOptions options) : base(options)
         {
 

@@ -73,7 +73,7 @@ namespace OpenMod.EntityFrameworkCore.Extensions
                     var connectionString = connectionStringAccessor.GetConnectionString(connectionStringName);
 
                     var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
-                    optionsBuilder.UseMySql(connectionString, x => x.MigrationsHistoryTable(migrationTableName));
+                    optionsBuilder.UseMySQL(connectionString, x => x.MigrationsHistoryTable(migrationTableName));
                     optionsBuilderAction?.Invoke(optionsBuilder);
 
                     optionsBuilder.UseApplicationServiceProvider(context.Resolve<IServiceProvider>());

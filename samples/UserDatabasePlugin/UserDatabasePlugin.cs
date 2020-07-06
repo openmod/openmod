@@ -26,6 +26,7 @@ namespace UserDatabasePlugin
 
         protected override async Task OnLoadAsync()
         {
+            m_Logger.LogInformation($"Provider: { m_DbContext.Database.ProviderName}");
             await m_DbContext.Database.MigrateAsync();
 
             m_Logger.LogInformation("UserDatabase has been loaded.");
