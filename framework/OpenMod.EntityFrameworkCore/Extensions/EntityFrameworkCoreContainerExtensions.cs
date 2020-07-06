@@ -3,6 +3,7 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Plugins;
 
@@ -80,7 +81,15 @@ namespace OpenMod.EntityFrameworkCore.Extensions
                     optionsBuilder.UseMySql(connectionString, x => x.MigrationsHistoryTable(migrationTableName));
                     optionsBuilderAction?.Invoke(optionsBuilder);
 
-                    var serviceProivder = context.Resolve<IServiceProvider>();
+                    var scope = context.Resolve<ILifetimeScope>().BeginLifetimeScope(builder =>
+                    {
+                        builder.Register(ctx => optionsBuilder.Options)
+                            .As<IDbContextOptions>()
+                            .SingleInstance()
+                            .OwnedByLifetimeScope();
+                    });
+
+                    var serviceProivder = scope.Resolve<IServiceProvider>();
                     optionsBuilder.UseApplicationServiceProvider(serviceProivder);
                     optionsBuilder.UseInternalServiceProvider(serviceProivder);
 
