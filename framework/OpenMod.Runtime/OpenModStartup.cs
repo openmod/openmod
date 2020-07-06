@@ -158,14 +158,13 @@ namespace OpenMod.Runtime
 
         internal async Task LoadPluginAssembliesAsync()
         {
-            var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
+            var nugetPluginAssembliesSource = new NuGetPluginAssembliesSource(m_NuGetPackageManager);
+            await RegisterPluginAssembliesAsync(nugetPluginAssembliesSource);
 
+            var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
             var logger = Context.LoggerFactory.CreateLogger<FileSystemPluginAssembliesSource>();
             var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(logger, pluginsDirectory);
             await RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
-            
-            var nugetPluginAssembliesSource = new NuGetPluginAssembliesSource(m_NuGetPackageManager);
-            await RegisterPluginAssembliesAsync(nugetPluginAssembliesSource);
         }
     }
 }

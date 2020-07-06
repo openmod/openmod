@@ -190,7 +190,7 @@ namespace OpenMod.NuGet
                 {
                     var versions = (await packageMeta.GetVersionsAsync()).ToList();
                     if (!versions.Any(d
-                        => d.Version.OriginalVersion.Equals(version, StringComparison.OrdinalIgnoreCase))) 
+                        => d.Version.OriginalVersion.Equals(version, StringComparison.OrdinalIgnoreCase)))
                         continue;
 
                     Logger.LogDebug("adding packageMeta: "
@@ -336,7 +336,7 @@ namespace OpenMod.NuGet
             foreach (var dir in Directory.GetDirectories(PackagesDirectory))
             {
                 var dirName = new DirectoryInfo(dir).Name;
-                if (!dirName.StartsWith(packageId + ".", StringComparison.OrdinalIgnoreCase)) 
+                if (!dirName.StartsWith(packageId + ".", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 var directoryName = new DirectoryInfo(dir).Name;
@@ -427,6 +427,7 @@ namespace OpenMod.NuGet
 
             if (exactMatch != null)
             {
+                m_Logger.LogDebug($"Resolved assembly from NuGet exact: {args.Name}");
                 return (Assembly)exactMatch.Assembly.Target;
             }
 
@@ -435,7 +436,13 @@ namespace OpenMod.NuGet
                     .Where(d => d.Assembly.IsAlive && d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     .OrderByDescending(d => d.Version);
 
-            return (Assembly)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
+            var result = (Assembly)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
+            
+            m_Logger.LogDebug(result == null
+                ? $"Failed to resolve {args.Name}"
+                : $"Resoled assembly from NuGet: {args.Name} @ v{result.GetName().Version}");
+
+            return result;
         }
 
         protected static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)

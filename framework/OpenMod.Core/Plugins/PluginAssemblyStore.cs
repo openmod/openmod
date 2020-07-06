@@ -45,7 +45,26 @@ namespace OpenMod.Core.Plugins
                     continue;
                 }
 
-                if (!providerAssembly.FindTypes<IOpenModPlugin>(false).Any())
+                ICollection<Type> types;
+                try
+                {
+                    types = providerAssembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    m_Logger.LogTrace(ex, $"Failed to load some types from plugin \"{pluginMetadata.Id}\"");
+                    if (ex.LoaderExceptions != null && ex.LoaderExceptions.Length > 0)
+                    {
+                        foreach (var loaderException in ex.LoaderExceptions)
+                        {
+                            m_Logger.LogTrace(loaderException, "Loader Exception: ");
+                        }
+                    }
+
+                    types = ex.Types.Where(d => d != null).ToArray();
+                }
+
+                if (!types.Any(d => typeof(IOpenModPlugin).IsAssignableFrom(d) && !d.IsAbstract && d.IsClass))
                 {
                     m_Logger.LogWarning($"No {nameof(IOpenModPlugin)} implementation found in assembly: {providerAssembly}; skipping loading of this assembly as plugin");
                     providerAssemblies.Remove(providerAssembly);

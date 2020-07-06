@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-    <PackageDescription>Core service implementations for OpenMod</PackageDescription>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <PackageDescription>EntityFrameworkCore integration for OpenMod</PackageDescription>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
