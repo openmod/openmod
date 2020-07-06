@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenMod.API.Commands;
 
 namespace OpenMod.Core.Commands
 {

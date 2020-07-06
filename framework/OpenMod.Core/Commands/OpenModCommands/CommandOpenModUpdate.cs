@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using OpenMod.API.Commands;
 using OpenMod.API.Localization;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;

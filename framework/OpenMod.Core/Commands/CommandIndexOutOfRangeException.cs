@@ -1,4 +1,6 @@
-﻿namespace OpenMod.Core.Commands
+﻿using OpenMod.API.Commands;
+
+namespace OpenMod.Core.Commands
 {
     public class CommandIndexOutOfRangeException : UserFriendlyException
     {

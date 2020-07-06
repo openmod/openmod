@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OpenMod.Core.Commands
+namespace OpenMod.API.Commands
 {
     public class UserFriendlyException : Exception
     {
