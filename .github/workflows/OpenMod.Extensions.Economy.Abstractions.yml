@@ -7,11 +7,11 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'extenions/OpenMod.Extensions.Economy.Abstractions/**'
+      - 'extensions/OpenMod.Extensions.Economy.Abstractions/**'
   pull_request:
     branches: [ master ]
     paths:
-      - 'extenions/OpenMod.Extensions.Economy.Abstractions/**'
+      - 'extensions/OpenMod.Extensions.Economy.Abstractions/**'
 
 jobs:
   build:

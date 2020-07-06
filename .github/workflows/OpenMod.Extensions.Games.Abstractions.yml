@@ -7,11 +7,11 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'extenions/OpenMod.Extensions.Games.Abstractions/**'
+      - 'extensions/OpenMod.Extensions.Games.Abstractions/**'
   pull_request:
     branches: [ master ]
     paths:
-      - 'extenions/OpenMod.Extensions.Games.Abstractions/**'
+      - 'extensions/OpenMod.Extensions.Games.Abstractions/**'
 
 jobs:
   build:
