@@ -6,6 +6,9 @@ namespace OpenMod.API.Plugins
 {
     public interface IPluginContainerConfigurator 
     {
-        void ConfigureContainer(ILifetimeScope parentLifetimeScope, IConfiguration configuration, ContainerBuilder containerBuilder);
+        void ConfigureContainer(
+            ILifetimeScope parentLifetimeScope, 
+            IConfiguration configuration, 
+            ContainerBuilder containerBuilder);
     }
 }

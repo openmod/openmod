@@ -119,6 +119,7 @@ namespace OpenMod.Core.Plugins
 
                     containerBuilder.RegisterType(pluginType)
                         .As(pluginType)
+                        .As<IOpenModComponent>()
                         .As<IOpenModPlugin>()
                         .SingleInstance()
                         .ExternallyOwned();

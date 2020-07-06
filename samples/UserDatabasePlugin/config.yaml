@@ -1,0 +1,2 @@
+﻿ConnectionStrings:
+  default: "Server=localhost; Database=openmod; Port=3306; User=root"

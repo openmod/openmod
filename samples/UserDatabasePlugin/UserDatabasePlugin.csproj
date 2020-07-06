@@ -7,16 +7,15 @@
 
   <ItemGroup>
     <None Remove="config.yaml" />
-    <None Remove="translations.yaml" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="config.yaml" />
-    <EmbeddedResource Include="translations.yaml" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj" />
+    <ProjectReference Include="..\..\framework\OpenMod.EntityFrameworkCore\OpenMod.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>
