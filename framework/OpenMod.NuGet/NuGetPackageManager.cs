@@ -417,7 +417,6 @@ namespace OpenMod.NuGet
 
         private Assembly OnAsssemlbyResolve(object sender, ResolveEventArgs args)
         {
-            m_Logger.LogDebug($"Resolving assembly from NuGet: {args.Name}");
             var name = GetVersionIndependentName(args.Name, out string version);
             var parsedVersion = new Version(version);
 
