@@ -22,6 +22,6 @@ namespace OpenMod.Extensions.Economy.Abstractions
         ///   Sets balance for a user.
         /// </summary>
         /// <exception cref="NotSupportedException">may be thrown if setting to negative balance and it's not supported</exception>
-        Task<decimal> SetBalanceAsync(string ownerId, string ownerType, decimal balance);
+        Task SetBalanceAsync(string ownerId, string ownerType, decimal balance);
     }
 }
