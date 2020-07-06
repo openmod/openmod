@@ -7,13 +7,13 @@ using OpenMod.API.Plugins;
 
 namespace OpenMod.EntityFrameworkCore
 {
-    public abstract class OpenModDbContext : DbContext
+    public abstract class OpenModPluginDbContext : DbContext
     {
         private readonly IConnectionStringAccessor m_ConnectionStringAccessor;
 
         public virtual string ConnectionStringName { get; } = "default";
 
-        protected OpenModDbContext([NotNull] DbContextOptions options, IServiceProvider serviceProvider) : base(options)
+        protected OpenModPluginDbContext([NotNull] DbContextOptions options, IServiceProvider serviceProvider) : base(options)
         {
             m_ConnectionStringAccessor = serviceProvider.GetRequiredService<IConnectionStringAccessor>();
         }

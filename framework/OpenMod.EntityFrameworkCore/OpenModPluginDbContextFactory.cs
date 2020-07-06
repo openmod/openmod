@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OpenMod.EntityFrameworkCore
 {
-    public class OpenModDbContextFactory<TDbContext> : IDesignTimeDbContextFactory<TDbContext> where TDbContext : OpenModDbContext
+    public class OpenModPluginDbContextFactory<TDbContext> : IDesignTimeDbContextFactory<TDbContext> where TDbContext : OpenModPluginDbContext
     {
         public TDbContext CreateDbContext(string[] args)
         {

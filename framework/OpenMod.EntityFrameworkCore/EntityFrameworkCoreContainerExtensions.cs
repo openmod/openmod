@@ -9,22 +9,22 @@ namespace OpenMod.EntityFrameworkCore
 {
     public static class EntityFrameworkCoreContainerExtensions
     {
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder) where T: OpenModDbContext
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder) where T: OpenModPluginDbContext
         {
             return AddDbContextInternal(containerBuilder, typeof(T), null, null);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, ServiceLifetime serviceLifetime) where T : OpenModPluginDbContext
         {
             return AddDbContextInternal(containerBuilder, typeof(T), null, serviceLifetime);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder> optionsBuilder) where T : OpenModDbContext
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder> optionsBuilder) where T : OpenModPluginDbContext
         {
             return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, null);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder> optionsBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder> optionsBuilder, ServiceLifetime serviceLifetime) where T : OpenModPluginDbContext
         {
             return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, serviceLifetime);
         }

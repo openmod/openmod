@@ -2,7 +2,7 @@
 
 namespace UserDatabasePlugin.Database
 {
-    public class UserDatabaseDbContextFactory : OpenModDbContextFactory<UserDatabaseDbContext>
+    public class UserDatabaseDbContextFactory : OpenModPluginDbContextFactory<UserDatabaseDbContext>
     {
         
     }
