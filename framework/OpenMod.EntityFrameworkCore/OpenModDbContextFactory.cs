@@ -9,7 +9,7 @@ using OpenMod.API.Plugins;
 
 namespace OpenMod.EntityFrameworkCore
 {
-    public class OpenModDbContextFactory<TDbContext> : IDesignTimeDbContextFactory<TDbContext> where TDbContext : OpenModDbContext
+    public class OpenModDbContextFactory<TDbContext> : IDesignTimeDbContextFactory<TDbContext> where TDbContext : OpenModDbContext<TDbContext>
     {
         public TDbContext CreateDbContext(string[] args)
         {
