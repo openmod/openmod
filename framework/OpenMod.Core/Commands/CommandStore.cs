@@ -77,7 +77,6 @@ namespace OpenMod.Core.Commands
             }
             m_IsDisposing = true;
 
-            System.Console.WriteLine("Dispose CommandStore");
             m_Options.Value.OnCommandSourcesChanged -= OnCommandSourcesChanged;
             return new ValueTask(m_CommandSources.DisposeAllAsync());
         }

@@ -221,7 +221,6 @@ namespace OpenMod.Core.Eventing
             }
             m_IsDisposing = true;
 
-            System.Console.WriteLine("Dispose EventBus");
             await m_EventSubscriptions
                 .Select(d => d.Scope)
                 .Distinct()

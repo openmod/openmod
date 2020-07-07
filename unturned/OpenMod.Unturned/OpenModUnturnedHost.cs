@@ -199,7 +199,6 @@ namespace OpenMod.Unturned
                 return;
             }
 
-            System.Console.WriteLine("Dispose OpenModUnturnedHost");
             Dedicator.commandWindow.removeIOHandler(m_OpenModIoHandler);
 
             m_IoHandlers.Reverse();
