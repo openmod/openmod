@@ -14,6 +14,7 @@ namespace UserDatabasePlugin
             IConfiguration configuration,
             ContainerBuilder containerBuilder)
         {
+            containerBuilder.AddEntityFrameworkCore();
             containerBuilder.AddDbContext<UserDatabaseDbContext>();
         }
     }

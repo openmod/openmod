@@ -1,11 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using OpenMod.API.Plugins;
 
 namespace OpenMod.EntityFrameworkCore.Extensions
 {
@@ -51,68 +50,51 @@ namespace OpenMod.EntityFrameworkCore.Extensions
             return AddDbContextInternal(containerBuilder, dbContextType, optionsBuilder, serviceLifetime);
         }
 
-        private static ContainerBuilder AddDbContextInternal(this ContainerBuilder containerBuilder,
-            Type dbContextType,
-            Action<DbContextOptionsBuilder> optionsBuilderAction,
-            ServiceLifetime? serviceLifetime)
+        public static ContainerBuilder AddEntityFrameworkCore(this ContainerBuilder containerBuilder)
         {
-            serviceLifetime ??= ServiceLifetime.Transient;
+            ServiceCollection mysqlServices = new ServiceCollection();
+            mysqlServices.AddEntityFrameworkMySql();
+            containerBuilder.Populate(mysqlServices);
+
             containerBuilder.RegisterType<ConfigurationBasedConnectionStringAccessor>()
                 .As<ConfigurationBasedConnectionStringAccessor>()
                 .As<IConnectionStringAccessor>()
                 .OwnedByLifetimeScope()
                 .InstancePerDependency();
 
-            ServiceCollection mysqlServices = new ServiceCollection();
-            mysqlServices.AddEntityFrameworkMySql();
-            containerBuilder.Populate(mysqlServices);
+            return containerBuilder;
+        }
 
-            var componentId = dbContextType.Assembly.GetCustomAttribute<PluginMetadataAttribute>().Id;
-            var migrationTableName = "__" + componentId.Replace(".", "_") + "_MigrationsHistory";
-            var connectionStringName = dbContextType.GetCustomAttribute<ConnectionStringAttribute>()?.Name ?? ConnectionStrings.Default;
+        private static ContainerBuilder AddDbContextInternal(this ContainerBuilder containerBuilder,
+            Type dbContextType,
+            Action<DbContextOptionsBuilder> optionsBuilderAction,
+            ServiceLifetime? serviceLifetime)
+        {
+            serviceLifetime ??= ServiceLifetime.Scoped;
 
-            var regBuilder = containerBuilder
-                .Register(context =>
+            ServiceCollection dbContextServiceCollection = new ServiceCollection();
+            var addDbContextMethod = typeof(EntityFrameworkServiceCollectionExtensions)
+                .GetMethods(BindingFlags.Static | BindingFlags.Public)
+                .FirstOrDefault(method =>
                 {
-                    var connectionStringAccessor = context.Resolve<IConnectionStringAccessor>();
-                    var connectionString = connectionStringAccessor.GetConnectionString(connectionStringName);
-
-                    var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
-                    optionsBuilder.UseMySql(connectionString, x => x.MigrationsHistoryTable(migrationTableName));
-                    optionsBuilderAction?.Invoke(optionsBuilder);
-
-                    var scope = context.Resolve<ILifetimeScope>().BeginLifetimeScope(builder =>
-                    {
-                        builder.Register(ctx => optionsBuilder.Options)
-                            .As<IDbContextOptions>()
-                            .SingleInstance()
-                            .OwnedByLifetimeScope();
-                    });
-
-                    var serviceProivder = scope.Resolve<IServiceProvider>();
-                    optionsBuilder.UseApplicationServiceProvider(serviceProivder);
-                    optionsBuilder.UseInternalServiceProvider(serviceProivder);
-
-                    return ActivatorUtilities.CreateInstance(serviceProivder, dbContextType, optionsBuilder.Options);
-                })
-                .As(dbContextType)
-                .OwnedByLifetimeScope();
-
-            switch (serviceLifetime)
+                    var parameters = method.GetParameters();
+                    return method.Name.Equals("AddDbContext", StringComparison.OrdinalIgnoreCase)
+                           && method.IsGenericMethod && method.GetGenericArguments().Length == 1
+                           && parameters[0].ParameterType == typeof(IServiceCollection)
+                           && parameters[1].ParameterType == typeof(Action<DbContextOptionsBuilder>)
+                           && parameters[2].ParameterType == typeof(ServiceLifetime)
+                           && parameters[3].ParameterType == typeof(ServiceLifetime);
+                });
+     
+            if (addDbContextMethod == null)
             {
-                case ServiceLifetime.Singleton:
-                    regBuilder.SingleInstance();
-                    break;
-                case ServiceLifetime.Scoped:
-                    regBuilder.InstancePerLifetimeScope();
-                    break;
-                case ServiceLifetime.Transient:
-                    regBuilder.InstancePerDependency();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(serviceLifetime), serviceLifetime, null);
+                throw new Exception("addDbContextMethod was null");
             }
 
+            addDbContextMethod = addDbContextMethod.MakeGenericMethod(dbContextType);
+            addDbContextMethod.Invoke(null,  new object[] { dbContextServiceCollection, optionsBuilderAction, serviceLifetime, ServiceLifetime.Scoped});
+
+            containerBuilder.Populate(dbContextServiceCollection);
             return containerBuilder;
         }
     }
