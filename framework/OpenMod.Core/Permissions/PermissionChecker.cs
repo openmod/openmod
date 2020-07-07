@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenMod.Core.Permissions
 {
@@ -16,6 +16,8 @@ namespace OpenMod.Core.Permissions
     [ServiceImplementation(Priority = Priority.Lowest, Lifetime = ServiceLifetime.Singleton)]
     public class PermissionChecker : IPermissionChecker, IAsyncDisposable
     {
+        private bool m_IsDisposing;
+
         private readonly IServiceProvider m_ServiceProvider;
         private readonly IOptions<PermissionCheckerOptions> m_Options;
         private readonly List<IPermissionStore> m_PermissionSources;
@@ -66,6 +68,12 @@ namespace OpenMod.Core.Permissions
 
         public async ValueTask DisposeAsync()
         {
+            if (m_IsDisposing)
+            {
+                return;
+            }
+            m_IsDisposing = true;
+
             await m_PermissionCheckProviders.DisposeAllAsync();
             await m_PermissionSources.DisposeAllAsync();
         }

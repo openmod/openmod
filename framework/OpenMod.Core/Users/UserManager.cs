@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
+using OpenMod.Core.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,9 +13,12 @@ using System.Threading.Tasks;
 namespace OpenMod.Core.Users
 {
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class UserManager : IUserManager, IDisposable
+    public class UserManager : IUserManager, IAsyncDisposable
     {
+        private bool m_IsDisposing;
+
         private readonly List<IUserProvider> m_UserProviders;
+
         public UserManager(IOptions<UserManagerOptions> options, IServiceProvider serviceProvider)
         {
             m_UserProviders = new List<IUserProvider>();
@@ -74,9 +78,15 @@ namespace OpenMod.Core.Users
             await provider.BroadcastAsync(userType, message, color);
         }
 
-        public virtual void Dispose()
+        public virtual ValueTask DisposeAsync()
         {
-            m_UserProviders.Clear();
+            if (m_IsDisposing)
+            {
+                return new ValueTask(Task.CompletedTask);
+            }
+            m_IsDisposing = true;
+
+            return new ValueTask(m_UserProviders.DisposeAllAsync());
         }
     }
 }
