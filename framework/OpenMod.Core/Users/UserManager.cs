@@ -15,6 +15,8 @@ namespace OpenMod.Core.Users
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class UserManager : IUserManager, IAsyncDisposable
     {
+        private bool m_IsDisposing;
+
         private readonly List<IUserProvider> m_UserProviders;
 
         public UserManager(IOptions<UserManagerOptions> options, IServiceProvider serviceProvider)
@@ -78,6 +80,12 @@ namespace OpenMod.Core.Users
 
         public virtual ValueTask DisposeAsync()
         {
+            if (m_IsDisposing)
+            {
+                return new ValueTask(Task.CompletedTask);
+            }
+            m_IsDisposing = true;
+
             return new ValueTask(m_UserProviders.DisposeAllAsync());
         }
     }
