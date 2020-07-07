@@ -84,6 +84,7 @@ namespace OpenMod.Core.Users
             {
                 return new ValueTask(Task.CompletedTask);
             }
+            System.Console.WriteLine("Dispose UserManager");
             m_IsDisposing = true;
 
             return new ValueTask(m_UserProviders.DisposeAllAsync());

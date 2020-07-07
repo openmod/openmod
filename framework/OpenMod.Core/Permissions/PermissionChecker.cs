@@ -72,6 +72,7 @@ namespace OpenMod.Core.Permissions
             {
                 return;
             }
+            System.Console.WriteLine("Dispose PermissionChecker");
             m_IsDisposing = true;
 
             await m_PermissionCheckProviders.DisposeAllAsync();

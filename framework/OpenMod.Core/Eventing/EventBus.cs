@@ -18,6 +18,8 @@ namespace OpenMod.Core.Eventing
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class EventBus : IEventBus, IAsyncDisposable
     {
+        private bool m_IsDisposing;
+
         private readonly ILogger<EventBus> m_Logger;
         private readonly List<EventSubscription> m_EventSubscriptions;
 
@@ -213,6 +215,13 @@ namespace OpenMod.Core.Eventing
 
         public virtual async ValueTask DisposeAsync()
         {
+            if (m_IsDisposing)
+            {
+                return;
+            }
+            m_IsDisposing = true;
+
+            System.Console.WriteLine("Dispose EventBus");
             await m_EventSubscriptions
                 .Select(d => d.Scope)
                 .Distinct()

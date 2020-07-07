@@ -16,23 +16,22 @@ namespace OpenMod.Core.Commands
 {
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class CommandStore : ICommandStore, IDisposable
+    public class CommandStore : ICommandStore, IAsyncDisposable
     {
+        private bool m_IsDisposing;
+
         private readonly PriorityComparer m_Comparer;
         private readonly IOptions<CommandStoreOptions> m_Options;
         private readonly IServiceProvider m_ServiceProvider;
         private IReadOnlyCollection<ICommandSource> m_CommandSources;
-        private ILifetimeScope m_LifetimeScope;
 
-        public CommandStore(IOptions<CommandStoreOptions> options, 
-            IServiceProvider serviceProvider, 
-            ILifetimeScope lifetimeScope)
+        public CommandStore(IOptions<CommandStoreOptions> options,
+            IServiceProvider serviceProvider)
         {
             m_Comparer = new PriorityComparer(PriortyComparisonMode.HighestFirst);
             m_CommandSources = options.Value.CreateCommandSources(serviceProvider);
             m_Options = options;
             m_ServiceProvider = serviceProvider;
-            m_LifetimeScope = lifetimeScope;
 
             OnCommandSourcesChanged();
             options.Value.OnCommandSourcesChanged += OnCommandSourcesChanged;
@@ -57,6 +56,11 @@ namespace OpenMod.Core.Commands
         {
             get
             {
+                if (m_IsDisposing)
+                {
+                    throw new ObjectDisposedException(nameof(CommandStore));
+                }
+
                 return m_CommandSources
                     .SelectMany(d => d.Commands)
                     .Where(d => d.Component.IsComponentAlive)
@@ -65,9 +69,17 @@ namespace OpenMod.Core.Commands
             }
         }
 
-        public void Dispose()
+        public ValueTask DisposeAsync()
         {
+            if (m_IsDisposing)
+            {
+                return new ValueTask(Task.CompletedTask);
+            }
+            m_IsDisposing = true;
+
+            System.Console.WriteLine("Dispose CommandStore");
             m_Options.Value.OnCommandSourcesChanged -= OnCommandSourcesChanged;
+            return new ValueTask(m_CommandSources.DisposeAllAsync());
         }
     }
 }
