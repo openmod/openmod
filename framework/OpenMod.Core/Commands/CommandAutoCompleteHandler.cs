@@ -26,7 +26,7 @@ namespace OpenMod.Core.Commands
         public string[] GetSuggestions(string text, int index)
         {
             var args = text.Substring(0, index).Split(' ').ToArray();
-            var commandStart = index >= text.Length ? string.Empty : text.Substring(index, text.Length - index - 1);
+            var commandStart = index >= text.Length ? string.Empty : text.Substring(index, text.Length - index);
 
             var commands = m_CommandStore.Commands;
             var context = m_CommandContextBuilder.CreateContext(m_ConsoleActorAccessor.Actor, args, string.Empty, commands);
