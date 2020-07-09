@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using OpenMod.Core.Ioc.Extensions;
 
 namespace OpenMod.EntityFrameworkCore.Extensions
 {
-    public static class EntityFrameworkCoreContainerExtensions
+    public static class EntityFrameworkCoreContainerBuilderExtensions
     {
         public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder) where T : OpenModDbContext<T>
         {
@@ -50,12 +49,8 @@ namespace OpenMod.EntityFrameworkCore.Extensions
             return AddDbContextInternal(containerBuilder, dbContextType, optionsBuilder, serviceLifetime);
         }
 
-        public static ContainerBuilder AddEntityFrameworkCore(this ContainerBuilder containerBuilder)
+        public static ContainerBuilder AddEntityFrameworkCoreMySql(this ContainerBuilder containerBuilder)
         {
-            ServiceCollection mysqlServices = new ServiceCollection();
-            mysqlServices.AddEntityFrameworkMySql();
-            containerBuilder.Populate(mysqlServices);
-
             containerBuilder.RegisterType<ConfigurationBasedConnectionStringAccessor>()
                 .As<ConfigurationBasedConnectionStringAccessor>()
                 .As<IConnectionStringAccessor>()
@@ -72,33 +67,21 @@ namespace OpenMod.EntityFrameworkCore.Extensions
         {
             serviceLifetime ??= ServiceLifetime.Scoped;
 
-            ServiceCollection dbContextServiceCollection = new ServiceCollection();
-            var addDbContextMethod = typeof(EntityFrameworkServiceCollectionExtensions)
-                .GetMethods(BindingFlags.Static | BindingFlags.Public)
-                .FirstOrDefault(method =>
+            containerBuilder
+                .Register(context =>
                 {
-                    var parameters = method.GetParameters();
-                    return method.Name.Equals("AddDbContext", StringComparison.OrdinalIgnoreCase)
-                           && method.IsGenericMethod && method.GetGenericArguments().Length == 1
-                           && parameters[0].ParameterType == typeof(IServiceCollection)
-                           && parameters[1].ParameterType == typeof(Action<DbContextOptionsBuilder>)
-                           && parameters[2].ParameterType == typeof(ServiceLifetime)
-                           && parameters[3].ParameterType == typeof(ServiceLifetime);
-                });
-     
-            if (addDbContextMethod == null)
-            {
-                throw new Exception("addDbContextMethod was null");
-            }
+                    var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
+                    optionsBuilder.UseLoggerFactory(context.Resolve<ILoggerFactory>());
 
-            addDbContextMethod = addDbContextMethod.MakeGenericMethod(dbContextType);
-            addDbContextMethod.Invoke(null,  new object[] { dbContextServiceCollection, optionsBuilderAction, serviceLifetime, ServiceLifetime.Scoped});
+                    var applicationServiceProvider = context.Resolve<IServiceProvider>();
+                    optionsBuilderAction?.Invoke(optionsBuilder);
+                    return Activator.CreateInstance(dbContextType, optionsBuilder.Options, applicationServiceProvider);
+                })
+                .As(dbContextType)
+                .WithLifetime(serviceLifetime.Value)
+                .OwnedByLifetimeScope();
 
-            containerBuilder.Populate(dbContextServiceCollection);
             return containerBuilder;
         }
     }
 }
-
-
-

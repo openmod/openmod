@@ -76,13 +76,20 @@ namespace OpenMod.Core.Plugins
         }
 
 
-        public virtual Task UnloadAsync()
+        public virtual async Task UnloadAsync()
         {
             m_CommandStoreOptions.Value.RemoveCommandSource(m_CommandSource);
             EventBus.Unsubscribe(this);
             IsComponentAlive = false;
 
-            return Task.CompletedTask;
+            if(Logger is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync();
+            }
+            else if(Logger is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         }
 
         public async ValueTask DisposeAsync()

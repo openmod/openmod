@@ -43,7 +43,7 @@ namespace UserDatabasePlugin
                 await m_DbContext.SaveChangesAsync();
             }
 
-            await m_DbContext.AddAsync(new UserActivity
+            await m_DbContext.UserActivities.AddAsync(new UserActivity
             {
                 Date = DateTime.UtcNow,
                 Type = @eventName,

@@ -1,11 +1,10 @@
 ﻿using System;
-using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OpenMod.API.Plugins;
 
 namespace OpenMod.EntityFrameworkCore
 {
@@ -18,24 +17,37 @@ namespace OpenMod.EntityFrameworkCore
                 .AddYamlFile("config.yaml", optional: false)
                 .Build();
 
+            var addDbContextMethod = typeof(EntityFrameworkServiceCollectionExtensions)
+                .GetMethods(BindingFlags.Static | BindingFlags.Public)
+                .FirstOrDefault(method =>
+                {
+                    var parameters = method.GetParameters();
+                    return method.Name.Equals("AddDbContext", StringComparison.OrdinalIgnoreCase)
+                           && method.IsGenericMethod && method.GetGenericArguments().Length == 1
+                           && parameters.Length == 4
+                           && parameters[0].ParameterType == typeof(IServiceCollection)
+                           && parameters[1].ParameterType == typeof(Action<DbContextOptionsBuilder>)
+                           && parameters[2].ParameterType == typeof(ServiceLifetime)
+                           && parameters[3].ParameterType == typeof(ServiceLifetime);
+                });
+
+            if (addDbContextMethod == null)
+            {
+                throw new Exception("addDbContextMethod was null");
+            }
+
+            addDbContextMethod = addDbContextMethod.MakeGenericMethod(typeof(TDbContext));
+
             var serviceCollection = new ServiceCollection();
+            serviceCollection.AddEntityFrameworkMySql();
             serviceCollection.AddSingleton(config);
             serviceCollection.AddSingleton<IConfiguration>(config);
             serviceCollection.AddTransient<IConnectionStringAccessor, ConfigurationBasedConnectionStringAccessor>();
+            addDbContextMethod.Invoke(null, new object[] { serviceCollection, null, ServiceLifetime.Scoped, ServiceLifetime.Scoped });
+           
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            var dbContextType = typeof(TDbContext);
-            var connectionStringName = dbContextType.GetCustomAttribute<ConnectionStringAttribute>()?.Name ?? ConnectionStrings.Default;
-            var connectionStringAccessor = serviceProvider.GetRequiredService<IConnectionStringAccessor>();
-            var connectionString = connectionStringAccessor.GetConnectionString(connectionStringName);
-            var componentId = dbContextType.Assembly.GetCustomAttribute<PluginMetadataAttribute>().Id;
-            var migrationTableName = "__" + componentId.Replace(".", "_") + "_MigrationsHistory";
-
-            var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
-            optionsBuilder.UseMySql(connectionString, x => x.MigrationsHistoryTable(migrationTableName));
-
-            optionsBuilder.UseApplicationServiceProvider(serviceProvider);
-            return (TDbContext) Activator.CreateInstance(typeof(TDbContext), optionsBuilder.Options);
+            return serviceProvider.GetRequiredService<TDbContext>();
         }
     }
 }

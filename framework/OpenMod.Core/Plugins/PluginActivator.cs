@@ -17,6 +17,7 @@ using OpenMod.API.Plugins;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
+using OpenMod.Core.Ioc.Extensions;
 using OpenMod.Core.Localization;
 using OpenMod.Core.Prioritization;
 
@@ -144,45 +145,17 @@ namespace OpenMod.Core.Plugins
                     foreach (var servicesRegistration in servicesRegistrations)
                     {
                         var implementationType = servicesRegistration.ServiceImplementationType;
-                        var builder = containerBuilder.RegisterType(implementationType)
+                        containerBuilder.RegisterType(implementationType)
                             .As(implementationType)
+                            .WithLifetime(servicesRegistration.Lifetime)
                             .OwnedByLifetimeScope();
-
-                        switch (servicesRegistration.Lifetime)
-                        {
-                            case ServiceLifetime.Singleton:
-                                builder.SingleInstance();
-                                break;
-                            case ServiceLifetime.Scoped:
-                                builder.InstancePerLifetimeScope();
-                                break;
-                            case ServiceLifetime.Transient:
-                                builder.InstancePerDependency();
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
 
                         foreach (var service in servicesRegistration.ServiceTypes)
                         {
-                            var serviceBuilder = containerBuilder.Register(c => c.Resolve(implementationType))
+                            containerBuilder.Register(c => c.Resolve(implementationType))
                                 .As(service)
+                                .WithLifetime(servicesRegistration.Lifetime)
                                 .OwnedByLifetimeScope();
-
-                            switch (servicesRegistration.Lifetime)
-                            {
-                                case ServiceLifetime.Singleton:
-                                    serviceBuilder.SingleInstance();
-                                    break;
-                                case ServiceLifetime.Scoped:
-                                    serviceBuilder.InstancePerLifetimeScope();
-                                    break;
-                                case ServiceLifetime.Transient:
-                                    serviceBuilder.InstancePerDependency();
-                                    break;
-                                default:
-                                    throw new ArgumentOutOfRangeException();
-                            }
                         }
                     }
 

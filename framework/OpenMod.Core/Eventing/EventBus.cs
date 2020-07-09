@@ -11,6 +11,7 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc.Extensions;
 using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Eventing
@@ -89,24 +90,10 @@ namespace OpenMod.Core.Eventing
 
                     var lifetime = type.GetCustomAttribute<EventListenerLifetimeAttribute>()?.Lifetime ?? ServiceLifetime.Transient;
 
-                    var registrationBuilder = builder.RegisterType(type)
+                    builder.RegisterType(type)
                         .As(type)
+                        .WithLifetime(lifetime)
                         .OwnedByLifetimeScope();
-
-                    switch (lifetime)
-                    {
-                        case ServiceLifetime.Singleton:
-                            registrationBuilder.SingleInstance();
-                            break;
-                        case ServiceLifetime.Scoped:
-                            registrationBuilder.InstancePerLifetimeScope();
-                            break;
-                        case ServiceLifetime.Transient:
-                            registrationBuilder.InstancePerRequest();
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
                 }
             }));
 

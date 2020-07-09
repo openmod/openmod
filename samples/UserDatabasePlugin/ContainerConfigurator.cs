@@ -1,7 +1,7 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using Microsoft.Extensions.Configuration;
 using OpenMod.API.Plugins;
-using OpenMod.EntityFrameworkCore;
 using OpenMod.EntityFrameworkCore.Extensions;
 using UserDatabasePlugin.Database;
 
@@ -14,7 +14,7 @@ namespace UserDatabasePlugin
             IConfiguration configuration,
             ContainerBuilder containerBuilder)
         {
-            containerBuilder.AddEntityFrameworkCore();
+            containerBuilder.AddEntityFrameworkCoreMySql();
             containerBuilder.AddDbContext<UserDatabaseDbContext>();
         }
     }
