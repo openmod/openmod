@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
+using Serilog;
 
 namespace OpenMod.Core.Helpers
 {
@@ -20,6 +21,11 @@ namespace OpenMod.Core.Helpers
 
             foreach (var resourceName in resourceNames)
             {
+                if (!resourceName.Contains(assembly.GetName().Name + "."))
+                {
+                    Log.Warning($"{resourceName} does not contain assembly name in assembly: {assembly.GetName().Name}. <AssemblyName> and <RootNamespace> must be equal inside your plugins .csproj file.");
+                }
+
                 var regex = new Regex(Regex.Escape(assembly.GetName().Name + "."));
                 var fileName = regex.Replace(resourceName, string.Empty, 1);
 
