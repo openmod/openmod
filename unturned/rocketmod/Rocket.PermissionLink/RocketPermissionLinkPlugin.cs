@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using OpenMod.Core.Plugins;
+using OpenMod.API.Plugins;
 using OpenMod.UnityEngine.Plugins;
 
 [assembly: PluginMetadata("Rocket.PermissionLink", Author = "OpenMod", DisplayName = "Rocket Permission Link")]

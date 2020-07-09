@@ -2,7 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using OpenMod.Core.Plugins;
+using OpenMod.API.Plugins;
 using OpenMod.Unturned.Plugins;
 
 [assembly: PluginMetadata("Rocket.Unturned", Author = "OpenMod", DisplayName = "OpenMod RocketMod Plugin")]
