@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.Core.Plugins;
+using OpenMod.API.Plugins;
 
 // For more, visit https://openmod.github.io/openmod-docs/development-guide/making-your-first-plugin/
 
