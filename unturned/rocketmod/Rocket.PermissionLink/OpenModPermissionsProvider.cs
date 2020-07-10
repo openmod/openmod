@@ -25,6 +25,11 @@ namespace Rocket.PermissionLink
 
         public bool HasPermission(IRocketPlayer player, List<string> requestedPermissions)
         {
+            if (requestedPermissions.Any(string.IsNullOrEmpty))
+            {
+                return true;
+            }
+
             var actor = ConvertToActor(player);
             return AsyncHelper.RunSync(async () =>
             {
