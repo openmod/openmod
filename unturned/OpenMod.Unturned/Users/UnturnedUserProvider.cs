@@ -67,12 +67,10 @@ namespace OpenMod.Unturned.Users
             }
 
             var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == player.playerID.steamID);
-            if (pending == null)
+            if (pending != null)
             {
-                return;
+                FinishSession(pending);
             }
-
-            FinishSession(pending);
 
             var user = new UnturnedUser(m_UserDataStore, player.player, pending);
             m_UnturnedUsers.Add(user);
@@ -104,6 +102,10 @@ namespace OpenMod.Unturned.Users
                 m_UnturnedUsers.Remove(user);
 
                 var userData = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
+                if (userData == null)
+                {
+                    return;
+                }
 
                 userData.LastSeen = DateTime.Now;
                 await m_UserDataStore.SaveUserDataAsync(userData);
@@ -141,6 +143,11 @@ namespace OpenMod.Unturned.Users
                 FinishSession(pending);
 
                 var userData = await m_UserDataStore.GetUserDataAsync(pending.Id, pending.Type);
+                if(userData == null)
+                {
+                    return;
+                }
+
                 userData.LastSeen = DateTime.Now;
                 await m_UserDataStore.SaveUserDataAsync(userData);
             });
@@ -174,9 +181,12 @@ namespace OpenMod.Unturned.Users
                 await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
 
                 var userData = await m_UserDataStore.GetUserDataAsync(pendingUser.Id, pendingUser.Type);
-                userData.LastSeen = DateTime.Now;
-                userData.LastDisplayName = pendingUser.DisplayName;
-                await m_UserDataStore.SaveUserDataAsync(userData);
+                if (userData != null)
+                {
+                    userData.LastSeen = DateTime.Now;
+                    userData.LastDisplayName = pendingUser.DisplayName;
+                    await m_UserDataStore.SaveUserDataAsync(userData);
+                }
 
                 m_PendingUsers.Add(pendingUser);
 
