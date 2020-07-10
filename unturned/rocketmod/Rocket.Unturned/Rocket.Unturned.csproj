@@ -5,7 +5,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageDescription>Rocket.Unturned integration for OpenMod</PackageDescription>
   	<PackageTags>openmod openmod-plugin unturned rocketmod</PackageTags>
-    <AssemblyVersion>4.9.3.2</AssemblyVersion>
+    <AssemblyVersion>4.9.3.3</AssemblyVersion>
     <TargetFramework>net461</TargetFramework>
     <Copyright>Sven Mawby</Copyright>
     <Authors>Sven Mawby;OpenMod</Authors>
