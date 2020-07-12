@@ -5,6 +5,7 @@ using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Users;
 using OpenMod.Core.Permissions;
+using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {
@@ -32,9 +33,9 @@ namespace OpenMod.Core.Commands.OpenModCommands
             }
 
             IPermissionActor target;
-            string permission;
 
             var actorType = Context.Parameters[0].ToLower();
+            var permission = "Manage." + actorType;
             var targetName = Context.Parameters[1];
             var permissionToUpdate = Context.Parameters[2];
 
@@ -56,21 +57,22 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 case "p":
                 case "player":
                     permission = "Manage.Players";
+                    actorType = KnownActorTypes.Player;
+                    goto default;
+
+                default:
                     var idOrName = await Context.Parameters.GetAsync<string>(1);
                     var user = await m_UserManager.FindUserAsync(actorType, idOrName, UserSearchMode.NameOrId);
 
                     if (user == null)
                     {
                         // todo: make localizable
-                        throw new UserFriendlyException($"User not found: {idOrName}");
+                        throw new UserFriendlyException($"Player not found: {idOrName}");
                     }
 
                     var userData = await m_UserDataStore.GetUserDataAsync(user.Id, actorType);
                     target = (UserDataPermissionActor)userData;
                     break;
-
-                default:
-                    throw new CommandWrongUsageException(Context);
             }
 
             if (await CheckPermissionAsync(permission) != PermissionGrantResult.Grant)

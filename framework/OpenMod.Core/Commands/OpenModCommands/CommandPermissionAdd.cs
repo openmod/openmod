@@ -23,7 +23,8 @@ namespace OpenMod.Core.Commands.OpenModCommands
             IPermissionChecker permissionChecker,
             IServiceProvider serviceProvider,
             IPermissionRoleStore permissionRoleStore,
-            IUserDataStore usersDataStore) : base(serviceProvider, permissionRoleStore, usersDataStore)
+            IUserDataStore usersDataStore,
+            IUserManager userManager) : base(serviceProvider, permissionRoleStore, usersDataStore, userManager)
         {
             m_PermissionChecker = permissionChecker;
         }

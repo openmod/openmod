@@ -11,7 +11,10 @@ namespace OpenMod.Core.Commands.OpenModCommands
     {
         private readonly IPermissionRoleStore m_PermissionRoleStore;
 
-        protected CommandRoleAction(IServiceProvider serviceProvider, IPermissionRoleStore permissionRoleStore, IUserDataStore userDataStore) : base(serviceProvider, permissionRoleStore, userDataStore)
+        protected CommandRoleAction(IServiceProvider serviceProvider, 
+            IPermissionRoleStore permissionRoleStore, 
+            IUserDataStore userDataStore,
+            IUserManager userManager) : base(serviceProvider, permissionRoleStore, userDataStore, userManager)
         {
             m_PermissionRoleStore = permissionRoleStore;
         }

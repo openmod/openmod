@@ -21,7 +21,8 @@ namespace OpenMod.Core.Commands.OpenModCommands
         public CommandPermissionRemove(IServiceProvider serviceProvider, 
             IPermissionRoleStore permissionRoleStore, 
             IUserDataStore usersDataStore, 
-            IPermissionChecker permissionChecker) : base(serviceProvider, permissionRoleStore, usersDataStore)
+            IPermissionChecker permissionChecker,
+            IUserManager userManager) : base(serviceProvider, permissionRoleStore, usersDataStore, userManager)
         {
             m_PermissionChecker = permissionChecker;
         }
