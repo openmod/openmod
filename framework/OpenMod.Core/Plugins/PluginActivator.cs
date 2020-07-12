@@ -77,7 +77,7 @@ namespace OpenMod.Core.Plugins
                 return null;
             }
 
-            var pluginTypes = assembly.FindTypes<IOpenModPlugin>(false).ToList();
+            var pluginTypes = assembly.FindTypes<IOpenModPlugin>().ToList();
             if (pluginTypes.Count == 0)
             {
                 m_Logger.LogError($"Failed to load plugin from assembly {assembly}: couldn't find any IOpenModPlugin implementation");
@@ -94,6 +94,9 @@ namespace OpenMod.Core.Plugins
             IOpenModPlugin pluginInstance;
             try
             {
+                assembly.GetTypes(); //this will cause a exception if some libs are missing, somehow is not catched in PluginAssemblyStore, we need to catched it here or otherise it will throw a exception at 'ServiceRegistrationHelper.FindFromAssembly'
+
+
                 var serviceProvider = m_LifetimeScope.Resolve<IServiceProvider>();
                 var lifetimeScope = m_LifetimeScope.BeginLifetimeScope(containerBuilder =>
                 {
@@ -167,6 +170,54 @@ namespace OpenMod.Core.Plugins
                 });
 
                 pluginInstance = (IOpenModPlugin)lifetimeScope.Resolve(pluginType);
+            }
+            catch (ReflectionTypeLoadException refEx)
+            {
+                var missingTypes = new List<string>();
+                for (var i = 0; i < refEx.LoaderExceptions.Length; i++)
+                {
+                    if (!(refEx.LoaderExceptions[i] is TypeLoadException typeEx))
+                        continue;
+
+                    var msgSplitted = typeEx.Message.Split(',');
+                    for (var j = msgSplitted.Length - 1; j > 0; j--)
+                    {
+                        /*
+                        System.TypeLoadException: Could not load type of field 'OpenMod.Economy.Helpers.MySqlHelper+<>c__DisplayClass3_0:action' (1) due to:
+                        Could not resolve type with token 01000028 (from typeref, class/assembly MySqlConnector.MySqlCommand, MySqlConnector, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d33d3e53aa5f8c92) 
+                        assembly:MySqlConnector, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d33d3e53aa5f8c92 type:MySqlConnector.MySqlCommand member:(null) signature:<none>
+                        
+                        We want to locate 'assembly:MySqlConnector, Version=1.0.0.0'*/
+                        if (!msgSplitted[j].TrimStart().StartsWith("Version=", StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        var packageName = msgSplitted[j - 1].Split(':').Last();
+                        if (!missingTypes.Contains(packageName))
+                            missingTypes.Add(packageName);
+
+                        break;
+                    }
+                }
+
+                if (missingTypes.Count > 0)
+                {
+                    m_Logger.LogError($"Some libraries are missing for plugin \"{pluginMetadata.Id}\"");
+                    m_Logger.LogError($"Missing type: {string.Join(", ", missingTypes)}.");
+                    m_Logger.LogInformation("Try install from: \"openmod install 'type'\"");
+                    return null;
+                }
+
+                m_Logger.LogError($"Failed to load plugin from type: {pluginType.FullName} in assembly: {assembly.FullName}");
+                m_Logger.LogError(refEx, $"Failed to load some types from plugin \"{pluginMetadata.Id}\"");
+                if (refEx.LoaderExceptions == null || refEx.LoaderExceptions.Length == 0) 
+                    return null;
+
+                foreach (var loaderException in refEx.LoaderExceptions)
+                {
+                    m_Logger.LogError(loaderException, "Loader Exception: ");
+                }
+
+                return null;
             }
             catch (Exception ex)
             {
