@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
+using HarmonyLib;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,6 +31,7 @@ namespace OpenMod.Core.Plugins
         public IRuntime Runtime { get; }
         public IEventBus EventBus { get; }
         protected ILogger Logger { get; set; }
+        protected Harmony Harmony { get; private set; }
 
         private readonly IOptions<CommandStoreOptions> m_CommandStoreOptions;
         private readonly ILoggerFactory m_LoggerFactory;
@@ -68,6 +70,10 @@ namespace OpenMod.Core.Plugins
             Logger.LogInformation($"[loading] {DisplayName} v{Version}");
             m_CommandSource = new OpenModComponentCommandSource(Logger, this);
             m_CommandStoreOptions.Value.AddCommandSource(m_CommandSource);
+
+            Harmony = new Harmony(OpenModComponentId);
+            Harmony.PatchAll(GetType().Assembly);
+
             IsComponentAlive = true;
 
             EventBus.Subscribe(this, GetType().Assembly);
@@ -78,6 +84,8 @@ namespace OpenMod.Core.Plugins
 
         public virtual async Task UnloadAsync()
         {
+            Harmony.UnpatchAll(OpenModComponentId);
+
             m_CommandStoreOptions.Value.RemoveCommandSource(m_CommandSource);
             EventBus.Unsubscribe(this);
             IsComponentAlive = false;
