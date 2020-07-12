@@ -12,13 +12,16 @@ namespace OpenMod.Core.Commands.OpenModCommands
     {
         private readonly IPermissionRoleStore m_PermissionRoleStore;
         private readonly IUserDataStore m_UserDataStore;
+        private readonly IUserManager m_UserManager;
 
         protected CommandPermissionAction(IServiceProvider serviceProvider,
             IPermissionRoleStore permissionRoleStore,
-            IUserDataStore userDataStore) : base(serviceProvider)
+            IUserDataStore userDataStore,
+            IUserManager userManager) : base(serviceProvider)
         {
             m_PermissionRoleStore = permissionRoleStore;
             m_UserDataStore = userDataStore;
+            m_UserManager = userManager;
         }
 
         protected override async Task OnExecuteAsync()
@@ -53,16 +56,17 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 case "p":
                 case "player":
                     permission = "Manage.Players";
-                    var id = await Context.Parameters.GetAsync<string>(1);
-                    var user = await m_UserDataStore.GetUserDataAsync(id, actorType);
+                    var idOrName = await Context.Parameters.GetAsync<string>(1);
+                    var user = await m_UserManager.FindUserAsync(actorType, idOrName, UserSearchMode.NameOrId);
 
                     if (user == null)
                     {
-                        // todo: localizable
-                        throw new UserFriendlyException($"User not found: {id}");
+                        // todo: make localizable
+                        throw new UserFriendlyException($"User not found: {idOrName}");
                     }
 
-                    target = (UserDataPermissionActor) user;
+                    var userData = await m_UserDataStore.GetUserDataAsync(user.Id, actorType);
+                    target = (UserDataPermissionActor)userData;
                     break;
 
                 default:
