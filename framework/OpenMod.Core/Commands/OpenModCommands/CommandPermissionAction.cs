@@ -54,7 +54,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 case "player":
                     permission = "Manage.Players";
                     var id = await Context.Parameters.GetAsync<string>(1);
-                    var user = await m_UserDataStore.GetUserDataAsync(id, actorType);
+                    var user = await m_UserDataStore.GetUserDataAsync(id, "player");
 
                     if (user == null)
                     {
