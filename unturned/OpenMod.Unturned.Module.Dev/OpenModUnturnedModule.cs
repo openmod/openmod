@@ -12,6 +12,8 @@ namespace OpenMod.Unturned.Module.Dev
 {
     public class OpenModUnturnedModule : IModuleNexus
     {
+        public Runtime.Runtime OpenModRuntime { get; private set; }
+        
         private OpenModSharedUnturnedModule m_SharedModule;
 
         public void initialize()
@@ -24,8 +26,9 @@ namespace OpenMod.Unturned.Module.Dev
         public void shutdown()
         {
             m_SharedModule.Shutdown();
+            OpenModRuntime = null;
         }
-        
+
         private void OnInitialize()
         {
             string openModDirectory = Path.GetFullPath($"Servers/{Dedicator.serverID}/OpenMod/");
@@ -46,8 +49,8 @@ namespace OpenMod.Unturned.Module.Dev
                 typeof(OpenModUnturnedHost).Assembly
             };
 
-            var runtime = new Runtime.Runtime();
-            runtime.Init(assemblies, parameters);
+            OpenModRuntime = new Runtime.Runtime();
+            OpenModRuntime.Init(assemblies, parameters);
         }
     }
 }

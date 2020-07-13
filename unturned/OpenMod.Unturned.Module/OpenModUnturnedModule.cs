@@ -12,6 +12,7 @@ namespace OpenMod.Unturned.Module
 {
     public class OpenModUnturnedModule : IModuleNexus
     {
+        public object OpenModRuntime { get; private set; }
         private OpenModSharedUnturnedModule m_SharedModule;
 
         public void initialize()
@@ -39,10 +40,10 @@ namespace OpenMod.Unturned.Module
 
             var bootrapper = new OpenModDynamicBootstrapper();
 
-            bootrapper.Bootstrap(
+            OpenModRuntime = bootrapper.Bootstrap(
                 openModDirectory,
                 Environment.GetCommandLineArgs(),
-                new []{ "OpenMod.Unturned" },
+                new[] { "OpenMod.Unturned" },
                 new[] { "OpenMod.Unturned.Redist", "OpenMod.UnityEngine.Redist" },
                 false,
                 new NuGetConsoleLogger());

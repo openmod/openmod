@@ -22,7 +22,7 @@ namespace OpenMod.Bootstrapper
     {
         public const string DefaultNugetRepository = "https://api.nuget.org/v3/index.json";
 
-        public Task BootstrapAsync(
+        public Task<object> BootstrapAsync(
             string openModFolder,
             string[] commandLineArgs,
             string packageId,
@@ -32,17 +32,17 @@ namespace OpenMod.Bootstrapper
             return BootstrapAsync(openModFolder, commandLineArgs, new List<string> { packageId }, Enumerable.Empty<string>(), allowPrereleaseVersions, logger);
         }
 
-        public void Bootstrap(string openModFolder,
+        public object Bootstrap(string openModFolder,
                               string[] commandLineArgs,
                               IEnumerable<string> packageIds,
                               IEnumerable<string> ignoredDependencies,
                               bool allowPrereleaseVersions = false,
                               ILogger logger = null)
         {
-            AsyncContext.Run(() => BootstrapAsync(openModFolder, commandLineArgs, packageIds, ignoredDependencies, allowPrereleaseVersions, logger));
+            return AsyncContext.Run(() => BootstrapAsync(openModFolder, commandLineArgs, packageIds, ignoredDependencies, allowPrereleaseVersions, logger));
         }
 
-        public async Task BootstrapAsync(
+        public async Task<object> BootstrapAsync(
             string openModFolder,
             string[] commandLineArgs,
             IEnumerable<string> packageIds,
@@ -123,7 +123,7 @@ namespace OpenMod.Bootstrapper
                 hostAssemblies.AddRange(packageAssemblies);
             }
 
-            await InitializeRuntimeAsync(nugetPackageManager, hostAssemblies, openModFolder, commandLineArgs);
+            return await InitializeRuntimeAsync(nugetPackageManager, hostAssemblies, openModFolder, commandLineArgs);
         }
 
         
@@ -133,7 +133,7 @@ namespace OpenMod.Bootstrapper
             return packageManager.LoadAssembliesFromNuGetPackageAsync(pkg);
         }
 
-        private Task InitializeRuntimeAsync(NuGetPackageManager packageManager, List<Assembly> hostAssemblies, string workingDirectory, string[] commandlineArgs)
+        private async Task<object> InitializeRuntimeAsync(NuGetPackageManager packageManager, List<Assembly> hostAssemblies, string workingDirectory, string[] commandlineArgs)
         {
             var runtimeAssembly = FindAssemblyInCurrentDomain("OpenMod.Runtime");
             var apiAssembly = FindAssemblyInCurrentDomain("OpenMod.API");
@@ -147,7 +147,8 @@ namespace OpenMod.Bootstrapper
             SetParameter(parameters, "PackageManager", packageManager);
             
             var initMethod = runtimeType.GetMethod("InitAsync", BindingFlags.Instance | BindingFlags.Public);
-            return (Task) initMethod?.Invoke(runtime, new[] {  hostAssemblies, parameters, null /* hostBuilderFunc */});
+            await (Task) initMethod.Invoke(runtime, new[] {  hostAssemblies, parameters, null /* hostBuilderFunc */});
+            return runtime;
         }
 
         
