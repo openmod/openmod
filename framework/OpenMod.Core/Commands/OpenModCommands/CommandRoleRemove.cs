@@ -16,7 +16,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
     {
         private readonly IPermissionRoleStore m_PermissionRoleStore;
 
-        public CommandRoleRemove(IServiceProvider serviceProvider, IPermissionRoleStore permissionRoleStore, IUserDataStore userDataStore) : base(serviceProvider, permissionRoleStore, userDataStore)
+        public CommandRoleRemove(IServiceProvider serviceProvider, IPermissionRoleStore permissionRoleStore, IUserDataStore userDataStore, IUserManager userManager) : base(serviceProvider, permissionRoleStore, userDataStore, userManager)
         {
             m_PermissionRoleStore = permissionRoleStore;
         }

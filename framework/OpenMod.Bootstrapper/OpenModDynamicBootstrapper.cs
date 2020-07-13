@@ -113,7 +113,7 @@ namespace OpenMod.Bootstrapper
                         logger.LogError($"Downloading has failed for {openModPackage.Identity.Id} v{openModPackage.Identity.Version.OriginalVersion}: {installResult.Code}");
                         if (packageIdentity == null)
                         {
-                            return;
+                            return null;
                         }
                     }
                 }
