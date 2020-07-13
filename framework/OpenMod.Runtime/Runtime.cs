@@ -49,7 +49,7 @@ namespace OpenMod.Runtime
 
         public IDataStore DataStore { get; private set; }
 
-        private IHost m_Host;
+        public IHost Host { get; private set; }
         private SerilogLoggerFactory m_LoggerFactory;
         private ILogger<Runtime> m_Logger;
 
@@ -128,15 +128,15 @@ namespace OpenMod.Runtime
                 .ConfigureServices(services => SetupServices(services, startup))
                 .UseSerilog();
 
-            m_Host = hostBuilder.Build();
-            m_AppLifeTime = m_Host.Services.GetRequiredService<IHostApplicationLifetime>();
+            Host = hostBuilder.Build();
+            m_AppLifeTime = Host.Services.GetRequiredService<IHostApplicationLifetime>();
             m_AppLifeTime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
 
             Status = RuntimeStatus.Initialized;
-            LifetimeScope = m_Host.Services.GetRequiredService<ILifetimeScope>();
-            DataStore = m_Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore("openmod", WorkingDirectory);
+            LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>();
+            DataStore = Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore("openmod", WorkingDirectory);
 
-            var eventBus = m_Host.Services.GetRequiredService<IEventBus>();
+            var eventBus = Host.Services.GetRequiredService<IEventBus>();
             foreach (var assembly in openModHostAssemblies)
             {
                 eventBus.Subscribe(this, assembly);
@@ -144,7 +144,7 @@ namespace OpenMod.Runtime
 
             try
             {
-                await m_Host.StartAsync();
+                await Host.StartAsync();
             }
             catch (Exception ex)
             {
@@ -152,7 +152,7 @@ namespace OpenMod.Runtime
                 m_Logger.LogCritical(ex, "OpenMod has crashed.");
                 Log.CloseAndFlush();
             }
-            return m_Host;
+            return Host;
         }
 
         public async Task ReloadAsync()
@@ -217,7 +217,7 @@ namespace OpenMod.Runtime
         public Task ShutdownAsync()
         {
             m_Logger.LogInformation("OpenMod is shutting down...");
-            m_Host.Dispose();
+            Host.Dispose();
             Status = RuntimeStatus.Unloaded;
             Log.CloseAndFlush();
             return Task.CompletedTask;

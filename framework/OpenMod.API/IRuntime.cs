@@ -47,5 +47,10 @@ namespace OpenMod.API
         /// </summary>
         /// <returns></returns>
         Task ReloadAsync();
+
+        /// <summary>
+        /// The .NET generic host instance
+        /// </summary>
+        IHost Host { get; }
     }
 }
