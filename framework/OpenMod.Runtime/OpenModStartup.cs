@@ -108,6 +108,12 @@ namespace OpenMod.Runtime
 
         internal void SetupContainer(ContainerBuilder containerBuilder)
         {
+            foreach (var servicesRegistration in m_ServiceRegistrations)
+            {
+                containerBuilder.RegisterType(servicesRegistration.ServiceImplementationType)
+                    .PropertiesAutowired();
+            }
+
             var containerConfiguratorTypes = m_Assemblies
                 .SelectMany(d => d.FindTypes<IContainerConfigurator>(false))
                 .OrderBy(d => d.GetPriority(), new PriorityComparer(PriortyComparisonMode.LowestFirst));

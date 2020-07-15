@@ -34,7 +34,8 @@ namespace OpenMod.Core.Ioc.Extensions
         public static ContainerBuilder PopulateServices(this ContainerBuilder containerBuilder, 
             ServiceCollection serviceCollection, 
             Func<ServiceDescriptor, bool> serviceFilter = null, 
-            bool replaceServices = false)
+            bool replaceServices = false,
+            bool autowire = true)
         {
             foreach (var descriptor in serviceCollection)
             {
@@ -61,6 +62,12 @@ namespace OpenMod.Core.Ioc.Extensions
                             .RegisterGeneric(descriptor.ImplementationType)
                             .As(descriptor.ServiceType)
                             .WithLifetime(descriptor.Lifetime);
+
+                        if (autowire)
+                        {
+                            registrator.PropertiesAutowired();
+                        }
+
                         if (!replaceServices)
                         {
                             registrator.IfNotRegistered(descriptor.ServiceType);
@@ -88,7 +95,12 @@ namespace OpenMod.Core.Ioc.Extensions
                             return descriptor.ImplementationFactory(serviceProvider);
                         })
                         .WithLifetime(descriptor.Lifetime);
-                    
+
+                    if (autowire)
+                    {
+                        registrator.PropertiesAutowired();
+                    }
+
                     var registration = registrator.CreateRegistration();
                     containerBuilder.RegisterComponent(registration);
                 }
@@ -99,6 +111,12 @@ namespace OpenMod.Core.Ioc.Extensions
                         .RegisterInstance(descriptor.ImplementationInstance)
                         .As(descriptor.ServiceType)
                         .WithLifetime(descriptor.Lifetime);
+
+                    if (autowire)
+                    {
+                        registrator.PropertiesAutowired();
+                    }
+
                     if (!replaceServices)
                     {
                         registrator.IfNotRegistered(descriptor.ServiceType);
