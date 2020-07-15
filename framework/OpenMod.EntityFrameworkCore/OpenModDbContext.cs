@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Plugins;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace OpenMod.EntityFrameworkCore
 {
@@ -13,6 +12,12 @@ namespace OpenMod.EntityFrameworkCore
     {
         private readonly IServiceProvider m_ServiceProvider;
         private readonly ILogger<OpenModDbContext<TSelf>> m_Logger;
+
+        protected OpenModDbContext(IServiceProvider serviceProvider)
+        {
+            m_ServiceProvider = serviceProvider;
+            m_Logger = serviceProvider.GetRequiredService<ILogger<OpenModDbContext<TSelf>>>();
+        }
 
         protected OpenModDbContext([NotNull] DbContextOptions<TSelf> options, IServiceProvider serviceProvider) : base(options)
         {
@@ -22,7 +27,6 @@ namespace OpenMod.EntityFrameworkCore
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            m_Logger.LogWarning("**** OnConfiguring");
             base.OnConfiguring(optionsBuilder);
 
             if (optionsBuilder.IsConfigured)
@@ -37,10 +41,8 @@ namespace OpenMod.EntityFrameworkCore
             var connectionStringName = dbContextType.GetCustomAttribute<ConnectionStringAttribute>()?.Name ?? ConnectionStrings.Default;
             var connectionString = connectionStringAccessor.GetConnectionString(connectionStringName);
 
-            m_Logger.LogWarning("**** UseMySql");
-            optionsBuilder.UseMySql(connectionString, options =>
+            optionsBuilder.UseMySQL(connectionString, options =>
             {
-                options.CharSetBehavior(CharSetBehavior.AppendToAllColumns);
                 options.MigrationsHistoryTable(migrationTableName);
             });
         }

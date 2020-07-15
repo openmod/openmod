@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MySql.Data.EntityFrameworkCore.Extensions;
 
 namespace OpenMod.EntityFrameworkCore
 {
@@ -39,7 +40,8 @@ namespace OpenMod.EntityFrameworkCore
             addDbContextMethod = addDbContextMethod.MakeGenericMethod(typeof(TDbContext));
 
             var serviceCollection = new ServiceCollection();
-            serviceCollection.AddEntityFrameworkMySql();
+            serviceCollection.AddLogging();
+            serviceCollection.AddEntityFrameworkMySQL();
             serviceCollection.AddSingleton(config);
             serviceCollection.AddSingleton<IConfiguration>(config);
             serviceCollection.AddTransient<IConnectionStringAccessor, ConfigurationBasedConnectionStringAccessor>();

@@ -16,11 +16,10 @@ namespace UserDatabasePlugin
         private readonly UserDatabaseDbContext m_DbContext;
 
         public UserDatabasePlugin(
-            UserDatabaseDbContext dbContext,
             ILogger<UserDatabasePlugin> logger,
             IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            m_DbContext = dbContext;
+            m_DbContext = new UserDatabaseDbContext(serviceProvider);
             m_Logger = logger;
         }
 

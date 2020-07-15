@@ -9,7 +9,7 @@ using UserDatabasePlugin.Database;
 namespace UserDatabasePlugin.Migrations
 {
     [DbContext(typeof(UserDatabaseDbContext))]
-    [Migration("20200706210346_Initial")]
+    [Migration("20200715194937_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,11 +22,11 @@ namespace UserDatabasePlugin.Migrations
             modelBuilder.Entity("UserDatabasePlugin.Database.User", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("varchar(36)")
                         .HasMaxLength(36);
 
                     b.Property<string>("Type")
-                        .HasColumnType("varchar(20) CHARACTER SET utf8mb4")
+                        .HasColumnType("varchar(20)")
                         .HasMaxLength(20);
 
                     b.HasKey("Id");
@@ -41,14 +41,14 @@ namespace UserDatabasePlugin.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime");
 
                     b.Property<string>("Type")
-                        .HasColumnType("varchar(32) CHARACTER SET utf8mb4")
+                        .HasColumnType("varchar(32)")
                         .HasMaxLength(32);
 
                     b.Property<string>("UserId")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(36)");
 
                     b.HasKey("Id");
 

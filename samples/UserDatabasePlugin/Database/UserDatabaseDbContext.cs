@@ -10,6 +10,10 @@ namespace UserDatabasePlugin.Database
         public DbSet<User> Users { get; set; }
         public DbSet<UserActivity> UserActivities { get; set; }
 
+        public UserDatabaseDbContext(IServiceProvider serviceProvider) : base(serviceProvider)
+        {
+        }
+
         public UserDatabaseDbContext(DbContextOptions<UserDatabaseDbContext> options, IServiceProvider serviceProvider) : base(options, serviceProvider)
         {
         }
