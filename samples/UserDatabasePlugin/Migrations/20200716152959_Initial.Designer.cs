@@ -9,7 +9,7 @@ using UserDatabasePlugin.Database;
 namespace UserDatabasePlugin.Migrations
 {
     [DbContext(typeof(UserDatabaseDbContext))]
-    [Migration("20200715194937_Initial")]
+    [Migration("20200716152959_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,7 +31,7 @@ namespace UserDatabasePlugin.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("UserDatabasePlugin_Users");
                 });
 
             modelBuilder.Entity("UserDatabasePlugin.Database.UserActivity", b =>
@@ -54,7 +54,7 @@ namespace UserDatabasePlugin.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserActivities");
+                    b.ToTable("UserDatabasePlugin_UserActivities");
                 });
 
             modelBuilder.Entity("UserDatabasePlugin.Database.UserActivity", b =>

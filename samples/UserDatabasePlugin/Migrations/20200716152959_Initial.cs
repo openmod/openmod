@@ -9,7 +9,7 @@ namespace UserDatabasePlugin.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "UserDatabasePlugin_Users",
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 36, nullable: false),
@@ -17,11 +17,11 @@ namespace UserDatabasePlugin.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_UserDatabasePlugin_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserActivities",
+                name: "UserDatabasePlugin_UserActivities",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -32,28 +32,28 @@ namespace UserDatabasePlugin.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserActivities", x => x.Id);
+                    table.PrimaryKey("PK_UserDatabasePlugin_UserActivities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserActivities_Users_UserId",
+                        name: "FK_UserDatabasePlugin_UserActivities_UserDatabasePlugin_Users_U~",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "UserDatabasePlugin_Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserActivities_UserId",
-                table: "UserActivities",
+                name: "IX_UserDatabasePlugin_UserActivities_UserId",
+                table: "UserDatabasePlugin_UserActivities",
                 column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "UserActivities");
+                name: "UserDatabasePlugin_UserActivities");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "UserDatabasePlugin_Users");
         }
     }
 }

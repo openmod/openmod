@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Plugins;
+using OpenMod.EntityFrameworkCore.Extensions;
 using UserDatabasePlugin.Database;
 
 [assembly: PluginMetadata("UserDatabasePlugin", Author = "OpenMod", DisplayName = "User Database Plugin")]
@@ -17,26 +17,18 @@ namespace UserDatabasePlugin
 
         public UserDatabasePlugin(
             ILogger<UserDatabasePlugin> logger,
-            IServiceProvider serviceProvider) : base(serviceProvider)
+            IServiceProvider serviceProvider,
+            UserDatabaseDbContext dbContext) : base(serviceProvider)
         {
-            m_DbContext = new UserDatabaseDbContext(serviceProvider);
+            m_DbContext = dbContext;
             m_Logger = logger;
         }
 
         protected override async Task OnLoadAsync()
         {
-            m_Logger.LogInformation($"Provider: { m_DbContext.Database.ProviderName}");
-            await m_DbContext.Database.MigrateAsync();
+            await m_DbContext.OpenModMigrateAsync();
 
             m_Logger.LogInformation("UserDatabase has been loaded.");
-        }
-
-        protected override async Task OnUnloadAsync()
-        {
-            if (m_DbContext != null)
-            {
-                await m_DbContext.DisposeAsync();
-            }
         }
     }
 }

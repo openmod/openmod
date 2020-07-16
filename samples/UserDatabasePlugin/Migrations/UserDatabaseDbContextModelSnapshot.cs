@@ -29,7 +29,7 @@ namespace UserDatabasePlugin.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("UserDatabasePlugin_Users");
                 });
 
             modelBuilder.Entity("UserDatabasePlugin.Database.UserActivity", b =>
@@ -52,7 +52,7 @@ namespace UserDatabasePlugin.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserActivities");
+                    b.ToTable("UserDatabasePlugin_UserActivities");
                 });
 
             modelBuilder.Entity("UserDatabasePlugin.Database.UserActivity", b =>

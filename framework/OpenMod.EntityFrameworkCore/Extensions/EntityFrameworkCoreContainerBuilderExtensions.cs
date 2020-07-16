@@ -74,9 +74,11 @@ namespace OpenMod.EntityFrameworkCore.Extensions
                     optionsBuilder.UseLoggerFactory(context.Resolve<ILoggerFactory>());
 
                     var applicationServiceProvider = context.Resolve<IServiceProvider>();
+                    optionsBuilder.UseApplicationServiceProvider(applicationServiceProvider);
                     optionsBuilderAction?.Invoke(optionsBuilder);
-                    return Activator.CreateInstance(dbContextType, optionsBuilder.Options, applicationServiceProvider);
+                    return ActivatorUtilities.CreateInstance(applicationServiceProvider, dbContextType, optionsBuilder.Options);
                 })
+                .PropertiesAutowired()
                 .As(dbContextType)
                 .WithLifetime(serviceLifetime.Value)
                 .OwnedByLifetimeScope();
