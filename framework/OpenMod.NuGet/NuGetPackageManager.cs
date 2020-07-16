@@ -439,7 +439,7 @@ namespace OpenMod.NuGet
             
             m_Logger.LogDebug(result == null
                 ? $"Failed to resolve {args.Name}"
-                : $"Resoled assembly from NuGet: {args.Name} @ v{result.GetName().Version}");
+                : $"Resolved assembly from NuGet: {args.Name} @ v{result.GetName().Version}");
 
             return result;
         }
