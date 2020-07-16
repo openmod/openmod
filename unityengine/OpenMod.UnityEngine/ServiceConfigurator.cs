@@ -8,6 +8,7 @@ namespace OpenMod.UnityEngine
     {
         public void ConfigureServices(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection)
         {
+            // bug: this method doesn't get called
             serviceCollection.AddSingleton<IHostLifetime, UnityHostLifetime>();
         }
     }
