@@ -156,7 +156,6 @@ namespace OpenMod.Core.Helpers
         {
             const BindingFlags bindingFlags =
                 BindingFlags.Instance
-                | BindingFlags.NonPublic
                 | BindingFlags.Public
                 | BindingFlags.IgnoreCase;
 
