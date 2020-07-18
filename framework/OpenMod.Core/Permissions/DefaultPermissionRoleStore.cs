@@ -207,7 +207,7 @@ namespace OpenMod.Core.Permissions
             return Task.FromResult(result);
         }
 
-        public async Task SavePersistentDataAsync<T>(string roleId, string key, T data) where T : class
+        public async Task SavePersistentDataAsync<T>(string roleId, string key, T data)
         {
             if (m_PermissionRolesDataStore.Roles == null)
             {
