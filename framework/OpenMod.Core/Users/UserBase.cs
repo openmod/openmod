@@ -28,7 +28,7 @@ namespace OpenMod.Core.Users
 
         public abstract Task PrintMessageAsync(string message, Color color);
 
-        public async Task SavePersistentDataAsync<T>(string key, T data) where T : class
+        public async Task SavePersistentDataAsync<T>(string key, T data)
         {
             var userData = await m_UserDataStore.GetUserDataAsync(Id, Type);
             userData.Data ??= new Dictionary<string, object>();
@@ -44,33 +44,9 @@ namespace OpenMod.Core.Users
             await m_UserDataStore.SaveUserDataAsync(userData);
         }
 
-        public async Task<T> GetPersistentDataAsync<T>(string key) where T : class
+        public async Task<T> GetPersistentDataAsync<T>(string key)
         {
-            var data = await m_UserDataStore.GetUserDataAsync(Id, Type);
-            if (!data.Data.ContainsKey(key))
-            {
-                return null;
-            }
-
-            var dataObject = data.Data[key];
-
-            if (dataObject is T obj)
-            {
-                return obj;
-            }
-
-            if (dataObject.GetType().HasConversionOperator(typeof(T)))
-            {
-                // ReSharper disable once PossibleInvalidCastException
-                return (T) dataObject;
-            }
-
-            if (dataObject is Dictionary<string, object> dict)
-            {
-                return dict.ToObject<T>();
-            }
-
-            throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
+            return await m_UserDataStore.GetUserDataAsync<T>(Id, Type, key);
         }
     }
 }

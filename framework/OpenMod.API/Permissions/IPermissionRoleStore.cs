@@ -72,11 +72,11 @@ namespace OpenMod.API.Permissions
         /// <summary>
         ///   Saves persistent data. T must be serializable.
         /// </summary>
-        Task SavePersistentDataAsync<T>(string roleId, string key, T data) where T : class;
+        Task SavePersistentDataAsync<T>(string roleId, string key, T data);
 
         /// <summary>
         ///   Gets persistent data. T must be serializable.
         /// </summary>
-        Task<T> GetPersistentDataAsync<T>(string roleId, string key) where T : class;
+        Task<T> GetPersistentDataAsync<T>(string roleId, string key);
     }
 }

@@ -72,6 +72,40 @@ namespace OpenMod.Core.Permissions
             return Task.FromResult(role);
         }
 
+        public Task<T> GetRoleDataAsync<T>(string roleId, string key)
+        {
+            var roleData = Roles.FirstOrDefault(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase));
+            if (roleData == null)
+            {
+                return Task.FromException<T>(new Exception($"Role does not exist: {roleId}"));
+            }
+
+            if (!roleData.Data.ContainsKey(key))
+            {
+                return Task.FromResult<T>(default);
+            }
+
+            var dataObject = roleData.Data[key];
+
+            if (dataObject is T obj)
+            {
+                return Task.FromResult(obj);
+            }
+
+            if (dataObject.GetType().HasConversionOperator(typeof(T)))
+            {
+                // ReSharper disable once PossibleInvalidCastException
+                return Task.FromResult((T)dataObject);
+            }
+
+            if (dataObject is Dictionary<object, object> dict)
+            {
+                return Task.FromResult(dict.ToObject<T>());
+            }
+
+            throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
+        }
+
         public virtual async Task ReloadAsync()
         {
             Roles = (await m_DataStore.LoadAsync<PermissionRolesData>(RolesKey))?.Roles ?? new List<PermissionRoleData>();

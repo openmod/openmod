@@ -14,7 +14,7 @@ namespace OpenMod.Core.Helpers
     {
         public static MethodBase GetCallingMethod(Type[] skipTypes = null, MethodBase[] skipMethods = null, bool applyAsyncMethodPatch = true)
         {
-            var skipList = new List<Type>(skipTypes ?? new Type[0]) {typeof(ReflectionExtensions)};
+            var skipList = new List<Type>(skipTypes ?? new Type[0]) { typeof(ReflectionExtensions) };
 
             var st = new StackTrace();
             var frameTarget = (StackFrame)null;
@@ -60,7 +60,7 @@ namespace OpenMod.Core.Helpers
 
                 if (skipMethods?.Any(c => c == frameMethod) ?? false)
                     continue;
-                    
+
                 frameTarget = frame;
                 break;
             }
@@ -152,15 +152,30 @@ namespace OpenMod.Core.Helpers
             method.Invoke(instance, @params.ToArray());
         }
 
-        public static T ToObject<T>(this Dictionary<string, object> dict)
+        public static T ToObject<T>(this Dictionary<object, object> dict)
         {
-            Type type = typeof(T);
+            const BindingFlags bindingFlags =
+                BindingFlags.Instance
+                | BindingFlags.NonPublic
+                | BindingFlags.Public
+                | BindingFlags.IgnoreCase;
+
+            var type = typeof(T);
             var obj = Activator.CreateInstance(type);
 
             foreach (var kv in dict)
             {
-                type.GetProperty(kv.Key).SetValue(obj, kv.Value);
+                var prop = type.GetProperty(kv.Key.ToString(), bindingFlags);
+                if (prop != null)
+                {
+                    prop.SetValue(obj, kv.Value);
+                    continue;
+                }
+
+                var field = type.GetField(kv.Key.ToString(), bindingFlags);
+                field?.SetValue(obj, kv.Value);
             }
+
             return (T)obj;
         }
 

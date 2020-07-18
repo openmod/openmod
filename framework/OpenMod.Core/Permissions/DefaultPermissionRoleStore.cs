@@ -232,43 +232,11 @@ namespace OpenMod.Core.Permissions
             await m_PermissionRolesDataStore.SaveChangesAsync();
         }
 
-        public Task<T> GetPersistentDataAsync<T>(string roleId, string key) where T : class
+        public Task<T> GetPersistentDataAsync<T>(string roleId, string key)
         {
-            if (m_PermissionRolesDataStore.Roles == null)
-            {
-                return default;
-            }
-
-            var roleData = m_PermissionRolesDataStore.Roles.FirstOrDefault(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase));
-            if (roleData == null)
-            {
-                return Task.FromException<T>(new Exception($"Role does not exist: {roleId}"));
-            }
-
-            if (!roleData.Data.ContainsKey(key))
-            {
-                return Task.FromResult<T>(null);
-            }
-
-            var dataObject = roleData.Data[key];
-
-            if (dataObject is T obj)
-            {
-                return Task.FromResult(obj);
-            }
-
-            if (dataObject.GetType().HasConversionOperator(typeof(T)))
-            {
-                // ReSharper disable once PossibleInvalidCastException
-                return Task.FromResult((T)dataObject);
-            }
-
-            if (dataObject is Dictionary<string, object> dict)
-            {
-                return Task.FromResult(dict.ToObject<T>());
-            }
-
-            throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
+            return m_PermissionRolesDataStore.Roles == null 
+                ? default 
+                : m_PermissionRolesDataStore.GetRoleDataAsync<T>(roleId, key);
         }
 
         protected IEnumerable<IPermissionRole> GetAutoAssignRoles()

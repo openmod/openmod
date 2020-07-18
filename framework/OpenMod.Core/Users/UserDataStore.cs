@@ -8,6 +8,7 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
+using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Users
 {
@@ -29,7 +30,35 @@ namespace OpenMod.Core.Users
             return usersData.Users.FirstOrDefault(d => d.Type.Equals(userType, StringComparison.OrdinalIgnoreCase)
                                                && d.Id.Equals(userId, StringComparison.OrdinalIgnoreCase));
         }
-        
+
+        public async Task<T> GetUserDataAsync<T>(string userId, string userType, string key)
+        {
+            var data = await GetUserDataAsync(userId, userType);
+            if (!data.Data.ContainsKey(key))
+            {
+                return default;
+            }
+
+            var dataObject = data.Data[key];
+            if (dataObject is T obj)
+            {
+                return obj;
+            }
+
+            if (dataObject.GetType().HasConversionOperator(typeof(T)))
+            {
+                // ReSharper disable once PossibleInvalidCastException
+                return (T)dataObject;
+            }
+
+            if (dataObject is Dictionary<object, object> dict)
+            {
+                return dict.ToObject<T>();
+            }
+
+            throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
+        }
+
         public async Task<IReadOnlyCollection<UserData>> GetUsersDataAsync(string type)
         {
             var usersData = await GetUsersDataAsync();
