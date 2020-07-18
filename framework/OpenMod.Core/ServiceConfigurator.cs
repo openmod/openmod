@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Ioc;
+using OpenMod.API.Plugins;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Console;
 using OpenMod.Core.Localization;
 using OpenMod.Core.Permissions;
+using OpenMod.Core.Plugins;
 using OpenMod.Core.Users;
 
 namespace OpenMod.Core
@@ -37,6 +38,7 @@ namespace OpenMod.Core
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
+            serviceCollection.AddTransient(typeof(IPluginAccessor<>), typeof(PluginAccessor<>));
             serviceCollection.AddSingleton<IAutoCompleteHandler, CommandAutoCompleteHandler>();
         }
     }
