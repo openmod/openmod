@@ -16,5 +16,10 @@ namespace OpenMod.API.Eventing
         ///     The arguments of the event.
         /// </summary>
         Dictionary<string, object> Arguments { get; }
+
+        /// <summary>
+        ///    Event data
+        /// </summary>
+        Dictionary<string, object> Data { get; }
     }
 }

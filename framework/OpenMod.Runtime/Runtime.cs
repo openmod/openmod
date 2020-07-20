@@ -15,6 +15,7 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 using Semver;
@@ -141,6 +142,9 @@ namespace OpenMod.Runtime
             {
                 eventBus.Subscribe(this, assembly);
             }
+
+            var @event = new OpenModInitializedEvent(Host);
+            await eventBus.EmitAsync(this, this, @event);
 
             try
             {

@@ -24,5 +24,7 @@ namespace OpenMod.Core.Eventing
         }
 
         public abstract Dictionary<string, object> Arguments { get; }
+
+        public Dictionary<string, object> Data { get; } = new Dictionary<string, object>();
     }
 }
