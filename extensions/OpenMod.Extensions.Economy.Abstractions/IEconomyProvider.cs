@@ -7,6 +7,10 @@ namespace OpenMod.Extensions.Economy.Abstractions
     [Service]
     public interface IEconomyProvider
     {
+        string CurrencyName { get; }
+
+        string CurrencySymbol { get; }
+
         /// <summary>
         /// Get's the balance of an user.
         /// </summary>
