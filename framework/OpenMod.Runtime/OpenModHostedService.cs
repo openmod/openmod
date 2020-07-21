@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -8,6 +6,8 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
+using OpenMod.Core.Ioc;
+using OpenMod.Core.Plugins;
 using SmartFormat;
 
 namespace OpenMod.Runtime
@@ -16,35 +16,38 @@ namespace OpenMod.Runtime
     {
         private readonly ILogger<OpenModHostedService> m_Logger;
         private readonly IPermissionChecker m_PermissionChecker;
-        private readonly IRuntime m_Runtime;
         private readonly IOpenModHost m_Host;
         private readonly IPluginAssemblyStore m_PluginAssemblyStore;
         private readonly IPluginActivator m_PluginActivator;
+        private readonly IEventBus m_EventBus;
 
         public OpenModHostedService(
             ILogger<OpenModHostedService> logger,
             IPermissionChecker permissionChecker,
-            IRuntime runtime,
             IOpenModHost host,
             IPluginAssemblyStore pluginAssemblyStore,
-            IPluginActivator pluginActivator
+            IPluginActivator pluginActivator,
+            IEventBus eventBus
         )
         {
             m_Logger = logger;
             m_PermissionChecker = permissionChecker;
-            m_Runtime = runtime;
             m_Host = host;
             m_PluginAssemblyStore = pluginAssemblyStore;
             m_PluginActivator = pluginActivator;
+            m_EventBus = eventBus;
         }
  
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await m_PermissionChecker.InitAsync();
-            Smart.Default.Parser.UseAlternativeEscapeChar('\\');
+            Smart.Default.Parser.UseAlternativeEscapeChar();// '\\' is the default value
 
             m_Logger.LogInformation($"Initializing for host: {m_Host.HostDisplayName} v{m_Host.HostVersion}");
             await m_Host.InitAsync();
+
+            var initializedEvent = new OpenModInitializedEvent(m_Host);
+            await m_EventBus.EmitAsync(m_Host, this, initializedEvent);
 
             m_Logger.LogInformation("Loading plugins...");
 
@@ -58,6 +61,9 @@ namespace OpenMod.Runtime
             }
 
             m_Logger.LogInformation($"> {i} plugins loaded.");
+
+            var pluginsLoadedEvent = new OpenModPluginsLoadedEvent(m_PluginAssemblyStore);
+            await m_EventBus.EmitAsync(m_Host, this, pluginsLoadedEvent);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

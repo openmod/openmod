@@ -1,13 +1,14 @@
 ﻿using Microsoft.Extensions.Hosting;
+using OpenMod.API;
 using OpenMod.Core.Eventing;
 
 namespace OpenMod.Core.Ioc
 {
     public sealed class OpenModInitializedEvent : Event
     {
-        public IHost Host { get; }
+        public IOpenModHost Host { get; }
 
-        public OpenModInitializedEvent(IHost host)
+        public OpenModInitializedEvent(IOpenModHost host)
         {
             Host = host;
         }
