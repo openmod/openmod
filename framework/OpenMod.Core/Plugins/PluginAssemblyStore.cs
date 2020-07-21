@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Plugins;
-using OpenMod.Core.Helpers;
-using Serilog;
 
 namespace OpenMod.Core.Plugins
 {
@@ -52,24 +51,50 @@ namespace OpenMod.Core.Plugins
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
-                    m_Logger.LogTrace(ex, $"Failed to load some types from plugin \"{pluginMetadata.Id}\"");
+                    var missingTypes = new List<string>();
+                    for (var i = 0; i < ex.LoaderExceptions.Length; i += 2)
+                    {
+                        if (i + 1 >= ex.LoaderExceptions.Length)
+                            break;
+
+                        if (!(ex.LoaderExceptions[i] is TypeLoadException &&
+                              ex.LoaderExceptions[i + 1] is FileNotFoundException fileEx))
+                        {
+                            i--;
+                            continue;
+                        }
+
+                        var packageName = fileEx.FileName.Split(',')[0];
+                        if (!missingTypes.Contains(packageName))
+                            missingTypes.Add(packageName);
+                    }
+
+                    if (missingTypes.Count > 0)
+                    {
+                        m_Logger.LogInformation($"Some libraries are missing for plugin \"{pluginMetadata.Id}\"");
+                        m_Logger.LogInformation($"Missing type: {string.Join(", ", missingTypes)}.");
+                        m_Logger.LogInformation("Try install from: \"openmod install 'type'\"");
+                        providerAssemblies.Remove(providerAssembly);
+                        continue;
+                    }
+
+                    m_Logger.LogInformation(ex, $"Failed to load some types from plugin \"{pluginMetadata.Id}\"");
                     if (ex.LoaderExceptions != null && ex.LoaderExceptions.Length > 0)
                     {
                         foreach (var loaderException in ex.LoaderExceptions)
                         {
-                            m_Logger.LogTrace(loaderException, "Loader Exception: ");
+                            m_Logger.LogInformation(loaderException, "Loader Exception: ");
                         }
                     }
 
                     types = ex.Types.Where(d => d != null).ToArray();
                 }
 
-                if (!types.Any(d => typeof(IOpenModPlugin).IsAssignableFrom(d) && !d.IsAbstract && d.IsClass))
-                {
-                    m_Logger.LogWarning($"No {nameof(IOpenModPlugin)} implementation found in assembly: {providerAssembly}; skipping loading of this assembly as plugin");
-                    providerAssemblies.Remove(providerAssembly);
+                if (types.Any(d => typeof(IOpenModPlugin).IsAssignableFrom(d) && !d.IsAbstract && d.IsClass)) 
                     continue;
-                }
+
+                m_Logger.LogWarning($"No {nameof(IOpenModPlugin)} implementation found in assembly: {providerAssembly}; skipping loading of this assembly as plugin");
+                providerAssemblies.Remove(providerAssembly);
             }
 
             m_LoadedPluginAssemblies.AddRange(providerAssemblies.Select(d => new WeakReference(d)));
