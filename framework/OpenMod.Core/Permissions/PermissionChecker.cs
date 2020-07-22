@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace OpenMod.Core.Permissions
 {
@@ -19,16 +20,21 @@ namespace OpenMod.Core.Permissions
         private bool m_IsDisposing;
 
         private readonly IServiceProvider m_ServiceProvider;
+        private readonly IPermissionRegistry m_PermissionRegistry;
         private readonly IOptions<PermissionCheckerOptions> m_Options;
         private readonly List<IPermissionStore> m_PermissionSources;
         private readonly List<IPermissionCheckProvider> m_PermissionCheckProviders;
-
+        private readonly ILogger<PermissionChecker> m_Logger;
         public PermissionChecker(
             IServiceProvider serviceProvider,
-            IOptions<PermissionCheckerOptions> options)
+            IPermissionRegistry permissionRegistry,
+            IOptions<PermissionCheckerOptions> options, 
+            ILogger<PermissionChecker> logger)
         {
             m_ServiceProvider = serviceProvider;
+            m_PermissionRegistry = permissionRegistry;
             m_Options = options;
+            m_Logger = logger;
             m_PermissionSources = new List<IPermissionStore>();
             m_PermissionCheckProviders = new List<IPermissionCheckProvider>();
         }
@@ -39,18 +45,26 @@ namespace OpenMod.Core.Permissions
 
         public async Task<PermissionGrantResult> CheckPermissionAsync(IPermissionActor actor, string permission)
         {
+            var registration = m_PermissionRegistry.FindPermission(permission);
+            if (registration == null)
+            {
+                throw new Exception($"Permission is not registered: {permission}");
+            }
+
             foreach (var provider in m_PermissionCheckProviders.Where(c => c.SupportsActor(actor)))
             {
                 var result = await provider.CheckPermissionAsync(actor, permission);
                 if (result != PermissionGrantResult.Default)
                 {
+                    m_Logger.LogDebug($"{actor.Type}/{actor.DisplayName} permission check result for \"{permission}\" ({provider.GetType().Name}): {result}");
                     return result;
                 }
             }
 
-            return PermissionGrantResult.Default;
+            m_Logger.LogDebug($"{actor.Type}/{actor.DisplayName} permission check result for \"{permission}\" (default): {registration.DefaultGrant}");
+            return registration.DefaultGrant;
         }
-
+        
         public Task InitAsync()
         {
             foreach (var permissionSourceType in m_Options.Value.PermissionSources)

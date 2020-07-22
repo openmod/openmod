@@ -45,6 +45,7 @@ namespace UserDatabasePlugin
 
             await m_DbContext.UserActivities.AddAsync(new UserActivity
             {
+                UserName = user.DisplayName,
                 Date = DateTime.UtcNow,
                 Type = @eventName,
                 UserId = user.Id

@@ -13,9 +13,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Eventing;
+using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
+using OpenMod.Core.Permissions;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 using Semver;
@@ -36,7 +38,7 @@ namespace OpenMod.Runtime
 
         public SemVersion Version { get; }
 
-        public string OpenModComponentId { get; } = "OpenMod.Runtime";
+        public string OpenModComponentId { get; } = "OpenMod.Core";
 
         public bool IsComponentAlive => Status != RuntimeStatus.Unloaded && Status != RuntimeStatus.Crashed;
 
@@ -134,7 +136,18 @@ namespace OpenMod.Runtime
             m_AppLifeTime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
 
             Status = RuntimeStatus.Initialized;
-            LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>();
+            LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>().BeginLifetimeScope(containerBuilder =>
+            {
+                containerBuilder.Register(ctx => this)
+                    .As<IOpenModComponent>()
+                    .SingleInstance()
+                    .ExternallyOwned();
+
+                containerBuilder.RegisterType<ScopedPermissionChecker>()
+                    .As<IPermissionChecker>()
+                    .InstancePerLifetimeScope()
+                    .OwnedByLifetimeScope();
+            });
             DataStore = Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore("openmod", WorkingDirectory);
 
             var eventBus = Host.Services.GetRequiredService<IEventBus>();

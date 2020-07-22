@@ -4,6 +4,7 @@ using Autofac.Util;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Commands;
+using OpenMod.API.Permissions;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 
@@ -11,15 +12,14 @@ namespace OpenMod.Core.Commands
 {
     public class OpenModComponentCommandSource : ICommandSource
     {
+
         private readonly ILogger m_Logger;
         private readonly IOpenModComponent m_OpenModComponent;
 
-        public OpenModComponentCommandSource(ILogger logger, IOpenModComponent openModComponent) : this(logger, openModComponent, openModComponent.GetType().Assembly)
-        {
-
-        }
-
-        public OpenModComponentCommandSource(ILogger logger, IOpenModComponent openModComponent, Assembly assembly)
+        public OpenModComponentCommandSource(
+            ILogger logger, 
+            IOpenModComponent openModComponent, 
+            Assembly assembly)
         {
             m_Logger = logger;
             m_OpenModComponent = openModComponent;
@@ -44,7 +44,9 @@ namespace OpenMod.Core.Commands
                     continue;
                 }
 
-                Commands.Add(new OpenModComponentBoundCommandRegistration(m_OpenModComponent, type));
+                var registatration = new OpenModComponentBoundCommandRegistration(m_OpenModComponent, type);
+
+                Commands.Add(registatration);
             }
 
             try

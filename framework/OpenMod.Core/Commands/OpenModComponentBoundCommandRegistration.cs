@@ -5,7 +5,9 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Commands;
+using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
+using OpenMod.Core.Permissions;
 
 namespace OpenMod.Core.Commands
 {
@@ -39,6 +41,16 @@ namespace OpenMod.Core.Commands
             Aliases = memberInfo.GetCustomAttributes<CommandAliasAttribute>().Select(d => d.Alias).ToList();
             Syntax = memberInfo.GetCustomAttribute<CommandSyntaxAttribute>()?.Syntax;
 
+            PermissionRegistrations = memberInfo.GetCustomAttributes<RegisterCommandPermissionAttribute>()
+                .Select(d => new PermissionRegistration
+                {
+                    DefaultGrant = d.DefaultGrant ?? PermissionGrantResult.Default,
+                    Description = d.Description,
+                    Owner = Component,
+                    Permission = d.Permission
+                })
+                .ToList();
+
             Id = CommandType != null 
                 ? CommandType.FullName 
                 : $"{CommandMethod.DeclaringType.FullName}.{CommandMethod.Name}";
@@ -57,8 +69,11 @@ namespace OpenMod.Core.Commands
         public string Syntax { get; private set; }
         public string Id { get; set; }
         public string Name { get; set; }
+
+
         public string Description { get; set; }
         public Priority Priority { get; set; }
+        public IReadOnlyCollection<IPermissionRegistration> PermissionRegistrations { get; set; }
         public IReadOnlyCollection<string> Aliases { get; set; }
         public string ParentId { get; set; }
 

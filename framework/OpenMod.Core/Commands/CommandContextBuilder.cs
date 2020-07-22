@@ -11,6 +11,8 @@ using OpenMod.API.Prioritization;
 
 namespace OpenMod.Core.Commands
 {
+    // todo: add CreateContext from an ICommandRegistration instance directly 
+
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Transient, Priority = Priority.Lowest)]
     public class CommandContextBuilder : ICommandContextBuilder
@@ -68,7 +70,12 @@ namespace OpenMod.Core.Commands
 
         private ICommandRegistration GetCommandRegistration(ICommandActor actor, string name, IEnumerable<ICommandRegistration> commandRegistrations)
         {
-            var baseQuery = commandRegistrations.Where(d => d.SupportsActor(actor));
+            var baseQuery = commandRegistrations;
+
+            if (actor != null)
+            {
+                baseQuery = baseQuery.Where(d => d.SupportsActor(actor));
+            }
 
             // todo: could be done in a single iteration
             // ReSharper disable PossibleMultipleEnumeration

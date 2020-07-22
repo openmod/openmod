@@ -19,11 +19,13 @@ namespace OpenMod.Core.Plugins
 {
     public abstract class OpenModPluginBase : IOpenModPlugin, IAsyncDisposable
     {
+        private readonly IServiceProvider m_ServiceProvider;
         public virtual string OpenModComponentId { get; }
         public virtual string WorkingDirectory { get; }
         public virtual bool IsComponentAlive { get; protected set; }
         public virtual string DisplayName { get; }
         public virtual string Author { get; }
+        public string Website { get; }
         public virtual SemVersion Version { get; }
         public virtual IDataStore DataStore { get; }
         public virtual ILifetimeScope LifetimeScope { get; }
@@ -39,6 +41,7 @@ namespace OpenMod.Core.Plugins
 
         protected OpenModPluginBase(IServiceProvider serviceProvider)
         {
+            m_ServiceProvider = serviceProvider;
             LifetimeScope = serviceProvider.GetRequiredService<ILifetimeScope>();
             Configuration = serviceProvider.GetRequiredService<IConfiguration>();
             DataStore = serviceProvider.GetRequiredService<IDataStore>();
@@ -56,6 +59,7 @@ namespace OpenMod.Core.Plugins
                 : metadata.Id;
 
             Author = metadata.Author;
+            Website = metadata.Website;
             WorkingDirectory = PluginHelper.GetWorkingDirectory(Runtime, metadata.Id);
         }
 
@@ -68,7 +72,8 @@ namespace OpenMod.Core.Plugins
         {
             Logger = m_LoggerFactory.CreateLogger(GetType());
             Logger.LogInformation($"[loading] {DisplayName} v{Version}");
-            m_CommandSource = new OpenModComponentCommandSource(Logger, this);
+
+            m_CommandSource = new OpenModComponentCommandSource(Logger, this, GetType().Assembly);
             m_CommandStoreOptions.Value.AddCommandSource(m_CommandSource);
 
             Harmony = new Harmony(OpenModComponentId);
