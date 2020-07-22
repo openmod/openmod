@@ -46,9 +46,6 @@ namespace OpenMod.Runtime
             m_Logger.LogInformation($"Initializing for host: {m_Host.HostDisplayName} v{m_Host.HostVersion}");
             await m_Host.InitAsync();
 
-            var initializedEvent = new OpenModInitializedEvent(m_Host);
-            await m_EventBus.EmitAsync(m_Host, this, initializedEvent);
-
             m_Logger.LogInformation("Loading plugins...");
 
             var i = 0;
@@ -62,8 +59,8 @@ namespace OpenMod.Runtime
 
             m_Logger.LogInformation($"> {i} plugins loaded.");
 
-            var pluginsLoadedEvent = new OpenModPluginsLoadedEvent(m_PluginAssemblyStore);
-            await m_EventBus.EmitAsync(m_Host, this, pluginsLoadedEvent);
+            var initializedEvent = new OpenModInitializedEvent(m_Host);
+            await m_EventBus.EmitAsync(m_Host, this, initializedEvent);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
