@@ -84,12 +84,14 @@ namespace OpenMod.Core.Permissions
                 "*"
             };
 
-
+            bool isFirst = true;
             var parentPath = string.Empty;
             foreach (var childPath in permission.Split('.'))
             {
-                permissions.Add(parentPath + childPath + ".*");
-                parentPath += childPath + ".";
+                char seperator = isFirst ? ':' : '.';
+                permissions.Add($"{parentPath}{childPath}{seperator}*");
+                parentPath += $"{childPath}{seperator}";
+                isFirst = false;
             }
 
             //remove last element because it should not contain "<permission>.*"
