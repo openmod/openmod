@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using JetBrains.Annotations;
 
 namespace UserDatabasePlugin.Database
 {
@@ -18,7 +17,7 @@ namespace UserDatabasePlugin.Database
         [StringLength(32)]
         public string Type { get; set; }
 
-        [NotNull]
+        [Required]
         public string UserId { get; set; }
         public virtual User User { get; set; }
     }
