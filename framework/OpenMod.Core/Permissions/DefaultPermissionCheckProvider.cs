@@ -77,6 +77,8 @@ namespace OpenMod.Core.Permissions
         /// <returns>The collection of all parent permission nodes</returns>
         public static IEnumerable<string> BuildPermissionTree(string permission)
         {
+            permission = permission.Replace(":", ".");
+
             var permissions = new List<string>
             {
                 "*"
