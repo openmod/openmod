@@ -7,9 +7,11 @@
 
   <ItemGroup>
     <None Remove="config.yaml" />
+    <None Remove="translations.yaml" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="translations.yaml" />
     <EmbeddedResource Include="config.yaml" />
   </ItemGroup>
 

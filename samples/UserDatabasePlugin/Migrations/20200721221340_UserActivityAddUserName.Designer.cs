@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UserDatabasePlugin.Database;
 
 namespace UserDatabasePlugin.Migrations
 {
     [DbContext(typeof(UserDatabaseDbContext))]
-    partial class UserDatabaseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200721221340_UserActivityAddUserName")]
+    partial class UserActivityAddUserName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,7 +26,6 @@ namespace UserDatabasePlugin.Migrations
                         .HasMaxLength(36);
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("varchar(20)")
                         .HasMaxLength(20);
 
@@ -47,7 +48,6 @@ namespace UserDatabasePlugin.Migrations
                         .HasMaxLength(32);
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("varchar(36)");
 
                     b.Property<string>("UserName")
@@ -64,9 +64,7 @@ namespace UserDatabasePlugin.Migrations
                 {
                     b.HasOne("UserDatabasePlugin.Database.User", "User")
                         .WithMany("UserActivities")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
                 });
 #pragma warning restore 612, 618
         }

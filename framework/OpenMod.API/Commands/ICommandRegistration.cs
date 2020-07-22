@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 
 namespace OpenMod.API.Commands
@@ -40,6 +41,9 @@ namespace OpenMod.API.Commands
         /// </example>
         [CanBeNull]
         IReadOnlyCollection<string> Aliases { get; }
+
+        [CanBeNull]
+        IReadOnlyCollection<IPermissionRegistration> PermissionRegistrations { get; }
 
         /// <summary>
         ///     The full description of the command.

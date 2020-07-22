@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Commands;
+using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Users;
 using SDG.Unturned;
@@ -21,6 +22,7 @@ namespace OpenMod.Unturned.Commands
             Syntax = string.Join(" ", cmd.info.Split(' ').Skip(1)); /* skip first word in info, which is the command */
             Description = cmd.help;
             Aliases = new List<string>();
+            PermissionRegistrations = new List<IPermissionRegistration>();
             Id = cmd.GetType().FullName;
         }
 
@@ -28,6 +30,7 @@ namespace OpenMod.Unturned.Commands
         public Command Cmd { get; }
         public string Name { get; }
         public IReadOnlyCollection<string> Aliases { get; }
+        public IReadOnlyCollection<IPermissionRegistration> PermissionRegistrations { get; }
         public string Description { get; }
         public string Syntax { get; }
         public string Id { get; }

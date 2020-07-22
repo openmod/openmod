@@ -77,17 +77,21 @@ namespace OpenMod.Core.Permissions
         /// <returns>The collection of all parent permission nodes</returns>
         public static IEnumerable<string> BuildPermissionTree(string permission)
         {
+            permission = permission.Replace(":", ".");
+
             var permissions = new List<string>
             {
                 "*"
             };
 
-
+            bool isFirst = true;
             var parentPath = string.Empty;
             foreach (var childPath in permission.Split('.'))
             {
-                permissions.Add(parentPath + childPath + ".*");
-                parentPath += childPath + ".";
+                char seperator = isFirst ? ':' : '.';
+                permissions.Add($"{parentPath}{childPath}{seperator}*");
+                parentPath += $"{childPath}{seperator}";
+                isFirst = false;
             }
 
             //remove last element because it should not contain "<permission>.*"

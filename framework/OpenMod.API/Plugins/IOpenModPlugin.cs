@@ -11,6 +11,9 @@ namespace OpenMod.API.Plugins
         [CanBeNull]
         string Author { get; }
 
+        [CanBeNull]
+        string Website { get; }
+
         SemVersion Version { get; }
 
         Task LoadAsync();

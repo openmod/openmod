@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Users;
 using OpenMod.Core.Permissions;
@@ -13,18 +14,19 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("add")]
     [CommandAlias("+")]
     [CommandAlias("a")]
-    [CommandSyntax("<[p]layer/[g]roup> [target] [permission]")]
+    [CommandSyntax("<[p]layer/[r]ole> [target] [permission]")]
     [CommandParent(typeof(CommandPermission))]
     public class CommandPermissionAdd : CommandPermissionAction
     {
         private readonly IPermissionChecker m_PermissionChecker;
 
-        public CommandPermissionAdd(
-            IPermissionChecker permissionChecker,
+        public CommandPermissionAdd(IPermissionChecker permissionChecker,
+            ICommandPermissionBuilder commandPermissionBuilder,
             IServiceProvider serviceProvider,
             IPermissionRoleStore permissionRoleStore,
             IUserDataStore usersDataStore,
-            IUserManager userManager) : base(serviceProvider, permissionRoleStore, usersDataStore, userManager)
+            IUserManager userManager, 
+            IPermissionRegistry commandRegistry) : base(serviceProvider, permissionRoleStore, commandPermissionBuilder, permissionChecker, usersDataStore, userManager, commandRegistry)
         {
             m_PermissionChecker = permissionChecker;
         }

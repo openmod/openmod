@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace OpenMod.API.Plugins
 {
@@ -38,7 +39,11 @@ namespace OpenMod.API.Plugins
         }
 
         public string DisplayName { get; set; }
-     
+
+        [CanBeNull]
         public string Author { get; set; }
+
+        [CanBeNull]
+        public string Website { get; set; }
     }
 }

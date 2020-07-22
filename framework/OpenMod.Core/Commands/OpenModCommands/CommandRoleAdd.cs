@@ -11,13 +11,19 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("add")]
     [CommandAlias("+")]
     [CommandAlias("a")]
-    [CommandSyntax("<[p]layer/[g]roup> [target] [role]")]
+    [CommandSyntax("<[p]layer/[r]ole> [target] [role]")]
     [CommandParent(typeof(CommandRole))]
     public class CommandRoleAdd : CommandRoleAction
     {
         private readonly IPermissionRoleStore m_PermissionRoleStore;
-
-        public CommandRoleAdd(IServiceProvider serviceProvider, IPermissionRoleStore permissionRoleStore, IUserDataStore userDataStore, IUserManager userManager) : base(serviceProvider, permissionRoleStore, userDataStore, userManager)
+        
+        public CommandRoleAdd(IPermissionChecker permissionChecker,
+            ICommandPermissionBuilder commandPermissionBuilder,
+            IServiceProvider serviceProvider,
+            IPermissionRoleStore permissionRoleStore,
+            IUserDataStore usersDataStore,
+            IUserManager userManager,
+            IPermissionRegistry commandRegistry) : base(permissionChecker, commandPermissionBuilder, serviceProvider, permissionRoleStore, usersDataStore, userManager, commandRegistry)
         {
             m_PermissionRoleStore = permissionRoleStore;
         }

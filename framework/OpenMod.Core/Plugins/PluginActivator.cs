@@ -12,6 +12,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
+using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
 using OpenMod.API.Prioritization;
@@ -19,6 +20,7 @@ using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Ioc.Extensions;
 using OpenMod.Core.Localization;
+using OpenMod.Core.Permissions;
 using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Plugins
@@ -127,6 +129,11 @@ namespace OpenMod.Core.Plugins
                         .SingleInstance()
                         .ExternallyOwned();
 
+                    containerBuilder.RegisterType<ScopedPermissionChecker>()
+                        .As<IPermissionChecker>()
+                        .InstancePerLifetimeScope()
+                        .OwnedByLifetimeScope();
+
                     containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(null, workingDirectory))
                         .As<IDataStore>()
                         .SingleInstance()
@@ -228,6 +235,9 @@ namespace OpenMod.Core.Plugins
             try
             {
                 await pluginInstance.LoadAsync();
+                var serviceProvider = pluginInstance.LifetimeScope.Resolve<IServiceProvider>();
+                var pluginHelpWriter = ActivatorUtilities.CreateInstance<PluginHelpWriter>(serviceProvider);
+                await pluginHelpWriter.WriteHelpFileAsync();
             }
             catch (Exception ex)
             {

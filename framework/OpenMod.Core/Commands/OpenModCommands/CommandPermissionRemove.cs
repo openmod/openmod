@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Users;
 using OpenMod.Core.Permissions;
@@ -12,17 +13,19 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("remove")]
     [CommandAlias("-")]
     [CommandAlias("r")]
-    [CommandSyntax("<[p]layer/[g]roup> [target] [permission]")]
+    [CommandSyntax("<[p]layer/[r]ole> [target] [permission]")]
     [CommandParent(typeof(CommandPermission))]
     public class CommandPermissionRemove : CommandPermissionAction
     {
         private readonly IPermissionChecker m_PermissionChecker;
 
-        public CommandPermissionRemove(IServiceProvider serviceProvider, 
-            IPermissionRoleStore permissionRoleStore, 
-            IUserDataStore usersDataStore, 
-            IPermissionChecker permissionChecker,
-            IUserManager userManager) : base(serviceProvider, permissionRoleStore, usersDataStore, userManager)
+        public CommandPermissionRemove(IPermissionChecker permissionChecker,
+            ICommandPermissionBuilder commandPermissionBuilder,
+            IServiceProvider serviceProvider,
+            IPermissionRoleStore permissionRoleStore,
+            IUserDataStore usersDataStore,
+            IUserManager userManager,
+            IPermissionRegistry commandRegistry) : base(serviceProvider, permissionRoleStore, commandPermissionBuilder, permissionChecker, usersDataStore, userManager, commandRegistry)
         {
             m_PermissionChecker = permissionChecker;
         }

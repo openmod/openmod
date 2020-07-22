@@ -13,9 +13,9 @@ namespace OpenMod.Core.Commands
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class CommandPermissionBuilder : ICommandPermissionBuilder
     {
-        private readonly ICommandStore m_CommandStore;
+        private readonly Lazy<ICommandStore> m_CommandStore;
 
-        public CommandPermissionBuilder(ICommandStore commandStore)
+        public CommandPermissionBuilder(Lazy<ICommandStore> commandStore)
         {
             m_CommandStore = commandStore;
         }
@@ -23,7 +23,7 @@ namespace OpenMod.Core.Commands
         private readonly Dictionary<string, string> m_Cache = new Dictionary<string, string>();
         public virtual string GetPermission(ICommandRegistration registration)
         {
-            return m_Cache.TryGetValue(registration.Id, out var cachedValue) ? cachedValue : GetPermission(registration, m_CommandStore.Commands);
+            return m_Cache.TryGetValue(registration.Id, out var cachedValue) ? cachedValue : GetPermission(registration, m_CommandStore.Value.Commands);
         }
 
         public virtual string GetPermission(ICommandRegistration registration, IReadOnlyCollection<ICommandRegistration> commands)
@@ -44,10 +44,11 @@ namespace OpenMod.Core.Commands
                 permission = current.Name + "." + permission;
             }
 
+            permission = "commands." + permission;
+
             m_Cache.Add(registration.Id, permission);
             return permission;
         }
-
 
         private ICommandRegistration GetParentCommand(ICommandRegistration registration, IEnumerable<ICommandRegistration> commands)
         {

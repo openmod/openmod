@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Localization;
 using OpenMod.API.Permissions;
@@ -19,22 +21,30 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [CommandSyntax("[command | page number]")]
     public class CommandHelp : Command
     {
-        private readonly IPermissionChecker m_PermissionChecker;
+        private readonly IRuntime m_Runtime;
         private readonly ICommandStore m_CommandStore;
+        private readonly IPermissionRegistry m_PermissionRegistry;
         private readonly ICommandPermissionBuilder m_CommandPermissionBuilder;
         private readonly ICommandContextBuilder m_CommandContextBuilder;
         private readonly IOpenModStringLocalizer m_StringLocalizer;
+        private readonly IPermissionChecker m_PermissionChecker;
 
         public CommandHelp(
-            IPermissionChecker permissionChecker,
+            IRuntime runtime,
             ICommandStore commandStore,
             IServiceProvider serviceProvider,
+            IPermissionRegistry permissionRegistry,
             ICommandPermissionBuilder commandPermissionBuilder,
             ICommandContextBuilder commandContextBuilder,
             IOpenModStringLocalizer stringLocalizer) : base(serviceProvider)
         {
-            m_PermissionChecker = permissionChecker;
+            m_Runtime = runtime;
+
+            // get global permission checker instead of scoped
+            m_PermissionChecker = m_Runtime.Host.Services.GetRequiredService<IPermissionChecker>();
+
             m_CommandStore = commandStore;
+            m_PermissionRegistry = permissionRegistry;
             m_CommandPermissionBuilder = commandPermissionBuilder;
             m_CommandContextBuilder = commandContextBuilder;
             m_StringLocalizer = stringLocalizer;
@@ -66,7 +76,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
             else if (Context.Parameters.Length > 0)
             {
                 var context = m_CommandContextBuilder.CreateContext(Context.Actor, Context.Parameters.ToArray(), Context.CommandPrefix, commands);
-                var permission = context.CommandRegistration == null ? null : m_CommandPermissionBuilder.GetPermission(context.CommandRegistration, commands);
+                var permission = GetPermission(context.CommandRegistration, commands);
 
                 if (context.CommandRegistration == null)
                 {
@@ -76,12 +86,29 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
                 if (!string.IsNullOrEmpty(permission) && await m_PermissionChecker.CheckPermissionAsync(Context.Actor, permission) != PermissionGrantResult.Grant)
                 {
-                    throw new NotEnoughPermissionException(permission, m_StringLocalizer);
+                    throw new NotEnoughPermissionException(m_StringLocalizer, permission);
                 }
-                
+
                 await PrintCommandHelpAsync(context, permission, commands);
                 await context.DisposeAsync();
             }
+        }
+
+        protected virtual string GetPermission(ICommandRegistration commandRegistration, IReadOnlyCollection<ICommandRegistration> commands)
+        {
+            var permission = commandRegistration == null ? null : m_CommandPermissionBuilder.GetPermission(commandRegistration, commands);
+            if (permission == null)
+            {
+                return null;
+            }
+
+            var registeredPermission = m_PermissionRegistry.FindPermission(commandRegistration.Component, permission);
+            if (registeredPermission == null)
+            {
+                throw new Exception($"Unregistered permission \"{permission}\" in component: {commandRegistration.Component.OpenModComponentId}");
+            }
+
+            return $"{registeredPermission.Owner.OpenModComponentId}:{registeredPermission.Permission}";
         }
 
         private async Task PrintCommandHelpAsync(ICommandContext context, string permission, IEnumerable<ICommandRegistration> commands)
@@ -151,7 +178,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
         private async Task PrintPageAsync(int pageNumber, int pageCount, ICollection<ICommandRegistration> page)
         {
             await PrintAsync($"[{pageNumber}/{pageCount}] Commands", Color.CornflowerBlue);
-           
+
             if (page.Count == 0)
             {
                 await PrintAsync("No commands found.", Color.Red);

@@ -55,7 +55,6 @@ namespace OpenMod.Core.Commands
             var currentCommandAccessor = m_LifetimeScope.Resolve<ICurrentCommandContextAccessor>();
             var commandsRegistrations = m_CommandStore.Commands;
             var commandContextBuilder = m_LifetimeScope.Resolve<ICommandContextBuilder>();
-            var permissionChecker = m_LifetimeScope.Resolve<IPermissionChecker>();
             var stringLocalizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
             var commandContext = commandContextBuilder.CreateContext(actor, args, prefix, commandsRegistrations);
 
@@ -77,9 +76,11 @@ namespace OpenMod.Core.Commands
                 currentCommandAccessor.Context = commandContext;
 
                 var permission = m_CommandPermissionBuilder.GetPermission(commandContext.CommandRegistration);
+                var permissionChecker = commandContext.ServiceProvider.GetRequiredService<IPermissionChecker>();
+
                 if (!string.IsNullOrWhiteSpace(permission) && await permissionChecker.CheckPermissionAsync(actor, permission) != PermissionGrantResult.Grant)
                 {
-                    throw new NotEnoughPermissionException(permission, stringLocalizer);
+                    throw new NotEnoughPermissionException(stringLocalizer, permission);
                 }
 
                 var command = commandContext.CommandRegistration.Instantiate(commandContext.ServiceProvider);
