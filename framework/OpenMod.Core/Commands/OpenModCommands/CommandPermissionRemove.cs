@@ -12,7 +12,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("remove")]
     [CommandAlias("-")]
     [CommandAlias("r")]
-    [CommandSyntax("<[p]layer/[g]roup> [target] [permission]")]
+    [CommandSyntax("<[p]layer/[r]ole> [target] [permission]")]
     [CommandParent(typeof(CommandPermission))]
     public class CommandPermissionRemove : CommandPermissionAction
     {
