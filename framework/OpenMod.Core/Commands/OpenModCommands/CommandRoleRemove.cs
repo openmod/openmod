@@ -10,7 +10,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("remove")]
     [CommandAlias("-")]
     [CommandAlias("r")]
-    [CommandSyntax("<[p]layer/[g]roup> [target] [role]")]
+    [CommandSyntax("<[p]layer/[r]ole> [target] [role]")]
     [CommandParent(typeof(CommandRole))]
     public class CommandRoleRemove : CommandRoleAction
     {
