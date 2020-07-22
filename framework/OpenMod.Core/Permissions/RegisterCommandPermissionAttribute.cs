@@ -3,7 +3,7 @@ using OpenMod.API.Permissions;
 
 namespace OpenMod.Core.Permissions
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class RegisterCommandPermissionAttribute : Attribute
     {
         public string Permission { get; }

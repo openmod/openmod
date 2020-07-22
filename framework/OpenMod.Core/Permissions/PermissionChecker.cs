@@ -45,6 +45,8 @@ namespace OpenMod.Core.Permissions
 
         public async Task<PermissionGrantResult> CheckPermissionAsync(IPermissionActor actor, string permission)
         {
+            permission = permission.Replace(":", ".");
+
             var registration = m_PermissionRegistry.FindPermission(permission);
             if (registration == null)
             {

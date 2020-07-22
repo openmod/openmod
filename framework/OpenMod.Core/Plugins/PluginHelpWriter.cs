@@ -86,7 +86,7 @@ namespace OpenMod.Core.Plugins
                 markdownBuilder.AppendLine("## Permissions");
                 foreach (var permission in permissions)
                 {
-                    markdownBuilder.Append($"  - {permission.Owner.OpenModComponentId}.{permission.Permission}");
+                    markdownBuilder.Append($"  - {permission.Owner.OpenModComponentId}:{permission.Permission}");
                     if (!string.IsNullOrEmpty(permission.Description))
                     {
                         markdownBuilder.Append($": {permission.Description}");
@@ -158,7 +158,7 @@ namespace OpenMod.Core.Plugins
 
                     foreach (var permissionRegistration in permissionRegistrations)
                     {
-                        markdownBuilder.Append($"  - {permissionRegistration.Owner.OpenModComponentId}.{permissionRegistration.Permission}");
+                        markdownBuilder.Append($"  - {permissionRegistration.Owner.OpenModComponentId}:{permissionRegistration.Permission}");
                         if (!string.IsNullOrEmpty(permissionRegistration.Description))
                         {
                             markdownBuilder.Append($": {permissionRegistration.Description}");

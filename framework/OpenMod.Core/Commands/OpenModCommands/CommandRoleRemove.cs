@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.Threading.Tasks;
+using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Users;
-using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {
@@ -16,7 +16,13 @@ namespace OpenMod.Core.Commands.OpenModCommands
     {
         private readonly IPermissionRoleStore m_PermissionRoleStore;
 
-        public CommandRoleRemove(IServiceProvider serviceProvider, IPermissionRoleStore permissionRoleStore, IUserDataStore userDataStore, IUserManager userManager) : base(serviceProvider, permissionRoleStore, userDataStore, userManager)
+        public CommandRoleRemove(IPermissionChecker permissionChecker,
+            ICommandPermissionBuilder commandPermissionBuilder,
+            IServiceProvider serviceProvider,
+            IPermissionRoleStore permissionRoleStore,
+            IUserDataStore usersDataStore,
+            IUserManager userManager,
+            IPermissionRegistry commandRegistry) : base(permissionChecker, commandPermissionBuilder, serviceProvider, permissionRoleStore, usersDataStore, userManager, commandRegistry)
         {
             m_PermissionRoleStore = permissionRoleStore;
         }

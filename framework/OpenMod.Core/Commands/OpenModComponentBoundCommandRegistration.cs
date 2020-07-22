@@ -41,7 +41,7 @@ namespace OpenMod.Core.Commands
             Aliases = memberInfo.GetCustomAttributes<CommandAliasAttribute>().Select(d => d.Alias).ToList();
             Syntax = memberInfo.GetCustomAttribute<CommandSyntaxAttribute>()?.Syntax;
 
-            PermissionRegistrations = memberInfo.GetCustomAttributes<RegisterCommandPermissionAttribute>()
+            PermissionRegistrations = memberInfo.GetCustomAttributes<RegisterCommandPermissionAttribute>(true)
                 .Select(d => new PermissionRegistration
                 {
                     DefaultGrant = d.DefaultGrant ?? PermissionGrantResult.Default,

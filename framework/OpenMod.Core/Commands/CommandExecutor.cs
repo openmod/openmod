@@ -80,7 +80,7 @@ namespace OpenMod.Core.Commands
 
                 if (!string.IsNullOrWhiteSpace(permission) && await permissionChecker.CheckPermissionAsync(actor, permission) != PermissionGrantResult.Grant)
                 {
-                    throw new NotEnoughPermissionException(permission, stringLocalizer);
+                    throw new NotEnoughPermissionException(stringLocalizer, permission);
                 }
 
                 var command = commandContext.CommandRegistration.Instantiate(commandContext.ServiceProvider);
