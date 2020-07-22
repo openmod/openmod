@@ -11,7 +11,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("add")]
     [CommandAlias("+")]
     [CommandAlias("a")]
-    [CommandSyntax("<[p]layer/[g]roup> [target] [role]")]
+    [CommandSyntax("<[p]layer/[r]ole> [target] [role]")]
     [CommandParent(typeof(CommandRole))]
     public class CommandRoleAdd : CommandRoleAction
     {
