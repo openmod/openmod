@@ -9,9 +9,11 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenMod.API;
 
 namespace OpenMod.Core.Users
 {
+    [OpenModInternal]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class UserManager : IUserManager, IAsyncDisposable
     {

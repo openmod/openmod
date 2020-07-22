@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using OpenMod.API;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Users;
@@ -11,6 +12,7 @@ using Steamworks;
 namespace OpenMod.Unturned.Commands
 {
     [DontAutoRegister]
+    [OpenModInternal]
     public class UnturnedBuiltinCommand : UnturnedCommand
     {
         private readonly UnturnedCommandRegistration m_CommandRegistration;

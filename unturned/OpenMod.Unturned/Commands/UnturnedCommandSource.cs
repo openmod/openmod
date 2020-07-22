@@ -5,6 +5,7 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Commands
 {
+    [OpenModInternal]
     public class UnturnedCommandSource : ICommandSource
     {
         // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */

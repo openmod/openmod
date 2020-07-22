@@ -12,6 +12,7 @@ using SmartFormat;
 
 namespace OpenMod.Runtime
 {
+    [OpenModInternal]
     public class OpenModHostedService : IHostedService
     {
         private readonly ILogger<OpenModHostedService> m_Logger;

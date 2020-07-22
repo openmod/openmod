@@ -5,6 +5,7 @@ using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Plugins
 {
+    [OpenModInternal]
     [Service]
     public interface IPluginActivator
     {

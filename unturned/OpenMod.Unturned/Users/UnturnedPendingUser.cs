@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using OpenMod.API;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
 using SDG.Unturned;
@@ -17,7 +18,8 @@ namespace OpenMod.Unturned.Users
         public CSteamID SteamId { get; }
 
         public SteamPending SteamPending { get; }
-        
+
+        [OpenModInternal]
         public UnturnedPendingUser(IUserDataStore userDataStore, SteamPending steamPending) : base(userDataStore)
         {
             SteamPending = steamPending;

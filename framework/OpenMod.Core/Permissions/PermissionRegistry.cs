@@ -10,6 +10,7 @@ using OpenMod.API.Prioritization;
 
 namespace OpenMod.Core.Permissions
 {
+    [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Priority = Priority.Lowest, Lifetime = ServiceLifetime.Singleton)]
     public class PermissionRegistry : IPermissionRegistry

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using OpenMod.API;
 using OpenMod.API.Persistence;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -11,6 +12,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace OpenMod.Core.Persistence
 {
+    [OpenModInternal]
     public class YamlDataStore : IDataStore
     {
         [CanBeNull]

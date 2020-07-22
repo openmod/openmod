@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using OpenMod.API;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
 using SDG.Unturned;
@@ -12,6 +13,7 @@ namespace OpenMod.Unturned.Users
     {
         public UnturnedUser User { get; }
 
+        [OpenModInternal]
         public UnturnedUserSession(UnturnedUser user, IUserSession baseSession = null)
         {
             User = user;

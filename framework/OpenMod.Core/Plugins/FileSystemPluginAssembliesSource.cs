@@ -4,10 +4,12 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 using OpenMod.API.Plugins;
 
 namespace OpenMod.Core.Plugins
 {
+    [OpenModInternal]
     public class FileSystemPluginAssembliesSource : IPluginAssembliesSource
     {
         private readonly ILogger m_Logger;

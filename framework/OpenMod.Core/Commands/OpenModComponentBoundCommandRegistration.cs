@@ -11,6 +11,7 @@ using OpenMod.Core.Permissions;
 
 namespace OpenMod.Core.Commands
 {
+    [OpenModInternal]
     public class OpenModComponentBoundCommandRegistration : ICommandRegistration
     {
         private ICollection<Type> m_CommandActorTypes;

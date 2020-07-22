@@ -25,6 +25,7 @@ using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Plugins
 {
+    [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class PluginActivator : IPluginActivator, IAsyncDisposable

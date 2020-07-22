@@ -4,6 +4,7 @@ using System.Linq;
 using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Localization;
@@ -13,6 +14,7 @@ namespace OpenMod.Core.Commands
 {
     // todo: add CreateContext from an ICommandRegistration instance directly 
 
+    [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Transient, Priority = Priority.Lowest)]
     public class CommandContextBuilder : ICommandContextBuilder

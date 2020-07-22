@@ -22,6 +22,7 @@ using OpenMod.NuGet;
 
 namespace OpenMod.Runtime
 {
+    [OpenModInternal]
     public class OpenModStartup : IOpenModStartup
     {
         private readonly IRuntime m_Runtime;

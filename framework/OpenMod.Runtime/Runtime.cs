@@ -29,6 +29,7 @@ using Serilog.Extensions.Logging;
 namespace OpenMod.Runtime
 {
     [UsedImplicitly]
+    [OpenModInternal]
     public sealed class Runtime : IRuntime
     {
         public Runtime()

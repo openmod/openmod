@@ -4,10 +4,12 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Logging
 {
+    [OpenModInternal]
     public class OpenModConsoleInputOutput : ICommandInputOutput
     {
         public event CommandInputHandler inputCommitted;

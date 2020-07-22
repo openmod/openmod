@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
@@ -10,6 +11,7 @@ using OpenMod.API.Users;
 
 namespace OpenMod.Core.Users
 {
+    [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Priority = Priority.Lowest, Lifetime = ServiceLifetime.Singleton)]
     public class UserDataSeeder : IUserDataSeeder

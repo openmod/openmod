@@ -6,12 +6,14 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Localization;
 using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Commands
 {
+    [OpenModInternal]
     public class CommandParameters : ICommandParameters, IEnumerable<string>
     {
         private readonly IServiceProvider m_ServiceProvider;

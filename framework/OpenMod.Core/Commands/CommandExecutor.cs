@@ -16,6 +16,7 @@ using OpenMod.Core.Commands.Events;
 
 namespace OpenMod.Core.Commands
 {
+    [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Transient, Priority = Priority.Lowest)]
     public class CommandExecutor : ICommandExecutor

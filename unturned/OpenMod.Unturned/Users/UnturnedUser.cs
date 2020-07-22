@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using OpenMod.API;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
 using SDG.Unturned;
@@ -22,6 +23,7 @@ namespace OpenMod.Unturned.Users
 
         public CSteamID SteamId { get; }
 
+        [OpenModInternal]
         public UnturnedUser(IUserDataStore userDataStore, Player player, UnturnedPendingUser pending = null) : base(userDataStore)
         {
             Type = KnownActorTypes.Player;

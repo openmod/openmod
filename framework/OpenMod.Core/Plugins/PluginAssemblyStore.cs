@@ -4,12 +4,14 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Helpers;
 using Serilog;
 
 namespace OpenMod.Core.Plugins
 {
+    [OpenModInternal]
     public class PluginAssemblyStore : IPluginAssemblyStore, IDisposable
     {
         private readonly ILogger<PluginAssemblyStore> m_Logger;

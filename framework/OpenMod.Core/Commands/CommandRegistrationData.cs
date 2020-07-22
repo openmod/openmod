@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using OpenMod.API;
 using OpenMod.API.Prioritization;
 
 namespace OpenMod.Core.Commands
@@ -9,6 +10,7 @@ namespace OpenMod.Core.Commands
     ///    Used for storing and loading commands from and to data store
     /// </summary>
     [Serializable]
+    [OpenModInternal]
     public class CommandRegistrationData
     {
         public string FullName { get; set; }

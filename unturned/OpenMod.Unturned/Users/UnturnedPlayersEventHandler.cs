@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
@@ -7,6 +8,7 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Users
 {
+    [OpenModInternal]
     public class UnturnedCommandHandler : IDisposable
     {
         private readonly ICommandExecutor m_CommandExecutor;

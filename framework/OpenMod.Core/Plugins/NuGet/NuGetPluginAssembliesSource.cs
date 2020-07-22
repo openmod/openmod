@@ -6,11 +6,13 @@ using System.Reflection;
 using System.Threading.Tasks;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
+using OpenMod.API;
 using OpenMod.API.Plugins;
 using OpenMod.NuGet;
 
 namespace OpenMod.Core.Plugins.NuGet
 {
+    [OpenModInternal]
     public class NuGetPluginAssembliesSource : IPluginAssembliesSource, IDisposable
     {
         private readonly NuGetPackageManager m_NuGetPackageManager;

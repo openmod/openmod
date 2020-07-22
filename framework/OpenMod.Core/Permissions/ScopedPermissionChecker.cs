@@ -7,6 +7,7 @@ using OpenMod.API.Permissions;
 
 namespace OpenMod.Core.Permissions
 {
+    [OpenModInternal]
     public class ScopedPermissionChecker : IPermissionChecker
     {
         private readonly IPermissionChecker m_Parent;

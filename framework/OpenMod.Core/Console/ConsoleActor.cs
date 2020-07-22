@@ -2,11 +2,13 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Console
 {
+    [OpenModInternal]
     public class ConsoleActor : ICommandActor
     {
         private readonly ILogger<ConsoleActor> m_Logger;
