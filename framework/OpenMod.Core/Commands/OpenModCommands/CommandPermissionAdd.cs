@@ -13,7 +13,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("add")]
     [CommandAlias("+")]
     [CommandAlias("a")]
-    [CommandSyntax("<[p]layer/[g]roup> [target] [permission]")]
+    [CommandSyntax("<[p]layer/[r]ole> [target] [permission]")]
     [CommandParent(typeof(CommandPermission))]
     public class CommandPermissionAdd : CommandPermissionAction
     {
