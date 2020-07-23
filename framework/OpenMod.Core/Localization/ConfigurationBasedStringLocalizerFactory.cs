@@ -9,6 +9,8 @@ namespace OpenMod.Core.Localization
     [OpenModInternal]
     public class ConfigurationBasedStringLocalizerFactory : IStringLocalizerFactory
     {
+    
+        [Obsolete("Use Create(baseName, location)")]
         public IStringLocalizer Create(Type resourceSource)
         {
             throw new NotSupportedException("Please use Create(baseName, location) instead!");
