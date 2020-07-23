@@ -10,6 +10,7 @@ using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Commands
 {
+    [OpenModInternal]
     public class OpenModComponentCommandSource : ICommandSource
     {
 

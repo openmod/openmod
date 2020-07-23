@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using OpenMod.API;
 
 namespace OpenMod.Standalone
 {
+    [OpenModInternal]
     public static class StandaloneConsoleIo
     {
         public delegate void CommandExecute(string commandLine);

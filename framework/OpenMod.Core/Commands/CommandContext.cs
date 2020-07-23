@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
+using OpenMod.API;
 using OpenMod.API.Commands;
 
 namespace OpenMod.Core.Commands
 {
+    [OpenModInternal]
     public class CommandContext : ICommandContext
     {
         public CommandContext(ICommandRegistration command, ICommandActor actor, string alias, string prefix, ICollection<string> args, ILifetimeScope scope)

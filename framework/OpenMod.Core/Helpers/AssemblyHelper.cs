@@ -2,10 +2,12 @@
 using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
+using OpenMod.API;
 using Serilog;
 
 namespace OpenMod.Core.Helpers
 {
+    [OpenModInternal]
     public static class AssemblyHelper
     {
         public static void CopyAssemblyResources(Assembly assembly, string baseDir, bool overwrite = false)

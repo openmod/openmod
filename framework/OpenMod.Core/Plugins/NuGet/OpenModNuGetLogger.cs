@@ -2,11 +2,13 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NuGet.Common;
+using OpenMod.API;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using LogLevel = NuGet.Common.LogLevel;
 
 namespace OpenMod.Core.Plugins.NuGet
 {
+    [OpenModInternal]
     public class OpenModNuGetLogger : LoggerBase
     {
         private readonly ILogger m_Logger;

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Threading;
+using OpenMod.API;
 
 namespace OpenMod.Core.Helpers
 {
+    [OpenModInternal]
     public static class TypeConverterHelper
     {
         public static TypeConverter GetConverter(Type type)

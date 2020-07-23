@@ -4,15 +4,17 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 using OpenMod.API.Plugins;
 
 namespace OpenMod.Core.Plugins
 {
-    public class FileSystemPluginAssembliesSource : IPluginAssembliesSource, IDisposable
+    [OpenModInternal]
+    public class FileSystemPluginAssembliesSource : IPluginAssembliesSource
     {
         private readonly ILogger m_Logger;
         private readonly string m_PluginsDirectory;
-        private bool m_AssemblyResolverInstalled;
+        /*private bool m_AssemblyResolverInstalled;*/
 
         public FileSystemPluginAssembliesSource(ILogger logger, string pluginsDirectory)
         {
@@ -24,13 +26,13 @@ namespace OpenMod.Core.Plugins
             m_Logger = logger;
             m_PluginsDirectory = pluginsDirectory;
 
-            if (m_AssemblyResolverInstalled)
+            /*if (m_AssemblyResolverInstalled)
             {
                 return;
             }
 
-            /*AppDomain.CurrentDomain.AssemblyResolve += OnAsssemlbyResolve;*/
-            m_AssemblyResolverInstalled = true;
+            AppDomain.CurrentDomain.AssemblyResolve += OnAsssemlbyResolve;
+            m_AssemblyResolverInstalled = true;*/
         }
 
         public virtual async Task<ICollection<Assembly>> LoadPluginAssembliesAsync()
@@ -66,13 +68,13 @@ namespace OpenMod.Core.Plugins
         /*private Assembly OnAsssemlbyResolve(object sender, ResolveEventArgs args)
         {
             throw new NotImplementedException();
-        }*/
+        }
 
         public void Dispose()
         {
             if (!m_AssemblyResolverInstalled) return;
-            /*AppDomain.CurrentDomain.AssemblyResolve -= OnAsssemlbyResolve;*/
+            AppDomain.CurrentDomain.AssemblyResolve -= OnAsssemlbyResolve;
             m_AssemblyResolverInstalled = false;
-        }
+        }*/
     }
 }

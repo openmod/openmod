@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
+using OpenMod.API;
 
 namespace OpenMod.EntityFrameworkCore
 {
+    [OpenModInternal]
     public class ConfigurationBasedConnectionStringAccessor : IConnectionStringAccessor
     {
         private readonly IConfiguration m_Configuration;

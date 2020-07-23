@@ -8,12 +8,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 using OpenMod.API.Plugins;
 using OpenMod.NuGet;
 using Semver;
 
 namespace OpenMod.Core.Plugins
 {
+    [OpenModInternal]
     public class PluginAssemblyStore : IPluginAssemblyStore, IDisposable
     {
         private readonly ILogger<PluginAssemblyStore> m_Logger;

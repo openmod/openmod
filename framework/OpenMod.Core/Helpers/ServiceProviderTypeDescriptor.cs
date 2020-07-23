@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API;
 
 namespace OpenMod.Core.Helpers
 {
+    [OpenModInternal]
     public class ServiceProviderTypeDescriptor : ITypeDescriptorContext
     {
         //todo unimplemented stuff

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
+using OpenMod.Core.Permissions;
 
 namespace OpenMod.Core.Plugins
 {

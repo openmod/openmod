@@ -86,12 +86,4 @@ namespace OpenMod.EntityFrameworkCore.Extensions
             return containerBuilder;
         }
     }
-
-    public class ServiceDisposer
-    {
-        public ServiceDisposer(IDisposable disposable)
-        {
-            
-        }
-    }
 }

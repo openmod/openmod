@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using OpenMod.API;
 using OpenMod.API.Permissions;
 using OpenMod.Core.Permissions.Data;
 
 namespace OpenMod.Core.Permissions
 {
+    [OpenModInternal]
     public sealed class PermissionRole : IPermissionRole
     {
         public PermissionRole()

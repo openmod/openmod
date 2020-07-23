@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using OpenMod.API;
 using OpenMod.Core.Users;
 using SDG.Unturned;
 
@@ -10,6 +11,7 @@ namespace OpenMod.Unturned.Users
     {
         public UnturnedPendingUser User { get; }
 
+        [OpenModInternal]
         public UnturnedPendingUserSession(UnturnedPendingUser user)
         {
             User = user;

@@ -4,10 +4,12 @@ using System.Linq;
 using System.Reflection;
 using Autofac.Util;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.Core.Ioc
 {
+    [OpenModInternal]
     public static class ServiceRegistrationHelper
     {
         public static IEnumerable<ServiceRegistration> FindFromAssembly<T>(Assembly assembly, ILogger logger = null) where T: ServiceImplementationAttribute

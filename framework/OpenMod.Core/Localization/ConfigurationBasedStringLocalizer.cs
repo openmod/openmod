@@ -3,10 +3,12 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+using OpenMod.API;
 using SmartFormat;
 
 namespace OpenMod.Core.Localization
 {
+    [OpenModInternal]
     public class ConfigurationBasedStringLocalizer : IStringLocalizer
     {
         private readonly IConfiguration m_Configuration;

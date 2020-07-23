@@ -16,6 +16,7 @@ using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Eventing
 {
+    [OpenModInternal]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class EventBus : IEventBus, IAsyncDisposable
     {

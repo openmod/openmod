@@ -7,6 +7,7 @@ using OpenMod.API.Prioritization;
 
 namespace OpenMod.Core.Persistence
 {
+    [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Priority = Priority.Lowest, Lifetime = ServiceLifetime.Singleton)]
     public class OpenModDataStoreAccessor : IOpenModDataStoreAccessor

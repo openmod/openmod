@@ -10,9 +10,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 
 namespace OpenMod.Core.Permissions
 {
+    [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Priority = Priority.Lowest, Lifetime = ServiceLifetime.Singleton)]
     public class PermissionChecker : IPermissionChecker, IAsyncDisposable

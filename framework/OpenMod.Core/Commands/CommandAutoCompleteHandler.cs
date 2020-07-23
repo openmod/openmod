@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.Core.Console;
 using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Commands
 {
+    [OpenModInternal]
     public class CommandAutoCompleteHandler : IAutoCompleteHandler
     {
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;

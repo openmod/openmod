@@ -10,6 +10,7 @@ using OpenMod.API.Prioritization;
 
 namespace OpenMod.Core.Localization
 {
+    [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModStringLocalizer : IOpenModStringLocalizer

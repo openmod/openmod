@@ -10,6 +10,7 @@ using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Eventing
 {
+    [OpenModInternal]
     internal class EventSubscription : IAsyncDisposable
     {
         public EventSubscription(

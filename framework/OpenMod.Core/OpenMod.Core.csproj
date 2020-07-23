@@ -45,6 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OpenMod.Analyzers\OpenMod.Analyzers.csproj" />
     <ProjectReference Include="..\OpenMod.API\OpenMod.API.csproj" />
     <ProjectReference Include="..\OpenMod.NuGet\OpenMod.NuGet.csproj" />
   </ItemGroup>

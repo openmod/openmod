@@ -12,6 +12,7 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Commands
 {
+    [OpenModInternal]
     public class UnturnedCommandRegistration : ICommandRegistration
     {
         public UnturnedCommandRegistration(IOpenModComponent component, Command cmd)

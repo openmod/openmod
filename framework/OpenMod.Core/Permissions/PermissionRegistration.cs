@@ -1,5 +1,9 @@
-﻿namespace OpenMod.API.Permissions
+﻿using OpenMod.API;
+using OpenMod.API.Permissions;
+
+namespace OpenMod.Core.Permissions
 {
+    [OpenModInternal]
     public class PermissionRegistration : IPermissionRegistration
     {
         public IOpenModComponent Owner { get; set; }    

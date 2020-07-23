@@ -7,6 +7,7 @@ using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
@@ -16,6 +17,7 @@ using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Commands
 {
+    [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class CommandStore : ICommandStore, IAsyncDisposable

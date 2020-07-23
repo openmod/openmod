@@ -2,9 +2,11 @@
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+using OpenMod.API;
 
 namespace OpenMod.Core.Localization
 {
+    [OpenModInternal]
     public class ConfigurationBasedStringLocalizerFactory : IStringLocalizerFactory
     {
         public IStringLocalizer Create(Type resourceSource)

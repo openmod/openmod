@@ -7,9 +7,11 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using OpenMod.API;
 
 namespace OpenMod.Core.Helpers
 {
+    [OpenModInternal]
     public static class ReflectionExtensions
     {
         public static MethodBase GetCallingMethod(Type[] skipTypes = null, MethodBase[] skipMethods = null, bool applyAsyncMethodPatch = true)
