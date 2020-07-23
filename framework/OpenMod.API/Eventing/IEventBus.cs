@@ -7,11 +7,25 @@ using OpenMod.API.Prioritization;
 namespace OpenMod.API.Eventing
 {
     /// <summary>
+    ///     The type safe callback for event notifications.
+    /// </summary>
+    /// <typeparam name="TEvent">The event type.</typeparam>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="event">The event instance.</param>
+    public delegate Task EventCallback<in TEvent>(IServiceProvider serviceProvider, object sender, TEvent @event) where TEvent : IEvent;
+
+    /// <summary>
     ///     The callback for event notifications.
     /// </summary>
     /// <param name="sender">The event sender.</param>
     /// <param name="event">The event instance.</param>
     public delegate Task EventCallback(IServiceProvider serviceProvider, object sender, IEvent @event);
+
+    /// <summary>
+    ///     The emit callback for events that have finished and notified all listeners.
+    /// </summary>
+    /// <param name="event"></param>
+    public delegate Task EventExecutedCallback(IEvent @event);
 
     /// <summary>
     ///     The event manager is responsible for emitting events and for managing their subscriptions.
