@@ -91,7 +91,17 @@ namespace OpenMod.Core.Commands
             TypeConverter converter = TypeConverterHelper.GetConverter(type);
             if (converter.CanConvertFrom(typeof(string)))
             {
-                return converter.ConvertFromWithServiceContext(m_ServiceProvider, arg);
+                try
+                {
+                    return converter.ConvertFromWithServiceContext(m_ServiceProvider, arg);
+                }
+                catch (Exception ex)
+                {
+                    if (!(ex.InnerException is FormatException))
+                    {
+                        throw;
+                    }
+                }
             }
 
             throw new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:parse_error", new { Value = arg , Type = type}], arg, type);
