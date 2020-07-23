@@ -157,9 +157,6 @@ namespace OpenMod.Runtime
                 eventBus.Subscribe(this, assembly);
             }
 
-            var @event = new OpenModInitializedEvent(Host);
-            await eventBus.EmitAsync(this, this, @event);
-
             try
             {
                 await Host.StartAsync();
@@ -170,6 +167,7 @@ namespace OpenMod.Runtime
                 m_Logger.LogCritical(ex, "OpenMod has crashed.");
                 Log.CloseAndFlush();
             }
+
             return Host;
         }
 
