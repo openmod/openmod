@@ -116,7 +116,12 @@ namespace OpenMod.Runtime
                 startup.RegisterIocAssemblyAndCopyResources(assembly, string.Empty);
             }
 
-            await startup.LoadPluginAssembliesAsync();
+            var configBuilder = new ConfigurationBuilder();
+            ConfigureConfiguration(configBuilder, startup);
+            var configuration = configBuilder.Build();
+
+            await startup.LoadNugetAssembliesAsync();
+            await startup.LoadPluginAssembliesAsync(configuration);
 
             hostBuilder
                 .UseContentRoot(parameters.WorkingDirectory)

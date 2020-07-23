@@ -69,7 +69,7 @@ namespace OpenMod.Core.Plugins.NuGet
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
             }
 
-            var package = (await m_NuGetPackageManager.QueryPackageExactAsync(packageName, version, isPreRelease));
+            var package = await m_NuGetPackageManager.QueryPackageExactAsync(packageName, version, isPreRelease);
             if (package == null)
             {
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);

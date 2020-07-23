@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
-using Autofac.Util;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,30 +17,33 @@ using OpenMod.Core.Ioc;
 using OpenMod.Core.Plugins;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.Core.Prioritization;
-using OpenMod.NuGet;
 
 namespace OpenMod.Runtime
 {
     public class OpenModStartup : IOpenModStartup
     {
         private readonly IRuntime m_Runtime;
-        private readonly NuGetPackageManager m_NuGetPackageManager;
         private readonly List<ServiceRegistration> m_ServiceRegistrations;
         private readonly HashSet<AssemblyName> m_RegisteredAssemblies;
         private readonly PluginAssemblyStore m_PluginAssemblyStore;
         private readonly ILogger<OpenModStartup> m_Logger;
         private readonly List<Assembly> m_Assemblies;
         private readonly List<IPluginAssembliesSource> m_PluginAssembliesSources;
+        private readonly NuGetPluginAssembliesSource m_NugetPluginAssembliesSource;
+
         public OpenModStartup(IOpenModStartupContext openModStartupContext)
         {
             Context = openModStartupContext;
-            m_NuGetPackageManager = ((OpenModStartupContext)openModStartupContext).NuGetPackageManager;
+
+            var nuGetPackageManager = ((OpenModStartupContext)openModStartupContext).NuGetPackageManager;
+            m_NugetPluginAssembliesSource = new NuGetPluginAssembliesSource(nuGetPackageManager);
+
             m_Logger = openModStartupContext.LoggerFactory.CreateLogger<OpenModStartup>();
             m_Runtime = openModStartupContext.Runtime;
             m_Assemblies = new List<Assembly>();
             m_ServiceRegistrations = new List<ServiceRegistration>();
             m_RegisteredAssemblies = new HashSet<AssemblyName>();
-            m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>());
+            m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>(), m_NugetPluginAssembliesSource);
             m_PluginAssembliesSources = new List<IPluginAssembliesSource>();
         }
 
@@ -162,15 +164,19 @@ namespace OpenMod.Runtime
             }
         }
 
-        internal async Task LoadPluginAssembliesAsync()
+        internal Task LoadNugetAssembliesAsync()
         {
-            var nugetPluginAssembliesSource = new NuGetPluginAssembliesSource(m_NuGetPackageManager);
-            await RegisterPluginAssembliesAsync(nugetPluginAssembliesSource);
+            return RegisterPluginAssembliesAsync(m_NugetPluginAssembliesSource);
+        }
+
+        internal Task LoadPluginAssembliesAsync(IConfiguration configuration)
+        {
+            m_PluginAssemblyStore.Configuration = configuration;
 
             var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
             var logger = Context.LoggerFactory.CreateLogger<FileSystemPluginAssembliesSource>();
             var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(logger, pluginsDirectory);
-            await RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
+            return RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
         }
     }
 }
