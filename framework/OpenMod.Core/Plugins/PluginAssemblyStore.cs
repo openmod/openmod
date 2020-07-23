@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Plugins;
-using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 using Semver;
 
@@ -17,14 +16,13 @@ namespace OpenMod.Core.Plugins
 {
     public class PluginAssemblyStore : IPluginAssemblyStore, IDisposable
     {
-        public IConfiguration Configuration;
         private readonly ILogger<PluginAssemblyStore> m_Logger;
-        private readonly NuGetPluginAssembliesSource m_NugetPlugins;
-        
-        public PluginAssemblyStore(ILogger<PluginAssemblyStore> logger, NuGetPluginAssembliesSource nugetPlugins)
+        private readonly NuGetPackageManager m_NuGetPackageManager;
+
+        public PluginAssemblyStore(ILogger<PluginAssemblyStore> logger, NuGetPackageManager nuGetPackageManager)
         {
             m_Logger = logger;
-            m_NugetPlugins = nugetPlugins;
+            m_NuGetPackageManager = nuGetPackageManager;
         }
 
         private readonly List<WeakReference> m_LoadedPluginAssemblies = new List<WeakReference>();
@@ -39,6 +37,8 @@ namespace OpenMod.Core.Plugins
                     .ToList();
             }
         }
+
+        public IConfigurationRoot Configuration;
 
         public async Task<ICollection<Assembly>> LoadPluginAssembliesAsync(IPluginAssembliesSource source)
         {
@@ -66,22 +66,26 @@ namespace OpenMod.Core.Plugins
                     providerAssemblies.Remove(providerAssembly);
 
                     var missingAssemblies = CheckRequiredDependencies(ex.LoaderExceptions);
+                    /*
+                    //Here Configuration is null, Check OpenModStartup.LoadPluginAssembliesAsync
                     var installMissingString = Configuration["nuget:tryAutoInstallMissingDependencies"];
-                    var installMissingDependencies = !string.IsNullOrEmpty(installMissingString) &&
-                                                     bool.TryParse(installMissingString, out var value) && value;
+                    System.Console.WriteLine("install missing string " + !string.IsNullOrEmpty(installMissingString) + ":" + installMissingString);*/
+
+                    var installMissingDependencies = false;/*!string.IsNullOrEmpty(installMissingString) &&
+                                                     bool.TryParse(installMissingString, out var value) && value;*/
 
                     if (!installMissingDependencies)
                     {
                         m_Logger.LogWarning($"Fail to load {providerAssembly} some dependecies are missing: {string.Join(", ", missingAssemblies.Keys)}", Color.DarkRed);
                         continue;
                     }
-
+                    
                     var installWithSuccess = await TryInstallRequiredDependenciesAsync(providerAssembly, missingAssemblies);
                     if (installWithSuccess)
                     {
                         assembliesWithMissingDependencies.Add(providerAssembly);
                     }
-
+                    
                     continue;
                 }
 
@@ -93,10 +97,10 @@ namespace OpenMod.Core.Plugins
             }
 
             //Lovely mono :(
-            if (assembliesWithMissingDependencies.Count != 0)
+            /*if (assembliesWithMissingDependencies.Count != 0)
             {
                 m_Logger.LogWarning($"Some plugins can not load until server restart: {string.Join(", ", assembliesWithMissingDependencies)}", Color.DarkRed);
-            }
+            }*/
 
             m_LoadedPluginAssemblies.AddRange(providerAssemblies.Select(d => new WeakReference(d)));
             return providerAssemblies;
@@ -149,7 +153,8 @@ namespace OpenMod.Core.Plugins
         {
             foreach (var assembly in missingAssemblies)
             {
-                var result = await m_NugetPlugins.InstallPackageAsync(assembly.Key, assembly.Value.ToString());
+                var packagetToInstall = await m_NuGetPackageManager.QueryPackageExactAsync(assembly.Key, assembly.Value.ToString());
+                var result = await m_NuGetPackageManager.InstallAsync(packagetToInstall.Identity);
                 if (result.Code == NuGetInstallCode.Success)
                     continue;
 

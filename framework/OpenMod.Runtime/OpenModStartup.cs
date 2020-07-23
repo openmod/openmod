@@ -17,6 +17,7 @@ using OpenMod.Core.Ioc;
 using OpenMod.Core.Plugins;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.Core.Prioritization;
+using OpenMod.NuGet;
 
 namespace OpenMod.Runtime
 {
@@ -29,21 +30,18 @@ namespace OpenMod.Runtime
         private readonly ILogger<OpenModStartup> m_Logger;
         private readonly List<Assembly> m_Assemblies;
         private readonly List<IPluginAssembliesSource> m_PluginAssembliesSources;
-        private readonly NuGetPluginAssembliesSource m_NugetPluginAssembliesSource;
+        private readonly NuGetPackageManager m_NuGetPackageManager;
 
         public OpenModStartup(IOpenModStartupContext openModStartupContext)
         {
             Context = openModStartupContext;
-
-            var nuGetPackageManager = ((OpenModStartupContext)openModStartupContext).NuGetPackageManager;
-            m_NugetPluginAssembliesSource = new NuGetPluginAssembliesSource(nuGetPackageManager);
-
+            m_NuGetPackageManager = ((OpenModStartupContext)openModStartupContext).NuGetPackageManager;
             m_Logger = openModStartupContext.LoggerFactory.CreateLogger<OpenModStartup>();
             m_Runtime = openModStartupContext.Runtime;
             m_Assemblies = new List<Assembly>();
             m_ServiceRegistrations = new List<ServiceRegistration>();
             m_RegisteredAssemblies = new HashSet<AssemblyName>();
-            m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>(), m_NugetPluginAssembliesSource);
+            m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>(), m_NuGetPackageManager);
             m_PluginAssembliesSources = new List<IPluginAssembliesSource>();
         }
 
@@ -164,19 +162,15 @@ namespace OpenMod.Runtime
             }
         }
 
-        internal Task LoadNugetAssembliesAsync()
+        internal async Task LoadPluginAssembliesAsync()
         {
-            return RegisterPluginAssembliesAsync(m_NugetPluginAssembliesSource);
-        }
-
-        internal Task LoadPluginAssembliesAsync(IConfiguration configuration)
-        {
-            m_PluginAssemblyStore.Configuration = configuration;
+            m_PluginAssemblyStore.Configuration = Context.Configuration;
+            await RegisterPluginAssembliesAsync(new NuGetPluginAssembliesSource(m_NuGetPackageManager));
 
             var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
             var logger = Context.LoggerFactory.CreateLogger<FileSystemPluginAssembliesSource>();
             var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(logger, pluginsDirectory);
-            return RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
+            await RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
         }
     }
 }

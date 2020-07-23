@@ -417,8 +417,8 @@ namespace OpenMod.NuGet
 
         private Assembly OnAsssemlbyResolve(object sender, ResolveEventArgs args)
         {
-            var name = GetVersionIndependentName(args.Name, out string version);
-            var parsedVersion = new Version(version);
+            var name = GetVersionIndependentName(args.Name, out var version);
+            var parsedVersion = Version.Parse(version);
 
             var exactMatch = m_LoadedPackageAssemblies
                 .Values.SelectMany(d => d)
@@ -435,8 +435,8 @@ namespace OpenMod.NuGet
                     .Where(d => d.Assembly.IsAlive && d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     .OrderByDescending(d => d.Version);
 
-            var result = (Assembly)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
-            
+            var result = (Assembly)matchingAssemblies.FirstOrDefault(d => d.Version.Equals(parsedVersion))?.Assembly.Target;
+
             m_Logger.LogDebug(result == null
                 ? $"Failed to resolve {args.Name}"
                 : $"Resolved assembly from NuGet: {args.Name} @ v{result.GetName().Version}");

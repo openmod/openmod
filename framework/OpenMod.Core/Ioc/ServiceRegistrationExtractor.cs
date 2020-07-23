@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Autofac.Util;
@@ -11,9 +12,27 @@ namespace OpenMod.Core.Ioc
     {
         public static IEnumerable<ServiceRegistration> FindFromAssembly<T>(Assembly assembly, ILogger logger = null) where T: ServiceImplementationAttribute
         {
-            var types = assembly.GetLoadableTypes()
-                .Where(d => d.IsClass && !d.IsInterface && !d.IsAbstract)
-                .ToList();
+            List<Type> types;
+            try
+            {
+                types = assembly.GetLoadableTypes()
+                    .Where(d => d.IsClass && !d.IsInterface && !d.IsAbstract)
+                    .ToList();
+            }
+            catch (ReflectionTypeLoadException ex) //this ignores missing optional dependencies
+            {
+                logger?.LogTrace(ex, $"Some optional dependencies are missing for \"{assembly}\"");
+                if (ex.LoaderExceptions != null && ex.LoaderExceptions.Length > 0)
+                {
+                    foreach (var loaderException in ex.LoaderExceptions)
+                    {
+                        logger?.LogTrace(loaderException, "Loader Exception: ");
+                    }
+                }
+
+
+                types = ex.Types.Where(tp => tp != null  && tp.IsClass && !tp.IsInterface && !tp.IsAbstract).ToList();
+            }
 
             foreach (var type in types)
             {

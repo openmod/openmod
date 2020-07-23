@@ -63,10 +63,10 @@ namespace OpenMod.Core.Plugins
             return assemblyList;
         }
 
-        private Assembly OnAsssemlbyResolve(object sender, ResolveEventArgs args)
+        /*private Assembly OnAsssemlbyResolve(object sender, ResolveEventArgs args)
         {
             throw new NotImplementedException();
-        }
+        }*/
 
         public void Dispose()
         {
