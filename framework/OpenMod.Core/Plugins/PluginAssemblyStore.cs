@@ -69,7 +69,7 @@ namespace OpenMod.Core.Plugins
 
                     var missingAssemblies = CheckRequiredDependencies(ex.LoaderExceptions);
                     var installMissingDependencies = Configuration != null &&
-                                                     Configuration.GetSection("nuget:autoInstallMissingDependencies")
+                                                     Configuration.GetSection("nuget:tryAutoInstallMissingDependencies")
                                                          .Get<bool>();//todo fix Configuration always null
 
                     if (!installMissingDependencies)
