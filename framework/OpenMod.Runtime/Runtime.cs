@@ -118,7 +118,7 @@ namespace OpenMod.Runtime
             }
 
             await startup.LoadPluginAssembliesAsync();
-
+            
             hostBuilder
                 .UseContentRoot(parameters.WorkingDirectory)
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())

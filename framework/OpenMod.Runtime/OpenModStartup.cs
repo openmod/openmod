@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
-using Autofac.Util;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -26,13 +25,14 @@ namespace OpenMod.Runtime
     public class OpenModStartup : IOpenModStartup
     {
         private readonly IRuntime m_Runtime;
-        private readonly NuGetPackageManager m_NuGetPackageManager;
         private readonly List<ServiceRegistration> m_ServiceRegistrations;
         private readonly HashSet<AssemblyName> m_RegisteredAssemblies;
         private readonly PluginAssemblyStore m_PluginAssemblyStore;
         private readonly ILogger<OpenModStartup> m_Logger;
         private readonly List<Assembly> m_Assemblies;
         private readonly List<IPluginAssembliesSource> m_PluginAssembliesSources;
+        private readonly NuGetPackageManager m_NuGetPackageManager;
+
         public OpenModStartup(IOpenModStartupContext openModStartupContext)
         {
             Context = openModStartupContext;
@@ -42,7 +42,7 @@ namespace OpenMod.Runtime
             m_Assemblies = new List<Assembly>();
             m_ServiceRegistrations = new List<ServiceRegistration>();
             m_RegisteredAssemblies = new HashSet<AssemblyName>();
-            m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>());
+            m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>(), m_NuGetPackageManager);
             m_PluginAssembliesSources = new List<IPluginAssembliesSource>();
         }
 
@@ -165,8 +165,8 @@ namespace OpenMod.Runtime
 
         internal async Task LoadPluginAssembliesAsync()
         {
-            var nugetPluginAssembliesSource = new NuGetPluginAssembliesSource(m_NuGetPackageManager);
-            await RegisterPluginAssembliesAsync(nugetPluginAssembliesSource);
+            m_PluginAssemblyStore.Configuration = Context.Configuration;
+            await RegisterPluginAssembliesAsync(new NuGetPluginAssembliesSource(m_NuGetPackageManager));
 
             var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
             var logger = Context.LoggerFactory.CreateLogger<FileSystemPluginAssembliesSource>();
