@@ -15,5 +15,9 @@ namespace OpenMod.API.Users
         Task BroadcastAsync(string userType, string message, Color color);
         
         Task BroadcastAsync(string message, Color color);
+
+        Task BroadcastAsync(string userType, string message);
+
+        Task BroadcastAsync(string message);
     }
 }

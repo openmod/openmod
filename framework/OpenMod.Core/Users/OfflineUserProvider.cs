@@ -53,5 +53,15 @@ namespace OpenMod.Core.Users
         {
             return Task.CompletedTask;
         }
+
+        public Task BroadcastAsync(string userType, string message)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task BroadcastAsync(string message)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

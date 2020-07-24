@@ -312,6 +312,21 @@ namespace OpenMod.Unturned.Users
             return BroadcastTask().AsTask();
         }
 
+        public Task BroadcastAsync(string userType, string message)
+        {
+            if (!KnownActorTypes.Player.Equals(userType, StringComparison.OrdinalIgnoreCase))
+            {
+                return Task.CompletedTask;
+            }
+
+            return BroadcastAsync(message, System.Drawing.Color.White);
+        }
+
+        public Task BroadcastAsync(string message)
+        {
+            return BroadcastAsync(message, System.Drawing.Color.White);
+        }
+
         public void Dispose()
         {
             m_UnturnedUsers.Clear();
