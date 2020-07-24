@@ -41,6 +41,7 @@ namespace OpenMod.Core.Persistence
 
             m_Serializer = new SerializerBuilder()
                 .WithNamingConvention(new CamelCaseNamingConvention())
+                .EmitDefaults()
                 .Build();
 
             m_Deserializer = new DeserializerBuilder()
