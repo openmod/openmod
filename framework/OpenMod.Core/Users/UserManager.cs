@@ -61,7 +61,26 @@ namespace OpenMod.Core.Users
             return null;
         }
 
-        public virtual async Task BroadcastAsync(string message, Color color)
+        public virtual async Task BroadcastAsync(string message)
+        {
+            foreach (var provider in UserProviders)
+            {
+                await provider.BroadcastAsync(message);
+            }
+        }
+
+        public virtual async Task BroadcastAsync(string userType, string message)
+        {
+            var provider = UserProviders.FirstOrDefault(d => d.SupportsUserType(userType));
+            if (provider == null)
+            {
+                return;
+            }
+
+            await provider.BroadcastAsync(userType, message);
+        }
+
+        public virtual async Task BroadcastAsync(string message, Color? color)
         {
             foreach (var provider in UserProviders)
             {
@@ -69,7 +88,7 @@ namespace OpenMod.Core.Users
             }
         }
 
-        public virtual async Task BroadcastAsync(string userType, string message, Color color)
+        public virtual async Task BroadcastAsync(string userType, string message, Color? color)
         {
             var provider = UserProviders.FirstOrDefault(d => d.SupportsUserType(userType));
             if (provider == null)
