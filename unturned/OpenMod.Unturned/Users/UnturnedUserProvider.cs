@@ -291,7 +291,7 @@ namespace OpenMod.Unturned.Users
             return Task.FromResult<IReadOnlyCollection<IUser>>(m_UnturnedUsers);
         }
 
-        public Task BroadcastAsync(string userType, string message, System.Drawing.Color color)
+        public Task BroadcastAsync(string userType, string message, System.Drawing.Color? color)
         {
             if (!KnownActorTypes.Player.Equals(userType, StringComparison.OrdinalIgnoreCase))
             {
@@ -301,30 +301,18 @@ namespace OpenMod.Unturned.Users
             return BroadcastAsync(message, color);
         }
 
-        public Task BroadcastAsync(string message, System.Drawing.Color color)
+        public Task BroadcastAsync(string message, System.Drawing.Color? color)
         {
             async UniTask BroadcastTask()
             {
                 await UniTask.SwitchToMainThread();
-                ChatManager.serverSendMessage(text: message, color: new Color(color.R / 255f, color.G / 255f, color.B / 255f), useRichTextFormatting: true);
+
+                color ??= System.Drawing.Color.White;
+
+                ChatManager.serverSendMessage(text: message, color: new Color(color.Value.R / 255f, color.Value.G / 255f, color.Value.B / 255f), useRichTextFormatting: true);
             }
 
             return BroadcastTask().AsTask();
-        }
-
-        public Task BroadcastAsync(string userType, string message)
-        {
-            if (!KnownActorTypes.Player.Equals(userType, StringComparison.OrdinalIgnoreCase))
-            {
-                return Task.CompletedTask;
-            }
-
-            return BroadcastAsync(message, System.Drawing.Color.White);
-        }
-
-        public Task BroadcastAsync(string message)
-        {
-            return BroadcastAsync(message, System.Drawing.Color.White);
         }
 
         public void Dispose()

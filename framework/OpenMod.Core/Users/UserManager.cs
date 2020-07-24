@@ -80,7 +80,7 @@ namespace OpenMod.Core.Users
             await provider.BroadcastAsync(userType, message);
         }
 
-        public virtual async Task BroadcastAsync(string message, Color color)
+        public virtual async Task BroadcastAsync(string message, Color? color)
         {
             foreach (var provider in UserProviders)
             {
@@ -88,7 +88,7 @@ namespace OpenMod.Core.Users
             }
         }
 
-        public virtual async Task BroadcastAsync(string userType, string message, Color color)
+        public virtual async Task BroadcastAsync(string userType, string message, Color? color)
         {
             var provider = UserProviders.FirstOrDefault(d => d.SupportsUserType(userType));
             if (provider == null)

@@ -12,12 +12,8 @@ namespace OpenMod.API.Users
 
         Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType);
 
-        Task BroadcastAsync(string userType, string message, Color color);
+        Task BroadcastAsync(string userType, string message, Color? color = null);
         
-        Task BroadcastAsync(string message, Color color);
-
-        Task BroadcastAsync(string userType, string message);
-
-        Task BroadcastAsync(string message);
+        Task BroadcastAsync(string message, Color? color = null);
     }
 }

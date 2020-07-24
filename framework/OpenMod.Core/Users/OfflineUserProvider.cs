@@ -44,22 +44,12 @@ namespace OpenMod.Core.Users
             return userDatas.Select(d => new OfflineUser(m_UserDataStore, d)).ToList();
         }
 
-        public Task BroadcastAsync(string userType, string message, Color color)
+        public Task BroadcastAsync(string userType, string message, Color? color)
         {
             return Task.CompletedTask;
         }
 
-        public Task BroadcastAsync(string message, Color color)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task BroadcastAsync(string userType, string message)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task BroadcastAsync(string message)
+        public Task BroadcastAsync(string message, Color? color)
         {
             return Task.CompletedTask;
         }
