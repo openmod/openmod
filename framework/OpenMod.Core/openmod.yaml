@@ -10,4 +10,4 @@
     allowedActors:
       - Console
       - Player
-  tryAutoInstallMissingDependencies: false #Do not activate unless you are sure what you are doing
+  tryAutoInstallMissingDependencies: false #Try to automatically install missing plugin dependencies

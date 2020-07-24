@@ -68,17 +68,13 @@ namespace OpenMod.Core.Plugins
                     providerAssemblies.Remove(providerAssembly);
 
                     var missingAssemblies = CheckRequiredDependencies(ex.LoaderExceptions);
-                    /*
-                    //Here Configuration is null, Check OpenModStartup.LoadPluginAssembliesAsync
-                    var installMissingString = Configuration["nuget:tryAutoInstallMissingDependencies"];
-                    System.Console.WriteLine("install missing string " + !string.IsNullOrEmpty(installMissingString) + ":" + installMissingString);*/
-
-                    var installMissingDependencies = false;/*!string.IsNullOrEmpty(installMissingString) &&
-                                                     bool.TryParse(installMissingString, out var value) && value;*/
+                    var installMissingDependencies = Configuration != null &&
+                                                     Configuration.GetSection("nuget:autoInstallMissingDependencies")
+                                                         .Get<bool>();//todo fix Configuration always null
 
                     if (!installMissingDependencies)
                     {
-                        m_Logger.LogWarning($"Fail to load {providerAssembly} some dependecies are missing: {string.Join(", ", missingAssemblies.Keys)}", Color.DarkRed);
+                        m_Logger.LogWarning($"Couldn't load plugin from {providerAssembly}: Failed to resolve required dependencies: {string.Join(", ", missingAssemblies.Keys)}", Color.DarkRed);
                         continue;
                     }
                     

@@ -14,8 +14,6 @@ namespace OpenMod.Core.Plugins
     {
         private readonly ILogger m_Logger;
         private readonly string m_PluginsDirectory;
-        /*private bool m_AssemblyResolverInstalled;*/
-
         public FileSystemPluginAssembliesSource(ILogger logger, string pluginsDirectory)
         {
             if (!Directory.Exists(pluginsDirectory))
@@ -25,14 +23,6 @@ namespace OpenMod.Core.Plugins
 
             m_Logger = logger;
             m_PluginsDirectory = pluginsDirectory;
-
-            /*if (m_AssemblyResolverInstalled)
-            {
-                return;
-            }
-
-            AppDomain.CurrentDomain.AssemblyResolve += OnAsssemlbyResolve;
-            m_AssemblyResolverInstalled = true;*/
         }
 
         public virtual async Task<ICollection<Assembly>> LoadPluginAssembliesAsync()
@@ -64,17 +54,5 @@ namespace OpenMod.Core.Plugins
 
             return assemblyList;
         }
-
-        /*private Assembly OnAsssemlbyResolve(object sender, ResolveEventArgs args)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dispose()
-        {
-            if (!m_AssemblyResolverInstalled) return;
-            AppDomain.CurrentDomain.AssemblyResolve -= OnAsssemlbyResolve;
-            m_AssemblyResolverInstalled = false;
-        }*/
     }
 }

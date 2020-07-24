@@ -435,7 +435,7 @@ namespace OpenMod.NuGet
                     .Where(d => d.Assembly.IsAlive && d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     .OrderByDescending(d => d.Version);
 
-            var result = (Assembly)matchingAssemblies.FirstOrDefault(d => d.Version.Equals(parsedVersion))?.Assembly.Target;
+            var result = (Assembly)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
 
             m_Logger.LogDebug(result == null
                 ? $"Failed to resolve {args.Name}"
