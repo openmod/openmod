@@ -17,7 +17,8 @@ namespace OpenMod.Core.Commands
         {
             m_MethodInfo = methodInfo;
         }
-        public async Task ExecuteAsync()
+
+        public Task ExecuteAsync()
         {
             // todo: implement MethodCommandWrapper
             throw new NotImplementedException();
