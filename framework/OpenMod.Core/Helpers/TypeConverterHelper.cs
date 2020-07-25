@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Threading;
 using OpenMod.API;
+using OpenMod.API.Users;
+using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Helpers
 {
@@ -10,9 +12,9 @@ namespace OpenMod.Core.Helpers
     {
         public static TypeConverter GetConverter(Type type)
         {
-            //todo ??
-            //if (typeof(IPlayer).IsAssignableFrom(type))
-            //    return new PlayerTypeConverter();
+            if (typeof(IUser).IsAssignableFrom(type))
+                return new UserTypeConverter();
+
             return TypeDescriptor.GetConverter(type);
         }
 
