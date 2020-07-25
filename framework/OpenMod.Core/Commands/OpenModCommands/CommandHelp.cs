@@ -108,7 +108,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 throw new Exception($"Unregistered permission \"{permission}\" in component: {commandRegistration.Component.OpenModComponentId}");
             }
 
-            return $"{registeredPermission.Owner.OpenModComponentId}:{registeredPermission.Permission}";
+            return $"{registeredPermission.Owner.OpenModComponentId}.{registeredPermission.Permission}";
         }
 
         private async Task PrintCommandHelpAsync(ICommandContext context, string permission, IEnumerable<ICommandRegistration> commands)
