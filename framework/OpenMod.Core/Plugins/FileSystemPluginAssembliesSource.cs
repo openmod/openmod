@@ -14,7 +14,6 @@ namespace OpenMod.Core.Plugins
     {
         private readonly ILogger m_Logger;
         private readonly string m_PluginsDirectory;
-
         public FileSystemPluginAssembliesSource(ILogger logger, string pluginsDirectory)
         {
             if (!Directory.Exists(pluginsDirectory))
@@ -33,8 +32,8 @@ namespace OpenMod.Core.Plugins
             {
                 try
                 {
-                    using FileStream stream = File.Open(file, FileMode.Open);
-                    byte[] data = new byte[stream.Length];
+                    using var stream = File.Open(file, FileMode.Open);
+                    var data = new byte[stream.Length];
                     await stream.ReadAsync(data, 0, (int) stream.Length);
                     var pluginAssembly = Assembly.Load(data);
 
