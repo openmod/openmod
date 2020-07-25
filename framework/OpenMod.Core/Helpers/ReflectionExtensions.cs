@@ -195,5 +195,10 @@ namespace OpenMod.Core.Helpers
                 return false;
             }
         }
+
+        public static IEnumerable<Type> GetParametersTypes(this ParameterInfo[] parameterInfos)
+        {
+            return parameterInfos.Select(x => x.ParameterType);
+        }
     }
 }
