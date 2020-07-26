@@ -56,36 +56,6 @@ namespace OpenMod.Core.Commands
 
             string arg = ToArray()[index];
 
-            //todo make type converters
-            //if (typeof(IUser).IsAssignableFrom(type))
-            //{
-            //    /*
-            //     * The logic for getting IUser and IUserInfo is as follows:
-            //     * If the name is supplied as usermanager:username, e.g. discord:Trojaner, it will search for valid "discord" user manager and return the "Trojaner" named user of it.
-            //     * Otherwise (if the user manager does not exist or the format was not supplied), it will use the player manager and return the user for the given input.
-            //     */
-            //    IUserManager targetUserManager = container.Resolve<IPlayerManager>();
-
-            //    string userName = arg;
-            //    if (arg.Contains(":"))
-            //    {
-            //        var args = arg.Split(':');
-            //        string userManagerMapping = args.First();
-
-            //        foreach (var userMgr in container.ResolveAll<IUserManager>())
-            //        {
-            //            if (userMgr.ServiceName.Equals(userManagerMapping, StringComparison.OrdinalIgnoreCase))
-            //            {
-            //                userName = string.Join(":", args.Skip(1).ToArray());
-            //                targetUserManager = userMgr;
-            //                break;
-            //            }
-            //        }
-            //    }
-
-            //    return await targetUserManager.GetUserAsync(userName);
-            //}
-
             TypeConverter converter = TypeConverterHelper.GetConverter(type);
             if (converter.CanConvertFrom(typeof(string)))
             {
