@@ -41,7 +41,7 @@ namespace OpenMod.Core.Commands
         public async Task<T> GetAsync<T>(int index) => (T)await GetAsync(index, typeof(T));
 
         /// <inheritdoc />
-        public async Task<object> GetAsync(int index, Type type)
+        public Task<object> GetAsync(int index, Type type)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -55,8 +55,6 @@ namespace OpenMod.Core.Commands
                 throw new IndexOutOfRangeException();
 
             string arg = ToArray()[index];
-
-
 
             //todo make type converters
             //if (typeof(IUser).IsAssignableFrom(type))
@@ -93,7 +91,8 @@ namespace OpenMod.Core.Commands
             {
                 try
                 {
-                    return converter.ConvertFromWithServiceContext(m_ServiceProvider, arg);
+                    object paramValue = converter.ConvertFromWithServiceContext(m_ServiceProvider, arg);
+                    return Task.FromResult(paramValue);
                 }
                 catch (Exception ex)
                 {
@@ -111,11 +110,12 @@ namespace OpenMod.Core.Commands
         public async Task<T> GetAsync<T>(int index, T defaultValue) => (T)await GetAsync(index, typeof(T), defaultValue);
 
         /// <inheritdoc />
-        public async Task<object> GetAsync(int index, Type type, object defaultValue)
+        public Task<object> GetAsync(int index, Type type, object defaultValue)
         {
             if (TryGet(index, type, out object val))
-                return val;
-            return defaultValue;
+                return Task.FromResult(val);
+
+            return Task.FromResult(defaultValue);
         }
 
         /// <inheritdoc />

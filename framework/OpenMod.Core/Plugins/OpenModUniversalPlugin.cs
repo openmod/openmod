@@ -9,10 +9,10 @@ namespace OpenMod.Core.Plugins
         {
         }
 
-        public sealed override Task LoadAsync()
+        public sealed override async Task LoadAsync()
         {
-            base.LoadAsync();
-            return OnLoadAsync();
+            await base.LoadAsync();
+            await OnLoadAsync();
         }
 
         protected virtual Task OnLoadAsync()
@@ -20,10 +20,10 @@ namespace OpenMod.Core.Plugins
             return Task.CompletedTask;
         }
 
-        public sealed override Task UnloadAsync()
+        public sealed override async Task UnloadAsync()
         {
-            base.UnloadAsync();
-            return OnUnloadAsync();
+            await base.UnloadAsync();
+            await OnUnloadAsync();
         }
 
         protected virtual Task OnUnloadAsync()

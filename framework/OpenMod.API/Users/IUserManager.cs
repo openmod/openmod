@@ -14,8 +14,8 @@ namespace OpenMod.API.Users
 
         Task<IUser> FindUserAsync(string type, string searchString, UserSearchMode searchMode);
 
-        Task BroadcastAsync(string message, Color color);
+        Task BroadcastAsync(string message, Color? color = null);
 
-        Task BroadcastAsync(string userType, string message, Color color);
+        Task BroadcastAsync(string userType, string message, Color? color = null);
     }
 }
