@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using HarmonyLib;
-using NuGet.Common;
 using SDG.Framework.Modules;
 
 namespace OpenMod.Unturned.Module.Shared
