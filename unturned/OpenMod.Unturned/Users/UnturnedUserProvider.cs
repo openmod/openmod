@@ -11,7 +11,6 @@ using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
 using OpenMod.Core.Users.Events;
 using SDG.Unturned;
-using Serilog;
 using Steamworks;
 using UnityEngine;
 
