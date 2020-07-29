@@ -48,8 +48,6 @@ namespace OpenMod.Core.Commands
                 throw new Exception("Can not execute command with null or empty args");
             }
 
-            args[0] = args[0].TrimStart('/');
-
             var logger = m_LifetimeScope.Resolve<ILogger<CommandExecutor>>();
             logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
 

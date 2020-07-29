@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
 using System.Text;
 
 namespace OpenMod.Core.Helpers
@@ -17,6 +15,7 @@ namespace OpenMod.Core.Helpers
             var argsBuilder = new StringBuilder(line);
             var inQuote = false;
             var isEscaped = false;
+            var lastIsSpace = true;
             var args = new List<string>();
             var currentArg = new StringBuilder();
 
@@ -31,23 +30,32 @@ namespace OpenMod.Core.Helpers
                     continue;
                 }
 
-                if (currentChar.Equals('\\'))
+                switch (currentChar)
                 {
-                    isEscaped = true;
-                    continue;
-                }
+                    case '\\':
+                        isEscaped = true;
+                        lastIsSpace = false;
+                        break;
 
-                switch (argsBuilder[i])
-                {
                     case '"':
                         inQuote = !inQuote;
+                        lastIsSpace = false;
                         break;
-                    case ' ' when !inQuote:
-                        args.Add(currentArg.ToString());
-                        currentArg.Clear();
-                        break;
+
                     default:
+                        if (char.IsWhiteSpace(currentChar) && !inQuote)
+                        {
+                            if (lastIsSpace)
+                                break;
+
+                            lastIsSpace = true;
+                            args.Add(currentArg.ToString());
+                            currentArg.Clear();
+                            break;
+                        }
+
                         currentArg.Append(argsBuilder[i]);
+                        lastIsSpace = false;
                         break;
                 }
             }
