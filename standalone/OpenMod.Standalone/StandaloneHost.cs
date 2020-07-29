@@ -78,10 +78,6 @@ namespace OpenMod.Standalone
                 return;
             }
 
-            foreach (var arg in args)
-            {
-                Console.WriteLine($"Argument '{arg}'");
-            }
             AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, args, string.Empty));
         }
 
