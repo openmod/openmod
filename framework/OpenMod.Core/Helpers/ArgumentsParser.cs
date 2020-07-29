@@ -47,15 +47,18 @@ namespace OpenMod.Core.Helpers
                         if (inQuote)
                         {
                             currentArg.Append(argsBuilder[i]);
-                            continue;
+                            break;
                         }
+
                         args.Add(currentArg.ToString());
                         currentArg.Clear();
                         break;
 
                     default:
                         if (char.IsWhiteSpace(argsBuilder[i])) //Space was checked before
-                            continue;
+                        {
+                            break;
+                        }
 
                         currentArg.Append(argsBuilder[i]);
                         break;
