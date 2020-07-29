@@ -5,6 +5,7 @@ using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
 using SDG.Unturned;
+using UnityEngine.Networking.NetworkSystem;
 
 namespace OpenMod.Unturned.Users
 {
@@ -53,7 +54,7 @@ namespace OpenMod.Unturned.Users
                 return;
             }
 
-            var args = ArgumentsParser.ParseArguments(text.TrimStart('/'));
+            var args = ArgumentsParser.ParseArguments(text.Substring(1));
             if (args.Length == 0)
             {
                 return;
