@@ -177,13 +177,14 @@ namespace OpenMod.Unturned
         {
             shouldExecuteCommand = false;
 
-            if (string.IsNullOrEmpty(string.Concat(text.Where(c => !char.IsWhiteSpace(c)))))
+            var trimmedCommand = string.Concat(text.Where(c => c.Equals(' ') || !char.IsWhiteSpace(c)));
+            if (string.IsNullOrEmpty(trimmedCommand))
             {
                 return;
             }
 
             var actor = m_ConsoleActorAccessor.Actor;
-            AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, ArgumentsParser.ParseArguments(text), string.Empty));
+            AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, ArgumentsParser.ParseArguments(trimmedCommand), string.Empty));
         }
 
         public Task ShutdownAsync()

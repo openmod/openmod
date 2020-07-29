@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Users;
@@ -55,6 +56,12 @@ namespace OpenMod.Unturned.Users
 
             shouldExecuteCommand = false;
             shouldList = false;
+
+            var trimmedCommand = string.Concat(text.Where(c => c.Equals(' ') || !char.IsWhiteSpace(c)));
+            if (string.IsNullOrEmpty(trimmedCommand))
+            {
+                return;
+            }
 
             AsyncHelper.Schedule("Player command execution", async () =>
             {
