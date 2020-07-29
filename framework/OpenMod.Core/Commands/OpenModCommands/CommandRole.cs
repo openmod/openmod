@@ -6,7 +6,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("role")]
     [CommandAlias("r")]
     [CommandDescription("Manage permission roles")]
-    [CommandSyntax("<add/remove> <[p]layer | [r]ole> <name> <role>")]
+    [CommandSyntax("<add/remove/reload>")]
 
     public class CommandRole : Command
     {
