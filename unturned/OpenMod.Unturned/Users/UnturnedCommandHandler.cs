@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Users;
@@ -54,11 +53,8 @@ namespace OpenMod.Unturned.Users
                 return;
             }
 
-            shouldExecuteCommand = false;
-            shouldList = false;
-
-            var trimmedCommand = string.Concat(text.Where(c => c.Equals(' ') || !char.IsWhiteSpace(c)));
-            if (string.IsNullOrEmpty(trimmedCommand))
+            var args = ArgumentsParser.ParseArguments(text.TrimStart('/'));
+            if (args.Length == 0)
             {
                 return;
             }
@@ -71,7 +67,7 @@ namespace OpenMod.Unturned.Users
                     return;
                 }
 
-                await m_CommandExecutor.ExecuteAsync(user, ArgumentsParser.ParseArguments(text), string.Empty);
+                await m_CommandExecutor.ExecuteAsync(user, args, string.Empty);
             });
         }
 

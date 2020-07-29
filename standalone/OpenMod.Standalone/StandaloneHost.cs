@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using JetBrains.Annotations;
@@ -72,13 +72,17 @@ namespace OpenMod.Standalone
 
         private void OnCommandExecute(string commandline)
         {
-            var trimmedCommand = string.Concat(commandline.Where(c => c.Equals(' ') || !char.IsWhiteSpace(c)));
-            if (string.IsNullOrEmpty(trimmedCommand))
+            var args = ArgumentsParser.ParseArguments(commandline);
+            if (args.Length == 0)
             {
                 return;
             }
 
-            AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, ArgumentsParser.ParseArguments(commandline), string.Empty));
+            foreach (var arg in args)
+            {
+                Console.WriteLine($"Argument '{arg}'");
+            }
+            AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, args, string.Empty));
         }
 
         public void Dispose()
