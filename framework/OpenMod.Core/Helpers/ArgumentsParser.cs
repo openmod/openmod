@@ -42,11 +42,21 @@ namespace OpenMod.Core.Helpers
                     case '"':
                         inQuote = !inQuote;
                         break;
-                    case ' ' when !inQuote:
+
+                    case ' ':
+                        if (inQuote)
+                        {
+                            currentArg.Append(argsBuilder[i]);
+                            continue;
+                        }
                         args.Add(currentArg.ToString());
                         currentArg.Clear();
                         break;
+
                     default:
+                        if (char.IsWhiteSpace(argsBuilder[i])) //Space was checked before
+                            continue;
+
                         currentArg.Append(argsBuilder[i]);
                         break;
                 }

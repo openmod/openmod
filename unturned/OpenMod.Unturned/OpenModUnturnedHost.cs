@@ -172,12 +172,12 @@ namespace OpenMod.Unturned
         }
 
 
+        // ReSharper disable once RedundantAssignment
         private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
         {
             shouldExecuteCommand = false;
 
-            text = text.Trim();
-            if (string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(string.Concat(text.Where(c => !char.IsWhiteSpace(c)))))
             {
                 return;
             }
