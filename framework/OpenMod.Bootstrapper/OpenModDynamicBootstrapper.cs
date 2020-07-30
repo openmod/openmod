@@ -54,7 +54,7 @@ namespace OpenMod.Bootstrapper
 
             if (!shouldAutoUpdate)
             {
-                if (!Environment.GetEnvironmentVariable("OpenMod_EnableAutoUpdate"), out shouldAutoUpdate))
+                if (!Environment.GetEnvironmentVariable("OpenMod_EnableAutoUpdate"), out shouldAutoUpdate)
                     shouldAutoUpdate = false;
             }
 
