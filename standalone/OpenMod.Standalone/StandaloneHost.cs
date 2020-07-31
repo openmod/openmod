@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using JetBrains.Annotations;
@@ -76,6 +75,11 @@ namespace OpenMod.Standalone
             if (args.Length == 0)
             {
                 return;
+            }
+
+            foreach (var arg in args)
+            {
+                Console.WriteLine($"Argument: '{arg}'");
             }
 
             AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, args, string.Empty));
