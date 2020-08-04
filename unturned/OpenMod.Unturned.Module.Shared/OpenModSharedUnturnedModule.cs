@@ -20,16 +20,15 @@ namespace OpenMod.Unturned.Module.Shared
         private readonly string[] m_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
         private readonly string[] m_CompatibleModules = { };
 
-        public void Initialize(Assembly moduleAssembly)
+        public bool Initialize(Assembly moduleAssembly)
         {
             var moduleAssemblyLocation = moduleAssembly.Location;
             var openModDirectory = Path.GetDirectoryName(moduleAssemblyLocation);
-            var openModModuleName = Path.GetDirectoryName(openModDirectory);
             var modulesDirectory = Directory.GetParent(openModDirectory).FullName;
 
-            if (HasIncompatibleModules(openModModuleName, modulesDirectory))
+            if (HasIncompatibleModules(openModDirectory, modulesDirectory))
             {
-                return;
+                return false;
             }
 
             m_HarmonyInstance = new Harmony(c_HarmonyInstanceId);
@@ -47,6 +46,7 @@ namespace OpenMod.Unturned.Module.Shared
                     LoadAssembly(openModDirectory, file);
                 }
             }
+            return true;
         }
 
         private bool HasIncompatibleModules(string openModModuleName, string modulesDirectory)
@@ -161,7 +161,7 @@ namespace OpenMod.Unturned.Module.Shared
 
         public void Shutdown()
         {
-            m_HarmonyInstance.UnpatchAll(c_HarmonyInstanceId);
+            m_HarmonyInstance?.UnpatchAll(c_HarmonyInstanceId);
         }
 
         private void InstallTlsWorkaround()
