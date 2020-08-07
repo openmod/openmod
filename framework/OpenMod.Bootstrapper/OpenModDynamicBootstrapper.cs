@@ -51,11 +51,9 @@ namespace OpenMod.Bootstrapper
             ILogger logger = null)
         {
             var shouldAutoUpdate = commandLineArgs.Any(arg => arg.Equals("-OpenModAutoUpdate", StringComparison.InvariantCultureIgnoreCase));
-
             if (!shouldAutoUpdate)
             {
-                if (!Environment.GetEnvironmentVariable("OpenMod_EnableAutoUpdate"), out shouldAutoUpdate)
-                    shouldAutoUpdate = false;
+                shouldAutoUpdate = Environment.GetEnvironmentVariable("OpenMod_EnableAutoUpdate") != null;
             }
 
 
