@@ -39,7 +39,7 @@ namespace OpenMod.Core.Helpers
                         break;
 
                     case '\'':
-                        if (currentArg.Length == 0 || argsBuilder.Length == nextIndex || IsSpace(argsBuilder[nextIndex]))
+                        if (!inQuote && (currentArg.Length == 0 || argsBuilder.Length == nextIndex || IsSpace(argsBuilder[nextIndex])))
                         {
                             inApostrophes = !inApostrophes;
                         }
@@ -50,7 +50,7 @@ namespace OpenMod.Core.Helpers
                         break;
 
                     case '"':
-                        if (currentArg.Length == 0 || argsBuilder.Length == nextIndex || IsSpace(argsBuilder[nextIndex]))
+                        if (!inApostrophes && (currentArg.Length == 0 || argsBuilder.Length == nextIndex || IsSpace(argsBuilder[nextIndex])))
                         {
                             inQuote = !inQuote;
                         }
