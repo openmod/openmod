@@ -9,6 +9,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
 {
     [UsedImplicitly]
     [Command("shutdown", Priority = Priority.Low)]
+    [CommandAlias("stop")]
     [CommandDescription("Shuts the application down")]
     public class CommandShutdown : Command
     {
