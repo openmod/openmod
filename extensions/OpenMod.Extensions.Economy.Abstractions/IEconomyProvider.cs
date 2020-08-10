@@ -20,7 +20,7 @@ namespace OpenMod.Extensions.Economy.Abstractions
         ///   Updates balance for a user.
         /// </summary>
         /// <exception cref="NotEnoughBalanceException">if the balance would become negative</exception>
-        Task<decimal> UpdateBalanceAsync(string ownerId, string ownerType, decimal changeAmount);
+        Task<decimal> UpdateBalanceAsync(string ownerId, string ownerType, decimal changeAmount, string reason);
 
         /// <summary>
         ///   Sets balance for a user.
