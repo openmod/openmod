@@ -45,7 +45,7 @@ namespace OpenMod.Core.Plugins
         public async Task<ICollection<Assembly>> LoadPluginAssembliesAsync(IPluginAssembliesSource source)
         {
             var providerAssemblies = await source.LoadPluginAssembliesAsync();
-            var assembliesWithMissingDependencies = new List<Assembly>();
+            /*var assembliesWithMissingDependencies = new List<Assembly>();*/
 
             foreach (var providerAssembly in providerAssemblies.ToList())
             {
@@ -77,13 +77,14 @@ namespace OpenMod.Core.Plugins
                         m_Logger.LogWarning($"Couldn't load plugin from {providerAssembly}: Failed to resolve required dependencies: {string.Join(", ", missingAssemblies.Keys)}", Color.DarkRed);
                         continue;
                     }
-                    
-                    var installWithSuccess = await TryInstallRequiredDependenciesAsync(providerAssembly, missingAssemblies);
-                    if (installWithSuccess)
+
+                    await TryInstallRequiredDependenciesAsync(providerAssembly, missingAssemblies);
+                    //var installWithSuccess = await TryInstallRequiredDependenciesAsync(providerAssembly, missingAssemblies);
+                    /*if (installWithSuccess)
                     {
                         assembliesWithMissingDependencies.Add(providerAssembly);
-                    }
-                    
+                    }*/
+
                     continue;
                 }
 

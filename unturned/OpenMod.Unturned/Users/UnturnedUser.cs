@@ -49,13 +49,21 @@ namespace OpenMod.Unturned.Users
             {
                 var convertedColor = new Color(color.R / 255f, color.G / 255f, color.B / 255f);
 
+                var lines = message.Split('\n');
                 await UniTask.SwitchToMainThread();
-                ChatManager.serverSendMessage(
-                    text: message, 
-                    color: convertedColor, 
-                    toPlayer: SteamPlayer, 
-                    mode: EChatMode.SAY, 
-                    useRichTextFormatting: true);
+                foreach (var line in lines)
+                {
+                    var lineToDisplay = line.Trim();
+                    if (lineToDisplay.Length == 0)
+                        continue;
+
+                    ChatManager.serverSendMessage(
+                        text: line,
+                        color: convertedColor,
+                        toPlayer: SteamPlayer,
+                        iconURL: Provider.configData.Browser.Icon,
+                        useRichTextFormatting: true);
+                }
             }
 
             return PrintMessageTask().AsTask();

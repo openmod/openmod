@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
@@ -188,14 +189,14 @@ namespace OpenMod.Unturned
         {
             shouldExecuteCommand = false;
 
-            text = text.Trim();
-            if (string.IsNullOrEmpty(text))
+            var actor = m_ConsoleActorAccessor.Actor;
+            var args = ArgumentsParser.ParseArguments(text);
+            if (args.Length == 0)
             {
                 return;
             }
 
-            var actor = m_ConsoleActorAccessor.Actor;
-            AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, ArgumentsParser.ParseArguments(text), string.Empty));
+            AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, args, string.Empty));
         }
 
         public Task ShutdownAsync()

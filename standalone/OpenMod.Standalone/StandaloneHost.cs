@@ -76,7 +76,13 @@ namespace OpenMod.Standalone
 
         private void OnCommandExecute(string commandline)
         {
-            AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, ArgumentsParser.ParseArguments(commandline), string.Empty));
+            var args = ArgumentsParser.ParseArguments(commandline);
+            if (args.Length == 0)
+            {
+                return;
+            }
+
+            AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, args, string.Empty));
         }
 
         public void Dispose()

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 
 namespace OpenMod.Core.Helpers
@@ -16,9 +15,15 @@ namespace OpenMod.Core.Helpers
 
         public IServiceProvider ServiceProvider { get; }
 
-        public object GetService(Type serviceType) => ServiceProvider.GetRequiredService(serviceType);
+        public object GetService(Type serviceType)
+        {
+            return ServiceProvider.GetService(serviceType);
+        }
 
-        public bool OnComponentChanging() => throw new NotImplementedException();
+        public bool OnComponentChanging()
+        {
+            throw new NotImplementedException();
+        }
 
         public void OnComponentChanged()
         {

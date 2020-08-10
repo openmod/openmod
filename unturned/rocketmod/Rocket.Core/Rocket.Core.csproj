@@ -13,7 +13,7 @@
   <Import Project="$(MSBuildThisFileDirectory)..\props\SharedProjectProps.props" /> 
   
   <ItemGroup>
-    <PackageReference Include="OpenMod.Core" Version="1.0.3" />
+    <PackageReference Include="OpenMod.Core" Version="1.1.8" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

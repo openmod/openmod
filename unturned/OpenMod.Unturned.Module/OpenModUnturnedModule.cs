@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using OpenMod.Bootstrapper;
@@ -18,7 +17,8 @@ namespace OpenMod.Unturned.Module
         public void initialize()
         {
             m_SharedModule = new OpenModSharedUnturnedModule();
-            m_SharedModule.Initialize(GetType().Assembly);
+            if (!m_SharedModule.Initialize(GetType().Assembly))
+                return;
             OnInitialize();
         }
 

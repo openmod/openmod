@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using HarmonyLib;
-using NuGet.Common;
 using SDG.Framework.Modules;
 
 namespace OpenMod.Unturned.Module.Shared
@@ -21,59 +20,58 @@ namespace OpenMod.Unturned.Module.Shared
         private readonly string[] m_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
         private readonly string[] m_CompatibleModules = { };
 
-        public void Initialize(Assembly moduleAssembly)
+        public bool Initialize(Assembly moduleAssembly)
         {
             var moduleAssemblyLocation = moduleAssembly.Location;
-            var openModDirectory = Path.GetDirectoryName(moduleAssemblyLocation);
-            var openModModuleName = Path.GetDirectoryName(openModDirectory);
-            var modulesDirectory = Directory.GetParent(openModDirectory).FullName;
-
-            if (HasIncompatibleModules(openModModuleName, modulesDirectory))
+            var openModDirPath = Path.GetDirectoryName(moduleAssemblyLocation);
+            var modulesDirectory = Directory.GetParent(openModDirPath).FullName;
+            if (HasIncompatibleModules(Path.GetFileName(openModDirPath), modulesDirectory))
             {
-                return;
+                return false;
             }
 
             m_HarmonyInstance = new Harmony(c_HarmonyInstanceId);
             m_HarmonyInstance.PatchAll(GetType().Assembly);
 
-            InstallNewtonsoftJson(openModDirectory);
+            InstallNewtonsoftJson(openModDirPath);
             InstallTlsWorkaround();
             InstallAssemblyResolver();
 
             // ReSharper disable once AssignNullToNotNullAttribute
-            foreach (var file in Directory.GetFiles(openModDirectory))
+            foreach (var file in Directory.GetFiles(openModDirPath))
             {
                 if (file.EndsWith(".dll"))
                 {
-                    LoadAssembly(openModDirectory, file);
+                    LoadAssembly(openModDirPath, file);
                 }
             }
+            return true;
         }
 
-        private bool HasIncompatibleModules(string openModModuleName, string modulesDirectory)
+        private bool HasIncompatibleModules(string openModDirName, string modulesDirectory)
         {
             foreach (var modulePath in Directory.GetDirectories(modulesDirectory))
             {
-                var moduleName = Path.GetDirectoryName(modulePath);
+                var moduleDirName = Path.GetFileName(modulePath);
                 // ReSharper disable once PossibleNullReferenceException
-                if (moduleName.Equals(openModModuleName))
+                if (moduleDirName.Equals(openModDirName))
                 {
                     continue; // OpenMod's own directory
                 }
 
-                if (m_CompatibleModules.Any(d => d.Equals(moduleName, StringComparison.OrdinalIgnoreCase)))
+                if (m_CompatibleModules.Any(d => d.Equals(moduleDirName, StringComparison.OrdinalIgnoreCase)))
                 {
                     continue;
                 }
                 
                 var previousColor = Console.ForegroundColor;
-                if (m_IncompatibleModules.Any(d => d.Equals(moduleName, StringComparison.OrdinalIgnoreCase)))
+                if (m_IncompatibleModules.Any(d => d.Equals(moduleDirName, StringComparison.OrdinalIgnoreCase)))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("================================================================");
-                    Console.WriteLine($"Incompatible module detected: {moduleName}");
+                    Console.WriteLine($"Incompatible module detected: {moduleDirName}");
 
-                    if (moduleName.Equals("Rocket.Unturned", StringComparison.OrdinalIgnoreCase))
+                    if (moduleDirName.Equals("Rocket.Unturned", StringComparison.OrdinalIgnoreCase))
                     {
                         Console.WriteLine("RocketMod detected! Read how to migrate from RocketMod:");
                         Console.WriteLine("https://openmod.github.io/openmod-docs/user-guide/migration/rocketmod/");
@@ -90,7 +88,7 @@ namespace OpenMod.Unturned.Module.Shared
                 }
 
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Unknown module detected: {moduleName}");
+                Console.WriteLine($"Unknown module detected: {moduleDirName}");
                 Console.WriteLine("This module may conflict with OpenMod.");
                 Console.WriteLine("OpenMod may not work correctly.");
                 Console.ForegroundColor = previousColor;
@@ -162,7 +160,7 @@ namespace OpenMod.Unturned.Module.Shared
 
         public void Shutdown()
         {
-            m_HarmonyInstance.UnpatchAll(c_HarmonyInstanceId);
+            m_HarmonyInstance?.UnpatchAll(c_HarmonyInstanceId);
         }
 
         private void InstallTlsWorkaround()

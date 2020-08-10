@@ -50,11 +50,14 @@ namespace OpenMod.Bootstrapper
             bool allowPrereleaseVersions = false,
             ILogger logger = null)
         {
-            var shouldAutoUpdate = false;
-            if (!commandLineArgs.Any(arg => arg.Equals("-NoOpenModAutoUpdate", StringComparison.InvariantCultureIgnoreCase)))
+            var shouldAutoUpdate = commandLineArgs.Any(arg => arg.Equals("-OpenModAutoUpdate", StringComparison.InvariantCultureIgnoreCase));
+            if (!shouldAutoUpdate)
             {
-                if (!bool.TryParse(Environment.GetEnvironmentVariable("OpenMod_EnableAutoUpdate"), out shouldAutoUpdate))
-                    shouldAutoUpdate = true;
+                var autoUpdateValue = Environment.GetEnvironmentVariable("OpenMod_EnableAutoUpdate");
+                if (string.IsNullOrEmpty(autoUpdateValue) || !bool.TryParse(autoUpdateValue, out shouldAutoUpdate))
+                {
+                    shouldAutoUpdate = false;
+                }
             }
 
 

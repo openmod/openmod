@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
 
 namespace OpenMod.EntityFrameworkCore.Extensions
 {
