@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 
 namespace OpenMod.Extensions.Games.Abstractions.Transforms
 {
-    public interface IGameTransform
+    public interface IGameTransform : IReadOnlyCollection<IGameTransform>
     {
         string TransformName { get; }
 
         IGameTransform ParentTransform { get; }
 
-        IEnumerable<IGameTransform> ChildTransforms { get; }
+        IReadOnlyCollection<IGameTransform> ChildTransforms { get; }
 
         Vector3 Position { get; }
 
