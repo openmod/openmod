@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -15,6 +16,7 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Console;
 using OpenMod.Core.Helpers;
+using OpenMod.Extensions.Games.Abstractions;
 using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
 using OpenMod.Unturned.Users;
@@ -35,6 +37,7 @@ namespace OpenMod.Unturned
         private readonly UnturnedCommandHandler m_UnturnedCommandHandler;
         private List<ICommandInputOutput> m_IoHandlers;
         private OpenModConsoleInputOutput m_OpenModIoHandler;
+        private readonly HashSet<string> m_Capabilities;
 
         public string HostDisplayName { get; } = Provider.APP_NAME;
 
@@ -79,6 +82,16 @@ namespace OpenMod.Unturned
             LifetimeScope = lifetimeScope;
             DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
+            m_Capabilities = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                KnownGameCapabilities.Health,
+                KnownGameCapabilities.Inventory,
+                KnownGameCapabilities.Vehicles
+            };
+        }
+        public bool HasCapability(string capability)
+        {
+            return m_Capabilities.Contains(capability);
         }
 
         public Task InitAsync()
@@ -170,8 +183,7 @@ namespace OpenMod.Unturned
             CommandWindow.onCommandWindowInputted -= OnCommandWindowInputted;
             // ReSharper restore DelegateSubtraction
         }
-
-
+        
         private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
         {
             shouldExecuteCommand = false;

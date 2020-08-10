@@ -8,7 +8,7 @@ namespace OpenMod.Core.Users
     {
         private readonly UserData m_Data;//todo
 
-        public OfflineUser(IUserDataStore userDataStore,  UserData data) : base(userDataStore)
+        public OfflineUser(IUserProvider userProvider, IUserDataStore userDataStore,  UserData data) : base(userProvider, userDataStore)
         {
             Id = data.Id;
             Type = data.Type;

@@ -35,13 +35,13 @@ namespace OpenMod.Core.Users
             	return null;
             }
             
-            return new OfflineUser(m_UserDataStore, data);
+            return new OfflineUser(this, m_UserDataStore, data);
         }
 
         public async Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType)
         {
             var userDatas = await m_UserDataStore.GetUsersDataAsync(userType);
-            return userDatas.Select(d => new OfflineUser(m_UserDataStore, d)).ToList();
+            return userDatas.Select(d => new OfflineUser(this, m_UserDataStore, d)).ToList();
         }
 
         public Task BroadcastAsync(string userType, string message, Color? color)

@@ -7,7 +7,6 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Ioc;
-using OpenMod.Core.Plugins;
 using SmartFormat;
 
 namespace OpenMod.Runtime

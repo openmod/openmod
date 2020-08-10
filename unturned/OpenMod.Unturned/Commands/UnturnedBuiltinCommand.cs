@@ -27,21 +27,14 @@ namespace OpenMod.Unturned.Commands
         protected override async UniTask OnExecuteAsync()
         {
             var cmd = m_CommandRegistration.Cmd;
-            CSteamID id;
 
-            switch (Context.Actor.Type)
+            CSteamID id = Context.Actor.Type switch
             {
-                case KnownActorTypes.Player:
-                    id = ((UnturnedUser) Context.Actor).SteamId;
-                    break;
-
-                case KnownActorTypes.Console:
-                    id = CSteamID.Nil;
-                    break;
-
-                default:
-                    throw new NotSupportedException($"Can not execute unturned commands from actor: {Context.Actor.GetType()}");
-            }
+                KnownActorTypes.Player => ((UnturnedUser) Context.Actor).SteamId,
+                KnownActorTypes.Console => CSteamID.Nil,
+                _ => throw new NotSupportedException(
+                    $"Can not execute unturned commands from actor: {Context.Actor.GetType()}")
+            };
 
             // unturned builtin commands must run on main thread
             await UniTask.SwitchToMainThread();

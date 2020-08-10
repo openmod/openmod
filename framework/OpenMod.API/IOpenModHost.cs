@@ -40,5 +40,7 @@ namespace OpenMod.API
         ///    Name of the host implementation. E.g. OpenMod for Unturned
         /// </summary>
         string Name { get; }
+
+        bool HasCapability(string capability);
     }
 }

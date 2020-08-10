@@ -11,7 +11,6 @@ using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
 using OpenMod.Core.Users.Events;
 using SDG.Unturned;
-using Serilog;
 using Steamworks;
 using UnityEngine;
 
@@ -45,12 +44,12 @@ namespace OpenMod.Unturned.Users
             // sync users in case of openmod reloads
             foreach (var client in Provider.clients)
             {
-                m_UnturnedUsers.Add(new UnturnedUser(userDataStore, client.player));
+                m_UnturnedUsers.Add(new UnturnedUser(this, userDataStore, client.player));
             }
 
             foreach (var pending in Provider.pending)
             {
-                m_PendingUsers.Add(new UnturnedPendingUser(userDataStore, pending));
+                m_PendingUsers.Add(new UnturnedPendingUser(this, userDataStore, pending));
             }
 
             Provider.onCheckValidWithExplanation += OnPendingPlayerConnecting;
@@ -72,7 +71,7 @@ namespace OpenMod.Unturned.Users
                 FinishSession(pending);
             }
 
-            var user = new UnturnedUser(m_UserDataStore, player.player, pending);
+            var user = new UnturnedUser(this, m_UserDataStore, player.player, pending);
             m_UnturnedUsers.Add(user);
 
             var connectedEvent = new UserConnectedEvent(user);
@@ -177,7 +176,7 @@ namespace OpenMod.Unturned.Users
                     return;
                 }
 
-                var pendingUser = new UnturnedPendingUser(m_UserDataStore, steamPending);
+                var pendingUser = new UnturnedPendingUser(this, m_UserDataStore, steamPending);
                 await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
 
                 var userData = await m_UserDataStore.GetUserDataAsync(pendingUser.Id, pendingUser.Type);

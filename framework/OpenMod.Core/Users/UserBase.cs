@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using OpenMod.API.Users;
-using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Users
 {
@@ -11,12 +9,15 @@ namespace OpenMod.Core.Users
     {
         private readonly IUserDataStore m_UserDataStore;
 
-        protected UserBase(IUserDataStore userDataStore)
+        protected UserBase(IUserProvider userProvider, IUserDataStore userDataStore)
         {
+            Provider = userProvider;
             m_UserDataStore = userDataStore;
         }
 
         public virtual string Id { get; protected set; }
+        
+        public virtual IUserProvider Provider { get; }
 
         public virtual string Type { get; protected set; }
 

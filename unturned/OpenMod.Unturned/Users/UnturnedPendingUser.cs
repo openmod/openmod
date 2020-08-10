@@ -20,7 +20,7 @@ namespace OpenMod.Unturned.Users
         public SteamPending SteamPending { get; }
 
         [OpenModInternal]
-        public UnturnedPendingUser(IUserDataStore userDataStore, SteamPending steamPending) : base(userDataStore)
+        public UnturnedPendingUser(IUserProvider userProvider, IUserDataStore userDataStore, SteamPending steamPending) : base(userProvider, userDataStore)
         {
             SteamPending = steamPending;
             SteamId = steamPending.playerID.steamID;

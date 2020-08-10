@@ -69,6 +69,11 @@ namespace OpenMod.Standalone
             return Task.CompletedTask;
         }
 
+        public bool HasCapability(string capability)
+        {
+            return false;
+        }
+
         private void OnCommandExecute(string commandline)
         {
             AsyncHelper.RunSync(() => m_CommandExecutor.ExecuteAsync(m_ConsoleActorAccessor.Actor, ArgumentsParser.ParseArguments(commandline), string.Empty));

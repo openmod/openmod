@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\framework\OpenMod.API\OpenMod.API.csproj" />
+    <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj" />
   </ItemGroup>
 
 </Project>

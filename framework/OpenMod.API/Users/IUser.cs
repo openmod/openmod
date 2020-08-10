@@ -25,5 +25,8 @@ namespace OpenMod.API.Users
         /// </summary>
         [CanBeNull]
         IUserSession Session { get; }
+
+        [CanBeNull]
+        IUserProvider Provider { get; }
     }
 }

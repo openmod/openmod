@@ -24,7 +24,8 @@ namespace OpenMod.Unturned.Users
         public CSteamID SteamId { get; }
 
         [OpenModInternal]
-        public UnturnedUser(IUserDataStore userDataStore, Player player, UnturnedPendingUser pending = null) : base(userDataStore)
+        public UnturnedUser(UnturnedUserProvider userProvider, IUserDataStore userDataStore, Player player,
+            UnturnedPendingUser pending = null) : base(userProvider, userDataStore)
         {
             Type = KnownActorTypes.Player;
             Player = player;
