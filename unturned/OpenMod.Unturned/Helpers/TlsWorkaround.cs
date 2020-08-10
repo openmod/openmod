@@ -20,22 +20,29 @@ namespace OpenMod.Unturned.Helpers
 
         private static bool CertificateValidationWorkaroundCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
-            if (sslPolicyErrors == SslPolicyErrors.None) 
+            if (sslPolicyErrors == SslPolicyErrors.None)
+            {
                 return true;
+            }
 
             // If there are errors in the certificate chain, look at each error to determine the cause.
             foreach (var chainStatus in chain.ChainStatus)
             {
-                if (chainStatus.Status == X509ChainStatusFlags.RevocationStatusUnknown) 
+                if (chainStatus.Status == X509ChainStatusFlags.RevocationStatusUnknown)
+                {
                     continue;
+                }
 
 
                 chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
                 chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
                 chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
                 chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
+                
                 if (!chain.Build((X509Certificate2) certificate))
+                {
                     return false;
+                }
             }
             return true;
         }

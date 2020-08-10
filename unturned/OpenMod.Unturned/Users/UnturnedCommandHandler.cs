@@ -54,6 +54,9 @@ namespace OpenMod.Unturned.Users
                 return;
             }
 
+            shouldList = false;
+            shouldExecuteCommand = false;
+
             var args = ArgumentsParser.ParseArguments(text.Substring(1));
             if (args.Length == 0)
             {
