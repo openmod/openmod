@@ -40,7 +40,7 @@ namespace OpenMod.Core.Permissions
                         Priority = 0,
                         Permissions = new HashSet<string> 
                         {
-                            "help"
+                            "OpenMod.Core.commands.help"
                         },
                         IsAutoAssigned = true
                     },
@@ -54,7 +54,7 @@ namespace OpenMod.Core.Permissions
                         },
                         Permissions = new HashSet<string>
                         {
-                            "kit.vip"
+                            "SomeKitsPlugin.kits.vip"
                         },
                         IsAutoAssigned = false
                     }
