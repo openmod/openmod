@@ -61,7 +61,7 @@ namespace OpenMod.Unturned.Users
                         text: line,
                         color: convertedColor,
                         toPlayer: SteamPlayer,
-                        iconURL: Provider.configData.Browser.Icon,
+                        iconURL: SDG.Unturned.Provider.configData.Browser.Icon,
                         useRichTextFormatting: true);
                 }
             }
