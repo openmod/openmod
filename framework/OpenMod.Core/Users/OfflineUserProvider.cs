@@ -24,7 +24,7 @@ namespace OpenMod.Core.Users
 
         public async Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
         {
-            if (searchMode != UserSearchMode.Id && searchMode != UserSearchMode.NameOrId)
+            if (searchMode != UserSearchMode.FindById && searchMode != UserSearchMode.FindByNameOrId)
             {
                 return null;
             }

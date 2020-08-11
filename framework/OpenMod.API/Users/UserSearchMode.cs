@@ -2,8 +2,8 @@
 {
     public enum UserSearchMode
     {
-        Id,
-        Name,
-        NameOrId
+        FindById,
+        FindByName,
+        FindByNameOrId
     }
 }

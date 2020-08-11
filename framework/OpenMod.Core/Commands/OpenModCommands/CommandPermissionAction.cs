@@ -74,7 +74,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
                 default:
                     var idOrName = await Context.Parameters.GetAsync<string>(1);
-                    var user = await m_UserManager.FindUserAsync(actorType, idOrName, UserSearchMode.NameOrId);
+                    var user = await m_UserManager.FindUserAsync(actorType, idOrName, UserSearchMode.FindByNameOrId);
                     m_PermissionRegistry.RegisterPermission(Context.CommandRegistration.Component, permission, description: $"Manage actor: {actorType}");
 
                     if (user == null)

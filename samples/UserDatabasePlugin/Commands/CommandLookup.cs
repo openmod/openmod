@@ -38,7 +38,7 @@ namespace UserDatabasePlugin.Commands
         protected override async Task OnExecuteAsync()
         {
             var userNameOrId = await Context.Parameters.GetAsync<string>(0);
-            var user = (await m_UserManager.FindUserAsync(KnownActorTypes.Player, userNameOrId, UserSearchMode.NameOrId));
+            var user = (await m_UserManager.FindUserAsync(KnownActorTypes.Player, userNameOrId, UserSearchMode.FindByNameOrId));
 
             var userId = user?.Id;
             var lastJoinTime = user?.Session?.SessionStartTime;

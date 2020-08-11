@@ -232,16 +232,16 @@ namespace OpenMod.Unturned.Users
             {
                 switch (searchMode)
                 {
-                    case UserSearchMode.NameOrId:
-                    case UserSearchMode.Id:
+                    case UserSearchMode.FindByNameOrId:
+                    case UserSearchMode.FindById:
                         if (user.Id.Equals(searchString, StringComparison.OrdinalIgnoreCase))
                             return Task.FromResult((IUser)user);
 
-                        if (searchMode == UserSearchMode.NameOrId)
-                            goto case UserSearchMode.Name;
+                        if (searchMode == UserSearchMode.FindByNameOrId)
+                            goto case UserSearchMode.FindByName;
                         break;
 
-                    case UserSearchMode.Name:
+                    case UserSearchMode.FindByName:
                         var currentConfidence = NameConfidence(user.DisplayName, searchString, confidence);
                         if (currentConfidence > confidence)
                         {

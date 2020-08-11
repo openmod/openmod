@@ -52,7 +52,7 @@ namespace OpenMod.Core.Users
             }
 
             return AsyncHelper.RunSync(async ()
-                => await userManager.FindUserAsync(userActorType, userNameOrId, UserSearchMode.NameOrId));
+                => await userManager.FindUserAsync(userActorType, userNameOrId, UserSearchMode.FindByNameOrId));
         }
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)

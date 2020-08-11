@@ -65,7 +65,7 @@ namespace OpenMod.Unturned.Users
 
             AsyncHelper.Schedule("Player command execution", async () =>
             {
-                var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, player.playerID.steamID.ToString(), UserSearchMode.Id);
+                var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, player.playerID.steamID.ToString(), UserSearchMode.FindById);
                 if (user == null)
                 {
                     return;
