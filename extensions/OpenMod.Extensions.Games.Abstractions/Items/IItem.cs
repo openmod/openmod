@@ -6,18 +6,12 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
     {
         bool IsEquipped { get; }
 
-        string ItemAssetId { get; }
-
         string ItemInstanceId { get; }
 
-        string ItemName { get; }
+        IItemAsset Asset { get; }
 
-        string ItemType { get; }
+        IItemState State { get; }
 
-        double ItemQuality { get; }
-        
-        double ItemAmount { get; }
-        
         Task SetItemQualityAsync(double quality);
 
         Task SetItemAmountAsync(double amount);

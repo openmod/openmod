@@ -14,6 +14,8 @@ namespace OpenMod.Extensions.Games.Abstractions.Transforms
 
         Vector3 Position { get; }
 
+        Vector3 Velocity { get; }
+
         Task<bool> SetPositionAsync(Vector3 targetPosition);
 
         Vector3 Rotation { get; }

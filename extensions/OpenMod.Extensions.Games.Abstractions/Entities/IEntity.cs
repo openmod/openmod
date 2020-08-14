@@ -4,10 +4,10 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
 {
     public interface IEntity : IGameTransform
     {
-        string Name { get; }
+        IEntityAsset Asset { get; }
 
-        string EntityType { get; }
-   
+        IEntityState State { get; }
+
         string EntityInstanceId { get; }
     }
 }
