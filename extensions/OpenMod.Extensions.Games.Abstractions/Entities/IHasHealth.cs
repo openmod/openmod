@@ -4,7 +4,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
 {
     public interface IHasHealth
     {
-        double IsAlive { get; }
+        bool IsAlive { get; }
 
         double MaxHealth { get; }
 
