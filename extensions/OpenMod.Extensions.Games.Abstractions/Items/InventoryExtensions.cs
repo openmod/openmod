@@ -36,7 +36,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
                 query = query.OrderBy(x => x, comparer);
             }
 
-            return query.FirstOrDefault(item => item.ItemType.Equals(itemType, StringComparison.OrdinalIgnoreCase));
+            return query.FirstOrDefault(item => item.Asset.ItemType.Equals(itemType, StringComparison.OrdinalIgnoreCase));
         }
 
         [CanBeNull]
@@ -60,7 +60,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
                 query = query.OrderBy(x => x, comparer);
             }
 
-            return query.FirstOrDefault(item => item.ItemAssetId.Equals(itemType, StringComparison.OrdinalIgnoreCase));
+            return query.FirstOrDefault(item => item.Asset.ItemAssetId.Equals(itemType, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
