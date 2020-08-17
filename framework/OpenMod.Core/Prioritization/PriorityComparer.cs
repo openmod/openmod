@@ -22,7 +22,7 @@ namespace OpenMod.Core.Prioritization
                 case PriortyComparisonMode.HighestFirst:
                     return ((int)y).CompareTo((int)x);
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentException(nameof(m_ComparisonMode));
             }
         }
     }

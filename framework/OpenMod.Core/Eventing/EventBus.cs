@@ -166,18 +166,30 @@ namespace OpenMod.Core.Eventing
             }
 
             var comparer = new PriorityComparer(PriortyComparisonMode.LowestFirst);
-            eventSubscriptions.Sort((a, b) => comparer.Compare(a.EventListenerAttribute.Priority, b.EventListenerAttribute.Priority));
+            eventSubscriptions.Sort((a, b) =>
+                comparer.Compare(
+                    (Priority)a.EventListenerAttribute.Priority,
+                    (Priority)b.EventListenerAttribute.Priority)
+                );
 
             foreach (var group in eventSubscriptions.GroupBy(e => e.Scope))
             {
                 await using var newScope = group.Key.BeginLifetimeScope("AutofacWebRequest");
                 foreach (var subscription in group)
                 {
-                    if (@event is ICancellableEvent cancellableEvent
+                    var cancellableEvent = @event as ICancellableEvent;
+
+                    if (cancellableEvent != null
                         && cancellableEvent.IsCancelled
                         && !subscription.EventListenerAttribute.IgnoreCancelled)
                     {
                         continue;
+                    }
+
+                    var wasCancelled = false;
+                    if (cancellableEvent != null)
+                    {
+                        wasCancelled = cancellableEvent.IsCancelled;
                     }
 
                     var serviceProvider = newScope.Resolve<IServiceProvider>();
@@ -185,6 +197,15 @@ namespace OpenMod.Core.Eventing
                     try
                     {
                         await subscription.Callback.Invoke(serviceProvider, sender, @event);
+
+                        if (cancellableEvent != null && subscription.EventListenerAttribute.Priority == EventListenerPriority.Monitor)
+                        {
+                            if (cancellableEvent.IsCancelled != wasCancelled)
+                            {
+                                cancellableEvent.IsCancelled = wasCancelled;
+                                m_Logger.LogWarning($"{((IOpenModComponent)@subscription.Owner.Target).OpenModComponentId} changed {@event.Name} cancellation status with Monitor priority which is not permitted.");
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
