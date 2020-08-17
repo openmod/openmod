@@ -3,12 +3,13 @@ using System.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
+using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 using Steamworks;
 
 namespace OpenMod.Unturned.Users
 {
-    public class UnturnedPendingUser : UserBase, IEquatable<UnturnedPendingUser>, IEquatable<UnturnedUser>
+    public class UnturnedPendingPlayer : UserBase, IEquatable<UnturnedPendingPlayer>, IEquatable<UnturnedPlayer>
     {
         public override string Id
         {
@@ -20,13 +21,13 @@ namespace OpenMod.Unturned.Users
         public SteamPending SteamPending { get; }
 
         [OpenModInternal]
-        public UnturnedPendingUser(IUserProvider userProvider, IUserDataStore userDataStore, SteamPending steamPending) : base(userProvider, userDataStore)
+        public UnturnedPendingPlayer(IUserProvider userProvider, IUserDataStore userDataStore, SteamPending steamPending) : base(userProvider, userDataStore)
         {
             SteamPending = steamPending;
             SteamId = steamPending.playerID.steamID;
             DisplayName = steamPending.playerID.characterName;
             Type = KnownActorTypes.Player;
-            Session = new UnturnedPendingUserSession(this);
+            Session = new UnturnedPendingPlayerSession(this);
         }
 
         public override Task PrintMessageAsync(string message)
@@ -39,14 +40,14 @@ namespace OpenMod.Unturned.Users
             return Task.CompletedTask;
         }
 
-        public bool Equals(UnturnedPendingUser other)
+        public bool Equals(UnturnedPendingPlayer other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return SteamId.Equals(other.SteamId);
         }
 
-        public bool Equals(UnturnedUser other)
+        public bool Equals(UnturnedPlayer other)
         {
             return other?.SteamId == SteamId;
         }
@@ -56,12 +57,12 @@ namespace OpenMod.Unturned.Users
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
 
-            if (obj is UnturnedUser user)
+            if (obj is UnturnedPlayer user)
             {
                 return Equals(user);
             }
 
-            if (obj is UnturnedPendingUser pendingUser)
+            if (obj is UnturnedPendingPlayer pendingUser)
             {
                 return Equals(pendingUser);
             }

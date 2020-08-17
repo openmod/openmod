@@ -4,13 +4,15 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
 {
     public interface IHasHealth
     {
-        double IsAlive { get; }
+        bool IsAlive { get; }
 
         double MaxHealth { get; }
 
         double Health { get; }
 
         Task SetHealthAsync(double health);
+
+        Task DamageAsync(double amount);
 
         Task KillAsync();
     }

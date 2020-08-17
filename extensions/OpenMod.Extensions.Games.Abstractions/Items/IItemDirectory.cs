@@ -9,6 +9,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
     {
         Task<IReadOnlyCollection<IItemAsset>> GetItemAssetsAsync();
 
-        Task<IReadOnlyCollection<IItem>> GetItemsAsync();
+        Task<IReadOnlyCollection<IItemDrop>> GetItemDropsAsync();
     }
 }

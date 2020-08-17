@@ -12,7 +12,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
 
             // very stupid random offset as a workaround for now
             var offset = new Vector3(5, 2, 5);
-            await vehicleSpawner.SpawnVehicleAsync(player.Position + offset, vehicleAssetId);
+            await vehicleSpawner.SpawnVehicleAsync(player.Transform.Position + offset, vehicleAssetId);
         }
     }
 }

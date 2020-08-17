@@ -17,50 +17,50 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         }
 
         [CanBeNull]
-        public static IItem FindByType(this IInventory inventory, string itemType, IComparer<IItem> comparer = null)
+        public static IInventoryItem FindByType(this IInventory inventory, string itemType, IComparer<IInventoryItem> comparer = null)
         {
             var query = inventory.SelectMany(d => d.Items);
             return FindByType(query, itemType, comparer);
         }
 
         [CanBeNull]
-        public static IItem FindByType(this IInventoryPage page, string itemType, IComparer<IItem> comparer = null)
+        public static IInventoryItem FindByType(this IInventoryPage page, string itemType, IComparer<IInventoryItem> comparer = null)
         {
-            return FindByType((IEnumerable<IItem>)page, itemType, comparer);
+            return FindByType((IEnumerable<IInventoryItem>)page, itemType, comparer);
         }
 
-        private static IItem FindByType(IEnumerable<IItem> query, string itemType, IComparer<IItem> comparer)
+        private static IInventoryItem FindByType(IEnumerable<IInventoryItem> query, string itemType, IComparer<IInventoryItem> comparer)
         {
             if (comparer != null)
             {
                 query = query.OrderBy(x => x, comparer);
             }
 
-            return query.FirstOrDefault(item => item.ItemType.Equals(itemType, StringComparison.OrdinalIgnoreCase));
+            return query.FirstOrDefault(item => item.Item.Asset.ItemType.Equals(itemType, StringComparison.OrdinalIgnoreCase));
         }
 
         [CanBeNull]
-        public static IItem FindByAssetId(this IInventory inventory, string itemAssetId, IComparer<IItem> comparer = null)
+        public static IInventoryItem FindByAssetId(this IInventory inventory, string itemAssetId, IComparer<IInventoryItem> comparer = null)
         {
             var query = inventory.SelectMany(d => d.Items);
             return FindByAssetId(query, itemAssetId, comparer);
         }
 
         [CanBeNull]
-        public static IItem FindByAssetId(this IInventoryPage page, string itemAssetId, IComparer<IItem> comparer = null)
+        public static IInventoryItem FindByAssetId(this IInventoryPage page, string itemAssetId, IComparer<IInventoryItem> comparer = null)
         {
-            return FindByAssetId((IEnumerable<IItem>)page, itemAssetId, comparer);
+            return FindByAssetId((IEnumerable<IInventoryItem>)page, itemAssetId, comparer);
 
         }
 
-        private static IItem FindByAssetId(IEnumerable<IItem> query, string itemType, IComparer<IItem> comparer)
+        private static IInventoryItem FindByAssetId(IEnumerable<IInventoryItem> query, string itemType, IComparer<IInventoryItem> comparer)
         {
             if (comparer != null)
             {
                 query = query.OrderBy(x => x, comparer);
             }
 
-            return query.FirstOrDefault(item => item.ItemAssetId.Equals(itemType, StringComparison.OrdinalIgnoreCase));
+            return query.FirstOrDefault(item => item.Item.Asset.ItemAssetId.Equals(itemType, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

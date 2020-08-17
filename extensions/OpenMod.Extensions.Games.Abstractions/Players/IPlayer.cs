@@ -5,6 +5,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
 {
     public interface IPlayer : IUser, IEntity
     {
-
+        string Stance { get; }
     }
 }

@@ -2,14 +2,18 @@
 
 namespace OpenMod.Extensions.Games.Abstractions.Items
 {
-    public interface IInventoryPage : IReadOnlyCollection<IItem>
+    public interface IInventoryPage : IReadOnlyCollection<IInventoryItem>
     {
-        string Id { get; }
+        IInventory Inventory { get; }
+
+        string Name { get; }
+
+        int Capacity { get; }
 
         bool IsReadOnly { get; }
 
         bool IsFull { get; }
 
-        IReadOnlyCollection<IItem> Items { get; }
+        IReadOnlyCollection<IInventoryItem> Items { get; }
     }
 }

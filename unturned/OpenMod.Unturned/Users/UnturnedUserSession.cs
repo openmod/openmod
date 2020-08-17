@@ -5,18 +5,19 @@ using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
+using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Users
 {
-    public class UnturnedUserSession : UserSessionBase
+    public class UnturnedPlayerSession : UserSessionBase
     {
-        public UnturnedUser User { get; }
+        public UnturnedPlayer Player { get; }
 
         [OpenModInternal]
-        public UnturnedUserSession(UnturnedUser user, IUserSession baseSession = null)
+        public UnturnedPlayerSession(UnturnedPlayer player, IUserSession baseSession = null)
         {
-            User = user;
+            Player = player;
             SessionData = baseSession?.SessionData ?? new Dictionary<string, object>();
             SessionStartTime = baseSession?.SessionStartTime ?? DateTime.Now;
         }
@@ -27,7 +28,7 @@ namespace OpenMod.Unturned.Users
             {
                 await UniTask.SwitchToMainThread();
                 SessionEndTime = DateTime.Now;
-                Provider.kick(User.SteamId, reason ?? string.Empty);
+                Provider.kick(Player.SteamId, reason ?? string.Empty);
             }
 
             return Task().AsTask();

@@ -4,6 +4,8 @@
     {
         string Name { get; }
 
+        string EntityAssetId { get; }
+
         string EntityType { get; }
     }
 }

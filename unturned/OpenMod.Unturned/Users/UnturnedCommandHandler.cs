@@ -47,7 +47,7 @@ namespace OpenMod.Unturned.Users
             m_Subscribed = false;
         }
 
-        protected virtual void OnCheckCommandPermissions(SteamPlayer player, string text, ref bool shouldExecuteCommand, ref bool shouldList)
+        protected virtual void OnCheckCommandPermissions(SteamPlayer steamPlayer, string text, ref bool shouldExecuteCommand, ref bool shouldList)
         {
             if (!text.StartsWith("/"))
             {
@@ -65,13 +65,13 @@ namespace OpenMod.Unturned.Users
 
             AsyncHelper.Schedule("Player command execution", async () =>
             {
-                var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, player.playerID.steamID.ToString(), UserSearchMode.FindById);
-                if (user == null)
+                var player = await m_UserManager.FindUserAsync(KnownActorTypes.Player, steamPlayer.playerID.steamID.ToString(), UserSearchMode.FindById);
+                if (player == null)
                 {
                     return;
                 }
 
-                await m_CommandExecutor.ExecuteAsync(user, args, string.Empty);
+                await m_CommandExecutor.ExecuteAsync(player, args, string.Empty);
             });
         }
 

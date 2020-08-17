@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\extensions\OpenMod.Extensions.Games.Abstractions\OpenMod.Extensions.Games.Abstractions.csproj" />
     <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj" />
   </ItemGroup>
 
