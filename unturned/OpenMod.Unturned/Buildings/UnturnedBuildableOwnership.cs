@@ -24,22 +24,19 @@ namespace OpenMod.Unturned.Buildings
             AssociatedGroupId = structure.group.ToString();
         }
 
-        public async Task<bool> HasAccess(IPlayer player)
+        public Task<bool> HasAccess(IPlayer player)
         {
             if (!(player is UnturnedPlayer uPlayer))
-                return false;
+                return Task.FromResult(result: false);
 
             if (OwnerPlayerId.Equals(uPlayer.SteamId))
-                return true;
+                return Task.FromResult(result: true);
 
-            if (AssociatedGroupId.Equals(uPlayer.SteamPlayer.playerID.group.ToString()) ||
-                AssociatedGroupId.Equals(uPlayer.Player.quests.groupID))
-                return true;
-
-            return false;
+            return Task.FromResult(AssociatedGroupId.Equals(uPlayer.SteamPlayer.playerID.group.ToString()) ||
+                                   AssociatedGroupId.Equals(uPlayer.Player.quests.groupID));
 
             // 1 liner:
-            //return player is UnturnedPlayer uPlayer && (OwnerPlayerId.Equals(uPlayer.SteamId) || AssociatedGroupId.Equals(uPlayer.SteamPlayer.playerID.group.ToString()) || AssociatedGroupId.Equals(uPlayer.Player.quests.groupID));
+            //return Task.FromResult(player is UnturnedPlayer uPlayer && (OwnerPlayerId.Equals(uPlayer.SteamId) || AssociatedGroupId.Equals(uPlayer.SteamPlayer.playerID.group.ToString()) || AssociatedGroupId.Equals(uPlayer.Player.quests.groupID)));
         }
     }
 }
