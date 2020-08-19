@@ -1,9 +1,8 @@
-﻿using OpenMod.API.Users;
-using OpenMod.Extensions.Games.Abstractions.Entities;
+﻿using OpenMod.Extensions.Games.Abstractions.Entities;
 
 namespace OpenMod.Extensions.Games.Abstractions.Players
 {
-    public interface IPlayer : IUser, IEntity
+    public interface IPlayer : IEntity
     {
         string Stance { get; }
     }

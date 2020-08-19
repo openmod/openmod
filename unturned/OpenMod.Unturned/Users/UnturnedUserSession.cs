@@ -12,10 +12,10 @@ namespace OpenMod.Unturned.Users
 {
     public class UnturnedPlayerSession : UserSessionBase
     {
-        public UnturnedPlayer Player { get; }
+        public UnturnedUser Player { get; }
 
         [OpenModInternal]
-        public UnturnedPlayerSession(UnturnedPlayer player, IUserSession baseSession = null)
+        public UnturnedPlayerSession(UnturnedUser player, IUserSession baseSession = null)
         {
             Player = player;
             SessionData = baseSession?.SessionData ?? new Dictionary<string, object>();

@@ -8,7 +8,7 @@ namespace OpenMod.Unturned.Permissions
     [Priority(Priority = Priority.High)]
     public class UnturnedAdminPermissionCheckProvider : AlwaysGrantPermissionCheckProvider
     {
-        public UnturnedAdminPermissionCheckProvider() : base(actor => actor is UnturnedPlayer user && user.SteamPlayer.isAdmin)
+        public UnturnedAdminPermissionCheckProvider() : base(actor => actor is UnturnedUser user && user.Player.SteamPlayer.isAdmin)
         {
         }
     }

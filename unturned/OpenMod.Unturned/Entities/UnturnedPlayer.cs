@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.API;
-using OpenMod.API.Users;
-using OpenMod.Core.Users;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Items;
 using OpenMod.Extensions.Games.Abstractions.Players;
@@ -16,7 +12,6 @@ using OpenMod.UnityEngine.Extensions;
 using OpenMod.UnityEngine.Helpers;
 using OpenMod.UnityEngine.Transforms;
 using OpenMod.Unturned.Items;
-using OpenMod.Unturned.Users;
 using OpenMod.Unturned.Vehicles;
 using SDG.Unturned;
 using Steamworks;
@@ -25,14 +20,8 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Entities
 {
-    public class UnturnedPlayer : UserBase, IEquatable<UnturnedPlayer>, IEquatable<UnturnedPendingPlayer>, 
-        IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle
+    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle
     {
-        public override string Id
-        {
-            get { return SteamId.ToString(); }
-        }
-
         public Player Player { get; }
 
         public SteamPlayer SteamPlayer { get; }
@@ -40,11 +29,7 @@ namespace OpenMod.Unturned.Entities
         public CSteamID SteamId { get; }
 
         [OpenModInternal]
-        protected internal UnturnedPlayer(
-            UnturnedUserProvider userProvider,
-            IUserDataStore userDataStore,
-            Player player,
-            UnturnedPendingPlayer pending = null) : base(userProvider, userDataStore)
+        protected internal UnturnedPlayer(Player player)
         {
             Asset = UnturnedPlayerAsset.Instance;
             State = NullEntityState.Instance;
@@ -52,93 +37,8 @@ namespace OpenMod.Unturned.Entities
             Transform = new UnityTransform(player.transform);
             Player = player;
             SteamPlayer = Player.channel.owner;
-
-            var steamPlayerIdId = SteamPlayer.playerID;
-            SteamId = steamPlayerIdId.steamID;
+            SteamId = SteamPlayer.playerID.steamID;
             EntityInstanceId = SteamId.ToString();
-
-            DisplayName = SteamPlayer.playerID.characterName;
-            Type = KnownActorTypes.Player;
-            Session = new UnturnedPlayerSession(this, pending?.Session);
-        }
-
-        public override Task PrintMessageAsync(string message)
-        {
-            return PrintMessageAsync(message, System.Drawing.Color.White);
-        }
-
-        public override Task PrintMessageAsync(string message, Color color)
-        {
-            return PrintMessageAsync(message, color, isRich: true, iconUrl: SDG.Unturned.Provider.configData.Browser.Icon);
-        }
-
-        public Task PrintMessageAsync(string message, Color color, bool isRich, string iconUrl)
-        {
-            async UniTask PrintMessageTask()
-            {
-                var lines = message.Replace(Environment.NewLine, "\n").Split('\n');
-                if (lines.Length == 0)
-                {
-                    return;
-                }
-
-                await UniTask.SwitchToMainThread();
-
-                foreach (var line in lines)
-                {
-                    var lineToDisplay = line.Trim();
-                    if (lineToDisplay.Length == 0)
-                    {
-                        continue;
-                    }
-
-                    foreach (var lline in WrapLine(line))
-                    {
-                        ChatManager.serverSendMessage(
-                            text: lline,
-                            color: color.ToUnityColor(),
-                            toPlayer: SteamPlayer,
-                            iconURL: iconUrl,
-                            useRichTextFormatting: isRich);
-                    }
-                }
-            }
-
-            return PrintMessageTask().AsTask();
-        }
-
-        private IEnumerable<string> WrapLine(string line)
-        {
-            var words = line.Split(' ');
-            var lines = new List<string>();
-            var currentLine = "";
-            var maxLength = 90;
-
-            foreach (var currentWord in words)
-            {
-                if ((currentLine.Length > maxLength) ||
-                    ((currentLine.Length + currentWord.Length) > maxLength))
-                {
-                    lines.Add(currentLine);
-                    currentLine = "";
-                }
-
-                if (currentLine.Length > 0)
-                {
-                    currentLine += " " + currentWord;
-                }
-                else
-                {
-                    currentLine += currentWord;
-                }
-            }
-
-            if (currentLine.Length > 0)
-            {
-                lines.Add(currentLine);
-            }
-
-            return lines;
         }
 
         public bool Equals(UnturnedPlayer other)
@@ -149,24 +49,16 @@ namespace OpenMod.Unturned.Entities
             return other.SteamId.Equals(SteamId);
         }
 
-        public bool Equals(UnturnedPendingPlayer other)
-        {
-            return other?.Equals(this) ?? false;
-        }
-
         public override bool Equals(object obj)
         {
-            return obj switch
-            {
-                UnturnedPlayer other => Equals(other),
-                UnturnedPendingPlayer otherPending => Equals(otherPending),
-                _ => false
-            };
+            if (obj is UnturnedPlayer other) return Equals(other);
+
+            return false;
         }
 
         public override int GetHashCode()
         {
-            return unchecked((int)(SteamId.m_SteamID * 154 ^ 7 + 165041));
+            return unchecked((int)(SteamId.m_SteamID * 174 ^ 5 + 185737));
         }
 
         public IEntityAsset Asset { get; }

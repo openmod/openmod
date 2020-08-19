@@ -7,14 +7,14 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Users
 {
-    public class UnturnedPendingPlayerSession : UserSessionBase
+    public class UnturnedPendingUserSession : UserSessionBase
     {
-        public UnturnedPendingPlayer Player { get; }
+        public UnturnedPendingUser User { get; }
 
         [OpenModInternal]
-        public UnturnedPendingPlayerSession(UnturnedPendingPlayer player)
+        public UnturnedPendingUserSession(UnturnedPendingUser user)
         {
-            Player = player;
+            User = user;
             SessionStartTime = DateTime.Now;
             SessionData = new Dictionary<string, object>();
         }
@@ -22,7 +22,7 @@ namespace OpenMod.Unturned.Users
         public override Task DisconnectAsync(string reason = "")
         {
             SessionEndTime = DateTime.Now;
-            Provider.reject(Player.SteamId, ESteamRejection.PLUGIN, reason ?? string.Empty);
+            Provider.reject(User.SteamId, ESteamRejection.PLUGIN, reason ?? string.Empty);
             return Task.CompletedTask;
         }
 

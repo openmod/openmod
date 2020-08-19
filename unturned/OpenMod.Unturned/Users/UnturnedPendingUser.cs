@@ -9,7 +9,7 @@ using Steamworks;
 
 namespace OpenMod.Unturned.Users
 {
-    public class UnturnedPendingPlayer : UserBase, IEquatable<UnturnedPendingPlayer>, IEquatable<UnturnedPlayer>
+    public class UnturnedPendingUser : UserBase, IEquatable<UnturnedPendingUser>, IEquatable<UnturnedUser>
     {
         public override string Id
         {
@@ -21,13 +21,13 @@ namespace OpenMod.Unturned.Users
         public SteamPending SteamPending { get; }
 
         [OpenModInternal]
-        public UnturnedPendingPlayer(IUserProvider userProvider, IUserDataStore userDataStore, SteamPending steamPending) : base(userProvider, userDataStore)
+        public UnturnedPendingUser(IUserProvider userProvider, IUserDataStore userDataStore, SteamPending steamPending) : base(userProvider, userDataStore)
         {
             SteamPending = steamPending;
             SteamId = steamPending.playerID.steamID;
             DisplayName = steamPending.playerID.characterName;
             Type = KnownActorTypes.Player;
-            Session = new UnturnedPendingPlayerSession(this);
+            Session = new UnturnedPendingUserSession(this);
         }
 
         public override Task PrintMessageAsync(string message)
@@ -40,14 +40,14 @@ namespace OpenMod.Unturned.Users
             return Task.CompletedTask;
         }
 
-        public bool Equals(UnturnedPendingPlayer other)
+        public bool Equals(UnturnedPendingUser other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return SteamId.Equals(other.SteamId);
         }
 
-        public bool Equals(UnturnedPlayer other)
+        public bool Equals(UnturnedUser other)
         {
             return other?.SteamId == SteamId;
         }
@@ -57,12 +57,12 @@ namespace OpenMod.Unturned.Users
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
 
-            if (obj is UnturnedPlayer user)
+            if (obj is UnturnedUser user)
             {
                 return Equals(user);
             }
 
-            if (obj is UnturnedPendingPlayer pendingUser)
+            if (obj is UnturnedPendingUser pendingUser)
             {
                 return Equals(pendingUser);
             }
