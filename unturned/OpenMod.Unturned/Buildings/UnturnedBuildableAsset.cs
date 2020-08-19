@@ -12,14 +12,15 @@ namespace OpenMod.Unturned.Buildings
 {
     public class UnturnedBuildableAsset : IBuildableAsset
     {
-        public string BuildableAssetId { get; }
+        public Asset Asset { get; }
 
-        public string BuildableType { get; }
+        public string BuildableAssetId => Asset.id.ToString();
+
+        public string BuildableType => Asset.GetType().Name;
 
         public UnturnedBuildableAsset(Asset asset)
         {
-            BuildableAssetId = asset.id.ToString();
-            BuildableType = asset.GetType().Name;
+            Asset = asset;
         }
     }
 }
