@@ -1,10 +1,10 @@
 ﻿using JetBrains.Annotations;
 
-namespace OpenMod.Extensions.Games.Abstractions.Buildings
+namespace OpenMod.Extensions.Games.Abstractions.Building
 {
     public interface IBuildableState
     {
-        ushort Health { get; }
+        double Health { get; }
 
         [CanBeNull]
         byte[] State { get; }

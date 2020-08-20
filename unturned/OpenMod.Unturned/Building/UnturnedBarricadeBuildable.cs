@@ -1,11 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
-using OpenMod.Extensions.Games.Abstractions.Buildings;
+﻿using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using OpenMod.Extensions.Games.Abstractions.Acl;
+using OpenMod.Extensions.Games.Abstractions.Building;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
 using OpenMod.UnityEngine.Transforms;
 using SDG.Unturned;
+using Object = UnityEngine.Object;
 
-namespace OpenMod.Unturned.Buildings
+namespace OpenMod.Unturned.Building
 {
     public class UnturnedBarricadeBuildable : IBuildable
     {
@@ -39,7 +41,13 @@ namespace OpenMod.Unturned.Buildings
 
         public Task DestroyAsync()
         {
-            throw new NotImplementedException();
+            async UniTask DestroyTask()
+            {
+                await UniTask.SwitchToMainThread();
+                Object.Destroy(Interactable);
+            }
+
+            return DestroyTask().AsTask();
         }
     }
 }

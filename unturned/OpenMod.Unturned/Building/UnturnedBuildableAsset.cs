@@ -1,14 +1,7 @@
-﻿using JetBrains.Annotations;
-using OpenMod.Extensions.Games.Abstractions.Buildings;
-using OpenMod.Extensions.Games.Abstractions.Vehicles;
+﻿using OpenMod.Extensions.Games.Abstractions.Building;
 using SDG.Unturned;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
-using UnityEngine;
 
-namespace OpenMod.Unturned.Buildings
+namespace OpenMod.Unturned.Building
 {
     public class UnturnedBuildableAsset : IBuildableAsset
     {

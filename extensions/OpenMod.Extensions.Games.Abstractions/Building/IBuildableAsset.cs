@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-
-namespace OpenMod.Extensions.Games.Abstractions.Buildings
+﻿namespace OpenMod.Extensions.Games.Abstractions.Building
 {
     public interface IBuildableAsset
     {

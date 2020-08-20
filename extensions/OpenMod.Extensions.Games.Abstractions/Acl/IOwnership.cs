@@ -1,14 +1,14 @@
 ﻿using System.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Players;
 
-namespace OpenMod.Extensions.Games.Abstractions.Buildings
+namespace OpenMod.Extensions.Games.Abstractions.Acl
 {
     public interface IOwnership
     {
         string OwnerPlayerId { get; }
 
-        string AssociatedGroupId { get; }
+        string OwnerGroupId { get; }
 
-        Task<bool> HasAccess(IPlayer player);
+        Task<bool> HasAccessAsync(IPlayer player);
     }
 }

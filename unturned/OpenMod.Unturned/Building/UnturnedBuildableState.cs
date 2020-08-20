@@ -1,11 +1,11 @@
-﻿using OpenMod.Extensions.Games.Abstractions.Buildings;
+﻿using OpenMod.Extensions.Games.Abstractions.Building;
 using SDG.Unturned;
 
-namespace OpenMod.Unturned.Buildings
+namespace OpenMod.Unturned.Building
 {
     public class UnturnedBuildableState : IBuildableState
     {
-        public ushort Health { get; }
+        public double Health { get; }
 
         public byte[] State { get; }
 
