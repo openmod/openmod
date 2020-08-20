@@ -52,7 +52,7 @@ namespace OpenMod.Core.Commands
             logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
 
             var currentCommandAccessor = m_LifetimeScope.Resolve<ICurrentCommandContextAccessor>();
-            var commandsRegistrations = m_CommandStore.Commands;
+            var commandsRegistrations = await m_CommandStore.GetCommandsAsync();
             var commandContextBuilder = m_LifetimeScope.Resolve<ICommandContextBuilder>();
             var stringLocalizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
             var commandContext = commandContextBuilder.CreateContext(actor, args, prefix, commandsRegistrations);

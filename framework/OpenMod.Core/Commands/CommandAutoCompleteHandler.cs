@@ -30,7 +30,7 @@ namespace OpenMod.Core.Commands
             var args = text.Substring(0, index).Split(' ').ToArray();
             var commandStart = index >= text.Length ? string.Empty : text.Substring(index, text.Length - index);
 
-            var commands = m_CommandStore.Commands;
+            var commands = AsyncHelper.RunSync(() => m_CommandStore.GetCommandsAsync());
             var context = m_CommandContextBuilder.CreateContext(m_ConsoleActorAccessor.Actor, args, string.Empty, commands);
 
             IEnumerable<ICommandRegistration> matchingCommands;

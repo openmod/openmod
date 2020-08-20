@@ -7,6 +7,7 @@ using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
+using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Commands
 {
@@ -25,7 +26,7 @@ namespace OpenMod.Core.Commands
         private readonly Dictionary<string, string> m_Cache = new Dictionary<string, string>();
         public virtual string GetPermission(ICommandRegistration registration)
         {
-            return m_Cache.TryGetValue(registration.Id, out var cachedValue) ? cachedValue : GetPermission(registration, m_CommandStore.Value.Commands);
+            return m_Cache.TryGetValue(registration.Id, out var cachedValue) ? cachedValue : GetPermission(registration, AsyncHelper.RunSync(() => m_CommandStore.Value.GetCommandsAsync()));
         }
 
         public virtual string GetPermission(ICommandRegistration registration, IReadOnlyCollection<ICommandRegistration> commands)

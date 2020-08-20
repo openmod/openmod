@@ -52,7 +52,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
         protected override async Task OnExecuteAsync()
         {
-            var commands = m_CommandStore.Commands;
+            var commands = await m_CommandStore.GetCommandsAsync();
             var totalCount = commands.Count;
 
             const int itemsPerPage = 10;

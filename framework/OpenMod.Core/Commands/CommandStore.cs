@@ -163,6 +163,8 @@ namespace OpenMod.Core.Commands
             var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync();
             if (commandsData?.Commands != null && commandsData.Commands.Count > 0)
             {
+                // clear unknown commands
+
                 var commands = new List<ICommandRegistration>();
                 foreach (var sources in m_CommandSources)
                 {

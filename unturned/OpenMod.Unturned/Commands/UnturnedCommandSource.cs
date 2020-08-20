@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using SDG.Unturned;
@@ -8,16 +9,22 @@ namespace OpenMod.Unturned.Commands
     [OpenModInternal]
     public class UnturnedCommandSource : ICommandSource
     {
+        private readonly List<ICommandRegistration> m_Commands;
+
         // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */
         public UnturnedCommandSource(IRuntime runtime)
         {
-            Commands = new List<ICommandRegistration>();
+            m_Commands = new List<ICommandRegistration>();
+            
             foreach (var cmd in Commander.commands)
             {
-                Commands.Add(new UnturnedCommandRegistration(runtime, cmd));
+                m_Commands.Add(new UnturnedCommandRegistration(runtime, cmd));
             }
         }
 
-        public ICollection<ICommandRegistration> Commands { get; }
+        public Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync()
+        {
+            return Task.FromResult<IReadOnlyCollection<ICommandRegistration>>(m_Commands);
+        }
     }
 }

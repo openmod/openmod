@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using Autofac.Util;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
@@ -16,6 +17,7 @@ namespace OpenMod.Core.Commands
 
         private readonly ILogger m_Logger;
         private readonly IOpenModComponent m_OpenModComponent;
+        private readonly List<ICommandRegistration> m_Commands;
 
         public OpenModComponentCommandSource(
             ILogger logger, 
@@ -24,7 +26,7 @@ namespace OpenMod.Core.Commands
         {
             m_Logger = logger;
             m_OpenModComponent = openModComponent;
-            Commands = new List<ICommandRegistration>();
+            m_Commands = new List<ICommandRegistration>();
             ScanAssemblyForCommmmands(assembly);
         }
 
@@ -47,7 +49,7 @@ namespace OpenMod.Core.Commands
 
                 var registatration = new OpenModComponentBoundCommandRegistration(m_OpenModComponent, type);
 
-                Commands.Add(registatration);
+                m_Commands.Add(registatration);
             }
 
             try
@@ -81,7 +83,7 @@ namespace OpenMod.Core.Commands
                     continue;
                 }
 
-                Commands.Add(new OpenModComponentBoundCommandRegistration(m_OpenModComponent, method));
+                m_Commands.Add(new OpenModComponentBoundCommandRegistration(m_OpenModComponent, method));
             }
         }
 
@@ -90,6 +92,9 @@ namespace OpenMod.Core.Commands
             get { return m_OpenModComponent.OpenModComponentId; }
         }
 
-        public ICollection<ICommandRegistration> Commands { get; }
+        public Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync()
+        {
+            return Task.FromResult<IReadOnlyCollection<ICommandRegistration>>(m_Commands);
+        }
     }
 }

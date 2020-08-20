@@ -36,7 +36,7 @@ namespace OpenMod.Core.Plugins
             m_PrintedCommandPermissions = new List<IPermissionRegistration>();
         }
 
-        public Task WriteHelpFileAsync()
+        public async Task WriteHelpFileAsync()
         {
             var directory = m_Plugin.WorkingDirectory;
             if (!Directory.Exists(directory))
@@ -57,7 +57,7 @@ namespace OpenMod.Core.Plugins
                 markdownBuilder.AppendLine($"Website: {m_Plugin.Website}  ");
             }
 
-            var commands = m_CommandStore.Commands
+            var commands = (await m_CommandStore.GetCommandsAsync())
                 .Where(d => d.Component == m_Plugin)
                 .ToList();
 
@@ -99,8 +99,6 @@ namespace OpenMod.Core.Plugins
 
             var filePath = Path.Combine(directory, "help.md");
             File.WriteAllText(filePath, markdownBuilder.ToString());
-
-            return Task.CompletedTask;
         }
 
         private void AppendCommand(
