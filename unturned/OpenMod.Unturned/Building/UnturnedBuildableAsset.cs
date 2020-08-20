@@ -5,6 +5,8 @@ namespace OpenMod.Unturned.Building
 {
     public class UnturnedBuildableAsset : IBuildableAsset
     {
+        public Asset Asset { get; }
+
         public string BuildableAssetId { get; }
 
         public string BuildableType { get; }
@@ -21,6 +23,7 @@ namespace OpenMod.Unturned.Building
 
         protected UnturnedBuildableAsset(Asset asset)
         {
+            Asset = asset;
             BuildableAssetId = asset.id.ToString();
         }
     }
