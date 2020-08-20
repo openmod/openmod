@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Reflection;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
@@ -223,6 +222,7 @@ namespace OpenMod.Unturned.Items
                 throw new ArgumentException($"Item amount can not be more than {byte.MaxValue}", nameof(state));
             }
         }
+
         private Item CreateItem(ushort id, IItemState state)
         {
             var itemAsset = (ItemAsset)Assets.find(EAssetType.ITEM, id);
