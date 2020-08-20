@@ -5,12 +5,11 @@ using OpenMod.Extensions.Games.Abstractions.Players;
 using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 
-namespace OpenMod.Unturned.Building
+namespace OpenMod.Unturned.Vehicles
 {
-    public class UnturnedBuildableOwnership : IOwnership
+    public class UnturnedVehicleOwnership : IOwnership
     {
-        private readonly StructureData m_Structure;
-        private readonly BarricadeData m_Barricade;
+        private readonly InteractableVehicle m_Vehicle;
 
         public bool HasOwner
         {
@@ -21,34 +20,13 @@ namespace OpenMod.Unturned.Building
             }
         }
 
-        public string OwnerPlayerId
-        {
-            get
-            {
-                return m_Barricade != null
-                    ? m_Barricade.owner.ToString()
-                    : m_Structure.owner.ToString();
-            }
-        }
+        public string OwnerPlayerId => m_Vehicle.lockedOwner.ToString();
 
-        public string OwnerGroupId
-        {
-            get
-            {
-                return m_Barricade != null
-                    ? m_Barricade.@group.ToString()
-                    : m_Structure.@group.ToString();
-            }
-        }
+        public string OwnerGroupId => m_Vehicle.lockedGroup.ToString();
 
-        public UnturnedBuildableOwnership(BarricadeData barricade)
+        public UnturnedVehicleOwnership(InteractableVehicle vehicle)
         {
-            m_Barricade = barricade;
-        }
-
-        public UnturnedBuildableOwnership(StructureData structure)
-        {
-            m_Structure = structure;
+            m_Vehicle = vehicle;
         }
 
         public Task<bool> HasAccessAsync(IPlayer player)
@@ -62,7 +40,7 @@ namespace OpenMod.Unturned.Building
 
                 if (OwnerGroupId != null
                     && (string.Equals(OwnerGroupId, unturnedPlayer.SteamPlayer.playerID.group.ToString(), StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(OwnerGroupId, unturnedPlayer.Player.quests.groupID.ToString(), StringComparison.OrdinalIgnoreCase)))
+                        || string.Equals(OwnerGroupId, unturnedPlayer.Player.quests.groupID.ToString(), StringComparison.OrdinalIgnoreCase)))
                 {
                     return Task.FromResult(true);
                 }

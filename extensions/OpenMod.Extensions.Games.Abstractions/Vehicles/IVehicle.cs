@@ -1,19 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using OpenMod.Extensions.Games.Abstractions.Acl;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
 
 namespace OpenMod.Extensions.Games.Abstractions.Vehicles
 {
-    public interface IVehicleState
-    {
-        [CanBeNull]
-        byte[] StateData { get; }
-    }
-
-    public interface IVehicle
+    public interface IVehicle : IHasOwnership
     {
         IVehicleAsset Asset { get; }
 

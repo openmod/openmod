@@ -146,5 +146,10 @@ namespace OpenMod.Unturned.Users
         }
 
         public UnturnedPlayer Player { get; }
+
+        IPlayer IPlayerUser.Player
+        {
+            get => Player;
+        }
     }
 }

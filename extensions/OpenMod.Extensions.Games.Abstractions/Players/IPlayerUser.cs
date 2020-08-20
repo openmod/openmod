@@ -2,8 +2,13 @@
 
 namespace OpenMod.Extensions.Games.Abstractions.Players
 {
-    public interface IPlayerUser<out T> : IUser where T : IPlayer
+    public interface IPlayerUser : IUser
     {
-        public T Player { get; }
+        public IPlayer Player { get; }
+    }
+
+    public interface IPlayerUser<out T> : IPlayerUser where T : IPlayer
+    {
+        public new T Player { get; }
     }
 }
