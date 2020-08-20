@@ -2,7 +2,7 @@
 using HarmonyLib;
 using UnityEngine;
 
-namespace OpenMod.Unturned.Module.Shared
+namespace OpenMod.Unturned.Module.Shared.Patches
 {
     // This patch is required because on Unity platforms this will always result in Windows being detected
     [HarmonyPatch(typeof(RuntimeInformation))]
