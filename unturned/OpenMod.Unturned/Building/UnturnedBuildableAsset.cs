@@ -9,10 +9,19 @@ namespace OpenMod.Unturned.Building
 
         public string BuildableType { get; }
 
-        public UnturnedBuildableAsset(Asset asset)
+        public UnturnedBuildableAsset(ItemBarricadeAsset barricadeAsset) : this((Asset)barricadeAsset)
+        {
+            BuildableType = "barricade";
+        }
+
+        public UnturnedBuildableAsset(ItemStructureAsset structureAsset) : this((Asset)structureAsset)
+        {
+            BuildableType = "structure";
+        }
+
+        protected UnturnedBuildableAsset(Asset asset)
         {
             BuildableAssetId = asset.id.ToString();
-            BuildableType = asset.GetType().Name;
         }
     }
 }
