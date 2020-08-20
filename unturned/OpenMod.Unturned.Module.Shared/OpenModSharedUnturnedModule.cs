@@ -12,13 +12,13 @@ using SDG.Framework.Modules;
 
 namespace OpenMod.Unturned.Module.Shared
 {
-    public sealed class OpenModSharedUnturnedModule 
+ public sealed class OpenModSharedUnturnedModule 
     {
         private const string c_HarmonyInstanceId = "com.get-openmod.unturned.module";
         private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new Dictionary<string, Assembly>();
         private Harmony m_HarmonyInstance;
         private readonly string[] m_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
-        private readonly string[] m_CompatibleModules = { };
+        private readonly string[] m_CompatibleModules = { "AviRockets" };
 
         public bool Initialize(Assembly moduleAssembly)
         {
