@@ -18,7 +18,7 @@ namespace OpenMod.Core.Users
     {
         public const string UsersKey = "users";
         private readonly IDataStore m_DataStore;
-        
+
         public UserDataStore(IOpenModDataStoreAccessor dataStoreAccessor)
         {
             m_DataStore = dataStoreAccessor.DataStore;
@@ -59,13 +59,29 @@ namespace OpenMod.Core.Users
             throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
         }
 
+        public async Task SetUserDataAsync<T>(string userId, string userType, string key, T value)
+        {
+            var userData = await GetUserDataAsync(userId, userType);
+            if (userData.Data == null)
+            {
+                userData.Data = new Dictionary<string, object>();
+            }
+            else if (userData.Data.ContainsKey(key))
+            {
+                userData.Data.Remove(key);
+            }
+
+            userData.Data.Add(key, value);
+            await SetUserDataAsync(userData);
+        }
+
         public async Task<IReadOnlyCollection<UserData>> GetUsersDataAsync(string type)
         {
             var usersData = await GetUsersDataAsync();
             return usersData.Users.Where(d => d.Type.Equals(type, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
-        public async Task SaveUserDataAsync(UserData userData)
+        public async Task SetUserDataAsync(UserData userData)
         {
             var usersData = await GetUsersDataAsync();
             var idx = usersData.Users.FindIndex(c =>

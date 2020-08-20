@@ -154,7 +154,7 @@ namespace OpenMod.Core.Permissions
             }
 
             userData.Roles.Add(roleId);
-            await m_UserDataStore.SaveUserDataAsync(userData);
+            await m_UserDataStore.SetUserDataAsync(userData);
             return true;
         }
 
@@ -162,7 +162,7 @@ namespace OpenMod.Core.Permissions
         {
             var userData = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
             userData.Roles.Remove(roleId);
-            await m_UserDataStore.SaveUserDataAsync(userData);
+            await m_UserDataStore.SetUserDataAsync(userData);
             return true;
         }
 

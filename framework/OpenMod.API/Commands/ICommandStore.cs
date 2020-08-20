@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Commands
@@ -6,6 +7,6 @@ namespace OpenMod.API.Commands
     [Service]
     public interface ICommandStore
     {
-        IReadOnlyCollection<ICommandRegistration> Commands { get; }
+        Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync();
     }
 }

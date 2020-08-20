@@ -9,7 +9,8 @@ namespace OpenMod.API.Users
     {
         Task<UserData> GetUserDataAsync(string userId, string userType);
         Task<T> GetUserDataAsync<T>(string userId, string userType, string key);
+        Task SetUserDataAsync<T>(string userId, string userType, string key, T value);
         Task<IReadOnlyCollection<UserData>> GetUsersDataAsync(string type);
-        Task SaveUserDataAsync(UserData userData);
+        Task SetUserDataAsync(UserData userData);
     }
 }

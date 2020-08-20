@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -29,12 +27,14 @@ namespace OpenMod.Core.Commands
         private readonly IServiceProvider m_ServiceProvider;
         private readonly IPermissionRegistry m_PermissionRegistry;
         private readonly ICommandPermissionBuilder m_CommandPermissionBuilder;
+        private readonly ICommandDataStore m_CommandDataStore;
         private IReadOnlyCollection<ICommandSource> m_CommandSources;
 
         public CommandStore(IOptions<CommandStoreOptions> options,
-            IServiceProvider serviceProvider, 
-            IPermissionRegistry permissionRegistry, 
-            ICommandPermissionBuilder commandPermissionBuilder)
+            IServiceProvider serviceProvider,
+            IPermissionRegistry permissionRegistry,
+            ICommandPermissionBuilder commandPermissionBuilder,
+            ICommandDataStore commandDataStore)
         {
             m_Comparer = new PriorityComparer(PriortyComparisonMode.HighestFirst);
             m_CommandSources = options.Value.CreateCommandSources(serviceProvider);
@@ -42,6 +42,7 @@ namespace OpenMod.Core.Commands
             m_ServiceProvider = serviceProvider;
             m_PermissionRegistry = permissionRegistry;
             m_CommandPermissionBuilder = commandPermissionBuilder;
+            m_CommandDataStore = commandDataStore;
 
             options.Value.OnCommandSourcesChanged += OnCommandSourcesChanged;
             OnCommandSourcesChanged();
@@ -49,71 +50,141 @@ namespace OpenMod.Core.Commands
 
         private void OnCommandSourcesChanged()
         {
-            AsyncHelper.RunSync(m_CommandSources.DisposeAllAsync);
-
-            try
+            AsyncHelper.RunSync(async () =>
             {
-                m_CommandSources = m_Options.Value.CreateCommandSources(m_ServiceProvider);
-            }
-            catch (ObjectDisposedException)
-            {
-                // https://github.com/openmod/OpenMod/issues/61
-                m_CommandSources = new List<ICommandSource>();
-            }
+                await m_CommandSources.DisposeAllAsync();
 
-            var commands = m_CommandSources.SelectMany(d => d.Commands).ToList();
-
-            foreach (var registration in commands)
-            {
-                var permission = m_CommandPermissionBuilder.GetPermission(registration, commands);
-
-                m_PermissionRegistry.RegisterPermission(registration.Component,
-                    permission,
-                    description: $"Grants access to the {registration.Id} command.",
-                    defaultGrant: PermissionGrantResult.Default);
-
-                if (registration.PermissionRegistrations == null)
+                try
                 {
-                    continue;
+                    m_CommandSources = m_Options.Value.CreateCommandSources(m_ServiceProvider);
+                }
+                catch (ObjectDisposedException)
+                {
+                    // https://github.com/openmod/OpenMod/issues/61
+                    m_CommandSources = new List<ICommandSource>();
                 }
 
-                foreach (var permissionRegistration in registration.PermissionRegistrations)
+                var commands = new List<ICommandRegistration>();
+                foreach (var sources in m_CommandSources)
                 {
-                    m_PermissionRegistry.RegisterPermission(permissionRegistration.Owner,
-                        $"{permission}.{permissionRegistration.Permission}",
-                        permissionRegistration.Description,
-                        permissionRegistration.DefaultGrant);
+                    commands.AddRange(await sources.GetCommandsAsync());
                 }
-            }
+
+                foreach (var registration in commands)
+                {
+                    var permission = m_CommandPermissionBuilder.GetPermission(registration, commands);
+
+                    m_PermissionRegistry.RegisterPermission(registration.Component,
+                        permission,
+                        description: $"Grants access to the {registration.Id} command.",
+                        defaultGrant: PermissionGrantResult.Default);
+
+                    if (registration.PermissionRegistrations == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var permissionRegistration in registration.PermissionRegistrations)
+                    {
+                        m_PermissionRegistry.RegisterPermission(permissionRegistration.Owner,
+                            $"{permission}.{permissionRegistration.Permission}",
+                            permissionRegistration.Description,
+                            permissionRegistration.DefaultGrant);
+                    }
+                }
+
+                var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync() ?? new RegisteredCommandsData();
+                commandsData.Commands ??= new List<RegisteredCommandData>();
+
+                foreach (var command in commands
+                    .Where(d => !commandsData.Commands.Any(c => c.Id.Equals(d.Id, StringComparison.OrdinalIgnoreCase))))
+                {
+                    commandsData.Commands.Add(CreateDefaultCommandData(command));
+                }
+
+                await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
+            });
         }
-
-        public IReadOnlyCollection<ICommandRegistration> Commands
-        {
-            get
-            {
-                if (m_IsDisposing)
-                {
-                    throw new ObjectDisposedException(nameof(CommandStore));
-                }
-
-                return m_CommandSources
-                    .SelectMany(d => d.Commands)
-                    .Where(d => d.Component.IsComponentAlive)
-                    .OrderBy(d => d.Priority, m_Comparer)
-                    .ToList();
-            }
-        }
-
-        public ValueTask DisposeAsync()
+        
+        public async Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync()
         {
             if (m_IsDisposing)
             {
-                return new ValueTask(Task.CompletedTask);
+                throw new ObjectDisposedException(nameof(CommandStore));
             }
+
+            var commands = new List<ICommandRegistration>();
+            foreach (var sources in m_CommandSources)
+            {
+                foreach (var command in await sources.GetCommandsAsync())
+                {
+                    if (!command.Component.IsComponentAlive)
+                    {
+                        continue;
+                    }
+
+                    var commandData = await GetOrCreateCommandData(command);
+                    commands.Add(new RegisteredCommand(command, commandData));
+                }
+            }
+
+            commands.Sort((a, b) => m_Comparer.Compare(a.Priority, b.Priority));
+            return commands;
+        }
+
+        private async Task<RegisteredCommandData> GetOrCreateCommandData(ICommandRegistration command)
+        {
+            var commandData = await m_CommandDataStore.GetRegisteredCommandAsync(command.Id);
+            return commandData ?? CreateDefaultCommandData(command);
+        }
+
+        private RegisteredCommandData CreateDefaultCommandData(ICommandRegistration command)
+        {
+            return new RegisteredCommandData
+            {
+                Name = command.Name,
+                Priority = command.Priority,
+                Data = new Dictionary<string, object>(),
+                ParentId = command.ParentId,
+                Aliases = command.Aliases?.ToList(),
+                Enabled = true,
+                Id = command.Id
+            };
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (m_IsDisposing)
+            {
+                return;
+            }
+
             m_IsDisposing = true;
+            var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync();
+            if (commandsData?.Commands != null && commandsData.Commands.Count > 0)
+            {
+                var commands = new List<ICommandRegistration>();
+                foreach (var sources in m_CommandSources)
+                {
+                    commands.AddRange(await sources.GetCommandsAsync());
+                }
+
+                var isDirty = false;
+                foreach (var command in commandsData.Commands
+                    .Where(command => !commands.Any(d => d.Id.Equals(command.Id, StringComparison.OrdinalIgnoreCase))))
+                {
+                    commandsData.Commands.Remove(command);
+                    isDirty = true;
+                }
+
+                if (isDirty)
+                {
+                    await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
+                }
+            }
 
             m_Options.Value.OnCommandSourcesChanged -= OnCommandSourcesChanged;
-            return new ValueTask(m_CommandSources.DisposeAllAsync());
+            await m_CommandSources.DisposeAllAsync();
         }
     }
 }

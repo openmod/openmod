@@ -109,7 +109,7 @@ namespace OpenMod.Unturned.Users
                 }
 
                 userData.LastSeen = DateTime.Now;
-                await m_UserDataStore.SaveUserDataAsync(userData);
+                await m_UserDataStore.SetUserDataAsync(userData);
             });
         }
 
@@ -150,7 +150,7 @@ namespace OpenMod.Unturned.Users
                 }
 
                 userData.LastSeen = DateTime.Now;
-                await m_UserDataStore.SaveUserDataAsync(userData);
+                await m_UserDataStore.SetUserDataAsync(userData);
             });
         }
 
@@ -186,7 +186,7 @@ namespace OpenMod.Unturned.Users
                 {
                     userData.LastSeen = DateTime.Now;
                     userData.LastDisplayName = pendingUser.DisplayName;
-                    await m_UserDataStore.SaveUserDataAsync(userData);
+                    await m_UserDataStore.SetUserDataAsync(userData);
                 }
 
                 m_PendingUsers.Add(pendingUser);

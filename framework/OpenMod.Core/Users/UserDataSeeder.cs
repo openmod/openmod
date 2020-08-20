@@ -47,7 +47,7 @@ namespace OpenMod.Core.Users
                 LastDisplayName = displayName
             };
 
-            await m_UserDataStore.SaveUserDataAsync(userData);
+            await m_UserDataStore.SetUserDataAsync(userData);
         }
     }
 }

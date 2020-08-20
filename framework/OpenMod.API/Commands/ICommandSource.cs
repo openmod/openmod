@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace OpenMod.API.Commands
 {
     public interface ICommandSource
     {
-        ICollection<ICommandRegistration> Commands { get; }
+        Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync();
     }
 }

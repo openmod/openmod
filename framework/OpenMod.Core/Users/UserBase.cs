@@ -42,7 +42,7 @@ namespace OpenMod.Core.Users
                 userData.Data.Add(key, data);
             }
 
-            await m_UserDataStore.SaveUserDataAsync(userData);
+            await m_UserDataStore.SetUserDataAsync(userData);
         }
 
         public async Task<T> GetPersistentDataAsync<T>(string key)

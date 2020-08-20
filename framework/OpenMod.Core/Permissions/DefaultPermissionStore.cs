@@ -95,7 +95,7 @@ namespace OpenMod.Core.Permissions
 
             var userData = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
             userData.Permissions.Add(permission);
-            await m_UserDataStore.SaveUserDataAsync(userData);
+            await m_UserDataStore.SetUserDataAsync(userData);
             return true;
         }
 
@@ -125,7 +125,7 @@ namespace OpenMod.Core.Permissions
             if (!userData.Permissions.Remove(permission))
                 return false;
 
-            await m_UserDataStore.SaveUserDataAsync(userData);
+            await m_UserDataStore.SetUserDataAsync(userData);
             return true;
         }
 
