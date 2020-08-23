@@ -10,16 +10,25 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Users
 {
-    public class UnturnedPlayerSession : UserSessionBase
+    public class UnturnedUserSession : UserSessionBase
     {
-        public UnturnedUser Player { get; }
-
         [OpenModInternal]
-        public UnturnedPlayerSession(UnturnedUser player, IUserSession baseSession = null)
+        public UnturnedUserSession(UnturnedUser user, IUserSession baseSession = null) : base(user)
         {
-            Player = player;
             SessionData = baseSession?.SessionData ?? new Dictionary<string, object>();
             SessionStartTime = baseSession?.SessionStartTime ?? DateTime.Now;
+
+            if (baseSession != null)
+            {
+                // copy instance data
+                foreach (var key in baseSession.InstanceData.Keys)
+                {
+                    if (!InstanceData.ContainsKey(key))
+                    {
+                        InstanceData.Add(key, baseSession.InstanceData[key]);
+                    }
+                }
+            }
         }
 
         public override Task DisconnectAsync(string reason = "")
@@ -28,7 +37,7 @@ namespace OpenMod.Unturned.Users
             {
                 await UniTask.SwitchToMainThread();
                 SessionEndTime = DateTime.Now;
-                Provider.kick(Player.SteamId, reason ?? string.Empty);
+                Provider.kick(((UnturnedUser)User).SteamId, reason ?? string.Empty);
             }
 
             return Task().AsTask();

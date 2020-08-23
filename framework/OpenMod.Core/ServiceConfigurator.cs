@@ -17,7 +17,7 @@ namespace OpenMod.Core
     [UsedImplicitly]
     public class ServiceConfigurator : IServiceConfigurator
     {
-        public void ConfigureServices(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection)
+        public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
         {
             serviceCollection.Configure<PermissionCheckerOptions>(options =>
             {

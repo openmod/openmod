@@ -16,8 +16,10 @@ namespace OpenMod.API.Plugins
 
         SemVersion Version { get; }
 
+        [OpenModInternal]
         Task LoadAsync();
 
+        [OpenModInternal]
         Task UnloadAsync();
     }
 }

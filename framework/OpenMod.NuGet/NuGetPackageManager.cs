@@ -283,39 +283,43 @@ namespace OpenMod.NuGet
             {
                 foreach (var item in file.Items)
                 {
-                    if (!item.EndsWith(".dll"))
-                    {
-                        continue;
-                    }
-
-                    var entry = packageReader.GetEntry(item);
-                    using var stream = entry.Open();
-                    var ms = new MemoryStream();
-                    await stream.CopyToAsync(ms);
-
                     try
                     {
-                        var asm = Assembly.Load(ms.ToArray());
 
-                        var name = GetVersionIndependentName(asm.FullName, out string extractedVersion);
-                        var parsedVersion = new Version(extractedVersion);
-
-                        assemblies.Add(new CachedNuGetAssembly
+                        if (!item.EndsWith(".dll"))
                         {
-                            Assembly = new WeakReference(asm),
-                            AssemblyName = name,
-                            Version = parsedVersion
-                        });
+                            continue;
+                        }
+
+                        var entry = packageReader.GetEntry(item);
+                        using var stream = entry.Open();
+                        var ms = new MemoryStream();
+                        await stream.CopyToAsync(ms);
+
+                        try
+                        {
+                            var asm = Assembly.Load(ms.ToArray());
+
+                            var name = GetVersionIndependentName(asm.FullName, out string extractedVersion);
+                            var parsedVersion = new Version(extractedVersion);
+
+                            assemblies.Add(new CachedNuGetAssembly
+                            {
+                                Assembly = new WeakReference(asm),
+                                AssemblyName = name,
+                                Version = parsedVersion
+                            });
+                        }
+                        finally
+                        {
+                            ms.Close();
+                            stream.Close();
+                        }
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("Failed to load assembly: " + item);
+                        Logger.LogError($"Failed to load assembly at {item} from file {nupkgFile}");
                         Logger.LogError(ex.ToString());
-                    }
-                    finally
-                    {
-                        ms.Close();
-                        stream.Close();
                     }
                 }
             }

@@ -90,7 +90,7 @@ namespace OpenMod.Unturned.Users
                 return;
             }
 
-            if (user.Session is UnturnedPlayerSession session)
+            if (user.Session is UnturnedUserSession session)
             {
                 session.OnSessionEnd();
             }
@@ -179,8 +179,6 @@ namespace OpenMod.Unturned.Users
                 }
 
                 var pendingUser = new UnturnedPendingUser(this, m_UserDataStore, steamPending);
-                await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
-
                 var userData = await m_UserDataStore.GetUserDataAsync(pendingUser.Id, pendingUser.Type);
                 if (userData != null)
                 {
@@ -188,10 +186,15 @@ namespace OpenMod.Unturned.Users
                     userData.LastDisplayName = pendingUser.DisplayName;
                     await m_UserDataStore.SetUserDataAsync(userData);
                 }
+                else
+                {
+                    await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
+                    await m_EventBus.EmitAsync(m_Runtime, this, new UserFirstConnectEvent(pendingUser));
+                }
 
                 m_PendingUsers.Add(pendingUser);
 
-                var userConnectingEvent = new UserConnectingEvent(pendingUser);
+                var userConnectingEvent = new UserConnectEvent(pendingUser);
                 await m_EventBus.EmitAsync(m_Runtime, this, userConnectingEvent);
 
                 if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))

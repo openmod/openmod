@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
+using OpenMod.API.Eventing;
 using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
@@ -21,6 +22,7 @@ using OpenMod.Core.Ioc;
 using OpenMod.Core.Ioc.Extensions;
 using OpenMod.Core.Localization;
 using OpenMod.Core.Permissions;
+using OpenMod.Core.Plugins.Events;
 using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Plugins
@@ -35,6 +37,9 @@ namespace OpenMod.Core.Plugins
         private readonly IStringLocalizerFactory m_StringLocalizerFactory;
         private readonly ILifetimeScope m_LifetimeScope;
         private readonly IDataStoreFactory m_DataStoreFactory;
+        private readonly List<WeakReference> m_ActivatedPlugins;
+        private readonly IEventBus m_EventBus;
+
         private bool m_IsDisposing;
 
         public PluginActivator(
@@ -42,16 +47,17 @@ namespace OpenMod.Core.Plugins
             ILogger<PluginActivator> logger,
             IStringLocalizerFactory stringLocalizerFactory,
             ILifetimeScope lifetimeScope,
-            IDataStoreFactory dataStoreFactory)
+            IDataStoreFactory dataStoreFactory, IEventBus eventBus)
         {
             m_Runtime = runtime;
             m_Logger = logger;
             m_StringLocalizerFactory = stringLocalizerFactory;
             m_LifetimeScope = lifetimeScope;
             m_DataStoreFactory = dataStoreFactory;
+            m_EventBus = eventBus;
+            m_ActivatedPlugins = new List<WeakReference>();
         }
 
-        private readonly List<WeakReference> m_ActivatedPlugins = new List<WeakReference>();
         public IReadOnlyCollection<IOpenModPlugin> ActivatedPlugins
         {
             get
@@ -68,135 +74,163 @@ namespace OpenMod.Core.Plugins
         [CanBeNull]
         public async Task<IOpenModPlugin> TryActivatePluginAsync(Assembly assembly)
         {
-            if (m_IsDisposing)
-            {
-                throw new ObjectDisposedException(nameof(PluginActivator));
-            }
-
-            var pluginMetadata = assembly.GetCustomAttribute<PluginMetadataAttribute>();
-            if (pluginMetadata == null)
-            {
-                m_Logger.LogError($"Failed to load plugin from assembly {assembly}: couldn't find any plugin metadata");
-                return null;
-            }
-
-            var pluginTypes = assembly.FindTypes<IOpenModPlugin>(false).ToList();
-            if (pluginTypes.Count == 0)
-            {
-                m_Logger.LogError($"Failed to load plugin from assembly {assembly}: couldn't find any IOpenModPlugin implementation");
-                return null;
-            }
-
-            if (pluginTypes.Count > 1)
-            {
-                m_Logger.LogError($"Failed to load plugin from assembly {assembly}: assembly has multiple IOpenModPlugin instances");
-                return null;
-            }
-
-            var pluginType = pluginTypes.Single();
-            IOpenModPlugin pluginInstance;
             try
             {
-                var serviceProvider = m_LifetimeScope.Resolve<IServiceProvider>();
-                var lifetimeScope = m_LifetimeScope.BeginLifetimeScope(containerBuilder =>
+                if (m_IsDisposing)
                 {
-                    var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
+                    throw new ObjectDisposedException(nameof(PluginActivator));
+                }
 
-                    var configurationBuilder = new ConfigurationBuilder();
-                    if (Directory.Exists(workingDirectory))
+                var pluginMetadata = assembly.GetCustomAttribute<PluginMetadataAttribute>();
+                if (pluginMetadata == null)
+                {
+                    m_Logger.LogError(
+                        $"Failed to load plugin from assembly {assembly}: couldn't find any plugin metadata");
+                    return null;
+                }
+
+                var pluginTypes = assembly.FindTypes<IOpenModPlugin>(false).ToList();
+                if (pluginTypes.Count == 0)
+                {
+                    m_Logger.LogError(
+                        $"Failed to load plugin from assembly {assembly}: couldn't find any IOpenModPlugin implementation");
+                    return null;
+                }
+
+                if (pluginTypes.Count > 1)
+                {
+                    m_Logger.LogError(
+                        $"Failed to load plugin from assembly {assembly}: assembly has multiple IOpenModPlugin instances");
+                    return null;
+                }
+
+                var pluginType = pluginTypes.Single();
+                IOpenModPlugin pluginInstance;
+                try
+                {
+                    var serviceProvider = m_LifetimeScope.Resolve<IServiceProvider>();
+                    var lifetimeScope = m_LifetimeScope.BeginLifetimeScope(containerBuilder =>
                     {
-                        configurationBuilder
-                            .SetBasePath(workingDirectory)
-                            .AddYamlFile("config.yaml", optional: true, reloadOnChange: true);
-                    }
+                        var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
 
-                    var configuration = configurationBuilder
-                        .AddEnvironmentVariables(pluginMetadata.Id.Replace(".", "_") + "_")
-                        .Build();
+                        var configurationBuilder = new ConfigurationBuilder();
+                        if (Directory.Exists(workingDirectory))
+                        {
+                            configurationBuilder
+                                .SetBasePath(workingDirectory)
+                                .AddYamlFile("config.yaml", optional: true, reloadOnChange: true);
+                        }
 
-                    containerBuilder.Register(context => configuration)
-                        .As<IConfiguration>()
-                        .As<IConfigurationRoot>()
-                        .SingleInstance()
-                        .OwnedByLifetimeScope();
+                        var configuration = configurationBuilder
+                            .AddEnvironmentVariables(pluginMetadata.Id.Replace(".", "_") + "_")
+                            .Build();
 
-                    containerBuilder.RegisterType(pluginType)
-                        .As(pluginType)
-                        .As<IOpenModComponent>()
-                        .As<IOpenModPlugin>()
-                        .SingleInstance()
-                        .ExternallyOwned();
-
-                    containerBuilder.RegisterType<ScopedPermissionChecker>()
-                        .As<IPermissionChecker>()
-                        .InstancePerLifetimeScope()
-                        .OwnedByLifetimeScope();
-
-                    containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(null, workingDirectory))
-                        .As<IDataStore>()
-                        .SingleInstance()
-                        .OwnedByLifetimeScope();
-
-                    var stringLocalizer = Directory.Exists(workingDirectory)
-                        ? m_StringLocalizerFactory.Create("translations", workingDirectory)
-                        : NullStringLocalizer.Instance;
-
-                    containerBuilder.Register(context => stringLocalizer)
-                        .As<IStringLocalizer>()
-                        .SingleInstance()
-                        .OwnedByLifetimeScope();
-
-                    var services = ServiceRegistrationHelper.FindFromAssembly<PluginServiceImplementationAttribute>(assembly, m_Logger);
-
-                    var servicesRegistrations = services.OrderBy(d => d.Priority, new PriorityComparer(PriortyComparisonMode.LowestFirst));
-
-                    foreach (var servicesRegistration in servicesRegistrations)
-                    {
-                        var implementationType = servicesRegistration.ServiceImplementationType;
-                        containerBuilder.RegisterType(implementationType)
-                            .As(implementationType)
-                            .WithLifetime(servicesRegistration.Lifetime)
+                        containerBuilder.Register(context => configuration)
+                            .As<IConfiguration>()
+                            .As<IConfigurationRoot>()
+                            .SingleInstance()
                             .OwnedByLifetimeScope();
 
-                        foreach (var service in servicesRegistration.ServiceTypes)
+                        containerBuilder.RegisterType(pluginType)
+                            .As(pluginType)
+                            .As<IOpenModComponent>()
+                            .As<IOpenModPlugin>()
+                            .SingleInstance()
+                            .ExternallyOwned();
+
+                        containerBuilder.RegisterType<ScopedPermissionChecker>()
+                            .As<IPermissionChecker>()
+                            .InstancePerLifetimeScope()
+                            .OwnedByLifetimeScope();
+
+                        containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(null, workingDirectory))
+                            .As<IDataStore>()
+                            .SingleInstance()
+                            .OwnedByLifetimeScope();
+
+                        var stringLocalizer = Directory.Exists(workingDirectory)
+                            ? m_StringLocalizerFactory.Create("translations", workingDirectory)
+                            : NullStringLocalizer.Instance;
+
+                        containerBuilder.Register(context => stringLocalizer)
+                            .As<IStringLocalizer>()
+                            .SingleInstance()
+                            .OwnedByLifetimeScope();
+
+                        var services =
+                            ServiceRegistrationHelper.FindFromAssembly<PluginServiceImplementationAttribute>(assembly,
+                                m_Logger);
+
+                        var servicesRegistrations = services.OrderBy(d => d.Priority,
+                            new PriorityComparer(PriortyComparisonMode.LowestFirst));
+
+                        foreach (var servicesRegistration in servicesRegistrations)
                         {
-                            containerBuilder.Register(c => c.Resolve(implementationType))
-                                .As(service)
+                            var implementationType = servicesRegistration.ServiceImplementationType;
+                            containerBuilder.RegisterType(implementationType)
+                                .As(implementationType)
                                 .WithLifetime(servicesRegistration.Lifetime)
                                 .OwnedByLifetimeScope();
+
+                            foreach (var service in servicesRegistration.ServiceTypes)
+                            {
+                                containerBuilder.Register(c => c.Resolve(implementationType))
+                                    .As(service)
+                                    .WithLifetime(servicesRegistration.Lifetime)
+                                    .OwnedByLifetimeScope();
+                            }
                         }
-                    }
 
-                    foreach (var type in pluginType.Assembly.FindTypes<IPluginContainerConfigurator>())
+                        foreach (var type in pluginType.Assembly.FindTypes<IPluginContainerConfigurator>())
+                        {
+                            var configurator =
+                                (IPluginContainerConfigurator)ActivatorUtilities.CreateInstance(serviceProvider, type);
+                            configurator.ConfigureContainer(new PluginServiceConfigurationContext(m_LifetimeScope, configuration, containerBuilder));
+                        }
+
+                        var configurationEvent = new PluginContainerConfigurationEvent(pluginMetadata, pluginType,
+                            configuration, containerBuilder, workingDirectory);
+                        AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_Runtime, this, configurationEvent));
+                    });
+
+                    pluginInstance = (IOpenModPlugin)lifetimeScope.Resolve(pluginType);
+                    var pluginActivateEvent = new PluginActivateEvent(pluginInstance);
+                    await m_EventBus.EmitAsync(m_Runtime, this, pluginActivateEvent);
+
+                    if (pluginActivateEvent.IsCancelled)
                     {
-                        var configurator = (IPluginContainerConfigurator)ActivatorUtilities.CreateInstance(serviceProvider, type);
-                        configurator.ConfigureContainer(m_LifetimeScope, configuration, containerBuilder);
+                        await lifetimeScope.DisposeAsync();
+                        return null;
                     }
-                });
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError(ex,
+                        $"Failed to load plugin from type: {pluginType.FullName} in assembly: {assembly.FullName}");
+                    return null;
+                }
 
-                pluginInstance = (IOpenModPlugin)lifetimeScope.Resolve(pluginType);
+                try
+                {
+                    await pluginInstance.LoadAsync();
+                    var serviceProvider = pluginInstance.LifetimeScope.Resolve<IServiceProvider>();
+                    var pluginHelpWriter = ActivatorUtilities.CreateInstance<PluginHelpWriter>(serviceProvider);
+                    await pluginHelpWriter.WriteHelpFileAsync();
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError(ex, $"Failed to load plugin: {pluginInstance.DisplayName} v{pluginInstance.Version}");
+                    return null;
+                }
+
+                m_ActivatedPlugins.Add(new WeakReference(pluginInstance));
+                return pluginInstance;
             }
             catch (Exception ex)
             {
-                m_Logger.LogError(ex, $"Failed to load plugin from type: {pluginType.FullName} in assembly: {assembly.FullName}");
+                m_Logger.LogError(ex, $"Failed to load plugin from assembly: {assembly.FullName}");
                 return null;
             }
-
-            try
-            {
-                await pluginInstance.LoadAsync();
-                var serviceProvider = pluginInstance.LifetimeScope.Resolve<IServiceProvider>();
-                var pluginHelpWriter = ActivatorUtilities.CreateInstance<PluginHelpWriter>(serviceProvider);
-                await pluginHelpWriter.WriteHelpFileAsync();
-            }
-            catch (Exception ex)
-            {
-                m_Logger.LogError(ex, $"Failed to load plugin: {pluginInstance.DisplayName} v{pluginInstance.Version}");
-                return null;
-            }
-
-            m_ActivatedPlugins.Add(new WeakReference(pluginInstance));
-            return pluginInstance;
         }
 
         public async ValueTask DisposeAsync()
@@ -209,22 +243,19 @@ namespace OpenMod.Core.Plugins
             m_IsDisposing = true;
             m_Logger.LogInformation("Unloading all plugins...");
 
-            int i = 0;
-            foreach (var plugin in m_ActivatedPlugins)
+            var i = 0;
+            foreach (var instance in from plugin in m_ActivatedPlugins 
+                where plugin.IsAlive 
+                select (IOpenModPlugin)plugin.Target)
             {
-                if (plugin.IsAlive)
+                try
                 {
-                    var instance = (IOpenModPlugin)plugin.Target;
-
-                    try
-                    {
-                        await instance.UnloadAsync();
-                        i++;
-                    }
-                    catch (Exception ex)
-                    {
-                        m_Logger.LogError(ex, $"An exception occured while unloading {instance.DisplayName}");
-                    }
+                    await instance.UnloadAsync();
+                    i++;
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError(ex, $"An exception occured while unloading {instance.DisplayName}");
                 }
             }
 

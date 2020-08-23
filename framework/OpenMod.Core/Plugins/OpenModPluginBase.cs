@@ -13,6 +13,7 @@ using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Plugins.Events;
 using Semver;
 
 namespace OpenMod.Core.Plugins
@@ -68,6 +69,7 @@ namespace OpenMod.Core.Plugins
             return VersionHelper.ParseAssemblyVersion(GetType().Assembly);
         }
 
+        [OpenModInternal]
         public virtual Task LoadAsync()
         {
             Logger = m_LoggerFactory.CreateLogger(GetType());
@@ -87,6 +89,7 @@ namespace OpenMod.Core.Plugins
         }
 
 
+        [OpenModInternal]
         public virtual async Task UnloadAsync()
         {
             Harmony.UnpatchAll(OpenModComponentId);
@@ -112,6 +115,7 @@ namespace OpenMod.Core.Plugins
                 await UnloadAsync();
             }
 
+            await EventBus.EmitAsync(this, this, new PluginDisposeEvent(this));
             LifetimeScope?.Dispose();
         }
 

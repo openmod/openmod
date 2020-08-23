@@ -33,20 +33,22 @@ namespace OpenMod.Runtime
         private readonly List<IPluginAssembliesSource> m_PluginAssembliesSources;
         private readonly NuGetPackageManager m_NuGetPackageManager;
 
-        public OpenModStartup(IOpenModStartupContext openModStartupContext)
+        public OpenModStartup(IOpenModServiceConfigurationContext openModStartupContext)
         {
             Context = openModStartupContext;
-            m_NuGetPackageManager = ((OpenModStartupContext)openModStartupContext).NuGetPackageManager;
+            m_NuGetPackageManager = ((OpenModStartupContext) openModStartupContext).NuGetPackageManager;
             m_Logger = openModStartupContext.LoggerFactory.CreateLogger<OpenModStartup>();
             m_Runtime = openModStartupContext.Runtime;
             m_Assemblies = new List<Assembly>();
             m_ServiceRegistrations = new List<ServiceRegistration>();
             m_RegisteredAssemblies = new HashSet<AssemblyName>();
-            m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>(), m_NuGetPackageManager);
+            m_PluginAssemblyStore =
+                new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>(),
+                    m_NuGetPackageManager);
             m_PluginAssembliesSources = new List<IPluginAssembliesSource>();
         }
 
-        public IOpenModStartupContext Context { get; }
+        public IOpenModServiceConfigurationContext Context { get; }
 
         public void RegisterIocAssemblyAndCopyResources(Assembly assembly, string assemblyDir)
         {
@@ -68,7 +70,8 @@ namespace OpenMod.Runtime
                 return;
             }
 
-            m_ServiceRegistrations.AddRange(ServiceRegistrationHelper.FindFromAssembly<ServiceImplementationAttribute>(assembly, m_Logger));
+            m_ServiceRegistrations.AddRange(
+                ServiceRegistrationHelper.FindFromAssembly<ServiceImplementationAttribute>(assembly, m_Logger));
             m_RegisteredAssemblies.Add(assemblyName);
             m_Assemblies.Add(assembly);
         }
@@ -80,14 +83,29 @@ namespace OpenMod.Runtime
             foreach (var assembly in assemblies)
             {
                 // PluginAssemblyStore checks if this attribute exists
-                var pluginMetadata = assembly.GetCustomAttribute<PluginMetadataAttribute>();
-                AssemblyHelper.CopyAssemblyResources(assembly, Path.Combine(m_Runtime.WorkingDirectory, "plugins", pluginMetadata.Id));
+                try
+                {
+                    var pluginMetadata = assembly.GetCustomAttribute<PluginMetadataAttribute>();
+                    AssemblyHelper.CopyAssemblyResources(assembly,
+                        Path.Combine(m_Runtime.WorkingDirectory, "plugins", pluginMetadata.Id));
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError(ex, $"Failed to copy resources from assembly: {assembly}");
+                }
             }
 
             foreach (var assembly in assemblies)
             {
                 // Auto register services with [Service] and [ServiceImplementation] attributes
-                RegisterServicesFromAssembly(assembly);
+                try
+                {
+                    RegisterServicesFromAssembly(assembly);
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError(ex, $"Failed to load services from assembly: {assembly}");
+                }
             }
 
             m_Assemblies.AddRange(assemblies);
@@ -102,7 +120,7 @@ namespace OpenMod.Runtime
 
             foreach (var configurationConfigurator in containerConfiguratorTypes)
             {
-                var instance = (IConfigurationConfigurator)Activator.CreateInstance(configurationConfigurator);
+                var instance = (IConfigurationConfigurator) Activator.CreateInstance(configurationConfigurator);
                 instance.ConfigureConfiguration(Context, builder);
             }
         }
@@ -121,7 +139,7 @@ namespace OpenMod.Runtime
 
             foreach (var containerConfiguratorType in containerConfiguratorTypes)
             {
-                var instance = (IContainerConfigurator)Activator.CreateInstance(containerConfiguratorType);
+                var instance = (IContainerConfigurator) Activator.CreateInstance(containerConfiguratorType);
                 instance.ConfigureContainer(Context, containerBuilder);
             }
         }
@@ -129,12 +147,14 @@ namespace OpenMod.Runtime
         internal void SetupServices(IServiceCollection serviceCollection)
         {
             var sortedSources = m_PluginAssembliesSources
-                .OrderBy(d => d.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Priority ?? Priority.Normal
+                .OrderBy(d =>
+                        d.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Priority ?? Priority.Normal
                     , new PriorityComparer(PriortyComparisonMode.LowestFirst));
 
             foreach (var source in sortedSources)
             {
-                var lifetime = source.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Lifetime ?? ServiceLifetime.Singleton;
+                var lifetime = source.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Lifetime ??
+                               ServiceLifetime.Singleton;
                 serviceCollection.Add(new ServiceDescriptor(source.GetType(), source.GetType(), lifetime));
             }
 
@@ -145,33 +165,50 @@ namespace OpenMod.Runtime
 
             foreach (var serviceConfiguratorType in serviceConfiguratorTypes)
             {
-                var instance = (IServiceConfigurator)Activator.CreateInstance(serviceConfiguratorType);
+                var instance = (IServiceConfigurator) Activator.CreateInstance(serviceConfiguratorType);
                 instance.ConfigureServices(Context, serviceCollection);
             }
 
-            var servicesRegistrations = m_ServiceRegistrations.OrderBy(d => d.Priority, new PriorityComparer(PriortyComparisonMode.LowestFirst));
+            var servicesRegistrations = m_ServiceRegistrations.OrderBy(d => d.Priority,
+                new PriorityComparer(PriortyComparisonMode.LowestFirst));
 
             foreach (var servicesRegistration in servicesRegistrations)
             {
                 var implementationType = servicesRegistration.ServiceImplementationType;
-                serviceCollection.Add(new ServiceDescriptor(implementationType, implementationType, servicesRegistration.Lifetime));
+                serviceCollection.Add(new ServiceDescriptor(implementationType, implementationType,
+                    servicesRegistration.Lifetime));
 
                 foreach (var service in servicesRegistration.ServiceTypes)
                 {
-                    serviceCollection.Add(new ServiceDescriptor(service, provider => provider.GetService(implementationType), servicesRegistration.Lifetime));
+                    serviceCollection.Add(new ServiceDescriptor(service,
+                        provider => provider.GetService(implementationType), servicesRegistration.Lifetime));
                 }
             }
         }
 
         internal async Task LoadPluginAssembliesAsync()
         {
-            m_PluginAssemblyStore.Configuration = Context.Configuration;
-            await RegisterPluginAssembliesAsync(new NuGetPluginAssembliesSource(m_NuGetPackageManager));
+            try
+            {
+                m_PluginAssemblyStore.Configuration = Context.Configuration;
+                await RegisterPluginAssembliesAsync(new NuGetPluginAssembliesSource(m_NuGetPackageManager));
+            }
+            catch (Exception ex)
+            {
+                m_Logger.LogError(ex, "Failed to load NuGet plugins");
+            }
 
-            var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
-            var logger = Context.LoggerFactory.CreateLogger<FileSystemPluginAssembliesSource>();
-            var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(logger, pluginsDirectory);
-            await RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
+            try
+            {
+                var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
+                var logger = Context.LoggerFactory.CreateLogger<FileSystemPluginAssembliesSource>();
+                var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(logger, pluginsDirectory);
+                await RegisterPluginAssembliesAsync(fileSystemPluginAssembliesSource);
+            }
+            catch (Exception ex)
+            {
+                m_Logger.LogError(ex, "Failed to load .dll plugins");
+            }
         }
     }
 }

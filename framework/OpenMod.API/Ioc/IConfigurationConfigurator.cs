@@ -4,6 +4,6 @@ namespace OpenMod.API.Ioc
 {
     public interface IConfigurationConfigurator
     {
-        void ConfigureConfiguration(IOpenModStartupContext openModStartupContext, IConfigurationBuilder configurationBuilder);
+        void ConfigureConfiguration(IOpenModServiceConfigurationContext openModStartupContext, IConfigurationBuilder configurationBuilder);
     }
 }

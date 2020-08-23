@@ -1,14 +1,7 @@
-﻿using System;
-using Autofac;
-using Microsoft.Extensions.Configuration;
-
-namespace OpenMod.API.Plugins
+﻿namespace OpenMod.API.Plugins
 {
-    public interface IPluginContainerConfigurator 
+    public interface IPluginContainerConfigurator
     {
-        void ConfigureContainer(
-            ILifetimeScope parentLifetimeScope, 
-            IConfiguration configuration, 
-            ContainerBuilder containerBuilder);
+        void ConfigureContainer(IPluginServiceConfigurationContext context);
     }
 }

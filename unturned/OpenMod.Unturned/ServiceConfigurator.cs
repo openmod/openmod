@@ -13,7 +13,7 @@ namespace OpenMod.Unturned
 {
     public class ServiceConfigurator : IServiceConfigurator
     {
-        public void ConfigureServices(IOpenModStartupContext openModStartupContext, IServiceCollection serviceCollection)
+        public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
         {
             // bug: UnityEngine service configurator doesn't get called
             serviceCollection.AddSingleton<IHostLifetime, UnityHostLifetime>();

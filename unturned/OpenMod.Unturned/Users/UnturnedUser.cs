@@ -35,7 +35,7 @@ namespace OpenMod.Unturned.Users
             Player = new UnturnedPlayer(player);
             DisplayName = player.channel.owner.playerID.characterName;
             Type = KnownActorTypes.Player;
-            Session = new UnturnedPlayerSession(this, pending?.Session);
+            Session = new UnturnedUserSession(this, pending?.Session);
         }
 
         public override Task PrintMessageAsync(string message)

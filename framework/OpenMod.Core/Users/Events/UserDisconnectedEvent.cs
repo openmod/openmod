@@ -1,15 +1,11 @@
 ﻿using OpenMod.API.Users;
-using OpenMod.Core.Eventing;
 
 namespace OpenMod.Core.Users.Events
 {
-    public sealed class UserDisconnectedEvent : Event
+    public class UserDisconnectedEvent : UserEvent
     {
-        public IUser User { get; }
-
-        public UserDisconnectedEvent(IUser user)
+        public UserDisconnectedEvent(IUser user) : base(user)
         {
-            User = user;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace OpenMod.API.Ioc
 {
     public interface IOpenModStartup
     {
-        IOpenModStartupContext Context { get; }
+        IOpenModServiceConfigurationContext Context { get; }
 
         void RegisterIocAssemblyAndCopyResources(Assembly assembly, string assemblyDir);
 

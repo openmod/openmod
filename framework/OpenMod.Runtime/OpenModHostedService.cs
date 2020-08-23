@@ -6,7 +6,7 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
-using OpenMod.Core.Ioc;
+using OpenMod.Runtime.Events;
 using SmartFormat;
 
 namespace OpenMod.Runtime
@@ -59,13 +59,12 @@ namespace OpenMod.Runtime
 
             m_Logger.LogInformation($"> {i} plugins loaded.");
 
-            var initializedEvent = new OpenModInitializedEvent(m_Host);
-            await m_EventBus.EmitAsync(m_Host, this, initializedEvent);
+            await m_EventBus.EmitAsync(m_Host, this, new OpenModInitializedEvent(m_Host));
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
+            return m_EventBus.EmitAsync(m_Host, this, new OpenModShutdownEvent());
         }
     }
 }

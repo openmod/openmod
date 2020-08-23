@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace OpenMod.API.Ioc
 {
-    public interface IOpenModStartupContext
+    public interface IOpenModServiceConfigurationContext
     {
         IRuntime Runtime { get; }
         IConfigurationRoot Configuration { get; }

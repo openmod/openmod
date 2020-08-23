@@ -8,7 +8,7 @@ using OpenMod.NuGet;
 namespace OpenMod.Runtime
 {
     [OpenModInternal]
-    public sealed class OpenModStartupContext : IOpenModStartupContext
+    public sealed class OpenModStartupContext : IOpenModServiceConfigurationContext
     {
         public IRuntime Runtime { get; internal set; }
         public IConfigurationRoot Configuration { get; internal set; }

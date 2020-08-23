@@ -22,6 +22,11 @@ namespace OpenMod.API.Users
         Dictionary<string, object> SessionData { get; }
 
         /// <summary>
+        ///   Data for this process instance lifetime.
+        /// </summary>
+        Dictionary<string, object> InstanceData { get; }
+
+        /// <summary>
         ///   Disconnects the user.
         /// </summary>
         /// <param name="reason">Disconnect reason.</param>

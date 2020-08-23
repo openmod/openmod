@@ -9,13 +9,10 @@ namespace UserDatabasePlugin
 {
     public class ContainerConfigurator : IPluginContainerConfigurator
     {
-        public void ConfigureContainer(
-            ILifetimeScope parentLifetimeScope, 
-            IConfiguration configuration,
-            ContainerBuilder containerBuilder)
+        public void ConfigureContainer(IPluginServiceConfigurationContext context)
         {
-            containerBuilder.AddEntityFrameworkCoreMySql();
-            containerBuilder.AddDbContext<UserDatabaseDbContext>();
+            context.ContainerBuilder.AddEntityFrameworkCoreMySql();
+            context.ContainerBuilder.AddDbContext<UserDatabaseDbContext>();
         }
     }
 }

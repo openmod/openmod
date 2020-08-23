@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
-using OpenMod.API;
+﻿using OpenMod.API;
 using OpenMod.Core.Eventing;
 
-namespace OpenMod.Core.Ioc
+namespace OpenMod.Runtime.Events
 {
     public sealed class OpenModInitializedEvent : Event
     {
