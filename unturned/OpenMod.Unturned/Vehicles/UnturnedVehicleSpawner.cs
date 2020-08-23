@@ -36,8 +36,8 @@ namespace OpenMod.Unturned.Vehicles
                     // todo: use state like VehicleManager.load() does
                 }
                 
-                VehicleManager.spawnVehicleV2(vehicleAsset.id, position.ToUnityVector(), Quaternion.identity);
-                return new UnturnedVehicle(VehicleManager.vehicles.Last());
+                var vehicle = VehicleManager.spawnVehicleV2(vehicleAsset.id, position.ToUnityVector(), Quaternion.identity);
+                return new UnturnedVehicle(vehicle);
             }
 
             return VehicleSpawnTask().AsTask();
