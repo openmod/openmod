@@ -20,7 +20,7 @@ namespace OpenMod.Core.Eventing
 
         internal EventBase()
         {
-            Name = GetType().Name;
+            Name = EventBus.GetEventName(GetType());
         }
 
         public abstract Dictionary<string, object> Arguments { get; }

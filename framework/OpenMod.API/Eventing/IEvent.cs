@@ -8,11 +8,6 @@ namespace OpenMod.API.Eventing
     public interface IEvent
     {
         /// <summary>
-        ///     The name of the event.
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
         ///     The arguments of the event.
         /// </summary>
         Dictionary<string, object> Arguments { get; }

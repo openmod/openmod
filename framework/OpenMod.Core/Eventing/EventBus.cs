@@ -136,85 +136,109 @@ namespace OpenMod.Core.Eventing
             m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == eventType || c.EventName.Equals(eventType.Name, StringComparison.OrdinalIgnoreCase)));
         }
 
-        public virtual async Task EmitAsync(IOpenModComponent component, object sender, IEvent @event, EventExecutedCallback callback = null)
+        public virtual async Task EmitAsync(IOpenModComponent component, object sender, IEvent @event,
+            EventExecutedCallback callback = null)
         {
             if (!component.IsComponentAlive)
             {
                 return;
             }
 
-            m_Logger.LogTrace($"Emitting event: {@event.Name}");
-            var eventSubscriptions
-                = m_EventSubscriptions
-                    .Where(c => (c.EventType != null && c.EventType.IsInstanceOfType(@event))
-                                || (@event.Name.Equals(c.EventName, StringComparison.OrdinalIgnoreCase)
-                                   && c.Owner.IsAlive && ((IOpenModComponent)c.Owner.Target).IsComponentAlive))
-                    .ToList();
-
-
-            void Complete()
+            var currentType = @event.GetType();
+            while (currentType != null && typeof(IEvent).IsAssignableFrom(currentType))
             {
-                m_Logger.LogTrace($"{@event.Name}: Finished.");
-                callback?.Invoke(@event);
-            }
+                string eventName = GetEventName(currentType);
 
-            if (eventSubscriptions.Count == 0)
-            {
-                m_Logger?.LogTrace($"{@event.Name}: No listeners found.");
-                Complete();
-                return;
-            }
+                m_Logger.LogTrace($"Emitting event: {eventName}");
+                var eventSubscriptions
+                    = m_EventSubscriptions
+                        .Where(c => (c.EventType != null && c.EventType == currentType)
+                                    || (eventName.Equals(c.EventName, StringComparison.OrdinalIgnoreCase)
+                                        && c.Owner.IsAlive && ((IOpenModComponent)c.Owner.Target).IsComponentAlive))
+                        .ToList();
 
-            var comparer = new PriorityComparer(PriortyComparisonMode.LowestFirst);
-            eventSubscriptions.Sort((a, b) =>
-                comparer.Compare(
-                    (Priority)a.EventListenerAttribute.Priority,
-                    (Priority)b.EventListenerAttribute.Priority)
+
+                void Complete()
+                {
+                    m_Logger.LogTrace($"{eventName}: Finished.");
+                }
+
+                if (eventSubscriptions.Count == 0)
+                {
+                    m_Logger?.LogTrace($"{eventName}: No listeners found.");
+                    continue;
+                }
+
+                var comparer = new PriorityComparer(PriortyComparisonMode.LowestFirst);
+                eventSubscriptions.Sort((a, b) =>
+                    comparer.Compare(
+                        (Priority)a.EventListenerAttribute.Priority,
+                        (Priority)b.EventListenerAttribute.Priority)
                 );
 
-            foreach (var group in eventSubscriptions.GroupBy(e => e.Scope))
-            {
-                await using var newScope = group.Key.BeginLifetimeScope("AutofacWebRequest");
-                foreach (var subscription in group)
+                foreach (var group in eventSubscriptions.GroupBy(e => e.Scope))
                 {
-                    var cancellableEvent = @event as ICancellableEvent;
-
-                    if (cancellableEvent != null
-                        && cancellableEvent.IsCancelled
-                        && !subscription.EventListenerAttribute.IgnoreCancelled)
+                    await using var newScope = group.Key.BeginLifetimeScope("AutofacWebRequest");
+                    foreach (var subscription in group)
                     {
-                        continue;
-                    }
+                        var cancellableEvent = @event as ICancellableEvent;
 
-                    var wasCancelled = false;
-                    if (cancellableEvent != null)
-                    {
-                        wasCancelled = cancellableEvent.IsCancelled;
-                    }
-
-                    var serviceProvider = newScope.Resolve<IServiceProvider>();
-
-                    try
-                    {
-                        await subscription.Callback.Invoke(serviceProvider, sender, @event);
-
-                        if (cancellableEvent != null && subscription.EventListenerAttribute.Priority == EventListenerPriority.Monitor)
+                        if (cancellableEvent != null
+                            && cancellableEvent.IsCancelled
+                            && !subscription.EventListenerAttribute.IgnoreCancelled)
                         {
-                            if (cancellableEvent.IsCancelled != wasCancelled)
+                            continue;
+                        }
+
+                        var wasCancelled = false;
+                        if (cancellableEvent != null)
+                        {
+                            wasCancelled = cancellableEvent.IsCancelled;
+                        }
+
+                        var serviceProvider = newScope.Resolve<IServiceProvider>();
+
+                        try
+                        {
+                            await subscription.Callback.Invoke(serviceProvider, sender, @event);
+
+                            if (cancellableEvent != null && subscription.EventListenerAttribute.Priority ==
+                                EventListenerPriority.Monitor)
                             {
-                                cancellableEvent.IsCancelled = wasCancelled;
-                                m_Logger.LogWarning($"{((IOpenModComponent)@subscription.Owner.Target).OpenModComponentId} changed {@event.Name} cancellation status with Monitor priority which is not permitted.");
+                                if (cancellableEvent.IsCancelled != wasCancelled)
+                                {
+                                    cancellableEvent.IsCancelled = wasCancelled;
+                                    m_Logger.LogWarning(
+                                        $"{((IOpenModComponent)@subscription.Owner.Target).OpenModComponentId} changed {@eventName} cancellation status with Monitor priority which is not permitted.");
+                                }
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            m_Logger.LogError(ex, $"Exception occured during event {@eventName}");
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        m_Logger.LogError(ex, $"Exception occured during event {@event.Name}");
-                    }
+
+                    currentType = currentType.BaseType;
                 }
+         
+                Complete();
             }
 
-            Complete();
+            callback?.Invoke(@event);
+        }
+
+        internal static string GetEventName(Type eventType)
+        {
+            // remove "Event" suffix from type name
+            
+            const string suffix = "Event";
+            var eventName = eventType.Name;
+            var idx = eventName.IndexOf(suffix, StringComparison.Ordinal);
+         
+            return idx == -1 
+                ? eventName 
+                : eventName.Remove(idx, suffix.Length);
         }
 
         protected virtual EventListenerAttribute GetEventListenerAttribute(MethodInfo method)
