@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace OpenMod.Core.Eventing
 {
-    public class Event : EventBase
+    public abstract class Event : EventBase
     {
         public override Dictionary<string, object> Arguments
         {
