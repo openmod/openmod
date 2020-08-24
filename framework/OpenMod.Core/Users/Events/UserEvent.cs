@@ -3,7 +3,7 @@ using OpenMod.Core.Eventing;
 
 namespace OpenMod.Core.Users.Events
 {
-    public class UserEvent : Event
+    public abstract class UserEvent : Event
     {
         public IUser User { get; }
 
