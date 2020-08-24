@@ -178,8 +178,8 @@ namespace OpenMod.Unturned
         {
             CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
 
-            //m_UnturnedEventsListener = ActivatorUtilities.CreateInstance<UnturnedEventsListener>(m_ServiceProvider);
-            //m_UnturnedEventsListener.Subscribe();
+            m_UnturnedEventsListener = ActivatorUtilities.CreateInstance<UnturnedEventsListener>(m_ServiceProvider);
+            m_UnturnedEventsListener.Subscribe();
         }
 
         protected virtual void UnbindUnturnedEvents()
@@ -188,7 +188,7 @@ namespace OpenMod.Unturned
             CommandWindow.onCommandWindowInputted -= OnCommandWindowInputted;
             // ReSharper restore DelegateSubtraction
 
-            //m_UnturnedEventsListener.Unsubscribe();
+            m_UnturnedEventsListener.Unsubscribe();
         }
         
         private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
