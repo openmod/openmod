@@ -166,7 +166,7 @@ namespace OpenMod.Core.Eventing
                 if (eventSubscriptions.Count == 0)
                 {
                     m_Logger?.LogTrace($"{eventName}: No listeners found.");
-                    continue;
+                    return;
                 }
 
                 var comparer = new PriorityComparer(PriortyComparisonMode.LowestFirst);
