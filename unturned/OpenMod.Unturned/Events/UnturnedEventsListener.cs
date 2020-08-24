@@ -306,6 +306,9 @@ namespace OpenMod.Unturned.Events
 
         private void OnServerSendingMessage(ref string text, ref Color color, SteamPlayer nativeFromPlayer, SteamPlayer nativeToPlayer, EChatMode mode, ref string iconURL, ref bool useRichTextFormatting)
         {
+            // If nativeToPlayer is null, this event will be called again for each player
+            if (nativeToPlayer == null) return;
+
             UnturnedPlayer fromPlayer = GetUnturnedPlayer(nativeFromPlayer);
             UnturnedPlayer toPlayer = GetUnturnedPlayer(nativeToPlayer);
 
