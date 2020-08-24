@@ -209,10 +209,15 @@ namespace OpenMod.Unturned.Events
             // ReSharper restore DelegateSubtraction
         }
 
+        private UnturnedPlayer GetUnturnedPlayer(SteamPlayer player)
+        {
+            return player == null ? null : GetUnturnedPlayer(player.player);
+        }
+
         private UnturnedPlayer GetUnturnedPlayer(Player player)
         {
-            return AsyncHelper.RunSync(() => m_UserManager.FindUserAsync(KnownActorTypes.Player,
-                player.channel.owner.playerID.steamID.ToString(), UserSearchMode.FindById)) as UnturnedPlayer;
+            return player == null ? null : (AsyncHelper.RunSync(() => m_UserManager.FindUserAsync(KnownActorTypes.Player,
+                player.channel.owner.playerID.steamID.ToString(), UserSearchMode.FindById)) as UnturnedPlayer);
         }
 
         private void Emit(IEvent @event)
@@ -288,7 +293,7 @@ namespace OpenMod.Unturned.Events
 
         private void OnChatted(SteamPlayer steamPlayer, EChatMode mode, ref Color color, ref bool isRich, string text, ref bool isVisible)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(steamPlayer.player);
+            UnturnedPlayer player = GetUnturnedPlayer(steamPlayer);
 
             UnturnedPlayerChatEvent @event = new UnturnedPlayerChatEvent(player, mode, color, isRich, text);
 
@@ -301,8 +306,8 @@ namespace OpenMod.Unturned.Events
 
         private void OnServerSendingMessage(ref string text, ref Color color, SteamPlayer nativeFromPlayer, SteamPlayer nativeToPlayer, EChatMode mode, ref string iconURL, ref bool useRichTextFormatting)
         {
-            UnturnedPlayer fromPlayer = GetUnturnedPlayer(nativeFromPlayer.player);
-            UnturnedPlayer toPlayer = GetUnturnedPlayer(nativeToPlayer.player);
+            UnturnedPlayer fromPlayer = GetUnturnedPlayer(nativeFromPlayer);
+            UnturnedPlayer toPlayer = GetUnturnedPlayer(nativeToPlayer);
 
             UnturnedServerSendMessageEvent @event = new UnturnedServerSendMessageEvent(fromPlayer, toPlayer, text, color, mode, iconURL, useRichTextFormatting);
 
@@ -616,7 +621,7 @@ namespace OpenMod.Unturned.Events
 
         private void OnPlayerConnected(SteamPlayer steamPlayer)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(steamPlayer.player);
+            UnturnedPlayer player = GetUnturnedPlayer(steamPlayer);
 
             UnturnedPlayerConnectEvent @event = new UnturnedPlayerConnectEvent(player);
 
@@ -625,7 +630,7 @@ namespace OpenMod.Unturned.Events
 
         private void OnPlayerDisconnected(SteamPlayer steamPlayer)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(steamPlayer.player);
+            UnturnedPlayer player = GetUnturnedPlayer(steamPlayer);
 
             UnturnedPlayerDisconnectEvent @event = new UnturnedPlayerDisconnectEvent(player);
 
