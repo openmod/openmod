@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
@@ -27,19 +28,24 @@ namespace OpenMod.Unturned.Events
         private readonly IOpenModHost m_OpenModHost;
         private readonly IEventBus m_EventBus;
         private readonly IUserManager m_UserManager;
+        private readonly ILogger<UnturnedEventsListener> m_Logger;
 
         public UnturnedEventsListener(
             IOpenModHost openModHost,
             IEventBus eventBus,
-            IUserManager userManager)
+            IUserManager userManager,
+            ILogger<UnturnedEventsListener> logger)
         {
             m_OpenModHost = openModHost;
             m_EventBus = eventBus;
             m_UserManager = userManager;
+            m_Logger = logger;
         }
 
         public void Subscribe()
         {
+            m_Logger.LogTrace("Subscribing to unturned events");
+
             Provider.clients.Do(SubscribePlayer);
             Provider.onEnemyConnected += SubscribePlayer;
             Provider.onEnemyDisconnected += UnsubscribePlayer;
@@ -91,6 +97,8 @@ namespace OpenMod.Unturned.Events
 
         public void Unsubscribe()
         {
+            m_Logger.LogTrace("Unsubscribing unturned events");
+
             // ReSharper disable DelegateSubtraction
             Provider.clients.Do(UnsubscribePlayer);
             Provider.onEnemyConnected -= SubscribePlayer;
