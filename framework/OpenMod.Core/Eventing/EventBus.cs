@@ -145,7 +145,7 @@ namespace OpenMod.Core.Eventing
             }
 
             var currentType = @event.GetType();
-            while (currentType != null && typeof(IEvent).IsAssignableFrom(currentType))
+            while (currentType != null && !currentType.IsAbstract && typeof(IEvent).IsAssignableFrom(currentType))
             {
                 string eventName = GetEventName(currentType);
 
@@ -165,6 +165,8 @@ namespace OpenMod.Core.Eventing
 
                 if (eventSubscriptions.Count == 0)
                 {
+                    currentType = currentType.BaseType;
+
                     m_Logger?.LogTrace($"{eventName}: No listeners found.");
                     continue;
                 }
@@ -218,10 +220,10 @@ namespace OpenMod.Core.Eventing
                             m_Logger.LogError(ex, $"Exception occured during event {@eventName}");
                         }
                     }
-
-                    currentType = currentType.BaseType;
                 }
-         
+
+                currentType = currentType.BaseType;
+
                 Complete();
             }
 

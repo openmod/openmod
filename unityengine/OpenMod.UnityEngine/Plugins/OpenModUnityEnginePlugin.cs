@@ -18,6 +18,8 @@ namespace OpenMod.UnityEngine.Plugins
         public sealed override async Task LoadAsync()
         {
             var @event = new PluginLoadEvent(this);
+            await EventBus.EmitAsync(this, this, @event);
+
             if (@event.IsCancelled)
             {
                 return;

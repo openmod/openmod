@@ -173,7 +173,7 @@ namespace OpenMod.Core.Commands
 
                 var isDirty = false;
                 foreach (var command in commandsData.Commands
-                    .Where(command => !commands.Any(d => d.Id.Equals(command.Id, StringComparison.OrdinalIgnoreCase))))
+                    .Where(command => !commands.Any(d => d.Id.Equals(command.Id, StringComparison.OrdinalIgnoreCase))).ToList())
                 {
                     commandsData.Commands.Remove(command);
                     isDirty = true;

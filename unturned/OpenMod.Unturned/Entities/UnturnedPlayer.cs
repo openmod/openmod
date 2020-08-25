@@ -33,7 +33,7 @@ namespace OpenMod.Unturned.Entities
         {
             Asset = UnturnedPlayerAsset.Instance;
             State = NullEntityState.Instance;
-            Inventory = new UnturnedPlayerInventory(Player);
+            Inventory = new UnturnedPlayerInventory(player);
             Transform = new UnityTransform(player.transform);
             Player = player;
             SteamPlayer = Player.channel.owner;
