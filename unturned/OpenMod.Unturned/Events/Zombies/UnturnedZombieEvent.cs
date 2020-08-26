@@ -3,7 +3,7 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Events.Zombies
 {
-    public class UnturnedZombieEvent : Event
+    public abstract class UnturnedZombieEvent : Event
     {
         protected UnturnedZombieEvent(Zombie zombie)
         {

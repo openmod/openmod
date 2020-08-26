@@ -39,8 +39,8 @@ namespace OpenMod.Unturned
         private List<ICommandInputOutput> m_IoHandlers;
         private OpenModConsoleInputOutput m_OpenModIoHandler;
         private readonly HashSet<string> m_Capabilities;
-        private UnturnedEventsListener m_UnturnedEventsListener;
         private Harmony m_Harmony;
+        private UnturnedEventsActivator m_UnturnedEventsListener;
 
         public string HostDisplayName { get; } = Provider.APP_NAME;
 
@@ -183,7 +183,7 @@ namespace OpenMod.Unturned
         {
             CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
 
-            m_UnturnedEventsListener = ActivatorUtilities.CreateInstance<UnturnedEventsListener>(m_ServiceProvider);
+            m_UnturnedEventsListener = ActivatorUtilities.CreateInstance<UnturnedEventsActivator>(m_ServiceProvider);
             m_UnturnedEventsListener.Subscribe();
         }
 
