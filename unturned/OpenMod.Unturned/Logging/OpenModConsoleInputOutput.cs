@@ -19,6 +19,7 @@ namespace OpenMod.Unturned.Logging
         private readonly ILogger m_Logger;
         private Thread m_InputThread;
         private bool m_IsAlive;
+        private TextReader m_PreviousConsoleIn;
 
         public OpenModConsoleInputOutput(
             ILoggerFactory loggerFactory,
@@ -36,7 +37,13 @@ namespace OpenMod.Unturned.Logging
                 return;
             }
 
-            System.Console.OutputEncoding = new UTF8Encoding(false);
+            var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+            
+            System.Console.OutputEncoding = encoding;
+            System.Console.InputEncoding = encoding;
+
+            m_PreviousConsoleIn = System.Console.In;
+            System.Console.SetIn(new StreamReader(System.Console.OpenStandardInput()));
 
             ReadLine.HistoryEnabled = true;
             ReadLine.AutoCompletionHandler = m_AutoCompleteHandler;
@@ -60,6 +67,7 @@ namespace OpenMod.Unturned.Logging
             m_IsAlive = false;
             ReadLine.AutoCompletionHandler = null;
             ReadLine.HistoryEnabled = false;
+            System.Console.SetIn(m_PreviousConsoleIn);
         }
 
         public void update()
