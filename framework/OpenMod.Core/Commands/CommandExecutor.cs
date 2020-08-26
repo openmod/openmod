@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading.Tasks;
 using Autofac;
@@ -26,19 +27,22 @@ namespace OpenMod.Core.Commands
         private readonly ICommandStore m_CommandStore;
         private readonly ICommandPermissionBuilder m_CommandPermissionBuilder;
         private readonly IEventBus m_EventBus;
+        private readonly ILogger<CommandExecutor> m_Logger;
 
         public CommandExecutor(
             IRuntime runtime,
             ILifetimeScope lifetimeScope,
             ICommandStore commandStore,
             ICommandPermissionBuilder commandPermissionBuilder,
-            IEventBus eventBus)
+            IEventBus eventBus,
+            ILogger<CommandExecutor> logger)
         {
             m_Runtime = runtime;
             m_LifetimeScope = lifetimeScope;
             m_CommandStore = commandStore;
             m_CommandPermissionBuilder = commandPermissionBuilder;
             m_EventBus = eventBus;
+            m_Logger = logger;
         }
 
         public async Task<ICommandContext> ExecuteAsync(ICommandActor actor, string[] args, string prefix)
@@ -52,11 +56,11 @@ namespace OpenMod.Core.Commands
             logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
 
             var currentCommandAccessor = m_LifetimeScope.Resolve<ICurrentCommandContextAccessor>();
-            var commandsRegistrations = await m_CommandStore.GetCommandsAsync();
             var commandContextBuilder = m_LifetimeScope.Resolve<ICommandContextBuilder>();
             var stringLocalizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
+            
+            var commandsRegistrations = await m_CommandStore.GetCommandsAsync();
             var commandContext = commandContextBuilder.CreateContext(actor, args, prefix, commandsRegistrations);
-
             var commandExecutingEvent = new CommandExecutingEvent(actor, commandContext);
             await m_EventBus.EmitAsync(m_Runtime, this, commandExecutingEvent);
 
@@ -75,15 +79,19 @@ namespace OpenMod.Core.Commands
                 currentCommandAccessor.Context = commandContext;
 
                 var permission = m_CommandPermissionBuilder.GetPermission(commandContext.CommandRegistration);
-                var permissionChecker = commandContext.ServiceProvider.GetRequiredService<IPermissionChecker>();
+                var permissionChecker = m_Runtime.Host.Services.GetRequiredService<IPermissionChecker>();
 
                 if (!string.IsNullOrWhiteSpace(permission) && await permissionChecker.CheckPermissionAsync(actor, permission) != PermissionGrantResult.Grant)
                 {
                     throw new NotEnoughPermissionException(stringLocalizer, permission);
                 }
 
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
                 var command = commandContext.CommandRegistration.Instantiate(commandContext.ServiceProvider);
                 await command.ExecuteAsync();
+                m_Logger.LogDebug($"Command \"{string.Join(" ", args)}\" executed in {sw.ElapsedMilliseconds}ms");
+                sw.Reset();
 
                 currentCommandAccessor.Context = null;
             }
@@ -94,9 +102,6 @@ namespace OpenMod.Core.Commands
             catch (Exception ex)
             {
                 commandContext.Exception = ex;
-#if DEBUG
-                throw; // in debug mode we want to debug such exceptions instead of catching them
-#endif
             }
             finally
             {

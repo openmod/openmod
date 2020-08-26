@@ -26,13 +26,13 @@ namespace OpenMod.Core.Commands
         private readonly Dictionary<string, string> m_Cache = new Dictionary<string, string>();
         public virtual string GetPermission(ICommandRegistration registration)
         {
-            return m_Cache.TryGetValue(registration.Id, out var cachedValue) ? cachedValue : GetPermission(registration, AsyncHelper.RunSync(() => m_CommandStore.Value.GetCommandsAsync()));
+            return m_Cache.TryGetValue(registration.Id, out var cachedValue) 
+                ? cachedValue 
+                : GetPermission(registration, AsyncHelper.RunSync(() => m_CommandStore.Value.GetCommandsAsync()));
         }
 
         public virtual string GetPermission(ICommandRegistration registration, IReadOnlyCollection<ICommandRegistration> commands)
         {
-            // todo: read the commands file and get permission from there if exists; otherwise build it
-
             if (m_Cache.TryGetValue(registration.Id, out var cachedValue))
             {
                 return cachedValue;
@@ -47,7 +47,7 @@ namespace OpenMod.Core.Commands
                 permission = current.Name + "." + permission;
             }
 
-            permission = "commands." + permission;
+            permission = $"{registration.Component.OpenModComponentId}:commands.{permission}";
 
             m_Cache.Add(registration.Id, permission);
             return permission;

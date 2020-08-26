@@ -31,7 +31,13 @@ namespace OpenMod.Core.Permissions
 
         public Task<PermissionGrantResult> CheckPermissionAsync(IPermissionActor actor, string permission)
         {
-            return m_Parent.CheckPermissionAsync(actor, m_Component.Value.OpenModComponentId + "." + permission);
+            // permission is already prefixed
+            if (permission.Contains(":"))
+            {
+                return m_Parent.CheckPermissionAsync(actor, permission);
+            }
+
+            return m_Parent.CheckPermissionAsync(actor, m_Component.Value.OpenModComponentId + ":" + permission);
         }
 
         public Task InitAsync()

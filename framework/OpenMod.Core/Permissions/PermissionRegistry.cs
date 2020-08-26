@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
@@ -16,9 +17,11 @@ namespace OpenMod.Core.Permissions
     public class PermissionRegistry : IPermissionRegistry
     {
         private readonly Dictionary<IOpenModComponent, List<PermissionRegistration>> m_PermissionRegistrations;
+        private readonly ILogger<PermissionRegistry> m_Logger;
 
-        public PermissionRegistry()
+        public PermissionRegistry(ILogger<PermissionRegistry> logger)
         {
+            m_Logger = logger;
             m_PermissionRegistrations = new Dictionary<IOpenModComponent, List<PermissionRegistration>>();
         }
 
@@ -58,8 +61,7 @@ namespace OpenMod.Core.Permissions
         {
             return m_PermissionRegistrations.Values
                 .SelectMany(d => d)
-                .FirstOrDefault(d => d.Owner.IsComponentAlive 
-                                     && permission.Equals($"{d.Owner.OpenModComponentId}.{d.Permission}", StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(registration => registration.Owner.IsComponentAlive && permission.Equals($"{registration.Owner.OpenModComponentId}:{registration.Permission}", StringComparison.OrdinalIgnoreCase));
         }
 
         public IPermissionRegistration FindPermission(IOpenModComponent component, string permission)

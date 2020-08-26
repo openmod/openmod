@@ -14,6 +14,11 @@ namespace OpenMod.Core.Commands
     {
         public const string CommandsKey = "commands";
         private readonly IDataStore m_DataStore;
+        private RegisteredCommandsData m_Cache;
+
+        // todo: reload m_Cache if openmod.commands.yaml / datastore updates
+        // requires datastore to add a filewatching system
+        // for now openmod.commands.yaml does not reload instantly
 
         public CommandDataStore(IOpenModDataStoreAccessor dataStoreAccessor)
         {
@@ -67,13 +72,13 @@ namespace OpenMod.Core.Commands
                 commandsData.Commands.Add(commandData);
             }
 
-
             await m_DataStore.SaveAsync(CommandsKey, commandsData);
+            m_Cache = commandsData;
         }
 
-        public Task<RegisteredCommandsData> GetRegisteredCommandsAsync()
+        public async Task<RegisteredCommandsData> GetRegisteredCommandsAsync()
         {
-            return m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey);
+            return m_Cache ??= await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey);
         }
 
         public async Task<T> GetCommandDataAsync<T>(string commandId, string key)

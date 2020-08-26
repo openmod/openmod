@@ -9,12 +9,10 @@ using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
-using OpenMod.Core.Users.Events;
 using OpenMod.UnityEngine.Extensions;
-using OpenMod.Unturned.Entities;
+using OpenMod.Unturned.Users.Events;
 using SDG.Unturned;
 using Steamworks;
-using UnityEngine;
 
 namespace OpenMod.Unturned.Users
 {
@@ -76,7 +74,7 @@ namespace OpenMod.Unturned.Users
             var user = new UnturnedUser(this, m_UserDataStore, steamPlayer.player, pending);
             m_Users.Add(user);
 
-            var connectedEvent = new UserConnectedEvent(user);
+            var connectedEvent = new UnturnedUserConnectedEvent(user);
 
             AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_Runtime, this, connectedEvent));
         }
@@ -97,7 +95,7 @@ namespace OpenMod.Unturned.Users
 
             AsyncHelper.RunSync(async () =>
             {
-                var disconnectedEvent = new UserDisconnectedEvent(user);
+                var disconnectedEvent = new UnturnedUserDisconnectedEvent(user);
                 await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
 
                 m_Users.Remove(user);
@@ -138,7 +136,7 @@ namespace OpenMod.Unturned.Users
 
             AsyncHelper.RunSync(async () =>
             {
-                var disconnectedEvent = new UserDisconnectedEvent(pending);
+                var disconnectedEvent = new UnturnedPendingUserDisconnectedEvent(pending);
                 await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
 
                 FinishSession(pending);
@@ -180,21 +178,24 @@ namespace OpenMod.Unturned.Users
 
                 var pendingUser = new UnturnedPendingUser(this, m_UserDataStore, steamPending);
                 var userData = await m_UserDataStore.GetUserDataAsync(pendingUser.Id, pendingUser.Type);
-                if (userData != null)
+                var isFirstConnect = userData == null;
+
+                if (isFirstConnect)
+                {
+                    await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
+                }
+                else
                 {
                     userData.LastSeen = DateTime.Now;
                     userData.LastDisplayName = pendingUser.DisplayName;
                     await m_UserDataStore.SetUserDataAsync(userData);
                 }
-                else
-                {
-                    await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
-                    await m_EventBus.EmitAsync(m_Runtime, this, new UserFirstConnectEvent(pendingUser));
-                }
 
                 m_PendingUsers.Add(pendingUser);
 
-                var userConnectingEvent = new UserConnectEvent(pendingUser);
+                var userConnectingEvent = isFirstConnect
+                    ? new UnturnedUserFirstConnectingEvent(pendingUser)
+                    : new UnturnedUserConnectingEvent(pendingUser);
                 await m_EventBus.EmitAsync(m_Runtime, this, userConnectingEvent);
 
                 if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))

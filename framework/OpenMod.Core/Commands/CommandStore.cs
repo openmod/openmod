@@ -72,7 +72,7 @@ namespace OpenMod.Core.Commands
 
                 foreach (var registration in commands)
                 {
-                    var permission = m_CommandPermissionBuilder.GetPermission(registration, commands);
+                    var permission = m_CommandPermissionBuilder.GetPermission(registration, commands).Split(':')[1];
 
                     m_PermissionRegistry.RegisterPermission(registration.Component,
                         permission,
