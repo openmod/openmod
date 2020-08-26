@@ -59,7 +59,7 @@ namespace OpenMod.Core.Permissions
             return m_PermissionRegistrations.Values
                 .SelectMany(d => d)
                 .FirstOrDefault(d => d.Owner.IsComponentAlive 
-                                     && permission.Equals($"{d.Owner.OpenModComponentId}.{d.Permission}", StringComparison.OrdinalIgnoreCase));
+                                     && permission.Equals($"{d.Owner.OpenModComponentId}:{d.Permission}", StringComparison.OrdinalIgnoreCase));
         }
 
         public IPermissionRegistration FindPermission(IOpenModComponent component, string permission)
