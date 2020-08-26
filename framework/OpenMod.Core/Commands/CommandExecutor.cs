@@ -54,17 +54,12 @@ namespace OpenMod.Core.Commands
 
             var logger = m_LifetimeScope.Resolve<ILogger<CommandExecutor>>();
             logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
-           
+
             var currentCommandAccessor = m_LifetimeScope.Resolve<ICurrentCommandContextAccessor>();
             var commandContextBuilder = m_LifetimeScope.Resolve<ICommandContextBuilder>();
             var stringLocalizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
-
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            
             var commandsRegistrations = await m_CommandStore.GetCommandsAsync();
-            m_Logger.LogInformation($"GetCommandsAsync {sw.ElapsedMilliseconds}ms");
-            sw.Reset();
-
             var commandContext = commandContextBuilder.CreateContext(actor, args, prefix, commandsRegistrations);
             var commandExecutingEvent = new CommandExecutingEvent(actor, commandContext);
             await m_EventBus.EmitAsync(m_Runtime, this, commandExecutingEvent);
@@ -84,13 +79,14 @@ namespace OpenMod.Core.Commands
                 currentCommandAccessor.Context = commandContext;
 
                 var permission = m_CommandPermissionBuilder.GetPermission(commandContext.CommandRegistration);
-                var permissionChecker = commandContext.ServiceProvider.GetRequiredService<IPermissionChecker>();
+                var permissionChecker = m_Runtime.Host.Services.GetRequiredService<IPermissionChecker>();
 
                 if (!string.IsNullOrWhiteSpace(permission) && await permissionChecker.CheckPermissionAsync(actor, permission) != PermissionGrantResult.Grant)
                 {
                     throw new NotEnoughPermissionException(stringLocalizer, permission);
                 }
 
+                Stopwatch sw = new Stopwatch();
                 sw.Start();
                 var command = commandContext.CommandRegistration.Instantiate(commandContext.ServiceProvider);
                 await command.ExecuteAsync();
@@ -106,9 +102,6 @@ namespace OpenMod.Core.Commands
             catch (Exception ex)
             {
                 commandContext.Exception = ex;
-#if DEBUG
-                throw; // in debug mode we want to debug such exceptions instead of catching them
-#endif
             }
             finally
             {

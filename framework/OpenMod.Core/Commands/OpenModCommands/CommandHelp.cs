@@ -96,7 +96,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
         protected virtual string GetPermission(ICommandRegistration commandRegistration, IReadOnlyCollection<ICommandRegistration> commands)
         {
-            var permission = commandRegistration == null ? null : m_CommandPermissionBuilder.GetPermission(commandRegistration, commands);
+            var permission = commandRegistration == null ? null : m_CommandPermissionBuilder.GetPermission(commandRegistration, commands).Split(':')[1];
             if (permission == null)
             {
                 return null;

@@ -20,9 +20,7 @@ namespace OpenMod.Core.Commands
         private static string GetPermission(ICommandContext context, string permission)
         {
             var permissionBuilder = context.ServiceProvider.GetRequiredService<ICommandPermissionBuilder>();
-            var prefixedPermission = $"{permissionBuilder.GetPermission(context.CommandRegistration)}.{permission}";
-
-            return $"{context.CommandRegistration.Component.OpenModComponentId}:{prefixedPermission}";
+            return $"{permissionBuilder.GetPermission(context.CommandRegistration)}.{permission}";
         }
     }
 }
