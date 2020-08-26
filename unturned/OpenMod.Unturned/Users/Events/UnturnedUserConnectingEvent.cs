@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using OpenMod.Core.Users.Events;
 
-namespace OpenMod.Unturned.Users
+namespace OpenMod.Unturned.Users.Events
 {
     public class UnturnedUserConnectingEvent : UnturnedPendingUserEvent, IUserConnectingEvent
     {

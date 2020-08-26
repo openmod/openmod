@@ -10,6 +10,7 @@ using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
 using OpenMod.UnityEngine.Extensions;
+using OpenMod.Unturned.Users.Events;
 using SDG.Unturned;
 using Steamworks;
 
