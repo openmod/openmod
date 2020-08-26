@@ -40,7 +40,7 @@ namespace OpenMod.Unturned
         private OpenModConsoleInputOutput m_OpenModIoHandler;
         private readonly HashSet<string> m_Capabilities;
         private Harmony m_Harmony;
-        private UnturnedEventsActivator m_UnturnedEventsListener;
+        private UnturnedEventsActivator m_UnturnedEventsActivator;
 
         public string HostDisplayName { get; } = Provider.APP_NAME;
 
@@ -183,8 +183,8 @@ namespace OpenMod.Unturned
         {
             CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
 
-            m_UnturnedEventsListener = ActivatorUtilities.CreateInstance<UnturnedEventsActivator>(m_ServiceProvider);
-            m_UnturnedEventsListener.Subscribe();
+            m_UnturnedEventsActivator = ActivatorUtilities.CreateInstance<UnturnedEventsActivator>(m_ServiceProvider);
+            m_UnturnedEventsActivator.ActivateEventListeners();
         }
 
         protected virtual void UnbindUnturnedEvents()
@@ -193,7 +193,7 @@ namespace OpenMod.Unturned
             CommandWindow.onCommandWindowInputted -= OnCommandWindowInputted;
             // ReSharper restore DelegateSubtraction
 
-            m_UnturnedEventsListener.Unsubscribe();
+            m_UnturnedEventsActivator.Dispose();
         }
         
         private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
