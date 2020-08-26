@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Cysharp.Threading.Tasks;
+using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
@@ -39,6 +40,7 @@ namespace OpenMod.Unturned
         private OpenModConsoleInputOutput m_OpenModIoHandler;
         private readonly HashSet<string> m_Capabilities;
         private UnturnedEventsListener m_UnturnedEventsListener;
+        private Harmony m_Harmony;
 
         public string HostDisplayName { get; } = Provider.APP_NAME;
 
@@ -100,6 +102,9 @@ namespace OpenMod.Unturned
         {
             // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
+
+            m_Harmony = new Harmony(OpenModComponentId);
+            m_Harmony.PatchAll(GetType().Assembly);
 
             m_UnturnedCommandHandler.Subscribe();
             BindUnturnedEvents();
@@ -231,7 +236,7 @@ namespace OpenMod.Unturned
             m_IsDisposing = true;
             TlsWorkaround.Uninstalll();
 
-            //m_Harmony.UnpatchAll(c_HarmonyInstanceId);
+            m_Harmony.UnpatchAll(OpenModComponentId);
             UnbindUnturnedEvents();
         }
     }
