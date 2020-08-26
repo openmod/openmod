@@ -144,29 +144,32 @@ namespace OpenMod.Core.Eventing
                 return;
             }
 
+            var eventTypes = new List<Type>();
+
             var currentType = @event.GetType();
-            while (currentType != null && !currentType.IsAbstract && typeof(IEvent).IsAssignableFrom(currentType))
+            while (currentType != null && !currentType.IsAbstract && !currentType.IsInterface && typeof(IEvent).IsAssignableFrom(currentType))
             {
-                string eventName = GetEventName(currentType);
+                eventTypes.Add(currentType);
+                currentType = currentType.BaseType;
+            }
+            
+            eventTypes.AddRange(@event.GetType().GetInterfaces().Where(d => typeof(IEvent).IsAssignableFrom(d)));
+
+            foreach (var eventType in eventTypes)
+            {
+                string eventName = GetEventName(eventType);
 
                 m_Logger.LogTrace($"Emitting event: {eventName}");
                 var eventSubscriptions
                     = m_EventSubscriptions
-                        .Where(c => (c.EventType != null && c.EventType == currentType)
+                        .Where(c => (c.EventType != null && c.EventType == eventType)
                                     || (eventName.Equals(c.EventName, StringComparison.OrdinalIgnoreCase)
                                         && c.Owner.IsAlive && ((IOpenModComponent)c.Owner.Target).IsComponentAlive))
                         .ToList();
 
 
-                void Complete()
-                {
-                    m_Logger.LogTrace($"{eventName}: Finished.");
-                }
-
                 if (eventSubscriptions.Count == 0)
                 {
-                    currentType = currentType.BaseType;
-
                     m_Logger?.LogTrace($"{eventName}: No listeners found.");
                     continue;
                 }
@@ -222,9 +225,7 @@ namespace OpenMod.Core.Eventing
                     }
                 }
 
-                currentType = currentType.BaseType;
-
-                Complete();
+                m_Logger.LogTrace($"{eventName}: Finished.");
             }
 
             callback?.Invoke(@event);
@@ -233,13 +234,13 @@ namespace OpenMod.Core.Eventing
         internal static string GetEventName(Type eventType)
         {
             // remove "Event" suffix from type name
-            
+
             const string suffix = "Event";
             var eventName = eventType.Name;
             var idx = eventName.IndexOf(suffix, StringComparison.Ordinal);
-         
-            return idx == -1 
-                ? eventName 
+
+            return idx == -1
+                ? eventName
                 : eventName.Remove(idx, suffix.Length);
         }
 

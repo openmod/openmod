@@ -10,7 +10,7 @@ using UserDatabasePlugin.Database;
 namespace UserDatabasePlugin
 {
     [UsedImplicitly]
-    public class UserEventsListener : IEventListener<UserConnectedEvent>, IEventListener<UserDisconnectedEvent>
+    public class UserEventsListener : IEventListener<IUserConnectedEvent>, IEventListener<IUserDisconnectedEvent>
     {
         private readonly UserDatabaseDbContext m_DbContext;
 
@@ -18,12 +18,12 @@ namespace UserDatabasePlugin
         {
             m_DbContext = dbContext;
         }
-        public Task HandleEventAsync(object sender, UserConnectedEvent @event)
+        public Task HandleEventAsync(object sender, IUserConnectedEvent @event)
         {
             return HandleUserEvent(@event.User, "connect");
         }
 
-        public Task HandleEventAsync(object sender, UserDisconnectedEvent @event)
+        public Task HandleEventAsync(object sender, IUserDisconnectedEvent @event)
         {
             return HandleUserEvent(@event.User, "disconnect");
         }

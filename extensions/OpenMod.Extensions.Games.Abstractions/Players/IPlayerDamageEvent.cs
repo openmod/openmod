@@ -4,7 +4,7 @@ using OpenMod.Extensions.Games.Abstractions.Entities;
 
 namespace OpenMod.Extensions.Games.Abstractions.Players
 {
-    public class PlayerDamageEvent : PlayerEvent, ICancellableEvent
+    public interface IPlayerDamageEvent : IPlayerEvent, ICancellableEvent
     {
         [CanBeNull]
         public IEntity Attacker { get; }
@@ -12,13 +12,5 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
         public double DamageAmount { get; set; }
 
         public string DamageSource { get; set; }
-
-        public bool IsCancelled { get; set; }
-
-        public PlayerDamageEvent(IPlayer player, IEntity attacker, double damageAmount) : base(player)
-        {
-            Attacker = attacker;
-            DamageAmount = damageAmount;
-        }
     }
 }
