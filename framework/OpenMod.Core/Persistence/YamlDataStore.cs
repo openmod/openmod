@@ -104,7 +104,7 @@ namespace OpenMod.Core.Persistence
 
         public IDisposable AddChangeWatcher(string key, IOpenModComponent component, Action onChange)
         {
-            string filePath = GetFilePathForKey(key);
+            var filePath = GetFilePathForKey(key);
 
             lock (GetLock(filePath))
             {
