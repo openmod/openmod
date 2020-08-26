@@ -23,6 +23,7 @@ namespace OpenMod.Core.Commands
             m_DataStore = dataStoreAccessor.DataStore;
             m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, runtime, () =>
             {
+                m_Cache = null;
                 AsyncHelper.RunSync(GetRegisteredCommandsAsync);
             });
         }
