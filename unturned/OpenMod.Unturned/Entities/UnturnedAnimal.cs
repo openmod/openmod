@@ -12,7 +12,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Entities
 {
-    public class UnturnedAnimal : IEntity, IHasHealth
+    public class UnturnedAnimal : IEntity, IHasHealth, IDamageSource
     {
         private static readonly FieldInfo m_HealthField;
 

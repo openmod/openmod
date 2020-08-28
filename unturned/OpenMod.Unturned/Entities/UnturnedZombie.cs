@@ -10,7 +10,7 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Entities
 {
-    public class UnturnedZombie : IEntity, IHasHealth
+    public class UnturnedZombie : IEntity, IHasHealth, IDamageSource
     {
         private static readonly FieldInfo m_HealthField;
         private static readonly FieldInfo m_MaxHealthField;

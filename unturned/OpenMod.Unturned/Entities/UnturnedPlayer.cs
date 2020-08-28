@@ -20,7 +20,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Entities
 {
-    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle
+    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource
     {
         public Player Player { get; }
 
