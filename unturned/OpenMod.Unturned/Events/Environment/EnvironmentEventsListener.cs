@@ -2,11 +2,6 @@
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using SDG.Unturned;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Events.Environment
 {
@@ -44,7 +39,7 @@ namespace OpenMod.Unturned.Events.Environment
 
         private void OnRainUpdated(ELightingRain rain)
         {
-            UnturnedRainUpdateEvent @event = new UnturnedRainUpdateEvent(rain);
+            UnturnedWeatherUpdateEvent @event = new UnturnedWeatherUpdateEvent(rain, LevelLighting.snowyness);
 
             Emit(@event);
         }
@@ -58,7 +53,7 @@ namespace OpenMod.Unturned.Events.Environment
 
         private void OnSnowUpdated(ELightingSnow snow)
         {
-            UnturnedSnowUpdateEvent @event = new UnturnedSnowUpdateEvent(snow);
+            UnturnedWeatherUpdateEvent @event = new UnturnedWeatherUpdateEvent(LevelLighting.rainyness, snow);
 
             Emit(@event);
         }
