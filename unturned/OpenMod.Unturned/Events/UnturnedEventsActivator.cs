@@ -14,18 +14,14 @@ namespace OpenMod.Unturned.Events
     internal class UnturnedEventsActivator : IDisposable
     {
         private readonly IServiceProvider m_ServiceProvider;
-        private readonly IOpenModHost m_OpenModHost;
-        private readonly IUserManager m_UserManager;
         private readonly ILogger<UnturnedEventsActivator> m_Logger;
         private readonly List<IUnturnedEventsListener> m_UnturnedEventsListeners;
 
         public UnturnedEventsActivator(
             IServiceProvider serviceProvider,
-            IUserManager userManager,
             ILogger<UnturnedEventsActivator> logger)
         {
             m_ServiceProvider = serviceProvider;
-            m_UserManager = userManager;
             m_Logger = logger;
             m_UnturnedEventsListeners = new List<IUnturnedEventsListener>();
         }
