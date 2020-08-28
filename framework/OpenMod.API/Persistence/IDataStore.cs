@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace OpenMod.API.Persistence
 {
@@ -22,5 +23,7 @@ namespace OpenMod.API.Persistence
         /// </summary>
         /// <param name="key">The keyto load from.</param>
         Task<T> LoadAsync<T>(string key) where T : class;
+
+        IDisposable AddChangeWatcher(string key, IOpenModComponent component, Action onChange);
     }
 }

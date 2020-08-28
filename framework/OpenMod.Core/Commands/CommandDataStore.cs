@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
@@ -10,19 +11,21 @@ using OpenMod.Core.Helpers;
 namespace OpenMod.Core.Commands
 {
     [ServiceImplementation(Priority = Priority.Lowest)]
-    public class CommandDataStore : ICommandDataStore
+    public class CommandDataStore : ICommandDataStore, IDisposable
     {
         public const string CommandsKey = "commands";
         private readonly IDataStore m_DataStore;
+        private readonly IDisposable m_ChangeWatcher;
         private RegisteredCommandsData m_Cache;
 
-        // todo: reload m_Cache if openmod.commands.yaml / datastore updates
-        // requires datastore to add a filewatching system
-        // for now openmod.commands.yaml does not reload instantly
-
-        public CommandDataStore(IOpenModDataStoreAccessor dataStoreAccessor)
+        public CommandDataStore(IOpenModDataStoreAccessor dataStoreAccessor, IRuntime runtime)
         {
             m_DataStore = dataStoreAccessor.DataStore;
+            m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, runtime, () =>
+            {
+                m_Cache = null;
+                AsyncHelper.RunSync(GetRegisteredCommandsAsync);
+            });
         }
 
         public async Task<RegisteredCommandData> GetRegisteredCommandAsync(string commandId)
@@ -107,6 +110,11 @@ namespace OpenMod.Core.Commands
             }
 
             throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
+        }
+
+        public void Dispose()
+        {
+            m_ChangeWatcher?.Dispose();
         }
     }
 }
