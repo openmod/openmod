@@ -13,7 +13,7 @@ namespace OpenMod.Unturned.Events
     {
         private readonly IOpenModHost m_OpenModHost;
         private readonly IEventBus m_EventBus;
-        private readonly IUserManager m_UserManager;
+        protected readonly IUserManager m_UserManager;
 
         protected UnturnedEventsListener(IOpenModHost openModHost,
             IEventBus eventBus,
