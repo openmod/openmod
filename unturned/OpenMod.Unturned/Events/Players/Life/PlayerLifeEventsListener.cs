@@ -6,6 +6,7 @@ using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -25,6 +26,7 @@ namespace OpenMod.Unturned.Events.Players.Life
             OnDoDamage += Events_OnDoDamage;
 
             PlayerLife.onPlayerDied += OnPlayerDeath;
+            PlayerLife.onPlayerLifeUpdated += OnPlayerLifeUpdated;
         }
 
         public override void Unsubscribe()
@@ -32,6 +34,7 @@ namespace OpenMod.Unturned.Events.Players.Life
             OnDoDamage -= Events_OnDoDamage;
 
             PlayerLife.onPlayerDied -= OnPlayerDeath;
+            PlayerLife.onPlayerLifeUpdated -= OnPlayerLifeUpdated;
         }
 
         private void Events_OnDoDamage(Player nativePlayer, ref byte amount,
@@ -40,6 +43,10 @@ namespace OpenMod.Unturned.Events.Players.Life
             ref Vector3 ragdoll, ref ERagdollEffect ragdollEffect,
             ref bool canCauseBleeding, out bool cancel)
         {
+            cancel = false;
+
+            if (amount == 0 || nativePlayer.life.isDead) return; 
+
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
             IDamageSource source = null;
@@ -53,8 +60,18 @@ namespace OpenMod.Unturned.Events.Players.Life
                     x => x.playerID.steamID == temp));
             }
 
-            UnturnedPlayerDamageEvent @event = new UnturnedPlayerDamageEvent(player, amount, cause, limb, killer,
-                source, trackKill, ragdoll, ragdollEffect, canCauseBleeding);
+            UnturnedPlayerDamageEvent @event;
+
+            if (amount >= nativePlayer.life.health)
+            {
+                @event = new UnturnedPlayerDyingEvent(player, amount, cause, limb, killer,
+                    source, trackKill, ragdoll, ragdollEffect, canCauseBleeding);
+            }
+            else
+            {
+                @event = new UnturnedPlayerDamageEvent(player, amount, cause, limb, killer,
+                    source, trackKill, ragdoll, ragdollEffect, canCauseBleeding);
+            }
 
             Emit(@event);
 
@@ -76,6 +93,18 @@ namespace OpenMod.Unturned.Events.Players.Life
             UnturnedPlayerDeathEvent @event = new UnturnedPlayerDeathEvent(player, cause, limb, instigator);
 
             Emit(@event);
+        }
+
+        private void OnPlayerLifeUpdated(Player nativePlayer)
+        {
+            if (!nativePlayer.life.isDead)
+            {
+                UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+                UnturnedPlayerReviveEvent @event = new UnturnedPlayerReviveEvent(player);
+
+                Emit(@event);
+            }
         }
 
         private delegate void DoDamageHandler(Player player, ref byte amount,
