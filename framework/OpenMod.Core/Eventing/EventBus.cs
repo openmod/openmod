@@ -155,7 +155,12 @@ namespace OpenMod.Core.Eventing
             
             eventTypes.AddRange(@event.GetType().GetInterfaces().Where(d => typeof(IEvent).IsAssignableFrom(d)));
 
-            foreach (var eventType in eventTypes)
+            Type[] omittedTypes = new[]
+            {
+                typeof(IEvent), typeof(EventBase), typeof(Event)
+            };
+
+            foreach (var eventType in eventTypes.Except(omittedTypes))
             {
                 string eventName = GetEventName(eventType);
 
