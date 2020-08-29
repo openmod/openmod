@@ -1,11 +1,11 @@
-﻿using OpenMod.API.Eventing;
+﻿using OpenMod.Extensions.Games.Abstractions.Players;
 using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Events.Chat
 {
-    public class UnturnedPlayerChatEvent : UnturnedPlayerEvent, ICancellableEvent
+    public class UnturnedPlayerChatEvent : UnturnedPlayerEvent, IPlayerChatEvent
     {
         public EChatMode Mode { get; }
 
@@ -13,16 +13,16 @@ namespace OpenMod.Unturned.Events.Chat
 
         public bool IsRich { get; set; }
 
-        public string Text { get; }
+        public string Message { get; }
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedPlayerChatEvent(UnturnedPlayer player, EChatMode mode, Color color, bool isRich, string text) : base(player)
+        public UnturnedPlayerChatEvent(UnturnedPlayer player, EChatMode mode, Color color, bool isRich, string message) : base(player)
         {
             Mode = mode;
             Color = color;
             IsRich = isRich;
-            Text = text;
+            Message = message;
         }
     }
 }
