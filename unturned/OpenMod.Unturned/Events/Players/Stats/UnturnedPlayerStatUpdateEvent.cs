@@ -4,7 +4,7 @@ namespace OpenMod.Unturned.Events.Players.Stats
 {
     public abstract class UnturnedPlayerStatUpdateEvent : UnturnedPlayerEvent
     {
-        protected UnturnedPlayerBleedingUpdateEvent(UnturnedPlayer player) : base(player)
+        protected UnturnedPlayerStatUpdateEvent(UnturnedPlayer player) : base(player)
         {
 
         }
