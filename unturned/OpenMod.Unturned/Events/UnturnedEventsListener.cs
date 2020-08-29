@@ -26,13 +26,14 @@ namespace OpenMod.Unturned.Events
 
         protected UnturnedPlayer GetUnturnedPlayer(Player player)
         {
-            return player == null ? null : (AsyncHelper.RunSync(() => m_UserManager.FindUserAsync(KnownActorTypes.Player,
-                player.channel.owner.playerID.steamID.ToString(), UserSearchMode.FindById)) as UnturnedPlayer);
+            if (player == null) return null;
+
+            return new UnturnedPlayer(player);
         }
 
         protected UnturnedPlayer GetUnturnedPlayer(SteamPlayer player)
         {
-            return player == null ? null : GetUnturnedPlayer(player.player);
+            return GetUnturnedPlayer(player?.player);
         }
 
         protected void Emit(IEvent @event)
