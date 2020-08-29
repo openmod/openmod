@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="3.1.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.7" />
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.7" />
@@ -44,6 +45,7 @@
     <ProjectReference Include="..\OpenMod.Analyzers\OpenMod.Analyzers.csproj" />
     <ProjectReference Include="..\OpenMod.API\OpenMod.API.csproj" />
     <ProjectReference Include="..\OpenMod.NuGet\OpenMod.NuGet.csproj" />
+    <ProjectReference Include="..\SqlSugar\SqlSugar.csproj" />
   </ItemGroup>
 
 </Project>

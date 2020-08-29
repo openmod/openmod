@@ -10,6 +10,7 @@ using OpenMod.Core.Console;
 using OpenMod.Core.Localization;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Plugins;
+using OpenMod.Core.Services;
 using OpenMod.Core.Users;
 
 namespace OpenMod.Core
@@ -36,6 +37,8 @@ namespace OpenMod.Core
             {
                 options.AddUserProvider<OfflineUserProvider>();
             });
+
+            serviceCollection.AddSqlsugarSetup();
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
             serviceCollection.AddTransient(typeof(IPluginAccessor<>), typeof(PluginAccessor<>));
