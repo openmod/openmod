@@ -21,6 +21,7 @@ namespace OpenMod.Unturned.Events.Zombies
         public override void Subscribe()
         {
             OnZombieDamage += Events_OnZombieDamage;
+            OnZombieDead += Events_OnZombieDead;
             OnZombieSpawn += Events_OnZombieSpawn;
         }
 
@@ -61,6 +62,13 @@ namespace OpenMod.Unturned.Events.Zombies
             cancel = @event.IsCancelled;
         }
 
+        private void Events_OnZombieDead(Zombie zombie, Vector3 ragdoll, ERagdollEffect ragdollEffect)
+        {
+            UnturnedZombieDeadEvent @event = new UnturnedZombieDeadEvent(zombie, ragdoll, ragdollEffect);
+
+            Emit(@event);
+        }
+
         private void Events_OnZombieSpawn(Zombie zombie)
         {
             UnturnedZombieSpawnEvent @event = new UnturnedZombieSpawnEvent(zombie);
@@ -75,6 +83,9 @@ namespace OpenMod.Unturned.Events.Zombies
 
         private delegate void ZombieSpawn(Zombie zombie);
         private static event ZombieSpawn OnZombieSpawn;
+
+        private delegate void ZombieDead(Zombie zombie, Vector3 ragdoll, ERagdollEffect ragdollEffect);
+        private static event ZombieDead OnZombieDead;
 
         [HarmonyPatch]
         private class ZombiePatches
@@ -112,6 +123,13 @@ namespace OpenMod.Unturned.Events.Zombies
                 {
                     OnZombieSpawn?.Invoke(zombie);
                 }
+            }
+
+            [HarmonyPatch(typeof(Zombie), "tellDead")]
+            [HarmonyPostfix]
+            private static void TellDead(Zombie __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
+            {
+                OnZombieDead?.Invoke(__instance, newRagdoll, ragdollEffect);
             }
         }
     }
