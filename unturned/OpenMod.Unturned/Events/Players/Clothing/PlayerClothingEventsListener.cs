@@ -234,7 +234,7 @@ namespace OpenMod.Unturned.Events.Players.Clothing
         private class Patches
         {
             [HarmonyPatch(typeof(PlayerClothing), "askWearBackpack")]
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             private static bool AskWearBackpack(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
                 bool cancel = false;
@@ -245,7 +245,7 @@ namespace OpenMod.Unturned.Events.Players.Clothing
             }
 
             [HarmonyPatch(typeof(PlayerClothing), "askWearGlasses")]
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             private static bool AskWearGlasses(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
                 bool cancel = false;
@@ -256,7 +256,7 @@ namespace OpenMod.Unturned.Events.Players.Clothing
             }
 
             [HarmonyPatch(typeof(PlayerClothing), "askWearHat")]
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             private static bool AskWearHat(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
                 bool cancel = false;
@@ -267,7 +267,7 @@ namespace OpenMod.Unturned.Events.Players.Clothing
             }
 
             [HarmonyPatch(typeof(PlayerClothing), "askWearMask")]
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             private static bool AskWearMask(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
                 bool cancel = false;
@@ -278,7 +278,7 @@ namespace OpenMod.Unturned.Events.Players.Clothing
             }
 
             [HarmonyPatch(typeof(PlayerClothing), "askWearPants")]
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             private static bool AskWearPants(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
                 bool cancel = false;
@@ -289,7 +289,7 @@ namespace OpenMod.Unturned.Events.Players.Clothing
             }
 
             [HarmonyPatch(typeof(PlayerClothing), "askWearShirt")]
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             private static bool AskWearShirt(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
                 bool cancel = false;
@@ -300,7 +300,7 @@ namespace OpenMod.Unturned.Events.Players.Clothing
             }
 
             [HarmonyPatch(typeof(PlayerClothing), "askWearVest")]
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             private static bool AskWearVest(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
                 bool cancel = false;
