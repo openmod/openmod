@@ -4,6 +4,7 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using SDG.Unturned;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Events.Zombies
@@ -29,10 +30,25 @@ namespace OpenMod.Unturned.Events.Zombies
             OnZombieSpawn -= Events_OnZombieSpawn;
         }
 
-        private void Events_OnZombieDamage(Zombie zombie, ref ushort damageAmount, ref Vector3 ragdoll, ref ERagdollEffect ragdollEffect, ref bool trackKill,
+        private readonly FieldInfo ZombieHealth =
+            typeof(Zombie).GetField("health", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        private void Events_OnZombieDamage(Zombie zombie, ref ushort damageAmount, ref Vector3 ragdoll,
+            ref ERagdollEffect ragdollEffect, ref bool trackKill,
             ref bool dropLoot, ref EZombieStunOverride stunOverride, out bool cancel)
         {
-            UnturnedZombieDamageEvent @event = new UnturnedZombieDamageEvent(zombie, damageAmount, ragdoll, ragdollEffect, trackKill, dropLoot, stunOverride);
+            UnturnedZombieDamageEvent @event;
+
+            if (damageAmount >= (ushort) ZombieHealth.GetValue(zombie))
+            {
+                @event = new UnturnedZombieDyingEvent(zombie, damageAmount, ragdoll, ragdollEffect, trackKill, dropLoot,
+                    stunOverride);
+            }
+            else
+            {
+                @event = new UnturnedZombieDamageEvent(zombie, damageAmount, ragdoll, ragdollEffect, trackKill,
+                    dropLoot, stunOverride);
+            }
 
             Emit(@event);
 
@@ -52,7 +68,8 @@ namespace OpenMod.Unturned.Events.Zombies
             Emit(@event);
         }
 
-        private delegate void ZombieDamage(Zombie zombie, ref ushort damageAmount, ref Vector3 ragdoll, ref ERagdollEffect ragdollEffect,
+        private delegate void ZombieDamage(Zombie zombie, ref ushort damageAmount, ref Vector3 ragdoll,
+            ref ERagdollEffect ragdollEffect,
             ref bool trackKill, ref bool dropLoot, ref EZombieStunOverride stunOverride, out bool cancel);
         private static event ZombieDamage OnZombieDamage;
 
@@ -65,7 +82,8 @@ namespace OpenMod.Unturned.Events.Zombies
             [HarmonyPatch(typeof(Zombie), "askDamage")]
             [HarmonyPrefix]
             private static bool AskDamage(Zombie __instance, ref ushort amount, ref Vector3 newRagdoll,
-                ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot, ref EZombieStunOverride stunOverride)
+                ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot,
+                ref EZombieStunOverride stunOverride)
             {
                 if (amount == 0 || __instance.isDead) return true;
 
