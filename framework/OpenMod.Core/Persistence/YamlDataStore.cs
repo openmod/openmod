@@ -106,6 +106,12 @@ namespace OpenMod.Core.Persistence
         {
             var filePath = GetFilePathForKey(key);
 
+            var directory = Path.GetDirectoryName(filePath);
+
+            if (directory == null) throw new Exception("Unable to retrieve directory info for file");
+
+            var fileName = Path.GetFileName(filePath);
+
             lock (GetLock(filePath))
             {
                 m_ChangeListeners.Add(new KeyValuePair<IOpenModComponent, Action>(component, onChange));
@@ -114,7 +120,7 @@ namespace OpenMod.Core.Persistence
                 if (idx == 0)
                 {
                     // first element, start watcher
-                    m_FileSystemWatcher = new FileSystemWatcher(filePath);
+                    m_FileSystemWatcher = new FileSystemWatcher(directory, fileName);
                     m_FileSystemWatcher.Changed += (s, a) => OnFileChange(filePath);
                 }
 
