@@ -2,9 +2,11 @@
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
+using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 using Steamworks;
+using System.Linq;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Events.Players
@@ -23,11 +25,9 @@ namespace OpenMod.Unturned.Events.Players
             Provider.onEnemyConnected += OnPlayerConnected;
             Provider.onEnemyDisconnected += OnPlayerDisconnected;
 
-            OnDoDamage += Events_OnDoDamage;
             OnTeleport += Events_OnTeleport;
 
             UseableConsumeable.onPerformingAid += OnPerformingAid;
-            PlayerLife.onPlayerDied += OnPlayerDeath;
         }
 
         public override void Unsubscribe()
@@ -35,11 +35,9 @@ namespace OpenMod.Unturned.Events.Players
             Provider.onEnemyConnected -= OnPlayerConnected;
             Provider.onEnemyDisconnected -= OnPlayerDisconnected;
 
-            OnDoDamage -= Events_OnDoDamage;
             OnTeleport -= Events_OnTeleport;
 
             UseableConsumeable.onPerformingAid -= OnPerformingAid;
-            PlayerLife.onPlayerDied -= OnPlayerDeath;
         }
 
         public override void SubscribePlayer(Player player)
@@ -70,30 +68,6 @@ namespace OpenMod.Unturned.Events.Players
             Emit(@event);
         }
 
-        private void Events_OnDoDamage(Player nativePlayer, ref byte amount,
-            ref EDeathCause cause, ref ELimb limb,
-            ref CSteamID killer, ref bool trackKill,
-            ref Vector3 ragdoll, ref ERagdollEffect ragdollEffect,
-            ref bool canCauseBleeding, out bool cancel)
-        {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
-
-            UnturnedPlayerDamageEvent @event = new UnturnedPlayerDamageEvent(player, amount, cause, limb, killer,
-                trackKill, ragdoll, ragdollEffect, canCauseBleeding);
-
-            Emit(@event);
-
-            amount = @event.DamageAmount;
-            cause = @event.Cause;
-            limb = @event.Limb;
-            killer = @event.Killer;
-            trackKill = @event.TrackKill;
-            ragdoll = @event.Ragdoll;
-            ragdollEffect = @event.RagdollEffect;
-            canCauseBleeding = @event.CanCauseBleeding;
-            cancel = @event.IsCancelled;
-        }
-
         private void Events_OnTeleport(Player nativePlayer, ref Vector3 position, ref float yaw, out bool cancel)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
@@ -105,15 +79,6 @@ namespace OpenMod.Unturned.Events.Players
             position = @event.Position;
             yaw = @event.Yaw;
             cancel = @event.IsCancelled;
-        }
-
-        private void Events_OnDead(Player nativePlayer, Vector3 ragdoll, byte ragdollEffect)
-        {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
-
-            UnturnedPlayerDeadEvent @event = new UnturnedPlayerDeadEvent(player, ragdoll, ragdollEffect);
-
-            Emit(@event);
         }
 
         private void OnPerformingAid(Player nativeInstigator, Player nativeTarget, ItemConsumeableAsset asset, ref bool shouldAllow)
@@ -137,22 +102,6 @@ namespace OpenMod.Unturned.Events.Players
             Emit(@event);
         }
 
-        private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
-        {
-            UnturnedPlayer player = GetUnturnedPlayer(sender.player);
-
-            UnturnedPlayerDeathEvent @event = new UnturnedPlayerDeathEvent(player, cause, limb, instigator);
-
-            Emit(@event);
-        }
-
-        private delegate void DoDamageHandler(Player player, ref byte amount,
-            ref EDeathCause cause, ref ELimb limb,
-            ref CSteamID killer, ref bool trackKill,
-            ref Vector3 ragdoll, ref ERagdollEffect ragdollEffect,
-            ref bool canCauseBleeding, out bool cancel);
-        private static event DoDamageHandler OnDoDamage;
-
         private delegate void TeleportHandler(Player player,
             ref Vector3 position, ref float yaw, out bool cancel);
         private static event TeleportHandler OnTeleport;
@@ -160,25 +109,6 @@ namespace OpenMod.Unturned.Events.Players
         [HarmonyPatch]
         private class Patches
         {
-            [HarmonyPatch(typeof(PlayerLife), "doDamage")]
-            [HarmonyPrefix]
-            private static bool DoDamage(PlayerLife __instance, ref byte amount,
-                ref EDeathCause newCause, ref ELimb newLimb,
-                ref CSteamID newKiller, ref bool trackKill,
-                ref Vector3 newRagdoll, ref ERagdollEffect newRagdollEffect,
-                ref bool canCauseBleeding)
-            {
-                bool cancel = false;
-
-                OnDoDamage?.Invoke(__instance.player, ref amount,
-                    ref newCause, ref newLimb,
-                    ref newKiller, ref trackKill,
-                    ref newRagdoll, ref newRagdollEffect,
-                    ref canCauseBleeding, out cancel);
-
-                return !cancel;
-            }
-
             [HarmonyPatch(typeof(Player), "teleportToLocationUnsafe")]
             [HarmonyPrefix]
             private static bool TeleportToLocationUnsafe(Player __instance, ref Vector3 position, ref float yaw)
