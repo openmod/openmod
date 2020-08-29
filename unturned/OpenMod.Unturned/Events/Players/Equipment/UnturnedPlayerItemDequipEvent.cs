@@ -1,15 +1,13 @@
-﻿using OpenMod.API.Eventing;
-using OpenMod.Unturned.Entities;
+﻿using OpenMod.Unturned.Entities;
+using SDG.Unturned;
 
 namespace OpenMod.Unturned.Events.Players.Equipment
 {
-    public class UnturnedPlayerItemDequipEvent : UnturnedPlayerEvent, ICancellableEvent
+    public class UnturnedPlayerItemDequipEvent : UnturnedPlayerDequipEvent
     {
-        public bool IsCancelled { get; set; }
-
-        public UnturnedPlayerItemDequipEvent(UnturnedPlayer player) : base(player)
+        public UnturnedPlayerItemDequipEvent(UnturnedPlayer player, Item item) : base(player, item)
         {
-            
+
         }
     }
 }
