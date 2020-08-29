@@ -22,9 +22,6 @@ namespace OpenMod.Unturned.Events.Players
 
         public override void Subscribe()
         {
-            Provider.onEnemyConnected += OnPlayerConnected;
-            Provider.onEnemyDisconnected += OnPlayerDisconnected;
-
             OnTeleport += Events_OnTeleport;
 
             UseableConsumeable.onPerformingAid += OnPerformingAid;
@@ -32,9 +29,6 @@ namespace OpenMod.Unturned.Events.Players
 
         public override void Unsubscribe()
         {
-            Provider.onEnemyConnected -= OnPlayerConnected;
-            Provider.onEnemyDisconnected -= OnPlayerDisconnected;
-
             OnTeleport -= Events_OnTeleport;
 
             UseableConsumeable.onPerformingAid -= OnPerformingAid;
@@ -48,24 +42,6 @@ namespace OpenMod.Unturned.Events.Players
         public override void UnsubscribePlayer(Player player)
         {
             player.stance.onStanceUpdated -= () => OnStanceUpdated(player);
-        }
-
-        private void OnPlayerConnected(SteamPlayer steamPlayer)
-        {
-            UnturnedPlayer player = GetUnturnedPlayer(steamPlayer);
-
-            UnturnedPlayerConnectEvent @event = new UnturnedPlayerConnectEvent(player);
-
-            Emit(@event);
-        }
-
-        private void OnPlayerDisconnected(SteamPlayer steamPlayer)
-        {
-            UnturnedPlayer player = GetUnturnedPlayer(steamPlayer);
-
-            UnturnedPlayerDisconnectEvent @event = new UnturnedPlayerDisconnectEvent(player);
-
-            Emit(@event);
         }
 
         private void Events_OnTeleport(Player nativePlayer, ref Vector3 position, ref float yaw, out bool cancel)

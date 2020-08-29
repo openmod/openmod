@@ -1,6 +1,6 @@
 ﻿using OpenMod.Unturned.Entities;
 
-namespace OpenMod.Unturned.Events.Players
+namespace OpenMod.Unturned.Events.Players.Connections
 {
     public class UnturnedPlayerConnectEvent : UnturnedPlayerEvent
     {
