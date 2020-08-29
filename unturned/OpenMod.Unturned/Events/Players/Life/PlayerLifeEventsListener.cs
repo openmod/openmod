@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using HarmonyLib;
+﻿using HarmonyLib;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
@@ -7,13 +6,14 @@ using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 using Steamworks;
+using System.Linq;
 using UnityEngine;
 
-namespace OpenMod.Unturned.Events.Players.Damage
+namespace OpenMod.Unturned.Events.Players.Life
 {
-    internal class PlayerDamageEventsListener : UnturnedEventsListener
+    internal class PlayerLifeEventsListener : UnturnedEventsListener
     {
-        public PlayerDamageEventsListener(IOpenModHost openModHost,
+        public PlayerLifeEventsListener(IOpenModHost openModHost,
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {

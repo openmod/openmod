@@ -6,7 +6,7 @@ using Steamworks;
 using System;
 using UnityEngine;
 
-namespace OpenMod.Unturned.Events.Players.Damage
+namespace OpenMod.Unturned.Events.Players.Life
 {
     public class UnturnedPlayerDamageEvent : UnturnedPlayerEvent, IPlayerDamageEvent
     {

@@ -4,7 +4,7 @@ using SDG.Unturned;
 using Steamworks;
 using System.Numerics;
 
-namespace OpenMod.Unturned.Events.Players.Damage
+namespace OpenMod.Unturned.Events.Players.Life
 {
     public class UnturnedPlayerDeathEvent : UnturnedPlayerEvent, IPlayerDeathEvent
     {
