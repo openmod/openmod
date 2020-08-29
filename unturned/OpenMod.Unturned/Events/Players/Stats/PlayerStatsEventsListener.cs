@@ -18,43 +18,47 @@ namespace OpenMod.Unturned.Events.Players.Stats
 
         public override void Subscribe()
         {
-
+            OnBleedingUpdate += Events_OnBleedingUpdate;
+            OnBrokenUpdate += Events_OnBrokenUpdate;
+            OnFoodUpdate += Events_OnFoodUpdate;
+            OnHealthUpdate += Events_OnHealthUpdate;
+            OnVirusUpdate += Events_OnVirusUpdate;
+            OnWaterUpdate += Events_OnWaterUpdate;
         }
 
         public override void Unsubscribe()
         {
-
+            OnBleedingUpdate -= Events_OnBleedingUpdate;
+            OnBrokenUpdate -= Events_OnBrokenUpdate;
+            OnFoodUpdate -= Events_OnFoodUpdate;
+            OnHealthUpdate -= Events_OnHealthUpdate;
+            OnVirusUpdate -= Events_OnVirusUpdate;
+            OnWaterUpdate -= Events_OnWaterUpdate;
         }
 
         public override void SubscribePlayer(Player player)
         {
-            player.life.onBleedingUpdated += isBleeding => OnBleedingUpdated(player, isBleeding);
-            player.life.onBrokenUpdated += isBroken => OnBrokenUpdated(player, isBroken);
-            player.life.onFoodUpdated += food => OnFoodUpdated(player, food);
-            player.life.onHealthUpdated += health => OnHealthUpdated(player, health);
             player.life.onLifeUpdated += isDead => OnLifeUpdated(player, isDead);
+
             player.life.onOxygenUpdated += oxygen => OnOxygenUpdated(player, oxygen);
             player.life.onStaminaUpdated += stamina => OnStaminaUpdated(player, stamina);
             player.life.onTemperatureUpdated += temperature => OnTemperatureUpdated(player, temperature);
-            player.life.onVirusUpdated += virus => OnVirusUpdated(player, virus);
+            player.life.onVirusUpdated += virus => Events_OnVirusUpdate(player, virus);
             player.life.onVisionUpdated += viewing => OnVisionUpdated(player, viewing);
         }
 
         public override void UnsubscribePlayer(Player player)
         {
-            player.life.onBleedingUpdated -= isBleeding => OnBleedingUpdated(player, isBleeding);
-            player.life.onBrokenUpdated -= isBroken => OnBrokenUpdated(player, isBroken);
-            player.life.onFoodUpdated -= food => OnFoodUpdated(player, food);
-            player.life.onHealthUpdated -= health => OnHealthUpdated(player, health);
             player.life.onLifeUpdated -= isDead => OnLifeUpdated(player, isDead);
+
             player.life.onOxygenUpdated -= oxygen => OnOxygenUpdated(player, oxygen);
             player.life.onStaminaUpdated -= stamina => OnStaminaUpdated(player, stamina);
             player.life.onTemperatureUpdated -= temperature => OnTemperatureUpdated(player, temperature);
-            player.life.onVirusUpdated -= virus => OnVirusUpdated(player, virus);
+            player.life.onVirusUpdated -= virus => Events_OnVirusUpdate(player, virus);
             player.life.onVisionUpdated -= viewing => OnVisionUpdated(player, viewing);
         }
 
-        private void OnBleedingUpdated(Player nativePlayer, bool isBleeding)
+        private void Events_OnBleedingUpdate(Player nativePlayer, bool isBleeding)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
@@ -63,7 +67,7 @@ namespace OpenMod.Unturned.Events.Players.Stats
             Emit(@event);
         }
 
-        private void OnBrokenUpdated(Player nativePlayer, bool isBroken)
+        private void Events_OnBrokenUpdate(Player nativePlayer, bool isBroken)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
@@ -72,7 +76,7 @@ namespace OpenMod.Unturned.Events.Players.Stats
             Emit(@event);
         }
 
-        private void OnFoodUpdated(Player nativePlayer, byte food)
+        private void Events_OnFoodUpdate(Player nativePlayer, byte food)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
@@ -81,7 +85,7 @@ namespace OpenMod.Unturned.Events.Players.Stats
             Emit(@event);
         }
 
-        private void OnHealthUpdated(Player nativePlayer, byte health)
+        private void Events_OnHealthUpdate(Player nativePlayer, byte health)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
@@ -126,7 +130,7 @@ namespace OpenMod.Unturned.Events.Players.Stats
             Emit(@event);
         }
 
-        private void OnVirusUpdated(Player nativePlayer, byte virus)
+        private void Events_OnVirusUpdate(Player nativePlayer, byte virus)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
@@ -153,20 +157,185 @@ namespace OpenMod.Unturned.Events.Players.Stats
             Emit(@event);
         }
 
-        private delegate void WaterUpdateHandler(Player player, byte water);
-        private static event WaterUpdateHandler OnWaterUpdate;
+        private delegate void BleedingUpdate(Player player, bool isBleeding);
+        private static event BleedingUpdate OnBleedingUpdate;
 
-        private delegate void FoodUpdateHandler(Player player, byte food);
-        private static event FoodUpdateHandler OnFoodUpdate;
+        private delegate void BrokenUpdate(Player player, bool isBroken);
+        private static event BrokenUpdate OnBrokenUpdate;
+
+        private delegate void FoodUpdate(Player player, byte food);
+        private static event FoodUpdate OnFoodUpdate;
+
+        private delegate void HealthUpdate(Player player, byte health);
+        private static event HealthUpdate OnHealthUpdate;
+
+        private delegate void VirusUpdate(Player player, byte stamina);
+        private static event VirusUpdate OnVirusUpdate;
+
+        private delegate void WaterUpdate(Player player, byte water);
+        private static event WaterUpdate OnWaterUpdate;
+
+        private struct PersistDoDamage
+        {
+            public bool IsBleeding;
+
+            public byte Health;
+
+            public PersistDoDamage(PlayerLife life)
+            {
+                IsBleeding = life.isBleeding;
+                Health = life.health;
+            }
+        }
 
         [HarmonyPatch]
         private class Patches
         {
+            [HarmonyPatch(typeof(PlayerLife), "serverSetBleeding")]
+            [HarmonyPrefix]
+            private static void PreServerSetBleeding(PlayerLife __instance, out bool __state)
+            {
+                __state = __instance.isBleeding;
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "serverSetBleeding")]
+            [HarmonyPostfix]
+            private static void PostServerSetBleeding(PlayerLife __instance, bool __state)
+            {
+                if (__instance.isBleeding != __state)
+                {
+                    OnBleedingUpdate?.Invoke(__instance.player, __instance.isBleeding);
+                }
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "serverSetLegsBroken")]
+            [HarmonyPrefix]
+            private static void PreServerSetLegsBroken(PlayerLife __instance, out bool __state)
+            {
+                __state = __instance.isBroken;
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "serverSetLegsBroken")]
+            [HarmonyPostfix]
+            private static void PostServerSetLegsBroken(PlayerLife __instance, bool __state)
+            {
+                if (__instance.isBroken != __state)
+                {
+                    OnBrokenUpdate?.Invoke(__instance.player, __instance.isBroken);
+                }
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "doDamage")]
+            [HarmonyPrefix]
+            private static void PreDoDamage(PlayerLife __instance, out PersistDoDamage __state)
+            {
+                __state = new PersistDoDamage(__instance);
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "doDamage")]
+            [HarmonyPostfix]
+            private static void PostDoDamage(PlayerLife __instance, PersistDoDamage __state)
+            {
+                if (__instance.isBleeding != __state.IsBleeding)
+                {
+                    OnBleedingUpdate?.Invoke(__instance.player, __instance.isBleeding);
+                }
+
+                if (__instance.health != __state.Health)
+                {
+                    OnHealthUpdate?.Invoke(__instance.player, __instance.health);
+                }
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askEat")]
+            [HarmonyPrefix]
+            private static void PreAskEat(PlayerLife __instance, out byte __state)
+            {
+                __state = __instance.food;
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askEat")]
+            [HarmonyPostfix]
+            private static void PostAskEat(PlayerLife __instance, byte __state)
+            {
+                if (__instance.food != __state)
+                {
+                    OnFoodUpdate?.Invoke(__instance.player, __instance.food);
+                }
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askStarve")]
+            [HarmonyPrefix]
+            private static void PreAskStarve(PlayerLife __instance, out byte __state)
+            {
+                __state = __instance.food;
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askStarve")]
+            [HarmonyPostfix]
+            private static void PostAskStarve(PlayerLife __instance, byte __state)
+            {
+                if (__instance.food != __state)
+                {
+                    OnFoodUpdate?.Invoke(__instance.player, __instance.food);
+                }
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askHeal")]
+            [HarmonyPrefix]
+            private static void PreAskHeal(PlayerLife __instance, out byte __state)
+            {
+                __state = __instance.health;
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askHeal")]
+            [HarmonyPostfix]
+            private static void PostAskHeal(PlayerLife __instance, byte __state)
+            {
+                if (__instance.health != __state)
+                {
+                    OnHealthUpdate?.Invoke(__instance.player, __instance.health);
+                }
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askDisinfect")]
+            [HarmonyPrefix]
+            private static void PreAskDisinfect(PlayerLife __instance, out byte __state)
+            {
+                __state = __instance.virus;
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askDisinfect")]
+            [HarmonyPostfix]
+            private static void PostAskDisinfect(PlayerLife __instance, byte __state)
+            {
+                if (__instance.virus != __state)
+                {
+                    OnVirusUpdate?.Invoke(__instance.player, __instance.virus);
+                }
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askInfect")]
+            [HarmonyPrefix]
+            private static void PreAskInfect(PlayerLife __instance, out byte __state)
+            {
+                __state = __instance.virus;
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askInfect")]
+            [HarmonyPostfix]
+            private static void PostAskInfect(PlayerLife __instance, byte __state)
+            {
+                if (__instance.virus != __state)
+                {
+                    OnVirusUpdate?.Invoke(__instance.player, __instance.virus);
+                }
+            }
+
             [HarmonyPatch(typeof(PlayerLife), "askDrink")]
             [HarmonyPrefix]
             private static void PreAskDrink(PlayerLife __instance, out byte __state)
             {
-                System.Console.WriteLine("PreAsk" + __instance.water);
                 __state = __instance.water;
             }
 
@@ -174,7 +343,23 @@ namespace OpenMod.Unturned.Events.Players.Stats
             [HarmonyPostfix]
             private static void PostAskDrink(PlayerLife __instance, byte __state)
             {
-                System.Console.WriteLine("PostAsk " + __instance.water);
+                if (__instance.water != __state)
+                {
+                    OnWaterUpdate?.Invoke(__instance.player, __instance.water);
+                }
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askDehydrate")]
+            [HarmonyPrefix]
+            private static void PreAskDehydrate(PlayerLife __instance, out byte __state)
+            {
+                __state = __instance.water;
+            }
+
+            [HarmonyPatch(typeof(PlayerLife), "askDehydrate")]
+            [HarmonyPostfix]
+            private static void PostAskDehydrate(PlayerLife __instance, byte __state)
+            {
                 if (__instance.water != __state)
                 {
                     OnWaterUpdate?.Invoke(__instance.player, __instance.water);

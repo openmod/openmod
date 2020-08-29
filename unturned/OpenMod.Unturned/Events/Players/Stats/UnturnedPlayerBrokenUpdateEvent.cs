@@ -2,9 +2,9 @@
 
 namespace OpenMod.Unturned.Events.Players.Stats
 {
-    public class UnturnedPlayerBrokenUpdateEvent : UnturnedPlayerEvent
+    public class UnturnedPlayerBrokenUpdateEvent : UnturnedPlayerStatUpdateEvent
     {
-        public bool IsBroken { get; set; }
+        public bool IsBroken { get; }
 
         public UnturnedPlayerBrokenUpdateEvent(UnturnedPlayer player, bool isBroken) : base(player)
         {

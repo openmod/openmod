@@ -3,9 +3,9 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Events.Players.Stats
 {
-    public class UnturnedPlayerTemperatureUpdateEvent : UnturnedPlayerEvent
+    public class UnturnedPlayerTemperatureUpdateEvent : UnturnedPlayerStatUpdateEvent
     {
-        public EPlayerTemperature Temperature { get; set; }
+        public EPlayerTemperature Temperature { get; }
 
         public UnturnedPlayerTemperatureUpdateEvent(UnturnedPlayer player, EPlayerTemperature temperature) : base(player)
         {

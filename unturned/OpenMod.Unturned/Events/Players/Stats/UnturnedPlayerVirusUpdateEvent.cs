@@ -2,9 +2,9 @@
 
 namespace OpenMod.Unturned.Events.Players.Stats
 {
-    public class UnturnedPlayerVirusUpdateEvent : UnturnedPlayerEvent
+    public class UnturnedPlayerVirusUpdateEvent : UnturnedPlayerStatUpdateEvent
     {
-        public byte Virus { get; set; }
+        public byte Virus { get; }
 
         public UnturnedPlayerVirusUpdateEvent(UnturnedPlayer player, byte virus) : base(player)
         {

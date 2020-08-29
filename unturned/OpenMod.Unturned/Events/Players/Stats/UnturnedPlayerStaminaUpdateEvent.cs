@@ -2,9 +2,9 @@
 
 namespace OpenMod.Unturned.Events.Players.Stats
 {
-    public class UnturnedPlayerStaminaUpdateEvent : UnturnedPlayerEvent
+    public class UnturnedPlayerStaminaUpdateEvent : UnturnedPlayerStatUpdateEvent
     {
-        public byte Stamina { get; set; }
+        public byte Stamina { get; }
 
         public UnturnedPlayerStaminaUpdateEvent(UnturnedPlayer player, byte stamina) : base(player)
         {

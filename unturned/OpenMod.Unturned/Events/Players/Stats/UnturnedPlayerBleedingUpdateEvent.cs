@@ -2,9 +2,9 @@
 
 namespace OpenMod.Unturned.Events.Players.Stats
 {
-    public class UnturnedPlayerBleedingUpdateEvent : UnturnedPlayerEvent
+    public class UnturnedPlayerBleedingUpdateEvent : UnturnedPlayerStatUpdateEvent
     {
-        public bool IsBleeding { get; set; }
+        public bool IsBleeding { get; }
 
         public UnturnedPlayerBleedingUpdateEvent(UnturnedPlayer player, bool isBleeding) : base(player)
         {

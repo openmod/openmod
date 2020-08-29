@@ -2,9 +2,9 @@
 
 namespace OpenMod.Unturned.Events.Players.Stats
 {
-    public class UnturnedPlayerLifeUpdateEvent : UnturnedPlayerEvent
+    public class UnturnedPlayerLifeUpdateEvent : UnturnedPlayerStatUpdateEvent
     {
-        public bool IsDead { get; set; }
+        public bool IsDead { get; }
 
         public UnturnedPlayerLifeUpdateEvent(UnturnedPlayer player, bool isDead) : base(player)
         {

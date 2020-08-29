@@ -2,9 +2,9 @@
 
 namespace OpenMod.Unturned.Events.Players.Stats
 {
-    public class UnturnedPlayerWaterUpdateEvent : UnturnedPlayerEvent
+    public class UnturnedPlayerWaterUpdateEvent : UnturnedPlayerStatUpdateEvent
     {
-        public byte Water { get; set; }
+        public byte Water { get; }
 
         public UnturnedPlayerWaterUpdateEvent(UnturnedPlayer player, byte water) : base(player)
         {

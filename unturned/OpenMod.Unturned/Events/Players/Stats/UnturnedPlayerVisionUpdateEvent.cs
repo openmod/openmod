@@ -2,9 +2,9 @@
 
 namespace OpenMod.Unturned.Events.Players.Stats
 {
-    public class UnturnedPlayerVisionUpdateEvent : UnturnedPlayerEvent
+    public class UnturnedPlayerVisionUpdateEvent : UnturnedPlayerStatUpdateEvent
     {
-        public bool IsViewing { get; set; }
+        public bool IsViewing { get; }
 
         public UnturnedPlayerVisionUpdateEvent(UnturnedPlayer player, bool isViewing) : base(player)
         {

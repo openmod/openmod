@@ -2,9 +2,9 @@
 
 namespace OpenMod.Unturned.Events.Players.Stats
 {
-    public class UnturnedPlayerFoodUpdateEvent : UnturnedPlayerEvent
+    public class UnturnedPlayerFoodUpdateEvent : UnturnedPlayerStatUpdateEvent
     {
-        public byte Food { get; set; }
+        public byte Food { get; }
 
         public UnturnedPlayerFoodUpdateEvent(UnturnedPlayer player, byte food) : base(player)
         {
