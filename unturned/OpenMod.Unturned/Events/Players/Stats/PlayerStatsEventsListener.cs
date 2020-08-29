@@ -39,7 +39,6 @@ namespace OpenMod.Unturned.Events.Players.Stats
         public override void SubscribePlayer(Player player)
         {
             player.life.onLifeUpdated += isDead => OnLifeUpdated(player, isDead);
-
             player.life.onOxygenUpdated += oxygen => OnOxygenUpdated(player, oxygen);
             player.life.onStaminaUpdated += stamina => OnStaminaUpdated(player, stamina);
             player.life.onTemperatureUpdated += temperature => OnTemperatureUpdated(player, temperature);
@@ -50,7 +49,6 @@ namespace OpenMod.Unturned.Events.Players.Stats
         public override void UnsubscribePlayer(Player player)
         {
             player.life.onLifeUpdated -= isDead => OnLifeUpdated(player, isDead);
-
             player.life.onOxygenUpdated -= oxygen => OnOxygenUpdated(player, oxygen);
             player.life.onStaminaUpdated -= stamina => OnStaminaUpdated(player, stamina);
             player.life.onTemperatureUpdated -= temperature => OnTemperatureUpdated(player, temperature);
