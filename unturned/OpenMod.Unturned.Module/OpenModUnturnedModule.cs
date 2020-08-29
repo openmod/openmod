@@ -30,7 +30,8 @@ namespace OpenMod.Unturned.Module
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void OnInitialize()
         {
-            string openModDirectory = Path.GetFullPath($"Servers/{Dedicator.serverID}/OpenMod/");
+            Environment.CurrentDirectory = ReadWrite.PATH;
+            var openModDirectory = Path.Combine(ReadWrite.PATH, $"Servers/{Dedicator.serverID}/OpenMod/");
             if (!Directory.Exists(openModDirectory))
             {
                 Directory.CreateDirectory(openModDirectory);
