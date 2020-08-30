@@ -1,6 +1,6 @@
 ﻿using OpenMod.Unturned.Entities;
 
-namespace OpenMod.Unturned.Events.Players
+namespace OpenMod.Unturned.Events.Players.Movement
 {
     public class UnturnedPlayerStanceUpdateEvent : UnturnedPlayerEvent
     {

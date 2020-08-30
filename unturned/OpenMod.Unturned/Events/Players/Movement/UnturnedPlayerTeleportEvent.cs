@@ -2,7 +2,7 @@
 using OpenMod.Unturned.Entities;
 using UnityEngine;
 
-namespace OpenMod.Unturned.Events.Players
+namespace OpenMod.Unturned.Events.Players.Movement
 {
     public class UnturnedPlayerTeleportEvent : UnturnedPlayerEvent, ICancellableEvent
     {

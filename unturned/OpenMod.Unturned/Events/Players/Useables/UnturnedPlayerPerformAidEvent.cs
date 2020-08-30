@@ -2,7 +2,7 @@
 using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 
-namespace OpenMod.Unturned.Events.Players
+namespace OpenMod.Unturned.Events.Players.Useables
 {
     public class UnturnedPlayerPerformAidEvent : UnturnedPlayerEvent, ICancellableEvent
     {

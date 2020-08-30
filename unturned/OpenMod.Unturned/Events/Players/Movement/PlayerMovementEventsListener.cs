@@ -2,18 +2,15 @@
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
-using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Unturned.Entities;
 using SDG.Unturned;
-using Steamworks;
-using System.Linq;
 using UnityEngine;
 
-namespace OpenMod.Unturned.Events.Players
+namespace OpenMod.Unturned.Events.Players.Movement
 {
-    internal class PlayerEventsListener : UnturnedPlayerEventsListener
+    internal class PlayerMovementEventsListener : UnturnedPlayerEventsListener
     {
-        public PlayerEventsListener(IOpenModHost openModHost,
+        public PlayerMovementEventsListener(IOpenModHost openModHost,
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
@@ -23,15 +20,11 @@ namespace OpenMod.Unturned.Events.Players
         public override void Subscribe()
         {
             OnTeleport += Events_OnTeleport;
-
-            UseableConsumeable.onPerformingAid += OnPerformingAid;
         }
 
         public override void Unsubscribe()
         {
             OnTeleport -= Events_OnTeleport;
-
-            UseableConsumeable.onPerformingAid -= OnPerformingAid;
         }
 
         public override void SubscribePlayer(Player player)
@@ -55,18 +48,6 @@ namespace OpenMod.Unturned.Events.Players
             position = @event.Position;
             yaw = @event.Yaw;
             cancel = @event.IsCancelled;
-        }
-
-        private void OnPerformingAid(Player nativeInstigator, Player nativeTarget, ItemConsumeableAsset asset, ref bool shouldAllow)
-        {
-            UnturnedPlayer instigator = GetUnturnedPlayer(nativeInstigator);
-            UnturnedPlayer target = GetUnturnedPlayer(nativeTarget);
-
-            UnturnedPlayerPerformAidEvent @event = new UnturnedPlayerPerformAidEvent(instigator, target, asset);
-
-            Emit(@event);
-
-            shouldAllow = !@event.IsCancelled;
         }
 
         private void OnStanceUpdated(Player nativePlayer)
