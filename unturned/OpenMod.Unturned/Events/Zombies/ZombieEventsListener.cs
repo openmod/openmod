@@ -2,6 +2,7 @@
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
+using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 using System.Linq;
 using System.Reflection;
@@ -20,6 +21,8 @@ namespace OpenMod.Unturned.Events.Zombies
 
         public override void Subscribe()
         {
+            OnZombieAlertPlayer += Events_OnZombieAlertPlayer;
+            OnZombieAlertPosition += Events_OnZombieAlertPosition;
             OnZombieDamage += Events_OnZombieDamage;
             OnZombieDead += Events_OnZombieDead;
             OnZombieSpawn += Events_OnZombieSpawn;
@@ -27,12 +30,38 @@ namespace OpenMod.Unturned.Events.Zombies
 
         public override void Unsubscribe()
         {
+            OnZombieAlertPlayer -= Events_OnZombieAlertPlayer;
+            OnZombieAlertPosition -= Events_OnZombieAlertPosition;
             OnZombieDamage -= Events_OnZombieDamage;
+            OnZombieDead -= Events_OnZombieDead;
             OnZombieSpawn -= Events_OnZombieSpawn;
         }
 
         private readonly FieldInfo ZombieHealth =
             typeof(Zombie).GetField("health", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        private void Events_OnZombieAlertPlayer(Zombie zombie, ref Player nativePlayer, out bool cancel)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedZombieAlertPlayerEvent @event = new UnturnedZombieAlertPlayerEvent(zombie, player);
+
+            Emit(@event);
+
+            nativePlayer = @event.Player?.Player;
+            cancel = @event.IsCancelled;
+        }
+
+        private void Events_OnZombieAlertPosition(Zombie zombie, ref Vector3 position, ref bool isStartling, out bool cancel)
+        {
+            UnturnedZombieAlertPositionEvent @event = new UnturnedZombieAlertPositionEvent(zombie, position, isStartling);
+
+            Emit(@event);
+
+            position = @event.Position;
+            isStartling = @event.IsStartling;
+            cancel = @event.IsCancelled;
+        }
 
         private void Events_OnZombieDamage(Zombie zombie, ref ushort damageAmount, ref Vector3 ragdoll,
             ref ERagdollEffect ragdollEffect, ref bool trackKill,
@@ -76,6 +105,13 @@ namespace OpenMod.Unturned.Events.Zombies
             Emit(@event);
         }
 
+        private delegate void ZombieAlertPlayer(Zombie zombie, ref Player player, out bool cancel);
+        private static event ZombieAlertPlayer OnZombieAlertPlayer;
+
+        private delegate void ZombieAlertPosition(Zombie zombie, ref Vector3 position, ref bool isStartling,
+            out bool cancel);
+        private static event ZombieAlertPosition OnZombieAlertPosition;
+
         private delegate void ZombieDamage(Zombie zombie, ref ushort damageAmount, ref Vector3 ragdoll,
             ref ERagdollEffect ragdollEffect,
             ref bool trackKill, ref bool dropLoot, ref EZombieStunOverride stunOverride, out bool cancel);
@@ -90,6 +126,33 @@ namespace OpenMod.Unturned.Events.Zombies
         [HarmonyPatch]
         private class ZombiePatches
         {
+            [HarmonyPatch(typeof(Zombie), "alert", typeof(Player))]
+            [HarmonyPrefix]
+            private static bool AlertPlayer(Zombie __instance, ref Player newPlayer, Player ___player)
+            {
+                if (__instance.isDead || newPlayer == ___player) return true;
+
+                bool cancel = false;
+
+                OnZombieAlertPlayer?.Invoke(__instance, ref newPlayer, out cancel);
+
+                return !cancel;
+            }
+
+            [HarmonyPatch(typeof(Zombie), "alert", typeof(Vector3), typeof(bool))]
+            [HarmonyPrefix]
+            private static bool AlertPosition(Zombie __instance, ref Vector3 newPosition, ref bool isStartling,
+                Player ___player)
+            {
+                if (__instance.isDead || ___player != null) return true;
+
+                bool cancel = false;
+
+                OnZombieAlertPosition?.Invoke(__instance, ref newPosition, ref isStartling, out cancel);
+
+                return !cancel;
+            }
+
             [HarmonyPatch(typeof(Zombie), "askDamage")]
             [HarmonyPrefix]
             private static bool AskDamage(Zombie __instance, ref ushort amount, ref Vector3 newRagdoll,
@@ -104,6 +167,13 @@ namespace OpenMod.Unturned.Events.Zombies
                     ref trackKill, ref dropLoot, ref stunOverride, out cancel);
 
                 return !cancel;
+            }
+
+            [HarmonyPatch(typeof(Zombie), "tellDead")]
+            [HarmonyPostfix]
+            private static void TellDead(Zombie __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
+            {
+                OnZombieDead?.Invoke(__instance, newRagdoll, ragdollEffect);
             }
 
             [HarmonyPatch(typeof(Zombie), "tellAlive")]
@@ -123,13 +193,6 @@ namespace OpenMod.Unturned.Events.Zombies
                 {
                     OnZombieSpawn?.Invoke(zombie);
                 }
-            }
-
-            [HarmonyPatch(typeof(Zombie), "tellDead")]
-            [HarmonyPostfix]
-            private static void TellDead(Zombie __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
-            {
-                OnZombieDead?.Invoke(__instance, newRagdoll, ragdollEffect);
             }
         }
     }
