@@ -2,9 +2,9 @@
 
 namespace OpenMod.Unturned.Events.Zombies
 {
-    public class UnturnedZombieSpawnEvent : UnturnedZombieEvent
+    public abstract class UnturnedZombieSpawnEvent : UnturnedZombieEvent
     {
-        public UnturnedZombieSpawnEvent(Zombie zombie) : base(zombie)
+        protected UnturnedZombieSpawnEvent(Zombie zombie) : base(zombie)
         {
 
         }

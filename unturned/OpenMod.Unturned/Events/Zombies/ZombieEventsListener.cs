@@ -25,7 +25,8 @@ namespace OpenMod.Unturned.Events.Zombies
             OnZombieAlertPosition += Events_OnZombieAlertPosition;
             OnZombieDamage += Events_OnZombieDamage;
             OnZombieDead += Events_OnZombieDead;
-            OnZombieSpawn += Events_OnZombieSpawn;
+            OnZombieAdded += Events_OnZombieAdded;
+            OnZombieRevive += Events_OnZombieRevive;
         }
 
         public override void Unsubscribe()
@@ -34,7 +35,8 @@ namespace OpenMod.Unturned.Events.Zombies
             OnZombieAlertPosition -= Events_OnZombieAlertPosition;
             OnZombieDamage -= Events_OnZombieDamage;
             OnZombieDead -= Events_OnZombieDead;
-            OnZombieSpawn -= Events_OnZombieSpawn;
+            OnZombieAdded -= Events_OnZombieAdded;
+            OnZombieRevive -= Events_OnZombieRevive;
         }
 
         private readonly FieldInfo ZombieHealth =
@@ -98,9 +100,16 @@ namespace OpenMod.Unturned.Events.Zombies
             Emit(@event);
         }
 
-        private void Events_OnZombieSpawn(Zombie zombie)
+        private void Events_OnZombieAdded(Zombie zombie)
         {
-            UnturnedZombieSpawnEvent @event = new UnturnedZombieSpawnEvent(zombie);
+            UnturnedZombieAddedEvent @event = new UnturnedZombieAddedEvent(zombie);
+
+            Emit(@event);
+        }
+
+        private void Events_OnZombieRevive(Zombie zombie)
+        {
+            UnturnedZombieReviveEvent @event = new UnturnedZombieReviveEvent(zombie);
 
             Emit(@event);
         }
@@ -118,7 +127,8 @@ namespace OpenMod.Unturned.Events.Zombies
         private static event ZombieDamage OnZombieDamage;
 
         private delegate void ZombieSpawn(Zombie zombie);
-        private static event ZombieSpawn OnZombieSpawn;
+        private static event ZombieSpawn OnZombieAdded;
+        private static event ZombieSpawn OnZombieRevive;
 
         private delegate void ZombieDead(Zombie zombie, Vector3 ragdoll, ERagdollEffect ragdollEffect);
         private static event ZombieDead OnZombieDead;
@@ -180,7 +190,7 @@ namespace OpenMod.Unturned.Events.Zombies
             [HarmonyPostfix]
             private static void TellAlive(Zombie __instance)
             {
-                OnZombieSpawn?.Invoke(__instance);
+                OnZombieRevive?.Invoke(__instance);
             }
 
             [HarmonyPatch(typeof(ZombieManager), "addZombie")]
@@ -191,7 +201,7 @@ namespace OpenMod.Unturned.Events.Zombies
 
                 if (zombie != null)
                 {
-                    OnZombieSpawn?.Invoke(zombie);
+                    OnZombieAdded?.Invoke(zombie);
                 }
             }
         }
