@@ -1,5 +1,4 @@
 ﻿using OpenMod.Unturned.Entities;
-using SDG.Unturned;
 
 namespace OpenMod.Unturned.Events.Zombies
 {
@@ -7,7 +6,7 @@ namespace OpenMod.Unturned.Events.Zombies
     {
         public UnturnedPlayer Player { get; set; }
 
-        public UnturnedZombieAlertPlayerEvent(Zombie zombie, UnturnedPlayer player) : base(zombie)
+        public UnturnedZombieAlertPlayerEvent(UnturnedZombie zombie, UnturnedPlayer player) : base(zombie)
         {
             Player = player;
         }

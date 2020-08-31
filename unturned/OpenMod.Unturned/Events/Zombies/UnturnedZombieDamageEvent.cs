@@ -1,4 +1,5 @@
 ﻿using OpenMod.API.Eventing;
+using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 using UnityEngine;
 
@@ -20,7 +21,7 @@ namespace OpenMod.Unturned.Events.Zombies
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedZombieDamageEvent(Zombie zombie, ushort damageAmount, Vector3 ragdoll, ERagdollEffect ragdollEffect, bool trackKill, bool dropLoot, EZombieStunOverride stunOverride) : base(zombie)
+        public UnturnedZombieDamageEvent(UnturnedZombie zombie, ushort damageAmount, Vector3 ragdoll, ERagdollEffect ragdollEffect, bool trackKill, bool dropLoot, EZombieStunOverride stunOverride) : base(zombie)
         {
             DamageAmount = damageAmount;
             Ragdoll = ragdoll;

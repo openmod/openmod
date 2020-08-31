@@ -1,5 +1,5 @@
 ﻿using OpenMod.API.Eventing;
-using SDG.Unturned;
+using OpenMod.Unturned.Entities;
 
 namespace OpenMod.Unturned.Events.Zombies
 {
@@ -7,7 +7,7 @@ namespace OpenMod.Unturned.Events.Zombies
     {
         public bool IsCancelled { get; set; }
 
-        protected UnturnedZombieAlertEvent(Zombie zombie) : base(zombie)
+        protected UnturnedZombieAlertEvent(UnturnedZombie zombie) : base(zombie)
         {
         }
     }

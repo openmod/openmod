@@ -1,4 +1,4 @@
-﻿using SDG.Unturned;
+﻿using OpenMod.Unturned.Entities;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Events.Zombies
@@ -9,7 +9,7 @@ namespace OpenMod.Unturned.Events.Zombies
 
         public bool IsStartling { get; set; }
 
-        public UnturnedZombieAlertPositionEvent(Zombie zombie, Vector3 position, bool isStartling) : base(zombie)
+        public UnturnedZombieAlertPositionEvent(UnturnedZombie zombie, Vector3 position, bool isStartling) : base(zombie)
         {
             Position = position;
             IsStartling = isStartling;

@@ -1,15 +1,15 @@
 ﻿using OpenMod.Core.Eventing;
-using SDG.Unturned;
+using OpenMod.Unturned.Entities;
 
 namespace OpenMod.Unturned.Events.Zombies
 {
     public abstract class UnturnedZombieEvent : Event
     {
-        protected UnturnedZombieEvent(Zombie zombie)
+        protected UnturnedZombieEvent(UnturnedZombie zombie)
         {
             Zombie = zombie;
         }
 
-        public Zombie Zombie { get; }
+        public UnturnedZombie Zombie { get; }
     }
 }

@@ -1,10 +1,10 @@
-﻿using SDG.Unturned;
+﻿using OpenMod.Unturned.Entities;
 
 namespace OpenMod.Unturned.Events.Zombies
 {
     public abstract class UnturnedZombieSpawnEvent : UnturnedZombieEvent
     {
-        protected UnturnedZombieSpawnEvent(Zombie zombie) : base(zombie)
+        protected UnturnedZombieSpawnEvent(UnturnedZombie zombie) : base(zombie)
         {
 
         }

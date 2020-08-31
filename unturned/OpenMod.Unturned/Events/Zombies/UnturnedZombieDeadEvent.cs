@@ -1,4 +1,5 @@
-﻿using SDG.Unturned;
+﻿using OpenMod.Unturned.Entities;
+using SDG.Unturned;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Events.Zombies
@@ -9,7 +10,7 @@ namespace OpenMod.Unturned.Events.Zombies
 
         public ERagdollEffect RagdollEffect { get; }
 
-        public UnturnedZombieDeadEvent(Zombie zombie, Vector3 ragdoll, ERagdollEffect ragdollEffect) : base(zombie)
+        public UnturnedZombieDeadEvent(UnturnedZombie zombie, Vector3 ragdoll, ERagdollEffect ragdollEffect) : base(zombie)
         {
             Ragdoll = ragdoll;
             RagdollEffect = ragdollEffect;

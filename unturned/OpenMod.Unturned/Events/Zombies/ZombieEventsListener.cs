@@ -39,11 +39,10 @@ namespace OpenMod.Unturned.Events.Zombies
             OnZombieRevive -= Events_OnZombieRevive;
         }
 
-        private readonly FieldInfo ZombieHealth =
-            typeof(Zombie).GetField("health", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        private void Events_OnZombieAlertPlayer(Zombie zombie, ref Player nativePlayer, out bool cancel)
+        private void Events_OnZombieAlertPlayer(Zombie nativeZombie, ref Player nativePlayer, out bool cancel)
         {
+            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
             UnturnedZombieAlertPlayerEvent @event = new UnturnedZombieAlertPlayerEvent(zombie, player);
@@ -54,8 +53,10 @@ namespace OpenMod.Unturned.Events.Zombies
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnZombieAlertPosition(Zombie zombie, ref Vector3 position, ref bool isStartling, out bool cancel)
+        private void Events_OnZombieAlertPosition(Zombie nativeZombie, ref Vector3 position, ref bool isStartling, out bool cancel)
         {
+            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+
             UnturnedZombieAlertPositionEvent @event = new UnturnedZombieAlertPositionEvent(zombie, position, isStartling);
 
             Emit(@event);
@@ -65,13 +66,15 @@ namespace OpenMod.Unturned.Events.Zombies
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnZombieDamage(Zombie zombie, ref ushort damageAmount, ref Vector3 ragdoll,
+        private void Events_OnZombieDamage(Zombie nativeZombie, ref ushort damageAmount, ref Vector3 ragdoll,
             ref ERagdollEffect ragdollEffect, ref bool trackKill,
             ref bool dropLoot, ref EZombieStunOverride stunOverride, out bool cancel)
         {
+            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+
             UnturnedZombieDamageEvent @event;
 
-            if (damageAmount >= (ushort) ZombieHealth.GetValue(zombie))
+            if (damageAmount >= zombie.Health)
             {
                 @event = new UnturnedZombieDyingEvent(zombie, damageAmount, ragdoll, ragdollEffect, trackKill, dropLoot,
                     stunOverride);
@@ -93,44 +96,50 @@ namespace OpenMod.Unturned.Events.Zombies
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnZombieDead(Zombie zombie, Vector3 ragdoll, ERagdollEffect ragdollEffect)
+        private void Events_OnZombieDead(Zombie nativeZombie, Vector3 ragdoll, ERagdollEffect ragdollEffect)
         {
+            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+
             UnturnedZombieDeadEvent @event = new UnturnedZombieDeadEvent(zombie, ragdoll, ragdollEffect);
 
             Emit(@event);
         }
 
-        private void Events_OnZombieAdded(Zombie zombie)
+        private void Events_OnZombieAdded(Zombie nativeZombie)
         {
+            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+
             UnturnedZombieAddedEvent @event = new UnturnedZombieAddedEvent(zombie);
 
             Emit(@event);
         }
 
-        private void Events_OnZombieRevive(Zombie zombie)
+        private void Events_OnZombieRevive(Zombie nativeZombie)
         {
+            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+
             UnturnedZombieReviveEvent @event = new UnturnedZombieReviveEvent(zombie);
 
             Emit(@event);
         }
 
-        private delegate void ZombieAlertPlayer(Zombie zombie, ref Player player, out bool cancel);
+        private delegate void ZombieAlertPlayer(Zombie nativeZombie, ref Player player, out bool cancel);
         private static event ZombieAlertPlayer OnZombieAlertPlayer;
 
-        private delegate void ZombieAlertPosition(Zombie zombie, ref Vector3 position, ref bool isStartling,
+        private delegate void ZombieAlertPosition(Zombie nativeZombie, ref Vector3 position, ref bool isStartling,
             out bool cancel);
         private static event ZombieAlertPosition OnZombieAlertPosition;
 
-        private delegate void ZombieDamage(Zombie zombie, ref ushort damageAmount, ref Vector3 ragdoll,
+        private delegate void ZombieDamage(Zombie nativeZombie, ref ushort damageAmount, ref Vector3 ragdoll,
             ref ERagdollEffect ragdollEffect,
             ref bool trackKill, ref bool dropLoot, ref EZombieStunOverride stunOverride, out bool cancel);
         private static event ZombieDamage OnZombieDamage;
 
-        private delegate void ZombieSpawn(Zombie zombie);
+        private delegate void ZombieSpawn(Zombie nativeZombie);
         private static event ZombieSpawn OnZombieAdded;
         private static event ZombieSpawn OnZombieRevive;
 
-        private delegate void ZombieDead(Zombie zombie, Vector3 ragdoll, ERagdollEffect ragdollEffect);
+        private delegate void ZombieDead(Zombie nativeZombie, Vector3 ragdoll, ERagdollEffect ragdollEffect);
         private static event ZombieDead OnZombieDead;
 
         [HarmonyPatch]
