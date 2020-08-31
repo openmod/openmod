@@ -59,7 +59,9 @@ namespace OpenMod.Core.Permissions
 
             var userData = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
             if (userData == null)
-                return roles;
+            {
+                return GetAutoAssignRoles().ToList();
+            }
 
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var roleId in userData.Roles)
