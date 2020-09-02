@@ -1,9 +1,10 @@
 ﻿using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
+using OpenMod.Unturned.Events;
 using SDG.Unturned;
 
-namespace OpenMod.Unturned.Events.Environment
+namespace OpenMod.Unturned.Environment.Events
 {
     internal class EnvironmentEventsListener : UnturnedEventsListener
     {

@@ -1,7 +1,7 @@
 ﻿using OpenMod.Core.Eventing;
 using SDG.Unturned;
 
-namespace OpenMod.Unturned.Events.Environment
+namespace OpenMod.Unturned.Environment.Events
 {
     public class UnturnedWeatherUpdateEvent : Event
     {

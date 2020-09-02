@@ -1,6 +1,6 @@
 ﻿using OpenMod.Core.Eventing;
 
-namespace OpenMod.Unturned.Events.Environment
+namespace OpenMod.Unturned.Environment.Events
 {
     public class UnturnedDayNightUpdateEvent : Event
     {
