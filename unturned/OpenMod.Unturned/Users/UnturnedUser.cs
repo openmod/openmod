@@ -52,7 +52,7 @@ namespace OpenMod.Unturned.Users
         {
             async UniTask PrintMessageTask()
             {
-                var lines = message.Replace(Environment.NewLine, "\n").Split('\n');
+                var lines = message.Replace(System.Environment.NewLine, "\n").Split('\n');
                 if (lines.Length == 0)
                 {
                     return;
