@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Extensions.Games.Abstractions.Entities;
+using OpenMod.Unturned.Animals;
+using OpenMod.Unturned.Players;
+using OpenMod.Unturned.Zombies;
 using SDG.Unturned;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Entities
 {

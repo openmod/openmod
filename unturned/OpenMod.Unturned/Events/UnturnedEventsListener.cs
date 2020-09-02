@@ -2,10 +2,8 @@
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
-using OpenMod.Core.Users;
-using OpenMod.Unturned.Entities;
+using OpenMod.Unturned.Players;
 using SDG.Unturned;
-using System;
 
 namespace OpenMod.Unturned.Events
 {

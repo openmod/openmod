@@ -1,6 +1,6 @@
 ﻿using OpenMod.Core.Eventing;
 using OpenMod.Extensions.Games.Abstractions.Players;
-using OpenMod.Unturned.Entities;
+using OpenMod.Unturned.Players;
 
 namespace OpenMod.Unturned.Events
 {
