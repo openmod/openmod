@@ -1,12 +1,11 @@
-﻿using System.Numerics;
-using System.Reflection;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
-using OpenMod.UnityEngine.Extensions;
 using OpenMod.UnityEngine.Transforms;
 using SDG.Unturned;
+using System.Numerics;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Zombies
 {

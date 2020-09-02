@@ -6,7 +6,7 @@ namespace OpenMod.Unturned.Players.Events.Bans
     public class UnturnedPlayerCheckBanEvent : Event
     {
         public SteamPlayerID SteamPlayerId { get; }
-        
+
         public uint RemoteIP { get; }
 
         public bool IsBanned { get; set; }

@@ -1,6 +1,4 @@
-﻿using OpenMod.Unturned.Entities;
-
-namespace OpenMod.Unturned.Players.Events.Life
+﻿namespace OpenMod.Unturned.Players.Events.Life
 {
     public class UnturnedPlayerReviveEvent : UnturnedPlayerSpawnEvent
     {

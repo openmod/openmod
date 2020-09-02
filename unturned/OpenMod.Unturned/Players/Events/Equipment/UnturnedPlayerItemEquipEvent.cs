@@ -1,5 +1,4 @@
-﻿using OpenMod.Unturned.Entities;
-using SDG.Unturned;
+﻿using SDG.Unturned;
 
 namespace OpenMod.Unturned.Players.Events.Equipment
 {

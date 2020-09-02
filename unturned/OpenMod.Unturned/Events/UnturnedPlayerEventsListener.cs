@@ -11,7 +11,7 @@ namespace OpenMod.Unturned.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-            
+
         }
 
         public abstract void SubscribePlayer(Player player);

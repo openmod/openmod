@@ -1,7 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Items;
@@ -15,6 +12,9 @@ using OpenMod.Unturned.Items;
 using OpenMod.Unturned.Vehicles;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Globalization;
+using System.Threading.Tasks;
 using IHasInventory = OpenMod.Extensions.Games.Abstractions.Entities.IHasInventory;
 using Vector3 = System.Numerics.Vector3;
 
@@ -117,7 +117,7 @@ namespace OpenMod.Unturned.Players
             async UniTask<bool> TeleportationTask()
             {
                 await UniTask.SwitchToMainThread();
-                
+
                 if (Player.transform.position == position.ToUnityVector() &&
                     Player.transform.rotation.eulerAngles == rotation.ToUnityVector())
                 {

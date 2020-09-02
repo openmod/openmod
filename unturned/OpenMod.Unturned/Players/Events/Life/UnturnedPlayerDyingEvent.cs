@@ -1,5 +1,4 @@
 ﻿using OpenMod.Extensions.Games.Abstractions.Entities;
-using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 using Steamworks;
 using UnityEngine;

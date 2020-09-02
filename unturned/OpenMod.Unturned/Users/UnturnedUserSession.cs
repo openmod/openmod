@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
-using OpenMod.Unturned.Entities;
 using SDG.Unturned;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
 {

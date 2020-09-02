@@ -1,12 +1,12 @@
-﻿using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Extensions.Games.Abstractions.Items;
 using OpenMod.UnityEngine.Extensions;
 using SDG.Unturned;
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 using UVector3 = UnityEngine.Vector3;
 using Vector3 = System.Numerics.Vector3;
@@ -103,7 +103,7 @@ namespace OpenMod.Unturned.Items
                 {
                     player.equipment.tryEquip(page, itemJar.x, itemJar.y);
                 }
-            
+
                 return true;
             }
 

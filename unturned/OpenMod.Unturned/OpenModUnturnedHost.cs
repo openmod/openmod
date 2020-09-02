@@ -195,7 +195,7 @@ namespace OpenMod.Unturned
 
             m_UnturnedEventsActivator.Dispose();
         }
-        
+
         private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
         {
             shouldExecuteCommand = false;

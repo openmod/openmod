@@ -1,5 +1,4 @@
-﻿using OpenMod.Unturned.Entities;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace OpenMod.Unturned.Animals.Events
 {

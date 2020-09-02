@@ -1,5 +1,4 @@
-﻿using OpenMod.Unturned.Entities;
-using OpenMod.Unturned.Players.Events.Equipment;
+﻿using OpenMod.Unturned.Players.Events.Equipment;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Players.Events.Clothing

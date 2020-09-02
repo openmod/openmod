@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenMod.API;
-using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
 using SDG.Unturned;
 using System;

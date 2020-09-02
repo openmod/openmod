@@ -1,5 +1,4 @@
-﻿using OpenMod.Unturned.Entities;
-using OpenMod.Unturned.Players.Events.Life;
+﻿using OpenMod.Unturned.Players.Events.Life;
 
 namespace OpenMod.Unturned.Players.Events.Connections
 {
@@ -7,7 +6,7 @@ namespace OpenMod.Unturned.Players.Events.Connections
     {
         public UnturnedPlayerConnectEvent(UnturnedPlayer player) : base(player)
         {
-            
+
         }
     }
 }

@@ -35,12 +35,12 @@ namespace OpenMod.Unturned.Players.Events.Life
         public bool CanCauseBleeding { get; set; }
 
         public bool IsCancelled { get; set; }
-        
-        public UnturnedPlayerDamageEvent(UnturnedPlayer player, byte amount, 
-            EDeathCause cause, ELimb limb, 
+
+        public UnturnedPlayerDamageEvent(UnturnedPlayer player, byte amount,
+            EDeathCause cause, ELimb limb,
             CSteamID killer, IDamageSource source,
-            bool trackKill, 
-            Vector3 ragdoll, ERagdollEffect ragdollEffect, 
+            bool trackKill,
+            Vector3 ragdoll, ERagdollEffect ragdollEffect,
             bool canCauseBleeding) : base(player)
         {
             DamageAmount = amount;

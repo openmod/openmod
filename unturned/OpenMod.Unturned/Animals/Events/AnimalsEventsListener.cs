@@ -65,7 +65,7 @@ namespace OpenMod.Unturned.Animals.Events
 
             UnturnedAnimalDamageEvent @event;
 
-            if (amount >= animal.Health) 
+            if (amount >= animal.Health)
             {
                 @event = new UnturnedAnimalDyingEvent(animal, amount, ragdoll, ragdollEffect, trackKill, dropLoot);
             }

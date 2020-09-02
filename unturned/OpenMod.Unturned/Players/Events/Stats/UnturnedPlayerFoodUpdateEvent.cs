@@ -1,6 +1,4 @@
-﻿using OpenMod.Unturned.Entities;
-
-namespace OpenMod.Unturned.Players.Events.Stats
+﻿namespace OpenMod.Unturned.Players.Events.Stats
 {
     public class UnturnedPlayerFoodUpdateEvent : UnturnedPlayerStatUpdateEvent
     {

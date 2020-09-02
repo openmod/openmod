@@ -22,7 +22,7 @@ namespace OpenMod.Unturned.Players
         }
 
         public string Name { get; }
-        
+
         public string EntityAssetId { get; }
 
         public string EntityType { get; }

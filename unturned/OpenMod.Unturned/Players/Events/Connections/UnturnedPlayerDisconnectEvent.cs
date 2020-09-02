@@ -6,7 +6,7 @@ namespace OpenMod.Unturned.Players.Events.Connections
     {
         public UnturnedPlayerDisconnectEvent(UnturnedPlayer player) : base(player)
         {
-            
+
         }
     }
 }

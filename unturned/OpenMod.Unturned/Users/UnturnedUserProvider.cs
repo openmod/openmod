@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Prioritization;
@@ -13,6 +9,10 @@ using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Users.Events;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
 {

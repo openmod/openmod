@@ -1,5 +1,4 @@
 ﻿using OpenMod.Core.Eventing;
-using OpenMod.Unturned.Entities;
 
 namespace OpenMod.Unturned.Animals.Events
 {

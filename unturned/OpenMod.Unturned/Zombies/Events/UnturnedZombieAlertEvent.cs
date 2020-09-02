@@ -1,5 +1,4 @@
 ﻿using OpenMod.API.Eventing;
-using OpenMod.Unturned.Entities;
 
 namespace OpenMod.Unturned.Zombies.Events
 {

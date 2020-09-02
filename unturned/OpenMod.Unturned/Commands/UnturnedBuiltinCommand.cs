@@ -1,14 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using OpenMod.API;
-using OpenMod.Core.Commands;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Users;
-using OpenMod.Unturned.Entities;
 using OpenMod.Unturned.Users;
 using Steamworks;
+using System;
 
 namespace OpenMod.Unturned.Commands
 {
@@ -31,7 +27,7 @@ namespace OpenMod.Unturned.Commands
 
             CSteamID id = Context.Actor.Type switch
             {
-                KnownActorTypes.Player => ((UnturnedUser) Context.Actor).SteamId,
+                KnownActorTypes.Player => ((UnturnedUser)Context.Actor).SteamId,
                 KnownActorTypes.Console => CSteamID.Nil,
                 _ => throw new NotSupportedException(
                     $"Can not execute unturned commands from actor: {Context.Actor.GetType()}")

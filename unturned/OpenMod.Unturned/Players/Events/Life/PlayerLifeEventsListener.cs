@@ -44,7 +44,7 @@ namespace OpenMod.Unturned.Players.Events.Life
         {
             cancel = false;
 
-            if (amount == 0 || nativePlayer.life.isDead) return; 
+            if (amount == 0 || nativePlayer.life.isDead) return;
 
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 

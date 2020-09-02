@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Users;
 using SDG.Unturned;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 namespace OpenMod.Unturned.Commands
 {
@@ -35,7 +35,7 @@ namespace OpenMod.Unturned.Commands
         public string Description { get; }
         public string Syntax { get; }
         public string Id { get; }
-        public Priority Priority { get;} = Priority.Lowest;
+        public Priority Priority { get; } = Priority.Lowest;
         public string ParentId { get; } = null;
 
         public bool SupportsActor(ICommandActor actor)

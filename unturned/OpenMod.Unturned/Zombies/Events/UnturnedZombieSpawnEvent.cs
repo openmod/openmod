@@ -1,6 +1,4 @@
-﻿using OpenMod.Unturned.Entities;
-
-namespace OpenMod.Unturned.Zombies.Events
+﻿namespace OpenMod.Unturned.Zombies.Events
 {
     public abstract class UnturnedZombieSpawnEvent : UnturnedZombieEvent
     {

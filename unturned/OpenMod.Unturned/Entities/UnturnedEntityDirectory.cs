@@ -33,7 +33,7 @@ namespace OpenMod.Unturned.Entities
 
             assets.Add(UnturnedPlayerAsset.Instance);
             assets.Add(UnturnedZombieAsset.Instance);
-            
+
             return assets;
         }
     }

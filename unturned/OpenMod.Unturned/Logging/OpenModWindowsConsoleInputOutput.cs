@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using OpenMod.API;
+using System;
 
 namespace OpenMod.Unturned.Logging
 {
