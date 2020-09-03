@@ -5,6 +5,8 @@ namespace OpenMod.Unturned.Players.Events.Clothing
 {
     public abstract class UnturnedPlayerClothingDequipEvent : UnturnedPlayerItemDequipEvent
     {
+        public abstract ClothingType Type { get; }
+
         protected UnturnedPlayerClothingDequipEvent(UnturnedPlayer player, Item item) : base(player, item)
         {
 

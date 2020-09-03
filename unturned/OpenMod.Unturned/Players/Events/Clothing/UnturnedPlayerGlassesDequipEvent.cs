@@ -4,6 +4,8 @@ namespace OpenMod.Unturned.Players.Events.Clothing
 {
     public class UnturnedPlayerGlassesDequipEvent : UnturnedPlayerClothingDequipEvent
     {
+        public override ClothingType Type => ClothingType.Glasses;
+
         public UnturnedPlayerGlassesDequipEvent(UnturnedPlayer player, Item item) : base(player, item)
         {
 
