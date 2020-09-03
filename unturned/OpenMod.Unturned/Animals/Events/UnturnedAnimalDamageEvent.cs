@@ -1,6 +1,6 @@
 ﻿using OpenMod.API.Eventing;
 using SDG.Unturned;
-using UnityEngine;
+using System.Numerics;
 
 namespace OpenMod.Unturned.Animals.Events
 {

@@ -2,6 +2,7 @@
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
+using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
@@ -70,12 +71,12 @@ namespace OpenMod.Unturned.Vehicles.Events
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerExitVehicleEvent @event = new UnturnedPlayerExitVehicleEvent(player, vehicle, pendingLocation, pendingYaw);
+            UnturnedPlayerExitVehicleEvent @event = new UnturnedPlayerExitVehicleEvent(player, vehicle, pendingLocation.ToSystemVector(), pendingYaw);
 
             Emit(@event);
 
             shouldAllow = !@event.IsCancelled;
-            pendingLocation = @event.PendingLocation;
+            pendingLocation = @event.PendingLocation.ToUnityVector();
             pendingYaw = @event.PendingYaw;
         }
 
@@ -95,13 +96,13 @@ namespace OpenMod.Unturned.Vehicles.Events
         {
             UnturnedPlayer instigator = GetUnturnedPlayer(instigatingPlayer);
 
-            UnturnedVehicleCarjackEvent @event = new UnturnedVehicleCarjackEvent(vehicle, instigator, force, torque);
+            UnturnedVehicleCarjackEvent @event = new UnturnedVehicleCarjackEvent(vehicle, instigator, force.ToSystemVector(), torque.ToSystemVector());
 
             Emit(@event);
 
             allow = !@event.IsCancelled;
-            force = @event.Force;
-            torque = @event.Torque;
+            force = @event.Force.ToUnityVector();
+            torque = @event.Torque.ToUnityVector();
         }
 
         private void OnVehicleLockpicked(InteractableVehicle vehicle, Player instigatingPlayer, ref bool allow)

@@ -2,6 +2,7 @@
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
+using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
@@ -67,17 +68,17 @@ namespace OpenMod.Unturned.Animals.Events
 
             if (amount >= animal.Health)
             {
-                @event = new UnturnedAnimalDyingEvent(animal, amount, ragdoll, ragdollEffect, trackKill, dropLoot);
+                @event = new UnturnedAnimalDyingEvent(animal, amount, ragdoll.ToSystemVector(), ragdollEffect, trackKill, dropLoot);
             }
             else
             {
-                @event = new UnturnedAnimalDamageEvent(animal, amount, ragdoll, ragdollEffect, trackKill, dropLoot);
+                @event = new UnturnedAnimalDamageEvent(animal, amount, ragdoll.ToSystemVector(), ragdollEffect, trackKill, dropLoot);
             }
 
             Emit(@event);
 
             amount = @event.DamageAmount;
-            ragdoll = @event.Ragdoll;
+            ragdoll = @event.Ragdoll.ToUnityVector();
             ragdollEffect = @event.RagdollEffect;
             trackKill = @event.TrackKill;
             dropLoot = @event.DropLoot;
@@ -88,7 +89,7 @@ namespace OpenMod.Unturned.Animals.Events
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
-            UnturnedAnimalDeadEvent @event = new UnturnedAnimalDeadEvent(animal, ragdoll, ragdollEffect);
+            UnturnedAnimalDeadEvent @event = new UnturnedAnimalDeadEvent(animal, ragdoll.ToSystemVector(), ragdollEffect);
 
             Emit(@event);
         }
@@ -97,11 +98,11 @@ namespace OpenMod.Unturned.Animals.Events
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
-            UnturnedAnimalFleeEvent @event = new UnturnedAnimalFleeEvent(animal, direction, sendToPack);
+            UnturnedAnimalFleeEvent @event = new UnturnedAnimalFleeEvent(animal, direction.ToSystemVector(), sendToPack);
 
             Emit(@event);
 
-            direction = @event.Direction;
+            direction = @event.Direction.ToUnityVector();
             sendToPack = @event.SendToPack;
             cancel = @event.IsCancelled;
         }
@@ -110,11 +111,11 @@ namespace OpenMod.Unturned.Animals.Events
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
-            UnturnedAnimalAttackPointEvent @event = new UnturnedAnimalAttackPointEvent(animal, point, sendToPack);
+            UnturnedAnimalAttackPointEvent @event = new UnturnedAnimalAttackPointEvent(animal, point.ToSystemVector(), sendToPack);
 
             Emit(@event);
 
-            point = @event.Point;
+            point = @event.Point.ToUnityVector();
             sendToPack = @event.SendToPack;
             cancel = @event.IsCancelled;
         }

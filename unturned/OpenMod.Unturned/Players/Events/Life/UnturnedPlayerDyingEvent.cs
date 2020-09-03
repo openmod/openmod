@@ -1,7 +1,7 @@
 ﻿using OpenMod.Extensions.Games.Abstractions.Entities;
 using SDG.Unturned;
 using Steamworks;
-using UnityEngine;
+using System.Numerics;
 
 namespace OpenMod.Unturned.Players.Events.Life
 {

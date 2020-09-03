@@ -5,6 +5,7 @@ using SDG.Unturned;
 using Steamworks;
 using System;
 using UnityEngine;
+using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players.Events.Life
 {

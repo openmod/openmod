@@ -2,6 +2,7 @@
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
+using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using UnityEngine;
@@ -41,11 +42,11 @@ namespace OpenMod.Unturned.Players.Events.Movement
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerTeleportEvent @event = new UnturnedPlayerTeleportEvent(player, position, yaw);
+            UnturnedPlayerTeleportEvent @event = new UnturnedPlayerTeleportEvent(player, position.ToSystemVector(), yaw);
 
             Emit(@event);
 
-            position = @event.Position;
+            position = @event.Position.ToUnityVector();
             yaw = @event.Yaw;
             cancel = @event.IsCancelled;
         }

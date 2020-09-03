@@ -7,6 +7,7 @@ using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
 using System.Linq;
+using OpenMod.UnityEngine.Extensions;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Players.Events.Life
@@ -64,12 +65,12 @@ namespace OpenMod.Unturned.Players.Events.Life
             if (amount >= nativePlayer.life.health)
             {
                 @event = new UnturnedPlayerDyingEvent(player, amount, cause, limb, killer,
-                    source, trackKill, ragdoll, ragdollEffect, canCauseBleeding);
+                    source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding);
             }
             else
             {
                 @event = new UnturnedPlayerDamageEvent(player, amount, cause, limb, killer,
-                    source, trackKill, ragdoll, ragdollEffect, canCauseBleeding);
+                    source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding);
             }
 
             Emit(@event);
@@ -79,7 +80,7 @@ namespace OpenMod.Unturned.Players.Events.Life
             limb = @event.Limb;
             killer = @event.Killer;
             trackKill = @event.TrackKill;
-            ragdoll = @event.Ragdoll;
+            ragdoll = @event.Ragdoll.ToUnityVector();
             ragdollEffect = @event.RagdollEffect;
             canCauseBleeding = @event.CanCauseBleeding;
             cancel = @event.IsCancelled;
