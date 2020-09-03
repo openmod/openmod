@@ -14,7 +14,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedVehicleDamageTireEvent(InteractableVehicle vehicle, CSteamID instigator, int tireIndex, EDamageOrigin damageOrigin) : base(vehicle)
+        public UnturnedVehicleDamageTireEvent(UnturnedVehicle vehicle, CSteamID instigator, int tireIndex, EDamageOrigin damageOrigin) : base(vehicle)
         {
             Instigator = instigator;
             TireIndex = tireIndex;

@@ -2,6 +2,7 @@
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
+using OpenMod.Unturned.Items;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Players.Events.Equipment
@@ -41,7 +42,7 @@ namespace OpenMod.Unturned.Players.Events.Equipment
         {
             UnturnedPlayer player = GetUnturnedPlayer(equipment.player);
 
-            UnturnedPlayerItemEquipEvent @event = new UnturnedPlayerItemEquipEvent(player, jar.item);
+            UnturnedPlayerItemEquipEvent @event = new UnturnedPlayerItemEquipEvent(player, new UnturnedItem(jar.item));
 
             Emit(@event);
 
@@ -62,7 +63,7 @@ namespace OpenMod.Unturned.Players.Events.Equipment
 
             if (jar?.item == null) return;
 
-            UnturnedPlayerItemDequipEvent @event = new UnturnedPlayerItemDequipEvent(player, jar.item);
+            UnturnedPlayerItemDequipEvent @event = new UnturnedPlayerItemDequipEvent(player, new UnturnedItem(jar.item));
 
             Emit(@event);
 

@@ -1,5 +1,4 @@
 ﻿using OpenMod.API.Eventing;
-using SDG.Unturned;
 using Steamworks;
 
 namespace OpenMod.Unturned.Vehicles.Events
@@ -12,7 +11,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedVehicleRepairEvent(InteractableVehicle vehicle, CSteamID instigator, ushort pendingTotalHealing) : base(vehicle)
+        public UnturnedVehicleRepairEvent(UnturnedVehicle vehicle, CSteamID instigator, ushort pendingTotalHealing) : base(vehicle)
         {
             Instigator = instigator;
             PendingTotalHealing = pendingTotalHealing;

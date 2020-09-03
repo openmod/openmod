@@ -1,6 +1,5 @@
 ﻿using OpenMod.API.Eventing;
 using OpenMod.Unturned.Players;
-using SDG.Unturned;
 
 namespace OpenMod.Unturned.Vehicles.Events
 {
@@ -12,7 +11,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedVehicleSiphonEvent(InteractableVehicle vehicle, UnturnedPlayer instigator, ushort desiredAmount) : base(vehicle)
+        public UnturnedVehicleSiphonEvent(UnturnedVehicle vehicle, UnturnedPlayer instigator, ushort desiredAmount) : base(vehicle)
         {
             Instigator = instigator;
             DesiredAmount = desiredAmount;

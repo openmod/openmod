@@ -16,7 +16,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedVehicleDamageEvent(InteractableVehicle vehicle, CSteamID instigator, ushort pendingTotalDamage, EDamageOrigin damageOrigin, bool canRepair) : base(vehicle)
+        public UnturnedVehicleDamageEvent(UnturnedVehicle vehicle, CSteamID instigator, ushort pendingTotalDamage, EDamageOrigin damageOrigin, bool canRepair) : base(vehicle)
         {
             Instigator = instigator;
             PendingTotalDamage = pendingTotalDamage;

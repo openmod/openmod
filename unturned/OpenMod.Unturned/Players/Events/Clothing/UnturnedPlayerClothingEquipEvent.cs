@@ -1,5 +1,5 @@
-﻿using OpenMod.Unturned.Players.Events.Equipment;
-using SDG.Unturned;
+﻿using OpenMod.Unturned.Items;
+using OpenMod.Unturned.Players.Events.Equipment;
 
 namespace OpenMod.Unturned.Players.Events.Clothing
 {
@@ -7,7 +7,7 @@ namespace OpenMod.Unturned.Players.Events.Clothing
     {
         public abstract ClothingType Type { get; }
 
-        protected UnturnedPlayerClothingEquipEvent(UnturnedPlayer player, Item item) : base(player, item)
+        protected UnturnedPlayerClothingEquipEvent(UnturnedPlayer player, UnturnedItem item) : base(player, item)
         {
 
         }

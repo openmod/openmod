@@ -1,13 +1,15 @@
 ﻿using OpenMod.API.Eventing;
+using OpenMod.Extensions.Games.Abstractions.Vehicles;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Players;
-using SDG.Unturned;
 
 namespace OpenMod.Unturned.Vehicles.Events
 {
-    public class UnturnedPlayerSwapSeatEvent : UnturnedPlayerEvent, ICancellableEvent
+    public class UnturnedPlayerSwapSeatEvent : UnturnedPlayerEvent, ICancellableEvent, IVehicleEvent
     {
-        public InteractableVehicle Vehicle { get; }
+        public UnturnedVehicle Vehicle { get; }
+
+        IVehicle IVehicleEvent.Vehicle => Vehicle;
 
         public byte FromSeatIndex { get; }
 
@@ -15,7 +17,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedPlayerSwapSeatEvent(UnturnedPlayer player, InteractableVehicle vehicle, byte fromSeatIndex, byte toSeatIndex) : base(player)
+        public UnturnedPlayerSwapSeatEvent(UnturnedPlayer player, UnturnedVehicle vehicle, byte fromSeatIndex, byte toSeatIndex) : base(player)
         {
             Vehicle = vehicle;
             FromSeatIndex = fromSeatIndex;

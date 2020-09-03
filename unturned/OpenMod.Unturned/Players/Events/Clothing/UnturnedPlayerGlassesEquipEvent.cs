@@ -1,4 +1,4 @@
-﻿using SDG.Unturned;
+﻿using OpenMod.Unturned.Items;
 
 namespace OpenMod.Unturned.Players.Events.Clothing
 {
@@ -6,7 +6,7 @@ namespace OpenMod.Unturned.Players.Events.Clothing
     {
         public override ClothingType Type => ClothingType.Glasses;
 
-        public UnturnedPlayerGlassesEquipEvent(UnturnedPlayer player, Item item) : base(player, item)
+        public UnturnedPlayerGlassesEquipEvent(UnturnedPlayer player, UnturnedItem item) : base(player, item)
         {
 
         }

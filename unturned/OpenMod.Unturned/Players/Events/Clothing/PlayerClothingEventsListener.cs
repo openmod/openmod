@@ -3,6 +3,7 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
+using OpenMod.Unturned.Items;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Players.Events.Clothing
@@ -50,13 +51,13 @@ namespace OpenMod.Unturned.Players.Events.Clothing
 
                 Item item = new Item(c.backpack, 1, c.backpackQuality, c.backpackState);
 
-                @event = new UnturnedPlayerBackpackDequipEvent(player, item);
+                @event = new UnturnedPlayerBackpackDequipEvent(player, new UnturnedItem(item));
             }
             else
             {
                 Item item = new Item(id, 1, quality, state);
 
-                @event = new UnturnedPlayerBackpackEquipEvent(player, item);
+                @event = new UnturnedPlayerBackpackEquipEvent(player, new UnturnedItem(item));
             }
 
             Emit(@event);
@@ -76,13 +77,13 @@ namespace OpenMod.Unturned.Players.Events.Clothing
 
                 Item item = new Item(c.glasses, 1, c.glassesQuality, c.glassesState);
 
-                @event = new UnturnedPlayerGlassesDequipEvent(player, item);
+                @event = new UnturnedPlayerGlassesDequipEvent(player, new UnturnedItem(item));
             }
             else
             {
                 Item item = new Item(id, 1, quality, state);
 
-                @event = new UnturnedPlayerGlassesEquipEvent(player, item);
+                @event = new UnturnedPlayerGlassesEquipEvent(player, new UnturnedItem(item));
             }
 
             Emit(@event);
@@ -102,13 +103,13 @@ namespace OpenMod.Unturned.Players.Events.Clothing
 
                 Item item = new Item(c.hat, 1, c.hatQuality, c.hatState);
 
-                @event = new UnturnedPlayerHatDequipEvent(player, item);
+                @event = new UnturnedPlayerHatDequipEvent(player, new UnturnedItem(item));
             }
             else
             {
                 Item item = new Item(id, 1, quality, state);
 
-                @event = new UnturnedPlayerHatEquipEvent(player, item);
+                @event = new UnturnedPlayerHatEquipEvent(player, new UnturnedItem(item));
             }
 
             Emit(@event);
@@ -128,13 +129,13 @@ namespace OpenMod.Unturned.Players.Events.Clothing
 
                 Item item = new Item(c.mask, 1, c.maskQuality, c.maskState);
 
-                @event = new UnturnedPlayerMaskDequipEvent(player, item);
+                @event = new UnturnedPlayerMaskDequipEvent(player, new UnturnedItem(item));
             }
             else
             {
                 Item item = new Item(id, 1, quality, state);
 
-                @event = new UnturnedPlayerMaskEquipEvent(player, item);
+                @event = new UnturnedPlayerMaskEquipEvent(player, new UnturnedItem(item));
             }
 
             Emit(@event);
@@ -154,13 +155,13 @@ namespace OpenMod.Unturned.Players.Events.Clothing
 
                 Item item = new Item(c.pants, 1, c.pantsQuality, c.pantsState);
 
-                @event = new UnturnedPlayerPantsDequipEvent(player, item);
+                @event = new UnturnedPlayerPantsDequipEvent(player, new UnturnedItem(item));
             }
             else
             {
                 Item item = new Item(id, 1, quality, state);
 
-                @event = new UnturnedPlayerPantsEquipEvent(player, item);
+                @event = new UnturnedPlayerPantsEquipEvent(player, new UnturnedItem(item));
             }
 
             Emit(@event);
@@ -180,13 +181,13 @@ namespace OpenMod.Unturned.Players.Events.Clothing
 
                 Item item = new Item(c.shirt, 1, c.shirtQuality, c.shirtState);
 
-                @event = new UnturnedPlayerShirtDequipEvent(player, item);
+                @event = new UnturnedPlayerShirtDequipEvent(player, new UnturnedItem(item));
             }
             else
             {
                 Item item = new Item(id, 1, quality, state);
 
-                @event = new UnturnedPlayerShirtEquipEvent(player, item);
+                @event = new UnturnedPlayerShirtEquipEvent(player, new UnturnedItem(item));
             }
 
             Emit(@event);
@@ -206,13 +207,13 @@ namespace OpenMod.Unturned.Players.Events.Clothing
 
                 Item item = new Item(c.vest, 1, c.vestQuality, c.vestState);
 
-                @event = new UnturnedPlayerVestDequipEvent(player, item);
+                @event = new UnturnedPlayerVestDequipEvent(player, new UnturnedItem(item));
             }
             else
             {
                 Item item = new Item(id, 1, quality, state);
 
-                @event = new UnturnedPlayerVestEquipEvent(player, item);
+                @event = new UnturnedPlayerVestEquipEvent(player, new UnturnedItem(item));
             }
 
             Emit(@event);

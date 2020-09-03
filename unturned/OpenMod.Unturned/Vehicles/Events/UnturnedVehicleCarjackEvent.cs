@@ -1,6 +1,5 @@
 ﻿using OpenMod.API.Eventing;
 using OpenMod.Unturned.Players;
-using SDG.Unturned;
 using System.Numerics;
 
 namespace OpenMod.Unturned.Vehicles.Events
@@ -15,7 +14,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedVehicleCarjackEvent(InteractableVehicle vehicle, UnturnedPlayer instigator, Vector3 force, Vector3 torque) : base(vehicle)
+        public UnturnedVehicleCarjackEvent(UnturnedVehicle vehicle, UnturnedPlayer instigator, Vector3 force, Vector3 torque) : base(vehicle)
         {
             Instigator = instigator;
             Force = force;

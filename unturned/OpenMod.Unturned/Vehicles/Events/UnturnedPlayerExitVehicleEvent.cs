@@ -2,16 +2,15 @@
 using OpenMod.Extensions.Games.Abstractions.Vehicles;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Players;
-using SDG.Unturned;
 using System.Numerics;
 
 namespace OpenMod.Unturned.Vehicles.Events
 {
     public class UnturnedPlayerExitVehicleEvent : UnturnedPlayerEvent, IPlayerExitVehicleEvent
     {
-        public InteractableVehicle Vehicle { get; }
+        public UnturnedVehicle Vehicle { get; }
 
-        IVehicle IVehicleEvent.Vehicle => new UnturnedVehicle(Vehicle);
+        IVehicle IVehicleEvent.Vehicle => Vehicle;
 
         public Vector3 PendingLocation { get; set; }
 
@@ -19,7 +18,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedPlayerExitVehicleEvent(UnturnedPlayer player, InteractableVehicle vehicle, Vector3 pendingLocation, float pendingYaw) : base(player)
+        public UnturnedPlayerExitVehicleEvent(UnturnedPlayer player, UnturnedVehicle vehicle, Vector3 pendingLocation, float pendingYaw) : base(player)
         {
             Vehicle = vehicle;
             PendingLocation = pendingLocation;

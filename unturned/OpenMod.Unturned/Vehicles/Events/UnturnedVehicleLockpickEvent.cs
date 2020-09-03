@@ -1,6 +1,5 @@
 ﻿using OpenMod.API.Eventing;
 using OpenMod.Unturned.Players;
-using SDG.Unturned;
 
 namespace OpenMod.Unturned.Vehicles.Events
 {
@@ -10,7 +9,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedVehicleLockpickEvent(InteractableVehicle vehicle, UnturnedPlayer instigator) : base(vehicle)
+        public UnturnedVehicleLockpickEvent(UnturnedVehicle vehicle, UnturnedPlayer instigator) : base(vehicle)
         {
             Instigator = instigator;
         }

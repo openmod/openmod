@@ -1,5 +1,4 @@
 ﻿using OpenMod.API.Eventing;
-using SDG.Unturned;
 
 namespace OpenMod.Unturned.Vehicles.Events
 {
@@ -7,7 +6,7 @@ namespace OpenMod.Unturned.Vehicles.Events
     {
         public bool IsCancelled { get; set; }
 
-        public UnturnedVehicleExplodeEvent(InteractableVehicle vehicle) : base(vehicle)
+        public UnturnedVehicleExplodeEvent(UnturnedVehicle vehicle) : base(vehicle)
         {
 
         }

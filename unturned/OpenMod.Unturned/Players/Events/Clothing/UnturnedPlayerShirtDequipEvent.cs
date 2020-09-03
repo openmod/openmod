@@ -1,4 +1,4 @@
-﻿using SDG.Unturned;
+﻿using OpenMod.Unturned.Items;
 
 namespace OpenMod.Unturned.Players.Events.Clothing
 {
@@ -6,7 +6,7 @@ namespace OpenMod.Unturned.Players.Events.Clothing
     {
         public override ClothingType Type => ClothingType.Shirt;
 
-        public UnturnedPlayerShirtDequipEvent(UnturnedPlayer player, Item item) : base(player, item)
+        public UnturnedPlayerShirtDequipEvent(UnturnedPlayer player, UnturnedItem item) : base(player, item)
         {
 
         }

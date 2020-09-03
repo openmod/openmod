@@ -60,7 +60,7 @@ namespace OpenMod.Unturned.Vehicles.Events
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerEnterVehicleEvent @event = new UnturnedPlayerEnterVehicleEvent(player, vehicle);
+            UnturnedPlayerEnterVehicleEvent @event = new UnturnedPlayerEnterVehicleEvent(player, new UnturnedVehicle(vehicle));
 
             Emit(@event);
 
@@ -71,7 +71,7 @@ namespace OpenMod.Unturned.Vehicles.Events
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerExitVehicleEvent @event = new UnturnedPlayerExitVehicleEvent(player, vehicle, pendingLocation.ToSystemVector(), pendingYaw);
+            UnturnedPlayerExitVehicleEvent @event = new UnturnedPlayerExitVehicleEvent(player, new UnturnedVehicle(vehicle), pendingLocation.ToSystemVector(), pendingYaw);
 
             Emit(@event);
 
@@ -84,7 +84,7 @@ namespace OpenMod.Unturned.Vehicles.Events
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerSwapSeatEvent @event = new UnturnedPlayerSwapSeatEvent(player, vehicle, fromSeatIndex, toSeatIndex);
+            UnturnedPlayerSwapSeatEvent @event = new UnturnedPlayerSwapSeatEvent(player, new UnturnedVehicle(vehicle), fromSeatIndex, toSeatIndex);
 
             Emit(@event);
 
@@ -96,7 +96,7 @@ namespace OpenMod.Unturned.Vehicles.Events
         {
             UnturnedPlayer instigator = GetUnturnedPlayer(instigatingPlayer);
 
-            UnturnedVehicleCarjackEvent @event = new UnturnedVehicleCarjackEvent(vehicle, instigator, force.ToSystemVector(), torque.ToSystemVector());
+            UnturnedVehicleCarjackEvent @event = new UnturnedVehicleCarjackEvent(new UnturnedVehicle(vehicle), instigator, force.ToSystemVector(), torque.ToSystemVector());
 
             Emit(@event);
 
@@ -109,7 +109,7 @@ namespace OpenMod.Unturned.Vehicles.Events
         {
             UnturnedPlayer instigator = GetUnturnedPlayer(instigatingPlayer);
 
-            UnturnedVehicleLockpickEvent @event = new UnturnedVehicleLockpickEvent(vehicle, instigator);
+            UnturnedVehicleLockpickEvent @event = new UnturnedVehicleLockpickEvent(new UnturnedVehicle(vehicle), instigator);
 
             Emit(@event);
 
@@ -120,7 +120,7 @@ namespace OpenMod.Unturned.Vehicles.Events
         {
             UnturnedPlayer instigator = GetUnturnedPlayer(instigatingPlayer);
 
-            UnturnedVehicleSiphonEvent @event = new UnturnedVehicleSiphonEvent(vehicle, instigator, desiredAmount);
+            UnturnedVehicleSiphonEvent @event = new UnturnedVehicleSiphonEvent(new UnturnedVehicle(vehicle), instigator, desiredAmount);
 
             Emit(@event);
 
@@ -130,7 +130,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void OnRepairVehicleRequested(CSteamID instigatorSteamID, InteractableVehicle vehicle, ref ushort pendingTotalHealing, ref bool shouldAllow)
         {
-            UnturnedVehicleRepairEvent @event = new UnturnedVehicleRepairEvent(vehicle, instigatorSteamID, pendingTotalHealing);
+            UnturnedVehicleRepairEvent @event = new UnturnedVehicleRepairEvent(new UnturnedVehicle(vehicle), instigatorSteamID, pendingTotalHealing);
 
             Emit(@event);
 
@@ -140,7 +140,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void OnDamageVehicleRequested(CSteamID instigatorSteamID, InteractableVehicle vehicle, ref ushort pendingTotalDamage, ref bool canRepair, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
-            UnturnedVehicleDamageEvent @event = new UnturnedVehicleDamageEvent(vehicle, instigatorSteamID, pendingTotalDamage, damageOrigin, canRepair);
+            UnturnedVehicleDamageEvent @event = new UnturnedVehicleDamageEvent(new UnturnedVehicle(vehicle), instigatorSteamID, pendingTotalDamage, damageOrigin, canRepair);
 
             Emit(@event);
 
@@ -151,7 +151,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void OnDamageTireRequested(CSteamID instigatorSteamID, InteractableVehicle vehicle, int tireIndex, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
-            UnturnedVehicleDamageTireEvent @event = new UnturnedVehicleDamageTireEvent(vehicle, instigatorSteamID, tireIndex, damageOrigin);
+            UnturnedVehicleDamageTireEvent @event = new UnturnedVehicleDamageTireEvent(new UnturnedVehicle(vehicle), instigatorSteamID, tireIndex, damageOrigin);
 
             Emit(@event);
 
@@ -160,7 +160,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void Events_OnVehicleExplode(InteractableVehicle vehicle, out bool cancel)
         {
-            UnturnedVehicleExplodeEvent @event = new UnturnedVehicleExplodeEvent(vehicle);
+            UnturnedVehicleExplodeEvent @event = new UnturnedVehicleExplodeEvent(new UnturnedVehicle(vehicle));
 
             Emit(@event);
 
@@ -169,7 +169,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void Events_OnVehicleSpawn(InteractableVehicle vehicle)
         {
-            UnturnedVehicleSpawnEvent @event = new UnturnedVehicleSpawnEvent(vehicle);
+            UnturnedVehicleSpawnEvent @event = new UnturnedVehicleSpawnEvent(new UnturnedVehicle(vehicle));
 
             Emit(@event);
         }
