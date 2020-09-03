@@ -26,11 +26,24 @@ namespace OpenMod.Unturned.Building.Events
 
             OnBarricadeDeployed += Events_OnBarricadeDeployed;
             OnStructureDeployed += Events_OnStructureDeployed;
+
+            BarricadeManager.onSalvageBarricadeRequested += OnSalvageBarricadeRequested;
+            StructureManager.onSalvageStructureRequested += OnSalvageStructureRequested;
+
+            OnBarricadeDestroyed += Events_OnBarricadeDestroyed;
+            OnStructureDestroyed += Events_OnStructureDestroyed;
         }
 
         public override void Unsubscribe()
         {
+            BarricadeManager.onDamageBarricadeRequested -= OnDamageBarricadeRequested;
+            StructureManager.onDamageStructureRequested -= OnDamageStructureRequested;
 
+            OnBarricadeDeployed -= Events_OnBarricadeDeployed;
+            OnStructureDeployed -= Events_OnStructureDeployed;
+
+            BarricadeManager.onSalvageBarricadeRequested -= OnSalvageBarricadeRequested;
+            StructureManager.onSalvageStructureRequested -= OnSalvageStructureRequested;
         }
 
         private void OnDamageBarricadeRequested(CSteamID instigatorSteamID, Transform barricadeTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
@@ -109,11 +122,59 @@ namespace OpenMod.Unturned.Building.Events
             Emit(@event);
         }
 
+        private void OnSalvageBarricadeRequested(CSteamID steamID, byte x, byte y, ushort plant, ushort index, ref bool shouldAllow)
+        {
+            BarricadeData data = BarricadeManager.regions[x, y].barricades[index];
+            BarricadeDrop drop = BarricadeManager.regions[x, y].drops[index];
+
+            UnturnedBarricadeSalvageEvent @event =
+                new UnturnedBarricadeSalvageEvent(new UnturnedBarricadeBuildable(data, drop));
+
+            Emit(@event);
+
+            shouldAllow = !@event.IsCancelled;
+        }
+
+        private void OnSalvageStructureRequested(CSteamID steamID, byte x, byte y, ushort index, ref bool shouldAllow)
+        {
+            StructureData data = StructureManager.regions[x, y].structures[index];
+            StructureDrop drop = StructureManager.regions[x, y].drops[index];
+
+            UnturnedStructureSalvageEvent @event =
+                new UnturnedStructureSalvageEvent(new UnturnedStructureBuildable(data, drop));
+
+            Emit(@event);
+
+            shouldAllow = !@event.IsCancelled;
+        }
+
+        private void Events_OnBarricadeDestroyed(BarricadeData data, BarricadeDrop drop)
+        {
+            UnturnedBarricadeDestroyedEvent @event =
+                new UnturnedBarricadeDestroyedEvent(new UnturnedBarricadeBuildable(data, drop));
+
+            Emit(@event);
+        }
+
+        private void Events_OnStructureDestroyed(StructureData data, StructureDrop drop)
+        {
+            UnturnedStructureDestroyedEvent @event =
+                new UnturnedStructureDestroyedEvent(new UnturnedStructureBuildable(data, drop));
+
+            Emit(@event);
+        }
+
         private delegate void BarricadeDeployed(BarricadeData data, BarricadeDrop drop);
         private static event BarricadeDeployed OnBarricadeDeployed;
 
         private delegate void StructureDeployed(StructureData data, StructureDrop drop);
         private static event StructureDeployed OnStructureDeployed;
+
+        private delegate void BarricadeDestroyed(BarricadeData data, BarricadeDrop drop);
+        private static event BarricadeDestroyed OnBarricadeDestroyed;
+
+        private delegate void StructureDestroyed(StructureData data, StructureDrop drop);
+        private static event StructureDestroyed OnStructureDestroyed;
 
         [HarmonyPatch]
         private class Patches
@@ -156,6 +217,30 @@ namespace OpenMod.Unturned.Building.Events
                         }
                     }
                 }
+            }
+
+            [HarmonyPatch(typeof(BarricadeManager), "destroyBarricade")]
+            [HarmonyPrefix]
+            private static void DestroyBarricade(BarricadeRegion region, ushort index)
+            {
+                ThreadUtil.assertIsGameThread();
+
+                BarricadeData data = region.barricades[index];
+                BarricadeDrop drop = region.drops[index];
+
+                OnBarricadeDestroyed?.Invoke(data, drop);
+            }
+
+            [HarmonyPatch(typeof(StructureManager), "destroyStructure")]
+            [HarmonyPrefix]
+            private static void DestroyStructure(StructureRegion region, ushort index)
+            {
+                ThreadUtil.assertIsGameThread();
+
+                StructureData data = region.structures[index];
+                StructureDrop drop = region.drops[index];
+
+                OnStructureDestroyed?.Invoke(data, drop);
             }
         }
     }
