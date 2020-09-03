@@ -182,8 +182,8 @@ namespace OpenMod.Unturned.Building.Events
             [HarmonyPatch(typeof(BarricadeManager), "dropBarricadeIntoRegionInternal")]
             [HarmonyPostfix]
             private static void DropBarricade(BarricadeRegion region, Barricade barricade, Vector3 point,
-                Quaternion rotation, ulong owner, ulong group, BarricadeData data, Transform result,
-                uint instanceID)
+                Quaternion rotation, ulong owner, ulong group, BarricadeData data, ref Transform result,
+                ref uint instanceID)
             {
                 if (result != null)
                 {
