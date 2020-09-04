@@ -1,4 +1,5 @@
-﻿using OpenMod.API;
+﻿using HarmonyLib;
+using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
@@ -18,11 +19,13 @@ namespace OpenMod.Unturned.Players.Events.Inventory
         public override void Subscribe()
         {
             ItemManager.onTakeItemRequested += OnTakeItemRequested;
+            OnOpenedStorage += Events_OnOpenedStorage;
         }
 
         public override void Unsubscribe()
         {
             ItemManager.onTakeItemRequested -= OnTakeItemRequested;
+            OnOpenedStorage -= Events_OnOpenedStorage;
         }
 
         public override void SubscribePlayer(Player player)
@@ -30,7 +33,6 @@ namespace OpenMod.Unturned.Players.Events.Inventory
             player.inventory.onDropItemRequested += OnDropItemRequested;
             player.inventory.onInventoryResized +=
                 (page, width, height) => OnInventoryResized(player, page, width, height);
-            player.inventory.onInventoryStored += () => OnInventoryStored(player);
             player.inventory.onInventoryStateUpdated += () => OnInventoryStateUpdated(player);
             player.inventory.onInventoryAdded += (page, index, jar) => OnInventoryAdded(player, page, index, jar);
             player.inventory.onInventoryRemoved += (page, index, jar) => OnInventoryRemoved(player, page, index, jar);
@@ -42,7 +44,6 @@ namespace OpenMod.Unturned.Players.Events.Inventory
             player.inventory.onDropItemRequested -= OnDropItemRequested;
             player.inventory.onInventoryResized -=
                 (page, width, height) => OnInventoryResized(player, page, width, height);
-            player.inventory.onInventoryStored -= () => OnInventoryStored(player);
             player.inventory.onInventoryStateUpdated -= () => OnInventoryStateUpdated(player);
             player.inventory.onInventoryAdded -= (page, index, jar) => OnInventoryAdded(player, page, index, jar);
             player.inventory.onInventoryRemoved -= (page, index, jar) => OnInventoryRemoved(player, page, index, jar);
@@ -73,6 +74,15 @@ namespace OpenMod.Unturned.Players.Events.Inventory
             shouldAllow = !@event.IsCancelled;
         }
 
+        private void Events_OnOpenedStorage(Player nativePlayer)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedPlayerOpenedStorageEvent @event = new UnturnedPlayerOpenedStorageEvent(player);
+
+            Emit(@event);
+        }
+
         private void OnInventoryResized(Player nativePlayer, byte page, byte width, byte height)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
@@ -87,15 +97,6 @@ namespace OpenMod.Unturned.Players.Events.Inventory
 
                 Emit(closedStorageEvent);
             }
-        }
-
-        private void OnInventoryStored(Player nativePlayer)
-        {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
-
-            UnturnedPlayerOpenedStorageEvent @event = new UnturnedPlayerOpenedStorageEvent(player);
-
-            Emit(@event);
         }
 
         private void OnInventoryStateUpdated(Player nativePlayer)
@@ -132,6 +133,20 @@ namespace OpenMod.Unturned.Players.Events.Inventory
             UnturnedPlayerItemUpdatedEvent @event = new UnturnedPlayerItemUpdatedEvent(player, page, index, jar);
 
             Emit(@event);
+        }
+
+        private delegate void OpenedStorage(Player player);
+        private static event OpenedStorage OnOpenedStorage;
+
+        [HarmonyPatch]
+        private class Patches
+        {
+            [HarmonyPatch(typeof(PlayerInventory), "openStorage")]
+            [HarmonyPostfix]
+            private static void OpenStorage(PlayerInventory __instance)
+            {
+                OnOpenedStorage?.Invoke(__instance.player);
+            }
         }
     }
 }
