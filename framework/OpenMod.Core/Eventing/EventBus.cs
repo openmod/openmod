@@ -157,7 +157,7 @@ namespace OpenMod.Core.Eventing
 
             Type[] omittedTypes = new[]
             {
-                typeof(IEvent), typeof(EventBase), typeof(Event)
+                typeof(IEvent), typeof(ICancellableEvent), typeof(EventBase), typeof(Event)
             };
 
             foreach (var eventType in eventTypes.Except(omittedTypes))
