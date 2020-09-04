@@ -20,12 +20,12 @@ namespace OpenMod.Unturned.Players.Events.Movement
 
         public override void Subscribe()
         {
-            OnTeleporting += EventsOnTeleporting;
+            OnTeleporting += Events_OnTeleporting;
         }
 
         public override void Unsubscribe()
         {
-            OnTeleporting -= EventsOnTeleporting;
+            OnTeleporting -= Events_OnTeleporting;
         }
 
         public override void SubscribePlayer(Player player)
@@ -38,7 +38,7 @@ namespace OpenMod.Unturned.Players.Events.Movement
             player.stance.onStanceUpdated -= () => OnStanceUpdated(player);
         }
 
-        private void EventsOnTeleporting(Player nativePlayer, ref Vector3 position, ref float yaw, out bool cancel)
+        private void Events_OnTeleporting(Player nativePlayer, ref Vector3 position, ref float yaw, out bool cancel)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 

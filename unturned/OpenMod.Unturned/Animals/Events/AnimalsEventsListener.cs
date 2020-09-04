@@ -21,27 +21,27 @@ namespace OpenMod.Unturned.Animals.Events
 
         public override void Subscribe()
         {
-            OnAnimalAdded += EventsOnAnimalAdded;
-            OnAnimalRevived += EventsOnAnimalRevived;
-            OnAnimalDamaging += EventsOnAnimalDamaging;
+            OnAnimalAdded += Events_OnAnimalAdded;
+            OnAnimalRevived += Events_OnAnimalRevived;
+            OnAnimalDamaging += Events_OnAnimalDamaging;
             OnAnimalDead += Events_OnAnimalDead;
-            OnAnimalFleeing += EventsOnAnimalFleeing;
-            OnAnimalAttackingPoint += EventsOnAnimalAttackingPoint;
-            OnAnimalAttackingPlayer += EventsOnAnimalAttackingPlayer;
+            OnAnimalFleeing += Events_OnAnimalFleeing;
+            OnAnimalAttackingPoint += Events_OnAnimalAttackingPoint;
+            OnAnimalAttackingPlayer += Events_OnAnimalAttackingPlayer;
         }
 
         public override void Unsubscribe()
         {
-            OnAnimalAdded -= EventsOnAnimalAdded;
-            OnAnimalRevived -= EventsOnAnimalRevived;
-            OnAnimalDamaging -= EventsOnAnimalDamaging;
+            OnAnimalAdded -= Events_OnAnimalAdded;
+            OnAnimalRevived -= Events_OnAnimalRevived;
+            OnAnimalDamaging -= Events_OnAnimalDamaging;
             OnAnimalDead -= Events_OnAnimalDead;
-            OnAnimalFleeing -= EventsOnAnimalFleeing;
-            OnAnimalAttackingPoint -= EventsOnAnimalAttackingPoint;
-            OnAnimalAttackingPlayer -= EventsOnAnimalAttackingPlayer;
+            OnAnimalFleeing -= Events_OnAnimalFleeing;
+            OnAnimalAttackingPoint -= Events_OnAnimalAttackingPoint;
+            OnAnimalAttackingPlayer -= Events_OnAnimalAttackingPlayer;
         }
 
-        private void EventsOnAnimalAdded(Animal nativeAnimal)
+        private void Events_OnAnimalAdded(Animal nativeAnimal)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
@@ -50,7 +50,7 @@ namespace OpenMod.Unturned.Animals.Events
             Emit(@event);
         }
 
-        private void EventsOnAnimalRevived(Animal nativeAnimal)
+        private void Events_OnAnimalRevived(Animal nativeAnimal)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
@@ -59,7 +59,7 @@ namespace OpenMod.Unturned.Animals.Events
             Emit(@event);
         }
 
-        private void EventsOnAnimalDamaging(Animal nativeAnimal, ref ushort amount, ref Vector3 ragdoll,
+        private void Events_OnAnimalDamaging(Animal nativeAnimal, ref ushort amount, ref Vector3 ragdoll,
             ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot, out bool cancel)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
@@ -94,7 +94,7 @@ namespace OpenMod.Unturned.Animals.Events
             Emit(@event);
         }
 
-        private void EventsOnAnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack, out bool cancel)
+        private void Events_OnAnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack, out bool cancel)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
@@ -107,7 +107,7 @@ namespace OpenMod.Unturned.Animals.Events
             cancel = @event.IsCancelled;
         }
 
-        private void EventsOnAnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack, out bool cancel)
+        private void Events_OnAnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack, out bool cancel)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
@@ -120,7 +120,7 @@ namespace OpenMod.Unturned.Animals.Events
             cancel = @event.IsCancelled;
         }
 
-        private void EventsOnAnimalAttackingPlayer(Animal nativeAnimal, ref Player nativePlayer, ref bool sendToPack,
+        private void Events_OnAnimalAttackingPlayer(Animal nativeAnimal, ref Player nativePlayer, ref bool sendToPack,
             out bool cancel)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
