@@ -59,7 +59,7 @@ namespace OpenMod.Unturned.Building.Events
 
                 UnturnedPlayer player = nativePlayer == null ? null : new UnturnedPlayer(nativePlayer);
 
-                UnturnedBuildableDamageEvent @event;
+                UnturnedBuildableDamagingEvent @event;
 
                 if (pendingTotalDamage >= buildable.State.Health)
                 {
@@ -67,7 +67,7 @@ namespace OpenMod.Unturned.Building.Events
                 }
                 else
                 {
-                    @event = new UnturnedBarricadeDamageEvent(buildable, pendingTotalDamage, damageOrigin, player, instigatorSteamID);
+                    @event = new UnturnedBarricadeDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player, instigatorSteamID);
                 }
 
                 Emit(@event);
@@ -90,7 +90,7 @@ namespace OpenMod.Unturned.Building.Events
 
                 UnturnedPlayer player = nativePlayer == null ? null : new UnturnedPlayer(nativePlayer);
 
-                UnturnedBuildableDamageEvent @event;
+                UnturnedBuildableDamagingEvent @event;
 
                 if (pendingTotalDamage >= buildable.State.Health)
                 {
@@ -98,7 +98,7 @@ namespace OpenMod.Unturned.Building.Events
                 }
                 else
                 {
-                    @event = new UnturnedStructureDamageEvent(buildable, pendingTotalDamage, damageOrigin, player, instigatorSteamID);
+                    @event = new UnturnedStructureDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player, instigatorSteamID);
                 }
 
                 Emit(@event);
@@ -110,14 +110,14 @@ namespace OpenMod.Unturned.Building.Events
 
         private void Events_OnBarricadeDeployed(BarricadeData data, BarricadeDrop drop)
         {
-            UnturnedBarricadeDeployEvent @event = new UnturnedBarricadeDeployEvent(new UnturnedBarricadeBuildable(data, drop));
+            UnturnedBarricadeDeployedEvent @event = new UnturnedBarricadeDeployedEvent(new UnturnedBarricadeBuildable(data, drop));
 
             Emit(@event);
         }
 
         private void Events_OnStructureDeployed(StructureData data, StructureDrop drop)
         {
-            UnturnedStructureDeployEvent @event = new UnturnedStructureDeployEvent(new UnturnedStructureBuildable(data, drop));
+            UnturnedStructureDeployedEvent @event = new UnturnedStructureDeployedEvent(new UnturnedStructureBuildable(data, drop));
 
             Emit(@event);
         }
@@ -127,8 +127,8 @@ namespace OpenMod.Unturned.Building.Events
             BarricadeData data = BarricadeManager.regions[x, y].barricades[index];
             BarricadeDrop drop = BarricadeManager.regions[x, y].drops[index];
 
-            UnturnedBarricadeSalvageEvent @event =
-                new UnturnedBarricadeSalvageEvent(new UnturnedBarricadeBuildable(data, drop));
+            UnturnedBarricadeSalvagingEvent @event =
+                new UnturnedBarricadeSalvagingEvent(new UnturnedBarricadeBuildable(data, drop));
 
             Emit(@event);
 
@@ -140,8 +140,8 @@ namespace OpenMod.Unturned.Building.Events
             StructureData data = StructureManager.regions[x, y].structures[index];
             StructureDrop drop = StructureManager.regions[x, y].drops[index];
 
-            UnturnedStructureSalvageEvent @event =
-                new UnturnedStructureSalvageEvent(new UnturnedStructureBuildable(data, drop));
+            UnturnedStructureSalvagingEvent @event =
+                new UnturnedStructureSalvagingEvent(new UnturnedStructureBuildable(data, drop));
 
             Emit(@event);
 

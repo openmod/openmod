@@ -29,7 +29,7 @@ namespace OpenMod.Unturned.Players.Events.Crafting
         {
             UnturnedPlayer player = GetUnturnedPlayer(crafting.player);
 
-            UnturnedPlayerCraftEvent @event = new UnturnedPlayerCraftEvent(player, itemId, blueprintIndex);
+            UnturnedPlayerCraftingEvent @event = new UnturnedPlayerCraftingEvent(player, itemId, blueprintIndex);
 
             Emit(@event);
 

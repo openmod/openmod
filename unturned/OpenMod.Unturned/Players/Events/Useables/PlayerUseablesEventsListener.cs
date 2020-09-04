@@ -30,7 +30,7 @@ namespace OpenMod.Unturned.Players.Events.Useables
             UnturnedPlayer instigator = GetUnturnedPlayer(nativeInstigator);
             UnturnedPlayer target = GetUnturnedPlayer(nativeTarget);
 
-            UnturnedPlayerPerformAidEvent @event = new UnturnedPlayerPerformAidEvent(instigator, target, asset);
+            UnturnedPlayerPerformingAidEvent @event = new UnturnedPlayerPerformingAidEvent(instigator, target, asset);
 
             Emit(@event);
 

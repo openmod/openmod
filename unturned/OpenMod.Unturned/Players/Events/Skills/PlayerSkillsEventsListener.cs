@@ -19,26 +19,26 @@ namespace OpenMod.Unturned.Players.Events.Skills
 
         public override void Subscribe()
         {
-            OnExperienceUpdate += Events_OnExperienceUpdate;
+            OnExperienceUpdated += EventsOnExperienceUpdated;
         }
 
         public override void Unsubscribe()
         {
-            OnExperienceUpdate -= Events_OnExperienceUpdate;
+            OnExperienceUpdated -= EventsOnExperienceUpdated;
         }
 
-        private void Events_OnExperienceUpdate(Player nativePlayer, uint experience)
+        private void EventsOnExperienceUpdated(Player nativePlayer, uint experience)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerExperienceUpdateEvent @event = new UnturnedPlayerExperienceUpdateEvent(player, experience);
+            UnturnedPlayerExperienceUpdatedEvent @event = new UnturnedPlayerExperienceUpdatedEvent(player, experience);
 
             Emit(@event);
         }
 
-        private delegate void ExperienceUpdate(Player player, uint experience);
+        private delegate void ExperienceUpdated(Player player, uint experience);
 
-        private static event ExperienceUpdate OnExperienceUpdate;
+        private static event ExperienceUpdated OnExperienceUpdated;
 
         [HarmonyPatch]
         private class ExperiencePatches
@@ -73,7 +73,7 @@ namespace OpenMod.Unturned.Players.Events.Skills
             {
                 if (__instance.experience != __state)
                 {
-                    OnExperienceUpdate?.Invoke(__instance.player, __instance.experience);
+                    OnExperienceUpdated?.Invoke(__instance.player, __instance.experience);
                 }
             }
         }

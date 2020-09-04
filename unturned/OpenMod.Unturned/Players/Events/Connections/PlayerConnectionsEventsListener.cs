@@ -31,7 +31,7 @@ namespace OpenMod.Unturned.Players.Events.Connections
         {
             UnturnedPlayer player = GetUnturnedPlayer(steamPlayer);
 
-            UnturnedPlayerConnectEvent @event = new UnturnedPlayerConnectEvent(player);
+            UnturnedPlayerConnectedEvent @event = new UnturnedPlayerConnectedEvent(player);
 
             Emit(@event);
         }
@@ -40,7 +40,7 @@ namespace OpenMod.Unturned.Players.Events.Connections
         {
             UnturnedPlayer player = GetUnturnedPlayer(steamPlayer);
 
-            UnturnedPlayerDisconnectEvent @event = new UnturnedPlayerDisconnectEvent(player);
+            UnturnedPlayerDisconnectedEvent @event = new UnturnedPlayerDisconnectedEvent(player);
 
             Emit(@event);
         }

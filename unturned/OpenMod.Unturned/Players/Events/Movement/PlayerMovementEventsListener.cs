@@ -20,12 +20,12 @@ namespace OpenMod.Unturned.Players.Events.Movement
 
         public override void Subscribe()
         {
-            OnTeleport += Events_OnTeleport;
+            OnTeleporting += EventsOnTeleporting;
         }
 
         public override void Unsubscribe()
         {
-            OnTeleport -= Events_OnTeleport;
+            OnTeleporting -= EventsOnTeleporting;
         }
 
         public override void SubscribePlayer(Player player)
@@ -38,11 +38,11 @@ namespace OpenMod.Unturned.Players.Events.Movement
             player.stance.onStanceUpdated -= () => OnStanceUpdated(player);
         }
 
-        private void Events_OnTeleport(Player nativePlayer, ref Vector3 position, ref float yaw, out bool cancel)
+        private void EventsOnTeleporting(Player nativePlayer, ref Vector3 position, ref float yaw, out bool cancel)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerTeleportEvent @event = new UnturnedPlayerTeleportEvent(player, position.ToSystemVector(), yaw);
+            UnturnedPlayerTeleportingEvent @event = new UnturnedPlayerTeleportingEvent(player, position.ToSystemVector(), yaw);
 
             Emit(@event);
 
@@ -55,14 +55,14 @@ namespace OpenMod.Unturned.Players.Events.Movement
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerStanceUpdateEvent @event = new UnturnedPlayerStanceUpdateEvent(player);
+            UnturnedPlayerStanceUpdatedEvent @event = new UnturnedPlayerStanceUpdatedEvent(player);
 
             Emit(@event);
         }
 
-        private delegate void TeleportHandler(Player player,
+        private delegate void Teleporting(Player player,
             ref Vector3 position, ref float yaw, out bool cancel);
-        private static event TeleportHandler OnTeleport;
+        private static event Teleporting OnTeleporting;
 
         [HarmonyPatch]
         private class Patches
@@ -73,7 +73,7 @@ namespace OpenMod.Unturned.Players.Events.Movement
             {
                 bool cancel = false;
 
-                OnTeleport?.Invoke(__instance, ref position, ref yaw, out cancel);
+                OnTeleporting?.Invoke(__instance, ref position, ref yaw, out cancel);
 
                 return !cancel;
             }

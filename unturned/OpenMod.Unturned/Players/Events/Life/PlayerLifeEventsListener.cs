@@ -60,7 +60,7 @@ namespace OpenMod.Unturned.Players.Events.Life
                     x => x.playerID.steamID == temp));
             }
 
-            UnturnedPlayerDamageEvent @event;
+            UnturnedPlayerDamagingEvent @event;
 
             if (amount >= nativePlayer.life.health)
             {
@@ -69,7 +69,7 @@ namespace OpenMod.Unturned.Players.Events.Life
             }
             else
             {
-                @event = new UnturnedPlayerDamageEvent(player, amount, cause, limb, killer,
+                @event = new UnturnedPlayerDamagingEvent(player, amount, cause, limb, killer,
                     source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding);
             }
 
@@ -90,7 +90,7 @@ namespace OpenMod.Unturned.Players.Events.Life
         {
             UnturnedPlayer player = GetUnturnedPlayer(sender.player);
 
-            UnturnedPlayerDeathEvent @event = new UnturnedPlayerDeathEvent(player, cause, limb, instigator);
+            UnturnedPlayerDeadEvent @event = new UnturnedPlayerDeadEvent(player, cause, limb, instigator);
 
             Emit(@event);
         }
@@ -101,7 +101,7 @@ namespace OpenMod.Unturned.Players.Events.Life
             {
                 UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-                UnturnedPlayerReviveEvent @event = new UnturnedPlayerReviveEvent(player);
+                UnturnedPlayerRevivedEvent @event = new UnturnedPlayerRevivedEvent(player);
 
                 Emit(@event);
             }

@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace OpenMod.Unturned.Players.Events.Life
 {
-    public class UnturnedPlayerDyingEvent : UnturnedPlayerDamageEvent
+    public class UnturnedPlayerDyingEvent : UnturnedPlayerDamagingEvent
     {
         public UnturnedPlayerDyingEvent(UnturnedPlayer player, byte amount,
             EDeathCause cause, ELimb limb,

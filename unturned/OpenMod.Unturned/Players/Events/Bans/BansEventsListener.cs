@@ -32,7 +32,7 @@ namespace OpenMod.Unturned.Players.Events.Bans
 
         private void OnBanPlayerRequested(CSteamID instigator, CSteamID playerToBan, uint ipToBan, ref string reason, ref uint duration, ref bool shouldVanillaBan)
         {
-            UnturnedPlayerBanEvent @event = new UnturnedPlayerBanEvent(instigator, playerToBan, ipToBan, reason, duration, shouldVanillaBan);
+            UnturnedPlayerBanningEvent @event = new UnturnedPlayerBanningEvent(instigator, playerToBan, ipToBan, reason, duration, shouldVanillaBan);
 
             Emit(@event);
 
@@ -43,7 +43,7 @@ namespace OpenMod.Unturned.Players.Events.Bans
 
         private void OnCheckBanStatus(SteamPlayerID playerId, uint remoteIP, ref bool isBanned, ref string banReason, ref uint banRemainingDuration)
         {
-            UnturnedPlayerCheckBanEvent @event = new UnturnedPlayerCheckBanEvent(playerId, remoteIP, isBanned, banReason, banRemainingDuration);
+            UnturnedPlayerCheckingBanEvent @event = new UnturnedPlayerCheckingBanEvent(playerId, remoteIP, isBanned, banReason, banRemainingDuration);
 
             Emit(@event);
 
@@ -54,7 +54,7 @@ namespace OpenMod.Unturned.Players.Events.Bans
 
         private void OnUnbanPlayerRequested(CSteamID instigator, CSteamID playerToUnban, ref bool shouldVanillaUnban)
         {
-            UnturnedPlayerUnbanEvent @event = new UnturnedPlayerUnbanEvent(instigator, playerToUnban, shouldVanillaUnban);
+            UnturnedPlayerUnbanningEvent @event = new UnturnedPlayerUnbanningEvent(instigator, playerToUnban, shouldVanillaUnban);
 
             Emit(@event);
 

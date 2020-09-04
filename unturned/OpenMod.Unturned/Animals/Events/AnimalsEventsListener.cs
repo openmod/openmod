@@ -21,50 +21,50 @@ namespace OpenMod.Unturned.Animals.Events
 
         public override void Subscribe()
         {
-            OnAnimalAdd += Events_OnAnimalAdd;
-            OnAnimalRevive += Events_OnAnimalRevive;
-            OnAnimalDamage += Events_OnAnimalDamage;
+            OnAnimalAdded += EventsOnAnimalAdded;
+            OnAnimalRevived += EventsOnAnimalRevived;
+            OnAnimalDamaging += EventsOnAnimalDamaging;
             OnAnimalDead += Events_OnAnimalDead;
-            OnAnimalFlee += Events_OnAnimalFlee;
-            OnAnimalAttackPoint += Events_OnAnimalAttackPoint;
-            OnAnimalAttackPlayer += Events_OnAnimalAttackPlayer;
+            OnAnimalFleeing += EventsOnAnimalFleeing;
+            OnAnimalAttackingPoint += EventsOnAnimalAttackingPoint;
+            OnAnimalAttackingPlayer += EventsOnAnimalAttackingPlayer;
         }
 
         public override void Unsubscribe()
         {
-            OnAnimalAdd -= Events_OnAnimalAdd;
-            OnAnimalRevive -= Events_OnAnimalRevive;
-            OnAnimalDamage -= Events_OnAnimalDamage;
+            OnAnimalAdded -= EventsOnAnimalAdded;
+            OnAnimalRevived -= EventsOnAnimalRevived;
+            OnAnimalDamaging -= EventsOnAnimalDamaging;
             OnAnimalDead -= Events_OnAnimalDead;
-            OnAnimalFlee -= Events_OnAnimalFlee;
-            OnAnimalAttackPoint -= Events_OnAnimalAttackPoint;
-            OnAnimalAttackPlayer -= Events_OnAnimalAttackPlayer;
+            OnAnimalFleeing -= EventsOnAnimalFleeing;
+            OnAnimalAttackingPoint -= EventsOnAnimalAttackingPoint;
+            OnAnimalAttackingPlayer -= EventsOnAnimalAttackingPlayer;
         }
 
-        private void Events_OnAnimalAdd(Animal nativeAnimal)
+        private void EventsOnAnimalAdded(Animal nativeAnimal)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
-            UnturnedAnimalAddEvent @event = new UnturnedAnimalAddEvent(animal);
+            UnturnedAnimalAddedEvent @event = new UnturnedAnimalAddedEvent(animal);
 
             Emit(@event);
         }
 
-        private void Events_OnAnimalRevive(Animal nativeAnimal)
+        private void EventsOnAnimalRevived(Animal nativeAnimal)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
-            UnturnedAnimalReviveEvent @event = new UnturnedAnimalReviveEvent(animal);
+            UnturnedAnimalRevivedEvent @event = new UnturnedAnimalRevivedEvent(animal);
 
             Emit(@event);
         }
 
-        private void Events_OnAnimalDamage(Animal nativeAnimal, ref ushort amount, ref Vector3 ragdoll,
+        private void EventsOnAnimalDamaging(Animal nativeAnimal, ref ushort amount, ref Vector3 ragdoll,
             ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot, out bool cancel)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
-            UnturnedAnimalDamageEvent @event;
+            UnturnedAnimalDamagingEvent @event;
 
             if (amount >= animal.Health)
             {
@@ -72,7 +72,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
             else
             {
-                @event = new UnturnedAnimalDamageEvent(animal, amount, ragdoll.ToSystemVector(), ragdollEffect, trackKill, dropLoot);
+                @event = new UnturnedAnimalDamagingEvent(animal, amount, ragdoll.ToSystemVector(), ragdollEffect, trackKill, dropLoot);
             }
 
             Emit(@event);
@@ -94,11 +94,11 @@ namespace OpenMod.Unturned.Animals.Events
             Emit(@event);
         }
 
-        private void Events_OnAnimalFlee(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack, out bool cancel)
+        private void EventsOnAnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack, out bool cancel)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
-            UnturnedAnimalFleeEvent @event = new UnturnedAnimalFleeEvent(animal, direction.ToSystemVector(), sendToPack);
+            UnturnedAnimalFleeingEvent @event = new UnturnedAnimalFleeingEvent(animal, direction.ToSystemVector(), sendToPack);
 
             Emit(@event);
 
@@ -107,11 +107,11 @@ namespace OpenMod.Unturned.Animals.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnAnimalAttackPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack, out bool cancel)
+        private void EventsOnAnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack, out bool cancel)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
-            UnturnedAnimalAttackPointEvent @event = new UnturnedAnimalAttackPointEvent(animal, point.ToSystemVector(), sendToPack);
+            UnturnedAnimalAttackingPointEvent @event = new UnturnedAnimalAttackingPointEvent(animal, point.ToSystemVector(), sendToPack);
 
             Emit(@event);
 
@@ -120,14 +120,14 @@ namespace OpenMod.Unturned.Animals.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnAnimalAttackPlayer(Animal nativeAnimal, ref Player nativePlayer, ref bool sendToPack,
+        private void EventsOnAnimalAttackingPlayer(Animal nativeAnimal, ref Player nativePlayer, ref bool sendToPack,
             out bool cancel)
         {
             UnturnedAnimal animal = new UnturnedAnimal(nativeAnimal);
 
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedAnimalAttackPlayerEvent @event = new UnturnedAnimalAttackPlayerEvent(animal, player, sendToPack);
+            UnturnedAnimalAttackingPlayerEvent @event = new UnturnedAnimalAttackingPlayerEvent(animal, player, sendToPack);
 
             Emit(@event);
 
@@ -136,26 +136,26 @@ namespace OpenMod.Unturned.Animals.Events
             cancel = @event.IsCancelled;
         }
 
-        private delegate void AnimalSpawn(Animal nativeAnimal);
-        private static event AnimalSpawn OnAnimalAdd;
-        private static event AnimalSpawn OnAnimalRevive;
+        private delegate void AnimalSpawned(Animal nativeAnimal);
+        private static event AnimalSpawned OnAnimalAdded;
+        private static event AnimalSpawned OnAnimalRevived;
 
-        private delegate void AnimalDamage(Animal nativeAnimal, ref ushort amount, ref Vector3 ragdoll,
+        private delegate void AnimalDamaging(Animal nativeAnimal, ref ushort amount, ref Vector3 ragdoll,
             ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot, out bool cancel);
-        private static event AnimalDamage OnAnimalDamage;
+        private static event AnimalDamaging OnAnimalDamaging;
 
         private delegate void AnimalDead(Animal nativeAnimal, Vector3 ragdoll, ERagdollEffect ragdollEffect);
         private static event AnimalDead OnAnimalDead;
 
-        private delegate void AnimalFlee(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack, out bool cancel);
-        private static event AnimalFlee OnAnimalFlee;
+        private delegate void AnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack, out bool cancel);
+        private static event AnimalFleeing OnAnimalFleeing;
 
-        private delegate void AnimalAttackPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack, out bool cancel);
-        private static event AnimalAttackPoint OnAnimalAttackPoint;
+        private delegate void AnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack, out bool cancel);
+        private static event AnimalAttackingPoint OnAnimalAttackingPoint;
 
-        private delegate void AnimalAttackPlayer(Animal nativeAnimal, ref Player player, ref bool sendToPack,
+        private delegate void AnimalAttackingPlayer(Animal nativeAnimal, ref Player player, ref bool sendToPack,
             out bool cancel);
-        private static event AnimalAttackPlayer OnAnimalAttackPlayer;
+        private static event AnimalAttackingPlayer OnAnimalAttackingPlayer;
 
         [HarmonyPatch]
         private class Patches
@@ -166,7 +166,7 @@ namespace OpenMod.Unturned.Animals.Events
             {
                 if (__result != null)
                 {
-                    OnAnimalAdd?.Invoke(__result);
+                    OnAnimalAdded?.Invoke(__result);
                 }
             }
 
@@ -174,7 +174,7 @@ namespace OpenMod.Unturned.Animals.Events
             [HarmonyPostfix]
             private static void TellAlive(Animal __instance)
             {
-                OnAnimalRevive?.Invoke(__instance);
+                OnAnimalRevived?.Invoke(__instance);
             }
 
             [HarmonyPatch(typeof(Animal), "askDamage")]
@@ -186,7 +186,7 @@ namespace OpenMod.Unturned.Animals.Events
 
                 if (amount == 0 || __instance.isDead) return false;
 
-                OnAnimalDamage?.Invoke(__instance, ref amount, ref newRagdoll, ref ragdollEffect, ref trackKill,
+                OnAnimalDamaging?.Invoke(__instance, ref amount, ref newRagdoll, ref ragdollEffect, ref trackKill,
                     ref dropLoot, out cancel);
 
                 return !cancel;
@@ -206,7 +206,7 @@ namespace OpenMod.Unturned.Animals.Events
                 // Fleeing from given direction
                 bool cancel = false;
 
-                OnAnimalFlee?.Invoke(__instance, ref newDirection, ref sendToPack, out cancel);
+                OnAnimalFleeing?.Invoke(__instance, ref newDirection, ref sendToPack, out cancel);
 
                 return !cancel;
             }
@@ -218,7 +218,7 @@ namespace OpenMod.Unturned.Animals.Events
                 // Attacking point
                 bool cancel = false;
 
-                OnAnimalAttackPoint?.Invoke(__instance, ref point, ref sendToPack, out cancel);
+                OnAnimalAttackingPoint?.Invoke(__instance, ref point, ref sendToPack, out cancel);
 
                 return !cancel;
             }
@@ -230,7 +230,7 @@ namespace OpenMod.Unturned.Animals.Events
                 // Attacking player
                 bool cancel = false;
 
-                OnAnimalAttackPlayer?.Invoke(__instance, ref newPlayer, ref sendToPack, out cancel);
+                OnAnimalAttackingPlayer?.Invoke(__instance, ref newPlayer, ref sendToPack, out cancel);
 
                 return !cancel;
             }

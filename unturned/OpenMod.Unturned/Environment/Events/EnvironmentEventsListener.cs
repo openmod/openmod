@@ -33,28 +33,28 @@ namespace OpenMod.Unturned.Environment.Events
 
         private void OnDayNightUpdated(bool isDaytime)
         {
-            UnturnedDayNightUpdateEvent @event = new UnturnedDayNightUpdateEvent(isDaytime);
+            UnturnedDayNightUpdatedEvent @event = new UnturnedDayNightUpdatedEvent(isDaytime);
 
             Emit(@event);
         }
 
         private void OnRainUpdated(ELightingRain rain)
         {
-            UnturnedWeatherUpdateEvent @event = new UnturnedWeatherUpdateEvent(rain, LevelLighting.snowyness);
+            UnturnedWeatherUpdatedEvent @event = new UnturnedWeatherUpdatedEvent(rain, LevelLighting.snowyness);
 
             Emit(@event);
         }
 
         private void OnMoonUpdated(bool isFullMoon)
         {
-            UnturnedMoonUpdateEvent @event = new UnturnedMoonUpdateEvent(isFullMoon);
+            UnturnedMoonUpdatedEvent @event = new UnturnedMoonUpdatedEvent(isFullMoon);
 
             Emit(@event);
         }
 
         private void OnSnowUpdated(ELightingSnow snow)
         {
-            UnturnedWeatherUpdateEvent @event = new UnturnedWeatherUpdateEvent(LevelLighting.rainyness, snow);
+            UnturnedWeatherUpdatedEvent @event = new UnturnedWeatherUpdatedEvent(LevelLighting.rainyness, snow);
 
             Emit(@event);
         }

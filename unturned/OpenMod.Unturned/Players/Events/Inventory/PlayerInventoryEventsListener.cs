@@ -54,7 +54,7 @@ namespace OpenMod.Unturned.Players.Events.Inventory
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerPickupItemEvent @event = new UnturnedPlayerPickupItemEvent(player, x, y, instanceID,
+            UnturnedPlayerTakingItemEvent @event = new UnturnedPlayerTakingItemEvent(player, x, y, instanceID,
                 to_x, to_y, to_rot, to_page, itemData);
 
             Emit(@event);
@@ -66,7 +66,7 @@ namespace OpenMod.Unturned.Players.Events.Inventory
         {
             UnturnedPlayer player = GetUnturnedPlayer(inventory.player);
 
-            UnturnedPlayerDropItemEvent @event = new UnturnedPlayerDropItemEvent(player, item);
+            UnturnedPlayerDroppedItemEvent @event = new UnturnedPlayerDroppedItemEvent(player, item);
 
             Emit(@event);
 
@@ -77,15 +77,15 @@ namespace OpenMod.Unturned.Players.Events.Inventory
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerInventoryResizeEvent @event = new UnturnedPlayerInventoryResizeEvent(player, page, width, height);
+            UnturnedPlayerInventoryResizedEvent @event = new UnturnedPlayerInventoryResizedEvent(player, page, width, height);
 
             Emit(@event);
 
             if (page == PlayerInventory.STORAGE && width == 0 && height == 0)
             {
-                UnturnedPlayerCloseStorageEvent closeStorageEvent = new UnturnedPlayerCloseStorageEvent(player);
+                UnturnedPlayerClosedStorageEvent closedStorageEvent = new UnturnedPlayerClosedStorageEvent(player);
 
-                Emit(closeStorageEvent);
+                Emit(closedStorageEvent);
             }
         }
 
@@ -93,7 +93,7 @@ namespace OpenMod.Unturned.Players.Events.Inventory
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerOpenStorageEvent @event = new UnturnedPlayerOpenStorageEvent(player);
+            UnturnedPlayerOpenedStorageEvent @event = new UnturnedPlayerOpenedStorageEvent(player);
 
             Emit(@event);
         }
@@ -102,7 +102,7 @@ namespace OpenMod.Unturned.Players.Events.Inventory
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerInventoryUpdateEvent @event = new UnturnedPlayerInventoryUpdateEvent(player);
+            UnturnedPlayerInventoryUpdatedEvent @event = new UnturnedPlayerInventoryUpdatedEvent(player);
 
             Emit(@event);
         }
@@ -111,7 +111,7 @@ namespace OpenMod.Unturned.Players.Events.Inventory
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerItemAddEvent @event = new UnturnedPlayerItemAddEvent(player, page, index, jar);
+            UnturnedPlayerItemAddedEvent @event = new UnturnedPlayerItemAddedEvent(player, page, index, jar);
 
             Emit(@event);
         }
@@ -120,7 +120,7 @@ namespace OpenMod.Unturned.Players.Events.Inventory
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerItemRemoveEvent @event = new UnturnedPlayerItemRemoveEvent(player, page, index, jar);
+            UnturnedPlayerItemRemovedEvent @event = new UnturnedPlayerItemRemovedEvent(player, page, index, jar);
 
             Emit(@event);
         }
@@ -129,7 +129,7 @@ namespace OpenMod.Unturned.Players.Events.Inventory
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerItemUpdateEvent @event = new UnturnedPlayerItemUpdateEvent(player, page, index, jar);
+            UnturnedPlayerItemUpdatedEvent @event = new UnturnedPlayerItemUpdatedEvent(player, page, index, jar);
 
             Emit(@event);
         }

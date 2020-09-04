@@ -4,7 +4,7 @@ using Steamworks;
 
 namespace OpenMod.Unturned.Building.Events
 {
-    public class UnturnedBuildableDestroyingEvent : UnturnedBuildableDamageEvent
+    public class UnturnedBuildableDestroyingEvent : UnturnedBuildableDamagingEvent
     {
         public UnturnedBuildableDestroyingEvent(UnturnedBuildable buildable, ushort damageAmount,
             EDamageOrigin damageOrigin, UnturnedPlayer instigator, CSteamID instigatorId) : base(buildable,

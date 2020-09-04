@@ -18,22 +18,22 @@ namespace OpenMod.Unturned.Players.Events.Stats
 
         public override void Subscribe()
         {
-            OnBleedingUpdate += Events_OnBleedingUpdate;
-            OnBrokenUpdate += Events_OnBrokenUpdate;
-            OnFoodUpdate += Events_OnFoodUpdate;
-            OnHealthUpdate += Events_OnHealthUpdate;
-            OnVirusUpdate += Events_OnVirusUpdate;
-            OnWaterUpdate += Events_OnWaterUpdate;
+            OnBleedingUpdated += EventsOnBleedingUpdated;
+            OnBrokenUpdated += EventsOnBrokenUpdated;
+            OnFoodUpdated += EventsOnFoodUpdated;
+            OnHealthUpdated += EventsOnHealthUpdated;
+            OnVirusUpdated += EventsOnVirusUpdated;
+            OnWaterUpdated += EventsOnWaterUpdated;
         }
 
         public override void Unsubscribe()
         {
-            OnBleedingUpdate -= Events_OnBleedingUpdate;
-            OnBrokenUpdate -= Events_OnBrokenUpdate;
-            OnFoodUpdate -= Events_OnFoodUpdate;
-            OnHealthUpdate -= Events_OnHealthUpdate;
-            OnVirusUpdate -= Events_OnVirusUpdate;
-            OnWaterUpdate -= Events_OnWaterUpdate;
+            OnBleedingUpdated -= EventsOnBleedingUpdated;
+            OnBrokenUpdated -= EventsOnBrokenUpdated;
+            OnFoodUpdated -= EventsOnFoodUpdated;
+            OnHealthUpdated -= EventsOnHealthUpdated;
+            OnVirusUpdated -= EventsOnVirusUpdated;
+            OnWaterUpdated -= EventsOnWaterUpdated;
         }
 
         public override void SubscribePlayer(Player player)
@@ -42,7 +42,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
             player.life.onOxygenUpdated += oxygen => OnOxygenUpdated(player, oxygen);
             player.life.onStaminaUpdated += stamina => OnStaminaUpdated(player, stamina);
             player.life.onTemperatureUpdated += temperature => OnTemperatureUpdated(player, temperature);
-            player.life.onVirusUpdated += virus => Events_OnVirusUpdate(player, virus);
+            player.life.onVirusUpdated += virus => EventsOnVirusUpdated(player, virus);
             player.life.onVisionUpdated += viewing => OnVisionUpdated(player, viewing);
         }
 
@@ -52,42 +52,42 @@ namespace OpenMod.Unturned.Players.Events.Stats
             player.life.onOxygenUpdated -= oxygen => OnOxygenUpdated(player, oxygen);
             player.life.onStaminaUpdated -= stamina => OnStaminaUpdated(player, stamina);
             player.life.onTemperatureUpdated -= temperature => OnTemperatureUpdated(player, temperature);
-            player.life.onVirusUpdated -= virus => Events_OnVirusUpdate(player, virus);
+            player.life.onVirusUpdated -= virus => EventsOnVirusUpdated(player, virus);
             player.life.onVisionUpdated -= viewing => OnVisionUpdated(player, viewing);
         }
 
-        private void Events_OnBleedingUpdate(Player nativePlayer, bool isBleeding)
+        private void EventsOnBleedingUpdated(Player nativePlayer, bool isBleeding)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerBleedingUpdateEvent @event = new UnturnedPlayerBleedingUpdateEvent(player, isBleeding);
+            UnturnedPlayerBleedingUpdatedEvent @event = new UnturnedPlayerBleedingUpdatedEvent(player, isBleeding);
 
             Emit(@event);
         }
 
-        private void Events_OnBrokenUpdate(Player nativePlayer, bool isBroken)
+        private void EventsOnBrokenUpdated(Player nativePlayer, bool isBroken)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerBrokenUpdateEvent @event = new UnturnedPlayerBrokenUpdateEvent(player, isBroken);
+            UnturnedPlayerBrokenUpdatedEvent @event = new UnturnedPlayerBrokenUpdatedEvent(player, isBroken);
 
             Emit(@event);
         }
 
-        private void Events_OnFoodUpdate(Player nativePlayer, byte food)
+        private void EventsOnFoodUpdated(Player nativePlayer, byte food)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerFoodUpdateEvent @event = new UnturnedPlayerFoodUpdateEvent(player, food);
+            UnturnedPlayerFoodUpdatedEvent @event = new UnturnedPlayerFoodUpdatedEvent(player, food);
 
             Emit(@event);
         }
 
-        private void Events_OnHealthUpdate(Player nativePlayer, byte health)
+        private void EventsOnHealthUpdated(Player nativePlayer, byte health)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerHealthUpdateEvent @event = new UnturnedPlayerHealthUpdateEvent(player, health);
+            UnturnedPlayerHealthUpdatedEvent @event = new UnturnedPlayerHealthUpdatedEvent(player, health);
 
             Emit(@event);
         }
@@ -96,7 +96,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerLifeUpdateEvent @event = new UnturnedPlayerLifeUpdateEvent(player, isDead);
+            UnturnedPlayerLifeUpdatedEvent @event = new UnturnedPlayerLifeUpdatedEvent(player, isDead);
 
             Emit(@event);
         }
@@ -105,7 +105,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerOxygenUpdateEvent @event = new UnturnedPlayerOxygenUpdateEvent(player, oxygen);
+            UnturnedPlayerOxygenUpdatedEvent @event = new UnturnedPlayerOxygenUpdatedEvent(player, oxygen);
 
             Emit(@event);
         }
@@ -114,7 +114,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerStaminaUpdateEvent @event = new UnturnedPlayerStaminaUpdateEvent(player, stamina);
+            UnturnedPlayerStaminaUpdatedEvent @event = new UnturnedPlayerStaminaUpdatedEvent(player, stamina);
 
             Emit(@event);
         }
@@ -123,16 +123,16 @@ namespace OpenMod.Unturned.Players.Events.Stats
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerTemperatureUpdateEvent @event = new UnturnedPlayerTemperatureUpdateEvent(player, temperature);
+            UnturnedPlayerTemperatureUpdatedEvent @event = new UnturnedPlayerTemperatureUpdatedEvent(player, temperature);
 
             Emit(@event);
         }
 
-        private void Events_OnVirusUpdate(Player nativePlayer, byte virus)
+        private void EventsOnVirusUpdated(Player nativePlayer, byte virus)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerVirusUpdateEvent @event = new UnturnedPlayerVirusUpdateEvent(player, virus);
+            UnturnedPlayerVirusUpdatedEvent @event = new UnturnedPlayerVirusUpdatedEvent(player, virus);
 
             Emit(@event);
         }
@@ -141,37 +141,37 @@ namespace OpenMod.Unturned.Players.Events.Stats
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerVisionUpdateEvent @event = new UnturnedPlayerVisionUpdateEvent(player, viewing);
+            UnturnedPlayerVisionUpdatedEvent @event = new UnturnedPlayerVisionUpdatedEvent(player, viewing);
 
             Emit(@event);
         }
 
-        private void Events_OnWaterUpdate(Player nativePlayer, byte water)
+        private void EventsOnWaterUpdated(Player nativePlayer, byte water)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerWaterUpdateEvent @event = new UnturnedPlayerWaterUpdateEvent(player, water);
+            UnturnedPlayerWaterUpdatedEvent @event = new UnturnedPlayerWaterUpdatedEvent(player, water);
 
             Emit(@event);
         }
 
-        private delegate void BleedingUpdate(Player player, bool isBleeding);
-        private static event BleedingUpdate OnBleedingUpdate;
+        private delegate void BleedingUpdated(Player player, bool isBleeding);
+        private static event BleedingUpdated OnBleedingUpdated;
 
-        private delegate void BrokenUpdate(Player player, bool isBroken);
-        private static event BrokenUpdate OnBrokenUpdate;
+        private delegate void BrokenUpdated(Player player, bool isBroken);
+        private static event BrokenUpdated OnBrokenUpdated;
 
-        private delegate void FoodUpdate(Player player, byte food);
-        private static event FoodUpdate OnFoodUpdate;
+        private delegate void FoodUpdated(Player player, byte food);
+        private static event FoodUpdated OnFoodUpdated;
 
-        private delegate void HealthUpdate(Player player, byte health);
-        private static event HealthUpdate OnHealthUpdate;
+        private delegate void HealthUpdated(Player player, byte health);
+        private static event HealthUpdated OnHealthUpdated;
 
-        private delegate void VirusUpdate(Player player, byte stamina);
-        private static event VirusUpdate OnVirusUpdate;
+        private delegate void VirusUpdated(Player player, byte stamina);
+        private static event VirusUpdated OnVirusUpdated;
 
-        private delegate void WaterUpdate(Player player, byte water);
-        private static event WaterUpdate OnWaterUpdate;
+        private delegate void WaterUpdated(Player player, byte water);
+        private static event WaterUpdated OnWaterUpdated;
 
         private struct PersistDoDamage
         {
@@ -202,7 +202,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
             {
                 if (__instance.isBleeding != __state)
                 {
-                    OnBleedingUpdate?.Invoke(__instance.player, __instance.isBleeding);
+                    OnBleedingUpdated?.Invoke(__instance.player, __instance.isBleeding);
                 }
             }
 
@@ -219,7 +219,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
             {
                 if (__instance.isBroken != __state)
                 {
-                    OnBrokenUpdate?.Invoke(__instance.player, __instance.isBroken);
+                    OnBrokenUpdated?.Invoke(__instance.player, __instance.isBroken);
                 }
             }
 
@@ -236,12 +236,12 @@ namespace OpenMod.Unturned.Players.Events.Stats
             {
                 if (__instance.isBleeding != __state.IsBleeding)
                 {
-                    OnBleedingUpdate?.Invoke(__instance.player, __instance.isBleeding);
+                    OnBleedingUpdated?.Invoke(__instance.player, __instance.isBleeding);
                 }
 
                 if (__instance.health != __state.Health)
                 {
-                    OnHealthUpdate?.Invoke(__instance.player, __instance.health);
+                    OnHealthUpdated?.Invoke(__instance.player, __instance.health);
                 }
             }
 
@@ -258,7 +258,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
             {
                 if (__instance.food != __state)
                 {
-                    OnFoodUpdate?.Invoke(__instance.player, __instance.food);
+                    OnFoodUpdated?.Invoke(__instance.player, __instance.food);
                 }
             }
 
@@ -275,7 +275,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
             {
                 if (__instance.food != __state)
                 {
-                    OnFoodUpdate?.Invoke(__instance.player, __instance.food);
+                    OnFoodUpdated?.Invoke(__instance.player, __instance.food);
                 }
             }
 
@@ -292,7 +292,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
             {
                 if (__instance.health != __state)
                 {
-                    OnHealthUpdate?.Invoke(__instance.player, __instance.health);
+                    OnHealthUpdated?.Invoke(__instance.player, __instance.health);
                 }
             }
 
@@ -309,7 +309,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
             {
                 if (__instance.virus != __state)
                 {
-                    OnVirusUpdate?.Invoke(__instance.player, __instance.virus);
+                    OnVirusUpdated?.Invoke(__instance.player, __instance.virus);
                 }
             }
 
@@ -326,7 +326,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
             {
                 if (__instance.virus != __state)
                 {
-                    OnVirusUpdate?.Invoke(__instance.player, __instance.virus);
+                    OnVirusUpdated?.Invoke(__instance.player, __instance.virus);
                 }
             }
 
@@ -343,7 +343,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
             {
                 if (__instance.water != __state)
                 {
-                    OnWaterUpdate?.Invoke(__instance.player, __instance.water);
+                    OnWaterUpdated?.Invoke(__instance.player, __instance.water);
                 }
             }
 
@@ -360,7 +360,7 @@ namespace OpenMod.Unturned.Players.Events.Stats
             {
                 if (__instance.water != __state)
                 {
-                    OnWaterUpdate?.Invoke(__instance.player, __instance.water);
+                    OnWaterUpdated?.Invoke(__instance.player, __instance.water);
                 }
             }
         }

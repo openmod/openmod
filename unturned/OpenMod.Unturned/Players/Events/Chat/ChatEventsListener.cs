@@ -32,7 +32,7 @@ namespace OpenMod.Unturned.Players.Events.Chat
         {
             UnturnedPlayer player = GetUnturnedPlayer(steamPlayer);
 
-            UnturnedPlayerChatEvent @event = new UnturnedPlayerChatEvent(player, mode, color, isRich, text);
+            UnturnedPlayerChattingEvent @event = new UnturnedPlayerChattingEvent(player, mode, color, isRich, text);
 
             Emit(@event);
 
@@ -49,7 +49,7 @@ namespace OpenMod.Unturned.Players.Events.Chat
             UnturnedPlayer fromPlayer = GetUnturnedPlayer(nativeFromPlayer);
             UnturnedPlayer toPlayer = GetUnturnedPlayer(nativeToPlayer);
 
-            UnturnedServerSendMessageEvent @event = new UnturnedServerSendMessageEvent(fromPlayer, toPlayer, text, color, mode, iconURL, useRichTextFormatting);
+            UnturnedServerSendingMessageEvent @event = new UnturnedServerSendingMessageEvent(fromPlayer, toPlayer, text, color, mode, iconURL, useRichTextFormatting);
 
             Emit(@event);
 
