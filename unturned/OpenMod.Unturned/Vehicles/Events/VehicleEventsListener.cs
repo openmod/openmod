@@ -31,8 +31,8 @@ namespace OpenMod.Unturned.Vehicles.Events
             VehicleManager.onSiphonVehicleRequested += OnSiphonVehicleRequested;
             VehicleManager.onVehicleCarjacked += OnVehicleCarjacked;
             VehicleManager.onVehicleLockpicked += OnVehicleLockpicked;
-            OnVehicleExploding += EventsOnVehicleExploding;
-            OnVehicleSpawned += EventsOnVehicleSpawned;
+            OnVehicleExploding += Events_OnVehicleExploding;
+            OnVehicleSpawned += Events_OnVehicleSpawned;
         }
 
         public override void Unsubscribe()
@@ -46,8 +46,8 @@ namespace OpenMod.Unturned.Vehicles.Events
             VehicleManager.onSiphonVehicleRequested -= OnSiphonVehicleRequested;
             VehicleManager.onVehicleCarjacked -= OnVehicleCarjacked;
             VehicleManager.onVehicleLockpicked -= OnVehicleLockpicked;
-            OnVehicleExploding -= EventsOnVehicleExploding;
-            OnVehicleSpawned -= EventsOnVehicleSpawned;
+            OnVehicleExploding -= Events_OnVehicleExploding;
+            OnVehicleSpawned -= Events_OnVehicleSpawned;
         }
 
         private delegate void VehicleExploding(InteractableVehicle vehicle, out bool cancel);
@@ -158,7 +158,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             shouldAllow = !@event.IsCancelled;
         }
 
-        private void EventsOnVehicleExploding(InteractableVehicle vehicle, out bool cancel)
+        private void Events_OnVehicleExploding(InteractableVehicle vehicle, out bool cancel)
         {
             UnturnedVehicleExplodingEvent @event = new UnturnedVehicleExplodingEvent(new UnturnedVehicle(vehicle));
 
@@ -167,7 +167,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             cancel = @event.IsCancelled;
         }
 
-        private void EventsOnVehicleSpawned(InteractableVehicle vehicle)
+        private void Events_OnVehicleSpawned(InteractableVehicle vehicle)
         {
             UnturnedVehicleSpawnedEvent @event = new UnturnedVehicleSpawnedEvent(new UnturnedVehicle(vehicle));
 

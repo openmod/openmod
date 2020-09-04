@@ -19,15 +19,15 @@ namespace OpenMod.Unturned.Players.Events.Skills
 
         public override void Subscribe()
         {
-            OnExperienceUpdated += EventsOnExperienceUpdated;
+            OnExperienceUpdated += Events_OnExperienceUpdated;
         }
 
         public override void Unsubscribe()
         {
-            OnExperienceUpdated -= EventsOnExperienceUpdated;
+            OnExperienceUpdated -= Events_OnExperienceUpdated;
         }
 
-        private void EventsOnExperienceUpdated(Player nativePlayer, uint experience)
+        private void Events_OnExperienceUpdated(Player nativePlayer, uint experience)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
