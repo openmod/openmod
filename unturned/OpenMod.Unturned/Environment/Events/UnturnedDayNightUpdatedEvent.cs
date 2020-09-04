@@ -4,11 +4,14 @@ namespace OpenMod.Unturned.Environment.Events
 {
     public class UnturnedDayNightUpdatedEvent : Event
     {
-        public bool IsDayTime { get; }
+        public WorldTime WorldTime { get; }
 
-        public UnturnedDayNightUpdatedEvent(bool isDayTime)
+        public bool IsFullMoon { get; }
+
+        public UnturnedDayNightUpdatedEvent(WorldTime worldTime, bool isFullMoon)
         {
-            IsDayTime = isDayTime;
+            WorldTime = worldTime;
+            IsFullMoon = isFullMoon;
         }
     }
 }

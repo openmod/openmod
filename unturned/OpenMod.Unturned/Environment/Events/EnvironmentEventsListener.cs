@@ -18,7 +18,6 @@ namespace OpenMod.Unturned.Environment.Events
         public override void Subscribe()
         {
             LightingManager.onDayNightUpdated += OnDayNightUpdated;
-            LightingManager.onMoonUpdated += OnMoonUpdated;
             LightingManager.onRainUpdated += OnRainUpdated;
             LightingManager.onSnowUpdated += OnSnowUpdated;
         }
@@ -26,14 +25,15 @@ namespace OpenMod.Unturned.Environment.Events
         public override void Unsubscribe()
         {
             LightingManager.onDayNightUpdated -= OnDayNightUpdated;
-            LightingManager.onMoonUpdated -= OnMoonUpdated;
             LightingManager.onRainUpdated -= OnRainUpdated;
             LightingManager.onSnowUpdated -= OnSnowUpdated;
         }
 
         private void OnDayNightUpdated(bool isDaytime)
         {
-            UnturnedDayNightUpdatedEvent @event = new UnturnedDayNightUpdatedEvent(isDaytime);
+            WorldTime worldTime = isDaytime ? WorldTime.Day : WorldTime.Night;
+
+            UnturnedDayNightUpdatedEvent @event = new UnturnedDayNightUpdatedEvent(worldTime, LightingManager.isFullMoon);
 
             Emit(@event);
         }
@@ -41,13 +41,6 @@ namespace OpenMod.Unturned.Environment.Events
         private void OnRainUpdated(ELightingRain rain)
         {
             UnturnedWeatherUpdatedEvent @event = new UnturnedWeatherUpdatedEvent(rain, LevelLighting.snowyness);
-
-            Emit(@event);
-        }
-
-        private void OnMoonUpdated(bool isFullMoon)
-        {
-            UnturnedMoonUpdatedEvent @event = new UnturnedMoonUpdatedEvent(isFullMoon);
 
             Emit(@event);
         }
