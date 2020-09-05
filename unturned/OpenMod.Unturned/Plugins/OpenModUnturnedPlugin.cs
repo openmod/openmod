@@ -1,5 +1,5 @@
-﻿using System;
-using OpenMod.UnityEngine.Plugins;
+﻿using OpenMod.UnityEngine.Plugins;
+using System;
 
 namespace OpenMod.Unturned.Plugins
 {

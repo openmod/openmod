@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using OpenMod.API;
+using SDG.Unturned;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Microsoft.Extensions.Logging;
-using OpenMod.API;
-using SDG.Unturned;
 
 namespace OpenMod.Unturned.Logging
 {
@@ -38,7 +38,7 @@ namespace OpenMod.Unturned.Logging
             }
 
             var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-            
+
             System.Console.OutputEncoding = encoding;
             System.Console.InputEncoding = encoding;
 

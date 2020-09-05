@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using OpenMod.Extensions.Games.Abstractions.Items;
+﻿using OpenMod.Extensions.Games.Abstractions.Items;
 using SDG.Unturned;
+using System;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Items
 {

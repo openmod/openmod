@@ -19,6 +19,6 @@ namespace OpenMod.Unturned.Items
         public double ItemAmount => Item.amount;
 
         /* Item.state and Item.metadata are the same thing */
-        public byte[] StateData => Item.state; 
+        public byte[] StateData => Item.state;
     }
 }

@@ -1,7 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using OpenMod.Extensions.Games.Abstractions.Items;
+﻿using OpenMod.Extensions.Games.Abstractions.Items;
 using SDG.Unturned;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace OpenMod.Unturned.Items
 {

@@ -1,7 +1,7 @@
-﻿using System;
-using OpenMod.API;
+﻿using OpenMod.API;
 using OpenMod.Core.Ioc;
 using OpenMod.UnityEngine.Commands;
+using System;
 
 namespace OpenMod.Unturned.Commands
 {

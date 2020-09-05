@@ -114,7 +114,9 @@ namespace OpenMod.Core.Persistence
 
             lock (GetLock(filePath))
             {
-                m_ChangeListeners.Add(new KeyValuePair<IOpenModComponent, Action>(component, onChange));
+                var pair = new KeyValuePair<IOpenModComponent, Action>(component, onChange);
+
+                m_ChangeListeners.Add(pair);
                 var idx = m_ChangeListeners.Count - 1;
 
                 if (idx == 0)
@@ -128,9 +130,9 @@ namespace OpenMod.Core.Persistence
                 {
                     lock (GetLock(filePath))
                     {
-                        m_ChangeListeners.RemoveAt(idx);
+                        m_ChangeListeners.Remove(pair);
 
-                        if (m_ChangeListeners.Count == 0)
+                        if (m_ChangeListeners.Count == 0 && m_FileSystemWatcher != null)
                         {
                             m_FileSystemWatcher.Dispose();
                             m_FileSystemWatcher = null;

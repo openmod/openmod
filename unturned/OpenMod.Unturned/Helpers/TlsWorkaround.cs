@@ -38,8 +38,8 @@ namespace OpenMod.Unturned.Helpers
                 chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
                 chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
                 chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
-                
-                if (!chain.Build((X509Certificate2) certificate))
+
+                if (!chain.Build((X509Certificate2)certificate))
                 {
                     return false;
                 }

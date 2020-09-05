@@ -17,12 +17,12 @@ namespace OpenMod.Unturned
         {
             // bug: UnityEngine service configurator doesn't get called
             serviceCollection.AddSingleton<IHostLifetime, UnityHostLifetime>();
-          
+
             serviceCollection.Configure<PermissionCheckerOptions>(options =>
             {
                 options.AddPermissionCheckProvider<UnturnedAdminPermissionCheckProvider>();
             });
-            
+
             serviceCollection.Configure<CommandStoreOptions>(options =>
             {
                 options.AddCommandSource<UnturnedCommandSource>();
@@ -32,7 +32,7 @@ namespace OpenMod.Unturned
             {
                 options.AddUserProvider<UnturnedUserProvider>();
             });
-            
+
             serviceCollection.AddSingleton<UnturnedCommandHandler>();
         }
     }

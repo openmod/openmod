@@ -1,6 +1,6 @@
-﻿using System;
+﻿using OpenMod.Core.Users.Events;
+using System;
 using System.Threading.Tasks;
-using OpenMod.Core.Users.Events;
 
 namespace OpenMod.Unturned.Users.Events
 {
