@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using OpenMod.API;
+﻿using OpenMod.API;
 using OpenMod.Core.Users;
 using SDG.Unturned;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
 {

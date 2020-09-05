@@ -43,7 +43,7 @@ namespace OpenMod.Unturned.Logging
             }
 
             var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-            
+
             System.Console.OutputEncoding = encoding;
             System.Console.InputEncoding = encoding;
 

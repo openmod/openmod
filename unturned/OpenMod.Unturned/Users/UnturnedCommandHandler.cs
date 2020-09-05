@@ -1,11 +1,10 @@
-﻿using System;
-using OpenMod.API;
+﻿using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
 using SDG.Unturned;
-using UnityEngine.Networking.NetworkSystem;
+using System;
 
 namespace OpenMod.Unturned.Users
 {

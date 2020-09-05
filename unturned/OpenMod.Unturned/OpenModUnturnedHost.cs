@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using Cysharp.Threading.Tasks;
+using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
@@ -18,11 +10,19 @@ using OpenMod.API.Persistence;
 using OpenMod.Core.Console;
 using OpenMod.Core.Helpers;
 using OpenMod.Extensions.Games.Abstractions;
+using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
 using OpenMod.Unturned.Users;
 using SDG.Unturned;
 using Semver;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine.Experimental.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
 
@@ -39,6 +39,8 @@ namespace OpenMod.Unturned
         private List<ICommandInputOutput> m_IoHandlers;
         private OpenModConsoleInputOutput m_OpenModIoHandler;
         private readonly HashSet<string> m_Capabilities;
+        private Harmony m_Harmony;
+        private UnturnedEventsActivator m_UnturnedEventsActivator;
 
         public string HostDisplayName { get; } = Provider.APP_NAME;
 
@@ -90,6 +92,7 @@ namespace OpenMod.Unturned
                 KnownGameCapabilities.Vehicles
             };
         }
+
         public bool HasCapability(string capability)
         {
             return m_Capabilities.Contains(capability);
@@ -99,6 +102,9 @@ namespace OpenMod.Unturned
         {
             // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
+
+            m_Harmony = new Harmony(OpenModComponentId);
+            m_Harmony.PatchAll(GetType().Assembly);
 
             m_UnturnedCommandHandler.Subscribe();
             BindUnturnedEvents();
@@ -176,6 +182,9 @@ namespace OpenMod.Unturned
         protected virtual void BindUnturnedEvents()
         {
             CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
+
+            m_UnturnedEventsActivator = ActivatorUtilities.CreateInstance<UnturnedEventsActivator>(m_ServiceProvider);
+            m_UnturnedEventsActivator.ActivateEventListeners();
         }
 
         protected virtual void UnbindUnturnedEvents()
@@ -183,8 +192,10 @@ namespace OpenMod.Unturned
             // ReSharper disable DelegateSubtraction
             CommandWindow.onCommandWindowInputted -= OnCommandWindowInputted;
             // ReSharper restore DelegateSubtraction
+
+            m_UnturnedEventsActivator.Dispose();
         }
-        
+
         private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
         {
             shouldExecuteCommand = false;
@@ -225,7 +236,7 @@ namespace OpenMod.Unturned
             m_IsDisposing = true;
             TlsWorkaround.Uninstalll();
 
-            //m_Harmony.UnpatchAll(c_HarmonyInstanceId);
+            m_Harmony.UnpatchAll(OpenModComponentId);
             UnbindUnturnedEvents();
         }
     }

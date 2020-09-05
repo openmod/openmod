@@ -25,6 +25,14 @@ namespace OpenMod.Core.Eventing
         private readonly ILogger<EventBus> m_Logger;
         private readonly List<EventSubscription> m_EventSubscriptions;
 
+        private static readonly Type[] s_OmittedTypes = new[]
+        {
+            typeof(IEvent),
+            typeof(ICancellableEvent),
+            typeof(EventBase),
+            typeof(Event)
+        };
+
         public EventBus(ILogger<EventBus> logger)
         {
             m_Logger = logger;
@@ -155,7 +163,7 @@ namespace OpenMod.Core.Eventing
             
             eventTypes.AddRange(@event.GetType().GetInterfaces().Where(d => typeof(IEvent).IsAssignableFrom(d)));
 
-            foreach (var eventType in eventTypes)
+            foreach (var eventType in eventTypes.Except(s_OmittedTypes))
             {
                 string eventName = GetEventName(eventType);
 
@@ -170,7 +178,6 @@ namespace OpenMod.Core.Eventing
 
                 if (eventSubscriptions.Count == 0)
                 {
-                    m_Logger?.LogTrace($"{eventName}: No listeners found.");
                     continue;
                 }
 

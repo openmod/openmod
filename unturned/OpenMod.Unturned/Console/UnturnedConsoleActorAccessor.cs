@@ -1,10 +1,10 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Console;
+using System;
 
 namespace OpenMod.Unturned.Console
 {
@@ -17,6 +17,6 @@ namespace OpenMod.Unturned.Console
             Actor = ActivatorUtilities.CreateInstance<ConsoleActor>(serviceProvider, "openmod-unturned-console");
         }
 
-        public ICommandActor Actor { get; } 
+        public ICommandActor Actor { get; }
     }
 }

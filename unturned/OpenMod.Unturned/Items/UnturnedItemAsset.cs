@@ -1,6 +1,6 @@
-﻿using System.Globalization;
-using OpenMod.Extensions.Games.Abstractions.Items;
+﻿using OpenMod.Extensions.Games.Abstractions.Items;
 using SDG.Unturned;
+using System.Globalization;
 
 namespace OpenMod.Unturned.Items
 {

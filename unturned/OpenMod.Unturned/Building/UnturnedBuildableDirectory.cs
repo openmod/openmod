@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using OpenMod.API.Ioc;
+﻿using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Extensions.Games.Abstractions.Building;
 using SDG.Unturned;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Building
 {
@@ -19,7 +19,7 @@ namespace OpenMod.Unturned.Building
                 {
                     if (d is ItemBarricadeAsset barricadeAsset)
                         return new UnturnedBuildableAsset(barricadeAsset);
-                    return new UnturnedBuildableAsset((ItemStructureAsset) d);
+                    return new UnturnedBuildableAsset((ItemStructureAsset)d);
                 })
                 .ToList();
 

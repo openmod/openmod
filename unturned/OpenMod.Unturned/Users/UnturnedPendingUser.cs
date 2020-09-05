@@ -1,11 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using OpenMod.API;
+﻿using OpenMod.API;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
-using OpenMod.Unturned.Entities;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
 {

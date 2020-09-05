@@ -1,6 +1,5 @@
 ﻿using OpenMod.API.Prioritization;
 using OpenMod.Core.Permissions;
-using OpenMod.Unturned.Entities;
 using OpenMod.Unturned.Users;
 
 namespace OpenMod.Unturned.Permissions

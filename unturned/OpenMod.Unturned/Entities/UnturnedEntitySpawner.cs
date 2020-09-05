@@ -1,9 +1,9 @@
-﻿using System;
-using System.Numerics;
-using System.Threading.Tasks;
-using OpenMod.API.Ioc;
+﻿using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Extensions.Games.Abstractions.Entities;
+using System;
+using System.Numerics;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Entities
 {

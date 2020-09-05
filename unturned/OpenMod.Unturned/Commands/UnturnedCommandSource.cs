@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using OpenMod.API;
+﻿using OpenMod.API;
 using OpenMod.API.Commands;
 using SDG.Unturned;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Commands
 {
@@ -15,7 +15,7 @@ namespace OpenMod.Unturned.Commands
         public UnturnedCommandSource(IRuntime runtime)
         {
             m_Commands = new List<ICommandRegistration>();
-            
+
             foreach (var cmd in Commander.commands)
             {
                 m_Commands.Add(new UnturnedCommandRegistration(runtime, cmd));
