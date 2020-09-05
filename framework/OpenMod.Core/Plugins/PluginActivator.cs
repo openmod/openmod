@@ -188,13 +188,13 @@ namespace OpenMod.Core.Plugins
                             configurator.ConfigureContainer(new PluginServiceConfigurationContext(m_LifetimeScope, configuration, containerBuilder));
                         }
 
-                        var configurationEvent = new PluginContainerConfigurationEvent(pluginMetadata, pluginType,
+                        var configurationEvent = new PluginContainerConfiguringEvent(pluginMetadata, pluginType,
                             configuration, containerBuilder, workingDirectory);
                         AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_Runtime, this, configurationEvent));
                     });
 
                     pluginInstance = (IOpenModPlugin)lifetimeScope.Resolve(pluginType);
-                    var pluginActivateEvent = new PluginActivateEvent(pluginInstance);
+                    var pluginActivateEvent = new PluginActivatingEvent(pluginInstance);
                     await m_EventBus.EmitAsync(m_Runtime, this, pluginActivateEvent);
 
                     if (pluginActivateEvent.IsCancelled)

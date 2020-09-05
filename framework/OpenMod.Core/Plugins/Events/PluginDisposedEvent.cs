@@ -3,11 +3,11 @@ using OpenMod.Core.Eventing;
 
 namespace OpenMod.Core.Plugins.Events
 {
-    public class PluginDisposeEvent : Event
+    public class PluginDisposedEvent : Event
     {
         public IOpenModPlugin Plugin { get; }
 
-        public PluginDisposeEvent(IOpenModPlugin plugin)
+        public PluginDisposedEvent(IOpenModPlugin plugin)
         {
             Plugin = plugin;
         }
