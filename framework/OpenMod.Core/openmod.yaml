@@ -1,4 +1,4 @@
-﻿console:
+﻿console: # Setting these to true will likely disable your console ability if you're using a web-based console
   autocomplete: false
   history: false
 nuget:
