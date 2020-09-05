@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using OpenMod.API;
+using SDG.Unturned;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Microsoft.Extensions.Logging;
-using OpenMod.API;
-using SDG.Unturned;
 
 namespace OpenMod.Unturned.Logging
 {
@@ -15,6 +16,8 @@ namespace OpenMod.Unturned.Logging
         public event CommandInputHandler inputCommitted;
 
         private readonly IAutoCompleteHandler m_AutoCompleteHandler;
+        private readonly IConfiguration m_Configuration;
+        private bool m_ReadLineEnabled;
         private readonly ConcurrentQueue<string> m_CommandQueue;
         private readonly ILogger m_Logger;
         private Thread m_InputThread;
@@ -23,10 +26,12 @@ namespace OpenMod.Unturned.Logging
 
         public OpenModConsoleInputOutput(
             ILoggerFactory loggerFactory,
+            IConfiguration configuration,
             IAutoCompleteHandler autoCompleteHandler)
         {
             m_CommandQueue = new ConcurrentQueue<string>();
             m_AutoCompleteHandler = autoCompleteHandler;
+            m_Configuration = configuration;
             m_Logger = loggerFactory.CreateLogger("SDG.Unturned");
         }
 
@@ -44,9 +49,18 @@ namespace OpenMod.Unturned.Logging
 
             m_PreviousConsoleIn = System.Console.In;
             System.Console.SetIn(new StreamReader(System.Console.OpenStandardInput()));
+            
+            bool history = m_Configuration.GetSection("console:history").Get<bool>();
+            bool autoComplete = m_Configuration.GetSection("console:autocomplete").Get<bool>();
 
-            ReadLine.HistoryEnabled = true;
-            ReadLine.AutoCompletionHandler = m_AutoCompleteHandler;
+            m_ReadLineEnabled = history || autoComplete;
+
+            if (m_ReadLineEnabled)
+            {
+                ReadLine.HistoryEnabled = history;
+                ReadLine.AutoCompletionHandler = autoComplete ?
+                    m_AutoCompleteHandler : null;
+            }
 
             m_IsAlive = true;
             m_InputThread = new Thread(OnInputThreadStart)
@@ -84,7 +98,10 @@ namespace OpenMod.Unturned.Logging
             {
                 if (System.Console.KeyAvailable)
                 {
-                    string command = ReadLine.Read();
+                    string command = m_ReadLineEnabled ?
+                        ReadLine.Read() :
+                        System.Console.ReadLine();
+
                     if (!string.IsNullOrWhiteSpace(command))
                     {
                         m_CommandQueue.Enqueue(command); /* Enqueue command because inputCommitted is expected on main thread */

@@ -1,4 +1,7 @@
-﻿nuget:
+﻿console:
+  autocomplete: false
+  history: false
+nuget:
   install:
     allowedActors:
       - Console

@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 
@@ -9,7 +10,8 @@ namespace OpenMod.Unturned.Logging
     {
         public OpenModWindowsConsoleInputOutput(
             ILoggerFactory loggerFactory,
-            IAutoCompleteHandler autoCompleteHandler) : base(loggerFactory, autoCompleteHandler)
+            IConfiguration configuration,
+            IAutoCompleteHandler autoCompleteHandler) : base(loggerFactory, configuration, autoCompleteHandler)
         {
         }
     }
