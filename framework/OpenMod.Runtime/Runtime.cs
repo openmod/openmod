@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Autofac.Util;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
@@ -23,6 +26,7 @@ using OpenMod.NuGet;
 using Semver;
 using Serilog;
 using Serilog.Extensions.Logging;
+using AssemblyExtensions = Autofac.Util.AssemblyExtensions;
 
 #pragma warning disable CS4014
 
@@ -53,6 +57,8 @@ namespace OpenMod.Runtime
 
         public IDataStore DataStore { get; private set; }
 
+        public IHostInformation HostInformation { get; private set; }
+
         public IHost Host { get; private set; }
         private SerilogLoggerFactory m_LoggerFactory;
         private ILogger<Runtime> m_Logger;
@@ -78,6 +84,16 @@ namespace OpenMod.Runtime
                 openModHostAssemblies.Insert(0, openModCoreAssembly);
             }
 
+            var hostInformationType = openModHostAssemblies
+                .Select(asm => asm.GetLoadableTypes().FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
+                .LastOrDefault(d => d != null);
+
+            if (hostInformationType == null)
+            {
+                throw new Exception("Failed to find IHostInformation in host assemblies.");
+            }
+
+            HostInformation = (IHostInformation) Activator.CreateInstance(hostInformationType);
             m_OpenModHostAssemblies = openModHostAssemblies;
             m_HostBuilderFunc = hostBuilderFunc;
             m_RuntimeInitParameters = parameters;
@@ -190,6 +206,7 @@ namespace OpenMod.Runtime
         private void SetupServices(IServiceCollection services, OpenModStartup startup)
         {
             services.AddSingleton<IRuntime>(this);
+            services.AddSingleton(HostInformation);
             services.AddHostedService<OpenModHostedService>();
             services.AddOptions();
             services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
