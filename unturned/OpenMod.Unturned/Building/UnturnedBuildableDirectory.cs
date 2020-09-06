@@ -43,15 +43,15 @@ namespace OpenMod.Unturned.Building
                 var structureDrops = structureRegions.SelectMany(str => str.drops);
 
                 return barricadeDatas
-                    .Select(k =>
+                    .Select((k, i) =>
                     {
-                        var drop = barricadeDrops.FirstOrDefault(l => l.instanceID == k.instanceID);
+                        var drop = barricadeDrops.ElementAt(i);
                         return drop == null ? null : new UnturnedBarricadeBuildable(k, drop);
                     })
                     .Cast<UnturnedBuildable>()
-                    .Concat(structureDatas.Select(k =>
+                    .Concat(structureDatas.Select((k, i) =>
                     {
-                        var drop = structureDrops.FirstOrDefault(l => l.instanceID == k.instanceID);
+                        var drop = structureDrops.ElementAt(i);
                         return drop == null ? null : new UnturnedStructureBuildable(k, drop);
                     }))
                     .Where(d => d != null)
