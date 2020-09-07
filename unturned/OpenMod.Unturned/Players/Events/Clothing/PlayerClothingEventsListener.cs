@@ -8,7 +8,7 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Players.Events.Clothing
 {
-    internal class PlayerClothingEventsListener : UnturnedEventsListener
+    internal class PlayerClothingEventsListener : UnturnedPlayerEventsListener
     {
         public PlayerClothingEventsListener(IOpenModHost openModHost,
             IEventBus eventBus,
@@ -37,6 +37,30 @@ namespace OpenMod.Unturned.Players.Events.Clothing
             OnWearPants -= Events_OnWearPants;
             OnWearShirt -= Events_OnWearShirt;
             OnWearVest -= Events_OnWearVest;
+        }
+
+        public override void SubscribePlayer(Player player)
+        {
+            player.clothing.onBackpackUpdated += (a, b, c) => OnBackpackUpdated(player, a, b, c);
+            player.clothing.onGlassesUpdated += (a, b, c) => OnGlassesUpdated(player, a, b, c);
+            player.clothing.onHatUpdated += (a, b, c) => OnHatUpdated(player, a, b, c);
+            player.clothing.onMaskUpdated += (a, b, c) => OnMaskUpdated(player, a, b, c);
+            player.clothing.onPantsUpdated += (a, b, c) => OnPantsUpdated(player, a, b, c);
+            player.clothing.onShirtUpdated += (a, b, c) => OnShirtUpdated(player, a, b, c);
+            player.clothing.onVestUpdated += (a, b, c) => OnVestUpdated(player, a, b, c);
+        }
+
+        public override void UnsubscribePlayer(Player player)
+        {
+            // ReSharper disable DelegateSubtraction
+            player.clothing.onBackpackUpdated -= (a, b, c) => OnBackpackUpdated(player, a, b, c);
+            player.clothing.onGlassesUpdated -= (a, b, c) => OnGlassesUpdated(player, a, b, c);
+            player.clothing.onHatUpdated -= (a, b, c) => OnHatUpdated(player, a, b, c);
+            player.clothing.onMaskUpdated -= (a, b, c) => OnMaskUpdated(player, a, b, c);
+            player.clothing.onPantsUpdated -= (a, b, c) => OnPantsUpdated(player, a, b, c);
+            player.clothing.onShirtUpdated -= (a, b, c) => OnShirtUpdated(player, a, b, c);
+            player.clothing.onVestUpdated -= (a, b, c) => OnVestUpdated(player, a, b, c);
+            // ReSharper restore DelegateSubtraction
         }
 
         private void Events_OnWearBackpack(Player nativePlayer, ushort id, byte quality, byte[] state, out bool cancel)
@@ -219,6 +243,146 @@ namespace OpenMod.Unturned.Players.Events.Clothing
             Emit(@event);
 
             cancel = @event.IsCancelled;
+        }
+
+        private void OnBackpackUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            IEvent @event;
+
+            if (id == 0)
+            {
+                @event = new UnturnedPlayerBackpackUnequippedEvent(player);
+            }
+            else
+            {
+                Item item = new Item(id, 1, quality, state);
+
+                @event = new UnturnedPlayerBackpackEquippedEvent(player, new UnturnedItem(item));
+            }
+
+            Emit(@event);
+        }
+
+        private void OnGlassesUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            IEvent @event;
+
+            if (id == 0)
+            {
+                @event = new UnturnedPlayerGlassesUnequippedEvent(player);
+            }
+            else
+            {
+                Item item = new Item(id, 1, quality, state);
+
+                @event = new UnturnedPlayerGlassesEquippedEvent(player, new UnturnedItem(item));
+            }
+
+            Emit(@event);
+        }
+
+        private void OnHatUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            IEvent @event;
+
+            if (id == 0)
+            {
+                @event = new UnturnedPlayerHatUnequippedEvent(player);
+            }
+            else
+            {
+                Item item = new Item(id, 1, quality, state);
+
+                @event = new UnturnedPlayerHatEquippedEvent(player, new UnturnedItem(item));
+            }
+
+            Emit(@event);
+        }
+
+        private void OnMaskUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            IEvent @event;
+
+            if (id == 0)
+            {
+                @event = new UnturnedPlayerMaskUnequippedEvent(player);
+            }
+            else
+            {
+                Item item = new Item(id, 1, quality, state);
+
+                @event = new UnturnedPlayerMaskEquippedEvent(player, new UnturnedItem(item));
+            }
+
+            Emit(@event);
+        }
+
+        private void OnPantsUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            IEvent @event;
+
+            if (id == 0)
+            {
+                @event = new UnturnedPlayerPantsUnequippedEvent(player);
+            }
+            else
+            {
+                Item item = new Item(id, 1, quality, state);
+
+                @event = new UnturnedPlayerPantsEquippedEvent(player, new UnturnedItem(item));
+            }
+
+            Emit(@event);
+        }
+
+        private void OnShirtUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            IEvent @event;
+
+            if (id == 0)
+            {
+                @event = new UnturnedPlayerShirtUnequippedEvent(player);
+            }
+            else
+            {
+                Item item = new Item(id, 1, quality, state);
+
+                @event = new UnturnedPlayerShirtEquippedEvent(player, new UnturnedItem(item));
+            }
+
+            Emit(@event);
+        }
+
+        private void OnVestUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            IEvent @event;
+
+            if (id == 0)
+            {
+                @event = new UnturnedPlayerVestUnequippedEvent(player);
+            }
+            else
+            {
+                Item item = new Item(id, 1, quality, state);
+
+                @event = new UnturnedPlayerVestEquippedEvent(player, new UnturnedItem(item));
+            }
+
+            Emit(@event);
         }
 
         private delegate void WearClothing(Player player, ushort id, byte quality, byte[] state, out bool cancel);
