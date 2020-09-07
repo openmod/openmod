@@ -1,21 +1,21 @@
-﻿using OpenMod.Core.Eventing;
+﻿using OpenMod.API.Eventing;
+using OpenMod.Core.Eventing;
 using Steamworks;
 
 namespace OpenMod.Unturned.Players.Events.Bans
 {
-    public class UnturnedPlayerUnbanningEvent : Event
+    public class UnturnedPlayerUnbanningEvent : Event, ICancellableEvent
     {
         public CSteamID Instigator { get; }
 
         public CSteamID PlayerToUnban { get; }
 
-        public bool ShouldVanillaUnban { get; set; }
+        public bool IsCancelled { get; set; }
 
-        public UnturnedPlayerUnbanningEvent(CSteamID instigator, CSteamID playerToUnban, bool shouldVanillaUnban)
+        public UnturnedPlayerUnbanningEvent(CSteamID instigator, CSteamID playerToUnban)
         {
             Instigator = instigator;
             PlayerToUnban = playerToUnban;
-            ShouldVanillaUnban = shouldVanillaUnban;
         }
     }
 }
