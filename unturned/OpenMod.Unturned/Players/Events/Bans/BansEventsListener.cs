@@ -1,4 +1,5 @@
-﻿using OpenMod.API;
+﻿using HarmonyLib;
+using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
@@ -21,6 +22,8 @@ namespace OpenMod.Unturned.Players.Events.Bans
             Provider.onBanPlayerRequested += OnBanPlayerRequested;
             Provider.onCheckBanStatusWithHWID += OnCheckBanStatus;
             Provider.onUnbanPlayerRequested += OnUnbanPlayerRequested;
+            OnBanned += Events_OnBanned;
+            OnUnbanned += Events_OnUnbanned;
         }
 
         public override void Unsubscribe()
@@ -28,6 +31,8 @@ namespace OpenMod.Unturned.Players.Events.Bans
             Provider.onBanPlayerRequested -= OnBanPlayerRequested;
             Provider.onCheckBanStatusWithHWID -= OnCheckBanStatus;
             Provider.onUnbanPlayerRequested -= OnUnbanPlayerRequested;
+            OnBanned -= Events_OnBanned;
+            OnUnbanned -= Events_OnUnbanned;
         }
 
         private void OnBanPlayerRequested(CSteamID instigator, CSteamID playerToBan, uint ipToBan, ref string reason, ref uint duration, ref bool shouldVanillaBan)
@@ -59,6 +64,47 @@ namespace OpenMod.Unturned.Players.Events.Bans
             Emit(@event);
 
             shouldVanillaUnban = !@event.IsCancelled;
+        }
+
+        private void Events_OnBanned(CSteamID instigator, CSteamID bannedPlayer, uint ip, string reason, uint duration)
+        {
+            UnturnedPlayerBannedEvent @event = new UnturnedPlayerBannedEvent(instigator, bannedPlayer, ip, reason, duration);
+
+            Emit(@event);
+        }
+
+        private void Events_OnUnbanned(CSteamID unbannedPlayer)
+        {
+            UnturnedPlayerUnbannedEvent @event = new UnturnedPlayerUnbannedEvent(unbannedPlayer);
+
+            Emit(@event);
+        }
+
+        private delegate void Banned(CSteamID instigator, CSteamID bannedPlayer, uint ip, string reason, uint duration);
+        private static event Banned OnBanned;
+
+        private delegate void Unbanned(CSteamID unbannedPlayer);
+        private static event Unbanned OnUnbanned;
+
+        [HarmonyPatch]
+        private class Patches
+        {
+            [HarmonyPatch(typeof(SteamBlacklist), "ban", typeof(CSteamID), typeof(uint), typeof(CSteamID), typeof(string), typeof(uint))]
+            [HarmonyPostfix]
+            private static void Ban(CSteamID playerID, uint ip, CSteamID judgeID, string reason, uint duration)
+            {
+                OnBanned?.Invoke(judgeID, playerID, ip, reason, duration);
+            }
+
+            [HarmonyPatch(typeof(SteamBlacklist), "unban")]
+            [HarmonyPostfix]
+            private static void Unban(CSteamID playerID, bool __result)
+            {
+                if (__result)
+                {
+                    OnUnbanned?.Invoke(playerID);
+                }
+            }
         }
     }
 }
