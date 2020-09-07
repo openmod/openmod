@@ -56,9 +56,14 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
             foreach (var arg in args)
             {
-                var packageInfo = arg.Split(':');
+                var packageInfo = arg.Split('@');
                 var packageName = packageInfo[0];
                 var packageVersion = packageInfo.Length > 1 ? packageInfo[1] : null;
+
+                if (packageVersion != null && packageVersion.Equals("latest", StringComparison.OrdinalIgnoreCase))
+                {
+                    packageVersion = null;
+                }
 
                 await Context.Actor.PrintMessageAsync($"Installing {arg}...", Color.White);
                 var result = await m_NuGetPlugins.InstallPackageAsync(packageName, packageVersion, isPre);

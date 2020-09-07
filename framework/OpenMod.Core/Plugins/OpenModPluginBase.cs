@@ -115,7 +115,7 @@ namespace OpenMod.Core.Plugins
                 await UnloadAsync();
             }
 
-            await EventBus.EmitAsync(this, this, new PluginDisposeEvent(this));
+            await EventBus.EmitAsync(this, this, new PluginDisposedEvent(this));
             LifetimeScope?.Dispose();
         }
 

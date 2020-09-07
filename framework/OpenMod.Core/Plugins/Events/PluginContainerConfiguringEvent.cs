@@ -6,7 +6,7 @@ using OpenMod.Core.Eventing;
 
 namespace OpenMod.Core.Plugins.Events
 {
-    public class PluginContainerConfigurationEvent : Event
+    public class PluginContainerConfiguringEvent : Event
     {
         public PluginMetadataAttribute Metadata { get; }
         public Type PluginType { get; }
@@ -14,7 +14,7 @@ namespace OpenMod.Core.Plugins.Events
         public ContainerBuilder ContainerBuilder { get; }
         public string WorkingDirectory { get; }
 
-        public PluginContainerConfigurationEvent(PluginMetadataAttribute metadata, 
+        public PluginContainerConfiguringEvent(PluginMetadataAttribute metadata, 
             Type pluginType, 
             IConfiguration configuration, 
             ContainerBuilder containerBuilder,

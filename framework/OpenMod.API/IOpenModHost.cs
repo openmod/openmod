@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using OpenMod.API.Ioc;
-using Semver;
 
 namespace OpenMod.API
 {
@@ -22,24 +21,8 @@ namespace OpenMod.API
         Task ShutdownAsync();
 
         /// <summary>
-        ///     The name of the host. E.g. the game's name.
+        ///    Checks if the host has a specific capability (e.g. supports inventories for games)
         /// </summary>
-        string HostDisplayName { get; }
-
-        /// <summary>
-        ///    The version of the host. E.g. the game's version.
-        /// </summary>
-        string HostVersion { get; }
-
-        /// <summary>
-        ///   Version of the OpenMod host implementation.
-        /// </summary>
-        SemVersion Version { get; }
-
-        /// <summary>
-        ///    Name of the host implementation. E.g. OpenMod for Unturned
-        /// </summary>
-        string Name { get; }
 
         bool HasCapability(string capability);
     }

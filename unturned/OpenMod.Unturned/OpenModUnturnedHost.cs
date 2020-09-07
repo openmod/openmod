@@ -15,7 +15,6 @@ using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
 using OpenMod.Unturned.Users;
 using SDG.Unturned;
-using Semver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +30,7 @@ namespace OpenMod.Unturned
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
+        private readonly IHostInformation m_HostInformation;
         private readonly IServiceProvider m_ServiceProvider;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly ICommandExecutor m_CommandExecutor;
@@ -39,16 +39,8 @@ namespace OpenMod.Unturned
         private List<ICommandInputOutput> m_IoHandlers;
         private OpenModConsoleInputOutput m_OpenModIoHandler;
         private readonly HashSet<string> m_Capabilities;
-        private Harmony m_Harmony;
         private UnturnedEventsActivator m_UnturnedEventsActivator;
-
-        public string HostDisplayName { get; } = Provider.APP_NAME;
-
-        public string HostVersion { get; } = Provider.APP_VERSION;
-
-        public SemVersion Version { get; }
-
-        public string Name { get; } = "OpenMod for Unturned";
+        private Harmony m_Harmony;
 
         public string OpenModComponentId { get; } = "OpenMod.Unturned";
 
@@ -68,6 +60,7 @@ namespace OpenMod.Unturned
 
         public OpenModUnturnedHost(
             IRuntime runtime,
+            IHostInformation hostInformation,
             IServiceProvider serviceProvider,
             ILifetimeScope lifetimeScope,
             IDataStoreFactory dataStoreFactory,
@@ -76,6 +69,7 @@ namespace OpenMod.Unturned
             ILogger<OpenModUnturnedHost> logger,
             UnturnedCommandHandler unturnedCommandHandler)
         {
+            m_HostInformation = hostInformation;
             m_ServiceProvider = serviceProvider;
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
@@ -84,7 +78,6 @@ namespace OpenMod.Unturned
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
             DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
-            Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
             m_Capabilities = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 KnownGameCapabilities.Health,
@@ -154,7 +147,7 @@ namespace OpenMod.Unturned
 
             Dedicator.commandWindow.addIOHandler(m_OpenModIoHandler);
 
-            m_Logger.LogInformation($"OpenMod for Unturned v{Version} is initializing...");
+            m_Logger.LogInformation($"OpenMod for Unturned v{m_HostInformation.HostVersion} is initializing...");
 
             TlsWorkaround.Install();
 

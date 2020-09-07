@@ -16,6 +16,7 @@ namespace OpenMod.Runtime
     {
         private readonly ILogger<OpenModHostedService> m_Logger;
         private readonly IPermissionChecker m_PermissionChecker;
+        private readonly IHostInformation m_HostInformation;
         private readonly IOpenModHost m_Host;
         private readonly IPluginAssemblyStore m_PluginAssemblyStore;
         private readonly IPluginActivator m_PluginActivator;
@@ -24,6 +25,7 @@ namespace OpenMod.Runtime
         public OpenModHostedService(
             ILogger<OpenModHostedService> logger,
             IPermissionChecker permissionChecker,
+            IHostInformation hostInformation,
             IOpenModHost host,
             IPluginAssemblyStore pluginAssemblyStore,
             IPluginActivator pluginActivator,
@@ -32,6 +34,7 @@ namespace OpenMod.Runtime
         {
             m_Logger = logger;
             m_PermissionChecker = permissionChecker;
+            m_HostInformation = hostInformation;
             m_Host = host;
             m_PluginAssemblyStore = pluginAssemblyStore;
             m_PluginActivator = pluginActivator;
@@ -43,7 +46,7 @@ namespace OpenMod.Runtime
             await m_PermissionChecker.InitAsync();
             Smart.Default.Parser.UseAlternativeEscapeChar();// '\\' is the default value
 
-            m_Logger.LogInformation($"Initializing for host: {m_Host.HostDisplayName} v{m_Host.HostVersion}");
+            m_Logger.LogInformation($"Initializing for host: {m_HostInformation.HostName} v{m_HostInformation.HostVersion}");
             await m_Host.InitAsync();
 
             m_Logger.LogInformation("Loading plugins...");

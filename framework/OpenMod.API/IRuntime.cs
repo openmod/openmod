@@ -49,8 +49,13 @@ namespace OpenMod.API
         Task ReloadAsync();
 
         /// <summary>
-        /// The .NET generic host instance
+        ///     The .NET generic host instance.
         /// </summary>
         IHost Host { get; }
+
+        /// <summary>
+        ///    Information about the OpenMod host.
+        /// </summary>
+        IHostInformation HostInformation { get; }
     }
 }
