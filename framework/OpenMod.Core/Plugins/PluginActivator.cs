@@ -113,12 +113,31 @@ namespace OpenMod.Core.Plugins
                     {
                         var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
 
+                        var assemblyName = assembly.GetName().Name;
+                        var resourcesNameSpace = assembly.GetManifestResourceNames()
+                            .FirstOrDefault(rs =>
+                                rs.EndsWith($"{assemblyName}.config.yaml") ||
+                                rs.EndsWith($"{assemblyName}.translations.yaml"));
+
+                        //Normal case:  <namespeace>.config.yaml -> generate config.yaml
+                        //RootName case: RG.Plugin.<namespeace>.config.yaml -> generate RG.Plugin.config.yaml
+                        if (!string.IsNullOrEmpty(resourcesNameSpace))
+                        {
+                            // ReSharper disable StringIndexOfIsCultureSpecific.1
+                            var indexToRemove = resourcesNameSpace.EndsWith($"{assemblyName}.config.yaml")
+                                ? resourcesNameSpace.IndexOf($"{assemblyName}.config.yaml")
+                                : resourcesNameSpace.IndexOf($"{assemblyName}.translations.yaml");
+                            // ReSharper restore StringIndexOfIsCultureSpecific.1        
+
+                            resourcesNameSpace = resourcesNameSpace.Remove(indexToRemove);
+                        }
+
                         var configurationBuilder = new ConfigurationBuilder();
                         if (Directory.Exists(workingDirectory))
                         {
                             configurationBuilder
                                 .SetBasePath(workingDirectory)
-                                .AddYamlFile("config.yaml", optional: true, reloadOnChange: true);
+                                .AddYamlFile($"{resourcesNameSpace}config.yaml", optional: true, reloadOnChange: true);
                         }
 
                         var configuration = configurationBuilder
@@ -149,7 +168,7 @@ namespace OpenMod.Core.Plugins
                             .OwnedByLifetimeScope();
 
                         var stringLocalizer = Directory.Exists(workingDirectory)
-                            ? m_StringLocalizerFactory.Create("translations", workingDirectory)
+                            ? m_StringLocalizerFactory.Create($"{resourcesNameSpace}translations", workingDirectory)
                             : NullStringLocalizer.Instance;
 
                         containerBuilder.Register(context => stringLocalizer)
@@ -184,8 +203,10 @@ namespace OpenMod.Core.Plugins
                         foreach (var type in pluginType.Assembly.FindTypes<IPluginContainerConfigurator>())
                         {
                             var configurator =
-                                (IPluginContainerConfigurator)ActivatorUtilities.CreateInstance(serviceProvider, type);
-                            configurator.ConfigureContainer(new PluginServiceConfigurationContext(m_LifetimeScope, configuration, containerBuilder));
+                                (IPluginContainerConfigurator) ActivatorUtilities.CreateInstance(serviceProvider, type);
+                            configurator.ConfigureContainer(
+                                new PluginServiceConfigurationContext(m_LifetimeScope, configuration,
+                                    containerBuilder));
                         }
 
                         var configurationEvent = new PluginContainerConfiguringEvent(pluginMetadata, pluginType,
@@ -193,7 +214,7 @@ namespace OpenMod.Core.Plugins
                         AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_Runtime, this, configurationEvent));
                     });
 
-                    pluginInstance = (IOpenModPlugin)lifetimeScope.Resolve(pluginType);
+                    pluginInstance = (IOpenModPlugin) lifetimeScope.Resolve(pluginType);
                     var pluginActivateEvent = new PluginActivatingEvent(pluginInstance);
                     await m_EventBus.EmitAsync(m_Runtime, this, pluginActivateEvent);
 
@@ -219,7 +240,8 @@ namespace OpenMod.Core.Plugins
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, $"Failed to load plugin: {pluginInstance.DisplayName} v{pluginInstance.Version}");
+                    m_Logger.LogError(ex,
+                        $"Failed to load plugin: {pluginInstance.DisplayName} v{pluginInstance.Version}");
                     return null;
                 }
 
@@ -244,9 +266,9 @@ namespace OpenMod.Core.Plugins
             m_Logger.LogInformation("Unloading all plugins...");
 
             var i = 0;
-            foreach (var instance in from plugin in m_ActivatedPlugins 
-                where plugin.IsAlive 
-                select (IOpenModPlugin)plugin.Target)
+            foreach (var instance in from plugin in m_ActivatedPlugins
+                where plugin.IsAlive
+                select (IOpenModPlugin) plugin.Target)
             {
                 try
                 {
