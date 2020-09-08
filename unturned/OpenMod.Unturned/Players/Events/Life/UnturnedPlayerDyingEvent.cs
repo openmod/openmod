@@ -1,11 +1,12 @@
 ﻿using OpenMod.Extensions.Games.Abstractions.Entities;
+using OpenMod.Extensions.Games.Abstractions.Players;
 using SDG.Unturned;
 using Steamworks;
 using System.Numerics;
 
 namespace OpenMod.Unturned.Players.Events.Life
 {
-    public class UnturnedPlayerDyingEvent : UnturnedPlayerDamagingEvent
+    public class UnturnedPlayerDyingEvent : UnturnedPlayerDamagingEvent, IPlayerDyingEvent
     {
         public UnturnedPlayerDyingEvent(UnturnedPlayer player, byte amount,
             EDeathCause cause, ELimb limb,
