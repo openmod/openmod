@@ -7,7 +7,6 @@ using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
 using Steamworks;
-using System;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Vehicles.Events
@@ -36,6 +35,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleSpawned += Events_OnVehicleSpawned;
             OnVehicleEntered += Events_OnVehicleEntered;
             OnVehicleExited += Events_OnVehicleExited;
+            OnVehicleSwapped += Events_OnVehicleSwapped;
         }
 
         public override void Unsubscribe()
@@ -53,6 +53,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleSpawned -= Events_OnVehicleSpawned;
             OnVehicleEntered -= Events_OnVehicleEntered;
             OnVehicleExited -= Events_OnVehicleExited;
+            OnVehicleSwapped -= Events_OnVehicleSwapped;
         }
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
@@ -193,6 +194,16 @@ namespace OpenMod.Unturned.Vehicles.Events
             Emit(@event);
         }
 
+        private void Events_OnVehicleSwapped(InteractableVehicle vehicle, Player nativePlayer, byte fromSeatIndex, byte toSeatIndex)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedPlayerSwappedSeatEvent @event =
+                new UnturnedPlayerSwappedSeatEvent(player, new UnturnedVehicle(vehicle), fromSeatIndex, toSeatIndex);
+
+            Emit(@event);
+        }
+
         private delegate void VehicleExploding(InteractableVehicle vehicle, out bool cancel);
         private static event VehicleExploding OnVehicleExploding;
 
@@ -204,6 +215,9 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private delegate void VehicleExited(InteractableVehicle vehicle, Player player);
         private static event VehicleExited OnVehicleExited;
+
+        private delegate void VehicleSwapped(InteractableVehicle vehicle, Player player, byte fromSeatIndex, byte toSeatIndex);
+        private static event VehicleSwapped OnVehicleSwapped;
 
         [HarmonyPatch]
         private class VehiclePatches
@@ -261,6 +275,23 @@ namespace OpenMod.Unturned.Vehicles.Events
                 if (__state != null)
                 {
                     OnVehicleExited?.Invoke(__instance, __state);
+                }
+            }
+
+            [HarmonyPatch(typeof(InteractableVehicle), "swapPlayer")]
+            [HarmonyPostfix]
+            private static void SwapPlayer(InteractableVehicle __instance, byte fromSeatIndex, byte toSeatIndex)
+            {
+                if (fromSeatIndex < __instance.passengers?.Length && toSeatIndex < __instance.passengers?.Length)
+                {
+                    Passenger passenger = __instance.passengers[toSeatIndex];
+
+                    Player player = passenger?.player?.player;
+
+                    if (player != null)
+                    {
+                        OnVehicleSwapped?.Invoke(__instance, player, fromSeatIndex, toSeatIndex);
+                    }
                 }
             }
         }
