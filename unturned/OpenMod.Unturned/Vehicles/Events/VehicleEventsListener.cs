@@ -33,6 +33,9 @@ namespace OpenMod.Unturned.Vehicles.Events
             VehicleManager.onVehicleLockpicked += OnVehicleLockpicked;
             OnVehicleExploding += Events_OnVehicleExploding;
             OnVehicleSpawned += Events_OnVehicleSpawned;
+            OnVehicleEntered += Events_OnVehicleEntered;
+            OnVehicleExited += Events_OnVehicleExited;
+            OnVehicleSwapped += Events_OnVehicleSwapped;
         }
 
         public override void Unsubscribe()
@@ -48,13 +51,10 @@ namespace OpenMod.Unturned.Vehicles.Events
             VehicleManager.onVehicleLockpicked -= OnVehicleLockpicked;
             OnVehicleExploding -= Events_OnVehicleExploding;
             OnVehicleSpawned -= Events_OnVehicleSpawned;
+            OnVehicleEntered -= Events_OnVehicleEntered;
+            OnVehicleExited -= Events_OnVehicleExited;
+            OnVehicleSwapped -= Events_OnVehicleSwapped;
         }
-
-        private delegate void VehicleExploding(InteractableVehicle vehicle, out bool cancel);
-        private static event VehicleExploding OnVehicleExploding;
-
-        private delegate void VehicleSpawned(InteractableVehicle vehicle);
-        private static event VehicleSpawned OnVehicleSpawned;
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
         {
@@ -174,6 +174,51 @@ namespace OpenMod.Unturned.Vehicles.Events
             Emit(@event);
         }
 
+        private void Events_OnVehicleEntered(InteractableVehicle vehicle, Player nativePlayer)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedPlayerEnteredVehicleEvent @event =
+                new UnturnedPlayerEnteredVehicleEvent(player, new UnturnedVehicle(vehicle));
+
+            Emit(@event);
+        }
+
+        private void Events_OnVehicleExited(InteractableVehicle vehicle, Player nativePlayer)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedPlayerExitedVehicleEvent @event =
+                new UnturnedPlayerExitedVehicleEvent(player, new UnturnedVehicle(vehicle));
+
+            Emit(@event);
+        }
+
+        private void Events_OnVehicleSwapped(InteractableVehicle vehicle, Player nativePlayer, byte fromSeatIndex, byte toSeatIndex)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedPlayerSwappedSeatEvent @event =
+                new UnturnedPlayerSwappedSeatEvent(player, new UnturnedVehicle(vehicle), fromSeatIndex, toSeatIndex);
+
+            Emit(@event);
+        }
+
+        private delegate void VehicleExploding(InteractableVehicle vehicle, out bool cancel);
+        private static event VehicleExploding OnVehicleExploding;
+
+        private delegate void VehicleSpawned(InteractableVehicle vehicle);
+        private static event VehicleSpawned OnVehicleSpawned;
+
+        private delegate void VehicleEntered(InteractableVehicle vehicle, Player player);
+        private static event VehicleEntered OnVehicleEntered;
+
+        private delegate void VehicleExited(InteractableVehicle vehicle, Player player);
+        private static event VehicleExited OnVehicleExited;
+
+        private delegate void VehicleSwapped(InteractableVehicle vehicle, Player player, byte fromSeatIndex, byte toSeatIndex);
+        private static event VehicleSwapped OnVehicleSwapped;
+
         [HarmonyPatch]
         private class VehiclePatches
         {
@@ -193,6 +238,61 @@ namespace OpenMod.Unturned.Vehicles.Events
             private static void SpawnVehicleInternal(InteractableVehicle __result)
             {
                 OnVehicleSpawned?.Invoke(__result);
+            }
+
+            [HarmonyPatch(typeof(InteractableVehicle), "addPlayer")]
+            [HarmonyPostfix]
+            private static void AddPlayer(InteractableVehicle __instance, CSteamID steamID)
+            {
+                Player player = PlayerTool.getPlayer(steamID);
+
+                if (player == null) return;
+
+                OnVehicleEntered?.Invoke(__instance, player);
+            }
+
+            [HarmonyPatch(typeof(InteractableVehicle), "removePlayer")]
+            [HarmonyPrefix]
+            private static void PreRemovePlayer(InteractableVehicle __instance, byte seatIndex, ref Player __state)
+            {
+                __state = null;
+
+                if (seatIndex < __instance.passengers?.Length)
+                {
+                    Passenger passenger = __instance.passengers[seatIndex];
+
+                    if (passenger?.player?.player != null)
+                    {
+                        __state = passenger.player.player;
+                    }
+                }
+            }
+
+            [HarmonyPatch(typeof(InteractableVehicle), "removePlayer")]
+            [HarmonyPostfix]
+            private static void PostRemovePlayer(InteractableVehicle __instance, Player __state)
+            {
+                if (__state != null)
+                {
+                    OnVehicleExited?.Invoke(__instance, __state);
+                }
+            }
+
+            [HarmonyPatch(typeof(InteractableVehicle), "swapPlayer")]
+            [HarmonyPostfix]
+            private static void SwapPlayer(InteractableVehicle __instance, byte fromSeatIndex, byte toSeatIndex)
+            {
+                if (fromSeatIndex < __instance.passengers?.Length && toSeatIndex < __instance.passengers?.Length)
+                {
+                    Passenger passenger = __instance.passengers[toSeatIndex];
+
+                    Player player = passenger?.player?.player;
+
+                    if (player != null)
+                    {
+                        OnVehicleSwapped?.Invoke(__instance, player, fromSeatIndex, toSeatIndex);
+                    }
+                }
             }
         }
     }
