@@ -15,10 +15,25 @@ namespace OpenMod.Unturned.Entities
     [ServiceImplementation(Priority = Priority.Lowest)]
     public class UnturnedEntityDirectory : IEntityDirectory
     {
-        public Task<IReadOnlyCollection<IEntity>> GetEntitiesAsync()
+        public async Task<IReadOnlyCollection<IEntity>> GetEntitiesAsync()
         {
-            // todo: add all zombies, players and animals
-            throw new System.NotImplementedException();
+            await UniTask.SwitchToMainThread();
+
+            var entities = new List<IEntity>();
+
+            entities.AddRange(Provider.clients
+                .Where(x => x?.player != null)
+                .Select(x => new UnturnedPlayer(x.player)));
+
+            entities.AddRange(AnimalManager.animals
+                .Where(x => x != null)
+                .Select(x => new UnturnedAnimal(x)));
+
+            entities.AddRange(ZombieManager.tickingZombies
+                .Where(x => x != null)
+                .Select(x => new UnturnedZombie(x)));
+
+            return entities;
         }
 
         public async Task<IReadOnlyCollection<IEntityAsset>> GetEntityAssetsAsync()

@@ -1,9 +1,10 @@
-﻿using OpenMod.Core.Eventing;
+﻿using OpenMod.API.Eventing;
+using OpenMod.Core.Eventing;
 using Steamworks;
 
 namespace OpenMod.Unturned.Players.Events.Bans
 {
-    public class UnturnedPlayerBanningEvent : Event
+    public class UnturnedPlayerBanningEvent : Event, ICancellableEvent
     {
         public CSteamID Instigator { get; }
 
@@ -15,16 +16,15 @@ namespace OpenMod.Unturned.Players.Events.Bans
 
         public uint Duration { get; set; }
 
-        public bool ShouldVanillaBan { get; set; }
+        public bool IsCancelled { get; set; }
 
-        public UnturnedPlayerBanningEvent(CSteamID instigator, CSteamID playerToBan, uint ipToBan, string reason, uint duration, bool shouldVanillaBan)
+        public UnturnedPlayerBanningEvent(CSteamID instigator, CSteamID playerToBan, uint ipToBan, string reason, uint duration)
         {
             Instigator = instigator;
             PlayerToBan = playerToBan;
             IPToBan = ipToBan;
             Reason = reason;
             Duration = duration;
-            ShouldVanillaBan = shouldVanillaBan;
         }
     }
 }

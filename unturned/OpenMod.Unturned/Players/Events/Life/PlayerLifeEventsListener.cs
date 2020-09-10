@@ -3,16 +3,16 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Extensions.Games.Abstractions.Entities;
+using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
 using System.Linq;
-using OpenMod.UnityEngine.Extensions;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Players.Events.Life
 {
-    internal class PlayerLifeEventsListener : UnturnedEventsListener
+    internal class PlayerLifeEventsListener : UnturnedPlayerEventsListener
     {
         public PlayerLifeEventsListener(IOpenModHost openModHost,
             IEventBus eventBus,
@@ -37,6 +37,33 @@ namespace OpenMod.Unturned.Players.Events.Life
             PlayerLife.onPlayerLifeUpdated -= OnPlayerLifeUpdated;
         }
 
+        public override void SubscribePlayer(Player player)
+        {
+            player.life.onHurt += OnHurt;
+        }
+
+        public override void UnsubscribePlayer(Player player)
+        {
+            player.life.onHurt -= OnHurt;
+        }
+
+        private IDamageSource GetDamageSource(UnturnedPlayer victim, byte amount, EDeathCause cause, ELimb limb,
+            CSteamID killer)
+        {
+            IDamageSource source = null;
+
+            // TODO: Split DoDamage into all possible forms of damage to allow multiple IDamageSource inputs
+            if (killer != CSteamID.Nil)
+            {
+                CSteamID temp = killer;
+
+                source = GetUnturnedPlayer(Provider.clients.FirstOrDefault(
+                    x => x.playerID.steamID == temp));
+            }
+
+            return source;
+        }
+
         private void Events_OnDoDamage(Player nativePlayer, ref byte amount,
             ref EDeathCause cause, ref ELimb limb,
             ref CSteamID killer, ref bool trackKill,
@@ -49,16 +76,7 @@ namespace OpenMod.Unturned.Players.Events.Life
 
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            IDamageSource source = null;
-
-            // TODO: Split DoDamage into all possible forms of damage to allow multiple IDamageSource inputs
-            if (killer != CSteamID.Nil)
-            {
-                CSteamID temp = killer;
-
-                source = GetUnturnedPlayer(Provider.clients.FirstOrDefault(
-                    x => x.playerID.steamID == temp));
-            }
+            IDamageSource source = GetDamageSource(player, amount, cause, limb, killer);
 
             UnturnedPlayerDamagingEvent @event;
 
@@ -84,6 +102,18 @@ namespace OpenMod.Unturned.Players.Events.Life
             ragdollEffect = @event.RagdollEffect;
             canCauseBleeding = @event.CanCauseBleeding;
             cancel = @event.IsCancelled;
+        }
+
+        private void OnHurt(Player nativePlayer, byte damage, Vector3 force, EDeathCause cause, ELimb limb, CSteamID killer)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            IDamageSource source = GetDamageSource(player, damage, cause, limb, killer);
+
+            UnturnedPlayerDamagedEvent @event =
+                new UnturnedPlayerDamagedEvent(player, damage, cause, limb, killer, source);
+
+            Emit(@event);
         }
 
         private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
