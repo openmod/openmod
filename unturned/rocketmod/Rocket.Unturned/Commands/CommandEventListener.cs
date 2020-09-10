@@ -23,7 +23,7 @@ namespace Rocket.Unturned.Commands
     [EventListenerLifetime(ServiceLifetime.Transient)]
     public class CommandEventListener : IEventListener<CommandExecutedEvent>
     {
-        [EventListener(Priority = Priority.Highest)]
+        [EventListener(Priority = EventListenerPriority.Highest)]
         public Task HandleEventAsync(object emitter, CommandExecutedEvent @event)
         {
             async UniTask Task()
@@ -36,7 +36,7 @@ namespace Rocket.Unturned.Commands
                     IRocketPlayer rocketPlayer;
                     if (@event.Actor is UnturnedUser user)
                     {
-                        var steamPlayer = user.SteamPlayer;
+                        var steamPlayer = user.Player.SteamPlayer;
                         if (!UnturnedPermissions.CheckPermissions(steamPlayer, $"/{@event.CommandContext.CommandAlias}"))
                         {
                             // command doesnt exist or no permission
