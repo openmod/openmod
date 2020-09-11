@@ -3,7 +3,7 @@ using OpenMod.Unturned.Players.Events.Equipment;
 
 namespace OpenMod.Unturned.Players.Events.Clothing
 {
-    public abstract class UnturnedPlayerClothingUnequippingEvent : UnturnedPlayerItemUnequippingEvent
+    public abstract class UnturnedPlayerClothingUnequippingEvent : UnturnedPlayerUnequippingEvent
     {
         public abstract ClothingType Type { get; }
 
