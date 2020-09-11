@@ -1,12 +1,21 @@
-﻿using OpenMod.Unturned.Items;
+﻿using OpenMod.Extensions.Games.Abstractions.Items;
+using OpenMod.Extensions.Games.Abstractions.Players;
+using OpenMod.Unturned.Events;
+using OpenMod.Unturned.Items;
 
 namespace OpenMod.Unturned.Players.Events.Equipment
 {
-    public class UnturnedPlayerItemEquippingEvent : UnturnedPlayerEquippingEvent
+    public abstract class UnturnedPlayerItemEquippingEvent : UnturnedPlayerEvent, IPlayerItemEquippingEvent
     {
-        public UnturnedPlayerItemEquippingEvent(UnturnedPlayer player, UnturnedItem item) : base(player, item)
-        {
+        public UnturnedItem Item { get; }
 
+        IItem IItemEvent.Item => Item;
+
+        public bool IsCancelled { get; set; }
+
+        protected UnturnedPlayerItemEquippingEvent(UnturnedPlayer player, UnturnedItem item) : base(player)
+        {
+            Item = item;
         }
     }
 }

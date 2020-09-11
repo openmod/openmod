@@ -1,10 +1,12 @@
-﻿namespace OpenMod.Unturned.Players.Events.Equipment
-{
-    public class UnturnedPlayerItemUnequippedEvent : UnturnedPlayerUnequippedEvent
-    {
-        public UnturnedPlayerItemUnequippedEvent(UnturnedPlayer player) : base(player)
-        {
+﻿using OpenMod.Extensions.Games.Abstractions.Players;
+using OpenMod.Unturned.Events;
 
+namespace OpenMod.Unturned.Players.Events.Equipment
+{
+    public abstract class UnturnedPlayerItemUnequippedEvent : UnturnedPlayerEvent, IPlayerItemUnequippedEvent
+    {
+        protected UnturnedPlayerItemUnequippedEvent(UnturnedPlayer player) : base(player)
+        {
         }
     }
 }
