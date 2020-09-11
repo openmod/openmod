@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OpenMod.Unturned.Events;
 
 namespace OpenMod.Unturned.Players.Movement.Events
 {
-    class UnturnedPlayerGestureUpdatedEvent
+    public class UnturnedPlayerGestureUpdatedEvent : UnturnedPlayerEvent
     {
+        public UnturnedPlayerGestureUpdatedEvent(UnturnedPlayer player) : base(player)
+        {
+
+        }
     }
 }
