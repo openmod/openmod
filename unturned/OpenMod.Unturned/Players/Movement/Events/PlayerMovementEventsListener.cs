@@ -31,11 +31,13 @@ namespace OpenMod.Unturned.Players.Movement.Events
         public override void SubscribePlayer(Player player)
         {
             player.stance.onStanceUpdated += () => OnStanceUpdated(player);
+            player.animator.onGestureUpdated += () => OnGestureUpdated(player);
         }
 
         public override void UnsubscribePlayer(Player player)
         {
             player.stance.onStanceUpdated -= () => OnStanceUpdated(player);
+            player.animator.onGestureUpdated -= () => OnGestureUpdated(player);
         }
 
         private void Events_OnTeleporting(Player nativePlayer, ref Vector3 position, ref float yaw, out bool cancel)
@@ -56,6 +58,15 @@ namespace OpenMod.Unturned.Players.Movement.Events
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
             UnturnedPlayerStanceUpdatedEvent @event = new UnturnedPlayerStanceUpdatedEvent(player);
+
+            Emit(@event);
+        }
+
+        private void OnGestureUpdated(Player nativePlayer)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedPlayerGestureUpdatedEvent @event = new UnturnedPlayerGestureUpdatedEvent(player);
 
             Emit(@event);
         }
