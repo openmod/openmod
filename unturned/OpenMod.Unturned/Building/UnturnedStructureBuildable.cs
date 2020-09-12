@@ -2,6 +2,7 @@
 using OpenMod.UnityEngine.Transforms;
 using SDG.Unturned;
 using System.Threading.Tasks;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace OpenMod.Unturned.Building
@@ -28,7 +29,11 @@ namespace OpenMod.Unturned.Building
             async UniTask DestroyTask()
             {
                 await UniTask.SwitchToMainThread();
-                Object.Destroy(StructureDrop.model);
+
+                if (StructureManager.tryGetInfo(StructureDrop.model, out var x, out var y, out var index, out var region))
+                {
+                    StructureManager.destroyStructure(region, x, y, index, Vector3.zero);
+                }
             }
 
             return DestroyTask().AsTask();

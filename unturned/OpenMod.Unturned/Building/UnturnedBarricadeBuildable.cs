@@ -32,7 +32,11 @@ namespace OpenMod.Unturned.Building
             async UniTask DestroyTask()
             {
                 await UniTask.SwitchToMainThread();
-                Object.Destroy(Interactable);
+
+                if (BarricadeManager.tryGetInfo(BarricadeDrop.model, out var x, out var y, out var plant, out var index, out var region))
+                {
+                    BarricadeManager.destroyBarricade(region, x, y, plant, index);
+                }
             }
 
             return DestroyTask().AsTask();
