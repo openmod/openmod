@@ -12,7 +12,7 @@ namespace OpenMod.UnityEngine.Extensions
 
         public static UColor ToUnityColor(this Color color)
         {
-            return new UColor(color.R / 255, color.G / 255, color.B / 255);
+            return new UColor(color.R / 255f, color.G / 255f, color.B / 255f);
         }
     }
 }
