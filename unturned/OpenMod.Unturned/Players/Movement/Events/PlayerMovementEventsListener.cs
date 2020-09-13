@@ -20,24 +20,24 @@ namespace OpenMod.Unturned.Players.Movement.Events
 
         public override void Subscribe()
         {
+            OnGestureUpdated += Events_OnGestureUpdated;
             OnTeleporting += Events_OnTeleporting;
         }
 
         public override void Unsubscribe()
         {
+            OnGestureUpdated -= Events_OnGestureUpdated;
             OnTeleporting -= Events_OnTeleporting;
         }
 
         public override void SubscribePlayer(Player player)
         {
             player.stance.onStanceUpdated += () => OnStanceUpdated(player);
-            player.animator.onGestureUpdated += (gesture) => OnGestureUpdated(player, gesture);
         }
 
         public override void UnsubscribePlayer(Player player)
         {
             player.stance.onStanceUpdated -= () => OnStanceUpdated(player);
-            player.animator.onGestureUpdated -= (gesture) => OnGestureUpdated(player, gesture);
         }
 
         private void Events_OnTeleporting(Player nativePlayer, ref Vector3 position, ref float yaw, out bool cancel)
@@ -62,7 +62,7 @@ namespace OpenMod.Unturned.Players.Movement.Events
             Emit(@event);
         }
 
-        private void OnGestureUpdated(Player nativePlayer, EPlayerGesture gesture)
+        private void Events_OnGestureUpdated(Player nativePlayer, EPlayerGesture gesture)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
@@ -71,6 +71,9 @@ namespace OpenMod.Unturned.Players.Movement.Events
             Emit(@event);
         }
 
+        private delegate void GestureUpdated(Player player, EPlayerGesture gesture);
+        private static event GestureUpdated OnGestureUpdated;
+
         private delegate void Teleporting(Player player,
             ref Vector3 position, ref float yaw, out bool cancel);
         private static event Teleporting OnTeleporting;
@@ -78,6 +81,18 @@ namespace OpenMod.Unturned.Players.Movement.Events
         [HarmonyPatch]
         private class Patches
         {
+            [HarmonyPatch(typeof(PlayerAnimator), "sendGesture")]
+            [HarmonyPostfix]
+            private static void SendGesture(PlayerAnimator __instance, EPlayerGesture gesture)
+            {
+                if (gesture == EPlayerGesture.REST_START && __instance.player.stance.stance != EPlayerStance.CROUCH)
+                {
+                    return;
+                }
+
+                OnGestureUpdated?.Invoke(__instance.player, gesture);
+            }
+
             [HarmonyPatch(typeof(Player), "teleportToLocationUnsafe")]
             [HarmonyPrefix]
             private static bool TeleportToLocationUnsafe(Player __instance, ref Vector3 position, ref float yaw)
