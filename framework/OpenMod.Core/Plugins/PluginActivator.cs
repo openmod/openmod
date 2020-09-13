@@ -132,7 +132,7 @@ namespace OpenMod.Core.Plugins
                             .OwnedByLifetimeScope();
 
                         containerBuilder.RegisterType(pluginType)
-                            .As(pluginType)
+                            .AsSelf()
                             .As<IOpenModComponent>()
                             .As<IOpenModPlugin>()
                             .SingleInstance()
