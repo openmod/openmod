@@ -35,13 +35,14 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
         protected override async Task OnExecuteAsync()
         {
-            if(Context.Parameters.Count == 0)
+            if (Context.Parameters.Count == 0)
             {
                 throw new CommandWrongUsageException(Context);
             }
 
             var allowedActors = m_Configuration.GetSection("nuget:install:allowedActors").Get<string[]>();
-            if (allowedActors.All(d => d.Trim() != "*" && !Context.Actor.Type.Equals(d.Trim(), StringComparison.OrdinalIgnoreCase)))
+            if (allowedActors.All(d =>
+                d.Trim() != "*" && !Context.Actor.Type.Equals(d.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
                 throw new UserFriendlyException(m_StringLocalizer["commands:openmod:restricted"]);
             }
@@ -54,6 +55,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 args.Remove("-Pre");
             }
 
+            var anySuccessful = false;
             foreach (var arg in args)
             {
                 var packageInfo = arg.Split('@');
@@ -69,14 +71,20 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 var result = await m_NuGetPlugins.InstallPackageAsync(packageName, packageVersion, isPre);
                 if (result.Code != NuGetInstallCode.Success)
                 {
-                    await Context.Actor.PrintMessageAsync($"Failed to install \"{packageName}\": " + result.Code, Color.DarkRed);
+                    await Context.Actor.PrintMessageAsync($"Failed to install \"{packageName}\": " + result.Code,
+                        Color.DarkRed);
                     continue;
                 }
 
-                await Context.Actor.PrintMessageAsync($"Successfully installed {result.Identity.Id} v{result.Identity.Version}.", Color.DarkGreen);
+                await Context.Actor.PrintMessageAsync(
+                    $"Successfully installed {result.Identity.Id} v{result.Identity.Version}.", Color.DarkGreen);
+                anySuccessful = true;
             }
 
-            await Context.Actor.PrintMessageAsync("To complete installation, please reload OpenMod with /openmod reload.", Color.White);
+            if (anySuccessful)
+            {
+                await Context.Actor.PrintMessageAsync("To complete installation, please reload OpenMod with /openmod reload.", Color.White);
+            }
         }
     }
 }
