@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 
-namespace OpenMod.Unturned.Module.Shared
+namespace OpenMod.Unturned.Module.Shared.Patches
 {
     // this patch replaces RocketMod.Unturned dependencies with OpenMod.Unturned
     // so third party modules can work with the OpenMod RocketMod Bridge (see #160)
