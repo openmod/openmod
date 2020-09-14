@@ -22,9 +22,10 @@ namespace OpenMod.Analyzers
         protected const string DefaultTitle = "Internal OpenMod API usage.";
         protected const string Category = "Usage";
 
-        private static readonly int s_OMLen = "OpenMod".Length;
+        private static readonly int s_OmLen = "OpenMod".Length;
 
-        private static readonly DiagnosticDescriptor m_Descriptor
+#pragma warning disable RS2008
+        private static readonly DiagnosticDescriptor s_Descriptor
             = new DiagnosticDescriptor(
                 Id,
                 title: DefaultTitle,
@@ -32,8 +33,9 @@ namespace OpenMod.Analyzers
                 category: Category,
                 defaultSeverity: DiagnosticSeverity.Warning,
                 isEnabledByDefault: true);
+#pragma warning restore RS2008
 
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(m_Descriptor);
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_Descriptor);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -60,14 +62,14 @@ namespace OpenMod.Analyzers
                             if (HasInternalAttribute(symbol))
                             {
                                 context.ReportDiagnostic(
-                                    Diagnostic.Create(m_Descriptor, memberAccessSyntax.Name.GetLocation(), $"{containingType}.{symbol.Name}"));
+                                    Diagnostic.Create(s_Descriptor, memberAccessSyntax.Name.GetLocation(), $"{containingType}.{symbol.Name}"));
                                 return;
                             }
 
                             if (IsInInternalNamespace(containingType)
                                 || HasInternalAttribute(containingType))
                             {
-                                context.ReportDiagnostic(Diagnostic.Create(m_Descriptor, memberAccessSyntax.Name.GetLocation(), containingType));
+                                context.ReportDiagnostic(Diagnostic.Create(s_Descriptor, memberAccessSyntax.Name.GetLocation(), containingType));
                                 return;
                             }
                         }
@@ -84,14 +86,14 @@ namespace OpenMod.Analyzers
 
                             if (HasInternalAttribute(symbol))
                             {
-                                context.ReportDiagnostic(Diagnostic.Create(m_Descriptor, creationSyntax.GetLocation(), containingType));
+                                context.ReportDiagnostic(Diagnostic.Create(s_Descriptor, creationSyntax.GetLocation(), containingType));
                                 return;
                             }
 
                             if (IsInInternalNamespace(containingType)
                                 || HasInternalAttribute(containingType))
                             {
-                                context.ReportDiagnostic(Diagnostic.Create(m_Descriptor, creationSyntax.Type.GetLocation(), containingType));
+                                context.ReportDiagnostic(Diagnostic.Create(s_Descriptor, creationSyntax.Type.GetLocation(), containingType));
                                 return;
                             }
                         }
@@ -108,7 +110,7 @@ namespace OpenMod.Analyzers
                             && (IsInInternalNamespace(symbol) || HasInternalAttribute(symbol))
                             && declarationSyntax.BaseList?.Types.Count > 0)
                         {
-                            context.ReportDiagnostic(Diagnostic.Create(m_Descriptor, declarationSyntax.BaseList.Types[0].GetLocation(), symbol));
+                            context.ReportDiagnostic(Diagnostic.Create(s_Descriptor, declarationSyntax.BaseList.Types[0].GetLocation(), symbol));
                         }
 
                         return;
@@ -134,7 +136,7 @@ namespace OpenMod.Analyzers
             return
                 i != -1 &&
                 (i == 0 || ns[i - 1] == '.') &&
-                i + s_OMLen < ns.Length && ns[i + s_OMLen] == '.';
+                i + s_OmLen < ns.Length && ns[i + s_OmLen] == '.';
         }
     }
 }
