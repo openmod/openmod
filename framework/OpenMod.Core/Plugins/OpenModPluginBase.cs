@@ -2,7 +2,11 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
+
+#if NETFRAMEWORK && !NET20
 using HarmonyLib;
+#endif
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -34,7 +38,10 @@ namespace OpenMod.Core.Plugins
         public IRuntime Runtime { get; }
         public IEventBus EventBus { get; }
         protected ILogger Logger { get; set; }
+
+#if NETFRAMEWORK && !NET20
         protected Harmony Harmony { get; private set; }
+#endif
 
         private readonly IOptions<CommandStoreOptions> m_CommandStoreOptions;
         private readonly ILoggerFactory m_LoggerFactory;
@@ -78,8 +85,10 @@ namespace OpenMod.Core.Plugins
             m_CommandSource = new OpenModComponentCommandSource(Logger, this, GetType().Assembly);
             m_CommandStoreOptions.Value.AddCommandSource(m_CommandSource);
 
+#if NETFRAMEWORK && !NET20
             Harmony = new Harmony(OpenModComponentId);
             Harmony.PatchAll(GetType().Assembly);
+#endif
 
             IsComponentAlive = true;
 
@@ -92,8 +101,9 @@ namespace OpenMod.Core.Plugins
         [OpenModInternal]
         public virtual async Task UnloadAsync()
         {
+#if NETFRAMEWORK && !NET20
             Harmony.UnpatchAll(OpenModComponentId);
-
+#endif
             m_CommandStoreOptions.Value.RemoveCommandSource(m_CommandSource);
             EventBus.Unsubscribe(this);
             IsComponentAlive = false;
