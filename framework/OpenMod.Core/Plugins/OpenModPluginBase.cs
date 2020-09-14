@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
 
-#if NETFRAMEWORK && !NET20
+#if NETFRAMEWORK && !NET20 || NET5_0 || NETCOREAPP3_1 || NETCOREAPP3_0
 using HarmonyLib;
 #endif
 
@@ -39,7 +39,7 @@ namespace OpenMod.Core.Plugins
         public IEventBus EventBus { get; }
         protected ILogger Logger { get; set; }
 
-#if NETFRAMEWORK && !NET20
+#if NETFRAMEWORK && !NET20 || NET5_0 || NETCOREAPP3_1 || NETCOREAPP3_0
         protected Harmony Harmony { get; private set; }
 #endif
 
@@ -85,7 +85,7 @@ namespace OpenMod.Core.Plugins
             m_CommandSource = new OpenModComponentCommandSource(Logger, this, GetType().Assembly);
             m_CommandStoreOptions.Value.AddCommandSource(m_CommandSource);
 
-#if NETFRAMEWORK && !NET20
+#if NETFRAMEWORK && !NET20 || NET5_0 || NETCOREAPP3_1 || NETCOREAPP3_0
             Harmony = new Harmony(OpenModComponentId);
             Harmony.PatchAll(GetType().Assembly);
 #endif
@@ -101,7 +101,7 @@ namespace OpenMod.Core.Plugins
         [OpenModInternal]
         public virtual async Task UnloadAsync()
         {
-#if NETFRAMEWORK && !NET20
+#if NETFRAMEWORK && !NET20 || NET5_0 || NETCOREAPP3_1 || NETCOREAPP3_0
             Harmony.UnpatchAll(OpenModComponentId);
 #endif
             m_CommandStoreOptions.Value.RemoveCommandSource(m_CommandSource);
