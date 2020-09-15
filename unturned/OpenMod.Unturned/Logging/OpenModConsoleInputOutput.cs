@@ -48,17 +48,16 @@ namespace OpenMod.Unturned.Logging
             System.Console.InputEncoding = encoding;
 
             m_PreviousConsoleIn = System.Console.In;
-            System.Console.SetIn(new StreamReader(System.Console.OpenStandardInput()));
             
-            bool history = m_Configuration.GetSection("console:history").Get<bool>();
-            bool autoComplete = m_Configuration.GetSection("console:autocomplete").Get<bool>();
+            var enableHistory = m_Configuration.GetSection("console:history").Get<bool>();
+            var enableAutoComplete = m_Configuration.GetSection("console:autocomplete").Get<bool>();
 
-            m_ReadLineEnabled = history || autoComplete;
+            m_ReadLineEnabled = enableHistory || enableAutoComplete;
 
             if (m_ReadLineEnabled)
             {
-                ReadLine.HistoryEnabled = history;
-                ReadLine.AutoCompletionHandler = autoComplete ?
+                ReadLine.HistoryEnabled = enableHistory;
+                ReadLine.AutoCompletionHandler = enableAutoComplete ?
                     m_AutoCompleteHandler : null;
             }
 

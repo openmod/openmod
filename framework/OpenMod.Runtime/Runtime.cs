@@ -128,6 +128,8 @@ namespace OpenMod.Runtime
             };
 
             var startup = new OpenModStartup(startupContext);
+            startupContext.OpenModStartup = startup;
+
             foreach (var assembly in openModHostAssemblies)
             {
                 startup.RegisterIocAssemblyAndCopyResources(assembly, string.Empty);
