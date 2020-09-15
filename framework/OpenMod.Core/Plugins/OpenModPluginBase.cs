@@ -35,7 +35,6 @@ namespace OpenMod.Core.Plugins
         public IEventBus EventBus { get; }
         protected ILogger Logger { get; set; }
         protected Harmony Harmony { get; private set; }
-
         private readonly IOptions<CommandStoreOptions> m_CommandStoreOptions;
         private readonly ILoggerFactory m_LoggerFactory;
         private OpenModComponentCommandSource m_CommandSource;
@@ -93,7 +92,6 @@ namespace OpenMod.Core.Plugins
         public virtual async Task UnloadAsync()
         {
             Harmony.UnpatchAll(OpenModComponentId);
-
             m_CommandStoreOptions.Value.RemoveCommandSource(m_CommandSource);
             EventBus.Unsubscribe(this);
             IsComponentAlive = false;
