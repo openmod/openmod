@@ -26,10 +26,20 @@ namespace OpenMod.Core.Plugins.NuGet
         {
             var assemblies = new List<Assembly>();
 
-            foreach (var nupkgFile in Directory.GetFiles(m_NuGetPackageManager.PackagesDirectory, "*.nupkg", SearchOption.AllDirectories))
+            foreach (var nupkgFile in Directory.GetFiles(m_NuGetPackageManager.PackagesDirectory, "*.nupkg",
+                SearchOption.AllDirectories))
             {
-                var nupkgAssemblies = await m_NuGetPackageManager.LoadAssembliesFromNuGetPackageAsync(nupkgFile);
-                assemblies.AddRange(nupkgAssemblies.Where(d => d.GetCustomAttribute<PluginMetadataAttribute>() != null));
+                try
+                {
+                    var nupkgAssemblies = await m_NuGetPackageManager.LoadAssembliesFromNuGetPackageAsync(nupkgFile);
+                    assemblies.AddRange(nupkgAssemblies.Where(d =>
+                        d.GetCustomAttribute<PluginMetadataAttribute>() != null));
+                }
+                catch (Exception ex)
+                {
+                    m_NuGetPackageManager.Logger.LogError($"Failed to load assemblies from nuget package: {nupkgFile}");
+                    m_NuGetPackageManager.Logger.LogError(ex.ToString());
+                }
             }
 
             return assemblies;

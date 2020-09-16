@@ -48,6 +48,8 @@ namespace OpenMod.Unturned.Module
                 new[] { "OpenMod.Unturned.Redist", "OpenMod.UnityEngine.Redist" },
                 false,
                 new NuGetConsoleLogger());
+
+            m_SharedModule.OnPostInitialize();
         }
     }
 }

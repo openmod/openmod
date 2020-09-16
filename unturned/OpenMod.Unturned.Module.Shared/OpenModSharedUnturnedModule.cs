@@ -9,16 +9,19 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using SDG.Framework.Modules;
+using SDG.Unturned;
 
 namespace OpenMod.Unturned.Module.Shared
 {
- public sealed class OpenModSharedUnturnedModule 
+    public sealed class OpenModSharedUnturnedModule
     {
         private const string c_HarmonyInstanceId = "com.get-openmod.unturned.module";
         private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new Dictionary<string, Assembly>();
         private Harmony m_HarmonyInstance;
         private readonly string[] m_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
         private readonly string[] m_CompatibleModules = { "AviRockets" };
+
+        private readonly Dictionary<string, Assembly> m_ResolvedAssemblies = new Dictionary<string, Assembly>();
 
         public bool Initialize(Assembly moduleAssembly)
         {
@@ -45,6 +48,7 @@ namespace OpenMod.Unturned.Module.Shared
                     LoadAssembly(openModDirPath, file);
                 }
             }
+
             return true;
         }
 
@@ -63,7 +67,7 @@ namespace OpenMod.Unturned.Module.Shared
                 {
                     continue;
                 }
-                
+
                 var previousColor = Console.ForegroundColor;
                 if (m_IncompatibleModules.Any(d => d.Equals(moduleDirName, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -96,7 +100,7 @@ namespace OpenMod.Unturned.Module.Shared
 
             return false;
         }
-        
+
         private void InstallNewtonsoftJson(string openModDir)
         {
             Console.WriteLine("Location: " + typeof(IModuleNexus).Assembly.Location);
@@ -148,13 +152,22 @@ namespace OpenMod.Unturned.Module.Shared
             AppDomain.CurrentDomain.AssemblyResolve += delegate (object sender, ResolveEventArgs args)
             {
                 var name = GetVersionIndependentName(args.Name, out _);
-
-                if (m_LoadedAssemblies.ContainsKey(name))
+                if (m_ResolvedAssemblies.ContainsKey(name))
                 {
-                    return m_LoadedAssemblies[name];
+                    return m_ResolvedAssemblies[name];
                 }
 
-                return null;
+                var assemblies = m_LoadedAssemblies.Values
+                    .Where(d => GetVersionIndependentName(d.FullName, out _).Equals(name))
+                    .OrderByDescending(d => d.GetName().Version);
+                
+                var match= assemblies.FirstOrDefault();
+                if (match != null)
+                {
+                    m_ResolvedAssemblies.Add(name, match);
+                }
+
+                return match;
             };
         }
 
@@ -224,6 +237,11 @@ namespace OpenMod.Unturned.Module.Shared
             }
 
             m_LoadedAssemblies.Add(name, asm);
+        }
+
+        public void OnPostInitialize()
+        {
+ 
         }
     }
 }

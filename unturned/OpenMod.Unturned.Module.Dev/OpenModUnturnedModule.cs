@@ -52,6 +52,7 @@ namespace OpenMod.Unturned.Module.Dev
 
             OpenModRuntime = new Runtime.Runtime();
             OpenModRuntime.Init(assemblies, parameters);
+            m_SharedModule.OnPostInitialize();
         }
     }
 }

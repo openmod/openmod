@@ -121,10 +121,9 @@ namespace OpenMod.Runtime
 
             foreach (var configurationConfiguratorType in containerConfiguratorTypes)
             {
-                var instance = (IConfigurationConfigurator)Activator.CreateInstance(configurationConfiguratorType);
-
                 try
                 {
+                    var instance = (IConfigurationConfigurator)Activator.CreateInstance(configurationConfiguratorType);
                     instance.ConfigureConfiguration(Context, builder);
                 }
                 catch (Exception ex)
@@ -148,10 +147,10 @@ namespace OpenMod.Runtime
 
             foreach (var containerConfiguratorType in containerConfiguratorTypes)
             {
-                var instance = (IContainerConfigurator)Activator.CreateInstance(containerConfiguratorType);
 
                 try
                 {
+                    var instance = (IContainerConfigurator)Activator.CreateInstance(containerConfiguratorType);
                     instance.ConfigureContainer(Context, containerBuilder);
                 }
                 catch (Exception ex)
@@ -182,9 +181,9 @@ namespace OpenMod.Runtime
 
             foreach (var serviceConfiguratorType in serviceConfiguratorTypes)
             {
-                var instance = (IServiceConfigurator)Activator.CreateInstance(serviceConfiguratorType);
                 try
                 {
+                    var instance = (IServiceConfigurator)Activator.CreateInstance(serviceConfiguratorType);
                     instance.ConfigureServices(Context, serviceCollection);
                 }
                 catch (Exception ex)

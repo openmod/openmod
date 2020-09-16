@@ -12,8 +12,9 @@ namespace OpenMod.Core.Ioc
     [OpenModInternal]
     public static class ServiceRegistrationHelper
     {
-        public static IEnumerable<ServiceRegistration> FindFromAssembly<T>(Assembly assembly, ILogger logger = null) where T: ServiceImplementationAttribute
+        public static IEnumerable<ServiceRegistration> FindFromAssembly<T>(Assembly assembly, ILogger logger = null) where T : ServiceImplementationAttribute
         {
+
             List<Type> types;
             try
             {
@@ -33,24 +34,38 @@ namespace OpenMod.Core.Ioc
                 }
 
 
-                types = ex.Types.Where(tp => tp != null  && tp.IsClass && !tp.IsInterface && !tp.IsAbstract).ToList();
+                types = ex.Types.Where(tp => tp != null && tp.IsClass && !tp.IsInterface && !tp.IsAbstract)
+                    .ToList();
             }
 
             foreach (var type in types)
             {
-                var attribute = type.GetCustomAttribute<T>();
-                if (attribute == null)
+                T attribute;
+                Type[] interfaces;
+
+                try
                 {
-                    continue;
+                    attribute = type.GetCustomAttribute<T>();
+                    if (attribute == null)
+                    {
+                        continue;
+                    }
+
+                    interfaces = type.GetInterfaces()
+                        .Where(d => d.GetCustomAttribute<ServiceAttribute>() != null)
+                        .ToArray();
+
+                    if (interfaces.Length == 0)
+                    {
+                        logger?.LogWarning(
+                            $"Type {type.FullName} in assembly {assembly.FullName} has been marked as ServiceImplementation but does not inherit any services!\nDid you forget to add [Service] to your interfaces?");
+                        continue;
+                    }
+
                 }
-
-                var interfaces = type.GetInterfaces()
-                    .Where(d => d.GetCustomAttribute<ServiceAttribute>() != null)
-                    .ToArray();
-
-                if (interfaces.Length == 0)
+                catch (Exception ex)
                 {
-                    logger?.LogWarning($"Type {type.FullName} in assembly {assembly.FullName} has been marked as ServiceImplementation but does not inherit any services!\nDid you forget to add [Service] to your interfaces?");
+                    logger.LogWarning($"FindFromAssembly has failed for type: {type.FullName} while searching for {typeof(T).FullName}", ex);
                     continue;
                 }
 
@@ -62,6 +77,7 @@ namespace OpenMod.Core.Ioc
                     Lifetime = attribute.Lifetime
                 };
             }
+
         }
     }
 }
