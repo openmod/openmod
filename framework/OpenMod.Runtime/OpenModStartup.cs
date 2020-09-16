@@ -8,6 +8,7 @@ using Autofac;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NuGet.Packaging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Plugins;
@@ -29,17 +30,17 @@ namespace OpenMod.Runtime
         private readonly HashSet<AssemblyName> m_RegisteredAssemblies;
         private readonly PluginAssemblyStore m_PluginAssemblyStore;
         private readonly ILogger<OpenModStartup> m_Logger;
-        private readonly List<Assembly> m_Assemblies;
+        private readonly HashSet<Assembly> m_Assemblies;
         private readonly List<IPluginAssembliesSource> m_PluginAssembliesSources;
         private readonly NuGetPackageManager m_NuGetPackageManager;
 
         public OpenModStartup(IOpenModServiceConfigurationContext openModStartupContext)
         {
             Context = openModStartupContext;
-            m_NuGetPackageManager = ((OpenModStartupContext) openModStartupContext).NuGetPackageManager;
+            m_NuGetPackageManager = ((OpenModStartupContext)openModStartupContext).NuGetPackageManager;
             m_Logger = openModStartupContext.LoggerFactory.CreateLogger<OpenModStartup>();
             m_Runtime = openModStartupContext.Runtime;
-            m_Assemblies = new List<Assembly>();
+            m_Assemblies = new HashSet<Assembly>(new AssemblyEqualityComparer());
             m_ServiceRegistrations = new List<ServiceRegistration>();
             m_RegisteredAssemblies = new HashSet<AssemblyName>();
             m_PluginAssemblyStore =
@@ -118,10 +119,18 @@ namespace OpenMod.Runtime
                 .SelectMany(d => d.FindTypes<IConfigurationConfigurator>(false))
                 .OrderBy(d => d.GetPriority(), new PriorityComparer(PriortyComparisonMode.LowestFirst));
 
-            foreach (var configurationConfigurator in containerConfiguratorTypes)
+            foreach (var configurationConfiguratorType in containerConfiguratorTypes)
             {
-                var instance = (IConfigurationConfigurator) Activator.CreateInstance(configurationConfigurator);
-                instance.ConfigureConfiguration(Context, builder);
+                var instance = (IConfigurationConfigurator)Activator.CreateInstance(configurationConfiguratorType);
+
+                try
+                {
+                    instance.ConfigureConfiguration(Context, builder);
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError("Failed to configure configuration from: " + configurationConfiguratorType.FullName, ex);
+                }
             }
         }
 
@@ -139,8 +148,16 @@ namespace OpenMod.Runtime
 
             foreach (var containerConfiguratorType in containerConfiguratorTypes)
             {
-                var instance = (IContainerConfigurator) Activator.CreateInstance(containerConfiguratorType);
-                instance.ConfigureContainer(Context, containerBuilder);
+                var instance = (IContainerConfigurator)Activator.CreateInstance(containerConfiguratorType);
+
+                try
+                {
+                    instance.ConfigureContainer(Context, containerBuilder);
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError("Failed to configure container from: " + containerConfiguratorType.FullName, ex);
+                }
             }
         }
 
@@ -165,8 +182,15 @@ namespace OpenMod.Runtime
 
             foreach (var serviceConfiguratorType in serviceConfiguratorTypes)
             {
-                var instance = (IServiceConfigurator) Activator.CreateInstance(serviceConfiguratorType);
-                instance.ConfigureServices(Context, serviceCollection);
+                var instance = (IServiceConfigurator)Activator.CreateInstance(serviceConfiguratorType);
+                try
+                {
+                    instance.ConfigureServices(Context, serviceCollection);
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError("Failed to configure services from: " + serviceConfiguratorType.FullName, ex);
+                }
             }
 
             var servicesRegistrations = m_ServiceRegistrations.OrderBy(d => d.Priority,
