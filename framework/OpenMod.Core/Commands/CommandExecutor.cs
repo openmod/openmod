@@ -52,8 +52,7 @@ namespace OpenMod.Core.Commands
                 throw new Exception("Can not execute command with null or empty args");
             }
 
-            var logger = m_LifetimeScope.Resolve<ILogger<CommandExecutor>>();
-            logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
+            m_Logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
 
             var currentCommandAccessor = m_LifetimeScope.Resolve<ICurrentCommandContextAccessor>();
             var commandContextBuilder = m_LifetimeScope.Resolve<ICommandContextBuilder>();
@@ -117,7 +116,7 @@ namespace OpenMod.Core.Commands
                     else
                     {
                         await actor.PrintMessageAsync("An internal error occured during the command execution.", Color.DarkRed);
-                        logger.LogError(commandContext.Exception, $"Exception occured on command \"{string.Join(" ", args)}\" by actor {actor.Type}/{actor.DisplayName} ({actor.Id})");
+                        m_Logger.LogError(commandContext.Exception, $"Exception occured on command \"{string.Join(" ", args)}\" by actor {actor.Type}/{actor.DisplayName} ({actor.Id})");
                     }
                 }
 
