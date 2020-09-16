@@ -170,11 +170,24 @@ namespace Rocket.PermissionLink
         {
             m_OriginalPermissionProvider = R.Permissions;
             R.Permissions = this;
+
+            R.OnRockedInitialized += RocketModInitialized;
+        }
+
+        private void RocketModInitialized()
+        {
+            if (m_OriginalPermissionProvider == null && R.Permissions != this)
+            {
+                m_OriginalPermissionProvider = R.Permissions;
+            }
+
+            R.Permissions = this;
         }
 
         public void Dispose()
         {
             R.Permissions = m_OriginalPermissionProvider;
+            R.OnRockedInitialized -= RocketModInitialized;
         }
 
         private IPermissionActor ConvertToActor(IRocketPlayer player)
