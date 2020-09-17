@@ -11,16 +11,22 @@ namespace Rocket.PermissionLink
 {
     public class OpenModPermissionsProvider : IRocketPermissionsProvider, IDisposable
     {
+        private readonly RocketPermissionLinkPlugin m_Plugin;
         private readonly IPermissionChecker m_PermissionChecker;
         private readonly IPermissionRoleStore m_PermissionRoleStore;
+        private readonly IPermissionRegistry m_PermissionRegistry;
         private IRocketPermissionsProvider m_OriginalPermissionProvider;
 
         public OpenModPermissionsProvider(
+            RocketPermissionLinkPlugin plugin,
             IPermissionChecker permissionChecker,
-            IPermissionRoleStore permissionRoleStore)
+            IPermissionRoleStore permissionRoleStore,
+            IPermissionRegistry permissionRegistry)
         {
+            m_Plugin = plugin;
             m_PermissionChecker = permissionChecker;
             m_PermissionRoleStore = permissionRoleStore;
+            m_PermissionRegistry = permissionRegistry;
         }
 
         public bool HasPermission(IRocketPlayer player, List<string> requestedPermissions)
@@ -35,6 +41,12 @@ namespace Rocket.PermissionLink
             {
                 foreach (var permission in requestedPermissions)
                 {
+                    var permissionRegistration = m_PermissionRegistry.FindPermission(m_Plugin, permission);
+                    if (permissionRegistration == null)
+                    {
+                        m_PermissionRegistry.RegisterPermission(m_Plugin, permission);
+                    }
+
                     if (await m_PermissionChecker.CheckPermissionAsync(actor, permission) != PermissionGrantResult.Grant)
                     {
                         return false;
