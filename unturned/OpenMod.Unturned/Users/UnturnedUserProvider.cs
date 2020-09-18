@@ -42,14 +42,20 @@ namespace OpenMod.Unturned.Users
             m_PendingUsers = new HashSet<UnturnedPendingUser>();
 
             // sync users in case of openmod reloads
-            foreach (var client in Provider.clients)
+            if (Provider.clients != null)
             {
-                m_Users.Add(new UnturnedUser(this, userDataStore, client.player));
+                foreach (var client in Provider.clients)
+                {
+                    m_Users.Add(new UnturnedUser(this, userDataStore, client.player));
+                }
             }
 
-            foreach (var pending in Provider.pending)
+            if (Provider.pending != null)
             {
-                m_PendingUsers.Add(new UnturnedPendingUser(this, userDataStore, pending));
+                foreach (var pending in Provider.pending)
+                {
+                    m_PendingUsers.Add(new UnturnedPendingUser(this, userDataStore, pending));
+                }
             }
 
             Provider.onCheckValidWithExplanation += OnPendingPlayerConnecting;
