@@ -47,13 +47,13 @@ namespace Rocket.PermissionLink
                         m_PermissionRegistry.RegisterPermission(m_Plugin, permission);
                     }
 
-                    if (await m_PermissionChecker.CheckPermissionAsync(actor, permission) != PermissionGrantResult.Grant)
+                    if (await m_PermissionChecker.CheckPermissionAsync(actor, permission) == PermissionGrantResult.Grant)
                     {
-                        return false;
+                        return true;
                     }
                 }
 
-                return true;
+                return false;
             });
         }
 
