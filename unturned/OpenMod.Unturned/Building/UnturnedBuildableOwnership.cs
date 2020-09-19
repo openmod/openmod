@@ -14,31 +14,27 @@ namespace OpenMod.Unturned.Building
 
         public bool HasOwner
         {
-            get
-            {
-                return !string.IsNullOrEmpty(OwnerPlayerId)
-                       || !string.IsNullOrEmpty(OwnerGroupId);
-            }
+            get { return PlayerId != 0 || GroupId != 0; }
         }
 
         public string OwnerPlayerId
         {
-            get
-            {
-                return m_Barricade != null
-                    ? m_Barricade.owner.ToString()
-                    : m_Structure.owner.ToString();
-            }
+            get { return PlayerId.ToString(); }
         }
 
         public string OwnerGroupId
         {
-            get
-            {
-                return m_Barricade != null
-                    ? m_Barricade.@group.ToString()
-                    : m_Structure.@group.ToString();
-            }
+            get { return GroupId.ToString(); }
+        }
+
+        private ulong PlayerId
+        {
+            get { return m_Barricade?.owner ?? m_Structure.owner; }
+        }
+
+        private ulong GroupId
+        {
+            get { return m_Barricade?.group ?? m_Structure.group; }
         }
 
         public UnturnedBuildableOwnership(BarricadeData barricade)
@@ -53,22 +49,25 @@ namespace OpenMod.Unturned.Building
 
         public Task<bool> HasAccessAsync(IPlayer player)
         {
-            if (player is UnturnedPlayer unturnedPlayer)
-            {
-                if (OwnerPlayerId != null && string.Equals(OwnerPlayerId, unturnedPlayer.SteamId.ToString(), StringComparison.OrdinalIgnoreCase))
-                {
-                    return Task.FromResult(true);
-                }
+            if (!(player is UnturnedPlayer unturnedPlayer))
+                return Task.FromResult(false);
 
-                if (OwnerGroupId != null
-                    && (string.Equals(OwnerGroupId, unturnedPlayer.SteamPlayer.playerID.group.ToString(), StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(OwnerGroupId, unturnedPlayer.Player.quests.groupID.ToString(), StringComparison.OrdinalIgnoreCase)))
-                {
-                    return Task.FromResult(true);
-                }
+            if (!HasOwner)
+                return Task.FromResult(true);
+
+            //Unturned Code to check access
+
+            //!this.isLocked || enemyPlayer == this.owner || this.group != CSteamID.Nil && enemyGroup == this.group
+            //EnemyPlayer => PlayerId
+            //EnemyGroup => Always quests.Group (there is not group for steam and other for quests)
+            //This -> barricade obj in example case
+
+            if (PlayerId == unturnedPlayer.SteamId.m_SteamID)
+            {
+                return Task.FromResult(true);
             }
 
-            return Task.FromResult(false);
+            return Task.FromResult(GroupId != 0 && GroupId == unturnedPlayer.Player.quests.groupID.m_SteamID);
         }
     }
 }
