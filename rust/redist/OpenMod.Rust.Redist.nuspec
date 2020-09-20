@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>OpenMod.Rust.Redist</id>
+    <version>2256.198.1</version>
+    <description>Rust redistributables for OpenMod</description>
+    <authors>Facepunch;OpenMod</authors>	
+	<license type="file">LICENSE.txt</license>
+	<requireLicenseAcceptance>true</requireLicenseAcceptance>
+  </metadata>
+  <files>
+    <file src="*.dll" target="lib\net461" />
+    <file src="LICENSE.txt" target="" />
+  </files>
+</package>

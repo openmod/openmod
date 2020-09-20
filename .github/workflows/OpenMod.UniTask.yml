@@ -8,10 +8,6 @@ on:
     branches: [ master ]
     paths:
       - 'unityengine/UniTask/**'        
-  pull_request:
-    branches: [ master ]
-    paths:
-      - 'unityengine/UniTask/**' 
 
 jobs:
   build:

@@ -1,5 +1,5 @@
 
-name: OpenMod.Unturned.Redist
+name: OpenMod.Rust.Redist
 
 on:
   create:
@@ -8,11 +8,11 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'unturned/redist/**'        
+      - 'Rust/redist/**'        
 
 jobs:
   build:
-    name: "OpenMod.Unturned.Redist"
+    name: "OpenMod.Rust.Redist"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -29,7 +29,7 @@ jobs:
         nuget-api-key: ${{ secrets.NUGET_DEPLOY_KEY }}
         nuget-version: '5.x'       
     - name: Pack
-      run: nuget pack unturned/redist/OpenMod.Unturned.Redist.nuspec
+      run: nuget pack rust/redist/OpenMod.Rust.Redist.nuspec
     - name: Push to NuGet
       run: dotnet nuget push *.nupkg
              --skip-duplicate
