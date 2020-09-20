@@ -331,6 +331,16 @@ namespace OpenMod.Unturned.Users
             return BroadcastTask().AsTask();
         }
 
+        public ICollection<UnturnedUser> GetOnlineUsers()
+        {
+            return m_Users;
+        }
+
+        public ICollection<UnturnedPendingUser> GetPendingUsers()
+        {
+            return m_PendingUsers;
+        }
+
         public void Dispose()
         {
             m_Users.Clear();

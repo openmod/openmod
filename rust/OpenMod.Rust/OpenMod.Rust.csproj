@@ -8,7 +8,9 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
-    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2018.4.23" />
+    <PackageReference Include="OpenMod.Rust.Redist" Version="2256.198.1.1" />
+    <PackageReference Include="OpenMod.UniTask" Version="2.0.34" />
+    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2019.3.5" />
   </ItemGroup>
 
   <ItemGroup>

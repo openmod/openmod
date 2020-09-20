@@ -8,6 +8,10 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
+    <PackageReference Include="OpenMod.Rust.Oxide.Redist" Version="2.0.4765" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\OpenMod.Rust\OpenMod.Rust.csproj" />
   </ItemGroup>
 
