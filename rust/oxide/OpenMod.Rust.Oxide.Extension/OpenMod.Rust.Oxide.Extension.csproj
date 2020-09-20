@@ -5,7 +5,7 @@
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
