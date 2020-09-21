@@ -52,7 +52,14 @@ namespace OpenMod.Standalone
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
-            DataStore = dataStoreFactory.CreateDataStore("openmod.standalone", WorkingDirectory);
+
+            DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters
+            {
+                ComponentId = OpenModComponentId,
+                Prefix = "openmod.standalone",
+                Suffix = null,
+                WorkingDirectory = WorkingDirectory
+            });
         }
 
         public Task InitAsync()

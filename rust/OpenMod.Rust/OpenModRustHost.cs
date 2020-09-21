@@ -38,7 +38,13 @@ namespace OpenMod.Rust
         {
             LifetimeScope = lifetimeScope;
             WorkingDirectory = runtime.WorkingDirectory;
-            DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
+            DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters
+            {
+                ComponentId = OpenModComponentId,
+                Prefix = "openmod.rust",
+                Suffix = null,
+                WorkingDirectory = WorkingDirectory
+            });
         }
 
         public async Task InitAsync()
