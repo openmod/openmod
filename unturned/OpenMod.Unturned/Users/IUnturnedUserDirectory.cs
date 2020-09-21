@@ -9,8 +9,8 @@ namespace OpenMod.Unturned.Users
     [Service]
     public interface IUnturnedUserDirectory
     {
-        public UnturnedUser GetUser(Player player);
-        public UnturnedPendingUser GetPendingUser(SteamPending pending);
+        UnturnedUser GetUser(Player player);
+        UnturnedPendingUser GetPendingUser(SteamPending pending);
         UnturnedUser FindUser(CSteamID steamId);
         UnturnedPendingUser FindPendingUser(CSteamID steamId);
         UnturnedUser FindUser(string searchString, UserSearchMode searchMode);
