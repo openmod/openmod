@@ -82,7 +82,7 @@ namespace OpenMod.Bootstrapper
                 "NETStandard.Library",
                 "System.IO.FileSystem.Watcher");
 
-            nugetPackageManager.IgnoreDependencies(ignoredDependencies.ToArray());
+            // nugetPackageManager.IgnoreDependencies(ignoredDependencies.ToArray());
 
             var hostAssemblies = new List<Assembly>();
             foreach (var packageId in packageIds)

@@ -38,7 +38,7 @@ namespace OpenMod.NuGet
         private readonly Dictionary<string, List<CachedNuGetAssembly>> m_LoadedPackageAssemblies;
         private readonly HashSet<string> m_IgnoredDependendencies;
 
-        private static Dictionary<string, List<Assembly>> s_LoadedPackages = new Dictionary<string, List<Assembly>>();
+        private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new Dictionary<string, List<Assembly>>();
         private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
 
@@ -147,7 +147,7 @@ namespace OpenMod.NuGet
 
         public async Task RemoveOutdatedPackagesAsync()
         {
-            Dictionary<string, List<NuGetVersion>> installedVersions = new Dictionary<string, List<NuGetVersion>>();
+            var installedVersions = new Dictionary<string, List<NuGetVersion>>();
 
             foreach (var directory in Directory.GetDirectories(PackagesDirectory))
             {
@@ -263,6 +263,7 @@ namespace OpenMod.NuGet
 
         private async Task<ICollection<PackageDependency>> GetDependenciesInternalAsync(PackageIdentity identity, List<string> lookedUpIds)
         {
+
             if (lookedUpIds.Any(d => string.Equals(d, identity.Id, StringComparison.OrdinalIgnoreCase)))
             {
                 return new List<PackageDependency>();
@@ -296,6 +297,7 @@ namespace OpenMod.NuGet
                 .Packages;
 
             list.AddRange(packages);
+            list.RemoveAll(d => m_IgnoredDependendencies.Contains(d.Id));
 
             foreach (var dependency in list.ToList())
             {
@@ -525,8 +527,12 @@ namespace OpenMod.NuGet
                 availablePackages.Add(dependencyInfo);
                 foreach (var dependency in dependencyInfo.Dependencies)
                 {
-                    await QueryPackageDependenciesAsync(
-                        new PackageIdentity(dependency.Id, dependency.VersionRange.MaxVersion ?? dependency.VersionRange.MinVersion), cacheContext, repos, availablePackages);
+                    if (m_IgnoredDependendencies.Contains(dependency.Id))
+                    {
+                        continue;
+                    }
+
+                    await QueryPackageDependenciesAsync(new PackageIdentity(dependency.Id, dependency.VersionRange.MaxVersion ?? dependency.VersionRange.MinVersion), cacheContext, repos, availablePackages);
                 }
             }
         }

@@ -77,7 +77,15 @@ namespace OpenMod.Unturned
             m_UnturnedCommandHandler = unturnedCommandHandler;
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
-            DataStore = dataStoreFactory.CreateDataStore("openmod.unturned", WorkingDirectory);
+            
+            DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters
+            {
+                ComponentId = OpenModComponentId,
+                Prefix = "openmod.unturned",
+                Suffix = null,
+                WorkingDirectory = WorkingDirectory
+            });
+
             m_Capabilities = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 KnownGameCapabilities.Health,

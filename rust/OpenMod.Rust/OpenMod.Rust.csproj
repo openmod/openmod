@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageDescription>Rust integration for OpenMod</PackageDescription>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
+
+  <ItemGroup>
+    <PackageReference Include="OpenMod.Rust.Redist" Version="2256.198.1.1" />
+    <PackageReference Include="OpenMod.UniTask" Version="2.0.34" />
+    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2019.3.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\extensions\OpenMod.Extensions.Games.Abstractions\OpenMod.Extensions.Games.Abstractions.csproj" />
+    <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj" />
+    <ProjectReference Include="..\..\unityengine\OpenMod.UnityEngine\OpenMod.UnityEngine.csproj" />
+  </ItemGroup>
+
+</Project>

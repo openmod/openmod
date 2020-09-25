@@ -30,19 +30,19 @@ namespace OpenMod.Core.Persistence
         private FileSystemWatcher m_FileSystemWatcher;
         private static ConcurrentDictionary<string, object> s_Locks;
 
-        public YamlDataStore([CanBeNull] string prefix, string basePath, string suffix = "data")
+        public YamlDataStore(DataStoreCreationParameters parameters)
         {
-            suffix ??= string.Empty;
-            if (!string.IsNullOrEmpty(prefix))
+            parameters.Suffix ??= string.Empty;
+            if (!string.IsNullOrEmpty(parameters.Prefix))
             {
-                m_Prefix = $"{prefix}.";
+                m_Prefix = $"{parameters.Prefix}.";
             }
 
-            m_BasePath = basePath;
+            m_BasePath = parameters.WorkingDirectory;
 
             if (!string.IsNullOrEmpty(m_Suffix))
             {
-                m_Suffix = $".{suffix}";
+                m_Suffix = $".{parameters.Suffix}";
             }
 
             m_Serializer = new SerializerBuilder()

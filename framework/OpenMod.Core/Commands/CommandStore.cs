@@ -93,19 +93,24 @@ namespace OpenMod.Core.Commands
                     }
                 }
 
-                var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync() ?? new RegisteredCommandsData();
-                commandsData.Commands ??= new List<RegisteredCommandData>();
-
-                foreach (var command in commands
-                    .Where(d => !commandsData.Commands.Any(c => c.Id.Equals(d.Id, StringComparison.OrdinalIgnoreCase))))
+                if (commands.Count > 0)
                 {
-                    commandsData.Commands.Add(CreateDefaultCommandData(command));
-                }
+                    var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync() ??
+                                       new RegisteredCommandsData();
+                    commandsData.Commands ??= new List<RegisteredCommandData>();
 
-                await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
+                    foreach (var command in commands
+                        .Where(d => !commandsData.Commands.Any(c =>
+                            c.Id.Equals(d.Id, StringComparison.OrdinalIgnoreCase))))
+                    {
+                        commandsData.Commands.Add(CreateDefaultCommandData(command));
+                    }
+               
+                    await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
+                }
             });
         }
-        
+
         public async Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync()
         {
             if (m_IsDisposing)

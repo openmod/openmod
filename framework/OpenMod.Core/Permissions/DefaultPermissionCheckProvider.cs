@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
+using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Permissions
 {
@@ -11,10 +14,14 @@ namespace OpenMod.Core.Permissions
     public class DefaultPermissionCheckProvider : IPermissionCheckProvider
     {
         private readonly IPermissionChecker m_PermissionChecker;
+        private readonly ILogger<DefaultPermissionCheckProvider> m_Logger;
 
-        public DefaultPermissionCheckProvider(IPermissionChecker permissionChecker)
+        public DefaultPermissionCheckProvider(
+            IPermissionChecker permissionChecker,
+            ILogger<DefaultPermissionCheckProvider> logger)
         {
             m_PermissionChecker = permissionChecker;
+            m_Logger = logger;
         }
 
         public bool SupportsActor(IPermissionActor actor)
@@ -33,9 +40,25 @@ namespace OpenMod.Core.Permissions
                 deniedPermissions.AddRange(await permissionSource.GetDeniedPermissionsAsync(actor));
             }
 
+
+            m_Logger.LogDebug("Granted permissions for " + actor.DisplayName + ": ");
+            foreach (var knownPerm in grantedPermissions)
+            {
+                m_Logger.LogDebug("* " + knownPerm);
+            }
+
+            m_Logger.LogDebug("Denied permissions for " + actor.DisplayName + ": ");
+            foreach (var knownPerm in deniedPermissions)
+            {
+                m_Logger.LogDebug("* " + knownPerm);
+            }
+
+
             var permissionTree = BuildPermissionTree(permission);
             foreach (var permissionNode in permissionTree)
             {
+                m_Logger.LogDebug("Checking node: " + permissionNode);
+
                 if (deniedPermissions.Any(c => CheckPermissionEquals(permissionNode, c)))
                 {
                     return PermissionGrantResult.Deny;
@@ -50,7 +73,7 @@ namespace OpenMod.Core.Permissions
             return PermissionGrantResult.Default;
         }
 
-        
+
         private bool CheckPermissionEquals(string input, string permission)
         {
             return input.Equals(permission, StringComparison.OrdinalIgnoreCase);
@@ -61,15 +84,16 @@ namespace OpenMod.Core.Permissions
         ///     If the target has any of these permissions, they will automatically have the given permission too <br /><br />
         ///     <b>Example Input:</b>
         /// <code>
-        ///   "player.test.sub"
+        ///   "OpenMod.Core:commands.help"
         /// </code>
         ///     <b>Example output:</b>
         ///     <code>
         /// [
         ///     "*",
-        ///     "player.*",
-        ///     "player.test.*",
-        ///     "player.test.sub"
+        ///     "OpenMod.*"
+        ///     "OpenMod.Core:*"
+        ///     "OpenMod.Core:commands.*",
+        ///     "OpenMod.Core:commands.help",
         /// ]
         /// </code>
         /// </summary>
@@ -77,29 +101,43 @@ namespace OpenMod.Core.Permissions
         /// <returns>The collection of all parent permission nodes</returns>
         public static IEnumerable<string> BuildPermissionTree(string permission)
         {
-            permission = permission.Replace(":", ".");
-
             var permissions = new List<string>
             {
                 "*"
             };
 
-            bool isFirst = true;
+            var separatorIndices = permission.AllIndexesOf(":");
+            
+            // replace all ":" with "." for more simple code
+            // we will restore : later again
+            permission = permission.Replace(":", "."); 
+
             var parentPath = string.Empty;
             foreach (var childPath in permission.Split('.'))
             {
-                char seperator = isFirst ? ':' : '.';
-                permissions.Add($"{parentPath}{childPath}{seperator}*");
-                parentPath += $"{childPath}{seperator}";
-                isFirst = false;
+                permissions.Add($"{parentPath}{childPath}.*");
+                parentPath += $"{childPath}.";
             }
 
-            //remove last element because it should not contain "<permission>.*"
-            //If someone has "permission.x.*" they should not have "permission.x" too
+            // Remove last element because it should not contain "<permission>.*"
+            // If someone has "permission.x.*" they should not have "permission.x" too
             permissions.RemoveAt(permissions.Count - 1);
 
             permissions.Add(permission);
-            return permissions;
+            return permissions.Select(d =>
+            {
+                foreach (var index in separatorIndices)
+                {
+                    if (d.Length < index)
+                    {
+                        continue;
+                    }
+
+                    d = new StringBuilder(d) { [index] = ':' }.ToString();
+                }
+
+                return d;
+            });
         }
     }
 }

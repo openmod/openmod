@@ -1,0 +1,44 @@
+name: OpenMod.Rust.Oxide.Extension
+
+on:
+  create:
+    tags:
+      - "*"
+  push:
+    branches: [ master ]
+    paths:
+      - 'rust/oxide/OpenMod.Rust.Oxide.Extension/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'rust/oxide/OpenMod.Rust.Oxide.Extension/**'
+
+jobs:
+  build:
+    name: "OpenMod.OpenMod.Rust.Oxide.Extension Build"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      name: Checkout Repository
+      with:
+        fetch-depth: 0
+    - name: Extract version
+      id: get_version
+      run: echo ::set-output name=VERSION::$(git describe --tags)        
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Install dependencies
+      run: dotnet restore rust/oxide/OpenMod.Rust.Oxide.Extension
+    - name: Update version
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"  
+    - name: Build
+      run: dotnet build rust/oxide/OpenMod.Rust.Oxide.Extension --configuration Release --no-restore
+#    - name: Test
+#      run: dotnet test --no-restore --verbosity normal
+    - name: Push to NuGet
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      run: dotnet nuget push rust/oxide/OpenMod.Rust.Oxide.Extension/bin/Release/*.nupkg
+             --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
+             --source https://api.nuget.org/v3/index.json

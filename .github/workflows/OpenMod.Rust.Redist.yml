@@ -1,0 +1,37 @@
+
+name: OpenMod.Rust.Redist
+
+on:
+  create:
+    tags:
+      - "*"
+  push:
+    branches: [ master ]
+    paths:
+      - 'rust/redist/**'        
+
+jobs:
+  build:
+    name: "OpenMod.Rust.Redist"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      name: Checkout Repository
+      with:
+        fetch-depth: 0   
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - uses: nuget/setup-nuget@v1
+      name: Setup NuGet
+      with:
+        nuget-api-key: ${{ secrets.NUGET_DEPLOY_KEY }}
+        nuget-version: '5.x'       
+    - name: Pack
+      run: nuget pack rust/redist/OpenMod.Rust.Redist.nuspec
+    - name: Push to NuGet
+      run: dotnet nuget push *.nupkg
+             --skip-duplicate
+             --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
+             --source https://api.nuget.org/v3/index.json

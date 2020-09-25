@@ -9,10 +9,6 @@ on:
     branches: [ master ]
     paths:
       - 'unturned/redist/**'        
-  pull_request:
-    branches: [ master ]
-    paths:
-      - 'unturned/redist/**' 
 
 jobs:
   build:

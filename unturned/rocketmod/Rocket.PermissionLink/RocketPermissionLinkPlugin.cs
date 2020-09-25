@@ -23,7 +23,7 @@ namespace Rocket.PermissionLink
             await base.OnLoadAsync();
             await UniTask.SwitchToMainThread();
 
-            m_PermissionProvider = ActivatorUtilities.CreateInstance<OpenModPermissionsProvider>(m_ServiceProvider);
+            m_PermissionProvider = ActivatorUtilities.CreateInstance<OpenModPermissionsProvider>(m_ServiceProvider, this);
             m_PermissionProvider.Install();
         }
 

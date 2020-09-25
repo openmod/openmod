@@ -143,7 +143,13 @@ namespace OpenMod.Core.Plugins
                             .InstancePerLifetimeScope()
                             .OwnedByLifetimeScope();
 
-                        containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(null, workingDirectory))
+                        containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(new DataStoreCreationParameters
+                            {
+                                ComponentId = pluginMetadata.Id,
+                                Prefix = null,
+                                Suffix = "data",
+                                WorkingDirectory = workingDirectory
+                        }))
                             .As<IDataStore>()
                             .SingleInstance()
                             .OwnedByLifetimeScope();

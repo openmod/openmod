@@ -2,7 +2,6 @@
 using OpenMod.Extensions.Games.Abstractions.Players;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
-using System;
 using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Vehicles
@@ -15,14 +14,29 @@ namespace OpenMod.Unturned.Vehicles
         {
             get
             {
-                return !string.IsNullOrEmpty(OwnerPlayerId)
-                       || !string.IsNullOrEmpty(OwnerGroupId);
+                return m_Vehicle.isLocked && (PlayerId != 0 || GroupId != 0);
             }
         }
 
-        public string OwnerPlayerId => m_Vehicle.lockedOwner.ToString();
+        public string OwnerPlayerId
+        {
+            get { return PlayerId.ToString(); }
+        }
 
-        public string OwnerGroupId => m_Vehicle.lockedGroup.ToString();
+        public string OwnerGroupId
+        {
+            get { return GroupId.ToString(); }
+        }
+
+        private ulong PlayerId
+        {
+            get { return m_Vehicle.lockedOwner.m_SteamID; }
+        }
+
+        private ulong GroupId
+        {
+            get { return m_Vehicle.lockedGroup.m_SteamID; }
+        }
 
         public UnturnedVehicleOwnership(InteractableVehicle vehicle)
         {
@@ -31,22 +45,19 @@ namespace OpenMod.Unturned.Vehicles
 
         public Task<bool> HasAccessAsync(IPlayer player)
         {
-            if (player is UnturnedPlayer unturnedPlayer)
-            {
-                if (OwnerPlayerId != null && string.Equals(OwnerPlayerId, unturnedPlayer.SteamId.ToString(), StringComparison.OrdinalIgnoreCase))
-                {
-                    return Task.FromResult(true);
-                }
+            if (!(player is UnturnedPlayer unturnedPlayer))
+                return Task.FromResult(false);
 
-                if (OwnerGroupId != null
-                    && (string.Equals(OwnerGroupId, unturnedPlayer.SteamPlayer.playerID.group.ToString(), StringComparison.OrdinalIgnoreCase)
-                        || string.Equals(OwnerGroupId, unturnedPlayer.Player.quests.groupID.ToString(), StringComparison.OrdinalIgnoreCase)))
-                {
-                    return Task.FromResult(true);
-                }
+            if (!HasOwner)
+                return Task.FromResult(true);
+
+            //Explanation at UnturnedBuildableOwnership
+            if (PlayerId == unturnedPlayer.SteamId.m_SteamID)
+            {
+                return Task.FromResult(true);
             }
 
-            return Task.FromResult(false);
+            return Task.FromResult(GroupId != 0 && GroupId == unturnedPlayer.Player.quests.groupID.m_SteamID);
         }
     }
 }

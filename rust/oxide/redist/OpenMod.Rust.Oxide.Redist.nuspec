@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>OpenMod.Rust.Oxide.Redist</id>
+    <version>2.0.4765</version>
+    <description>OxideMod redistributables for OpenMod</description>
+    <authors>Oxide Team and Contributors;OpenMod</authors>
+	<license type="file">LICENSE.txt</license>
+	<requireLicenseAcceptance>true</requireLicenseAcceptance>
+  </metadata>
+  <files>
+    <file src="*.dll" target="lib\net461" />
+    <file src="LICENSE.txt" target="" />
+  </files>
+</package>

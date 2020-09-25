@@ -30,16 +30,29 @@ namespace Rocket.Unturned.Commands
             {
                 // RocketMod commands must run on main thread
                 await UniTask.SwitchToMainThread();
+                const string rocketPrefix = "rocket:";
 
                 if (@event.CommandContext.Exception is CommandNotFoundException && R.Commands != null)
                 {
+                    var commandAlias = @event.CommandContext.CommandAlias;
+                    if (string.IsNullOrEmpty(commandAlias))
+                    {
+                        return;
+                    }
+
+                    if (commandAlias.StartsWith(rocketPrefix))
+                    {
+                        commandAlias = commandAlias.Replace(rocketPrefix, string.Empty);
+                    }
+
                     IRocketPlayer rocketPlayer;
                     if (@event.Actor is UnturnedUser user)
                     {
                         var steamPlayer = user.Player.SteamPlayer;
-                        if (!UnturnedPermissions.CheckPermissions(steamPlayer, $"/{@event.CommandContext.CommandAlias}"))
+                        if (!UnturnedPermissions.CheckPermissions(steamPlayer, $"/{commandAlias}"))
                         {
                             // command doesnt exist or no permission
+                            @event.ExceptionHandled = true;
                             return;
                         }
 
@@ -49,7 +62,7 @@ namespace Rocket.Unturned.Commands
                     {
                         rocketPlayer = new ConsolePlayer();
 
-                        var command = R.Commands.GetCommand(@event.CommandContext.CommandAlias.ToLower(CultureInfo.InvariantCulture));
+                        var command = R.Commands.GetCommand(commandAlias.ToLower(CultureInfo.InvariantCulture));
                         if (command == null)
                         {
                             return;
@@ -61,13 +74,7 @@ namespace Rocket.Unturned.Commands
                         return;
                     }
 
-                    if (string.IsNullOrEmpty(@event.CommandContext.CommandAlias))
-                    {
-                        Console.WriteLine("command alias is null or empty");
-                        return;
-                    }
-
-                    var args = new List<string> { @event.CommandContext.CommandAlias };
+                    var args = new List<string> { commandAlias };
                     args.AddRange(@event.CommandContext.Parameters);
 
                     R.Commands.Execute(rocketPlayer, args.ToArray());
