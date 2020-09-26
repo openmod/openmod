@@ -18,6 +18,7 @@ using Rocket.Unturned.Utils;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -224,16 +225,26 @@ namespace Rocket.Unturned
 
                 try
                 {
+                    // OPENMOD PATCH: Remove setting framework as RocketMod 
+
                     R.Plugins.OnPluginsLoaded += () =>
                     {
-                        SteamGameServer.SetKeyValue("rocketplugins", String.Join(",", R.Plugins.GetPlugins().Select(p => p.Name).ToArray()));
+                        IPluginAdvertising pluginAdvertising = PluginAdvertising.Get();
+                        List<IRocketPlugin> rocketPlugins = R.Plugins.GetPlugins();
+                        List<string> pluginNames = new List<string>(rocketPlugins.Count);
+                        foreach (IRocketPlugin plugin in rocketPlugins)
+                        {
+                            if (plugin != null && !string.IsNullOrEmpty(plugin.Name))
+                            {
+                                pluginNames.Add(plugin.Name);
+                            }
+                        }
+                        pluginAdvertising.AddPlugins(pluginNames);
                     };
 
-
                     SteamGameServer.SetKeyValue("unturned", Provider.APP_VERSION);
-                    SteamGameServer.SetKeyValue("rocket", Assembly.GetExecutingAssembly().GetName().Version.ToString());
-                    SteamGameServer.SetBotPlayerCount(1);
-
+                    
+                    // END OPENMOD PATCH
                 }
                 catch (Exception ex)
                 {
