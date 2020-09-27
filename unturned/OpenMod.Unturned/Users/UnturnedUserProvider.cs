@@ -82,7 +82,14 @@ namespace OpenMod.Unturned.Users
 
             var connectedEvent = new UnturnedUserConnectedEvent(user);
 
-            AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_Runtime, this, connectedEvent));
+            async UniTaskVoid EmitDelayedEvent(UnturnedUserConnectedEvent @event)
+            {
+                await UniTask.DelayFrame(1);
+
+                await m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
+            }
+
+            EmitDelayedEvent(connectedEvent).Forget();
         }
 
         protected virtual void OnPlayerDisconnected(SteamPlayer steamPlayer)
