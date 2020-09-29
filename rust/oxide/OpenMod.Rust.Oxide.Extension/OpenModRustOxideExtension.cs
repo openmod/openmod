@@ -29,7 +29,7 @@ namespace OpenMod.Rust.Oxide.Extension
             OpenModRuntime = bootrapper.Bootstrap(
                 openModDirectory,
                 Environment.GetCommandLineArgs(),
-                new[] { "OpenMod.Rust", "OpenMod.Rust.Oxide" },
+                new[] { "OpenMod.UnityEngine", "OpenMod.Rust", "OpenMod.Rust.Oxide" },
                 new[] { "OpenMod.Rust.Redist", "OpenMod.UnityEngine.Redist", "OpenMod.Rust.Oxide.Redist" },
                 allowPrereleaseVersions: false,
                 new NuGetConsoleLogger());
