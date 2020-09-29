@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenMod.Rust.Oxide.Redist" Version="2.0.4765" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\framework\OpenMod.Runtime\OpenMod.Runtime.csproj" />
+    <ProjectReference Include="..\..\..\unityengine\OpenMod.UnityEngine\OpenMod.UnityEngine.csproj" />
+    <ProjectReference Include="..\OpenMod.Rust.Oxide\OpenMod.Rust.Oxide.csproj" />
+  </ItemGroup>
+
+</Project>
