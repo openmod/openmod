@@ -19,4 +19,8 @@
     <ProjectReference Include="..\..\unityengine\OpenMod.UnityEngine\OpenMod.UnityEngine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Networkables\" />
+  </ItemGroup>
+
 </Project>

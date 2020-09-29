@@ -1,14 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using OpenMod.API.Ioc;
 
-namespace OpenMod.UnityEngine
+namespace OpenMod.Rust.Oxide
 {
     public class ServiceConfigurator : IServiceConfigurator
     {
         public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IHostLifetime, UnityHostLifetime>();
+            // todo
         }
     }
 }

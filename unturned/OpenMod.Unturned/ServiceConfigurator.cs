@@ -15,9 +15,6 @@ namespace OpenMod.Unturned
     {
         public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
         {
-            // bug: UnityEngine service configurator doesn't get called
-            serviceCollection.AddSingleton<IHostLifetime, UnityHostLifetime>();
-
             serviceCollection.Configure<PermissionCheckerOptions>(options =>
             {
                 options.AddPermissionCheckProvider<UnturnedAdminPermissionCheckProvider>();
