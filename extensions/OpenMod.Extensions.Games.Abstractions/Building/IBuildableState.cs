@@ -7,6 +7,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Building
         double Health { get; }
 
         [CanBeNull]
-        byte[] State { get; }
+        byte[] StateData { get; }
     }
 }
