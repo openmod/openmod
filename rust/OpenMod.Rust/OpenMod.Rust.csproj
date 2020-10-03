@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="OpenMod.Rust.Redist" Version="2256.198.1.1" />
-    <PackageReference Include="OpenMod.UniTask" Version="2.0.34" />
+    <PackageReference Include="OpenMod.UniTask" Version="2019.2.0.34" />
     <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2019.3.5" />
   </ItemGroup>
 
