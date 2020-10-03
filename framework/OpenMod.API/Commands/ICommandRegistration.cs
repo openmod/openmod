@@ -93,5 +93,10 @@ namespace OpenMod.API.Commands
         ///    Creates a new command instance for execution.
         /// </summary>
         ICommand Instantiate(IServiceProvider serviceProvider);
+
+        /// <summary>
+        ///    Checks if the command is enabled.
+        /// </summary>
+        bool IsEnabled { get; }
     }
 }
