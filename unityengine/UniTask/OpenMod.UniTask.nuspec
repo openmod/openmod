@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>OpenMod.UniTask</id>
-    <version>2019.2.0.34</version>
+    <version>2018.2.0.36</version>
     <authors>Cysharp;OpenMod</authors>
     <owners>OpenMod</owners>
 	<description>UniTask for OpenMod</description>
