@@ -15,7 +15,7 @@ namespace OpenMod.Core.Users
 {
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class UserDataStore : IUserDataStore
+    public class UserDataStore : IUserDataStore, IAsyncDisposable
     {
         private readonly IRuntime m_Runtime;
         public const string UsersKey = "users";
@@ -110,7 +110,6 @@ namespace OpenMod.Core.Users
             }
 
             m_CachedUsersData = usersData;
-            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
         }
 
         private async Task<UsersData> GetUsersDataAsync()
@@ -135,6 +134,12 @@ namespace OpenMod.Core.Users
             {
                 Users = new List<UserData>()
             };
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            m_FileChangeWatcher?.Dispose();
+            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
         }
     }
 }
