@@ -15,6 +15,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="OpenMod.Rust.Oxide.Redist" Version="2.0.4765" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\framework\OpenMod.Bootstrapper\OpenMod.Bootstrapper.csproj" />
+    <ProjectReference Include="..\..\..\framework\OpenMod.NuGet\OpenMod.NuGet.csproj" />
   </ItemGroup>
 
   <ItemGroup>

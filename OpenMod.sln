@@ -59,6 +59,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Rust.Oxide.Permissi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "oxide", "oxide", "{DD874A83-4476-4906-96F6-D0BAC674E9BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Rust.Oxide.Extension.Dev", "rust\oxide\OpenMod.Rust.Oxide.Extension.Dev\OpenMod.Rust.Oxide.Extension.Dev.csproj", "{1023EB73-C8EF-4F68-BC50-CAA466E36140}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,10 @@ Global
 		{B0B13E02-8147-43DC-A7E2-D896C357D79A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0B13E02-8147-43DC-A7E2-D896C357D79A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0B13E02-8147-43DC-A7E2-D896C357D79A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1023EB73-C8EF-4F68-BC50-CAA466E36140}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1023EB73-C8EF-4F68-BC50-CAA466E36140}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1023EB73-C8EF-4F68-BC50-CAA466E36140}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1023EB73-C8EF-4F68-BC50-CAA466E36140}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -171,6 +177,7 @@ Global
 		{97D0A0FF-D8DB-4D39-A419-A9741DAE0FCB} = {DD874A83-4476-4906-96F6-D0BAC674E9BE}
 		{B0B13E02-8147-43DC-A7E2-D896C357D79A} = {DD874A83-4476-4906-96F6-D0BAC674E9BE}
 		{DD874A83-4476-4906-96F6-D0BAC674E9BE} = {5CEFA8BE-8466-40F2-8FBA-DE866DCD8AB3}
+		{1023EB73-C8EF-4F68-BC50-CAA466E36140} = {DD874A83-4476-4906-96F6-D0BAC674E9BE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5384DBB4-E799-40C6-BD98-4C90698BE085}

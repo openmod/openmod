@@ -7,12 +7,12 @@ namespace OpenMod.Unturned.Building
     {
         public double Health { get; }
 
-        public byte[] State { get; }
+        public byte[] StateData { get; }
 
         public UnturnedBuildableState(Barricade barricade)
         {
             Health = barricade.health;
-            State = barricade.state;
+            StateData = barricade.state;
         }
 
         public UnturnedBuildableState(Structure structure)

@@ -120,7 +120,7 @@ namespace OpenMod.Unturned.Players.Life.Events
         {
             UnturnedPlayer player = GetUnturnedPlayer(sender.player);
 
-            UnturnedPlayerDeadEvent @event = new UnturnedPlayerDeadEvent(player, cause, limb, instigator);
+            UnturnedPlayerDeathEvent @event = new UnturnedPlayerDeathEvent(player, cause, limb, instigator);
 
             Emit(@event);
         }

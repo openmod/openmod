@@ -4,18 +4,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Cysharp.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
-using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
-using OpenMod.API.Prioritization;
+using OpenMod.Extensions.Games.Abstractions;
 using Rust;
 using UnityEngine.LowLevel;
 
 namespace OpenMod.Rust
 {
-    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class OpenModRustHost : IOpenModHost, IDisposable
+    public abstract class BaseOpenModRustHost : IOpenModHost, IDisposable
     {
         public string OpenModComponentId { get; } = "OpenMod.Rust";
 
@@ -30,7 +27,7 @@ namespace OpenMod.Rust
         private bool m_IsDisposing;
         private static bool s_UniTaskInited;
 
-        public OpenModRustHost(
+        protected BaseOpenModRustHost(
             ILifetimeScope lifetimeScope,
             IRuntime runtime,
             IDataStoreFactory dataStoreFactory
@@ -47,7 +44,7 @@ namespace OpenMod.Rust
             });
         }
 
-        public async Task InitAsync()
+        public Task InitAsync()
         {
             IsComponentAlive = true;
 
@@ -67,7 +64,11 @@ namespace OpenMod.Rust
                 PlayerLoopHelper.Initialize(ref playerLoop);
                 s_UniTaskInited = true;
             }
+
+            return OnInitAsync();
         }
+
+        protected abstract Task OnInitAsync();
 
         public Task ShutdownAsync()
         {
@@ -77,7 +78,11 @@ namespace OpenMod.Rust
 
         public bool HasCapability(string capability)
         {
-            // todo: implement universal API
+            if (capability == KnownGameCapabilities.Health)
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -88,8 +93,12 @@ namespace OpenMod.Rust
                 return;
             }
 
+            OnDispose();
+
             m_IsDisposing = true;
             IsComponentAlive = false;
         }
+
+        protected abstract void OnDispose();
     }
 }

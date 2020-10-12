@@ -44,9 +44,9 @@ namespace OpenMod.Unturned.Module
             OpenModRuntime = bootrapper.Bootstrap(
                 openModDirectory,
                 Environment.GetCommandLineArgs(),
-                new[] { "OpenMod.Unturned" },
+                new[] { "OpenMod.UnityEngine", "OpenMod.Unturned" },
                 new[] { "OpenMod.Unturned.Redist", "OpenMod.UnityEngine.Redist" },
-                false,
+                allowPrereleaseVersions: false,
                 new NuGetConsoleLogger());
 
             m_SharedModule.OnPostInitialize();

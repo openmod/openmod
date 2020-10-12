@@ -123,6 +123,11 @@ namespace OpenMod.Core.Commands
             {
                 foreach (var command in await sources.GetCommandsAsync())
                 {
+                    if (!command.IsEnabled)
+                    {
+                        continue;
+                    }
+
                     if (!command.Component.IsComponentAlive)
                     {
                         continue;

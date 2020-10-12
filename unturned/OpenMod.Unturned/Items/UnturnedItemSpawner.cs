@@ -50,7 +50,6 @@ namespace OpenMod.Unturned.Items
                         itemJar = drop.interactableItem.jar;
                     }
 
-                    playerInventory.Inventory.forceAddItem(item, auto: true, playEffect: true);
                     return new UnturnedInventoryItem(itemJar, new UnturnedItem(item));
                 }
 

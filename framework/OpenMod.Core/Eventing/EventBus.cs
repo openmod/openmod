@@ -155,7 +155,8 @@ namespace OpenMod.Core.Eventing
             var eventTypes = new List<Type>();
 
             var currentType = @event.GetType();
-            while (currentType != null && !currentType.IsAbstract && !currentType.IsInterface && typeof(IEvent).IsAssignableFrom(currentType))
+
+            while (currentType != null && typeof(IEvent).IsAssignableFrom(currentType))
             {
                 eventTypes.Add(currentType);
                 currentType = currentType.BaseType;

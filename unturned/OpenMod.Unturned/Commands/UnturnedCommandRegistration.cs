@@ -47,5 +47,13 @@ namespace OpenMod.Unturned.Commands
         {
             return ActivatorUtilities.CreateInstance<UnturnedBuiltinCommand>(serviceProvider, this);
         }
+
+        public bool IsEnabled
+        {
+            get
+            {
+                return true;
+            }
+        }
     }
 }

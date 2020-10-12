@@ -2,7 +2,7 @@
 
 namespace OpenMod.Extensions.Games.Abstractions.Players
 {
-    public interface IPlayerDeadEvent : IPlayerEvent
+    public interface IPlayerDeathEvent : IPlayerEvent
     {
         Vector3 DeathPosition { get; }
     }
