@@ -32,6 +32,12 @@ namespace OpenMod.Unturned.Building.Events
 
             OnBarricadeDestroyed += Events_OnBarricadeDestroyed;
             OnStructureDestroyed += Events_OnStructureDestroyed;
+
+            BarricadeManager.onTransformRequested += OnTransformBarricadeRequested;
+            StructureManager.onTransformRequested += OnTransformStructureRequested;
+
+            OnBarricadeTransformed += Events_OnBarricadeTransformed;
+            OnStructureTransformed += Events_OnStructureTransformed;
         }
 
         public override void Unsubscribe()
@@ -44,6 +50,15 @@ namespace OpenMod.Unturned.Building.Events
 
             BarricadeManager.onSalvageBarricadeRequested -= OnSalvageBarricadeRequested;
             StructureManager.onSalvageStructureRequested -= OnSalvageStructureRequested;
+
+            OnBarricadeDestroyed -= Events_OnBarricadeDestroyed;
+            OnStructureDestroyed -= Events_OnStructureDestroyed;
+
+            BarricadeManager.onTransformRequested -= OnTransformBarricadeRequested;
+            StructureManager.onTransformRequested -= OnTransformStructureRequested;
+
+            OnBarricadeTransformed -= Events_OnBarricadeTransformed;
+            OnStructureTransformed -= Events_OnStructureTransformed;
         }
 
         private void OnDamageBarricadeRequested(CSteamID instigatorSteamID, Transform barricadeTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
@@ -164,6 +179,80 @@ namespace OpenMod.Unturned.Building.Events
             Emit(@event);
         }
 
+        private void OnTransformBarricadeRequested(CSteamID instigator, byte x, byte y, ushort plant, uint instanceID,
+            ref Vector3 point, ref byte angle_x, ref byte angle_y, ref byte angle_z, ref bool shouldAllow)
+        {
+            BarricadeRegion region = BarricadeManager.regions[x, y];
+            int index = region.barricades.FindIndex(k => k.instanceID == instanceID);
+
+            BarricadeData data = region.barricades[index];
+            BarricadeDrop drop = region.drops[index];
+
+            Player nativePlayer = Provider.clients.FirstOrDefault(x => x?.playerID.steamID == instigator)?.player;
+
+            UnturnedPlayer player = nativePlayer == null ? null : new UnturnedPlayer(nativePlayer);
+
+            UnturnedBarricadeTransformingEvent @event = new UnturnedBarricadeTransformingEvent(
+                new UnturnedBarricadeBuildable(data, drop), player, instigator, point,
+                Quaternion.Euler(angle_x * 2, angle_y * 2, angle_z * 2));
+
+            Emit(@event);
+
+            shouldAllow = !@event.IsCancelled;
+            point = @event.Point;
+
+            Vector3 eulerAngles = @event.Rotation.eulerAngles;
+
+            angle_x = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.x / 2f) * 2);
+            angle_y = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.y / 2f) * 2);
+            angle_z = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2);
+        }
+
+        private void OnTransformStructureRequested(CSteamID instigator, byte x, byte y, uint instanceID,
+            ref Vector3 point, ref byte angle_x, ref byte angle_y, ref byte angle_z, ref bool shouldAllow)
+        {
+            StructureRegion region = StructureManager.regions[x, y];
+            int index = region.structures.FindIndex(k => k.instanceID == instanceID);
+
+            StructureData data = region.structures[index];
+            StructureDrop drop = region.drops[index];
+
+            Player nativePlayer = Provider.clients.FirstOrDefault(x => x?.playerID.steamID == instigator)?.player;
+
+            UnturnedPlayer player = nativePlayer == null ? null : new UnturnedPlayer(nativePlayer);
+
+            UnturnedStructureTransformingEvent @event = new UnturnedStructureTransformingEvent(
+                new UnturnedStructureBuildable(data, drop), player, instigator, point,
+                Quaternion.Euler(angle_x * 2, angle_y * 2, angle_z * 2));
+
+            Emit(@event);
+
+            shouldAllow = !@event.IsCancelled;
+            point = @event.Point;
+
+            Vector3 eulerAngles = @event.Rotation.eulerAngles;
+
+            angle_x = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.x / 2f) * 2);
+            angle_y = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.y / 2f) * 2);
+            angle_z = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2);
+        }
+
+        private void Events_OnBarricadeTransformed(BarricadeData data, BarricadeDrop drop)
+        {
+            UnturnedBarricadeTransformedEvent @event =
+                new UnturnedBarricadeTransformedEvent(new UnturnedBarricadeBuildable(data, drop));
+
+            Emit(@event);
+        }
+
+        private void Events_OnStructureTransformed(StructureData data, StructureDrop drop)
+        {
+            UnturnedStructureTransformedEvent @event =
+                new UnturnedStructureTransformedEvent(new UnturnedStructureBuildable(data, drop));
+
+            Emit(@event);
+        }
+
         private delegate void BarricadeDeployed(BarricadeData data, BarricadeDrop drop);
         private static event BarricadeDeployed OnBarricadeDeployed;
 
@@ -175,6 +264,12 @@ namespace OpenMod.Unturned.Building.Events
 
         private delegate void StructureDestroyed(StructureData data, StructureDrop drop);
         private static event StructureDestroyed OnStructureDestroyed;
+
+        private delegate void BarricadeTransformed(BarricadeData data, BarricadeDrop drop);
+        private static event BarricadeTransformed OnBarricadeTransformed;
+
+        private delegate void StructureTransformed(StructureData data, StructureDrop drop);
+        private static event StructureTransformed OnStructureTransformed;
 
         [HarmonyPatch]
         private class Patches
@@ -241,6 +336,38 @@ namespace OpenMod.Unturned.Building.Events
                 StructureDrop drop = region.drops[index];
 
                 OnStructureDestroyed?.Invoke(data, drop);
+            }
+
+
+            [HarmonyPatch(typeof(BarricadeManager), "askTransformBarricade")]
+            [HarmonyPostfix]
+            public static void AskTransformBarricade(byte x, byte y, ushort plant, uint instanceID)
+            {
+                ThreadUtil.assertIsGameThread();
+
+                if (!BarricadeManager.tryGetRegion(x, y, plant, out BarricadeRegion region)) return;
+
+
+                int index = region.barricades.FindIndex(k => k.instanceID == instanceID);
+                BarricadeData data = region.barricades[index];
+                BarricadeDrop drop = region.drops[index];
+
+                OnBarricadeTransformed?.Invoke(data, drop);
+            }
+
+            [HarmonyPatch(typeof(StructureManager), "askTransformStructure")]
+            [HarmonyPostfix]
+            public static void AskTransformStructure(byte x, byte y, uint instanceID)
+            {
+                ThreadUtil.assertIsGameThread();
+
+                if (!StructureManager.tryGetRegion(x, y, out StructureRegion region)) return;
+
+                int index = region.structures.FindIndex(k => k.instanceID == instanceID);
+                StructureData data = region.structures[index];
+                StructureDrop drop = region.drops[index];
+
+                OnStructureTransformed?.Invoke(data, drop);
             }
         }
     }
