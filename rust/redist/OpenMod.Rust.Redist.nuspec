@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>OpenMod.Rust.Redist</id>
-    <version>2256.198.1.1</version>
+    <version>2260.199.1</version>
     <description>Rust redistributables for OpenMod</description>
     <authors>Facepunch;OpenMod</authors>	
 	<license type="file">LICENSE.txt</license>
