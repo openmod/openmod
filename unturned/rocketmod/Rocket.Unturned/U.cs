@@ -151,8 +151,9 @@ namespace Rocket.Unturned
         {
             if (Dedicator.isDedicated)
             {
-                rocketGameObject = new GameObject("Rocket");
-                DontDestroyOnLoad(rocketGameObject);
+                // OPENMOD PATCH: Remove late creation of gameObject
+                rocketGameObject = gameObject;
+                //END OPENMOD PATCH: Remove late creation of gameObject
 
                 if (System.Environment.OSVersion.Platform == PlatformID.Unix || System.Environment.OSVersion.Platform == PlatformID.MacOSX)
 #pragma warning disable CS0618
@@ -181,7 +182,7 @@ namespace Rocket.Unturned
 
         private void OnServerHosted()
         {
-            rocketGameObject.TryAddComponent<U>();
+            // OPENMOD PATCH: 'Removed rocketGameObject.TryAddComponent<U>();' since U is already injected into gameObject
             rocketGameObject.TryAddComponent<R>();
         }
 
@@ -189,6 +190,10 @@ namespace Rocket.Unturned
         {
             Instance = this;
             Environment.Initialize();
+
+            // OPENMOD PATCH: initialize U component on awake (on old version this happens on instantiate)
+            initialize();
+            //END OPENMOD PATCH: initialize U component on awake (on old version this happens on instantiate)
         }
 
         internal void Initialize()
