@@ -166,6 +166,11 @@ namespace Rocket.Unturned
 
                 Provider.onServerHosted += OnServerHosted;
                 // END OPENMOD PATCH: extracted callbacks to methods
+
+                // OPENMOD PATCH: fix rocket when om reloads if server is already loaded (issue: #232)
+                if (Provider.isServer)
+                    OnServerHosted();
+                // END OPENMOD PATCH: fix rocket when om reloads if server is already loaded (issue: #232)
             }
         }
 
