@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using OpenMod.API.Localization;
 using OpenMod.Core.Commands;
 
 namespace OpenMod.Core.Tests.Commands
@@ -10,14 +11,16 @@ namespace OpenMod.Core.Tests.Commands
     public class TypeDescriptorCommandParameterResolveProviderTests
     {
         private TypeDescriptorCommandParameterResolveProvider m_TypeDescriptorCommandParameterResolveProvider;
+        private Mock<IOpenModStringLocalizer> m_OpenModStringLocalizerMock;
 
         [TestInitialize]
         public void Initialize()
         {
-            IServiceProvider serviceProvider = Mock.Of<IServiceProvider>();
+            var serviceProvider = Mock.Of<IServiceProvider>();
+            m_OpenModStringLocalizerMock = new Mock<IOpenModStringLocalizer>();
 
             m_TypeDescriptorCommandParameterResolveProvider =
-                new TypeDescriptorCommandParameterResolveProvider(serviceProvider);
+                new TypeDescriptorCommandParameterResolveProvider(serviceProvider, m_OpenModStringLocalizerMock.Object);
         }
 
         [DataTestMethod]
@@ -92,6 +95,18 @@ namespace OpenMod.Core.Tests.Commands
 
             // Assert
             await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await resolveTask, "The given type is not supported");
+        }
+
+        [DataTestMethod]
+        [DataRow(typeof(byte), "-1")]
+        [DataRow(typeof(byte), "word")]
+        public async Task ResolveAsync_ShouldThrowCommandParameterParseException_WhenPassingInvalidArgument(Type type, string input)
+        {
+            // Act
+            Task<object> resolveTask = m_TypeDescriptorCommandParameterResolveProvider.ResolveAsync(type, input);
+
+            // Assert
+            await Assert.ThrowsExceptionAsync<CommandParameterParseException>(async () => await resolveTask);
         }
     }
 }

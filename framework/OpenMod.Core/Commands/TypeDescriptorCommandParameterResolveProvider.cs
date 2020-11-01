@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using OpenMod.API.Commands;
+using OpenMod.API.Localization;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
 
@@ -11,10 +12,12 @@ namespace OpenMod.Core.Commands
     public class TypeDescriptorCommandParameterResolveProvider : ICommandParameterResolveProvider
     {
         private readonly IServiceProvider m_ServiceProvider;
+        private readonly IOpenModStringLocalizer m_OpenModStringLocalizer;
 
-        public TypeDescriptorCommandParameterResolveProvider(IServiceProvider serviceProvider)
+        public TypeDescriptorCommandParameterResolveProvider(IServiceProvider serviceProvider, IOpenModStringLocalizer openModStringLocalizer)
         {
             m_ServiceProvider = serviceProvider;
+            m_OpenModStringLocalizer = openModStringLocalizer;
         }
 
         public bool Supports(Type type)
@@ -31,9 +34,22 @@ namespace OpenMod.Core.Commands
             }
 
             var descriptor = new ServiceProviderTypeDescriptor(m_ServiceProvider);
-            object result = converter.ConvertFromString(descriptor, input);
 
-            return Task.FromResult(result);
+            try
+            {
+                object result = converter.ConvertFromString(descriptor, input);
+                return Task.FromResult(result);
+            }
+            catch (Exception ex) when (ex.InnerException is OverflowException)
+            {
+                var parseException = new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:overflow_error", new { Value = input, Type = type }], input, type);
+                return Task.FromException<object>(parseException);
+            }
+            catch (Exception ex) when (ex.InnerException is FormatException)
+            {
+                var parseException = new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:parse_error", new { Value = input, Type = type }], input, type);
+                return Task.FromException<object>(parseException);
+            }
         }
 
         private bool TryGetSupportedConverter(Type type, out TypeConverter converter)
