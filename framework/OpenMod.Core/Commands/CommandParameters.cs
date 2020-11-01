@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Localization;
-using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Commands
 {
     [OpenModInternal]
     public class CommandParameters : ICommandParameters, IEnumerable<string>
     {
-        private readonly IServiceProvider m_ServiceProvider;
         private readonly IOpenModStringLocalizer m_OpenModStringLocalizer;
+        private readonly ICommandParameterResolver m_CommandParameterResolver;
 
         public CommandParameters(CommandContext commandContext, ICollection<string> args)
         {
             m_OpenModStringLocalizer = commandContext.ServiceProvider.GetRequiredService<IOpenModStringLocalizer>();
-            m_ServiceProvider = commandContext.ServiceProvider;
             RawParameters = args;
+            m_CommandParameterResolver = commandContext.ServiceProvider.GetRequiredService<ICommandParameterResolver>();
         }
 
         /// <summary>
@@ -41,7 +38,7 @@ namespace OpenMod.Core.Commands
         public async Task<T> GetAsync<T>(int index) => (T)await GetAsync(index, typeof(T));
 
         /// <inheritdoc />
-        public Task<object> GetAsync(int index, Type type)
+        public async Task<object> GetAsync(int index, Type type)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -55,25 +52,14 @@ namespace OpenMod.Core.Commands
                 throw new IndexOutOfRangeException();
 
             string arg = ToArray()[index];
+            object value = await m_CommandParameterResolver.ResolveAsync(type, arg);
 
-            TypeConverter converter = TypeConverterHelper.GetConverter(type);
-            if (converter.CanConvertFrom(typeof(string)))
+            if (value != null)
             {
-                try
-                {
-                    object paramValue = converter.ConvertFromWithServiceContext(m_ServiceProvider, arg);
-                    return Task.FromResult(paramValue);
-                }
-                catch (Exception ex)
-                {
-                    if (!(ex.InnerException is FormatException))
-                    {
-                        throw;
-                    }
-                }
+                return value;
             }
 
-            throw new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:parse_error", new { Value = arg , Type = type}], arg, type);
+            throw new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:parse_error", new { Value = arg, Type = type }], arg, type);
         }
 
         /// <inheritdoc />
@@ -94,7 +80,7 @@ namespace OpenMod.Core.Commands
             bool result = TryGet(index, typeof(T), out object tmp);
             if (result)
             {
-                value = (T) tmp;
+                value = (T)tmp;
             }
             else
             {

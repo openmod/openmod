@@ -4,6 +4,7 @@
   errors:
     out_of_range_error: "Too few arguments: missing parameter at index {Index} of type {Type.Name}"
     parse_error: "Parse error: could not parse {Value} to {Type.Name}"
+    overflow_error: "Overflow error: argument {Value} was either too large or too small than expected"
     not_found: "Command was not found: {CommandName}"
     wrong_usage: "Wrong command usage. Correct usage: {Command} {Syntax}"
     not_enough_permission: "You don't have permission '{Permission}' to execute this command"

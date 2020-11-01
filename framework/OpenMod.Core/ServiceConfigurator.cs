@@ -37,6 +37,12 @@ namespace OpenMod.Core
                 options.AddUserProvider<OfflineUserProvider>();
             });
 
+            serviceCollection.Configure<CommandParameterResolverOptions>(options =>
+            {
+                options.AddCommandParameterResolveProvider<TypeDescriptorCommandParameterResolveProvider>();
+                options.AddCommandParameterResolveProvider<UserCommandParameterResolveProvider>();
+            });
+
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
             serviceCollection.AddTransient(typeof(IPluginAccessor<>), typeof(PluginAccessor<>));
             serviceCollection.AddSingleton<IAutoCompleteHandler, CommandAutoCompleteHandler>();
