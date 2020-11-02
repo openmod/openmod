@@ -66,6 +66,10 @@ namespace OpenMod.Core.Persistence
             var encodedData = Encoding.UTF8.GetBytes(serializedYaml);
             var filePath = GetFilePathForKey(key);
 
+            var directory = Path.GetDirectoryName(filePath);
+            if (directory != null && !Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
             File.WriteAllBytes(filePath, encodedData);
             return Task.CompletedTask;
 
