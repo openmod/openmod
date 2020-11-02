@@ -1,10 +1,12 @@
 ﻿using OpenMod.API.Commands;
+using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
 using System;
 using System.Threading.Tasks;
 
 namespace OpenMod.Core.Commands.Parameters
 {
+    [Priority(Priority = Priority.Low)]
     public class TimeSpanCommandParameterResolveProvider : ICommandParameterResolveProvider
     {
         public bool Supports(Type type)
