@@ -50,65 +50,67 @@ namespace OpenMod.Core.Commands
 
         private void OnCommandSourcesChanged()
         {
-            AsyncHelper.RunSync(async () =>
+            AsyncHelper.RunSync(InvalidateAsync);
+        }
+
+        public async Task InvalidateAsync()
+        {
+            await m_CommandSources.DisposeAllAsync();
+
+            try
             {
-                await m_CommandSources.DisposeAllAsync();
+                m_CommandSources = m_Options.Value.CreateCommandSources(m_ServiceProvider);
+            }
+            catch (ObjectDisposedException)
+            {
+                // https://github.com/openmod/OpenMod/issues/61
+                m_CommandSources = new List<ICommandSource>();
+            }
 
-                try
+            var commands = new List<ICommandRegistration>();
+            foreach (var sources in m_CommandSources)
+            {
+                commands.AddRange(await sources.GetCommandsAsync());
+            }
+
+            foreach (var registration in commands)
+            {
+                var permission = m_CommandPermissionBuilder.GetPermission(registration, commands).Split(':')[1];
+
+                m_PermissionRegistry.RegisterPermission(registration.Component,
+                    permission,
+                    description: $"Grants access to the {registration.Id} command.",
+                    defaultGrant: PermissionGrantResult.Default);
+
+                if (registration.PermissionRegistrations == null)
                 {
-                    m_CommandSources = m_Options.Value.CreateCommandSources(m_ServiceProvider);
-                }
-                catch (ObjectDisposedException)
-                {
-                    // https://github.com/openmod/OpenMod/issues/61
-                    m_CommandSources = new List<ICommandSource>();
-                }
-
-                var commands = new List<ICommandRegistration>();
-                foreach (var sources in m_CommandSources)
-                {
-                    commands.AddRange(await sources.GetCommandsAsync());
-                }
-
-                foreach (var registration in commands)
-                {
-                    var permission = m_CommandPermissionBuilder.GetPermission(registration, commands).Split(':')[1];
-
-                    m_PermissionRegistry.RegisterPermission(registration.Component,
-                        permission,
-                        description: $"Grants access to the {registration.Id} command.",
-                        defaultGrant: PermissionGrantResult.Default);
-
-                    if (registration.PermissionRegistrations == null)
-                    {
-                        continue;
-                    }
-
-                    foreach (var permissionRegistration in registration.PermissionRegistrations)
-                    {
-                        m_PermissionRegistry.RegisterPermission(permissionRegistration.Owner,
-                            $"{permission}.{permissionRegistration.Permission}",
-                            permissionRegistration.Description,
-                            permissionRegistration.DefaultGrant);
-                    }
+                    continue;
                 }
 
-                if (commands.Count > 0)
+                foreach (var permissionRegistration in registration.PermissionRegistrations)
                 {
-                    var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync() ??
-                                       new RegisteredCommandsData();
-                    commandsData.Commands ??= new List<RegisteredCommandData>();
-
-                    foreach (var command in commands
-                        .Where(d => !commandsData.Commands.Any(c =>
-                            c.Id.Equals(d.Id, StringComparison.OrdinalIgnoreCase))))
-                    {
-                        commandsData.Commands.Add(CreateDefaultCommandData(command));
-                    }
-               
-                    await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
+                    m_PermissionRegistry.RegisterPermission(permissionRegistration.Owner,
+                        $"{permission}.{permissionRegistration.Permission}",
+                        permissionRegistration.Description,
+                        permissionRegistration.DefaultGrant);
                 }
-            });
+            }
+
+            if (commands.Count > 0)
+            {
+                var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync() ??
+                                   new RegisteredCommandsData();
+                commandsData.Commands ??= new List<RegisteredCommandData>();
+
+                foreach (var command in commands
+                    .Where(d => !commandsData.Commands.Any(c =>
+                        c.Id.Equals(d.Id, StringComparison.OrdinalIgnoreCase))))
+                {
+                    commandsData.Commands.Add(CreateDefaultCommandData(command));
+                }
+
+                await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
+            }
         }
 
         public async Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync()
