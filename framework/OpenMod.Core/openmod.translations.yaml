@@ -2,7 +2,7 @@
   openmod:
     restricted: "This command is restricted."
   errors:
-    out_of_range_error: "Too few arguments: missing parameter at index {Index} of type {Type.Name}"
+    out_of_range_error: "Too few arguments: missing parameter at index {CommandIndex} of type {Type.Name}"
     parse_error: "Parse error: could not parse {Value} to {Type.Name}"
     overflow_error: "Overflow error: argument {Value} was either too large or too small than expected"
     not_found: "Command was not found: {CommandName}"
