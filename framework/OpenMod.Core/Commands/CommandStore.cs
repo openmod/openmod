@@ -98,9 +98,11 @@ namespace OpenMod.Core.Commands
 
             if (commands.Count > 0)
             {
-                var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync() ??
-                                   new RegisteredCommandsData();
-                commandsData.Commands ??= new List<RegisteredCommandData>();
+                var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync();
+                if (commandsData?.Commands == null)
+                {
+                    throw new Exception("Failed to register commands: command data was null");
+                }
 
                 foreach (var command in commands
                     .Where(d => !commandsData.Commands.Any(c =>

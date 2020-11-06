@@ -93,7 +93,7 @@ namespace OpenMod.Core.Persistence
             var filePath = GetFilePathForKey(key);
             if (!File.Exists(filePath))
             {
-                return Task.FromResult<T>(default);
+                throw new Exception($"Load called on Yaml file that doesnt exist: {filePath}");
             }
 
             // see SaveAsync for why this is commented
