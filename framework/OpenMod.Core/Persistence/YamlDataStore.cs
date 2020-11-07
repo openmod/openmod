@@ -128,6 +128,7 @@ namespace OpenMod.Core.Persistence
                     // first element, start watcher
                     m_FileSystemWatcher = new FileSystemWatcher(directory, fileName);
                     m_FileSystemWatcher.Changed += (s, a) => OnFileChange(filePath);
+                    m_FileSystemWatcher.EnableRaisingEvents = true;
                 }
 
                 return new DisposeAction(() =>
