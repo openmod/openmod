@@ -18,6 +18,7 @@ using Rocket.Unturned.Utils;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -150,8 +151,9 @@ namespace Rocket.Unturned
         {
             if (Dedicator.isDedicated)
             {
-                rocketGameObject = new GameObject("Rocket");
-                DontDestroyOnLoad(rocketGameObject);
+                // OPENMOD PATCH: Remove late creation of gameObject
+                rocketGameObject = gameObject;
+                //END OPENMOD PATCH: Remove late creation of gameObject
 
                 if (System.Environment.OSVersion.Platform == PlatformID.Unix || System.Environment.OSVersion.Platform == PlatformID.MacOSX)
 #pragma warning disable CS0618
@@ -165,6 +167,11 @@ namespace Rocket.Unturned
 
                 Provider.onServerHosted += OnServerHosted;
                 // END OPENMOD PATCH: extracted callbacks to methods
+
+                // OPENMOD PATCH: fix rocket when om reloads if server is already loaded (issue: #232)
+                if (Provider.isServer)
+                    OnServerHosted();
+                // END OPENMOD PATCH: fix rocket when om reloads if server is already loaded (issue: #232)
             }
         }
 
@@ -175,7 +182,7 @@ namespace Rocket.Unturned
 
         private void OnServerHosted()
         {
-            rocketGameObject.TryAddComponent<U>();
+            // OPENMOD PATCH: 'Removed rocketGameObject.TryAddComponent<U>();' since U is already injected into gameObject
             rocketGameObject.TryAddComponent<R>();
         }
 
@@ -183,6 +190,10 @@ namespace Rocket.Unturned
         {
             Instance = this;
             Environment.Initialize();
+
+            // OPENMOD PATCH: initialize U component on awake (on old version this happens on instantiate)
+            initialize();
+            //END OPENMOD PATCH: initialize U component on awake (on old version this happens on instantiate)
         }
 
         internal void Initialize()
@@ -224,16 +235,26 @@ namespace Rocket.Unturned
 
                 try
                 {
+                    // OPENMOD PATCH: Remove setting framework as RocketMod 
+
                     R.Plugins.OnPluginsLoaded += () =>
                     {
-                        SteamGameServer.SetKeyValue("rocketplugins", String.Join(",", R.Plugins.GetPlugins().Select(p => p.Name).ToArray()));
+                        IPluginAdvertising pluginAdvertising = PluginAdvertising.Get();
+                        List<IRocketPlugin> rocketPlugins = R.Plugins.GetPlugins();
+                        List<string> pluginNames = new List<string>(rocketPlugins.Count);
+                        foreach (IRocketPlugin plugin in rocketPlugins)
+                        {
+                            if (plugin != null && !string.IsNullOrEmpty(plugin.Name))
+                            {
+                                pluginNames.Add(plugin.Name);
+                            }
+                        }
+                        pluginAdvertising.AddPlugins(pluginNames);
                     };
 
-
                     SteamGameServer.SetKeyValue("unturned", Provider.APP_VERSION);
-                    SteamGameServer.SetKeyValue("rocket", Assembly.GetExecutingAssembly().GetName().Version.ToString());
-                    SteamGameServer.SetBotPlayerCount(1);
-
+                    
+                    // END OPENMOD PATCH
                 }
                 catch (Exception ex)
                 {

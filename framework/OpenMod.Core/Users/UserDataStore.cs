@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
@@ -14,13 +15,19 @@ namespace OpenMod.Core.Users
 {
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class UserDataStore : IUserDataStore
+    public class UserDataStore : IUserDataStore, IAsyncDisposable
     {
+        private readonly IRuntime m_Runtime;
         public const string UsersKey = "users";
         private readonly IDataStore m_DataStore;
+        private IDisposable m_FileChangeWatcher;
+        private UsersData m_CachedUsersData;
 
-        public UserDataStore(IOpenModDataStoreAccessor dataStoreAccessor)
+        public UserDataStore(
+            IOpenModDataStoreAccessor dataStoreAccessor,
+            IRuntime runtime)
         {
+            m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
         }
 
@@ -102,16 +109,37 @@ namespace OpenMod.Core.Users
                 usersData.Users.Add(userData);
             }
 
-
-            await m_DataStore.SaveAsync(UsersKey, usersData);
+            m_CachedUsersData = usersData;
         }
 
         private async Task<UsersData> GetUsersDataAsync()
+        {
+            if (m_CachedUsersData != null)
+            {
+                return m_CachedUsersData;
+            }
+
+            m_FileChangeWatcher = m_DataStore.AddChangeWatcher(UsersKey, m_Runtime, () =>
+            {
+                m_CachedUsersData = AsyncHelper.RunSync(LoadUsersDataFromDiskAsync);
+            });
+
+            m_CachedUsersData = await LoadUsersDataFromDiskAsync();
+            return m_CachedUsersData;
+        }
+
+        private async Task<UsersData> LoadUsersDataFromDiskAsync()
         {
             return await m_DataStore.LoadAsync<UsersData>(UsersKey) ?? new UsersData
             {
                 Users = new List<UserData>()
             };
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            m_FileChangeWatcher?.Dispose();
+            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
         }
     }
 }

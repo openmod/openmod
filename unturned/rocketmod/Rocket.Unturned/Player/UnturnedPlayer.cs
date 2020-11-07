@@ -10,6 +10,7 @@ using Rocket.Unturned.Chat;
 using Rocket.Unturned.Skills;
 using Rocket.Core.Steam;
 using Rocket.API.Serialisation;
+using Random = UnityEngine.Random;
 
 namespace Rocket.Unturned.Player
 {
@@ -205,9 +206,17 @@ namespace Rocket.Unturned.Player
         {
             get
             {
-                P2PSessionState_t State;
-                SteamGameServerNetworking.GetP2PSessionState(CSteamID, out State);
-                return Parser.getIPFromUInt32(State.m_nRemoteIP);
+                if (player != null)
+                {
+                    string address = player.channel.owner.getAddressString(/*withPort*/ false);
+                    if (!string.IsNullOrEmpty(address))
+                    {
+                        return address;
+                    }
+                }
+
+                // Prior to the net transport rewrite this property always returned a non-null IPv4 string.
+                return "0.0.0.0";
             }
         }
 
@@ -291,11 +300,14 @@ namespace Rocket.Unturned.Player
         {
             CSteamID steamIdToBan = this.CSteamID;
 
-            uint ipToBan = 0;
-            P2PSessionState_t state;
-            if(SteamGameServerNetworking.GetP2PSessionState(steamIdToBan, out state))
+            uint ipToBan;
+            if (player != null)
             {
-                ipToBan = state.m_nRemoteIP;
+                ipToBan = player.channel.owner.getIPv4AddressOrZero();
+            }
+            else
+            {
+                ipToBan = 0;
             }
 
             Provider.requestBanPlayer(instigator, steamIdToBan, ipToBan, reason, duration);

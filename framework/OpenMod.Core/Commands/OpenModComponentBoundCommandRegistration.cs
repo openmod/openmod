@@ -52,8 +52,8 @@ namespace OpenMod.Core.Commands
                 })
                 .ToList();
 
-            Id = CommandType != null 
-                ? CommandType.FullName 
+            Id = CommandType != null
+                ? CommandType.FullName
                 : $"{CommandMethod.DeclaringType.FullName}.{CommandMethod.Name}";
 
             m_CommandActorTypes = memberInfo.GetCustomAttributes<CommandActorAttribute>().Select(d => d.ActorType).ToList();
@@ -61,8 +61,8 @@ namespace OpenMod.Core.Commands
             var parent = memberInfo.GetCustomAttribute<CommandParentAttribute>();
             if (parent != null)
             {
-                ParentId = parent.CommandType != null 
-                    ? parent.CommandType.FullName 
+                ParentId = parent.CommandType != null
+                    ? parent.CommandType.FullName
                     : $"{parent.DeclaringType.FullName}.{parent.MethodName}";
             }
         }
@@ -96,6 +96,14 @@ namespace OpenMod.Core.Commands
             }
 
             return new MethodCommandWrapper(CommandMethod, serviceProvider);
+        }
+
+        public bool IsEnabled
+        {
+            get
+            {
+                return Component.IsComponentAlive;
+            }
         }
     }
 }

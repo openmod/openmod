@@ -45,5 +45,13 @@ namespace OpenMod.Core.Commands
         {
             return BaseCommandRegistration.Instantiate(serviceProvider);
         }
+
+        public bool IsEnabled
+        {
+            get
+            {
+                return BaseCommandRegistration.IsEnabled && CommandData.Enabled;
+            }
+        }
     }
 }

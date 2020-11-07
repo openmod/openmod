@@ -15,6 +15,7 @@ using SDG.Unturned;
 using Serilog;
 using UnityEngine;
 using Module = SDG.Framework.Modules.Module;
+using Object = UnityEngine.Object;
 
 [assembly: PluginMetadata("Rocket.Unturned", Author = "OpenMod", DisplayName = "OpenMod RocketMod Plugin")]
 
@@ -23,7 +24,7 @@ namespace Rocket.Unturned
     public class RocketUnturnedOpenModPlugin : OpenModUnturnedPlugin
     {
         private readonly ILoggerFactory m_LoggerFactory;
-        private U m_RocketComponent;
+        private GameObject m_rocketGameObject;
 
         private static readonly MethodInfo s_AreModuleDependenciesEnabled;
         private static readonly MethodInfo s_IsModuleDisabledByCommandLine;
@@ -69,8 +70,9 @@ namespace Rocket.Unturned
                 module.isEnabled = true;
             }
 
-            m_RocketComponent = new U();
-            m_RocketComponent.initialize();
+            m_rocketGameObject = new GameObject("Rocket");
+            Object.DontDestroyOnLoad(m_rocketGameObject);
+            m_rocketGameObject.AddComponent<U>();
         }
 
         private List<ModuleConfig> FindRocketModModules()
@@ -125,15 +127,10 @@ namespace Rocket.Unturned
         {
             await base.OnUnloadAsync();
             await UniTask.SwitchToMainThread();
-            
+
             U.Logger = NullLogger.Instance;
             U.Instance?.shutdown();
             U.PluginInstance = null;
-
-            if (m_RocketComponent != null) // can not use ? null conditional operator on Unity components
-            {
-                m_RocketComponent.shutdown();
-            }
         }
     }
 }

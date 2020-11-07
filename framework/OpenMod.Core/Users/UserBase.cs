@@ -49,5 +49,10 @@ namespace OpenMod.Core.Users
         {
             return await m_UserDataStore.GetUserDataAsync<T>(Id, Type, key);
         }
+
+        public override string ToString()
+        {
+            return $"{Type}/{DisplayName} ({Id})";
+        }
     }
 }

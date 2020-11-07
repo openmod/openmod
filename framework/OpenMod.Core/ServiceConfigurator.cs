@@ -1,16 +1,17 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Ioc;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Commands;
+using OpenMod.Core.Commands.Parameters;
 using OpenMod.Core.Console;
 using OpenMod.Core.Localization;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Plugins;
 using OpenMod.Core.Users;
+using System;
 
 namespace OpenMod.Core
 {
@@ -35,6 +36,13 @@ namespace OpenMod.Core
             serviceCollection.Configure<UserManagerOptions>(options =>
             {
                 options.AddUserProvider<OfflineUserProvider>();
+            });
+
+            serviceCollection.Configure<CommandParameterResolverOptions>(options =>
+            {
+                options.AddCommandParameterResolveProvider<TypeDescriptorCommandParameterResolveProvider>();
+                options.AddCommandParameterResolveProvider<UserCommandParameterResolveProvider>();
+                options.AddCommandParameterResolveProvider<TimeSpanCommandParameterResolveProvider>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();

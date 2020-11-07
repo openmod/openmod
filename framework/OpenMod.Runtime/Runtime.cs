@@ -207,7 +207,6 @@ namespace OpenMod.Runtime
             builder
                 .SetBasePath(WorkingDirectory)
                 .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
-                .AddCommandLine(CommandlineArgs)
                 .AddEnvironmentVariables("OpenMod_");
             startup.ConfigureConfiguration(builder);
         }
@@ -244,7 +243,6 @@ namespace OpenMod.Runtime
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(WorkingDirectory)
                 .AddYamlFile("logging.yaml")
-                .AddCommandLine(CommandlineArgs)
                 .AddEnvironmentVariables()
                 .Build();
 

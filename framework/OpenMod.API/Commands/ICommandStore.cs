@@ -8,5 +8,7 @@ namespace OpenMod.API.Commands
     public interface ICommandStore
     {
         Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync();
+
+        Task InvalidateAsync();
     }
 }

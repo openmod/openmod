@@ -6,9 +6,9 @@ using System.Numerics;
 
 namespace OpenMod.Unturned.Players.Life.Events
 {
-    public class UnturnedPlayerDeadEvent : UnturnedPlayerEvent, IPlayerDeadEvent
+    public class UnturnedPlayerDeathEvent : UnturnedPlayerEvent, IPlayerDeathEvent
     {
-        public UnturnedPlayerDeadEvent(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID instigator) : base(player)
+        public UnturnedPlayerDeathEvent(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID instigator) : base(player)
         {
             DeathCause = cause;
             Limb = limb;
