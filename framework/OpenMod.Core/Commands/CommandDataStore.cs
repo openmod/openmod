@@ -12,7 +12,7 @@ using OpenMod.Core.Helpers;
 namespace OpenMod.Core.Commands
 {
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class CommandDataStore : ICommandDataStore, IDisposable
+    public class CommandDataStore : ICommandDataStore, IAsyncDisposable
     {
         public const string CommandsKey = "commands";
         private readonly IDataStore m_DataStore;
@@ -35,7 +35,8 @@ namespace OpenMod.Core.Commands
 
         public Task SetRegisteredCommandsAsync(RegisteredCommandsData data)
         {
-            return m_DataStore.SaveAsync(CommandsKey, data);
+            m_Cache = data;
+            return Task.CompletedTask;
         }
 
         public async Task SetCommandDataAsync<T>(string commandId, string key, T value)
@@ -73,7 +74,6 @@ namespace OpenMod.Core.Commands
                 commandsData.Commands.Add(commandData);
             }
 
-            await m_DataStore.SaveAsync(CommandsKey, commandsData);
             m_Cache = commandsData;
         }
 
@@ -83,11 +83,11 @@ namespace OpenMod.Core.Commands
             {
                 return m_Cache;
             }
+            m_Cache = await LoadCommandsFromDisk();
             m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () =>
             {
                 m_Cache = AsyncHelper.RunSync(LoadCommandsFromDisk);
             });
-            m_Cache = await LoadCommandsFromDisk();
             return m_Cache;
         }
 
@@ -127,9 +127,10 @@ namespace OpenMod.Core.Commands
             throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
         }
 
-        public void Dispose()
+        public ValueTask DisposeAsync()
         {
             m_ChangeWatcher?.Dispose();
+            return new ValueTask(m_DataStore.SaveAsync(CommandsKey, m_Cache));
         }
     }
 }
