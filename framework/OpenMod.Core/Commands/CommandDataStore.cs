@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
@@ -10,22 +11,19 @@ using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Commands
 {
-    [ServiceImplementation(Priority = Priority.Lowest)]
+    [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class CommandDataStore : ICommandDataStore, IDisposable
     {
         public const string CommandsKey = "commands";
         private readonly IDataStore m_DataStore;
-        private readonly IDisposable m_ChangeWatcher;
+        private readonly IRuntime m_Runtime;
+        private IDisposable m_ChangeWatcher;
         private RegisteredCommandsData m_Cache;
 
         public CommandDataStore(IOpenModDataStoreAccessor dataStoreAccessor, IRuntime runtime)
         {
             m_DataStore = dataStoreAccessor.DataStore;
-            m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, runtime, () =>
-            {
-                m_Cache = null;
-                AsyncHelper.RunSync(GetRegisteredCommandsAsync);
-            });
+            m_Runtime = runtime;
         }
 
         public async Task<RegisteredCommandData> GetRegisteredCommandAsync(string commandId)
@@ -81,7 +79,24 @@ namespace OpenMod.Core.Commands
 
         public async Task<RegisteredCommandsData> GetRegisteredCommandsAsync()
         {
-            return m_Cache ??= await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey);
+            if(m_Cache != null)
+            {
+                return m_Cache;
+            }
+            m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () =>
+            {
+                m_Cache = AsyncHelper.RunSync(LoadCommandsFromDisk);
+            });
+            m_Cache = await LoadCommandsFromDisk();
+            return m_Cache;
+        }
+
+        private async Task<RegisteredCommandsData> LoadCommandsFromDisk()
+        {
+            return await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey) ?? new RegisteredCommandsData
+            {
+                Commands = new List<RegisteredCommandData>()
+            };
         }
 
         public async Task<T> GetCommandDataAsync<T>(string commandId, string key)
