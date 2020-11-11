@@ -45,7 +45,7 @@ namespace OpenMod.Core.Commands
 
             if (Length <= index)
             {
-                throw new CommandIndexOutOfRangeException(m_OpenModStringLocalizer["commands:errors:out_of_range_error", new { CommandIndex = index, Type = type, Length }], index, Length);
+                throw new CommandIndexOutOfRangeException(m_OpenModStringLocalizer["commands:errors:out_of_range_error", new { Index = index, Type = type, Length }], index, Length);
             }
 
             if (index < 0)
