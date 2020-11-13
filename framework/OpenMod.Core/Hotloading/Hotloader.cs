@@ -41,6 +41,8 @@ namespace OpenMod.Core.Hotloading
 
         public static Assembly LoadAssembly(byte[] assemblyData)
         {
+            return Assembly.Load(assemblyData);
+            /*
             using var input = new MemoryStream(assemblyData, writable: false);
             using var output = new MemoryStream();
 
@@ -68,6 +70,7 @@ namespace OpenMod.Core.Hotloading
             var assembly = Assembly.Load(newAssemblyData);
             s_Assemblies.Add(realFullname, assembly);
             return assembly;
+            */
         }
 
         public static void Remove(Assembly assembly)
