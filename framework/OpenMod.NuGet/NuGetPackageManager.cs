@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,16 +35,19 @@ namespace OpenMod.NuGet
         private readonly FrameworkReducer m_FrameworkReducer;
         private readonly PackagePathResolver m_PackagePathResolver;
         private readonly PackageResolver m_PackageResolver;
-        private readonly Dictionary<string, Assembly> m_ResolvedAssemblies;
-        private readonly Dictionary<string, List<CachedNuGetAssembly>> m_LoadedPackageAssemblies;
+        private readonly Dictionary<string, Assembly> m_ResolveCache;
+        private readonly Dictionary<string, List<NuGetAssembly>> m_LoadedPackageAssemblies;
         private readonly HashSet<string> m_IgnoredDependendencies;
 
         private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new Dictionary<string, List<Assembly>>();
         private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
+        private Func<byte[], Assembly> m_AssemblyLoader;
 
         public NuGetPackageManager(string packagesDirectory)
         {
+            m_AssemblyLoader = Assembly.Load;
+
             Logger = new NullLogger();
             PackagesDirectory = packagesDirectory;
             m_Providers = new List<Lazy<INuGetResourceProvider>>();
@@ -85,8 +89,8 @@ namespace OpenMod.NuGet
 
             m_PackagePathResolver = new PackagePathResolver(packagesDirectory);
             m_PackageResolver = new PackageResolver();
-            m_LoadedPackageAssemblies = new Dictionary<string, List<CachedNuGetAssembly>>();
-            m_ResolvedAssemblies = new Dictionary<string, Assembly>();
+            m_LoadedPackageAssemblies = new Dictionary<string, List<NuGetAssembly>>();
+            m_ResolveCache = new Dictionary<string, Assembly>();
             m_IgnoredDependendencies = new HashSet<string>();
             InstallAssemblyResolver();
         }
@@ -175,7 +179,7 @@ namespace OpenMod.NuGet
             {
                 var versions = installedVersions[package]
                     .OrderByDescending(d => d);
-                
+
                 foreach (var version in versions.Skip(1))
                 {
                     await RemoveAsync(new PackageIdentity(package, version));
@@ -312,6 +316,12 @@ namespace OpenMod.NuGet
 
             return list;
         }
+
+        public void SetAssemblyLoader(Func<byte[], Assembly> assemblyLoader)
+        {
+            m_AssemblyLoader = assemblyLoader;
+        }
+
         public virtual async Task<ICollection<SourcePackageDependencyInfo>> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext)
         {
             var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
@@ -339,6 +349,51 @@ namespace OpenMod.NuGet
                 .ToList();
         }
 
+        public virtual async Task<List<byte[]>> LoadAssembliesFromNuGetPackageRawAsync(string nupkgFile)
+        {
+            using var packageReader = new PackageArchiveReader(nupkgFile);
+
+            var libItems = packageReader.GetLibItems().ToList();
+            var nearest = m_FrameworkReducer.GetNearest(m_CurrentFramework, libItems.Select(x => x.TargetFramework));
+            var assemblies = new List<byte[]>();
+
+            foreach (var file in libItems.Where(x => x.TargetFramework.Equals(nearest)))
+            {
+                foreach (var item in file.Items)
+                {
+                    try
+                    {
+                        if (!item.EndsWith(".dll"))
+                        {
+                            continue;
+                        }
+
+                        var entry = packageReader.GetEntry(item);
+                        using var stream = entry.Open();
+                        var ms = new MemoryStream();
+                        await stream.CopyToAsync(ms);
+
+                        try
+                        {
+                            assemblies.Add(ms.ToArray());
+                        }
+                        finally
+                        {
+                            ms.Close();
+                            stream.Close();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError($"Failed to load assembly at {item} from file {nupkgFile}");
+                        Logger.LogError(ex.ToString());
+                    }
+                }
+            }
+
+            return assemblies;
+        }
+
         public virtual async Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageAsync(string nupkgFile)
         {
             if (s_LoadedPackages.ContainsKey(nupkgFile))
@@ -346,12 +401,17 @@ namespace OpenMod.NuGet
                 return s_LoadedPackages[nupkgFile];
             }
 
-            var packageReader = new PackageArchiveReader(nupkgFile);
+            using var packageReader = new PackageArchiveReader(nupkgFile);
             var identity = await packageReader.GetIdentityAsync(CancellationToken.None);
-
-            if (s_LoadedPackages.ContainsKey(identity.Id))
+            var versionedIdentity = identity.Id;
+            if (identity.HasVersion)
             {
-                return s_LoadedPackages[identity.Id];
+                versionedIdentity += $"-{identity.Version.OriginalVersion}";
+            }
+
+            if (s_LoadedPackages.ContainsKey(versionedIdentity))
+            {
+                return s_LoadedPackages[versionedIdentity];
             }
 
             Logger.LogInformation("Loading NuGet package: " + Path.GetFileName(nupkgFile));
@@ -368,9 +428,7 @@ namespace OpenMod.NuGet
                 m_LoadedPackageAssemblies.Remove(fullPath);
             }
 
-            List<CachedNuGetAssembly> assemblies = new List<CachedNuGetAssembly>();
-
-            
+            var assemblies = new List<NuGetAssembly>();
 
             var dependencies = await GetDependenciesAsync(identity);
             foreach (var dependency in dependencies.Where(d => !d.Id.Equals(identity.Id)))
@@ -406,7 +464,6 @@ namespace OpenMod.NuGet
                 {
                     try
                     {
-
                         if (!item.EndsWith(".dll"))
                         {
                             continue;
@@ -419,16 +476,17 @@ namespace OpenMod.NuGet
 
                         try
                         {
-                            var asm = Assembly.Load(ms.ToArray());
+                            var asm = m_AssemblyLoader(ms.ToArray());
 
-                            var name = GetVersionIndependentName(asm.FullName, out string extractedVersion);
+                            var name = GetVersionIndependentName(asm.FullName, out var extractedVersion);
                             var parsedVersion = new Version(extractedVersion);
 
-                            assemblies.Add(new CachedNuGetAssembly
+                            assemblies.Add(new NuGetAssembly
                             {
                                 Assembly = new WeakReference(asm),
                                 AssemblyName = name,
-                                Version = parsedVersion
+                                Version = parsedVersion,
+                                Package = identity
                             });
                         }
                         finally
@@ -446,10 +504,9 @@ namespace OpenMod.NuGet
             }
 
             m_LoadedPackageAssemblies.Add(fullPath, assemblies);
-            packageReader.Dispose();
             var result = assemblies.Select(d => d.Assembly.Target).Cast<Assembly>().ToList();
 
-            s_LoadedPackages.Add(identity.Id, result);
+            s_LoadedPackages.Add(versionedIdentity, result);
             s_LoadedPackages.Add(nupkgFile, result);
             return result;
         }
@@ -537,23 +594,23 @@ namespace OpenMod.NuGet
             }
         }
 
-        public void InstallAssemblyResolver()
+        public virtual void InstallAssemblyResolver()
         {
             if (m_AssemblyResolverInstalled)
             {
                 return;
             }
 
-            AppDomain.CurrentDomain.AssemblyResolve += OnAsssemlbyResolve;
+            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
             m_AssemblyResolverInstalled = true;
         }
 
-        private Assembly OnAsssemlbyResolve(object sender, ResolveEventArgs args)
+        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var name = GetVersionIndependentName(args.Name, out _);
-            if (m_ResolvedAssemblies.ContainsKey(name))
+            if (m_ResolveCache.ContainsKey(name))
             {
-                return m_ResolvedAssemblies[name];
+                return m_ResolveCache[name];
             }
 
             var matchingAssemblies =
@@ -564,7 +621,7 @@ namespace OpenMod.NuGet
             var result = (Assembly)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
             if (result != null)
             {
-                m_ResolvedAssemblies.Add(name, result);
+                m_ResolveCache.Add(name, result);
             }
 
             m_Logger.LogDebug(result == null
@@ -605,7 +662,7 @@ namespace OpenMod.NuGet
         {
             if (m_AssemblyResolverInstalled)
             {
-                AppDomain.CurrentDomain.AssemblyResolve -= OnAsssemlbyResolve;
+                AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
                 m_AssemblyResolverInstalled = false;
             }
 
@@ -615,6 +672,19 @@ namespace OpenMod.NuGet
             }
 
             m_LoadedPackageAssemblies.Clear();
+        }
+
+        public virtual ICollection<NuGetAssembly> GetLoadedAssemblies()
+        {
+            return m_LoadedPackageAssemblies.Values
+                .SelectMany(d => d)
+                .ToList();
+        }
+
+        public void ClearCache()
+        {
+            m_LoadedPackageAssemblies.Clear();
+            m_ResolveCache.Clear();
         }
     }
 }

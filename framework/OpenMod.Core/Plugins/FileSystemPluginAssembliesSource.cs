@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Plugins;
+using OpenMod.Core.Hotloading;
 
 namespace OpenMod.Core.Plugins
 {
@@ -35,7 +36,7 @@ namespace OpenMod.Core.Plugins
                     using var stream = File.Open(file, FileMode.Open);
                     var data = new byte[stream.Length];
                     await stream.ReadAsync(data, 0, (int) stream.Length);
-                    var pluginAssembly = Assembly.Load(data);
+                    var pluginAssembly = Hotloader.LoadAssembly(data);
 
                     var pluginMetadata = pluginAssembly.GetCustomAttribute<PluginMetadataAttribute>();
                     if (pluginMetadata == null)

@@ -45,7 +45,6 @@ namespace OpenMod.Core.Plugins
         public async Task<ICollection<Assembly>> LoadPluginAssembliesAsync(IPluginAssembliesSource source)
         {
             var providerAssemblies = await source.LoadPluginAssembliesAsync();
-            /*var assembliesWithMissingDependencies = new List<Assembly>();*/
 
             foreach (var providerAssembly in providerAssemblies.ToList())
             {

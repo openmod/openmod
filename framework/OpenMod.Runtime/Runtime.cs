@@ -13,12 +13,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Mono.Cecil;
 using Newtonsoft.Json.Linq;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Hotloading;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Plugins.NuGet;
@@ -93,7 +95,7 @@ namespace OpenMod.Runtime
                 throw new Exception("Failed to find IHostInformation in host assemblies.");
             }
 
-            HostInformation = (IHostInformation) Activator.CreateInstance(hostInformationType);
+            HostInformation = (IHostInformation)Activator.CreateInstance(hostInformationType);
             m_OpenModHostAssemblies = openModHostAssemblies;
             m_HostBuilderFunc = hostBuilderFunc;
             m_RuntimeInitParameters = parameters;
@@ -115,10 +117,12 @@ namespace OpenMod.Runtime
 
             var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
             var nuGetPackageManager = parameters.PackageManager as NuGetPackageManager ?? new NuGetPackageManager(packagesDirectory);
-            
+            nuGetPackageManager.ClearCache();
+
             nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
             await nuGetPackageManager.RemoveOutdatedPackagesAsync();
             nuGetPackageManager.InstallAssemblyResolver();
+            nuGetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
 
             var startupContext = new OpenModStartupContext
             {
@@ -137,7 +141,7 @@ namespace OpenMod.Runtime
             }
 
             await startup.LoadPluginAssembliesAsync();
-            
+
             hostBuilder
                 .UseContentRoot(parameters.WorkingDirectory)
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
