@@ -5,13 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.0.2" />
+    <PackageReference Include="Lib.Harmony" Version="2.0.4" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2018.4.23" />
-    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.12.1" />
+    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2019.3.5" />
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.12.2" />
   </ItemGroup>
 
   <ItemGroup>
