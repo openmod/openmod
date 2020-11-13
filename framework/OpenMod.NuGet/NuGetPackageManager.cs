@@ -41,9 +41,12 @@ namespace OpenMod.NuGet
         private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new Dictionary<string, List<Assembly>>();
         private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
+        private Func<byte[], Assembly> m_AssemblyLoader;
 
         public NuGetPackageManager(string packagesDirectory)
         {
+            m_AssemblyLoader = Assembly.Load;
+
             Logger = new NullLogger();
             PackagesDirectory = packagesDirectory;
             m_Providers = new List<Lazy<INuGetResourceProvider>>();
@@ -312,6 +315,12 @@ namespace OpenMod.NuGet
 
             return list;
         }
+
+        public void SetAssemblyLoader(Func<byte[], Assembly> assemblyLoader)
+        {
+            m_AssemblyLoader = assemblyLoader;
+        }
+
         public virtual async Task<ICollection<SourcePackageDependencyInfo>> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext)
         {
             var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
@@ -419,9 +428,9 @@ namespace OpenMod.NuGet
 
                         try
                         {
-                            var asm = Assembly.Load(ms.ToArray());
+                            var asm = m_AssemblyLoader(ms.ToArray());
 
-                            var name = GetVersionIndependentName(asm.FullName, out string extractedVersion);
+                            var name = GetVersionIndependentName(asm.FullName, out var extractedVersion);
                             var parsedVersion = new Version(extractedVersion);
 
                             assemblies.Add(new CachedNuGetAssembly

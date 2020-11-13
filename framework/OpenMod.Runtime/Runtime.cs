@@ -19,6 +19,7 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Hotloading;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Plugins.NuGet;
@@ -78,6 +79,8 @@ namespace OpenMod.Runtime
             RuntimeInitParameters parameters,
             Func<IHostBuilder> hostBuilderFunc = null)
         {
+            AssemblyHotloader.Clear();
+
             var openModCoreAssembly = typeof(AsyncHelper).Assembly;
             if (!openModHostAssemblies.Contains(openModCoreAssembly))
             {
@@ -119,6 +122,7 @@ namespace OpenMod.Runtime
             nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
             await nuGetPackageManager.RemoveOutdatedPackagesAsync();
             nuGetPackageManager.InstallAssemblyResolver();
+            nuGetPackageManager.SetAssemblyLoader(AssemblyHotloader.LoadAssembly);
 
             var startupContext = new OpenModStartupContext
             {
