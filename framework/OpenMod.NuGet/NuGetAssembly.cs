@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Reflection;
+using NuGet.Packaging.Core;
 
 namespace OpenMod.NuGet
 {
-    public sealed class CachedNuGetAssembly
+    public sealed class NuGetAssembly
     {
         public string AssemblyName { get; set; }
         public Version Version { get; set; }
         public WeakReference Assembly { get; set; }
+        public PackageIdentity Package { get; set; }
     }
 }

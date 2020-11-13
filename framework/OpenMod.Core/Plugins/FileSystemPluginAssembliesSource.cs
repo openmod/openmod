@@ -36,7 +36,7 @@ namespace OpenMod.Core.Plugins
                     using var stream = File.Open(file, FileMode.Open);
                     var data = new byte[stream.Length];
                     await stream.ReadAsync(data, 0, (int) stream.Length);
-                    var pluginAssembly = AssemblyHotloader.LoadAssembly(data);
+                    var pluginAssembly = Hotloader.LoadAssembly(data);
 
                     var pluginMetadata = pluginAssembly.GetCustomAttribute<PluginMetadataAttribute>();
                     if (pluginMetadata == null)

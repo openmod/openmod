@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Mono.Cecil;
+using dnlib.DotNet;
 using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Hotloading
 {
-    public static class AssemblyHotloader
+    public static class Hotloader
     {
         private static readonly Dictionary<string, Assembly> s_Assemblies;
 
-        static AssemblyHotloader()
+        static Hotloader()
         {
             s_Assemblies = new Dictionary<string, Assembly>();
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
@@ -44,11 +44,23 @@ namespace OpenMod.Core.Hotloading
             using var input = new MemoryStream(assemblyData, writable: false);
             using var output = new MemoryStream();
 
-            var module = ModuleDefinition.ReadModule(input);
+            var modCtx = ModuleDef.CreateModuleContext();
+            var module = ModuleDefMD.Load(input, modCtx);
+
             var realFullname = module.Assembly.FullName;
 
-            var name = Guid.NewGuid().ToString().Replace("-", "");
-            module.Assembly.Name = new AssemblyNameDefinition(name, new Version(0, 0));
+            if (s_Assemblies.ContainsKey(realFullname))
+            {
+                s_Assemblies.Remove(realFullname);
+            }
+
+            var guid = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 6);
+            var name = $"{module.Assembly.Name}-{guid}";
+
+            module.Assembly.Name = name; 
+            module.Assembly.PublicKey = null;
+            module.Assembly.HasPublicKey = false;
+
             module.Write(output);
             output.Seek(offset: 0, SeekOrigin.Begin);
 
@@ -58,17 +70,35 @@ namespace OpenMod.Core.Hotloading
             return assembly;
         }
 
-        public static void Clear()
-        {
-            s_Assemblies.Clear();
-        }
-
         public static void Remove(Assembly assembly)
         {
             foreach (var kv in s_Assemblies.Where(kv => kv.Value == assembly))
             {
                 s_Assemblies.Remove(kv.Key);
             }
+        }
+
+        public static Assembly GetAssembly(string fullname)
+        {
+            return s_Assemblies[fullname];
+        }
+
+        public static IReadOnlyCollection<Assembly> GetHotloadedAssemblies()
+        {
+            return s_Assemblies.Values;
+        }
+
+        public static AssemblyName GetRealName(Assembly assembly)
+        {
+            foreach (var kv in s_Assemblies)
+            {
+                if (kv.Value == assembly)
+                {
+                    return new AssemblyName(kv.Key);
+                }
+            }
+
+            return assembly.GetName();
         }
     }
 }

@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Mono.Cecil;
 using Newtonsoft.Json.Linq;
 using OpenMod.API;
 using OpenMod.API.Eventing;
@@ -79,8 +80,6 @@ namespace OpenMod.Runtime
             RuntimeInitParameters parameters,
             Func<IHostBuilder> hostBuilderFunc = null)
         {
-            AssemblyHotloader.Clear();
-
             var openModCoreAssembly = typeof(AsyncHelper).Assembly;
             if (!openModHostAssemblies.Contains(openModCoreAssembly))
             {
@@ -96,7 +95,7 @@ namespace OpenMod.Runtime
                 throw new Exception("Failed to find IHostInformation in host assemblies.");
             }
 
-            HostInformation = (IHostInformation) Activator.CreateInstance(hostInformationType);
+            HostInformation = (IHostInformation)Activator.CreateInstance(hostInformationType);
             m_OpenModHostAssemblies = openModHostAssemblies;
             m_HostBuilderFunc = hostBuilderFunc;
             m_RuntimeInitParameters = parameters;
@@ -118,11 +117,12 @@ namespace OpenMod.Runtime
 
             var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
             var nuGetPackageManager = parameters.PackageManager as NuGetPackageManager ?? new NuGetPackageManager(packagesDirectory);
-            
+            nuGetPackageManager.ClearCache();
+
             nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
             await nuGetPackageManager.RemoveOutdatedPackagesAsync();
             nuGetPackageManager.InstallAssemblyResolver();
-            nuGetPackageManager.SetAssemblyLoader(AssemblyHotloader.LoadAssembly);
+            nuGetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
 
             var startupContext = new OpenModStartupContext
             {
@@ -141,7 +141,7 @@ namespace OpenMod.Runtime
             }
 
             await startup.LoadPluginAssembliesAsync();
-            
+
             hostBuilder
                 .UseContentRoot(parameters.WorkingDirectory)
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())

@@ -93,7 +93,17 @@ namespace OpenMod.Core.Commands
 
         private async Task<RegisteredCommandsData> LoadCommandsFromDisk()
         {
-            return await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey) ?? new RegisteredCommandsData
+            if (!await m_DataStore.ExistsAsync(CommandsKey))
+            {
+                return GetDefaultCommandsData();
+            }
+
+            return await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey) ?? GetDefaultCommandsData();
+        }
+
+        private RegisteredCommandsData GetDefaultCommandsData()
+        {
+            return new RegisteredCommandsData
             {
                 Commands = new List<RegisteredCommandData>()
             };
