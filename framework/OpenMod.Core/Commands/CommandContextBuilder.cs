@@ -34,7 +34,7 @@ namespace OpenMod.Core.Commands
         {
             if (currentContext.Parameters.Count == 0)
             {
-                return currentContext.CommandRegistration.IsEnabled ? currentContext : null;
+                return currentContext;
             }
 
             var childCommandName = currentContext.Parameters.First();
@@ -42,14 +42,14 @@ namespace OpenMod.Core.Commands
             var childCommand = GetCommandRegistration(currentContext.Actor, childCommandName, children);
             if (childCommand == null)
             {
-                return currentContext.CommandRegistration.IsEnabled ? currentContext : null;
+                return currentContext;
             }
 
             var scope = childCommand.Component.LifetimeScope.BeginLifetimeScope();
             var childContext = new CommandContext(childCommand, scope, currentContext) { CommandRegistration = childCommand };
             currentContext.ChildContext = childContext;
 
-            return childContext.CommandRegistration.IsEnabled ? BuildContextTree(childContext, commandRegistrations) : null;
+            return BuildContextTree(childContext, commandRegistrations);
         }
 
         public ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, IEnumerable<ICommandRegistration> commandRegistrations)
