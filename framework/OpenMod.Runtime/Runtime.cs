@@ -88,17 +88,30 @@ namespace OpenMod.Runtime
                     openModHostAssemblies.Insert(0, openModCoreAssembly);
                 }
 
-                var hostInformationType = openModHostAssemblies
-                    .Select(asm =>
-                        asm.GetLoadableTypes().FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
-                    .LastOrDefault(d => d != null);
+                Type hostInformationType = null;
+                try
+                {
+                    hostInformationType = openModHostAssemblies
+                        .Select(asm =>
+                            asm.GetLoadableTypes().FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
+                        .LastOrDefault(d => d != null);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("failed to get hostInformationType");
+                    Console.WriteLine(ex);
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine(ex.InnerException);
+                    }
+                }
 
                 if (hostInformationType == null)
                 {
                     throw new Exception("Failed to find IHostInformation in host assemblies.");
                 }
 
-                HostInformation = (IHostInformation) Activator.CreateInstance(hostInformationType);
+                HostInformation = (IHostInformation)Activator.CreateInstance(hostInformationType);
                 m_OpenModHostAssemblies = openModHostAssemblies;
                 m_HostBuilderFunc = hostBuilderFunc;
                 m_RuntimeInitParameters = parameters;
@@ -152,7 +165,7 @@ namespace OpenMod.Runtime
                     .ConfigureHostConfiguration(builder =>
                     {
                         ConfigureConfiguration(builder, startup);
-                        ((OpenModStartupContext) startup.Context).Configuration = builder.Build();
+                        ((OpenModStartupContext)startup.Context).Configuration = builder.Build();
                     })
                     .ConfigureAppConfiguration(builder => ConfigureConfiguration(builder, startup))
                     .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, startup))
