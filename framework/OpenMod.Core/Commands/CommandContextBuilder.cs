@@ -34,7 +34,7 @@ namespace OpenMod.Core.Commands
         {
             if (currentContext.Parameters.Count == 0)
             {
-                return currentContext;
+                return currentContext.CommandRegistration.IsEnabled ? currentContext : null;
             }
 
             var childCommandName = currentContext.Parameters.First();
@@ -42,14 +42,14 @@ namespace OpenMod.Core.Commands
             var childCommand = GetCommandRegistration(currentContext.Actor, childCommandName, children);
             if (childCommand == null)
             {
-                return currentContext;
+                return currentContext.CommandRegistration.IsEnabled ? currentContext : null;
             }
 
             var scope = childCommand.Component.LifetimeScope.BeginLifetimeScope();
             var childContext = new CommandContext(childCommand, scope, currentContext) { CommandRegistration = childCommand };
             currentContext.ChildContext = childContext;
 
-            return BuildContextTree(childContext, commandRegistrations);
+            return childContext.CommandRegistration.IsEnabled ? BuildContextTree(childContext, commandRegistrations) : null;
         }
 
         public ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, IEnumerable<ICommandRegistration> commandRegistrations)
@@ -66,8 +66,16 @@ namespace OpenMod.Core.Commands
 
             var scope = rootCommand.Component.LifetimeScope.BeginLifetimeScope("AutofacWebRequest");
             var rootContext = new CommandContext(rootCommand, actor, args.First(), prefix, args.Skip(1).ToList(), scope);
+            var commandContext = BuildContextTree(rootContext, commandRegistrations);
+            if (commandContext == null)
+            {
+                var exceptionContext = new CommandContext(null, actor, args.First(), prefix, args.Skip(1).ToList(), m_LifetimeScope.BeginLifetimeScope());
+                var localizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
+                exceptionContext.Exception = new CommandDisabledException(localizer["commands:errors:command_disabled", new { CommandName = args[0], Args = args }]);
+                return exceptionContext;
+            }
 
-            return BuildContextTree(rootContext, commandRegistrations);
+            return commandContext;
         }
 
         private ICommandRegistration GetCommandRegistration(ICommandActor actor, string name, IEnumerable<ICommandRegistration> commandRegistrations)
