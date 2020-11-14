@@ -80,124 +80,136 @@ namespace OpenMod.Runtime
             RuntimeInitParameters parameters,
             Func<IHostBuilder> hostBuilderFunc = null)
         {
-            var openModCoreAssembly = typeof(AsyncHelper).Assembly;
-            if (!openModHostAssemblies.Contains(openModCoreAssembly))
-            {
-                openModHostAssemblies.Insert(0, openModCoreAssembly);
-            }
-
-            var hostInformationType = openModHostAssemblies
-                .Select(asm => asm.GetLoadableTypes().FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
-                .LastOrDefault(d => d != null);
-
-            if (hostInformationType == null)
-            {
-                throw new Exception("Failed to find IHostInformation in host assemblies.");
-            }
-
-            HostInformation = (IHostInformation)Activator.CreateInstance(hostInformationType);
-            m_OpenModHostAssemblies = openModHostAssemblies;
-            m_HostBuilderFunc = hostBuilderFunc;
-            m_RuntimeInitParameters = parameters;
-
-            var hostBuilder = hostBuilderFunc == null ? new HostBuilder() : hostBuilderFunc();
-
-            if (!Directory.Exists(parameters.WorkingDirectory))
-            {
-                Directory.CreateDirectory(parameters.WorkingDirectory);
-            }
-
-            Status = RuntimeStatus.Initializing;
-            WorkingDirectory = parameters.WorkingDirectory;
-            CommandlineArgs = parameters.CommandlineArgs;
-
-            SetupSerilog();
-
-            m_Logger.LogInformation($"OpenMod v{Version} is starting...");
-
-            var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
-            var nuGetPackageManager = parameters.PackageManager as NuGetPackageManager ?? new NuGetPackageManager(packagesDirectory);
-            nuGetPackageManager.ClearCache();
-
-            nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
-            await nuGetPackageManager.RemoveOutdatedPackagesAsync();
-            nuGetPackageManager.InstallAssemblyResolver();
-            nuGetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
-
-            var startupContext = new OpenModStartupContext
-            {
-                Runtime = this,
-                LoggerFactory = m_LoggerFactory,
-                NuGetPackageManager = nuGetPackageManager,
-                DataStore = new Dictionary<string, object>()
-            };
-
-            var startup = new OpenModStartup(startupContext);
-            startupContext.OpenModStartup = startup;
-
-            foreach (var assembly in openModHostAssemblies)
-            {
-                startup.RegisterIocAssemblyAndCopyResources(assembly, string.Empty);
-            }
-
-            await startup.LoadPluginAssembliesAsync();
-
-            hostBuilder
-                .UseContentRoot(parameters.WorkingDirectory)
-                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-                .ConfigureHostConfiguration(builder =>
-                {
-                    ConfigureConfiguration(builder, startup);
-                    ((OpenModStartupContext)startup.Context).Configuration = builder.Build();
-                })
-                .ConfigureAppConfiguration(builder => ConfigureConfiguration(builder, startup))
-                .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, startup))
-                .ConfigureServices(services => SetupServices(services, startup))
-                .UseSerilog();
-
-            Host = hostBuilder.Build();
-            m_AppLifeTime = Host.Services.GetRequiredService<IHostApplicationLifetime>();
-            m_AppLifeTime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
-
-            Status = RuntimeStatus.Initialized;
-            LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>().BeginLifetimeScope(containerBuilder =>
-            {
-                containerBuilder.Register(ctx => this)
-                    .As<IOpenModComponent>()
-                    .SingleInstance()
-                    .ExternallyOwned();
-
-                containerBuilder.RegisterType<ScopedPermissionChecker>()
-                    .As<IPermissionChecker>()
-                    .InstancePerLifetimeScope()
-                    .OwnedByLifetimeScope();
-            });
-            DataStore = Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore(new DataStoreCreationParameters
-            {
-                ComponentId = OpenModComponentId,
-                Prefix = "openmod",
-                Suffix = null,
-                WorkingDirectory = WorkingDirectory
-            });
-
-            var eventBus = Host.Services.GetRequiredService<IEventBus>();
-            foreach (var assembly in openModHostAssemblies)
-            {
-                eventBus.Subscribe(this, assembly);
-            }
-
             try
             {
-                await Host.StartAsync();
+                var openModCoreAssembly = typeof(AsyncHelper).Assembly;
+                if (!openModHostAssemblies.Contains(openModCoreAssembly))
+                {
+                    openModHostAssemblies.Insert(0, openModCoreAssembly);
+                }
+
+                var hostInformationType = openModHostAssemblies
+                    .Select(asm =>
+                        asm.GetLoadableTypes().FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
+                    .LastOrDefault(d => d != null);
+
+                if (hostInformationType == null)
+                {
+                    throw new Exception("Failed to find IHostInformation in host assemblies.");
+                }
+
+                HostInformation = (IHostInformation) Activator.CreateInstance(hostInformationType);
+                m_OpenModHostAssemblies = openModHostAssemblies;
+                m_HostBuilderFunc = hostBuilderFunc;
+                m_RuntimeInitParameters = parameters;
+
+                var hostBuilder = hostBuilderFunc == null ? new HostBuilder() : hostBuilderFunc();
+
+                if (!Directory.Exists(parameters.WorkingDirectory))
+                {
+                    Directory.CreateDirectory(parameters.WorkingDirectory);
+                }
+
+                Status = RuntimeStatus.Initializing;
+                WorkingDirectory = parameters.WorkingDirectory;
+                CommandlineArgs = parameters.CommandlineArgs;
+
+                SetupSerilog();
+
+                m_Logger.LogInformation($"OpenMod v{Version} is starting...");
+
+                var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
+                var nuGetPackageManager = parameters.PackageManager as NuGetPackageManager ??
+                                          new NuGetPackageManager(packagesDirectory);
+                nuGetPackageManager.ClearCache();
+
+                nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
+                await nuGetPackageManager.RemoveOutdatedPackagesAsync();
+                nuGetPackageManager.InstallAssemblyResolver();
+                nuGetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
+
+                var startupContext = new OpenModStartupContext
+                {
+                    Runtime = this,
+                    LoggerFactory = m_LoggerFactory,
+                    NuGetPackageManager = nuGetPackageManager,
+                    DataStore = new Dictionary<string, object>()
+                };
+
+                var startup = new OpenModStartup(startupContext);
+                startupContext.OpenModStartup = startup;
+
+                foreach (var assembly in openModHostAssemblies)
+                {
+                    startup.RegisterIocAssemblyAndCopyResources(assembly, string.Empty);
+                }
+
+                await startup.LoadPluginAssembliesAsync();
+
+                hostBuilder
+                    .UseContentRoot(parameters.WorkingDirectory)
+                    .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                    .ConfigureHostConfiguration(builder =>
+                    {
+                        ConfigureConfiguration(builder, startup);
+                        ((OpenModStartupContext) startup.Context).Configuration = builder.Build();
+                    })
+                    .ConfigureAppConfiguration(builder => ConfigureConfiguration(builder, startup))
+                    .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, startup))
+                    .ConfigureServices(services => SetupServices(services, startup))
+                    .UseSerilog();
+
+                Host = hostBuilder.Build();
+                m_AppLifeTime = Host.Services.GetRequiredService<IHostApplicationLifetime>();
+                m_AppLifeTime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
+
+                Status = RuntimeStatus.Initialized;
+                LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>().BeginLifetimeScope(
+                    containerBuilder =>
+                    {
+                        containerBuilder.Register(ctx => this)
+                            .As<IOpenModComponent>()
+                            .SingleInstance()
+                            .ExternallyOwned();
+
+                        containerBuilder.RegisterType<ScopedPermissionChecker>()
+                            .As<IPermissionChecker>()
+                            .InstancePerLifetimeScope()
+                            .OwnedByLifetimeScope();
+                    });
+                DataStore = Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore(
+                    new DataStoreCreationParameters
+                    {
+                        ComponentId = OpenModComponentId,
+                        Prefix = "openmod",
+                        Suffix = null,
+                        WorkingDirectory = WorkingDirectory
+                    });
+
+                var eventBus = Host.Services.GetRequiredService<IEventBus>();
+                foreach (var assembly in openModHostAssemblies)
+                {
+                    eventBus.Subscribe(this, assembly);
+                }
+
+                try
+                {
+                    await Host.StartAsync();
+                }
+                catch (Exception ex)
+                {
+                    Status = RuntimeStatus.Crashed;
+                    m_Logger.LogCritical(ex, "OpenMod has crashed.");
+                    Log.CloseAndFlush();
+                }
+
+                return Host;
             }
             catch (Exception ex)
             {
-                Status = RuntimeStatus.Crashed;
-                m_Logger.LogCritical(ex, "OpenMod has crashed.");
-                Log.CloseAndFlush();
+                Console.WriteLine(ex);
+                throw;
             }
-
-            return Host;
         }
 
         public async Task ReloadAsync()

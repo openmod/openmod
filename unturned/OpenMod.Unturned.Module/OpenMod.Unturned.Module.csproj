@@ -18,7 +18,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.12.2" />
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.14" />
   </ItemGroup>
 
   <!-- Todo: Delete Assembly-CSharp, Assembly-CSharp-firstpass, UnityEngine and UnityEngine.CoreModule from output -->

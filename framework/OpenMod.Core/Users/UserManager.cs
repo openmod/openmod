@@ -26,6 +26,7 @@ namespace OpenMod.Core.Users
             m_UserProviders = new List<IUserProvider>();
             foreach (var provider in options.Value.UserProviderTypes)
             {
+                System.Console.WriteLine("Activating: " + provider.FullName);
                 m_UserProviders.Add((IUserProvider)ActivatorUtilities.CreateInstance(serviceProvider, provider));
             }
         }
