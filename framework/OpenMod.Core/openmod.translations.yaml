@@ -8,4 +8,3 @@
     not_found: "Command was not found: {CommandName}"
     wrong_usage: "Wrong command usage. Correct usage: {Command} {Syntax}"
     not_enough_permission: "You don't have permission '{Permission}' to execute this command"
-    command_disabled: "Command is disabled: {CommandName}"

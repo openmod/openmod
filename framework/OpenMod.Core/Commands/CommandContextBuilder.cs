@@ -54,7 +54,7 @@ namespace OpenMod.Core.Commands
 
         public ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, IEnumerable<ICommandRegistration> commandRegistrations)
         {
-            var rootCommand = GetCommandRegistration(actor, args[0], commandRegistrations.Where(d => d.ParentId == null));
+            var rootCommand = GetCommandRegistration(actor, args[0], commandRegistrations.Where(d => d.ParentId == null && d.IsEnabled));
             if (rootCommand == null)
             {
                 var exceptionContext = new CommandContext(null, actor, args.First(), prefix,  args.Skip(1).ToList(), m_LifetimeScope.BeginLifetimeScope());
@@ -66,16 +66,7 @@ namespace OpenMod.Core.Commands
 
             var scope = rootCommand.Component.LifetimeScope.BeginLifetimeScope("AutofacWebRequest");
             var rootContext = new CommandContext(rootCommand, actor, args.First(), prefix, args.Skip(1).ToList(), scope);
-            var commandContext = BuildContextTree(rootContext, commandRegistrations);
-            if (commandContext == null)
-            {
-                var exceptionContext = new CommandContext(null, actor, args.First(), prefix, args.Skip(1).ToList(), m_LifetimeScope.BeginLifetimeScope());
-                var localizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
-                exceptionContext.Exception = new CommandDisabledException(localizer["commands:errors:command_disabled", new { CommandName = args[0], Args = args }]);
-                return exceptionContext;
-            }
-
-            return commandContext;
+            return BuildContextTree(rootContext, commandRegistrations);
         }
 
         private ICommandRegistration GetCommandRegistration(ICommandActor actor, string name, IEnumerable<ICommandRegistration> commandRegistrations)
