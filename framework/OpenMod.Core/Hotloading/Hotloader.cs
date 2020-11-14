@@ -11,11 +11,13 @@ namespace OpenMod.Core.Hotloading
     public static class Hotloader
     {
         private static readonly Dictionary<string, Assembly> s_Assemblies;
+        private static readonly bool s_HotloadingEnabled;
 
         static Hotloader()
         {
             s_Assemblies = new Dictionary<string, Assembly>();
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+            s_HotloadingEnabled = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("OpenMod_EnableHotLoading"));
         }
 
         private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
@@ -41,8 +43,11 @@ namespace OpenMod.Core.Hotloading
 
         public static Assembly LoadAssembly(byte[] assemblyData)
         {
-            return Assembly.Load(assemblyData);
-            /*
+            if (!s_HotloadingEnabled)
+            {
+                return Assembly.Load(assemblyData);
+            }
+
             using var input = new MemoryStream(assemblyData, writable: false);
             using var output = new MemoryStream();
 
@@ -70,7 +75,6 @@ namespace OpenMod.Core.Hotloading
             var assembly = Assembly.Load(newAssemblyData);
             s_Assemblies.Add(realFullname, assembly);
             return assembly;
-            */
         }
 
         public static void Remove(Assembly assembly)
