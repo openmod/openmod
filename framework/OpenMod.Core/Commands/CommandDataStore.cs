@@ -96,7 +96,7 @@ namespace OpenMod.Core.Commands
             if (await m_DataStore.ExistsAsync(CommandsKey))
             {
                 commandsData = await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey);
-                if (commandsData.Commands.Count != 0)
+                if ((commandsData?.Commands?.Count ?? 0) != 0)
                     return commandsData;
             }
 
