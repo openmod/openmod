@@ -80,25 +80,29 @@ namespace OpenMod.Core.Commands
 
         public async Task<RegisteredCommandsData> GetRegisteredCommandsAsync()
         {
-            if (m_Cache != null && m_Cache.Commands.Count != 0)
+            if (m_Cache != null)
             {
                 return m_Cache;
             }
 
             m_Cache = await LoadCommandsFromDisk();
-            await m_DataStore.SaveAsync(CommandsKey, m_Cache);
-
-            m_ChangeWatcher ??= m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () => m_Cache = AsyncHelper.RunSync(LoadCommandsFromDisk));
+            m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () => m_Cache = AsyncHelper.RunSync(LoadCommandsFromDisk));
             return m_Cache;
         }
 
         private async Task<RegisteredCommandsData> LoadCommandsFromDisk()
         {
-            RegisteredCommandsData commandsData = null;
+            RegisteredCommandsData commandsData;
             if (await m_DataStore.ExistsAsync(CommandsKey))
+            {
                 commandsData = await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey);
+                if (commandsData.Commands.Count != 0)
+                    return commandsData;
+            }
 
-            return commandsData ?? GetDefaultCommandsData();
+            commandsData = GetDefaultCommandsData();
+            await m_DataStore.SaveAsync(CommandsKey, m_Cache);
+            return commandsData;
         }
 
         private RegisteredCommandsData GetDefaultCommandsData()
