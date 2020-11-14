@@ -134,7 +134,7 @@ namespace OpenMod.Runtime
                 var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
                 var nuGetPackageManager = parameters.PackageManager as NuGetPackageManager ??
                                           new NuGetPackageManager(packagesDirectory);
-                nuGetPackageManager.ClearCache();
+                // nuGetPackageManager.ClearCache();
 
                 nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
                 await nuGetPackageManager.RemoveOutdatedPackagesAsync();
