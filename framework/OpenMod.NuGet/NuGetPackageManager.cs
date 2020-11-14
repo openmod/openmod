@@ -164,7 +164,7 @@ namespace OpenMod.NuGet
                     continue;
                 }
 
-                var packageReader = new PackageArchiveReader(nupkgFile);
+                using var packageReader = new PackageArchiveReader(nupkgFile);
                 var identity = await packageReader.GetIdentityAsync(CancellationToken.None);
 
                 if (!installedVersions.ContainsKey(identity.Id))
@@ -281,7 +281,7 @@ namespace OpenMod.NuGet
                 throw new Exception($"GetDependenciesAsync on a nupkg that doesn't exist: {identity.Id} v{identity.Version}");
             }
 
-            var packageReader = new PackageArchiveReader(nupkgFile);
+            using var packageReader = new PackageArchiveReader(nupkgFile);
             var list = new List<PackageDependency>();
             var dependencyGroups = (await packageReader.GetPackageDependenciesAsync(CancellationToken.None)).ToList();
 
