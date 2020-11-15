@@ -139,6 +139,12 @@ namespace OpenMod.Core.Users
         public async ValueTask DisposeAsync()
         {
             m_FileChangeWatcher?.Dispose();
+
+            if (m_CachedUsersData?.Users == null)
+            {
+                throw new Exception("Tried to save null users data");
+            }
+            
             await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
         }
     }
