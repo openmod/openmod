@@ -36,7 +36,7 @@ namespace OpenMod.Core.Commands
         public Task SetRegisteredCommandsAsync(RegisteredCommandsData data)
         {
             m_Cache = data;
-            return Task.CompletedTask;
+            return m_DataStore.SaveAsync(CommandsKey, data);
         }
 
         public async Task SetCommandDataAsync<T>(string commandId, string key, T value)
@@ -75,30 +75,34 @@ namespace OpenMod.Core.Commands
             }
 
             m_Cache = commandsData;
+            await m_DataStore.SaveAsync(CommandsKey, commandsData);
         }
 
         public async Task<RegisteredCommandsData> GetRegisteredCommandsAsync()
         {
-            if(m_Cache != null)
+            if (m_Cache != null)
             {
                 return m_Cache;
             }
+
             m_Cache = await LoadCommandsFromDisk();
-            m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () =>
-            {
-                m_Cache = AsyncHelper.RunSync(LoadCommandsFromDisk);
-            });
+            m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () => m_Cache = AsyncHelper.RunSync(LoadCommandsFromDisk));
             return m_Cache;
         }
 
         private async Task<RegisteredCommandsData> LoadCommandsFromDisk()
         {
-            if (!await m_DataStore.ExistsAsync(CommandsKey))
+            RegisteredCommandsData commandsData;
+            if (await m_DataStore.ExistsAsync(CommandsKey))
             {
-                return GetDefaultCommandsData();
+                commandsData = await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey);
+                if ((commandsData?.Commands?.Count ?? 0) != 0)
+                    return commandsData;
             }
 
-            return await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey) ?? GetDefaultCommandsData();
+            commandsData = GetDefaultCommandsData();
+            await m_DataStore.SaveAsync(CommandsKey, m_Cache);
+            return commandsData;
         }
 
         private RegisteredCommandsData GetDefaultCommandsData()
