@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using OpenMod.API;
@@ -66,11 +67,15 @@ namespace OpenMod.Core.Persistence
             var encodedData = Encoding.UTF8.GetBytes(serializedYaml);
             var filePath = GetFilePathForKey(key);
 
-            var directory = Path.GetDirectoryName(filePath);
-            if (directory != null && !Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
+            lock (GetLock(filePath))
+            {
+                var directory = Path.GetDirectoryName(filePath);
+                if (directory != null && !Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
 
-            File.WriteAllBytes(filePath, encodedData);
+                File.WriteAllBytes(filePath, encodedData);
+            }
+
             return Task.CompletedTask;
 
             //bug: the follow lines work on .NET Core / Framework but not on mono 
@@ -149,14 +154,17 @@ namespace OpenMod.Core.Persistence
 
         private void OnFileChange(string filePath)
         {
-            foreach (var listener in m_ChangeListeners)
+            lock (GetLock(filePath))
             {
-                if (!listener.Key.IsComponentAlive)
+                foreach (var listener in m_ChangeListeners)
                 {
-                    continue;
-                }
+                    if (!listener.Key.IsComponentAlive)
+                    {
+                        continue;
+                    }
 
-                listener.Value?.Invoke();
+                    listener.Value?.Invoke();
+                }
             }
         }
 

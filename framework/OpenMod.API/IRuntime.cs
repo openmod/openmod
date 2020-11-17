@@ -17,6 +17,11 @@ namespace OpenMod.API
     public interface IRuntime : IOpenModComponent
     {
         /// <summary>
+        ///   Checks if the runtime is shutting down / disposing.
+        /// </summary>
+        public bool IsDisposing { get; }
+
+        /// <summary>
         ///     Initializes the runtime.
         /// </summary>
         /// <returns></returns>

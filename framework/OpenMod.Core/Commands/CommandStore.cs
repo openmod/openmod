@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.API.Commands;
@@ -24,25 +27,32 @@ namespace OpenMod.Core.Commands
 
         private readonly PriorityComparer m_Comparer;
         private readonly IOptions<CommandStoreOptions> m_Options;
+        private readonly IRuntime m_Runtime;
+        private readonly ILifetimeScope m_LifetimeScope;
         private readonly IServiceProvider m_ServiceProvider;
         private readonly IPermissionRegistry m_PermissionRegistry;
         private readonly ICommandPermissionBuilder m_CommandPermissionBuilder;
         private readonly ICommandDataStore m_CommandDataStore;
+        private readonly ILogger<CommandStore> m_Logger;
         private IReadOnlyCollection<ICommandSource> m_CommandSources;
 
         public CommandStore(IOptions<CommandStoreOptions> options,
+            IRuntime runtime,
             IServiceProvider serviceProvider,
             IPermissionRegistry permissionRegistry,
             ICommandPermissionBuilder commandPermissionBuilder,
-            ICommandDataStore commandDataStore)
+            ICommandDataStore commandDataStore,
+            ILogger<CommandStore> logger)
         {
             m_Comparer = new PriorityComparer(PriortyComparisonMode.HighestFirst);
             m_CommandSources = options.Value.CreateCommandSources(serviceProvider);
             m_Options = options;
+            m_Runtime = runtime;
             m_ServiceProvider = serviceProvider;
             m_PermissionRegistry = permissionRegistry;
             m_CommandPermissionBuilder = commandPermissionBuilder;
             m_CommandDataStore = commandDataStore;
+            m_Logger = logger;
 
             options.Value.OnCommandSourcesChanged += OnCommandSourcesChanged;
             OnCommandSourcesChanged();
@@ -57,14 +67,17 @@ namespace OpenMod.Core.Commands
         {
             await m_CommandSources.DisposeAllAsync();
 
-            try
+            if (m_Runtime.IsDisposing)
             {
-                m_CommandSources = m_Options.Value.CreateCommandSources(m_ServiceProvider);
+                return;
             }
-            catch (ObjectDisposedException)
+
+            m_CommandSources = m_Options.Value.CreateCommandSources(m_ServiceProvider);
+
+            if (m_CommandSources.Count == 0)
             {
-                // https://github.com/openmod/OpenMod/issues/61
-                m_CommandSources = new List<ICommandSource>();
+                m_Logger.LogDebug("InvalidateAsync: failed because no command sources were found; this is normal on booting.");
+                return;
             }
 
             var commands = new List<ICommandRegistration>();
@@ -96,23 +109,26 @@ namespace OpenMod.Core.Commands
                 }
             }
 
-            if (commands.Count > 0)
+            var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync();
+            if (commandsData?.Commands == null)
             {
-                var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync();
-                if (commandsData?.Commands == null)
-                {
-                    throw new Exception("Failed to register commands: command data was null");
-                }
-
-                foreach (var command in commands
-                    .Where(d => !commandsData.Commands.Any(c =>
-                        c.Id.Equals(d.Id, StringComparison.OrdinalIgnoreCase))))
-                {
-                    commandsData.Commands.Add(CreateDefaultCommandData(command));
-                }
-
-                await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
+                throw new Exception("Failed to register commands: command data was null");
             }
+
+            foreach (var command in commands
+                .Where(d => !commandsData.Commands.Any(c =>
+                    c.Id.Equals(d.Id, StringComparison.OrdinalIgnoreCase))))
+            {
+                commandsData.Commands.Add(CreateDefaultCommandData(command));
+            }
+
+            if (commandsData.Commands.Count == 0)
+            {
+                throw new Exception("Failed to register commands: command data was empty.");
+            }
+
+            await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
+            m_Logger.LogDebug($"InvalidateAsync: Loaded {commands.Count} commands.");
         }
 
         public async Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync()
@@ -173,6 +189,8 @@ namespace OpenMod.Core.Commands
                 return;
             }
 
+            m_Options.Value.OnCommandSourcesChanged -= OnCommandSourcesChanged;
+
             m_IsDisposing = true;
             var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync();
             if (commandsData?.Commands != null && commandsData.Commands.Count > 0)
@@ -199,7 +217,6 @@ namespace OpenMod.Core.Commands
                 }
             }
 
-            m_Options.Value.OnCommandSourcesChanged -= OnCommandSourcesChanged;
             await m_CommandSources.DisposeAllAsync();
         }
     }

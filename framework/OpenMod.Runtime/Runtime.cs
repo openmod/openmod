@@ -62,6 +62,8 @@ namespace OpenMod.Runtime
         public IHostInformation HostInformation { get; private set; }
 
         public IHost Host { get; private set; }
+        public bool IsDisposing { get; private set; }
+
         private SerilogLoggerFactory m_LoggerFactory;
         private ILogger<Runtime> m_Logger;
 
@@ -74,7 +76,7 @@ namespace OpenMod.Runtime
         {
             AsyncHelper.RunSync(() => InitAsync(openModAssemblies, parameters, hostBuilderFunc));
         }
-
+        
         public async Task<IHost> InitAsync(
             List<Assembly> openModHostAssemblies,
             RuntimeInitParameters parameters,
@@ -88,23 +90,10 @@ namespace OpenMod.Runtime
                     openModHostAssemblies.Insert(0, openModCoreAssembly);
                 }
 
-                Type hostInformationType = null;
-                try
-                {
-                    hostInformationType = openModHostAssemblies
-                        .Select(asm =>
-                            asm.GetLoadableTypes().FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
-                        .LastOrDefault(d => d != null);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("failed to get hostInformationType");
-                    Console.WriteLine(ex);
-                    if (ex.InnerException != null)
-                    {
-                        Console.WriteLine(ex.InnerException);
-                    }
-                }
+                Type hostInformationType = openModHostAssemblies
+                    .Select(asm =>
+                        asm.GetLoadableTypes().FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
+                    .LastOrDefault(d => d != null);
 
                 if (hostInformationType == null)
                 {
@@ -285,6 +274,7 @@ namespace OpenMod.Runtime
 
         public Task ShutdownAsync()
         {
+            IsDisposing = true;
             m_Logger.LogInformation("OpenMod is shutting down...");
             Host.Dispose();
             Status = RuntimeStatus.Unloaded;

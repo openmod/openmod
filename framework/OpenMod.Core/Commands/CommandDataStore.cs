@@ -83,6 +83,7 @@ namespace OpenMod.Core.Commands
             {
                 return m_Cache;
             }
+
             m_Cache = await LoadCommandsFromDisk();
             m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () =>
             {
@@ -140,6 +141,12 @@ namespace OpenMod.Core.Commands
         public ValueTask DisposeAsync()
         {
             m_ChangeWatcher?.Dispose();
+
+            if (m_Cache?.Commands == null || m_Cache.Commands.Count == 0)
+            {
+                throw new Exception("Tried to save null or empty commands; this is a bug.");
+            }
+            
             return new ValueTask(m_DataStore.SaveAsync(CommandsKey, m_Cache));
         }
     }

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
@@ -17,16 +20,20 @@ namespace OpenMod.Core.Users
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class UserDataStore : IUserDataStore, IAsyncDisposable
     {
+        private readonly ILogger<UserDataStore> m_Logger;
         private readonly IRuntime m_Runtime;
         public const string UsersKey = "users";
         private readonly IDataStore m_DataStore;
         private IDisposable m_FileChangeWatcher;
         private UsersData m_CachedUsersData;
+        private bool m_IsUpdating;
 
         public UserDataStore(
+            ILogger<UserDataStore> logger,
             IOpenModDataStoreAccessor dataStoreAccessor,
             IRuntime runtime)
         {
+            m_Logger = logger;
             m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
         }
@@ -90,6 +97,8 @@ namespace OpenMod.Core.Users
 
         public async Task SetUserDataAsync(UserData userData)
         {
+            m_Logger.LogDebug("SetUserDataAsync for user: " + userData.Id + "\n" + new StackTrace());
+
             var usersData = await GetUsersDataAsync();
             var idx = usersData.Users.FindIndex(c =>
                 c.Type.Equals(userData.Type, StringComparison.OrdinalIgnoreCase) &&
@@ -110,6 +119,9 @@ namespace OpenMod.Core.Users
             }
 
             m_CachedUsersData = usersData;
+
+            m_IsUpdating = true;
+            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
         }
 
         private async Task<UsersData> GetUsersDataAsync()
@@ -119,12 +131,29 @@ namespace OpenMod.Core.Users
                 return m_CachedUsersData;
             }
 
+            var created = false;
+            if (!await m_DataStore.ExistsAsync(UsersKey))
+            {
+                m_CachedUsersData = new UsersData { Users = new List<UserData>() };
+
+                await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+                created = true;
+            }
+
             m_FileChangeWatcher = m_DataStore.AddChangeWatcher(UsersKey, m_Runtime, () =>
             {
-                m_CachedUsersData = AsyncHelper.RunSync(LoadUsersDataFromDiskAsync);
+                if (!m_IsUpdating)
+                {
+                    m_CachedUsersData = AsyncHelper.RunSync(LoadUsersDataFromDiskAsync);
+                }
+
+                m_IsUpdating = false;
             });
 
-            m_CachedUsersData = await LoadUsersDataFromDiskAsync();
+            if (!created)
+            {
+                m_CachedUsersData = await LoadUsersDataFromDiskAsync();
+            }
             return m_CachedUsersData;
         }
 
