@@ -159,6 +159,17 @@ namespace OpenMod.Core.Users
 
         private async Task<UsersData> LoadUsersDataFromDiskAsync()
         {
+            if (!await m_DataStore.ExistsAsync(UsersKey))
+            {
+                m_CachedUsersData = new UsersData
+                {
+                    Users = new List<UserData>()
+                };
+
+                await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+                return m_CachedUsersData;
+            }
+
             return await m_DataStore.LoadAsync<UsersData>(UsersKey) ?? new UsersData
             {
                 Users = new List<UserData>()
@@ -168,6 +179,12 @@ namespace OpenMod.Core.Users
         public async ValueTask DisposeAsync()
         {
             m_FileChangeWatcher?.Dispose();
+
+            if (m_CachedUsersData?.Users == null)
+            {
+                throw new Exception("Tried to save null users data");
+            }
+            
             await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
         }
     }

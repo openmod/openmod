@@ -154,6 +154,10 @@ namespace OpenMod.Core.Commands
                     }
 
                     var commandData = await GetOrCreateCommandData(command);
+                    if (!commandData.Enabled)
+                    {
+                        continue;
+                    }
                     commands.Add(new RegisteredCommand(command, commandData));
                 }
             }
