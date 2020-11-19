@@ -36,7 +36,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleEntered += Events_OnVehicleEntered;
             OnVehicleExited += Events_OnVehicleExited;
             OnVehicleSwapped += Events_OnVehicleSwapped;
-            OnVehicleStealBattery += Events_OnStealBattery;
+            OnVehicleStealBattery += Events_OnVehicleStealBattery;
         }
 
         public override void Unsubscribe()
@@ -55,7 +55,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleEntered -= Events_OnVehicleEntered;
             OnVehicleExited -= Events_OnVehicleExited;
             OnVehicleSwapped -= Events_OnVehicleSwapped;
-            OnVehicleStealBattery += Events_OnStealBattery;
+            OnVehicleStealBattery += Events_OnVehicleStealBattery;
         }
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
@@ -206,7 +206,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             Emit(@event);
         }
 
-        private void Events_OnStealBattery(InteractableVehicle vehicle, Player nativePlayer, out bool cancel)
+        private void Events_OnVehicleStealBattery(InteractableVehicle vehicle, Player nativePlayer, out bool cancel)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
