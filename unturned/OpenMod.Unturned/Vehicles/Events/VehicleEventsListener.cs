@@ -55,7 +55,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleEntered -= Events_OnVehicleEntered;
             OnVehicleExited -= Events_OnVehicleExited;
             OnVehicleSwapped -= Events_OnVehicleSwapped;
-            OnVehicleStealBattery += Events_OnVehicleStealBattery;
+            OnVehicleStealBattery -= Events_OnVehicleStealBattery;
         }
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
@@ -210,8 +210,8 @@ namespace OpenMod.Unturned.Vehicles.Events
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedVehicleStealBatteryEvent @event =
-                new UnturnedVehicleStealBatteryEvent(player, new UnturnedVehicle(vehicle));
+            UnturnedVehicleStealingBatteryEvent @event =
+                new UnturnedVehicleStealingBatteryEvent(player, new UnturnedVehicle(vehicle));
 
             Emit(@event);
 
