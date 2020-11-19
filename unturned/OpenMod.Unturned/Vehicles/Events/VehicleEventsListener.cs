@@ -36,6 +36,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleEntered += Events_OnVehicleEntered;
             OnVehicleExited += Events_OnVehicleExited;
             OnVehicleSwapped += Events_OnVehicleSwapped;
+            OnVehicleStealBattery += Events_OnStealBattery;
         }
 
         public override void Unsubscribe()
@@ -54,6 +55,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleEntered -= Events_OnVehicleEntered;
             OnVehicleExited -= Events_OnVehicleExited;
             OnVehicleSwapped -= Events_OnVehicleSwapped;
+            OnVehicleStealBattery += Events_OnStealBattery;
         }
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
@@ -204,6 +206,18 @@ namespace OpenMod.Unturned.Vehicles.Events
             Emit(@event);
         }
 
+        private void Events_OnStealBattery(InteractableVehicle vehicle, Player nativePlayer, out bool cancel)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedVehicleStealBatteryEvent @event =
+                new UnturnedVehicleStealBatteryEvent(player, new UnturnedVehicle(vehicle));
+
+            Emit(@event);
+
+            cancel = @event.IsCancelled;
+        }
+
         private delegate void VehicleExploding(InteractableVehicle vehicle, out bool cancel);
         private static event VehicleExploding OnVehicleExploding;
 
@@ -218,6 +232,9 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private delegate void VehicleSwapped(InteractableVehicle vehicle, Player player, byte fromSeatIndex, byte toSeatIndex);
         private static event VehicleSwapped OnVehicleSwapped;
+
+        private delegate void VehicleStealBattery(InteractableVehicle vehicle, Player player, out bool cancel);
+        private static event VehicleStealBattery OnVehicleStealBattery;
 
         [HarmonyPatch]
         private class VehiclePatches
@@ -293,6 +310,17 @@ namespace OpenMod.Unturned.Vehicles.Events
                         OnVehicleSwapped?.Invoke(__instance, player, fromSeatIndex, toSeatIndex);
                     }
                 }
+            }
+
+            [HarmonyPatch(typeof(InteractableVehicle), "stealBattery")]
+            [HarmonyPrefix]
+            private static bool StealBattery(InteractableVehicle __instance, Player player)
+            {
+                bool cancel = false;
+
+                OnVehicleStealBattery?.Invoke(__instance, player, out cancel);
+
+                return !cancel;
             }
         }
     }
