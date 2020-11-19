@@ -37,6 +37,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleExited += Events_OnVehicleExited;
             OnVehicleSwapped += Events_OnVehicleSwapped;
             OnVehicleStealBattery += Events_OnVehicleStealingBattery;
+            OnVehicleReplacingBattery += Events_OnVehicleReplacingBattery;
         }
 
         public override void Unsubscribe()
@@ -56,6 +57,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleExited -= Events_OnVehicleExited;
             OnVehicleSwapped -= Events_OnVehicleSwapped;
             OnVehicleStealBattery -= Events_OnVehicleStealingBattery;
+            OnVehicleReplacingBattery -= Events_OnVehicleReplacingBattery;
         }
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
@@ -218,6 +220,18 @@ namespace OpenMod.Unturned.Vehicles.Events
             cancel = @event.IsCancelled;
         }
 
+        private void Events_OnVehicleReplacingBattery(InteractableVehicle vehicle, Player nativePlayer, byte amount, out bool cancel)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedVehicleReplacingBatteryEvent @event =
+                new UnturnedVehicleReplacingBatteryEvent(player, new UnturnedVehicle(vehicle), amount);
+
+            Emit(@event);
+
+            cancel = @event.IsCancelled;
+        }
+
         private delegate void VehicleExploding(InteractableVehicle vehicle, out bool cancel);
         private static event VehicleExploding OnVehicleExploding;
 
@@ -235,6 +249,9 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private delegate void VehicleStealBattery(InteractableVehicle vehicle, Player player, out bool cancel);
         private static event VehicleStealBattery OnVehicleStealBattery;
+
+        private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, byte amount, out bool cancel);
+        private static event VehicleReplacingBattery OnVehicleReplacingBattery;
 
         [HarmonyPatch]
         private class VehiclePatches
@@ -319,6 +336,17 @@ namespace OpenMod.Unturned.Vehicles.Events
                 bool cancel = false;
 
                 OnVehicleStealBattery?.Invoke(__instance, player, out cancel);
+
+                return !cancel;
+            }
+
+            [HarmonyPatch(typeof(InteractableVehicle), "replaceBattery")]
+            [HarmonyPrefix]
+            private static bool ReplaceBattery(InteractableVehicle __instance, Player player, byte amount)
+            {
+                bool cancel = false;
+
+                OnVehicleReplacingBattery?.Invoke(__instance, player, amount, out cancel);
 
                 return !cancel;
             }
