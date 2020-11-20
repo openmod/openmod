@@ -38,9 +38,8 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleSwapped += Events_OnVehicleSwapped;
             OnVehicleStealBattery += Events_OnVehicleStealingBattery;
             OnVehicleReplacingBattery += Events_OnVehicleReplacingBattery;
-            OnVehicleLocking += Events_OnVehicleLocking;
+            OnVehicleLockUpdating += Events_OnVehicleLockUpdating;
             OnVehicleLocked += Events_OnVehicleLocked;
-            OnVehicleUnlocking += Events_OnVehicleUnlocking;
         }
 
         public override void Unsubscribe()
@@ -61,9 +60,8 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleSwapped -= Events_OnVehicleSwapped;
             OnVehicleStealBattery -= Events_OnVehicleStealingBattery;
             OnVehicleReplacingBattery -= Events_OnVehicleReplacingBattery;
-            OnVehicleLocking -= Events_OnVehicleLocking;
+            OnVehicleLockUpdating += Events_OnVehicleLockUpdating;
             OnVehicleLocked -= Events_OnVehicleLocked;
-            OnVehicleUnlocking -= Events_OnVehicleUnlocking;
         }
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
@@ -238,38 +236,26 @@ namespace OpenMod.Unturned.Vehicles.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnVehicleLocking(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, out bool cancel)
+        private void Events_OnVehicleLockUpdating(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, bool isLocked, out bool cancel)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedVehicleLockingEvent @event =
-                new UnturnedVehicleLockingEvent(player, new UnturnedVehicle(vehicle), group);
+            UnturnedVehicleLockUpdatingEvent @event =
+                new UnturnedVehicleLockUpdatingEvent(player, new UnturnedVehicle(vehicle), group, isLocked);
 
             Emit(@event);
 
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnVehicleLocked(InteractableVehicle vehicle, Player nativePlayer, CSteamID group)
+        private void Events_OnVehicleLocked(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, bool isLocked)
         {
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
             UnturnedVehicleLockedEvent @event =
-                new UnturnedVehicleLockedEvent(player, new UnturnedVehicle(vehicle), group);
+                new UnturnedVehicleLockedEvent(player, new UnturnedVehicle(vehicle), group, isLocked);
 
             Emit(@event);
-        }
-
-        private void Events_OnVehicleUnlocking(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, out bool cancel)
-        {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
-
-            UnturnedVehicleUnlockingEvent @event =
-                new UnturnedVehicleUnlockingEvent(player, new UnturnedVehicle(vehicle), group);
-
-            Emit(@event);
-
-            cancel = @event.IsCancelled;
         }
 
         private delegate void VehicleExploding(InteractableVehicle vehicle, out bool cancel);
@@ -293,14 +279,11 @@ namespace OpenMod.Unturned.Vehicles.Events
         private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, byte amount, out bool cancel);
         private static event VehicleReplacingBattery OnVehicleReplacingBattery;
 
-        private delegate void VehicleLocking(InteractableVehicle vehicle, Player player, CSteamID group, out bool cancel);
-        private static event VehicleLocking OnVehicleLocking;
+        private delegate void VehicleLockUpdating(InteractableVehicle vehicle, Player player, CSteamID group, bool isLocked, out bool cancel);
+        private static event VehicleLockUpdating OnVehicleLockUpdating;
 
-        private delegate void VehicleLocked(InteractableVehicle vehicle, Player player, CSteamID group);
+        private delegate void VehicleLocked(InteractableVehicle vehicle, Player player, CSteamID group, bool isLocked);
         private static event VehicleLocked OnVehicleLocked;
-
-        private delegate void VehicleUnlocking(InteractableVehicle vehicle, Player player, CSteamID group, out bool cancel);
-        private static event VehicleUnlocking OnVehicleUnlocking;
 
         [HarmonyPatch]
         private class VehiclePatches
@@ -427,13 +410,7 @@ namespace OpenMod.Unturned.Vehicles.Events
                     return false;
                 }
 
-                if (flag)
-                {
-                    OnVehicleLocking?.Invoke(vehicle, player, player.quests.groupID, out cancel);
-                } else
-                {
-                    OnVehicleUnlocking?.Invoke(vehicle, player, player.quests.groupID, out cancel);
-                }
+                OnVehicleLockUpdating?.Invoke(vehicle, player, player.quests.groupID, flag, out cancel);
 
                 return !cancel;
             }
@@ -451,7 +428,7 @@ namespace OpenMod.Unturned.Vehicles.Events
                     return;
 
                 if (locked)
-                    OnVehicleLocked?.Invoke(vehicle, nativePlayer, group);
+                    OnVehicleLocked?.Invoke(vehicle, nativePlayer, group, locked);
             }
         }
     }
