@@ -11,9 +11,10 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedVehicleReplacingBatteryEvent(UnturnedPlayer instigator, UnturnedVehicle vehicle, byte BatteryQuality) : base(vehicle)
+        public UnturnedVehicleReplacingBatteryEvent(UnturnedPlayer instigator, UnturnedVehicle vehicle, byte batteryQuality) : base(vehicle)
         {
             Instigator = instigator;
+            BatteryQuality = batteryQuality;
         }
     }
 }

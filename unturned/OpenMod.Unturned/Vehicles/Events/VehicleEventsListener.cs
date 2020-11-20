@@ -38,6 +38,9 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleSwapped += Events_OnVehicleSwapped;
             OnVehicleStealBattery += Events_OnVehicleStealingBattery;
             OnVehicleReplacingBattery += Events_OnVehicleReplacingBattery;
+            OnVehicleLocking += Events_OnVehicleLocking;
+            OnVehicleLocked += Events_OnVehicleLocked;
+            OnVehicleUnlocking += Events_OnVehicleUnlocking;
         }
 
         public override void Unsubscribe()
@@ -58,6 +61,9 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleSwapped -= Events_OnVehicleSwapped;
             OnVehicleStealBattery -= Events_OnVehicleStealingBattery;
             OnVehicleReplacingBattery -= Events_OnVehicleReplacingBattery;
+            OnVehicleLocking -= Events_OnVehicleLocking;
+            OnVehicleLocked -= Events_OnVehicleLocked;
+            OnVehicleUnlocking -= Events_OnVehicleUnlocking;
         }
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
@@ -232,6 +238,40 @@ namespace OpenMod.Unturned.Vehicles.Events
             cancel = @event.IsCancelled;
         }
 
+        private void Events_OnVehicleLocking(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, out bool cancel)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedVehicleLockingEvent @event =
+                new UnturnedVehicleLockingEvent(player, new UnturnedVehicle(vehicle), group);
+
+            Emit(@event);
+
+            cancel = @event.IsCancelled;
+        }
+
+        private void Events_OnVehicleLocked(InteractableVehicle vehicle, Player nativePlayer, CSteamID group)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedVehicleLockedEvent @event =
+                new UnturnedVehicleLockedEvent(player, new UnturnedVehicle(vehicle), group);
+
+            Emit(@event);
+        }
+
+        private void Events_OnVehicleUnlocking(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, out bool cancel)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedVehicleUnlockingEvent @event =
+                new UnturnedVehicleUnlockingEvent(player, new UnturnedVehicle(vehicle), group);
+
+            Emit(@event);
+
+            cancel = @event.IsCancelled;
+        }
+
         private delegate void VehicleExploding(InteractableVehicle vehicle, out bool cancel);
         private static event VehicleExploding OnVehicleExploding;
 
@@ -252,6 +292,15 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, byte amount, out bool cancel);
         private static event VehicleReplacingBattery OnVehicleReplacingBattery;
+
+        private delegate void VehicleLocking(InteractableVehicle vehicle, Player player, CSteamID group, out bool cancel);
+        private static event VehicleLocking OnVehicleLocking;
+
+        private delegate void VehicleLocked(InteractableVehicle vehicle, Player player, CSteamID group);
+        private static event VehicleLocked OnVehicleLocked;
+
+        private delegate void VehicleUnlocking(InteractableVehicle vehicle, Player player, CSteamID group, out bool cancel);
+        private static event VehicleUnlocking OnVehicleUnlocking;
 
         [HarmonyPatch]
         private class VehiclePatches
@@ -342,13 +391,67 @@ namespace OpenMod.Unturned.Vehicles.Events
 
             [HarmonyPatch(typeof(InteractableVehicle), "replaceBattery")]
             [HarmonyPrefix]
-            private static bool ReplaceBattery(InteractableVehicle __instance, Player player, byte amount)
+            private static bool ReplaceBattery(InteractableVehicle __instance, Player player, byte quality)
             {
                 bool cancel = false;
 
-                OnVehicleReplacingBattery?.Invoke(__instance, player, amount, out cancel);
+                OnVehicleReplacingBattery?.Invoke(__instance, player, quality, out cancel);
 
                 return !cancel;
+            }
+
+            [HarmonyPatch(typeof(VehicleManager), "askVehicleLock")]
+            [HarmonyPrefix]
+            private static bool PreVehicleLock(VehicleManager __instance, CSteamID steamID)
+            {
+                bool cancel = false;
+
+                Player player = PlayerTool.getPlayer(steamID);
+                if (player == null)
+                {
+                    return false;
+                }
+                InteractableVehicle vehicle = player.movement.getVehicle();
+                if (vehicle == null || vehicle.asset == null)
+                {
+                    return false;
+                }
+                if (!vehicle.checkDriver(steamID))
+                {
+                    return false;
+                }
+                bool isLocked = vehicle.isLocked;
+                bool flag = vehicle.asset.canBeLocked && !isLocked;
+                if (isLocked == flag)
+                {
+                    return false;
+                }
+
+                if (flag)
+                {
+                    OnVehicleLocking?.Invoke(vehicle, player, player.quests.groupID, out cancel);
+                } else
+                {
+                    OnVehicleUnlocking?.Invoke(vehicle, player, player.quests.groupID, out cancel);
+                }
+
+                return !cancel;
+            }
+
+            [HarmonyPatch(typeof(VehicleManager), "tellVehicleLock")]
+            [HarmonyPostfix]
+            private static void PostVehicleLock(VehicleManager __instance, uint instanceID, CSteamID owner, CSteamID group, bool locked)
+            {
+                InteractableVehicle vehicle = VehicleManager.findVehicleByNetInstanceID(instanceID);
+                if (vehicle is null)
+                    return;
+
+                Player nativePlayer = PlayerTool.getPlayer(owner);
+                if (nativePlayer is null)
+                    return;
+
+                if (locked)
+                    OnVehicleLocked?.Invoke(vehicle, nativePlayer, group);
             }
         }
     }
