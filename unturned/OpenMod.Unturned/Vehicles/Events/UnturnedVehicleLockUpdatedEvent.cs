@@ -3,7 +3,7 @@ using Steamworks;
 
 namespace OpenMod.Unturned.Vehicles.Events
 {
-    public class UnturnedVehicleLockedEvent : UnturnedVehicleEvent
+    public class UnturnedVehicleLockUpdatedEvent : UnturnedVehicleEvent
     {
         public UnturnedPlayer Instigator { get; }
 
@@ -11,7 +11,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         public bool IsLocked { get; }
 
-        public UnturnedVehicleLockedEvent(UnturnedPlayer instigator, UnturnedVehicle vehicle, CSteamID group, bool isLocked) : base(vehicle)
+        public UnturnedVehicleLockUpdatedEvent(UnturnedPlayer instigator, UnturnedVehicle vehicle, CSteamID group, bool isLocked) : base(vehicle)
         {
             Instigator = instigator;
             Group = group;
