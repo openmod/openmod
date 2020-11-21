@@ -1,6 +1,6 @@
 ﻿using OpenMod.Core.Eventing;
 
-namespace OpenMod.Unturned.Provider.Events
+namespace OpenMod.Unturned.Server.Events
 {
     public class UnturnedShutdownCommencedEvent : Event
     {

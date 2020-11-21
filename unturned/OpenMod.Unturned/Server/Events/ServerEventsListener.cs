@@ -3,11 +3,11 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 
-namespace OpenMod.Unturned.Provider.Events
+namespace OpenMod.Unturned.Server.Events
 {
-    class ProviderEventsListener : UnturnedEventsListener
+    class ServerEventsListener : UnturnedEventsListener
     {
-        public ProviderEventsListener(IOpenModHost openModHost,
+        public ServerEventsListener(IOpenModHost openModHost,
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
