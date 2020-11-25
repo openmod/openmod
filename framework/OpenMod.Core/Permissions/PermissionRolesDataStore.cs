@@ -8,7 +8,6 @@ using OpenMod.Core.Helpers;
 using OpenMod.Core.Permissions.Data;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace OpenMod.Core.Permissions
@@ -16,7 +15,7 @@ namespace OpenMod.Core.Permissions
     [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class PermissionRolesDataStore : IPermissionRolesDataStore
+    public class PermissionRolesDataStore : IPermissionRolesDataStore, IDisposable
     {
         public const string RolesKey = "roles";
 
@@ -92,18 +91,18 @@ namespace OpenMod.Core.Permissions
 
         public Task<T> GetRoleDataAsync<T>(string roleId, string key)
         {
-            var roleData = Roles.Find(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase));
-            if (roleData == null)
+            var role = Roles.Find(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase));
+            if (role == null)
             {
                 return Task.FromException<T>(new Exception($"Role does not exist: {roleId}"));
             }
 
-            if (!roleData.Data.ContainsKey(key))
+            if (!role.Data.ContainsKey(key))
             {
                 return Task.FromResult<T>(default);
             }
 
-            var dataObject = roleData.Data[key];
+            var dataObject = role.Data[key];
 
             if (dataObject is T obj)
             {
@@ -137,6 +136,11 @@ namespace OpenMod.Core.Permissions
         public virtual Task<bool> ExistsAsync()
         {
             return m_DataStore.ExistsAsync(RolesKey);
+        }
+
+        public void Dispose()
+        {
+            m_FileChangeWatcher?.Dispose();
         }
     }
 }
