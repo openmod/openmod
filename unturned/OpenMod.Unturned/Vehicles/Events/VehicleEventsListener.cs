@@ -37,6 +37,9 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleExited += Events_OnVehicleExited;
             OnVehicleSwapped += Events_OnVehicleSwapped;
             OnVehicleStealBattery += Events_OnVehicleStealingBattery;
+            OnVehicleReplacingBattery += Events_OnVehicleReplacingBattery;
+            OnVehicleLockUpdating += Events_OnVehicleLockUpdating;
+            OnVehicleLockUpdated += Events_OnVehicleLockUpdated;
         }
 
         public override void Unsubscribe()
@@ -56,6 +59,9 @@ namespace OpenMod.Unturned.Vehicles.Events
             OnVehicleExited -= Events_OnVehicleExited;
             OnVehicleSwapped -= Events_OnVehicleSwapped;
             OnVehicleStealBattery -= Events_OnVehicleStealingBattery;
+            OnVehicleReplacingBattery -= Events_OnVehicleReplacingBattery;
+            OnVehicleLockUpdating -= Events_OnVehicleLockUpdating;
+            OnVehicleLockUpdated -= Events_OnVehicleLockUpdated;
         }
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
@@ -218,6 +224,40 @@ namespace OpenMod.Unturned.Vehicles.Events
             cancel = @event.IsCancelled;
         }
 
+        private void Events_OnVehicleReplacingBattery(InteractableVehicle vehicle, Player nativePlayer, byte amount, out bool cancel)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedVehicleReplacingBatteryEvent @event =
+                new UnturnedVehicleReplacingBatteryEvent(player, new UnturnedVehicle(vehicle), amount);
+
+            Emit(@event);
+
+            cancel = @event.IsCancelled;
+        }
+
+        private void Events_OnVehicleLockUpdating(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, bool isLocked, out bool cancel)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedVehicleLockUpdatingEvent @event =
+                new UnturnedVehicleLockUpdatingEvent(player, new UnturnedVehicle(vehicle), group, isLocked);
+
+            Emit(@event);
+
+            cancel = @event.IsCancelled;
+        }
+
+        private void Events_OnVehicleLockUpdated(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, bool isLocked)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedVehicleLockUpdatedEvent @event =
+                new UnturnedVehicleLockUpdatedEvent(player, new UnturnedVehicle(vehicle), group, isLocked);
+
+            Emit(@event);
+        }
+
         private delegate void VehicleExploding(InteractableVehicle vehicle, out bool cancel);
         private static event VehicleExploding OnVehicleExploding;
 
@@ -235,6 +275,15 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private delegate void VehicleStealBattery(InteractableVehicle vehicle, Player player, out bool cancel);
         private static event VehicleStealBattery OnVehicleStealBattery;
+
+        private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, byte amount, out bool cancel);
+        private static event VehicleReplacingBattery OnVehicleReplacingBattery;
+
+        private delegate void VehicleLockUpdating(InteractableVehicle vehicle, Player player, CSteamID group, bool isLocked, out bool cancel);
+        private static event VehicleLockUpdating OnVehicleLockUpdating;
+
+        private delegate void VehicleLockUpdated(InteractableVehicle vehicle, Player player, CSteamID group, bool isLocked);
+        private static event VehicleLockUpdated OnVehicleLockUpdated;
 
         [HarmonyPatch]
         private class VehiclePatches
@@ -321,6 +370,65 @@ namespace OpenMod.Unturned.Vehicles.Events
                 OnVehicleStealBattery?.Invoke(__instance, player, out cancel);
 
                 return !cancel;
+            }
+
+            [HarmonyPatch(typeof(InteractableVehicle), "replaceBattery")]
+            [HarmonyPrefix]
+            private static bool ReplaceBattery(InteractableVehicle __instance, Player player, byte quality)
+            {
+                bool cancel = false;
+
+                OnVehicleReplacingBattery?.Invoke(__instance, player, quality, out cancel);
+
+                return !cancel;
+            }
+
+            [HarmonyPatch(typeof(VehicleManager), "askVehicleLock")]
+            [HarmonyPrefix]
+            private static bool PreVehicleLock(VehicleManager __instance, CSteamID steamID)
+            {
+                bool cancel = false;
+
+                Player player = PlayerTool.getPlayer(steamID);
+                if (player == null)
+                {
+                    return false;
+                }
+                InteractableVehicle vehicle = player.movement.getVehicle();
+                if (vehicle == null || vehicle.asset == null)
+                {
+                    return false;
+                }
+                if (!vehicle.checkDriver(steamID))
+                {
+                    return false;
+                }
+                bool isLocked = vehicle.isLocked;
+                bool flag = vehicle.asset.canBeLocked && !isLocked;
+                if (isLocked == flag)
+                {
+                    return false;
+                }
+
+                OnVehicleLockUpdating?.Invoke(vehicle, player, player.quests.groupID, flag, out cancel);
+
+                return !cancel;
+            }
+
+            [HarmonyPatch(typeof(VehicleManager), "tellVehicleLock")]
+            [HarmonyPostfix]
+            private static void PostVehicleLock(VehicleManager __instance, uint instanceID, CSteamID owner, CSteamID group, bool locked)
+            {
+                InteractableVehicle vehicle = VehicleManager.findVehicleByNetInstanceID(instanceID);
+                if (vehicle is null)
+                    return;
+
+                Player nativePlayer = PlayerTool.getPlayer(owner);
+                if (nativePlayer is null)
+                    return;
+
+                if (locked)
+                    OnVehicleLockUpdated?.Invoke(vehicle, nativePlayer, group, locked);
             }
         }
     }
