@@ -4,6 +4,7 @@
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\..\framework\OpenMod.Bootstrapper\OpenMod.Bootstrapper.csproj" />

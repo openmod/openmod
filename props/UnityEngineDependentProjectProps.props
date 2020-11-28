@@ -1,0 +1,9 @@
+<Project>
+  <Target Name="ChangeAliasesOfNugetRefs" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(FileName)' == 'JetBrains.Annotations'">
+        <Aliases>JetBrainsAnnotations</Aliases>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
+</Project>

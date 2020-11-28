@@ -18,6 +18,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         public override void Subscribe()
         {
+            Player.onPlayerStatIncremented += OnPlayerStatIncremented;
             OnBleedingUpdated += Events_OnBleedingUpdated;
             OnBrokenUpdated += Events_OnBrokenUpdated;
             OnFoodUpdated += Events_OnFoodUpdated;
@@ -28,6 +29,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         public override void Unsubscribe()
         {
+            Player.onPlayerStatIncremented -= OnPlayerStatIncremented;
             OnBleedingUpdated -= Events_OnBleedingUpdated;
             OnBrokenUpdated -= Events_OnBrokenUpdated;
             OnFoodUpdated -= Events_OnFoodUpdated;
@@ -38,7 +40,6 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         public override void SubscribePlayer(Player player)
         {
-            Player.onPlayerStatIncremented += onPlayerStatIncremented;
             player.life.onLifeUpdated += isDead => OnLifeUpdated(player, isDead);
             player.life.onOxygenUpdated += oxygen => OnOxygenUpdated(player, oxygen);
             player.life.onStaminaUpdated += stamina => OnStaminaUpdated(player, stamina);
@@ -49,22 +50,12 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         public override void UnsubscribePlayer(Player player)
         {
-            Player.onPlayerStatIncremented -= onPlayerStatIncremented;
             player.life.onLifeUpdated -= isDead => OnLifeUpdated(player, isDead);
             player.life.onOxygenUpdated -= oxygen => OnOxygenUpdated(player, oxygen);
             player.life.onStaminaUpdated -= stamina => OnStaminaUpdated(player, stamina);
             player.life.onTemperatureUpdated -= temperature => OnTemperatureUpdated(player, temperature);
             player.life.onVirusUpdated -= virus => Events_OnVirusUpdated(player, virus);
             player.life.onVisionUpdated -= viewing => OnVisionUpdated(player, viewing);
-        }
-
-        private void onPlayerStatIncremented(Player nativePlayer, EPlayerStat stat)
-        {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
-
-            UnturnedPlayerStatIncrementedEvent @event = new UnturnedPlayerStatIncrementedEvent(player, stat);
-
-            Emit(@event);
         }
 
         private void Events_OnBleedingUpdated(Player nativePlayer, bool isBleeding)
@@ -99,6 +90,15 @@ namespace OpenMod.Unturned.Players.Stats.Events
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
             UnturnedPlayerHealthUpdatedEvent @event = new UnturnedPlayerHealthUpdatedEvent(player, health);
+
+            Emit(@event);
+        }
+
+        private void OnPlayerStatIncremented(Player nativePlayer, EPlayerStat stat)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedPlayerStatIncrementedEvent @event = new UnturnedPlayerStatIncrementedEvent(player, stat);
 
             Emit(@event);
         }
