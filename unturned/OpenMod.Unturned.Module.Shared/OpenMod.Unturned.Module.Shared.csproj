@@ -4,6 +4,8 @@
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
+  <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
+  
   <ItemGroup>
     <PackageReference Include="Lib.Harmony" Version="2.0.4" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
