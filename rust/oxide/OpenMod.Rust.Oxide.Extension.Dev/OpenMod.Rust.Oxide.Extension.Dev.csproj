@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <AssemblyName>Oxide.Ext.OpenMod.Rust.Dev</AssemblyName>
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
