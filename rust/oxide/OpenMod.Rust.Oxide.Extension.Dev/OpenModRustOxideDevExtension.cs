@@ -35,7 +35,8 @@ namespace OpenMod.Rust.Oxide.Extension.Dev
             var assemblies = new List<Assembly>
             {
                 typeof(OpenModUnityEnginePlugin).Assembly,
-                typeof(OpenModRustOxideHost).Assembly
+                typeof(OpenModRustOxideHost).Assembly,
+                typeof(BaseOpenModRustHost).Assembly
             };
 
             var openModRuntime = new Runtime.Runtime();
