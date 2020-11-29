@@ -5,6 +5,12 @@
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>OpenMod.Rust.Oxide.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\props\SharedProjectProps.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\props\UnityEngineDependentProjectProps.props" />
 

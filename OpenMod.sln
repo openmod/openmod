@@ -63,7 +63,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Rust.Oxide.Extensio
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{764A5587-D05A-40F3-8D56-3FCE83C67BDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Core.Tests", "framework\tests\OpenMod.Core.Tests\OpenMod.Core.Tests.csproj", "{5E00B168-A765-407B-BC88-2ACA7E458CBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Core.Tests", "framework\tests\OpenMod.Core.Tests\OpenMod.Core.Tests.csproj", "{5E00B168-A765-407B-BC88-2ACA7E458CBD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E7F9DE25-AA15-49F1-A3FF-0349CF1624CC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Rust.Oxide.Tests", "rust\oxide\tests\OpenMod.Rust.Oxide.Tests\OpenMod.Rust.Oxide.Tests.csproj", "{4953870C-FA45-460C-B7AC-90AF8CBD9865}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -159,6 +163,10 @@ Global
 		{5E00B168-A765-407B-BC88-2ACA7E458CBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E00B168-A765-407B-BC88-2ACA7E458CBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E00B168-A765-407B-BC88-2ACA7E458CBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4953870C-FA45-460C-B7AC-90AF8CBD9865}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4953870C-FA45-460C-B7AC-90AF8CBD9865}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4953870C-FA45-460C-B7AC-90AF8CBD9865}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4953870C-FA45-460C-B7AC-90AF8CBD9865}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -188,6 +196,8 @@ Global
 		{1023EB73-C8EF-4F68-BC50-CAA466E36140} = {DD874A83-4476-4906-96F6-D0BAC674E9BE}
 		{764A5587-D05A-40F3-8D56-3FCE83C67BDA} = {42C946B3-E1EF-4278-A983-E99AA3F73527}
 		{5E00B168-A765-407B-BC88-2ACA7E458CBD} = {764A5587-D05A-40F3-8D56-3FCE83C67BDA}
+		{E7F9DE25-AA15-49F1-A3FF-0349CF1624CC} = {DD874A83-4476-4906-96F6-D0BAC674E9BE}
+		{4953870C-FA45-460C-B7AC-90AF8CBD9865} = {E7F9DE25-AA15-49F1-A3FF-0349CF1624CC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5384DBB4-E799-40C6-BD98-4C90698BE085}
