@@ -43,6 +43,7 @@ namespace OpenMod.Core
                 options.AddCommandParameterResolveProvider<TypeDescriptorCommandParameterResolveProvider>();
                 options.AddCommandParameterResolveProvider<UserCommandParameterResolveProvider>();
                 options.AddCommandParameterResolveProvider<TimeSpanCommandParameterResolveProvider>();
+                options.AddCommandParameterResolveProvider<DateTimeCommandParameterResolveProvider>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
