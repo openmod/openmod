@@ -91,7 +91,7 @@ namespace OpenMod.Unturned.Zombies.Events
             parameters.damage = @event.DamageAmount;
             parameters.direction = @event.Ragdoll;
             parameters.ragdollEffect = @event.RagdollEffect;
-            parameters.instigator = player.Player;
+            parameters.instigator = @event.Instigator.Player;
             // parameters.trackKill = @event.TrackKill;
             // parameters.dropLoot = @event.DropLoot;
             parameters.zombieStunOverride = @event.StunOverride;
