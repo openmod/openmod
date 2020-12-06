@@ -29,12 +29,12 @@ namespace OpenMod.Core.Helpers
         {
             var matches = s_RegexPattern.Matches(unparsed);
 
-            TimeSpan total = new TimeSpan();
-
             if (matches.Count == 0)
             {
                 throw new UserFriendlyException("Invalid time span format");
             }
+
+            TimeSpan total = new TimeSpan();
 
             foreach (Match match in matches)
             {
