@@ -33,7 +33,6 @@ namespace OpenMod.Core.Persistence
 
         public YamlDataStore(DataStoreCreationParameters parameters)
         {
-            parameters.Suffix ??= string.Empty;
             if (!string.IsNullOrEmpty(parameters.Prefix))
             {
                 m_Prefix = $"{parameters.Prefix}.";
@@ -41,7 +40,7 @@ namespace OpenMod.Core.Persistence
 
             m_BasePath = parameters.WorkingDirectory;
 
-            if (!string.IsNullOrEmpty(m_Suffix))
+            if (!string.IsNullOrEmpty(parameters.Suffix))
             {
                 m_Suffix = $".{parameters.Suffix}";
             }

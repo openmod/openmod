@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Ioc;
@@ -10,20 +6,30 @@ using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Permissions.Data;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace OpenMod.Core.Permissions
 {
     [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class PermissionRolesDataStore : IPermissionRolesDataStore
+    public class PermissionRolesDataStore : IPermissionRolesDataStore, IDisposable
     {
         public const string RolesKey = "roles";
 
         private readonly IDataStore m_DataStore;
-        public PermissionRolesDataStore(IOpenModDataStoreAccessor dataStoreAccessor)
+        private readonly IRuntime m_Runtime;
+        private IDisposable m_FileChangeWatcher;
+        private PermissionRolesData m_CachedPermissionRolesData;
+
+        public List<PermissionRoleData> Roles { get => m_CachedPermissionRolesData.Roles; }
+
+        public PermissionRolesDataStore(IOpenModDataStoreAccessor dataStoreAccessor, IRuntime runtime)
         {
             m_DataStore = dataStoreAccessor.DataStore;
+            m_Runtime = runtime;
             AsyncHelper.RunSync(InitAsync);
         }
 
@@ -31,63 +37,72 @@ namespace OpenMod.Core.Permissions
         {
             if (!await ExistsAsync())
             {
-                Roles = new List<PermissionRoleData>
+                m_CachedPermissionRolesData = new PermissionRolesData
                 {
-                    new PermissionRoleData
+                    Roles = new List<PermissionRoleData>
                     {
-                        Id = "default",
-                        DisplayName = "Default",
-                        Priority = 0,
-                        Permissions = new HashSet<string> 
+                        new PermissionRoleData
                         {
-                            "OpenMod.Core:commands.help"
+                            Id = "default",
+                            DisplayName = "Default",
+                            Priority = 0,
+                            Data = new Dictionary<string, object>(),
+                            Parents = new HashSet<string>(),
+                            Permissions = new HashSet<string>
+                            {
+                                "OpenMod.Core:commands.help"
+                            },
+                            IsAutoAssigned = true
                         },
-                        IsAutoAssigned = true
-                    },
-                    new PermissionRoleData
-                    {
-                        Id = "vip",
-                        Priority = 1,
-                        Parents = new HashSet<string>
+                        new PermissionRoleData
                         {
-                            "default"
-                        },
-                        Permissions = new HashSet<string>
-                        {
-                            "SomeKitsPlugin:kits.vip"
-                        },
-                        IsAutoAssigned = false
+                            Id = "vip",
+                            Priority = 1,
+                            Parents = new HashSet<string>
+                            {
+                                "default"
+                            },
+                            Data = new Dictionary<string, object>(),
+                            DisplayName = "VIP",
+                            Permissions = new HashSet<string>
+                            {
+                                "SomeKitsPlugin:kits.vip"
+                            },
+                            IsAutoAssigned = false
+                        }
                     }
                 };
+
                 await SaveChangesAsync();
             }
             else
             {
                 await ReloadAsync();
             }
+
+            m_FileChangeWatcher = m_DataStore.AddChangeWatcher(RolesKey, m_Runtime, () => AsyncHelper.RunSync(ReloadAsync));
         }
 
-        public List<PermissionRoleData> Roles { get; private set; }
         public Task<PermissionRoleData> GetRoleAsync(string id)
         {
-            var role = Roles.FirstOrDefault(d => d.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+            var role = Roles.Find(d => d.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
             return Task.FromResult(role);
         }
 
         public Task<T> GetRoleDataAsync<T>(string roleId, string key)
         {
-            var roleData = Roles.FirstOrDefault(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase));
-            if (roleData == null)
+            var role = Roles.Find(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase));
+            if (role == null)
             {
                 return Task.FromException<T>(new Exception($"Role does not exist: {roleId}"));
             }
 
-            if (!roleData.Data.ContainsKey(key))
+            if (!role.Data.ContainsKey(key))
             {
                 return Task.FromResult<T>(default);
             }
 
-            var dataObject = roleData.Data[key];
+            var dataObject = role.Data[key];
 
             if (dataObject is T obj)
             {
@@ -110,17 +125,22 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task ReloadAsync()
         {
-            Roles = (await m_DataStore.LoadAsync<PermissionRolesData>(RolesKey))?.Roles ?? new List<PermissionRoleData>();
+            m_CachedPermissionRolesData = await m_DataStore.LoadAsync<PermissionRolesData>(RolesKey) ?? new PermissionRolesData();
         }
 
         public virtual Task SaveChangesAsync()
         {
-            return m_DataStore.SaveAsync(RolesKey, new PermissionRolesData { Roles = Roles });
+            return m_DataStore.SaveAsync(RolesKey, m_CachedPermissionRolesData);
         }
 
         public virtual Task<bool> ExistsAsync()
         {
             return m_DataStore.ExistsAsync(RolesKey);
+        }
+
+        public void Dispose()
+        {
+            m_FileChangeWatcher?.Dispose();
         }
     }
 }
