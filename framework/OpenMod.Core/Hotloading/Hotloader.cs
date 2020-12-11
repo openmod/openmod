@@ -11,13 +11,17 @@ namespace OpenMod.Core.Hotloading
     public static class Hotloader
     {
         private static readonly Dictionary<string, Assembly> s_Assemblies;
-        private static readonly bool s_HotloadingEnabled;
+        private static bool s_HotloadingEnabled;
 
         static Hotloader()
         {
             s_Assemblies = new Dictionary<string, Assembly>();
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-            s_HotloadingEnabled = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("OpenMod_EnableHotLoading"));
+        }
+
+        public static void SetIsEnabled(bool isEnabled)
+        {
+            s_HotloadingEnabled = isEnabled;
         }
 
         private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
