@@ -7,5 +7,6 @@
 			"Path": "/OpenMod.Unturned.Module.dll",
 			"Role": "Server"
 		}
-	]
+	],
+	"Load_As_Byte_Array": true
 }

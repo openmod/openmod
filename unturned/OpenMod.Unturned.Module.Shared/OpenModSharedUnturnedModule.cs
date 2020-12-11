@@ -25,9 +25,9 @@ namespace OpenMod.Unturned.Module.Shared
 
         public bool Initialize(Assembly moduleAssembly)
         {
-            var moduleAssemblyLocation = moduleAssembly.Location;
-            var openModDirPath = Path.GetDirectoryName(moduleAssemblyLocation);
-            var modulesDirectory = Directory.GetParent(openModDirPath).FullName;
+            var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
+            var openModDirPath = Path.Combine(modulesDirectory, "OpenMod.Unturned");
+
             if (HasIncompatibleModules(Path.GetFileName(openModDirPath), modulesDirectory))
             {
                 return false;
@@ -103,7 +103,6 @@ namespace OpenMod.Unturned.Module.Shared
 
         private void InstallNewtonsoftJson(string openModDir)
         {
-            Console.WriteLine("Location: " + typeof(IModuleNexus).Assembly.Location);
             var managedDir = Path.GetDirectoryName(typeof(IModuleNexus).Assembly.Location);
 
             // ReSharper disable once AssignNullToNotNullAttribute
