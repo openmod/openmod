@@ -4,6 +4,7 @@
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\OpenMod.Unturned.Module.Shared\OpenMod.Unturned.Module.Shared.csproj" />

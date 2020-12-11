@@ -4,6 +4,7 @@
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\..\framework\OpenMod.Bootstrapper\OpenMod.Bootstrapper.csproj" />
@@ -18,7 +19,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.14" />
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.14">
+	  <IncludeAssets>compile</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <!-- Todo: Delete Assembly-CSharp, Assembly-CSharp-firstpass, UnityEngine and UnityEngine.CoreModule from output -->
