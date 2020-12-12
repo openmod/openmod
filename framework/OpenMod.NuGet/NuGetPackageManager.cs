@@ -306,6 +306,11 @@ namespace OpenMod.NuGet
 
             foreach (var dependency in list.ToList())
             {
+                if (m_IgnoredDependendencies.Contains(dependency.Id))
+                {
+                    continue;
+                }
+
                 var dependencyPackage = await GetLatestPackageIdentityAsync(dependency.Id);
                 if (dependencyPackage == null)
                 {
