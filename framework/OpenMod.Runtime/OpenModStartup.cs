@@ -13,6 +13,7 @@ using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Plugins;
 using OpenMod.API.Prioritization;
+using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Plugins;

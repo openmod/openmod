@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Plugins;
-using OpenMod.Core.Hotloading;
+using OpenMod.Common.Hotloading;
 
 namespace OpenMod.Core.Plugins
 {

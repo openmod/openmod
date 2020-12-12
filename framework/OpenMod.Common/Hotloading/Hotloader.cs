@@ -4,24 +4,19 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using dnlib.DotNet;
-using OpenMod.Core.Helpers;
+using OpenMod.Common.Helpers;
 
-namespace OpenMod.Core.Hotloading
+namespace OpenMod.Common.Hotloading
 {
     public static class Hotloader
     {
         private static readonly Dictionary<string, Assembly> s_Assemblies;
-        private static bool s_HotloadingEnabled;
+        public static bool Enabled { get; set; }
 
         static Hotloader()
         {
             s_Assemblies = new Dictionary<string, Assembly>();
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-        }
-
-        public static void SetIsEnabled(bool isEnabled)
-        {
-            s_HotloadingEnabled = isEnabled;
         }
 
         private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
@@ -47,7 +42,7 @@ namespace OpenMod.Core.Hotloading
 
         public static Assembly LoadAssembly(byte[] assemblyData)
         {
-            if (!s_HotloadingEnabled)
+            if (!Enabled)
             {
                 return Assembly.Load(assemblyData);
             }

@@ -17,6 +17,7 @@ using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
 using OpenMod.API.Prioritization;
+using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Ioc.Extensions;

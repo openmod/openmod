@@ -14,4 +14,8 @@
     <PackageReference Include="NuGet.Resolver" Version="5.8.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OpenMod.Common\OpenMod.Common.csproj" />
+  </ItemGroup>
+
 </Project>

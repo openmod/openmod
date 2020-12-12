@@ -17,8 +17,8 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
+using OpenMod.Common.Hotloading;
 using OpenMod.Core.Helpers;
-using OpenMod.Core.Hotloading;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
@@ -153,7 +153,7 @@ namespace OpenMod.Runtime
                         .Build();
 
                     var config = deserializer.Deserialize<Dictionary<string, object>>(yaml);
-                    Hotloader.SetIsEnabled((bool?)config["hotreloading"] ?? true);
+                    Hotloader.Enabled = (bool?)config["hotreloading"] ?? true;
                 }
 
                 await startup.LoadPluginAssembliesAsync();

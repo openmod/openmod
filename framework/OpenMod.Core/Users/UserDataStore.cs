@@ -12,6 +12,7 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
+using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Users

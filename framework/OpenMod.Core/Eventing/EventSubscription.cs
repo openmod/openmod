@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Eventing;
+using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Eventing

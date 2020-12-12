@@ -23,7 +23,7 @@ namespace OpenMod.Unturned.Module.Shared
 
         private readonly Dictionary<string, Assembly> m_ResolvedAssemblies = new Dictionary<string, Assembly>();
 
-        public bool Initialize(Assembly moduleAssembly)
+        public bool Initialize(Assembly moduleAssembly, bool isDynamicLoad)
         {
             var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
             var openModDirPath = Path.Combine(modulesDirectory, "OpenMod.Unturned");
@@ -36,9 +36,12 @@ namespace OpenMod.Unturned.Module.Shared
             m_HarmonyInstance = new Harmony(c_HarmonyInstanceId);
             m_HarmonyInstance.PatchAll(GetType().Assembly);
 
-            InstallNewtonsoftJson(openModDirPath);
-            InstallTlsWorkaround();
-            InstallAssemblyResolver();
+            if (!isDynamicLoad)
+            {
+                InstallNewtonsoftJson(openModDirPath);
+                InstallTlsWorkaround();
+                InstallAssemblyResolver();
+            }
 
             // ReSharper disable once AssignNullToNotNullAttribute
             foreach (var file in Directory.GetFiles(openModDirPath))

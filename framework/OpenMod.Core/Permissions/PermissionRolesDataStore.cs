@@ -9,6 +9,7 @@ using OpenMod.Core.Permissions.Data;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using OpenMod.Common.Helpers;
 
 namespace OpenMod.Core.Permissions
 {
