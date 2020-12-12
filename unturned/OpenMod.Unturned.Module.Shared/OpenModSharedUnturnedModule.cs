@@ -19,8 +19,8 @@ namespace OpenMod.Unturned.Module.Shared
         private const string c_HarmonyInstanceId = "com.get-openmod.unturned.module";
         private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new Dictionary<string, Assembly>();
         private Harmony m_HarmonyInstance;
-        private readonly string[] m_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
-        private readonly string[] m_CompatibleModules = { "AviRockets" };
+        private readonly string[] m_IncompatibleModules = { "Redox.Unturned" };
+        private readonly string[] m_CompatibleModules = { "AviRockets", "Rocket.Unturned" };
         private RemoteCertificateValidationCallback m_OldCallBack;
         private readonly Dictionary<string, Assembly> m_ResolvedAssemblies = new Dictionary<string, Assembly>();
 
@@ -191,7 +191,7 @@ namespace OpenMod.Unturned.Module.Shared
         private void InstallTlsWorkaround()
         {
             m_OldCallBack = ServicePointManager.ServerCertificateValidationCallback;
-           
+
             //http://answers.unity.com/answers/1089592/view.html
             ServicePointManager.ServerCertificateValidationCallback = CertificateValidationWorkaroundCallback;
         }
@@ -213,7 +213,8 @@ namespace OpenMod.Unturned.Module.Shared
                     chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
                     chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
                     chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
-                    bool chainIsValid = chain.Build((X509Certificate2)certificate);
+
+                    var chainIsValid = chain.Build((X509Certificate2)certificate);
                     if (!chainIsValid)
                     {
                         isOk = false;
