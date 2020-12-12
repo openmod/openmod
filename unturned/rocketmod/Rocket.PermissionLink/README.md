@@ -1,2 +1,0 @@
-# RocketMod Permission Link Plugin
-This plugin forces RocketMod to use OpenMod permissions instead of RocketMod's own permissions system. It is incompatible with any other RocketMod permissions plugin.
