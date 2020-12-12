@@ -37,6 +37,11 @@ namespace OpenMod.Core.Users
             m_Logger = logger;
             m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
+
+            AsyncHelper.RunSync(async () =>
+            {
+                m_CachedUsersData = await LoadUsersDataFromDiskAsync();
+            });
         }
 
         public async Task<UserData> GetUserDataAsync(string userId, string userType)
@@ -185,7 +190,7 @@ namespace OpenMod.Core.Users
             {
                 throw new Exception("Tried to save null users data");
             }
-            
+
             await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
         }
     }
