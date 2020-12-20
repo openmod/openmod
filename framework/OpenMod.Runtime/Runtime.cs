@@ -82,6 +82,8 @@ namespace OpenMod.Runtime
         {
             try
             {
+                IsDisposing = false;
+
                 var openModCoreAssembly = typeof(AsyncHelper).Assembly;
                 if (!openModHostAssemblies.Contains(openModCoreAssembly))
                 {
