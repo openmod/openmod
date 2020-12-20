@@ -52,7 +52,8 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
         protected override async Task OnExecuteAsync()
         {
-            var commands = await m_CommandStore.GetCommandsAsync();
+            var commands = (await m_CommandStore.GetCommandsAsync())
+                .Where(d => d.ParentId == null).ToList();
             var totalCount = commands.Count;
 
             const int itemsPerPage = 10;
@@ -66,7 +67,6 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 }
 
                 var pageCommands = commands
-                    .Where(d => d.ParentId == null)
                     .Skip(itemsPerPage * (currentPage - 1))
                     .Take(itemsPerPage)
                     .ToList();
