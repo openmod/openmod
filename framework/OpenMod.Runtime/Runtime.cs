@@ -153,7 +153,26 @@ namespace OpenMod.Runtime
                         .Build();
 
                     var config = deserializer.Deserialize<Dictionary<string, object>>(yaml);
-                    Hotloader.Enabled = (bool?)config["hotreloading"] ?? true;
+
+                    var hotReloadingEnabled = true;
+
+                    if (config.TryGetValue("hotreloading", out var unparsed))
+                    {
+                        switch (unparsed)
+                        {
+                            case bool value:
+                                hotReloadingEnabled = value;
+                                break;
+                            case string strValue when bool.TryParse(strValue, out var parsed):
+                                hotReloadingEnabled = parsed;
+                                break;
+                            default:
+                                m_Logger.LogWarning("Unknown config for 'hotreloading' in OpenMod configuration: " + unparsed);
+                                break;
+                        }
+                    }
+
+                    Hotloader.Enabled = hotReloadingEnabled;
                 }
 
                 await startup.LoadPluginAssembliesAsync();
