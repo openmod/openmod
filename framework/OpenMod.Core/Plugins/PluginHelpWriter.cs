@@ -64,8 +64,8 @@ namespace OpenMod.Core.Plugins
                 markdownBuilder.AppendLine("## Commands");
                 foreach (var currentCommand in rootCommands)
                 {
-                    var args = new List<string> { currentCommand.Name };
-                    AppendCommand(markdownBuilder, currentCommand, commands, args);
+                    var ctx = m_CommandContextBuilder.CreateContext(null, new string[] { currentCommand.Name }, string.Empty, commands);
+                    AppendCommand(markdownBuilder, currentCommand, commands, ctx);
                 }
             }
 
@@ -103,11 +103,9 @@ namespace OpenMod.Core.Plugins
             StringBuilder markdownBuilder,
             ICommandRegistration command,
             List<ICommandRegistration> commands,
-            List<string> args)
+            ICommandContext commandContext)
         {
-            var ctx = m_CommandContextBuilder.CreateContext(null, args.ToArray(), string.Empty, commands);
-
-            markdownBuilder.Append("- ").Append(ctx.CommandPrefix).Append(ctx.CommandAlias);
+            markdownBuilder.Append("- ").Append(commandContext.CommandPrefix).Append(commandContext.CommandAlias);
             if (!string.IsNullOrEmpty(command.Syntax))
             {
                 markdownBuilder.Append(' ').Append(command.Syntax);
@@ -170,9 +168,10 @@ namespace OpenMod.Core.Plugins
                 .Where(d => string.Equals(d.ParentId, command.Id, StringComparison.OrdinalIgnoreCase));
             foreach (var child in childCommands)
             {
-                args.Add(child.Name);
-                AppendCommand(markdownBuilder, child, commands, args);
+                var ctx2 = m_CommandContextBuilder.CreateContext(null, new string[] { command.Name, child.Name }, string.Empty, commands);
+                AppendCommand(markdownBuilder, child, commands, ctx2);
             }
+            commandContext.DisposeAsync().GetAwaiter().GetResult();
         }
     }
 }
