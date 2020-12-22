@@ -351,6 +351,8 @@ namespace OpenMod.Unturned.Users
         public void Dispose()
         {
             m_Users.Clear();
+            m_PendingUsers.Clear();
+
             // ReSharper disable DelegateSubtraction
             Provider.onCheckValidWithExplanation -= OnPendingPlayerConnecting;
             Provider.onEnemyConnected -= OnPlayerConnected;

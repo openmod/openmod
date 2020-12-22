@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
 using OpenMod.API;
-using OpenMod.Core.Hotloading;
+using OpenMod.Common.Hotloading;
 using Serilog;
 
 namespace OpenMod.Core.Helpers

@@ -18,8 +18,12 @@ namespace OpenMod.Unturned.Module.Dev
         public void initialize()
         {
             m_SharedModule = new OpenModSharedUnturnedModule();
-            if (!m_SharedModule.Initialize(GetType().Assembly))
+            
+            if (!m_SharedModule.Initialize(GetType().Assembly, isDynamicLoad: false))
+            {
                 return;
+            }
+
             OnInitialize();
         }
 

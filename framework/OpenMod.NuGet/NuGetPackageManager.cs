@@ -16,6 +16,7 @@ using NuGet.Packaging.Signing;
 using NuGet.Protocol.Core.Types;
 using NuGet.Resolver;
 using NuGet.Versioning;
+using OpenMod.Common.Hotloading;
 
 namespace OpenMod.NuGet
 {
@@ -46,7 +47,7 @@ namespace OpenMod.NuGet
 
         public NuGetPackageManager(string packagesDirectory)
         {
-            m_AssemblyLoader = Assembly.Load;
+            m_AssemblyLoader = Hotloader.LoadAssembly;
 
             Logger = new NullLogger();
             PackagesDirectory = packagesDirectory;
@@ -305,6 +306,11 @@ namespace OpenMod.NuGet
 
             foreach (var dependency in list.ToList())
             {
+                if (m_IgnoredDependendencies.Contains(dependency.Id))
+                {
+                    continue;
+                }
+
                 var dependencyPackage = await GetLatestPackageIdentityAsync(dependency.Id);
                 if (dependencyPackage == null)
                 {

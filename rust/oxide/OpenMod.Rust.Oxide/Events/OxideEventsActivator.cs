@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenMod.Core.Helpers;
+using OpenMod.Common.Helpers;
 using Oxide.Core;
 
 namespace OpenMod.Rust.Oxide.Events

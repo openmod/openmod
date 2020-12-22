@@ -12,13 +12,18 @@ namespace OpenMod.Unturned.Module
     public class OpenModUnturnedModule : IModuleNexus
     {
         public object OpenModRuntime { get; private set; }
+        public bool IsDynamicLoad { get; set; }
+
         private OpenModSharedUnturnedModule m_SharedModule;
 
         public void initialize()
         {
             m_SharedModule = new OpenModSharedUnturnedModule();
-            if (!m_SharedModule.Initialize(GetType().Assembly))
+            if (!m_SharedModule.Initialize(GetType().Assembly, IsDynamicLoad))
+            {
                 return;
+            }
+
             OnInitialize();
         }
 
