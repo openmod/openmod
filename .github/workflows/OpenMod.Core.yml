@@ -10,12 +10,14 @@ on:
       - 'framework/OpenMod.Core/**'
       - 'framework/OpenMod.NuGet/**'
       - 'framework/OpenMod.API/**'
+      - 'framework/tests/OpenMod.Core.Tests/**'
   pull_request:
     branches: [ master ]
     paths:
       - 'framework/OpenMod.Core/**'
       - 'framework/OpenMod.NuGet/**'
       - 'framework/OpenMod.API/**'
+      - 'framework/tests/OpenMod.Core.Tests/**'
 
 jobs:
   build:

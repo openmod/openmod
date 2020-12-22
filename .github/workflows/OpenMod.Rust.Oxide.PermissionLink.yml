@@ -15,7 +15,7 @@ on:
 
 jobs:
   build:
-    name: "OpenMod.OpenMod.Rust.Oxide.PermissionLink Build"
+    name: "OpenMod.Rust.Oxide.PermissionLink Build"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

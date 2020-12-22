@@ -15,7 +15,7 @@ on:
 
 jobs:
   build:
-    name: "OpenMod.OpenMod.Rust.Oxide.Extension Build"
+    name: "OpenMod.Rust.Oxide.Extension Build"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
