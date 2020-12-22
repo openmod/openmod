@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Oxide.Ext.OpenMod.Rust.Dev</AssemblyName>
+    <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\props\UnityEngineDependentProjectProps.props" />
