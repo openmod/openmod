@@ -4,8 +4,7 @@ using OpenMod.Extensions.Games.Abstractions.Items;
 
 namespace OpenMod.Rust.Items
 {
-    // todo: implement OpenMod.Extensions.Games.Abstractions.Items.IHasInventory
-    public class RustItem : IItem
+    public class RustItem : IItem, IHasInventory
     {
         public Item Item { get; }
 
@@ -14,6 +13,11 @@ namespace OpenMod.Rust.Items
             Item = item;
             Asset = new RustItemAsset(Item.info);
             State = new RustItemState(Item);
+
+            if (Item.contents != null)
+            {
+                Inventory = new RustItemContainerInventory(Item.contents);
+            }
         }
 
         public string ItemInstanceId
@@ -49,5 +53,7 @@ namespace OpenMod.Rust.Items
 
             return SetItemAmountTask().AsTask();
         }
+
+        public IInventory Inventory { get; }
     }
 }

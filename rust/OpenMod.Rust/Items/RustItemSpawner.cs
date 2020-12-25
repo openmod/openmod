@@ -18,7 +18,22 @@ namespace OpenMod.Rust.Items
         {
             ValidateState(state);
 
-            throw new NotImplementedException();
+            async UniTask<IInventoryItem> GiveItemTask()
+            {
+                await UniTask.SwitchToMainThread();
+
+                if (inventory is RustPlayerInventory playerInventory)
+                {
+                    RustItem item = CreateItem(itemId, state);
+
+                    playerInventory.GiveItem(item.Item);
+                    return new RustInventoryItem(item);
+                }
+
+                throw new NotSupportedException($"Inventory type not supported: {inventory.GetType().FullName}");
+            }
+
+            return GiveItemTask().AsTask();
         }
 
         public Task<IItemDrop> SpawnItemAsync(Vector3 position, string itemId, IItemState state = null)
