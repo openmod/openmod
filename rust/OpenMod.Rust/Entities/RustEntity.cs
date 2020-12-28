@@ -4,9 +4,7 @@ using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
-using OpenMod.Rust.Players;
-using OpenMod.UnityEngine.Extensions;
-using OpenMod.UnityEngine.Transforms;
+using OpenMod.Rust.Transforms;
 using UVector3 = UnityEngine.Vector3;
 
 namespace OpenMod.Rust.Entities
@@ -18,7 +16,7 @@ namespace OpenMod.Rust.Entities
         public RustEntity(BaseEntity entity)
         {
             Entity = entity;
-            Transform = new UnityTransform(entity.transform);
+            Transform = new RustNetworkableTransform(entity);
             EntityInstanceId = entity.GetInstanceID().ToString();
 
             // Rust todo: asset and state impl
