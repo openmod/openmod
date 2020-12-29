@@ -35,6 +35,8 @@ namespace OpenMod.Unturned.Vehicles
                 step += 4;
                 CopyBytes(buffer, BitConverter.GetBytes(m_Vehicle.skinID), step);
                 step += 2;
+                CopyBytes(buffer, BitConverter.GetBytes(m_Vehicle.mythicID), step);
+                step += 2;
                 CopyBytes(buffer, BitConverter.GetBytes(m_Vehicle.roadPosition), step);
                 step += 4;
                 CopyBytes(buffer, BitConverter.GetBytes(m_Vehicle.fuel), step);
@@ -51,8 +53,6 @@ namespace OpenMod.Unturned.Vehicles
                 step += 8;
                 buffer[step] = BitConverter.GetBytes(m_Vehicle.isLocked)[0];
                 step++;
-                CopyBytes(buffer, BitConverter.GetBytes(m_Vehicle.batteryCharge), step);
-                step += 2;
 
                 if (m_Vehicle.turrets != null)
                 {
