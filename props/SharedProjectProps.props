@@ -7,7 +7,7 @@
     <PackageProjectUrl>https://get-openmod.com/</PackageProjectUrl>
     <PackageOwners>OpenMod;Enes Sadık Özbek&lt;esozbek.me&gt;</PackageOwners>
     <Authors>OpenMod</Authors>
-	  <Version>0.0.0</Version>
+	  <Version>2.3.8</Version>
     <Company>OpenMod</Company>
     <Copyright>Enes Sadık Özbek &lt;esozbek.me&gt;</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
