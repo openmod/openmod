@@ -34,8 +34,7 @@ namespace OpenMod.Unturned.Vehicles
                     throw new Exception($"Invalid vehicle id: {vehicleId}");
                 }
 
-                var vehicleAsset = (ItemAsset)Assets.find(EAssetType.ITEM, parsedVehicleId);
-                if (vehicleAsset?.isPro != false)
+                if (Assets.find(EAssetType.VEHICLE, parsedVehicleId) is not VehicleAsset)
                 {
                     return null;
                 }
@@ -70,7 +69,7 @@ namespace OpenMod.Unturned.Vehicles
                 }
                 else
                 {
-                    var iVehicle = VehicleManager.spawnVehicleV2(vehicleAsset.id, position.ToUnityVector(), Quaternion.identity);
+                    var iVehicle = VehicleManager.spawnVehicleV2(parsedVehicleId, position.ToUnityVector(), Quaternion.identity);
                     if (iVehicle != null)
                     {
                         vehicle = new UnturnedVehicle(iVehicle);

@@ -17,6 +17,8 @@ namespace OpenMod.Unturned.Vehicles
         {
             get
             {
+                // SAVEDATA_VERSION = 12
+
                 // cannot use Block because it's singleton
                 var buffer = new byte[Block.BUFFER_SIZE];
                 var step = 0;
