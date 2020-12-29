@@ -24,8 +24,7 @@ namespace OpenMod.Unturned.Vehicles
         public Task<IReadOnlyCollection<IVehicle>> GetVehiclesAsync()
         {
             return Task.FromResult<IReadOnlyCollection<IVehicle>>(VehicleManager.vehicles
-                .Select(v => new UnturnedVehicle(v))
-                .ToList());
+                .ConvertAll(v => new UnturnedVehicle(v)));
         }
     }
 }

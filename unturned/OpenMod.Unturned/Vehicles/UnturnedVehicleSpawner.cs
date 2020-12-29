@@ -25,7 +25,7 @@ namespace OpenMod.Unturned.Vehicles
                 }
 
                 var vehicleAsset = (ItemAsset)Assets.find(EAssetType.ITEM, parsedVehicleId);
-                if (vehicleAsset == null || vehicleAsset.isPro)
+                if (vehicleAsset?.isPro != false)
                 {
                     return null;
                 }
