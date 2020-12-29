@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using HarmonyLib;
+using OpenMod.Common.Helpers;
 using SDG.Framework.Modules;
 using SDG.Unturned;
 
@@ -18,16 +19,16 @@ namespace OpenMod.Unturned.Module.Shared
         private const string c_HarmonyInstanceId = "com.get-openmod.unturned.module";
         private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new Dictionary<string, Assembly>();
         private Harmony m_HarmonyInstance;
-        private readonly string[] m_IncompatibleModules = { "Rocket.Unturned", "Redox.Unturned" };
-        private readonly string[] m_CompatibleModules = { "AviRockets" };
-
+        private readonly string[] m_IncompatibleModules = { "Redox.Unturned" };
+        private readonly string[] m_CompatibleModules = { "AviRockets", "Rocket.Unturned" };
+        private RemoteCertificateValidationCallback m_OldCallBack;
         private readonly Dictionary<string, Assembly> m_ResolvedAssemblies = new Dictionary<string, Assembly>();
 
-        public bool Initialize(Assembly moduleAssembly)
+        public bool Initialize(Assembly moduleAssembly, bool isDynamicLoad)
         {
-            var moduleAssemblyLocation = moduleAssembly.Location;
-            var openModDirPath = Path.GetDirectoryName(moduleAssemblyLocation);
-            var modulesDirectory = Directory.GetParent(openModDirPath).FullName;
+            var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
+            var openModDirPath = Path.Combine(modulesDirectory, "OpenMod.Unturned");
+
             if (HasIncompatibleModules(Path.GetFileName(openModDirPath), modulesDirectory))
             {
                 return false;
@@ -37,8 +38,13 @@ namespace OpenMod.Unturned.Module.Shared
             m_HarmonyInstance.PatchAll(GetType().Assembly);
 
             InstallNewtonsoftJson(openModDirPath);
-            InstallTlsWorkaround();
-            InstallAssemblyResolver();
+
+            if (!isDynamicLoad)
+            {
+                SystemDrawingRedirect.Install();
+                InstallTlsWorkaround();
+                InstallAssemblyResolver();
+            }
 
             // ReSharper disable once AssignNullToNotNullAttribute
             foreach (var file in Directory.GetFiles(openModDirPath))
@@ -103,7 +109,6 @@ namespace OpenMod.Unturned.Module.Shared
 
         private void InstallNewtonsoftJson(string openModDir)
         {
-            Console.WriteLine("Location: " + typeof(IModuleNexus).Assembly.Location);
             var managedDir = Path.GetDirectoryName(typeof(IModuleNexus).Assembly.Location);
 
             // ReSharper disable once AssignNullToNotNullAttribute
@@ -134,9 +139,11 @@ namespace OpenMod.Unturned.Module.Shared
 
             // Copy Newtonsoft.Json
             var asm = AssemblyName.GetAssemblyName(unturnedNewtonsoftFile);
-            GetVersionIndependentName(asm.FullName, out var version);
+            ReflectionExtensions.GetVersionIndependentName(asm.FullName, out var version);
             if (!version.StartsWith("7.", StringComparison.OrdinalIgnoreCase))
+            {
                 return;
+            }
 
             if (File.Exists(newtonsoftBackupFile))
             {
@@ -149,71 +156,72 @@ namespace OpenMod.Unturned.Module.Shared
 
         private void InstallAssemblyResolver()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += delegate (object sender, ResolveEventArgs args)
+            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+        }
+
+        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            var name = ReflectionExtensions.GetVersionIndependentName(args.Name, out _);
+            if (m_ResolvedAssemblies.ContainsKey(name))
             {
-                var name = GetVersionIndependentName(args.Name, out _);
-                if (m_ResolvedAssemblies.ContainsKey(name))
-                {
-                    return m_ResolvedAssemblies[name];
-                }
+                return m_ResolvedAssemblies[name];
+            }
 
-                var assemblies = m_LoadedAssemblies.Values
-                    .Where(d => GetVersionIndependentName(d.FullName, out _).Equals(name))
-                    .OrderByDescending(d => d.GetName().Version);
-                
-                var match= assemblies.FirstOrDefault();
-                if (match != null)
-                {
-                    m_ResolvedAssemblies.Add(name, match);
-                }
+            var assemblies = m_LoadedAssemblies.Values
+                .Where(d => ReflectionExtensions.GetVersionIndependentName(d.FullName, out _).Equals(name))
+                .OrderByDescending(d => d.GetName().Version);
 
-                return match;
-            };
+            var match = assemblies.FirstOrDefault();
+            if (match != null)
+            {
+                m_ResolvedAssemblies.Add(name, match);
+            }
+
+            return match;
         }
 
         public void Shutdown()
         {
+            ServicePointManager.ServerCertificateValidationCallback = m_OldCallBack;
+            SystemDrawingRedirect.Uninstall();
+            AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
             m_HarmonyInstance?.UnpatchAll(c_HarmonyInstanceId);
         }
 
         private void InstallTlsWorkaround()
         {
+            m_OldCallBack = ServicePointManager.ServerCertificateValidationCallback;
+
             //http://answers.unity.com/answers/1089592/view.html
             ServicePointManager.ServerCertificateValidationCallback = CertificateValidationWorkaroundCallback;
         }
 
         private bool CertificateValidationWorkaroundCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
-            bool isOk = true;
+            var isOk = true;
             // If there are errors in the certificate chain, look at each error to determine the cause.
-            if (sslPolicyErrors != SslPolicyErrors.None)
+            if (sslPolicyErrors == SslPolicyErrors.None)
             {
-                foreach (X509ChainStatus chainStatus in chain.ChainStatus)
+                return true;
+            }
+
+            foreach (X509ChainStatus chainStatus in chain.ChainStatus)
+            {
+                if (chainStatus.Status != X509ChainStatusFlags.RevocationStatusUnknown)
                 {
-                    if (chainStatus.Status != X509ChainStatusFlags.RevocationStatusUnknown)
+                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+                    chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                    chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
+
+                    var chainIsValid = chain.Build((X509Certificate2)certificate);
+                    if (!chainIsValid)
                     {
-                        chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
-                        chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
-                        chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
-                        chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
-                        bool chainIsValid = chain.Build((X509Certificate2)certificate);
-                        if (!chainIsValid)
-                        {
-                            isOk = false;
-                        }
+                        isOk = false;
                     }
                 }
             }
             return isOk;
-        }
-
-        private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
-
-        private static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
-        {
-            var match = s_VersionRegex.Match(fullAssemblyName);
-            extractedVersion = match.Groups[1].Value;
-            return s_VersionRegex.Replace(fullAssemblyName, string.Empty);
         }
 
         public void LoadAssembly(string baseDirectory, string dllName)
@@ -229,7 +237,7 @@ namespace OpenMod.Unturned.Module.Shared
             var data = File.ReadAllBytes(dllFullPath);
             var asm = Assembly.Load(data);
 
-            var name = GetVersionIndependentName(asm.FullName, out _);
+            var name = ReflectionExtensions.GetVersionIndependentName(asm.FullName, out _);
 
             if (m_LoadedAssemblies.ContainsKey(name))
             {
@@ -241,7 +249,7 @@ namespace OpenMod.Unturned.Module.Shared
 
         public void OnPostInitialize()
         {
- 
+
         }
     }
 }

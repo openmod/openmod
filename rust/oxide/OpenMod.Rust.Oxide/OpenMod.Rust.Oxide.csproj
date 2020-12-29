@@ -5,10 +5,19 @@
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>OpenMod.Rust.Oxide.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\props\SharedProjectProps.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\props\UnityEngineDependentProjectProps.props" />
 
   <ItemGroup>
-    <PackageReference Include="OpenMod.Rust.Oxide.Redist" Version="2.0.4765" />
+    <PackageReference Include="OpenMod.Rust.Oxide.Redist" Version="2.0.4765">
+	  <IncludeAssets>compile</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

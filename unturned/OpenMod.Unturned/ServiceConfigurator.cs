@@ -1,11 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Ioc;
+using OpenMod.API.Permissions;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Users;
 using OpenMod.Unturned.Commands;
 using OpenMod.Unturned.Permissions;
 using OpenMod.Unturned.Players;
+using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.Users;
 
 namespace OpenMod.Unturned
@@ -33,6 +35,18 @@ namespace OpenMod.Unturned
             {
                 options.AddCommandParameterResolveProvider<UnturnedPlayerCommandParameterResolveProvider>();
             });
+
+            if (RocketModIntegration.IsRocketModInstalled())
+            {
+                // todo: check direction for permission link from config
+
+                serviceCollection.Configure<PermissionCheckerOptions>(options =>
+                {
+                    options.AddPermissionSource<RocketPermissionStore>();
+                });
+
+                serviceCollection.AddTransient<IPermissionRoleStore, RocketPermissionRoleStore>();
+            }
 
             serviceCollection.AddSingleton<UnturnedCommandHandler>();
         }

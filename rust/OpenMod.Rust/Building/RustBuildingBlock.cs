@@ -3,6 +3,7 @@ using OpenMod.Extensions.Games.Abstractions.Acl;
 using OpenMod.Extensions.Games.Abstractions.Building;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
 using OpenMod.Rust.Networkables;
+using OpenMod.Rust.Transforms;
 using OpenMod.UnityEngine.Transforms;
 
 namespace OpenMod.Rust.Building
@@ -15,7 +16,7 @@ namespace OpenMod.Rust.Building
         {
             BuildingBlock = buildingBlock;
             Asset = new RustBaseNetworkableAsset(buildingBlock, RustBaseNetworkableAsset.BuildingBlock);
-            Transform = new UnityTransform(buildingBlock.transform);
+            Transform = new RustNetworkableTransform(buildingBlock);
             State = new RustBuildingBlockState(buildingBlock);
             BuildableInstanceId = buildingBlock.GetInstanceID().ToString();
 
@@ -34,8 +35,7 @@ namespace OpenMod.Rust.Building
 
         public Task DestroyAsync()
         {
-            // Rust todo: implemented replicated
-            throw new System.NotImplementedException();
+            return Transform.DestroyAsync();
         }
     }
 }

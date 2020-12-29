@@ -80,6 +80,8 @@ namespace OpenMod.Bootstrapper
                 "Microsoft.NETCore.Platforms",
                 "Microsoft.Packaging.Tools",
                 "NETStandard.Library",
+                "OpenMod.UnityEngine.Redist",
+                "OpenMod.Unturned.Redist",
                 "System.IO.FileSystem.Watcher");
 
             // nugetPackageManager.IgnoreDependencies(ignoredDependencies.ToArray());

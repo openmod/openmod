@@ -7,6 +7,7 @@ using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
+using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Commands

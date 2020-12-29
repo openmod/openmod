@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <AssemblyName>Oxide.Ext.OpenMod.Rust</AssemblyName>
     <PackageDescription>OpenMod Rust extension</PackageDescription>
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
@@ -15,7 +16,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenMod.Rust.Oxide.Redist" Version="2.0.4765" />
+    <PackageReference Include="OpenMod.Rust.Oxide.Redist" Version="2.0.4765">
+	  <IncludeAssets>compile</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

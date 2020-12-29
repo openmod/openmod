@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using OpenMod.API.Commands;
 using OpenMod.API.Localization;
+using OpenMod.Common.Hotloading;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 
@@ -24,7 +25,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
         public CommandOpenModInstall(
             IOpenModStringLocalizer stringLocalizer,
-            IServiceProvider serviceProvider, 
+            IServiceProvider serviceProvider,
             IConfiguration configuration,
             NuGetPluginAssembliesSource nuGetPlugins) : base(serviceProvider)
         {
@@ -83,7 +84,14 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
             if (anySuccessful)
             {
-                await Context.Actor.PrintMessageAsync("To complete installation, please reload OpenMod with /openmod reload.", Color.White);
+                if (Hotloader.Enabled)
+                {
+                    await Context.Actor.PrintMessageAsync("To complete installation, please reload OpenMod with /openmod reload.", Color.White);
+                }
+                else
+                {
+                    await Context.Actor.PrintMessageAsync("To complete installation, please restart your server or enable hotloading and reload.", Color.White);
+                }
             }
         }
     }

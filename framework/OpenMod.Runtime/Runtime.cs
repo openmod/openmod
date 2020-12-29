@@ -13,22 +13,20 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Mono.Cecil;
-using Newtonsoft.Json.Linq;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
+using OpenMod.Common.Hotloading;
 using OpenMod.Core.Helpers;
-using OpenMod.Core.Hotloading;
-using OpenMod.Core.Ioc;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 using Semver;
 using Serilog;
 using Serilog.Extensions.Logging;
-using AssemblyExtensions = Autofac.Util.AssemblyExtensions;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 #pragma warning disable CS4014
 
@@ -84,13 +82,15 @@ namespace OpenMod.Runtime
         {
             try
             {
+                IsDisposing = false;
+
                 var openModCoreAssembly = typeof(AsyncHelper).Assembly;
                 if (!openModHostAssemblies.Contains(openModCoreAssembly))
                 {
                     openModHostAssemblies.Insert(0, openModCoreAssembly);
                 }
 
-                Type hostInformationType = openModHostAssemblies
+                var hostInformationType = openModHostAssemblies
                     .Select(asm =>
                         asm.GetLoadableTypes().FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
                     .LastOrDefault(d => d != null);
@@ -146,6 +146,37 @@ namespace OpenMod.Runtime
                     startup.RegisterIocAssemblyAndCopyResources(assembly, string.Empty);
                 }
 
+                var configFile = Path.Combine(WorkingDirectory, "openmod.yaml");
+                if (File.Exists(configFile))
+                {
+                    var yaml = File.ReadAllText(configFile);
+                    var deserializer = new DeserializerBuilder()
+                        .WithNamingConvention(new CamelCaseNamingConvention())
+                        .Build();
+
+                    var config = deserializer.Deserialize<Dictionary<string, object>>(yaml);
+
+                    var hotReloadingEnabled = true;
+
+                    if (config.TryGetValue("hotreloading", out var unparsed))
+                    {
+                        switch (unparsed)
+                        {
+                            case bool value:
+                                hotReloadingEnabled = value;
+                                break;
+                            case string strValue when bool.TryParse(strValue, out var parsed):
+                                hotReloadingEnabled = parsed;
+                                break;
+                            default:
+                                m_Logger.LogWarning("Unknown config for 'hotreloading' in OpenMod configuration: " + unparsed);
+                                break;
+                        }
+                    }
+
+                    Hotloader.Enabled = hotReloadingEnabled;
+                }
+
                 await startup.LoadPluginAssembliesAsync();
 
                 hostBuilder
@@ -162,6 +193,7 @@ namespace OpenMod.Runtime
                     .UseSerilog();
 
                 Host = hostBuilder.Build();
+
                 m_AppLifeTime = Host.Services.GetRequiredService<IHostApplicationLifetime>();
                 m_AppLifeTime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
 

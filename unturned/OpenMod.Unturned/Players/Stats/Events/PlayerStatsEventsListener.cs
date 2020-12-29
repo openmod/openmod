@@ -18,6 +18,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         public override void Subscribe()
         {
+            Player.onPlayerStatIncremented += OnPlayerStatIncremented;
             OnBleedingUpdated += Events_OnBleedingUpdated;
             OnBrokenUpdated += Events_OnBrokenUpdated;
             OnFoodUpdated += Events_OnFoodUpdated;
@@ -28,6 +29,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         public override void Unsubscribe()
         {
+            Player.onPlayerStatIncremented -= OnPlayerStatIncremented;
             OnBleedingUpdated -= Events_OnBleedingUpdated;
             OnBrokenUpdated -= Events_OnBrokenUpdated;
             OnFoodUpdated -= Events_OnFoodUpdated;
@@ -88,6 +90,15 @@ namespace OpenMod.Unturned.Players.Stats.Events
             UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
 
             UnturnedPlayerHealthUpdatedEvent @event = new UnturnedPlayerHealthUpdatedEvent(player, health);
+
+            Emit(@event);
+        }
+
+        private void OnPlayerStatIncremented(Player nativePlayer, EPlayerStat stat)
+        {
+            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+
+            UnturnedPlayerStatIncrementedEvent @event = new UnturnedPlayerStatIncrementedEvent(player, stat);
 
             Emit(@event);
         }

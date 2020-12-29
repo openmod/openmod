@@ -14,7 +14,6 @@ namespace OpenMod.Core.Ioc
     {
         public static IEnumerable<ServiceRegistration> FindFromAssembly<T>(Assembly assembly, ILogger logger = null) where T : ServiceImplementationAttribute
         {
-
             List<Type> types;
             try
             {
@@ -45,7 +44,7 @@ namespace OpenMod.Core.Ioc
 
                 try
                 {
-                    attribute = type.GetCustomAttribute<T>();
+                    attribute = type.GetCustomAttribute<T>(inherit: false);
                     if (attribute == null)
                     {
                         continue;

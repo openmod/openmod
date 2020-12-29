@@ -10,6 +10,7 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
+using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc.Extensions;
 using OpenMod.Core.Prioritization;
