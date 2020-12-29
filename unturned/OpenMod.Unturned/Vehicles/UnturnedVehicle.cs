@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Object = UnityEngine.Object;
 
 namespace OpenMod.Unturned.Vehicles
 {
@@ -33,6 +32,8 @@ namespace OpenMod.Unturned.Vehicles
         public IVehicleState State { get; }
 
         public IWorldTransform Transform { get; }
+
+        public IOwnership Ownership { get; }
 
         public string VehicleInstanceId { get; }
 
@@ -66,29 +67,28 @@ namespace OpenMod.Unturned.Vehicles
             }
         }
 
-        public IOwnership Ownership { get; }
-
-        public Task<bool> AddPassengerAsync(IEntity passenger)
+        public async Task<bool> AddPassengerAsync(IEntity passenger)
         {
-            if (!(passenger is UnturnedPlayer))
+            await UniTask.SwitchToMainThread();
+            if (passenger is not UnturnedPlayer player)
             {
-                return Task.FromException<bool>(
-                    new NotSupportedException($"Can not add entity {passenger.GetType()} as passenger"));
+                throw new NotSupportedException($"Can not add entity {passenger.GetType()} as passenger");
             }
 
-
-            throw new System.NotImplementedException();
+            VehicleManager.instance.askEnterVehicle(player.SteamId, Vehicle.instanceID, Vehicle.asset.hash, (byte)Vehicle.asset.engine);
+            return player.CurrentVehicle?.VehicleInstanceId == VehicleInstanceId;
         }
 
-        public Task<bool> RemovePassengerAsync(IEntity passenger)
+        public async Task<bool> RemovePassengerAsync(IEntity passenger)
         {
-            if (!(passenger is UnturnedPlayer))
+            await UniTask.SwitchToMainThread();
+            if (passenger is not UnturnedPlayer player)
             {
-                return Task.FromException<bool>(
-                    new NotSupportedException($"Can not remove entity {passenger.GetType()} as passenger"));
+                throw new NotSupportedException($"Can not remove entity {passenger.GetType()} as passenger");
             }
 
-            throw new System.NotImplementedException();
+            VehicleManager.forceRemovePlayer(Vehicle, player.SteamId);
+            return player.CurrentVehicle == null;
         }
 
         public Task DestroyAsync()
@@ -97,8 +97,7 @@ namespace OpenMod.Unturned.Vehicles
             {
                 await UniTask.SwitchToMainThread();
 
-                // todo may need replication
-                Object.Destroy(Vehicle);
+                VehicleManager.askVehicleDestroy(Vehicle);
             }
 
             return DestroyTask().AsTask();
