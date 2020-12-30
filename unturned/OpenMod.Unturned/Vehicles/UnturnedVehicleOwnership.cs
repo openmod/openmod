@@ -45,7 +45,7 @@ namespace OpenMod.Unturned.Vehicles
 
         public Task<bool> HasAccessAsync(IPlayer player)
         {
-            if (!(player is UnturnedPlayer unturnedPlayer))
+            if (player is not UnturnedPlayer unturnedPlayer)
                 return Task.FromResult(false);
 
             if (!HasOwner)
