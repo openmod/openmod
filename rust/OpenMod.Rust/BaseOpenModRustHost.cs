@@ -78,6 +78,11 @@ namespace OpenMod.Rust
 
         public bool HasCapability(string capability)
         {
+            if (capability == KnownGameCapabilities.Inventory)
+            {
+                return true;
+            }
+            
             if (capability == KnownGameCapabilities.Health)
             {
                 return true;
