@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +19,12 @@ using OpenMod.Core.Localization;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Plugins.Events;
 using OpenMod.Core.Prioritization;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace OpenMod.Core.Plugins
 {
@@ -137,7 +137,7 @@ namespace OpenMod.Core.Plugins
                             .As<IOpenModComponent>()
                             .As<IOpenModPlugin>()
                             .SingleInstance()
-                            .ExternallyOwned();
+                            .OwnedByLifetimeScope();
 
                         containerBuilder.RegisterType<ScopedPermissionChecker>()
                             .As<IPermissionChecker>()
@@ -145,11 +145,11 @@ namespace OpenMod.Core.Plugins
                             .OwnedByLifetimeScope();
 
                         containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(new DataStoreCreationParameters
-                            {
-                                ComponentId = pluginMetadata.Id,
-                                Prefix = null,
-                                Suffix = "data",
-                                WorkingDirectory = workingDirectory
+                        {
+                            ComponentId = pluginMetadata.Id,
+                            Prefix = null,
+                            Suffix = "data",
+                            WorkingDirectory = workingDirectory
                         }))
                             .As<IDataStore>()
                             .SingleInstance()
@@ -227,6 +227,16 @@ namespace OpenMod.Core.Plugins
                 catch (Exception ex)
                 {
                     m_Logger.LogError(ex, $"Failed to load plugin: {pluginInstance.DisplayName} v{pluginInstance.Version}");
+
+                    try
+                    {
+                        await pluginInstance.LifetimeScope.DisposeAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        m_Logger.LogError(e, "Failed to unload plugin: {DisplayName} v{Version}", pluginInstance.DisplayName, pluginInstance.Version);
+                    }
+
                     return null;
                 }
 
@@ -251,13 +261,13 @@ namespace OpenMod.Core.Plugins
             m_Logger.LogInformation("Unloading all plugins...");
 
             var i = 0;
-            foreach (var instance in from plugin in m_ActivatedPlugins 
-                where plugin.IsAlive 
-                select (IOpenModPlugin)plugin.Target)
+            foreach (var instance in from plugin in m_ActivatedPlugins
+                                     where plugin.IsAlive
+                                     select (IOpenModPlugin)plugin.Target)
             {
                 try
                 {
-                    await instance.UnloadAsync();
+                    await instance.LifetimeScope.DisposeAsync();
                     i++;
                 }
                 catch (Exception ex)

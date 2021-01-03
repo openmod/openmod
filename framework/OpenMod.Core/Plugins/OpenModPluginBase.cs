@@ -114,7 +114,6 @@ namespace OpenMod.Core.Plugins
             }
 
             await EventBus.EmitAsync(this, this, new PluginDisposedEvent(this));
-            LifetimeScope?.Dispose();
         }
 
         protected virtual ValueTask<bool> OnDispose()
