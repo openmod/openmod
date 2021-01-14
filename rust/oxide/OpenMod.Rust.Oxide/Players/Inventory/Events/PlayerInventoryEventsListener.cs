@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.API.Eventing;
+using OpenMod.Rust.Items;
 using OpenMod.Rust.Oxide.Events;
 using OpenMod.Rust.Players;
 using OpenMod.Rust.Players.Inventory.Events;
@@ -18,14 +19,15 @@ namespace OpenMod.Rust.Oxide.Players.Inventory.Events
         [HookMethod("OnActiveItemChanged")]
         private void OnActiveItemChanged(BasePlayer player, Item oldItem, Item newItem)
         {
-            var @event = new RustPlayerActiveItemChangedEvent(new RustPlayer(player), oldItem, newItem);
+            var @event = new RustPlayerActiveItemChangedEvent(
+                new RustPlayer(player), new RustItem(oldItem), new RustItem(newItem));
             Emit(@event);
         }
 
         [HookMethod("OnPlayerDropActiveItem")]
         private object OnPlayerDropActiveItem(BasePlayer player, Item item)
         {
-            var @event = new RustPlayerActiveItemDroppedEvent(new RustPlayer(player), item);
+            var @event = new RustPlayerActiveItemDroppedEvent(new RustPlayer(player), new RustItem(item));
             return EmitCancellableReturnsObject(@event);
         }
 
@@ -50,7 +52,7 @@ namespace OpenMod.Rust.Oxide.Players.Inventory.Events
         [HookMethod("OnItemPickup")]
         private object OnItemPickup(Item item, BasePlayer player)
         {
-            var @event = new RustPlayerPickingUpItemEvent(new RustPlayer(player), item, item.position);
+            var @event = new RustPlayerPickingUpItemEvent(new RustPlayer(player), new RustItem(item), item.position);
             return EmitCancellableReturnsObject(@event);
         }
 
@@ -64,7 +66,7 @@ namespace OpenMod.Rust.Oxide.Players.Inventory.Events
         [HookMethod("CanResearchItem")]
         private object CanResearchItem(BasePlayer player, Item targetItem)
         {
-            var @event = new RustPlayerResearchingItemEvent(new RustPlayer(player), targetItem);
+            var @event = new RustPlayerResearchingItemEvent(new RustPlayer(player), new RustItem(targetItem));
             return EmitCancellableReturnsObject(@event);
         }
     }

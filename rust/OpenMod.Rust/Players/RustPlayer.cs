@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Numerics;
 using OpenMod.Extensions.Games.Abstractions.Entities;
+using OpenMod.Extensions.Games.Abstractions.Items;
 using OpenMod.Extensions.Games.Abstractions.Players;
 using OpenMod.Rust.Entities;
+using OpenMod.Rust.Items;
 using OpenMod.UnityEngine.Extensions;
+using IHasInventory = OpenMod.Extensions.Games.Abstractions.Items.IHasInventory;
 
 namespace OpenMod.Rust.Players
 {
-    public class RustPlayer : RustEntity, IPlayer, IComparable<RustPlayer>, IDamageSource
+    public class RustPlayer : RustEntity, IPlayer, IComparable<RustPlayer>, IDamageSource, IHasInventory
     {
         public BasePlayer Player { get; }
 
@@ -15,6 +18,7 @@ namespace OpenMod.Rust.Players
         {
             Player = player;
             EntityInstanceId = player.UserIDString;
+            Inventory = new RustPlayerInventory(Player.inventory);
 
             // Rust todo: set stance
         }
@@ -55,5 +59,7 @@ namespace OpenMod.Rust.Players
 
             return true;
         }
+
+        public IInventory Inventory { get; }
     }
 }

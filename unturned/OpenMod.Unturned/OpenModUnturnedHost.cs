@@ -37,7 +37,6 @@ namespace OpenMod.Unturned
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly ICommandExecutor m_CommandExecutor;
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
-        private readonly IPluginActivator m_PluginActivator;
         private readonly UnturnedCommandHandler m_UnturnedCommandHandler;
         private List<ICommandInputOutput> m_IoHandlers;
         private OpenModConsoleInputOutput m_OpenModIoHandler;
@@ -78,7 +77,6 @@ namespace OpenMod.Unturned
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
             m_Logger = logger;
-            m_PluginActivator = pluginActivator;
             m_UnturnedCommandHandler = unturnedCommandHandler;
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
@@ -182,19 +180,8 @@ namespace OpenMod.Unturned
 
             m_Logger.LogInformation("OpenMod for Unturned is ready.");
 
-            BroadcastPlugins();
             return Task.CompletedTask;
             // ReSharper restore PossibleNullReferenceException
-        }
-
-        private void BroadcastPlugins()
-        {
-            var pluginAdvertising = PluginAdvertising.Get();
-            pluginAdvertising.PluginFrameworkName = "openmod";
-
-            pluginAdvertising.AddPlugins(from plugin in m_PluginActivator.ActivatedPlugins
-                                         where plugin.IsComponentAlive
-                                         select plugin.DisplayName);
         }
 
         protected virtual void BindUnturnedEvents()
