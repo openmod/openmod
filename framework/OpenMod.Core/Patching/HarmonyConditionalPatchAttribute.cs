@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Globalization;
 
 namespace OpenMod.Core.Patching
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Delegate | AttributeTargets.Method, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class HarmonyConditionalPatchAttribute : Attribute
     {
         public string Condition { get; }

@@ -8,6 +8,7 @@ using OpenMod.Unturned.Commands;
 using OpenMod.Unturned.Permissions;
 using OpenMod.Unturned.Players;
 using OpenMod.Unturned.RocketMod;
+using OpenMod.Unturned.RocketMod.Permissions;
 using OpenMod.Unturned.Users;
 
 namespace OpenMod.Unturned
@@ -38,8 +39,6 @@ namespace OpenMod.Unturned
 
             if (RocketModIntegration.IsRocketModInstalled())
             {
-                // todo: check direction for permission link from config
-
                 serviceCollection.Configure<PermissionCheckerOptions>(options =>
                 {
                     options.AddPermissionSource<RocketPermissionStore>();

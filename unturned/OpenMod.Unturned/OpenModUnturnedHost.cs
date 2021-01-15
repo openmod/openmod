@@ -22,8 +22,10 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenMod.API.Eventing;
 using OpenMod.API.Plugins;
 using OpenMod.Unturned.RocketMod;
+using OpenMod.Unturned.RocketMod.Events;
 using UnityEngine.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
 
@@ -32,17 +34,21 @@ namespace OpenMod.Unturned
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
+        private static bool s_UniTaskInited;
         private readonly IHostInformation m_HostInformation;
         private readonly IServiceProvider m_ServiceProvider;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly ICommandExecutor m_CommandExecutor;
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
+        private readonly Lazy<IEventBus> m_EventBus;
         private readonly UnturnedCommandHandler m_UnturnedCommandHandler;
         private List<ICommandInputOutput> m_IoHandlers;
         private OpenModConsoleInputOutput m_OpenModIoHandler;
         private readonly HashSet<string> m_Capabilities;
         private UnturnedEventsActivator m_UnturnedEventsActivator;
+        private RocketModIntegration m_RocketModIntegration;
         private Harmony m_Harmony;
+        private bool m_IsDisposing;
 
         public string OpenModComponentId { get; } = "OpenMod.Unturned";
 
@@ -53,10 +59,6 @@ namespace OpenMod.Unturned
         public ILifetimeScope LifetimeScope { get; }
 
         public IDataStore DataStore { get; }
-
-        private bool m_IsDisposing;
-
-        private static bool s_UniTaskInited;
 
         // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */
 
@@ -69,7 +71,7 @@ namespace OpenMod.Unturned
             IConsoleActorAccessor consoleActorAccessor,
             ICommandExecutor commandExecutor,
             ILogger<OpenModUnturnedHost> logger,
-            IPluginActivator pluginActivator,
+            Lazy<IEventBus> eventBus,
             UnturnedCommandHandler unturnedCommandHandler)
         {
             m_HostInformation = hostInformation;
@@ -77,6 +79,7 @@ namespace OpenMod.Unturned
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
             m_Logger = logger;
+            m_EventBus = eventBus;
             m_UnturnedCommandHandler = unturnedCommandHandler;
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
@@ -104,6 +107,15 @@ namespace OpenMod.Unturned
 
         public Task InitAsync()
         {
+            if (RocketModIntegration.IsRocketModUnturnedLoaded(out var rocketAssembly))
+            {
+                OnRocketModUnturnedLoaded(rocketAssembly);
+            }
+            else
+            {
+                AppDomain.CurrentDomain.AssemblyLoad += RocketModAssemblyLoadListener;
+            }
+
             // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
 
@@ -124,7 +136,8 @@ namespace OpenMod.Unturned
             {
                 /* Fix Unturned destroying console and breaking Serilog formatting and colors */
                 var windowsConsole = typeof(Provider).Assembly.GetType("SDG.Unturned.WindowsConsole");
-                var shouldManageConsoleField = windowsConsole?.GetField("shouldManageConsole", BindingFlags.Static | BindingFlags.NonPublic);
+                var shouldManageConsoleField = windowsConsole?.GetField("shouldManageConsole",
+                    BindingFlags.Static | BindingFlags.NonPublic);
 
                 if (shouldManageConsoleField != null)
                 {
@@ -137,10 +150,11 @@ namespace OpenMod.Unturned
             m_IoHandlers = ioHandlers.ToList(); // copy Unturneds IoHandlers
             // unturned built-in io handlers
             var defaultIoHandlers = ioHandlers.Where(c =>
-                                         c.GetType().FullName.Equals("SDG.Unturned.ThreadedWindowsConsoleInputOutput") // type doesnt exist on Linux
-                                      || c.GetType().FullName.Equals("SDG.Unturned.WindowsConsoleInputOutput") // type doesnt exist on Linux
-                                      || c.GetType() == typeof(ThreadedConsoleInputOutput)
-                                      || c.GetType() == typeof(ConsoleInputOutput)).ToList();
+                c.GetType().FullName
+                    .Equals("SDG.Unturned.ThreadedWindowsConsoleInputOutput") // type doesnt exist on Linux
+                || c.GetType().FullName.Equals("SDG.Unturned.WindowsConsoleInputOutput") // type doesnt exist on Linux
+                || c.GetType() == typeof(ThreadedConsoleInputOutput)
+                || c.GetType() == typeof(ConsoleInputOutput)).ToList();
 
             foreach (var ioHandler in defaultIoHandlers)
             {
@@ -184,6 +198,28 @@ namespace OpenMod.Unturned
             // ReSharper restore PossibleNullReferenceException
         }
 
+        private void OnRocketModUnturnedLoaded(Assembly assembly)
+        {
+            m_RocketModIntegration = ActivatorUtilities.CreateInstance<RocketModIntegration>(m_ServiceProvider, this);
+            m_RocketModIntegration.Install();
+
+            AsyncHelper.RunSync(async () =>
+            {
+                await m_EventBus.Value.EmitAsync(this, this,
+                    new RocketModLoadedEvent(assembly));
+            });
+        }
+
+        private void RocketModAssemblyLoadListener(object sender, AssemblyLoadEventArgs args)
+        {
+            if (!RocketModIntegration.IsRocketModUnturnedAssembly(args.LoadedAssembly))
+            {
+                return;
+            }
+
+            OnRocketModUnturnedLoaded(args.LoadedAssembly);
+        }
+
         protected virtual void BindUnturnedEvents()
         {
             CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
@@ -212,7 +248,8 @@ namespace OpenMod.Unturned
                 return;
             }
 
-            AsyncHelper.Schedule("Console command execution", () => m_CommandExecutor.ExecuteAsync(actor, args, string.Empty));
+            AsyncHelper.Schedule("Console command execution",
+                () => m_CommandExecutor.ExecuteAsync(actor, args, string.Empty));
         }
 
         public Task ShutdownAsync()
@@ -223,7 +260,8 @@ namespace OpenMod.Unturned
 
         public void Dispose()
         {
-            RocketModIntegration.Uninstall();
+            AppDomain.CurrentDomain.AssemblyLoad -= RocketModAssemblyLoadListener;
+            m_RocketModIntegration?.Dispose();
 
             if (m_IsDisposing)
             {
@@ -237,6 +275,7 @@ namespace OpenMod.Unturned
             {
                 Dedicator.commandWindow.addIOHandler(ioHandler);
             }
+
             m_IoHandlers.Clear();
 
             IsComponentAlive = false;
