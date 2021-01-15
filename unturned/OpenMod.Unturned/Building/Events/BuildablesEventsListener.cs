@@ -366,6 +366,9 @@ namespace OpenMod.Unturned.Building.Events
                 if (!BarricadeManager.tryGetRegion(x, y, plant, out var region)) return;
 
                 var index = region.barricades.FindIndex(k => k.instanceID == instanceID);
+
+                if (index < 0) return;
+
                 var data = region.barricades[index];
                 var drop = region.drops[index];
 
@@ -382,6 +385,9 @@ namespace OpenMod.Unturned.Building.Events
                     return;
 
                 var index = region.structures.FindIndex(k => k.instanceID == instanceID);
+
+                if (index < 0) return;
+
                 var data = region.structures[index];
                 var drop = region.drops[index];
 
