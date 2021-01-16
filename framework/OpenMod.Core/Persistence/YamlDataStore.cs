@@ -155,7 +155,7 @@ namespace OpenMod.Core.Persistence
         {
             lock (GetLock(filePath))
             {
-                foreach (var listener in m_ChangeListeners)
+                foreach (var listener in m_ChangeListeners.ToList())
                 {
                     if (!listener.Key.IsComponentAlive)
                     {
