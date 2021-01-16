@@ -17,15 +17,18 @@ namespace OpenMod.Unturned.RocketMod
 {
     public class RocketModIntegration : IDisposable
     {
+        private const string c_HarmonyId = "com.get-openmod.unturned.module.rocketmod";
+        private const BindingFlags c_BindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
+
+        private static bool s_IsReady;
+        
         private readonly OpenModUnturnedHost m_UnturnedHost;
         private readonly IEventBus m_EventBus;
         private readonly ILogger<RocketModIntegration> m_Logger;
-        private const string c_HarmonyId = "com.get-openmod.unturned.module.rocketmod";
-        private bool s_Installed;
-        private static bool s_IsReady;
+        private readonly ILogger m_RocketModLogger;
+        
         private Harmony s_HarmonyInstance;
-        private readonly BindingFlags c_BindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
-        private ILogger m_RocketModLogger;
+        private bool s_Installed;
 
         public RocketModIntegration(
             OpenModUnturnedHost unturnedHost,
@@ -109,6 +112,11 @@ namespace OpenMod.Unturned.RocketMod
 
         public void Install()
         {
+            if (!IsRocketModInstalled())
+            {
+                return;
+            }
+
             if (!IsRocketModUnturnedLoaded(out _))
             {
                 return;
