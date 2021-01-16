@@ -6,6 +6,12 @@
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
+  <ItemGroup>
+    <None Remove="openmod.unturned.yaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="openmod.unturned.yaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.14">
