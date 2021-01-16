@@ -65,7 +65,7 @@ namespace OpenMod.Core.Permissions
         {
             var permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             var user = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
-            if (user != null)
+            if (user?.Permissions != null)
             {
                 permissions.UnionWith(user.Permissions);
             }
