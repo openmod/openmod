@@ -20,8 +20,6 @@ namespace OpenMod.Bootstrapper
     /// </summary>
     public class OpenModDynamicBootstrapper
     {
-        public const string DefaultNugetRepository = "https://api.nuget.org/v3/index.json";
-
         public Task<object> BootstrapAsync(
             string openModFolder,
             string[] commandLineArgs,
@@ -63,7 +61,7 @@ namespace OpenMod.Bootstrapper
 
             logger ??= new NuGetConsoleLogger();
             openModFolder = Path.GetFullPath(openModFolder);
-            
+
             var packagesDirectory = Path.Combine(openModFolder, "packages");
             if (!Directory.Exists(packagesDirectory))
             {
@@ -71,11 +69,11 @@ namespace OpenMod.Bootstrapper
             }
 
             Environment.SetEnvironmentVariable("NUGET_COMMON_APPLICATION_DATA", Path.GetFullPath(packagesDirectory));
-            
-            var nugetPackageManager = new NuGetPackageManager(packagesDirectory) {Logger = logger};
 
-            // these dependencies do not exist on NuGet and create warnings
-            // they are not required
+            var nugetPackageManager = new NuGetPackageManager(packagesDirectory) { Logger = logger };
+            await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
+
+            // these dependencies are not required and cause issues
             nugetPackageManager.IgnoreDependencies(
                 "Microsoft.NETCore.Platforms",
                 "Microsoft.Packaging.Tools",
@@ -83,8 +81,6 @@ namespace OpenMod.Bootstrapper
                 "OpenMod.UnityEngine.Redist",
                 "OpenMod.Unturned.Redist",
                 "System.IO.FileSystem.Watcher");
-
-            // nugetPackageManager.IgnoreDependencies(ignoredDependencies.ToArray());
 
             var hostAssemblies = new List<Assembly>();
             foreach (var packageId in packageIds)
@@ -95,7 +91,7 @@ namespace OpenMod.Bootstrapper
                 IPackageSearchMetadata openModPackage = null;
                 if (packageIdentity == null || shouldAutoUpdate)
                 {
-                    openModPackage = await nugetPackageManager.QueryPackageExactAsync(packageId, null, allowPrereleaseVersions);
+                    openModPackage = await nugetPackageManager.QueryPackageExactAsync(packageId, version: null, allowPrereleaseVersions);
                 }
 
                 if (packageIdentity != null && shouldAutoUpdate)
@@ -131,7 +127,6 @@ namespace OpenMod.Bootstrapper
             return await InitializeRuntimeAsync(nugetPackageManager, hostAssemblies, openModFolder, commandLineArgs);
         }
 
-        
         private Task<IEnumerable<Assembly>> LoadPackageAsync(NuGetPackageManager packageManager, PackageIdentity identity)
         {
             var pkg = packageManager.GetNugetPackageFile(identity);
@@ -150,20 +145,18 @@ namespace OpenMod.Bootstrapper
             SetParameter(parameters, "WorkingDirectory", workingDirectory);
             SetParameter(parameters, "CommandlineArgs", commandlineArgs);
             SetParameter(parameters, "PackageManager", packageManager);
-            
+
             var initMethod = runtimeType.GetMethod("InitAsync", BindingFlags.Instance | BindingFlags.Public);
-            await (Task) initMethod.Invoke(runtime, new[] {  hostAssemblies, parameters, null /* hostBuilderFunc */});
+            await (Task)initMethod.Invoke(runtime, new[] { hostAssemblies, parameters, null /* hostBuilderFunc */});
             return runtime;
         }
 
-        
         private Assembly FindAssemblyInCurrentDomain(string name)
         {
             return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(d => d.GetName().Name.Equals(name)) ??
                    throw new Exception($"Failed to find assembly: {name}");
         }
 
-        
         private void SetParameter(object parametersObject, string name, object value)
         {
             var field = parametersObject.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);

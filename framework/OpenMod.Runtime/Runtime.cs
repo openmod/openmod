@@ -74,7 +74,7 @@ namespace OpenMod.Runtime
         {
             AsyncHelper.RunSync(() => InitAsync(openModAssemblies, parameters, hostBuilderFunc));
         }
-        
+
         public async Task<IHost> InitAsync(
             List<Assembly> openModHostAssemblies,
             RuntimeInitParameters parameters,
@@ -120,21 +120,25 @@ namespace OpenMod.Runtime
 
                 m_Logger.LogInformation($"OpenMod v{Version} is starting...");
 
-                var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
-                var nuGetPackageManager = parameters.PackageManager as NuGetPackageManager ??
-                                          new NuGetPackageManager(packagesDirectory);
+                if (!(parameters.PackageManager is NuGetPackageManager nugetPackageManager))
+                {
+                    var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
+                    nugetPackageManager = new NuGetPackageManager(packagesDirectory);
+                    await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
+                }
+
                 // nuGetPackageManager.ClearCache();
 
-                nuGetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
-                await nuGetPackageManager.RemoveOutdatedPackagesAsync();
-                nuGetPackageManager.InstallAssemblyResolver();
-                nuGetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
+                nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
+                await nugetPackageManager.RemoveOutdatedPackagesAsync();
+                nugetPackageManager.InstallAssemblyResolver();
+                nugetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
 
                 var startupContext = new OpenModStartupContext
                 {
                     Runtime = this,
                     LoggerFactory = m_LoggerFactory,
-                    NuGetPackageManager = nuGetPackageManager,
+                    NuGetPackageManager = nugetPackageManager,
                     DataStore = new Dictionary<string, object>()
                 };
 

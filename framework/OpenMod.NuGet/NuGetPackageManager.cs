@@ -39,15 +39,27 @@ namespace OpenMod.NuGet
         private readonly Dictionary<string, Assembly> m_ResolveCache;
         private readonly Dictionary<string, List<NuGetAssembly>> m_LoadedPackageAssemblies;
         private readonly HashSet<string> m_IgnoredDependendencies;
+        private readonly PackagesDataStore m_PackagesDataStore;
 
         private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new Dictionary<string, List<Assembly>>();
         private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
         private Func<byte[], Assembly> m_AssemblyLoader;
 
-        public NuGetPackageManager(string packagesDirectory)
+        public NuGetPackageManager(string packagesDirectory) : this(packagesDirectory, usePackagesFiles: true)
+        {
+
+        }
+
+        public NuGetPackageManager(string packagesDirectory, bool usePackagesFiles)
         {
             m_AssemblyLoader = Hotloader.LoadAssembly;
+
+            if (usePackagesFiles)
+            {
+                m_PackagesDataStore = new PackagesDataStore(Path.Combine(packagesDirectory, "packages.yaml"));
+                m_PackagesDataStore.EnsureExistsAsync().GetAwaiter().GetResult();
+            }
 
             Logger = new NullLogger();
             PackagesDirectory = packagesDirectory;
@@ -147,6 +159,12 @@ namespace OpenMod.NuGet
             }
 
             await RemoveOutdatedPackagesAsync();
+
+            if (m_PackagesDataStore != null)
+            {
+                await m_PackagesDataStore.AddOrUpdatePackageIdentity(packageIdentity);
+            }
+
             return new NuGetInstallResult(packageIdentity);
         }
 
@@ -644,24 +662,58 @@ namespace OpenMod.NuGet
             return s_VersionRegex.Replace(fullAssemblyName, string.Empty);
         }
 
-        public Task<bool> RemoveAsync(PackageIdentity package)
+        public async Task InstallMissingPackagesAsync(bool updateExisting = true)
         {
-            var installDir = m_PackagePathResolver.GetInstallPath(package);
+            if (m_PackagesDataStore == null)
+            {
+                throw new Exception("InstallMissingPackagesAsync failed: packages.yaml is not enabled.");
+            }
+
+            var packages = await m_PackagesDataStore.GetPackagesAsync();
+            foreach (var package in packages)
+            {
+                if (await IsPackageInstalledAsync(package.Id))
+                {
+                    if (updateExisting)
+                    {
+                        var installedPackage = await GetLatestPackageIdentityAsync(package.Id);
+                        if (package.HasVersion && installedPackage.Version != package.Version)
+                        {
+                            await InstallAsync(package, allowPrereleaseVersions: true);
+                        }
+                    }
+
+                    continue;
+                }
+
+                await InstallAsync(package, allowPrereleaseVersions: true);
+            }
+        }
+
+        public async Task<bool> RemoveAsync(PackageIdentity packageIdentity)
+        {
+            var installDir = m_PackagePathResolver.GetInstallPath(packageIdentity);
             if (installDir == null || !Directory.Exists(installDir))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             try
             {
-                Directory.Delete(installDir, true);
+                Directory.Delete(installDir, recursive: true);
             }
             catch (Exception ex)
             {
                 m_Logger.LogWarning($"Failed to delete directory \"{installDir}\" " + ex.Message);
-                return Task.FromResult(false);
+                return false;
             }
-            return Task.FromResult(true);
+
+            if (m_PackagesDataStore != null)
+            {
+                await m_PackagesDataStore.AddOrUpdatePackageIdentity(packageIdentity);
+            }
+
+            return true;
         }
 
         public void Dispose()
