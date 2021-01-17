@@ -8,7 +8,7 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.10" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.11" />
     <PackageReference Include="OpenMod.UniTask" Version="2019.2.1" />
     <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2019.4.10">
       <IncludeAssets>compile</IncludeAssets>
