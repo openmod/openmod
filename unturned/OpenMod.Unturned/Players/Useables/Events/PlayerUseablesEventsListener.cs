@@ -12,7 +12,6 @@ namespace OpenMod.Unturned.Players.Useables.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -27,10 +26,13 @@ namespace OpenMod.Unturned.Players.Useables.Events
 
         private void OnPerformingAid(Player nativeInstigator, Player nativeTarget, ItemConsumeableAsset asset, ref bool shouldAllow)
         {
-            UnturnedPlayer instigator = GetUnturnedPlayer(nativeInstigator);
-            UnturnedPlayer target = GetUnturnedPlayer(nativeTarget);
+            var instigator = GetUnturnedPlayer(nativeInstigator);
+            var target = GetUnturnedPlayer(nativeTarget);
 
-            UnturnedPlayerPerformingAidEvent @event = new UnturnedPlayerPerformingAidEvent(instigator, target, asset);
+            var @event = new UnturnedPlayerPerformingAidEvent(instigator, target, asset)
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 

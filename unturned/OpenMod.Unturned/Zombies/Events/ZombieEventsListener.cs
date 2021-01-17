@@ -3,11 +3,11 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Players;
 using SDG.Unturned;
 using System;
 using System.Linq;
 using UnityEngine;
+// ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Zombies.Events
 {
@@ -17,7 +17,6 @@ namespace OpenMod.Unturned.Zombies.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -40,13 +39,16 @@ namespace OpenMod.Unturned.Zombies.Events
             OnZombieRevived -= Events_OnZombieRevived;
         }
 
-        private void Events_OnZombieAlertingPlayer(Zombie nativeZombie, ref Player nativePlayer, out bool cancel)
+        private void Events_OnZombieAlertingPlayer(Zombie nativeZombie, ref Player nativePlayer, ref bool cancel)
         {
-            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+            var zombie = new UnturnedZombie(nativeZombie);
 
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedZombieAlertingPlayerEvent @event = new UnturnedZombieAlertingPlayerEvent(zombie, player);
+            var @event = new UnturnedZombieAlertingPlayerEvent(zombie, player)
+            {
+                IsCancelled = cancel
+            };
 
             Emit(@event);
 
@@ -54,11 +56,14 @@ namespace OpenMod.Unturned.Zombies.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnZombieAlertingPosition(Zombie nativeZombie, ref Vector3 position, ref bool isStartling, out bool cancel)
+        private void Events_OnZombieAlertingPosition(Zombie nativeZombie, ref Vector3 position, ref bool isStartling, ref bool cancel)
         {
-            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+            var zombie = new UnturnedZombie(nativeZombie);
 
-            UnturnedZombieAlertingPositionEvent @event = new UnturnedZombieAlertingPositionEvent(zombie, position, isStartling);
+            var @event = new UnturnedZombieAlertingPositionEvent(zombie, position, isStartling)
+            {
+                IsCancelled = cancel
+            };
 
             Emit(@event);
 
@@ -69,22 +74,18 @@ namespace OpenMod.Unturned.Zombies.Events
 
         private void DamageTool_damageZombieRequested(ref DamageZombieParameters parameters, ref bool shouldAllow)
         {
-            UnturnedZombie zombie = new UnturnedZombie(parameters.zombie);
+            var zombie = new UnturnedZombie(parameters.zombie);
             var player = GetUnturnedPlayer(parameters.instigator as Player);
 
-            UnturnedZombieDamagingEvent @event;
-            var damageAmount = (ushort)Math.Min(65535, Math.Floor(parameters.damage * parameters.times));
+            var damageAmount = (ushort)Math.Min(ushort.MaxValue, Math.Floor(parameters.damage * parameters.times));
 
-            if (damageAmount >= zombie.Health)
-            {
-                @event = new UnturnedZombieDyingEvent(zombie, player, damageAmount, parameters.direction,
+            var @event = damageAmount >= zombie.Health
+                ? new UnturnedZombieDyingEvent(zombie, player, damageAmount, parameters.direction,
+                    parameters.ragdollEffect, parameters.zombieStunOverride)
+                : new UnturnedZombieDamagingEvent(zombie, player, damageAmount, parameters.direction,
                     parameters.ragdollEffect, parameters.zombieStunOverride);
-            }
-            else
-            {
-                @event = new UnturnedZombieDamagingEvent(zombie, player, damageAmount, parameters.direction,
-                    parameters.ragdollEffect, parameters.zombieStunOverride);
-            }
+
+            @event.IsCancelled = !shouldAllow;
 
             Emit(@event);
 
@@ -98,36 +99,36 @@ namespace OpenMod.Unturned.Zombies.Events
 
         private void Events_OnZombieDead(Zombie nativeZombie, Vector3 ragdoll, ERagdollEffect ragdollEffect)
         {
-            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+            var zombie = new UnturnedZombie(nativeZombie);
 
-            UnturnedZombieDeadEvent @event = new UnturnedZombieDeadEvent(zombie, ragdoll, ragdollEffect);
+            var @event = new UnturnedZombieDeadEvent(zombie, ragdoll, ragdollEffect);
 
             Emit(@event);
         }
 
         private void Events_OnZombieAdded(Zombie nativeZombie)
         {
-            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+            var zombie = new UnturnedZombie(nativeZombie);
 
-            UnturnedZombieAddedEvent @event = new UnturnedZombieAddedEvent(zombie);
+            var @event = new UnturnedZombieAddedEvent(zombie);
 
             Emit(@event);
         }
 
         private void Events_OnZombieRevived(Zombie nativeZombie)
         {
-            UnturnedZombie zombie = new UnturnedZombie(nativeZombie);
+            var zombie = new UnturnedZombie(nativeZombie);
 
-            UnturnedZombieRevivedEvent @event = new UnturnedZombieRevivedEvent(zombie);
+            var @event = new UnturnedZombieRevivedEvent(zombie);
 
             Emit(@event);
         }
 
-        private delegate void ZombieAlertingPlayer(Zombie nativeZombie, ref Player player, out bool cancel);
+        private delegate void ZombieAlertingPlayer(Zombie nativeZombie, ref Player player, ref bool cancel);
         private static event ZombieAlertingPlayer OnZombieAlertingPlayer;
 
         private delegate void ZombieAlertingPosition(Zombie nativeZombie, ref Vector3 position, ref bool isStartling,
-            out bool cancel);
+            ref bool cancel);
         private static event ZombieAlertingPosition OnZombieAlertingPosition;
 
         private delegate void ZombieSpawned(Zombie nativeZombie);
@@ -146,9 +147,9 @@ namespace OpenMod.Unturned.Zombies.Events
             {
                 if (__instance.isDead || newPlayer == ___player) return true;
 
-                bool cancel = false;
+                var cancel = false;
 
-                OnZombieAlertingPlayer?.Invoke(__instance, ref newPlayer, out cancel);
+                OnZombieAlertingPlayer?.Invoke(__instance, ref newPlayer, ref cancel);
 
                 return !cancel;
             }
@@ -160,9 +161,9 @@ namespace OpenMod.Unturned.Zombies.Events
             {
                 if (__instance.isDead || ___player != null) return true;
 
-                bool cancel = false;
+                var cancel = false;
 
-                OnZombieAlertingPosition?.Invoke(__instance, ref newPosition, ref isStartling, out cancel);
+                OnZombieAlertingPosition?.Invoke(__instance, ref newPosition, ref isStartling, ref cancel);
 
                 return !cancel;
             }
@@ -185,7 +186,7 @@ namespace OpenMod.Unturned.Zombies.Events
             [HarmonyPostfix]
             private static void AddZombie(byte bound)
             {
-                Zombie zombie = ZombieManager.regions[bound].zombies.LastOrDefault();
+                var zombie = ZombieManager.regions[bound].zombies.LastOrDefault();
 
                 if (zombie != null)
                 {

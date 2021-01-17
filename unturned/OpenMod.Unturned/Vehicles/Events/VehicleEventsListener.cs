@@ -4,10 +4,11 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Players;
 using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
+// ReSharper disable DelegateSubtraction
+// ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Vehicles.Events
 {
@@ -17,7 +18,6 @@ namespace OpenMod.Unturned.Vehicles.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -66,9 +66,12 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerEnteringVehicleEvent @event = new UnturnedPlayerEnteringVehicleEvent(player, new UnturnedVehicle(vehicle));
+            var @event = new UnturnedPlayerEnteringVehicleEvent(player, new UnturnedVehicle(vehicle))
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -77,9 +80,13 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void OnExitVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow, ref Vector3 pendingLocation, ref float pendingYaw)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerExitingVehicleEvent @event = new UnturnedPlayerExitingVehicleEvent(player, new UnturnedVehicle(vehicle), pendingLocation.ToSystemVector(), pendingYaw);
+            var @event = new UnturnedPlayerExitingVehicleEvent(player, new UnturnedVehicle(vehicle),
+                pendingLocation.ToSystemVector(), pendingYaw)
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -90,9 +97,13 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void OnSwapSeatRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow, byte fromSeatIndex, ref byte toSeatIndex)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerSwappingSeatEvent @event = new UnturnedPlayerSwappingSeatEvent(player, new UnturnedVehicle(vehicle), fromSeatIndex, toSeatIndex);
+            var @event =
+                new UnturnedPlayerSwappingSeatEvent(player, new UnturnedVehicle(vehicle), fromSeatIndex, toSeatIndex)
+                {
+                    IsCancelled = !shouldAllow
+                };
 
             Emit(@event);
 
@@ -102,9 +113,13 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void OnVehicleCarjacked(InteractableVehicle vehicle, Player instigatingPlayer, ref bool allow, ref Vector3 force, ref Vector3 torque)
         {
-            UnturnedPlayer instigator = GetUnturnedPlayer(instigatingPlayer);
+            var instigator = GetUnturnedPlayer(instigatingPlayer);
 
-            UnturnedVehicleCarjackingEvent @event = new UnturnedVehicleCarjackingEvent(new UnturnedVehicle(vehicle), instigator, force.ToSystemVector(), torque.ToSystemVector());
+            var @event = new UnturnedVehicleCarjackingEvent(new UnturnedVehicle(vehicle), instigator,
+                force.ToSystemVector(), torque.ToSystemVector())
+            {
+                IsCancelled = !allow
+            };
 
             Emit(@event);
 
@@ -115,9 +130,9 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void OnVehicleLockpicked(InteractableVehicle vehicle, Player instigatingPlayer, ref bool allow)
         {
-            UnturnedPlayer instigator = GetUnturnedPlayer(instigatingPlayer);
+            var instigator = GetUnturnedPlayer(instigatingPlayer);
 
-            UnturnedVehicleLockpickingEvent @event = new UnturnedVehicleLockpickingEvent(new UnturnedVehicle(vehicle), instigator);
+            var @event = new UnturnedVehicleLockpickingEvent(new UnturnedVehicle(vehicle), instigator);
 
             Emit(@event);
 
@@ -126,9 +141,12 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void OnSiphonVehicleRequested(InteractableVehicle vehicle, Player instigatingPlayer, ref bool shouldAllow, ref ushort desiredAmount)
         {
-            UnturnedPlayer instigator = GetUnturnedPlayer(instigatingPlayer);
+            var instigator = GetUnturnedPlayer(instigatingPlayer);
 
-            UnturnedVehicleSiphoningEvent @event = new UnturnedVehicleSiphoningEvent(new UnturnedVehicle(vehicle), instigator, desiredAmount);
+            var @event = new UnturnedVehicleSiphoningEvent(new UnturnedVehicle(vehicle), instigator, desiredAmount)
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -136,9 +154,13 @@ namespace OpenMod.Unturned.Vehicles.Events
             desiredAmount = @event.DesiredAmount;
         }
 
-        private void OnRepairVehicleRequested(CSteamID instigatorSteamID, InteractableVehicle vehicle, ref ushort pendingTotalHealing, ref bool shouldAllow)
+        private void OnRepairVehicleRequested(CSteamID instigatorSteamId, InteractableVehicle vehicle, ref ushort pendingTotalHealing, ref bool shouldAllow)
         {
-            UnturnedVehicleRepairingEvent @event = new UnturnedVehicleRepairingEvent(new UnturnedVehicle(vehicle), instigatorSteamID, pendingTotalHealing);
+            var @event =
+                new UnturnedVehicleRepairingEvent(new UnturnedVehicle(vehicle), instigatorSteamId, pendingTotalHealing)
+                {
+                    IsCancelled = !shouldAllow
+                };
 
             Emit(@event);
 
@@ -146,9 +168,13 @@ namespace OpenMod.Unturned.Vehicles.Events
             shouldAllow = !@event.IsCancelled;
         }
 
-        private void OnDamageVehicleRequested(CSteamID instigatorSteamID, InteractableVehicle vehicle, ref ushort pendingTotalDamage, ref bool canRepair, ref bool shouldAllow, EDamageOrigin damageOrigin)
+        private void OnDamageVehicleRequested(CSteamID instigatorSteamId, InteractableVehicle vehicle, ref ushort pendingTotalDamage, ref bool canRepair, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
-            UnturnedVehicleDamagingEvent @event = new UnturnedVehicleDamagingEvent(new UnturnedVehicle(vehicle), instigatorSteamID, pendingTotalDamage, damageOrigin, canRepair);
+            var @event = new UnturnedVehicleDamagingEvent(new UnturnedVehicle(vehicle), instigatorSteamId,
+                pendingTotalDamage, damageOrigin, canRepair)
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -157,18 +183,25 @@ namespace OpenMod.Unturned.Vehicles.Events
             shouldAllow = !@event.IsCancelled;
         }
 
-        private void OnDamageTireRequested(CSteamID instigatorSteamID, InteractableVehicle vehicle, int tireIndex, ref bool shouldAllow, EDamageOrigin damageOrigin)
+        private void OnDamageTireRequested(CSteamID instigatorSteamId, InteractableVehicle vehicle, int tireIndex, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
-            UnturnedVehicleDamagingTireEvent @event = new UnturnedVehicleDamagingTireEvent(new UnturnedVehicle(vehicle), instigatorSteamID, tireIndex, damageOrigin);
+            var @event = new UnturnedVehicleDamagingTireEvent(new UnturnedVehicle(vehicle), instigatorSteamId,
+                tireIndex, damageOrigin)
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
             shouldAllow = !@event.IsCancelled;
         }
 
-        private void Events_OnVehicleExploding(InteractableVehicle vehicle, out bool cancel)
+        private void Events_OnVehicleExploding(InteractableVehicle vehicle, ref bool cancel)
         {
-            UnturnedVehicleExplodingEvent @event = new UnturnedVehicleExplodingEvent(new UnturnedVehicle(vehicle));
+            var @event = new UnturnedVehicleExplodingEvent(new UnturnedVehicle(vehicle))
+            {
+                IsCancelled = cancel
+            };
 
             Emit(@event);
 
@@ -177,71 +210,75 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void Events_OnVehicleSpawned(InteractableVehicle vehicle)
         {
-            UnturnedVehicleSpawnedEvent @event = new UnturnedVehicleSpawnedEvent(new UnturnedVehicle(vehicle));
+            var @event = new UnturnedVehicleSpawnedEvent(new UnturnedVehicle(vehicle));
 
             Emit(@event);
         }
 
         private void Events_OnVehicleEntered(InteractableVehicle vehicle, Player nativePlayer)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerEnteredVehicleEvent @event =
-                new UnturnedPlayerEnteredVehicleEvent(player, new UnturnedVehicle(vehicle));
+            var @event = new UnturnedPlayerEnteredVehicleEvent(player, new UnturnedVehicle(vehicle));
 
             Emit(@event);
         }
 
         private void Events_OnVehicleExited(InteractableVehicle vehicle, Player nativePlayer)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerExitedVehicleEvent @event =
-                new UnturnedPlayerExitedVehicleEvent(player, new UnturnedVehicle(vehicle));
+            var @event = new UnturnedPlayerExitedVehicleEvent(player, new UnturnedVehicle(vehicle));
 
             Emit(@event);
         }
 
         private void Events_OnVehicleSwapped(InteractableVehicle vehicle, Player nativePlayer, byte fromSeatIndex, byte toSeatIndex)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerSwappedSeatEvent @event =
+            var @event =
                 new UnturnedPlayerSwappedSeatEvent(player, new UnturnedVehicle(vehicle), fromSeatIndex, toSeatIndex);
 
             Emit(@event);
         }
 
-        private void Events_OnVehicleStealingBattery(InteractableVehicle vehicle, Player nativePlayer, out bool cancel)
+        private void Events_OnVehicleStealingBattery(InteractableVehicle vehicle, Player nativePlayer, ref bool cancel)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedVehicleStealingBatteryEvent @event =
-                new UnturnedVehicleStealingBatteryEvent(player, new UnturnedVehicle(vehicle));
+            var @event = new UnturnedVehicleStealingBatteryEvent(player, new UnturnedVehicle(vehicle))
+            {
+                IsCancelled = cancel
+            };
 
             Emit(@event);
 
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnVehicleReplacingBattery(InteractableVehicle vehicle, Player nativePlayer, byte amount, out bool cancel)
+        private void Events_OnVehicleReplacingBattery(InteractableVehicle vehicle, Player nativePlayer, byte amount, ref bool cancel)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedVehicleReplacingBatteryEvent @event =
-                new UnturnedVehicleReplacingBatteryEvent(player, new UnturnedVehicle(vehicle), amount);
+            var @event = new UnturnedVehicleReplacingBatteryEvent(player, new UnturnedVehicle(vehicle), amount)
+            {
+                IsCancelled = cancel
+            };
 
             Emit(@event);
 
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnVehicleLockUpdating(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, bool isLocked, out bool cancel)
+        private void Events_OnVehicleLockUpdating(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, bool isLocked, ref bool cancel)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedVehicleLockUpdatingEvent @event =
-                new UnturnedVehicleLockUpdatingEvent(player, new UnturnedVehicle(vehicle), group, isLocked);
+            var @event = new UnturnedVehicleLockUpdatingEvent(player, new UnturnedVehicle(vehicle), group, isLocked)
+            {
+                IsCancelled = cancel
+            };
 
             Emit(@event);
 
@@ -250,15 +287,14 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         private void Events_OnVehicleLockUpdated(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, bool isLocked)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedVehicleLockUpdatedEvent @event =
-                new UnturnedVehicleLockUpdatedEvent(player, new UnturnedVehicle(vehicle), group, isLocked);
+            var @event = new UnturnedVehicleLockUpdatedEvent(player, new UnturnedVehicle(vehicle), group, isLocked);
 
             Emit(@event);
         }
 
-        private delegate void VehicleExploding(InteractableVehicle vehicle, out bool cancel);
+        private delegate void VehicleExploding(InteractableVehicle vehicle, ref bool cancel);
         private static event VehicleExploding OnVehicleExploding;
 
         private delegate void VehicleSpawned(InteractableVehicle vehicle);
@@ -273,13 +309,13 @@ namespace OpenMod.Unturned.Vehicles.Events
         private delegate void VehicleSwapped(InteractableVehicle vehicle, Player player, byte fromSeatIndex, byte toSeatIndex);
         private static event VehicleSwapped OnVehicleSwapped;
 
-        private delegate void VehicleStealBattery(InteractableVehicle vehicle, Player player, out bool cancel);
+        private delegate void VehicleStealBattery(InteractableVehicle vehicle, Player player, ref bool cancel);
         private static event VehicleStealBattery OnVehicleStealBattery;
 
-        private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, byte amount, out bool cancel);
+        private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, byte amount, ref bool cancel);
         private static event VehicleReplacingBattery OnVehicleReplacingBattery;
 
-        private delegate void VehicleLockUpdating(InteractableVehicle vehicle, Player player, CSteamID group, bool isLocked, out bool cancel);
+        private delegate void VehicleLockUpdating(InteractableVehicle vehicle, Player player, CSteamID group, bool isLocked, ref bool cancel);
         private static event VehicleLockUpdating OnVehicleLockUpdating;
 
         private delegate void VehicleLockUpdated(InteractableVehicle vehicle, Player player, CSteamID group, bool isLocked);
@@ -292,9 +328,9 @@ namespace OpenMod.Unturned.Vehicles.Events
             [HarmonyPrefix]
             private static bool Explode(InteractableVehicle __instance)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                OnVehicleExploding?.Invoke(__instance, out cancel);
+                OnVehicleExploding?.Invoke(__instance, ref cancel);
 
                 return !cancel;
             }
@@ -310,7 +346,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             [HarmonyPostfix]
             private static void AddPlayer(InteractableVehicle __instance, CSteamID steamID)
             {
-                Player player = PlayerTool.getPlayer(steamID);
+                var player = PlayerTool.getPlayer(steamID);
 
                 if (player == null) return;
 
@@ -325,7 +361,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
                 if (seatIndex < __instance.passengers?.Length)
                 {
-                    Passenger passenger = __instance.passengers[seatIndex];
+                    var passenger = __instance.passengers[seatIndex];
 
                     if (passenger?.player?.player != null)
                     {
@@ -350,9 +386,9 @@ namespace OpenMod.Unturned.Vehicles.Events
             {
                 if (fromSeatIndex < __instance.passengers?.Length && toSeatIndex < __instance.passengers?.Length)
                 {
-                    Passenger passenger = __instance.passengers[toSeatIndex];
+                    var passenger = __instance.passengers[toSeatIndex];
 
-                    Player player = passenger?.player?.player;
+                    var player = passenger?.player?.player;
 
                     if (player != null)
                     {
@@ -365,9 +401,9 @@ namespace OpenMod.Unturned.Vehicles.Events
             [HarmonyPrefix]
             private static bool StealBattery(InteractableVehicle __instance, Player player)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                OnVehicleStealBattery?.Invoke(__instance, player, out cancel);
+                OnVehicleStealBattery?.Invoke(__instance, player, ref cancel);
 
                 return !cancel;
             }
@@ -376,9 +412,9 @@ namespace OpenMod.Unturned.Vehicles.Events
             [HarmonyPrefix]
             private static bool ReplaceBattery(InteractableVehicle __instance, Player player, byte quality)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                OnVehicleReplacingBattery?.Invoke(__instance, player, quality, out cancel);
+                OnVehicleReplacingBattery?.Invoke(__instance, player, quality, ref cancel);
 
                 return !cancel;
             }
@@ -387,30 +423,36 @@ namespace OpenMod.Unturned.Vehicles.Events
             [HarmonyPrefix]
             private static bool PreVehicleLock(VehicleManager __instance, CSteamID steamID)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                Player player = PlayerTool.getPlayer(steamID);
+                var player = PlayerTool.getPlayer(steamID);
+
                 if (player == null)
                 {
                     return false;
                 }
-                InteractableVehicle vehicle = player.movement.getVehicle();
+
+                var vehicle = player.movement.getVehicle();
+
                 if (vehicle == null || vehicle.asset == null)
                 {
                     return false;
                 }
+
                 if (!vehicle.checkDriver(steamID))
                 {
                     return false;
                 }
-                bool isLocked = vehicle.isLocked;
-                bool flag = vehicle.asset.canBeLocked && !isLocked;
+
+                var isLocked = vehicle.isLocked;
+                var flag = vehicle.asset.canBeLocked && !isLocked;
+
                 if (isLocked == flag)
                 {
                     return false;
                 }
 
-                OnVehicleLockUpdating?.Invoke(vehicle, player, player.quests.groupID, flag, out cancel);
+                OnVehicleLockUpdating?.Invoke(vehicle, player, player.quests.groupID, flag, ref cancel);
 
                 return !cancel;
             }
@@ -419,11 +461,13 @@ namespace OpenMod.Unturned.Vehicles.Events
             [HarmonyPostfix]
             private static void PostVehicleLock(VehicleManager __instance, uint instanceID, CSteamID owner, CSteamID group, bool locked)
             {
-                InteractableVehicle vehicle = VehicleManager.findVehicleByNetInstanceID(instanceID);
+                var vehicle = VehicleManager.findVehicleByNetInstanceID(instanceID);
+
                 if (vehicle is null)
                     return;
 
-                Player nativePlayer = PlayerTool.getPlayer(owner);
+                var nativePlayer = PlayerTool.getPlayer(owner);
+
                 if (nativePlayer is null)
                     return;
 

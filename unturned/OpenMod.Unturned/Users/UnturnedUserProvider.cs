@@ -202,8 +202,14 @@ namespace OpenMod.Unturned.Users
                 m_PendingUsers.Add(pendingUser);
 
                 var userConnectingEvent = isFirstConnect
-                    ? new UnturnedUserFirstConnectingEvent(pendingUser, isPendingValid, rejectExplanation)
-                    : new UnturnedUserConnectingEvent(pendingUser, isPendingValid, rejectExplanation);
+                    ? new UnturnedUserFirstConnectingEvent(pendingUser)
+                    : new UnturnedUserConnectingEvent(pendingUser);
+
+                userConnectingEvent.IsCancelled = !isPendingValid;
+
+                if (rejectExplanation != null)
+                    await userConnectingEvent.RejectAsync(rejectExplanation);
+
                 await m_EventBus.EmitAsync(m_Runtime, this, userConnectingEvent);
 
                 if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))
