@@ -172,11 +172,6 @@ namespace OpenMod.Unturned.Users
                 return;
             }
 
-            if (!isValid)
-            {
-                return;
-            }
-
             //todo check if it is working, if not this should be patched
             var isPendingValid = isValid;
             var rejectExplanation = explanation;
@@ -207,8 +202,8 @@ namespace OpenMod.Unturned.Users
                 m_PendingUsers.Add(pendingUser);
 
                 var userConnectingEvent = isFirstConnect
-                    ? new UnturnedUserFirstConnectingEvent(pendingUser)
-                    : new UnturnedUserConnectingEvent(pendingUser);
+                    ? new UnturnedUserFirstConnectingEvent(pendingUser, isPendingValid, rejectExplanation)
+                    : new UnturnedUserConnectingEvent(pendingUser, isPendingValid, rejectExplanation);
                 await m_EventBus.EmitAsync(m_Runtime, this, userConnectingEvent);
 
                 if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))

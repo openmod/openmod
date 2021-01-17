@@ -6,8 +6,10 @@ namespace OpenMod.Unturned.Users.Events
 {
     public class UnturnedUserConnectingEvent : UnturnedPendingUserEvent, IUserConnectingEvent
     {
-        public UnturnedUserConnectingEvent(UnturnedPendingUser user) : base(user)
+        public UnturnedUserConnectingEvent(UnturnedPendingUser user, bool isCancelled, string rejectionReason) : base(user)
         {
+            IsCancelled = isCancelled;
+            RejectionReason = rejectionReason;
         }
 
         public bool IsCancelled { get; set; }
