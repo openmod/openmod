@@ -32,3 +32,5 @@ Serilog:
       Microsoft.EntityFrameworkCore.Infrastructure: Warning
       Microsoft.EntityFrameworkCore.Database.Connection: Warning
       Microsoft.EntityFrameworkCore.Query: Warning
+      # In case of verbose logging we still might want to have the event bus disabled as it spams a lot of logs
+      OpenMod.Core.Eventing.EventBus: Information
