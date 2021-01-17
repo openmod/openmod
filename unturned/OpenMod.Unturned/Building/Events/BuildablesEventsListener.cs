@@ -365,13 +365,14 @@ namespace OpenMod.Unturned.Building.Events
             }
 
 
-            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.askTransformBarricade))]
+            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.tellTransformBarricade))]
             [HarmonyPostfix]
-            private static void AskTransformBarricade(byte x, byte y, ushort plant, uint instanceID)
+            private static void TellTransformBarricade(BarricadeManager __instance, CSteamID steamID, byte x, byte y, ushort plant, uint instanceID)
             {
                 ThreadUtil.assertIsGameThread();
 
-                if (!BarricadeManager.tryGetRegion(x, y, plant, out var region)) return;
+                if (!__instance.channel.checkServer(steamID) ||
+                    !BarricadeManager.tryGetRegion(x, y, plant, out var region)) return;
 
                 var index = region.barricades.FindIndex(k => k.instanceID == instanceID);
 
@@ -383,14 +384,14 @@ namespace OpenMod.Unturned.Building.Events
                 OnBarricadeTransformed?.Invoke(data, drop);
             }
 
-            [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.askTransformStructure))]
+            [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.tellTransformStructure))]
             [HarmonyPostfix]
-            private static void AskTransformStructure(byte x, byte y, uint instanceID)
+            private static void TellTransformStructure(StructureManager __instance, CSteamID steamID, byte x, byte y, uint instanceID)
             {
                 ThreadUtil.assertIsGameThread();
 
-                if (!StructureManager.tryGetRegion(x, y, out var region)) 
-                    return;
+                if (!__instance.channel.checkServer(steamID) ||
+                    !StructureManager.tryGetRegion(x, y, out var region)) return;
 
                 var index = region.structures.FindIndex(k => k.instanceID == instanceID);
 
