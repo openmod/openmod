@@ -55,6 +55,12 @@ namespace OpenMod.NuGet
         {
             m_AssemblyLoader = Hotloader.LoadAssembly;
 
+            PackagesDirectory = packagesDirectory;
+            if (!Directory.Exists(packagesDirectory))
+            {
+                Directory.CreateDirectory(packagesDirectory);
+            }
+
             if (usePackagesFiles)
             {
                 m_PackagesDataStore = new PackagesDataStore(Path.Combine(packagesDirectory, "packages.yaml"));
@@ -62,16 +68,11 @@ namespace OpenMod.NuGet
             }
 
             Logger = new NullLogger();
-            PackagesDirectory = packagesDirectory;
             m_Providers = new List<Lazy<INuGetResourceProvider>>();
             m_Providers.AddRange(Repository.Provider.GetCoreV3()); // Add v3 API support
 
             const string nugetFile = "NuGet.Config";
 
-            if (!Directory.Exists(packagesDirectory))
-            {
-                Directory.CreateDirectory(packagesDirectory);
-            }
 
             var nugetConfig = Path.Combine(packagesDirectory, nugetFile);
             if (!File.Exists(nugetConfig))
@@ -686,6 +687,7 @@ namespace OpenMod.NuGet
                     continue;
                 }
 
+                Logger.LogInformation($"Installing dependency: {package.Id}@{package.Version?.OriginalVersion ?? "latest"}");
                 await InstallAsync(package, allowPrereleaseVersions: true);
             }
         }

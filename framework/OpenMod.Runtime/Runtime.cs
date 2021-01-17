@@ -127,8 +127,6 @@ namespace OpenMod.Runtime
                     await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
                 }
 
-                // nuGetPackageManager.ClearCache();
-
                 nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
                 await nugetPackageManager.RemoveOutdatedPackagesAsync();
                 nugetPackageManager.InstallAssemblyResolver();
