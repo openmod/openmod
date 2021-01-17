@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
 
 namespace OpenMod.Core.Plugins
 {
@@ -110,6 +111,9 @@ namespace OpenMod.Core.Plugins
                 try
                 {
                     var serviceProvider = m_LifetimeScope.Resolve<IServiceProvider>();
+                    IConfigurationRoot configuration = null;
+                    IChangeToken configurationReloadToken = null;
+
                     var lifetimeScope = m_LifetimeScope.BeginLifetimeScope(containerBuilder =>
                     {
                         var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
@@ -122,9 +126,11 @@ namespace OpenMod.Core.Plugins
                                 .AddYamlFile("config.yaml", optional: true, reloadOnChange: true);
                         }
 
-                        var configuration = configurationBuilder
+                        configuration = configurationBuilder
                             .AddEnvironmentVariables(pluginMetadata.Id.Replace(".", "_") + "_")
                             .Build();
+
+                        configurationReloadToken = configuration.GetReloadToken();
 
                         containerBuilder.Register(context => configuration)
                             .As<IConfiguration>()
@@ -201,6 +207,19 @@ namespace OpenMod.Core.Plugins
                     });
 
                     pluginInstance = (IOpenModPlugin)lifetimeScope.Resolve(pluginType);
+
+                    var pluginLoggerType = typeof(ILogger<>).MakeGenericType(pluginType);
+                    var pluginLogger = (ILogger)pluginInstance.LifetimeScope.Resolve(pluginLoggerType);
+
+                    configurationReloadToken?.RegisterChangeCallback(_ =>
+                    {
+                        AsyncHelper.Schedule($"Configuration changed event for {pluginMetadata.Id}", () =>
+                        {
+                            pluginLogger.LogInformation($"Configuration updated for plugin: {pluginMetadata.Id}");
+                            return m_EventBus.EmitAsync(m_Runtime, this, new PluginConfigurationChangedEvent(pluginInstance, configuration));
+                        });
+                    }, null);
+
                     var pluginActivateEvent = new PluginActivatingEvent(pluginInstance);
                     await m_EventBus.EmitAsync(m_Runtime, this, pluginActivateEvent);
 
