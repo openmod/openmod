@@ -128,7 +128,7 @@ namespace OpenMod.Core.Commands
             }
 
             await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
-            m_Logger.LogDebug($"InvalidateAsync: Loaded {commands.Count} commands.");
+            m_Logger.LogInformation($"Loaded {commands.Count} commands.");
         }
 
         public async Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync()

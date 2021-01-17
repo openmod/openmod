@@ -47,10 +47,13 @@ namespace OpenMod.Core.Persistence
 
             m_Serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithTypeConverter(new YamlNullableEnumTypeConverter())
                 .Build();
 
             m_Deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
+                .WithTypeConverter(new YamlNullableEnumTypeConverter())
                 .Build();
 
             m_ChangeListeners = new List<KeyValuePair<IOpenModComponent, Action>>();
