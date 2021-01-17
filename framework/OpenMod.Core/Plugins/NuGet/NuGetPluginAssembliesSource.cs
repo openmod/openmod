@@ -27,7 +27,7 @@ namespace OpenMod.Core.Plugins.NuGet
             var assemblies = new List<Assembly>();
 
             foreach (var nupkgFile in Directory.GetFiles(m_NuGetPackageManager.PackagesDirectory, "*.nupkg",
-                SearchOption.AllDirectories))
+                SearchOption.TopDirectoryOnly))
             {
                 try
                 {

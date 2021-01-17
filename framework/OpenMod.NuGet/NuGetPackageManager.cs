@@ -687,7 +687,7 @@ namespace OpenMod.NuGet
                     continue;
                 }
 
-                Logger.LogInformation($"Installing dependency: {package.Id}@{package.Version?.OriginalVersion ?? "latest"}");
+                Logger.LogInformation($"Installing package: {package.Id}@{package.Version?.OriginalVersion ?? "latest"}");
                 await InstallAsync(package, allowPrereleaseVersions: true);
             }
         }

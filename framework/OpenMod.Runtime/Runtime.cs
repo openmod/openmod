@@ -20,6 +20,7 @@ using OpenMod.API.Persistence;
 using OpenMod.Common.Hotloading;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Permissions;
+using OpenMod.Core.Persistence;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 using Semver;
@@ -120,14 +121,20 @@ namespace OpenMod.Runtime
 
                 m_Logger.LogInformation($"OpenMod v{Version} is starting...");
 
+                var installMissingPackages = false;
                 if (!(parameters.PackageManager is NuGetPackageManager nugetPackageManager))
                 {
                     var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
-                    nugetPackageManager = new NuGetPackageManager(packagesDirectory);
-                    await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
-                }
+                    nugetPackageManager = new NuGetPackageManager(packagesDirectory)
+                    {
+                        Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"))
+                    };
 
+                    installMissingPackages = true;
+                }
+                
                 nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
+
                 await nugetPackageManager.RemoveOutdatedPackagesAsync();
                 nugetPackageManager.InstallAssemblyResolver();
                 nugetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
@@ -153,7 +160,8 @@ namespace OpenMod.Runtime
                 {
                     var yaml = File.ReadAllText(configFile);
                     var deserializer = new DeserializerBuilder()
-                        .WithNamingConvention(new CamelCaseNamingConvention())
+                        .WithTypeConverter(new YamlNullableEnumTypeConverter())
+                        .WithNamingConvention(CamelCaseNamingConvention.Instance)
                         .Build();
 
                     var config = deserializer.Deserialize<Dictionary<string, object>>(yaml);
@@ -177,6 +185,11 @@ namespace OpenMod.Runtime
                     }
 
                     Hotloader.Enabled = hotReloadingEnabled;
+                }
+
+                if (installMissingPackages)
+                {
+                    await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
                 }
 
                 await startup.LoadPluginAssembliesAsync();
