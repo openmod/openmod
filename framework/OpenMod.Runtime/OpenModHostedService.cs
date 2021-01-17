@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -6,6 +7,7 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
+using OpenMod.Core.Helpers;
 using OpenMod.Runtime.Events;
 using SmartFormat;
 
@@ -40,7 +42,7 @@ namespace OpenMod.Runtime
             m_PluginActivator = pluginActivator;
             m_EventBus = eventBus;
         }
- 
+
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await m_PermissionChecker.InitAsync();
@@ -62,7 +64,7 @@ namespace OpenMod.Runtime
 
             m_Logger.LogInformation($"> {i} plugins loaded.");
 
-            await m_EventBus.EmitAsync(m_Host, this, new OpenModInitializedEvent(m_Host));
+            AsyncHelper.Schedule("OpenMod initialize event", () => m_EventBus.EmitAsync(m_Host, this, new OpenModInitializedEvent(m_Host)));
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
