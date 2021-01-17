@@ -3,6 +3,7 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+// ReSharper disable DelegateSubtraction
 
 namespace OpenMod.Unturned.Players.Crafting.Events
 {
@@ -12,7 +13,6 @@ namespace OpenMod.Unturned.Players.Crafting.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -27,9 +27,12 @@ namespace OpenMod.Unturned.Players.Crafting.Events
 
         private void OnCraftBlueprintRequested(PlayerCrafting crafting, ref ushort itemId, ref byte blueprintIndex, ref bool shouldAllow)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(crafting.player);
+            var player = GetUnturnedPlayer(crafting.player);
 
-            UnturnedPlayerCraftingEvent @event = new UnturnedPlayerCraftingEvent(player, itemId, blueprintIndex);
+            var @event = new UnturnedPlayerCraftingEvent(player, itemId, blueprintIndex)
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 

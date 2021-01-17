@@ -4,6 +4,7 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+// ReSharper disable DelegateSubtraction
 
 namespace OpenMod.Unturned.Players.Connections.Events
 {
@@ -13,7 +14,6 @@ namespace OpenMod.Unturned.Players.Connections.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()

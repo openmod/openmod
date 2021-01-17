@@ -5,6 +5,7 @@ using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Items;
 using SDG.Unturned;
+// ReSharper disable DelegateSubtraction
 
 namespace OpenMod.Unturned.Players.Clothing.Events
 {
@@ -14,7 +15,6 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -52,7 +52,6 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         public override void UnsubscribePlayer(Player player)
         {
-            // ReSharper disable DelegateSubtraction
             player.clothing.onBackpackUpdated -= (a, b, c) => OnBackpackUpdated(player, a, b, c);
             player.clothing.onGlassesUpdated -= (a, b, c) => OnGlassesUpdated(player, a, b, c);
             player.clothing.onHatUpdated -= (a, b, c) => OnHatUpdated(player, a, b, c);
@@ -60,38 +59,39 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             player.clothing.onPantsUpdated -= (a, b, c) => OnPantsUpdated(player, a, b, c);
             player.clothing.onShirtUpdated -= (a, b, c) => OnShirtUpdated(player, a, b, c);
             player.clothing.onVestUpdated -= (a, b, c) => OnVestUpdated(player, a, b, c);
-            // ReSharper restore DelegateSubtraction
         }
 
-        private void Events_OnWearBackpack(Player nativePlayer, ushort id, byte quality, byte[] state, out bool cancel)
+        private void Events_OnWearBackpack(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             ICancellableEvent @event;
 
             if (id == 0)
             {
-                PlayerClothing c = nativePlayer.clothing;
+                var c = nativePlayer.clothing;
 
-                Item item = new Item(c.backpack, 1, c.backpackQuality, c.backpackState);
+                var item = new Item(c.backpack, 1, c.backpackQuality, c.backpackState);
 
                 @event = new UnturnedPlayerClothingUnequippingEvent(player, new UnturnedItem(item), ClothingType.Backpack);
             }
             else
             {
-                Item item = new Item(id, 1, quality, state);
+                var item = new Item(id, 1, quality, state);
 
                 @event = new UnturnedPlayerClothingEquippingEvent(player, new UnturnedItem(item), ClothingType.Backpack);
             }
+
+            @event.IsCancelled = cancel;
 
             Emit(@event);
 
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearGlasses(Player nativePlayer, ushort id, byte quality, byte[] state, out bool cancel)
+        private void Events_OnWearGlasses(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             ICancellableEvent @event;
 
@@ -110,14 +110,16 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 @event = new UnturnedPlayerClothingEquippingEvent(player, new UnturnedItem(item), ClothingType.Glasses);
             }
 
+            @event.IsCancelled = cancel;
+
             Emit(@event);
 
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearHat(Player nativePlayer, ushort id, byte quality, byte[] state, out bool cancel)
+        private void Events_OnWearHat(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             ICancellableEvent @event;
 
@@ -136,14 +138,16 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 @event = new UnturnedPlayerClothingEquippingEvent(player, new UnturnedItem(item), ClothingType.Hat);
             }
 
+            @event.IsCancelled = cancel;
+
             Emit(@event);
 
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearMask(Player nativePlayer, ushort id, byte quality, byte[] state, out bool cancel)
+        private void Events_OnWearMask(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             ICancellableEvent @event;
 
@@ -162,14 +166,16 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 @event = new UnturnedPlayerClothingEquippingEvent(player, new UnturnedItem(item), ClothingType.Mask);
             }
 
+            @event.IsCancelled = cancel;
+
             Emit(@event);
 
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearPants(Player nativePlayer, ushort id, byte quality, byte[] state, out bool cancel)
+        private void Events_OnWearPants(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             ICancellableEvent @event;
 
@@ -188,14 +194,16 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 @event = new UnturnedPlayerClothingEquippingEvent(player, new UnturnedItem(item), ClothingType.Pants);
             }
 
+            @event.IsCancelled = cancel;
+
             Emit(@event);
 
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearShirt(Player nativePlayer, ushort id, byte quality, byte[] state, out bool cancel)
+        private void Events_OnWearShirt(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             ICancellableEvent @event;
 
@@ -214,14 +222,16 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 @event = new UnturnedPlayerClothingEquippingEvent(player, new UnturnedItem(item), ClothingType.Shirt);
             }
 
+            @event.IsCancelled = cancel;
+
             Emit(@event);
 
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearVest(Player nativePlayer, ushort id, byte quality, byte[] state, out bool cancel)
+        private void Events_OnWearVest(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             ICancellableEvent @event;
 
@@ -240,6 +250,8 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 @event = new UnturnedPlayerClothingEquippingEvent(player, new UnturnedItem(item), ClothingType.Vest);
             }
 
+            @event.IsCancelled = cancel;
+
             Emit(@event);
 
             cancel = @event.IsCancelled;
@@ -247,7 +259,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnBackpackUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             IEvent @event;
 
@@ -267,7 +279,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnGlassesUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             IEvent @event;
 
@@ -287,7 +299,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnHatUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             IEvent @event;
 
@@ -307,7 +319,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnMaskUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             IEvent @event;
 
@@ -327,7 +339,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnPantsUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             IEvent @event;
 
@@ -347,7 +359,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnShirtUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             IEvent @event;
 
@@ -367,7 +379,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnVestUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             IEvent @event;
 
@@ -385,7 +397,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             Emit(@event);
         }
 
-        private delegate void WearClothing(Player player, ushort id, byte quality, byte[] state, out bool cancel);
+        private delegate void WearClothing(Player player, ushort id, byte quality, byte[] state, ref bool cancel);
 
         private static event WearClothing OnWearBackpack;
         private static event WearClothing OnWearGlasses;
@@ -402,9 +414,9 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             [HarmonyPrefix]
             private static bool AskWearBackpack(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                OnWearBackpack?.Invoke(__instance.player, id, quality, state, out cancel);
+                OnWearBackpack?.Invoke(__instance.player, id, quality, state, ref cancel);
 
                 return !cancel;
             }
@@ -413,9 +425,9 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             [HarmonyPrefix]
             private static bool AskWearGlasses(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                OnWearGlasses?.Invoke(__instance.player, id, quality, state, out cancel);
+                OnWearGlasses?.Invoke(__instance.player, id, quality, state, ref cancel);
 
                 return !cancel;
             }
@@ -424,9 +436,9 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             [HarmonyPrefix]
             private static bool AskWearHat(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                OnWearHat?.Invoke(__instance.player, id, quality, state, out cancel);
+                OnWearHat?.Invoke(__instance.player, id, quality, state, ref cancel);
 
                 return !cancel;
             }
@@ -435,9 +447,9 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             [HarmonyPrefix]
             private static bool AskWearMask(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                OnWearMask?.Invoke(__instance.player, id, quality, state, out cancel);
+                OnWearMask?.Invoke(__instance.player, id, quality, state, ref cancel);
 
                 return !cancel;
             }
@@ -446,9 +458,9 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             [HarmonyPrefix]
             private static bool AskWearPants(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                OnWearPants?.Invoke(__instance.player, id, quality, state, out cancel);
+                OnWearPants?.Invoke(__instance.player, id, quality, state, ref cancel);
 
                 return !cancel;
             }
@@ -457,9 +469,9 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             [HarmonyPrefix]
             private static bool AskWearShirt(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                OnWearShirt?.Invoke(__instance.player, id, quality, state, out cancel);
+                OnWearShirt?.Invoke(__instance.player, id, quality, state, ref cancel);
 
                 return !cancel;
             }
@@ -468,9 +480,9 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             [HarmonyPrefix]
             private static bool AskWearVest(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
-                bool cancel = false;
+                var cancel = false;
 
-                OnWearVest?.Invoke(__instance.player, id, quality, state, out cancel);
+                OnWearVest?.Invoke(__instance.player, id, quality, state, ref cancel);
 
                 return !cancel;
             }

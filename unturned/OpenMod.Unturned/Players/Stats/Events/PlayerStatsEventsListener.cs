@@ -4,6 +4,8 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+// ReSharper disable DelegateSubtraction
+// ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Players.Stats.Events
 {
@@ -13,7 +15,6 @@ namespace OpenMod.Unturned.Players.Stats.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -60,108 +61,108 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void Events_OnBleedingUpdated(Player nativePlayer, bool isBleeding)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerBleedingUpdatedEvent @event = new UnturnedPlayerBleedingUpdatedEvent(player, isBleeding);
+            var @event = new UnturnedPlayerBleedingUpdatedEvent(player, isBleeding);
 
             Emit(@event);
         }
 
         private void Events_OnBrokenUpdated(Player nativePlayer, bool isBroken)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerBrokenUpdatedEvent @event = new UnturnedPlayerBrokenUpdatedEvent(player, isBroken);
+            var @event = new UnturnedPlayerBrokenUpdatedEvent(player, isBroken);
 
             Emit(@event);
         }
 
         private void Events_OnFoodUpdated(Player nativePlayer, byte food)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerFoodUpdatedEvent @event = new UnturnedPlayerFoodUpdatedEvent(player, food);
+            var @event = new UnturnedPlayerFoodUpdatedEvent(player, food);
 
             Emit(@event);
         }
 
         private void Events_OnHealthUpdated(Player nativePlayer, byte health)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerHealthUpdatedEvent @event = new UnturnedPlayerHealthUpdatedEvent(player, health);
+            var @event = new UnturnedPlayerHealthUpdatedEvent(player, health);
 
             Emit(@event);
         }
 
         private void OnPlayerStatIncremented(Player nativePlayer, EPlayerStat stat)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerStatIncrementedEvent @event = new UnturnedPlayerStatIncrementedEvent(player, stat);
+            var @event = new UnturnedPlayerStatIncrementedEvent(player, stat);
 
             Emit(@event);
         }
 
         private void OnLifeUpdated(Player nativePlayer, bool isDead)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerLifeUpdatedEvent @event = new UnturnedPlayerLifeUpdatedEvent(player, isDead);
+            var @event = new UnturnedPlayerLifeUpdatedEvent(player, isDead);
 
             Emit(@event);
         }
 
         private void OnOxygenUpdated(Player nativePlayer, byte oxygen)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerOxygenUpdatedEvent @event = new UnturnedPlayerOxygenUpdatedEvent(player, oxygen);
+            var @event = new UnturnedPlayerOxygenUpdatedEvent(player, oxygen);
 
             Emit(@event);
         }
 
         private void OnStaminaUpdated(Player nativePlayer, byte stamina)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerStaminaUpdatedEvent @event = new UnturnedPlayerStaminaUpdatedEvent(player, stamina);
+            var @event = new UnturnedPlayerStaminaUpdatedEvent(player, stamina);
 
             Emit(@event);
         }
 
         private void OnTemperatureUpdated(Player nativePlayer, EPlayerTemperature temperature)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerTemperatureUpdatedEvent @event = new UnturnedPlayerTemperatureUpdatedEvent(player, temperature);
+            var @event = new UnturnedPlayerTemperatureUpdatedEvent(player, temperature);
 
             Emit(@event);
         }
 
         private void Events_OnVirusUpdated(Player nativePlayer, byte virus)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerVirusUpdatedEvent @event = new UnturnedPlayerVirusUpdatedEvent(player, virus);
+            var @event = new UnturnedPlayerVirusUpdatedEvent(player, virus);
 
             Emit(@event);
         }
 
         private void OnVisionUpdated(Player nativePlayer, bool viewing)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerVisionUpdatedEvent @event = new UnturnedPlayerVisionUpdatedEvent(player, viewing);
+            var @event = new UnturnedPlayerVisionUpdatedEvent(player, viewing);
 
             Emit(@event);
         }
 
         private void Events_OnWaterUpdated(Player nativePlayer, byte water)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerWaterUpdatedEvent @event = new UnturnedPlayerWaterUpdatedEvent(player, water);
+            var @event = new UnturnedPlayerWaterUpdatedEvent(player, water);
 
             Emit(@event);
         }
@@ -184,11 +185,11 @@ namespace OpenMod.Unturned.Players.Stats.Events
         private delegate void WaterUpdated(Player player, byte water);
         private static event WaterUpdated OnWaterUpdated;
 
-        private struct PersistDoDamage
+        private readonly struct PersistDoDamage
         {
-            public bool IsBleeding;
+            public readonly bool IsBleeding;
 
-            public byte Health;
+            public readonly byte Health;
 
             public PersistDoDamage(PlayerLife life)
             {

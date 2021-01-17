@@ -3,7 +3,6 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Players;
 using SDG.Unturned;
 using Steamworks;
 using System.Linq;
@@ -78,17 +77,15 @@ namespace OpenMod.Unturned.Building.Events
             var buildable = new UnturnedBarricadeBuildable(data, drop);
 
             var nativePlayer = Provider.clients.FirstOrDefault(x => x?.playerID.steamID == instigatorSteamId)?.player;
-            var player = nativePlayer == null ? null : new UnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedBuildableDamagingEvent @event;
-            if (pendingTotalDamage >= buildable.State.Health)
-            {
-                @event = new UnturnedBarricadeDestroyingEvent(buildable, pendingTotalDamage, damageOrigin, player, instigatorSteamId);
-            }
-            else
-            {
-                @event = new UnturnedBarricadeDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player, instigatorSteamId);
-            }
+            var @event = pendingTotalDamage >= buildable.State.Health
+                ? (UnturnedBuildableDamagingEvent) new UnturnedBarricadeDestroyingEvent(buildable, pendingTotalDamage,
+                    damageOrigin, player, instigatorSteamId)
+                : new UnturnedBarricadeDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player,
+                    instigatorSteamId);
+
+            @event.IsCancelled = !shouldAllow;
 
             Emit(@event);
 
@@ -108,17 +105,15 @@ namespace OpenMod.Unturned.Building.Events
                 var buildable = new UnturnedStructureBuildable(data, drop);
 
                 var nativePlayer = Provider.clients.FirstOrDefault(x => x?.playerID.steamID == instigatorSteamId)?.player;
-                var player = nativePlayer == null ? null : new UnturnedPlayer(nativePlayer);
+                var player = GetUnturnedPlayer(nativePlayer);
 
-                UnturnedBuildableDamagingEvent @event;
-                if (pendingTotalDamage >= buildable.State.Health)
-                {
-                    @event = new UnturnedStructureDestroyingEvent(buildable, pendingTotalDamage, damageOrigin, player, instigatorSteamId);
-                }
-                else
-                {
-                    @event = new UnturnedStructureDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player, instigatorSteamId);
-                }
+                var @event = pendingTotalDamage >= buildable.State.Health
+                    ? (UnturnedBuildableDamagingEvent) new UnturnedStructureDestroyingEvent(buildable,
+                        pendingTotalDamage, damageOrigin, player, instigatorSteamId)
+                    : new UnturnedStructureDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player,
+                        instigatorSteamId);
+
+                @event.IsCancelled = !shouldAllow;
 
                 Emit(@event);
 
@@ -130,12 +125,14 @@ namespace OpenMod.Unturned.Building.Events
         private void Events_OnBarricadeDeployed(BarricadeData data, BarricadeDrop drop)
         {
             var @event = new UnturnedBarricadeDeployedEvent(new UnturnedBarricadeBuildable(data, drop));
+
             Emit(@event);
         }
 
         private void Events_OnStructureDeployed(StructureData data, StructureDrop drop)
         {
             var @event = new UnturnedStructureDeployedEvent(new UnturnedStructureBuildable(data, drop));
+
             Emit(@event);
         }
 
@@ -149,8 +146,10 @@ namespace OpenMod.Unturned.Building.Events
             var data = region.barricades[index];
             var drop = region.drops[index];
 
-            var @event =
-                new UnturnedBarricadeSalvagingEvent(new UnturnedBarricadeBuildable(data, drop));
+            var @event = new UnturnedBarricadeSalvagingEvent(new UnturnedBarricadeBuildable(data, drop))
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -167,8 +166,10 @@ namespace OpenMod.Unturned.Building.Events
             var data = region.structures[index];
             var drop = region.drops[index];
 
-            var @event =
-                new UnturnedStructureSalvagingEvent(new UnturnedStructureBuildable(data, drop));
+            var @event = new UnturnedStructureSalvagingEvent(new UnturnedStructureBuildable(data, drop))
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -177,15 +178,15 @@ namespace OpenMod.Unturned.Building.Events
 
         private void Events_OnBarricadeDestroyed(BarricadeData data, BarricadeDrop drop)
         {
-            var @event =
-                new UnturnedBarricadeDestroyedEvent(new UnturnedBarricadeBuildable(data, drop));
+            var @event = new UnturnedBarricadeDestroyedEvent(new UnturnedBarricadeBuildable(data, drop));
+
             Emit(@event);
         }
 
         private void Events_OnStructureDestroyed(StructureData data, StructureDrop drop)
         {
-            var @event =
-                new UnturnedStructureDestroyedEvent(new UnturnedStructureBuildable(data, drop));
+            var @event = new UnturnedStructureDestroyedEvent(new UnturnedStructureBuildable(data, drop));
+
             Emit(@event);
         }
 
@@ -202,11 +203,14 @@ namespace OpenMod.Unturned.Building.Events
             var drop = region.drops[index];
 
             var nativePlayer = Provider.clients.FirstOrDefault(cl => cl?.playerID.steamID == instigator)?.player;
-            var player = nativePlayer == null ? null : new UnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
             var @event = new UnturnedBarricadeTransformingEvent(
                 new UnturnedBarricadeBuildable(data, drop), player, instigator, point,
-                Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2));
+                Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2))
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -233,11 +237,15 @@ namespace OpenMod.Unturned.Building.Events
             var drop = region.drops[index];
 
             var nativePlayer = Provider.clients.FirstOrDefault(cl => cl?.playerID.steamID == instigator)?.player;
-            var player = nativePlayer == null ? null : new UnturnedPlayer(nativePlayer);
+
+            var player = GetUnturnedPlayer(nativePlayer);
 
             var @event = new UnturnedStructureTransformingEvent(
                 new UnturnedStructureBuildable(data, drop), player, instigator, point,
-                Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2));
+                Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2))
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -357,13 +365,14 @@ namespace OpenMod.Unturned.Building.Events
             }
 
 
-            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.askTransformBarricade))]
+            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.tellTransformBarricade))]
             [HarmonyPostfix]
-            private static void AskTransformBarricade(byte x, byte y, ushort plant, uint instanceID)
+            private static void TellTransformBarricade(BarricadeManager __instance, CSteamID steamID, byte x, byte y, ushort plant, uint instanceID)
             {
                 ThreadUtil.assertIsGameThread();
 
-                if (!BarricadeManager.tryGetRegion(x, y, plant, out var region)) return;
+                if (!__instance.channel.checkServer(steamID) ||
+                    !BarricadeManager.tryGetRegion(x, y, plant, out var region)) return;
 
                 var index = region.barricades.FindIndex(k => k.instanceID == instanceID);
 
@@ -375,14 +384,14 @@ namespace OpenMod.Unturned.Building.Events
                 OnBarricadeTransformed?.Invoke(data, drop);
             }
 
-            [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.askTransformStructure))]
+            [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.tellTransformStructure))]
             [HarmonyPostfix]
-            private static void AskTransformStructure(byte x, byte y, uint instanceID)
+            private static void TellTransformStructure(StructureManager __instance, CSteamID steamID, byte x, byte y, uint instanceID)
             {
                 ThreadUtil.assertIsGameThread();
 
-                if (!StructureManager.tryGetRegion(x, y, out var region)) 
-                    return;
+                if (!__instance.channel.checkServer(steamID) ||
+                    !StructureManager.tryGetRegion(x, y, out var region)) return;
 
                 var index = region.structures.FindIndex(k => k.instanceID == instanceID);
 
