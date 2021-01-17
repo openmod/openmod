@@ -28,7 +28,6 @@ namespace OpenMod.Core.Commands
         private readonly PriorityComparer m_Comparer;
         private readonly IOptions<CommandStoreOptions> m_Options;
         private readonly IRuntime m_Runtime;
-        private readonly ILifetimeScope m_LifetimeScope;
         private readonly IServiceProvider m_ServiceProvider;
         private readonly IPermissionRegistry m_PermissionRegistry;
         private readonly ICommandPermissionBuilder m_CommandPermissionBuilder;
@@ -128,7 +127,7 @@ namespace OpenMod.Core.Commands
             }
 
             await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
-            m_Logger.LogInformation($"Loaded {commands.Count} commands.");
+            m_Logger.LogDebug($"Reloaded {commands.Count} commands.");
         }
 
         public async Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync()

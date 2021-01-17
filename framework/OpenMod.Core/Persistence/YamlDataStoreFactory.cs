@@ -1,4 +1,6 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
@@ -11,9 +13,16 @@ namespace OpenMod.Core.Persistence
     [ServiceImplementation(Priority = Priority.Lowest)]
     public class YamlDataStoreFactory : IDataStoreFactory
     {
+        private readonly IServiceProvider m_ServiceProvider;
+
+        public YamlDataStoreFactory(IServiceProvider serviceProvider)
+        {
+            m_ServiceProvider = serviceProvider;
+        }
+
         public IDataStore CreateDataStore(DataStoreCreationParameters parameters)
         {
-            return new YamlDataStore(parameters);
+            return ActivatorUtilities.CreateInstance<YamlDataStore>(m_ServiceProvider, parameters);
         }
     }
 }

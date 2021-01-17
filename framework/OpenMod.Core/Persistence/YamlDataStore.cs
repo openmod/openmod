@@ -3,10 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
@@ -27,12 +29,25 @@ namespace OpenMod.Core.Persistence
         private readonly string m_Suffix;
         private readonly ISerializer m_Serializer;
         private readonly IDeserializer m_Deserializer;
-        private readonly List<KeyValuePair<IOpenModComponent, Action>> m_ChangeListeners;
+        private readonly List<RegisteredChangeListener> m_ChangeListeners;
+        private readonly ILogger<YamlDataStore> m_Logger;
+        private readonly IRuntime m_Runtime;
+        private readonly List<string> m_WatchedFiles;
+        private readonly ConcurrentDictionary<string, object> m_Locks;
+        private readonly bool m_LogOnChange;
+        private readonly Dictionary<string, int> m_WriteCounter;
         private FileSystemWatcher m_FileSystemWatcher;
-        private static ConcurrentDictionary<string, object> s_Locks;
 
-        public YamlDataStore(DataStoreCreationParameters parameters)
+        public YamlDataStore(DataStoreCreationParameters parameters,
+            ILogger<YamlDataStore> logger,
+            IRuntime runtime)
         {
+            m_LogOnChange = parameters.LogOnChange;
+            m_Logger = logger;
+            m_Runtime = runtime;
+            m_WriteCounter = new Dictionary<string, int>();
+            m_WatchedFiles = new List<string>();
+
             if (!string.IsNullOrEmpty(parameters.Prefix))
             {
                 m_Prefix = $"{parameters.Prefix}.";
@@ -56,8 +71,8 @@ namespace OpenMod.Core.Persistence
                 .WithTypeConverter(new YamlNullableEnumTypeConverter())
                 .Build();
 
-            m_ChangeListeners = new List<KeyValuePair<IOpenModComponent, Action>>();
-            s_Locks = new ConcurrentDictionary<string, object>();
+            m_ChangeListeners = new List<RegisteredChangeListener>();
+            m_Locks = new ConcurrentDictionary<string, object>();
         }
 
         public virtual Task SaveAsync<T>(string key, T data) where T : class
@@ -67,14 +82,42 @@ namespace OpenMod.Core.Persistence
             var serializedYaml = m_Serializer.Serialize(data);
             var encodedData = Encoding.UTF8.GetBytes(serializedYaml);
             var filePath = GetFilePathForKey(key);
+            AddLogChangeWatcher(key);
 
             lock (GetLock(filePath))
             {
                 var directory = Path.GetDirectoryName(filePath);
                 if (directory != null && !Directory.Exists(directory))
+                {
                     Directory.CreateDirectory(directory);
+                }
+                else if(File.Exists(filePath))
+                {
+                    using var sha = new SHA256Managed();
+                    using var fileStream = File.OpenRead(filePath);
+                    
+                    var fileHash = BitConverter.ToString(sha.ComputeHash(fileStream));
+                    var contentHash = BitConverter.ToString(sha.ComputeHash(encodedData));
 
-                File.WriteAllBytes(filePath, encodedData);
+                    // Ensure that we are actually writing different data
+                    // otherwise the file change watcher won't trigger and result in desycned write counter
+                    if (string.Equals(fileHash, contentHash, StringComparison.Ordinal))
+                    {
+                        return Task.CompletedTask;
+                    }
+                }
+
+                IncrementWriteCounter(key);
+
+                try
+                {
+                    File.WriteAllBytes(filePath, encodedData);
+                }
+                catch
+                {
+                    DecrementWriteCounter(key);
+                    throw;
+                }
             }
 
             return Task.CompletedTask;
@@ -102,6 +145,8 @@ namespace OpenMod.Core.Persistence
                 throw new Exception($"Load called on Yaml file that doesnt exist: {filePath}");
             }
 
+            AddLogChangeWatcher(key);
+
             // see SaveAsync for why this is commented
             //using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize: 4096, useAsync: true);
             //var encodedData = new byte[stream.Length];
@@ -114,26 +159,53 @@ namespace OpenMod.Core.Persistence
 
         public IDisposable AddChangeWatcher(string key, IOpenModComponent component, Action onChange)
         {
-            var filePath = GetFilePathForKey(key);
+            CheckKeyValid(key);
+            AddLogChangeWatcher(key);
 
+            var filePath = GetFilePathForKey(key);
             var directory = Path.GetDirectoryName(filePath);
 
-            if (directory == null) throw new Exception("Unable to retrieve directory info for file");
-
-            var fileName = Path.GetFileName(filePath);
+            if (directory == null)
+            {
+                throw new Exception($"Unable to retrieve directory info for file: {filePath}");
+            }
 
             lock (GetLock(filePath))
             {
-                var pair = new KeyValuePair<IOpenModComponent, Action>(component, onChange);
-
-                m_ChangeListeners.Add(pair);
+                var changeListener = new RegisteredChangeListener(component, key, onChange);
+                m_ChangeListeners.Add(changeListener);
                 var idx = m_ChangeListeners.Count - 1;
 
                 if (idx == 0)
                 {
-                    // first element, start watcher
-                    m_FileSystemWatcher = new FileSystemWatcher(directory, fileName);
-                    m_FileSystemWatcher.Changed += (s, a) => OnFileChange(filePath);
+                    // first listener, create watcher
+                    m_FileSystemWatcher = new FileSystemWatcher(directory);
+                    m_FileSystemWatcher.Changed += (s, a) =>
+                    {
+                        try
+                        {
+                            lock (GetLock(filePath))
+                            {
+                                if (a.ChangeType == WatcherChangeTypes.Renamed ||
+                                    a.ChangeType == WatcherChangeTypes.Deleted)
+                                {
+                                    return;
+                                }
+
+                                if (Path.GetFullPath(a.FullPath).Equals(Path.GetFullPath(filePath), StringComparison.Ordinal)
+                                    && DecrementWriteCounter(key))
+                                {
+                                    m_Logger.LogDebug($"File changed: {a.FullPath} ({a.ChangeType:X})");
+                                    OnFileChange(key);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            m_Logger.LogError(ex, $"Error occured on file change for: {filePath}");
+                        }
+                    };
+
                     m_FileSystemWatcher.EnableRaisingEvents = true;
                 }
 
@@ -141,8 +213,9 @@ namespace OpenMod.Core.Persistence
                 {
                     lock (GetLock(filePath))
                     {
-                        m_ChangeListeners.Remove(pair);
+                        m_ChangeListeners.Remove(changeListener);
 
+                        // last listener, destroy watcher
                         if (m_ChangeListeners.Count == 0 && m_FileSystemWatcher != null)
                         {
                             m_FileSystemWatcher.Dispose();
@@ -153,28 +226,30 @@ namespace OpenMod.Core.Persistence
             }
         }
 
-        private void OnFileChange(string filePath)
+        private void OnFileChange(string key)
         {
-            lock (GetLock(filePath))
+            foreach (var listener in m_ChangeListeners.ToList())
             {
-                foreach (var listener in m_ChangeListeners.ToList())
+                if (!listener.Key.Equals(key, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!listener.Key.IsComponentAlive)
-                    {
-                        continue;
-                    }
-
-                    listener.Value?.Invoke();
+                    continue;
                 }
+
+                if (!listener.Component.IsComponentAlive)
+                {
+                    continue;
+                }
+
+                listener.Callback?.Invoke();
             }
         }
 
         private object GetLock(string filePath)
         {
-            if (!s_Locks.TryGetValue(filePath, out var @lock))
+            if (!m_Locks.TryGetValue(filePath, out var @lock))
             {
                 @lock = new object();
-                s_Locks.TryAdd(filePath, @lock);
+                m_Locks.TryAdd(filePath, @lock);
             }
 
             return @lock;
@@ -198,14 +273,82 @@ namespace OpenMod.Core.Persistence
             }
         }
 
+        private void AddLogChangeWatcher(string key)
+        {
+            // Will add a change watcher that logs detected file changes
+
+            if (m_LogOnChange && !m_WatchedFiles.Contains(key))
+            {
+                m_WatchedFiles.Add(key);
+
+                AddChangeWatcher(key, m_Runtime, () =>
+                {
+                    m_Logger.LogInformation($"Reloaded {m_Prefix ?? string.Empty}{key}{m_Suffix ?? string.Empty}.yaml.");
+                });
+            }
+        }
+
         protected virtual string GetFilePathForKey(string key)
         {
             return Path.Combine(m_BasePath, $"{m_Prefix ?? string.Empty}{key}{m_Suffix ?? string.Empty}.yaml");
         }
 
+        private void IncrementWriteCounter(string key)
+        {
+            if (!m_WriteCounter.ContainsKey(key))
+            {
+                m_WriteCounter.Add(key, 1);
+            }
+            else
+            {
+                m_WriteCounter[key]++;
+            }
+        }
+
+        private bool DecrementWriteCounter(string key)
+        {
+            if (!m_WriteCounter.ContainsKey(key))
+            {
+                return true;
+            }
+
+            if (m_WriteCounter[key] == 0)
+            {
+                return true;
+            }
+
+            if (m_WriteCounter[key] < 0)
+            {
+                // race condition? can only happen if called outside lock
+                throw new InvalidOperationException("DecrementWriteCounter has become negative");
+            }
+
+            return m_WriteCounter[key]-- == 0;
+        }
+
         public void Dispose()
         {
+            m_Locks.Clear();
+            m_WriteCounter.Clear();
+            m_WatchedFiles.Clear();
+            m_ChangeListeners?.Clear();
             m_FileSystemWatcher?.Dispose();
+        }
+
+        private class RegisteredChangeListener
+        {
+            public RegisteredChangeListener(IOpenModComponent component, string key, Action callback)
+            {
+                Component = component;
+                Key = key;
+                Callback = callback;
+            }
+
+            public IOpenModComponent Component { get; }
+
+            public string Key { get; }
+
+            public Action Callback { get; }
         }
     }
 }

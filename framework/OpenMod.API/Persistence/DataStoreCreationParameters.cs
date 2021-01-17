@@ -9,5 +9,7 @@
         public string Prefix { get; set; }
 
         public string Suffix { get; set; }
+
+        public bool LogOnChange { get; set; } = true;
     }
 }
