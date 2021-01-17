@@ -236,7 +236,7 @@ namespace OpenMod.Unturned.Animals.Events
                 // Attacking player
                 var cancel = false;
 
-                OnAnimalAttackingPlayer?.Invoke(__instance, ref newPlayer, ref sendToPack, out cancel);
+                OnAnimalAttackingPlayer?.Invoke(__instance, ref newPlayer, ref sendToPack, ref cancel);
 
                 return !cancel;
             }
