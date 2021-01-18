@@ -111,9 +111,6 @@ namespace OpenMod.Core.Plugins
                 try
                 {
                     var serviceProvider = m_LifetimeScope.Resolve<IServiceProvider>();
-                    IConfigurationRoot configuration = null;
-                    IChangeToken configurationReloadToken = null;
-
                     var lifetimeScope = m_LifetimeScope.BeginLifetimeScope(containerBuilder =>
                     {
                         var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
@@ -126,11 +123,9 @@ namespace OpenMod.Core.Plugins
                                 .AddYamlFile("config.yaml", optional: true, reloadOnChange: true);
                         }
 
-                        configuration = configurationBuilder
+                        var configuration = configurationBuilder
                             .AddEnvironmentVariables(pluginMetadata.Id.Replace(".", "_") + "_")
                             .Build();
-
-                        configurationReloadToken = configuration.GetReloadToken();
 
                         containerBuilder.Register(context => configuration)
                             .As<IConfiguration>()
@@ -211,14 +206,7 @@ namespace OpenMod.Core.Plugins
                     var pluginLoggerType = typeof(ILogger<>).MakeGenericType(pluginType);
                     var pluginLogger = (ILogger)pluginInstance.LifetimeScope.Resolve(pluginLoggerType);
 
-                    configurationReloadToken?.RegisterChangeCallback(_ =>
-                    {
-                        AsyncHelper.Schedule($"Configuration changed event for {pluginMetadata.Id}", () =>
-                        {
-                            pluginLogger.LogInformation($"Configuration updated for plugin: {pluginMetadata.Id}");
-                            return m_EventBus.EmitAsync(m_Runtime, this, new PluginConfigurationChangedEvent(pluginInstance, configuration));
-                        });
-                    }, null);
+                    RegisterConfigChangeCallback(pluginInstance, pluginLogger);
 
                     var pluginActivateEvent = new PluginActivatingEvent(pluginInstance);
                     await m_EventBus.EmitAsync(m_Runtime, this, pluginActivateEvent);
@@ -267,6 +255,29 @@ namespace OpenMod.Core.Plugins
                 m_Logger.LogError(ex, $"Failed to load plugin from assembly: {assembly.FullName}");
                 return null;
             }
+        }
+
+        private void RegisterConfigChangeCallback(IOpenModPlugin pluginInstance, ILogger pluginLogger)
+        {
+            var pluginConfiguration = pluginInstance.LifetimeScope.Resolve<IConfiguration>();
+
+            var ignored = false;
+            pluginConfiguration.GetReloadToken().RegisterChangeCallback(_ =>
+            {
+                if (ignored || !pluginInstance.IsComponentAlive)
+                {
+                    return;
+                }
+                
+                AsyncHelper.Schedule($"Configuration changed event for {pluginInstance.OpenModComponentId}", () =>
+                {
+                    pluginLogger.LogInformation($"Configuration updated for plugin: {pluginInstance.OpenModComponentId}");
+                    return m_EventBus.EmitAsync(m_Runtime, this, new PluginConfigurationChangedEvent(pluginInstance, pluginConfiguration));
+                });
+
+                RegisterConfigChangeCallback(pluginInstance, pluginLogger);
+                ignored = true;
+            }, null);
         }
 
         public async ValueTask DisposeAsync()
