@@ -590,7 +590,6 @@ namespace OpenMod.NuGet
 
             Logger.LogDebug("GetPackageDependencies: " + package);
             var repos = repositories.ToList();
-            Logger.LogDebug($"Repos for {package}: " + repos.Count);
 
             foreach (var sourceRepository in repos)
             {
@@ -608,6 +607,7 @@ namespace OpenMod.NuGet
 
                 Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
 
+                // ignore already installed packages
                 if (ignoreInstalled && await IsPackageInstalledAsync(dependencyInfo.Id))
                 {
                     var installed = await GetLatestPackageIdentityAsync(dependencyInfo.Id);
