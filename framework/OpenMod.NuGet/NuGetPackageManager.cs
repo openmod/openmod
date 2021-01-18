@@ -347,7 +347,7 @@ namespace OpenMod.NuGet
             m_AssemblyLoader = assemblyLoader;
         }
 
-        public virtual async Task<ICollection<SourcePackageDependencyInfo>> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext)
+        public virtual async Task<ICollection<SourcePackageDependencyInfo>> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext, bool ignoreInstalled = true)
         {
             var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
             var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, m_Providers);
@@ -355,7 +355,7 @@ namespace OpenMod.NuGet
             var sourceRepositories = sourceRepositoryProvider.GetRepositories();
 
             var availablePackages = new HashSet<SourcePackageDependencyInfo>(PackageIdentityComparer.Default);
-            await QueryPackageDependenciesAsync(identity, cacheContext, sourceRepositories, availablePackages);
+            await QueryPackageDependenciesAsync(identity, cacheContext, sourceRepositories, availablePackages, ignoreInstalled);
 
             var resolverContext = new PackageResolverContext(
                 DependencyBehavior.Lowest,
@@ -580,7 +580,8 @@ namespace OpenMod.NuGet
         protected virtual async Task QueryPackageDependenciesAsync(PackageIdentity package,
                                                             SourceCacheContext cacheContext,
                                                             IEnumerable<SourceRepository> repositories,
-                                                            ISet<SourcePackageDependencyInfo> availablePackages)
+                                                            ISet<SourcePackageDependencyInfo> availablePackages,
+                                                            bool ignoreInstalled = true)
         {
             if (availablePackages.Contains(package))
             {
@@ -604,7 +605,17 @@ namespace OpenMod.NuGet
                     Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
                     continue;
                 }
+
                 Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
+
+                if (ignoreInstalled && await IsPackageInstalledAsync(dependencyInfo.Id))
+                {
+                    var installed = await GetLatestPackageIdentityAsync(dependencyInfo.Id);
+                    if (!dependencyInfo.HasVersion || installed.Version >= dependencyInfo.Version)
+                    {
+                        continue;
+                    }
+                }
 
                 availablePackages.Add(dependencyInfo);
                 foreach (var dependency in dependencyInfo.Dependencies)
@@ -616,6 +627,8 @@ namespace OpenMod.NuGet
 
                     await QueryPackageDependenciesAsync(new PackageIdentity(dependency.Id, dependency.VersionRange.MaxVersion ?? dependency.VersionRange.MinVersion), cacheContext, repos, availablePackages);
                 }
+
+                break;
             }
         }
 
