@@ -149,7 +149,7 @@ namespace OpenMod.Unturned.RocketMod
         private void PatchInitialize()
         {
             var intializePostfixMethod = new HarmonyMethod(typeof(RocketModLoadPatch).GetMethod(nameof(RocketModLoadPatch.PostInitialize), c_BindingFlags));
-            s_HarmonyInstance.Patch(typeof(U).GetMethod("initialize", c_BindingFlags), postfix: intializePostfixMethod);
+            s_HarmonyInstance.Patch(typeof(U).GetMethod("Initialize", c_BindingFlags), postfix: intializePostfixMethod);
             RocketModLoadPatch.OnRocketModIntialized += OnRocketModIntialized;
         }
 
