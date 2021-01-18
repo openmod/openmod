@@ -3,6 +3,7 @@
     public enum NuGetInstallCode
     {
         Success,
+        NoUpdatesFound,
         PackageOrVersionNotFound
     }
 }

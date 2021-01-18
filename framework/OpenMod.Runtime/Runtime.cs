@@ -121,7 +121,6 @@ namespace OpenMod.Runtime
 
                 m_Logger.LogInformation($"OpenMod v{Version} is starting...");
 
-                var installMissingPackages = false;
                 if (!(parameters.PackageManager is NuGetPackageManager nugetPackageManager))
                 {
                     var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
@@ -129,10 +128,8 @@ namespace OpenMod.Runtime
                     {
                         Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"))
                     };
-
-                    installMissingPackages = true;
                 }
-                
+
                 nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
 
                 await nugetPackageManager.RemoveOutdatedPackagesAsync();
@@ -187,11 +184,7 @@ namespace OpenMod.Runtime
                     Hotloader.Enabled = hotReloadingEnabled;
                 }
 
-                if (installMissingPackages)
-                {
-                    await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
-                }
-
+                await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
                 await startup.LoadPluginAssembliesAsync();
 
                 hostBuilder

@@ -27,6 +27,7 @@ namespace OpenMod.Rust.Oxide.Extension
             var bootrapper = new OpenModDynamicBootstrapper();
 
             OpenModRuntime = bootrapper.Bootstrap(
+                null, // todo create package manager
                 openModDirectory,
                 Environment.GetCommandLineArgs(),
                 new[] { "OpenMod.UnityEngine", "OpenMod.Rust", "OpenMod.Rust.Oxide" },

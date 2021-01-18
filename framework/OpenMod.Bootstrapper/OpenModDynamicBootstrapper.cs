@@ -21,26 +21,30 @@ namespace OpenMod.Bootstrapper
     public class OpenModDynamicBootstrapper
     {
         public Task<object> BootstrapAsync(
+            NuGetPackageManager packageManager,
             string openModFolder,
             string[] commandLineArgs,
             string packageId,
             bool allowPrereleaseVersions = false,
             ILogger logger = null)
         {
-            return BootstrapAsync(openModFolder, commandLineArgs, new List<string> { packageId }, Enumerable.Empty<string>(), allowPrereleaseVersions, logger);
+            return BootstrapAsync(packageManager, openModFolder, commandLineArgs, new List<string> { packageId }, Enumerable.Empty<string>(), allowPrereleaseVersions, logger);
         }
 
-        public object Bootstrap(string openModFolder,
-                              string[] commandLineArgs,
-                              IEnumerable<string> packageIds,
-                              IEnumerable<string> ignoredDependencies,
-                              bool allowPrereleaseVersions = false,
-                              ILogger logger = null)
+        public object Bootstrap(
+            NuGetPackageManager packageManager,
+            string openModFolder,
+            string[] commandLineArgs,
+            IEnumerable<string> packageIds,
+            IEnumerable<string> ignoredDependencies,
+            bool allowPrereleaseVersions = false,
+            ILogger logger = null)
         {
-            return AsyncContext.Run(() => BootstrapAsync(openModFolder, commandLineArgs, packageIds, ignoredDependencies, allowPrereleaseVersions, logger));
+            return AsyncContext.Run(() => BootstrapAsync(packageManager, openModFolder, commandLineArgs, packageIds, ignoredDependencies, allowPrereleaseVersions, logger));
         }
 
         public async Task<object> BootstrapAsync(
+            NuGetPackageManager packageManager,
             string openModFolder,
             string[] commandLineArgs,
             IEnumerable<string> packageIds,
@@ -58,40 +62,31 @@ namespace OpenMod.Bootstrapper
                 }
             }
 
-
             logger ??= new NuGetConsoleLogger();
             openModFolder = Path.GetFullPath(openModFolder);
 
-            var packagesDirectory = Path.Combine(openModFolder, "packages");
-            if (!Directory.Exists(packagesDirectory))
+            if (packageManager == null)
             {
-                Directory.CreateDirectory(packagesDirectory);
+                var packagesDirectory = Path.Combine(openModFolder, "packages");
+                if (!Directory.Exists(packagesDirectory))
+                {
+                    Directory.CreateDirectory(packagesDirectory);
+                }
+
+                packageManager = new NuGetPackageManager(packagesDirectory) { Logger = logger };
+                Environment.SetEnvironmentVariable("NUGET_COMMON_APPLICATION_DATA", Path.GetFullPath(packagesDirectory));
             }
-
-            Environment.SetEnvironmentVariable("NUGET_COMMON_APPLICATION_DATA", Path.GetFullPath(packagesDirectory));
-
-            var nugetPackageManager = new NuGetPackageManager(packagesDirectory) { Logger = logger };
-            await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
-
-            // these dependencies are not required and cause issues
-            nugetPackageManager.IgnoreDependencies(
-                "Microsoft.NETCore.Platforms",
-                "Microsoft.Packaging.Tools",
-                "NETStandard.Library",
-                "OpenMod.UnityEngine.Redist",
-                "OpenMod.Unturned.Redist",
-                "System.IO.FileSystem.Watcher");
 
             var hostAssemblies = new List<Assembly>();
             foreach (var packageId in packageIds)
             {
-                var packageIdentity = await nugetPackageManager.GetLatestPackageIdentityAsync(packageId);
+                var packageIdentity = await packageManager.GetLatestPackageIdentityAsync(packageId);
                 var shouldInstallOrUpdate = packageIdentity == null;
 
                 IPackageSearchMetadata openModPackage = null;
                 if (packageIdentity == null || shouldAutoUpdate)
                 {
-                    openModPackage = await nugetPackageManager.QueryPackageExactAsync(packageId, version: null, allowPrereleaseVersions);
+                    openModPackage = await packageManager.QueryPackageExactAsync(packageId, version: null, allowPrereleaseVersions);
                 }
 
                 if (packageIdentity != null && shouldAutoUpdate)
@@ -103,11 +98,13 @@ namespace OpenMod.Bootstrapper
                 if (shouldInstallOrUpdate)
                 {
                     logger.LogInformation($"Downloading {openModPackage.Identity.Id} v{openModPackage.Identity.Version} via NuGet");
-                    var installResult = await nugetPackageManager.InstallAsync(openModPackage.Identity, allowPrereleaseVersions);
-                    if (installResult.Code == NuGetInstallCode.Success)
+                    var installResult = await packageManager.InstallAsync(openModPackage.Identity, allowPrereleaseVersions);
+                    if (installResult.Code == NuGetInstallCode.Success || installResult.Code == NuGetInstallCode.NoUpdatesFound)
                     {
                         packageIdentity = installResult.Identity;
-                        logger.LogInformation($"Finished downloading \"{packageId}\".");
+                        logger.LogInformation(installResult.Code == NuGetInstallCode.Success
+                            ? $"Finished downloading \"{packageId}\"."
+                            : $"Latest \"{packageId}\" is already installed.");
                     }
                     else
                     {
@@ -120,11 +117,11 @@ namespace OpenMod.Bootstrapper
                 }
 
                 logger.LogInformation($"Loading {packageIdentity.Id} v{packageIdentity.Version}");
-                var packageAssemblies = await LoadPackageAsync(nugetPackageManager, packageIdentity);
+                var packageAssemblies = await LoadPackageAsync(packageManager, packageIdentity);
                 hostAssemblies.AddRange(packageAssemblies);
             }
 
-            return await InitializeRuntimeAsync(nugetPackageManager, hostAssemblies, openModFolder, commandLineArgs);
+            return await InitializeRuntimeAsync(packageManager, hostAssemblies, openModFolder, commandLineArgs);
         }
 
         private Task<IEnumerable<Assembly>> LoadPackageAsync(NuGetPackageManager packageManager, PackageIdentity identity)

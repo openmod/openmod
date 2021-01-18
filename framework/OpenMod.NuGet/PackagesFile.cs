@@ -99,7 +99,9 @@ namespace OpenMod.NuGet
             await EnsureExistsAsync();
 
             var yaml = File.ReadAllText(m_Path);
-            return m_Deserializer.Deserialize<SerializedPackagesFile>(yaml);
+            var result = m_Deserializer.Deserialize<SerializedPackagesFile>(yaml);
+            result.Packages ??= new HashSet<SerializedNuGetPackage>();
+            return result;
         }
 
         private Task WritePackagesFile(SerializedPackagesFile file)

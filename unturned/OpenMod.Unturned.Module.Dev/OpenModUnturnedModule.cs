@@ -6,19 +6,20 @@ using SDG.Unturned;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using OpenMod.NuGet;
 
 namespace OpenMod.Unturned.Module.Dev
 {
     public class OpenModUnturnedModule : IModuleNexus
     {
         public Runtime.Runtime OpenModRuntime { get; private set; }
-        
+
         private OpenModSharedUnturnedModule m_SharedModule;
 
         public void initialize()
         {
             m_SharedModule = new OpenModSharedUnturnedModule();
-            
+
             if (!m_SharedModule.Initialize(GetType().Assembly, isDynamicLoad: false))
             {
                 return;
@@ -45,7 +46,8 @@ namespace OpenMod.Unturned.Module.Dev
             var parameters = new RuntimeInitParameters
             {
                 CommandlineArgs = System.Environment.GetCommandLineArgs(),
-                WorkingDirectory = openModDirectory
+                WorkingDirectory = openModDirectory,
+                PackageManager = m_SharedModule.GetNugetPackageManager(openModDirectory)
             };
 
             var assemblies = new List<Assembly>

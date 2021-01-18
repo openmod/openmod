@@ -153,7 +153,7 @@ namespace OpenMod.Core.Plugins
             {
                 var packagetToInstall = await m_NuGetPackageManager.QueryPackageExactAsync(assembly.Key, assembly.Value.ToString());
                 var result = await m_NuGetPackageManager.InstallAsync(packagetToInstall.Identity);
-                if (result.Code == NuGetInstallCode.Success)
+                if (result.Code == NuGetInstallCode.Success || result.Code == NuGetInstallCode.NoUpdatesFound)
                     continue;
 
                 m_Logger.LogWarning($"Failed to install \"{assembly.Key}\": " + result.Code, Color.DarkRed);

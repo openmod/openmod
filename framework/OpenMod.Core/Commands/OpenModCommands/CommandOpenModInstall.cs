@@ -70,16 +70,23 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
                 await Context.Actor.PrintMessageAsync($"Installing {arg}...", Color.White);
                 var result = await m_NuGetPlugins.InstallPackageAsync(packageName, packageVersion, isPre);
-                if (result.Code != NuGetInstallCode.Success)
-                {
-                    await Context.Actor.PrintMessageAsync($"Failed to install \"{packageName}\": " + result.Code,
-                        Color.DarkRed);
-                    continue;
-                }
 
-                await Context.Actor.PrintMessageAsync(
-                    $"Successfully installed {result.Identity.Id} v{result.Identity.Version}.", Color.DarkGreen);
-                anySuccessful = true;
+                switch (result.Code)
+                {
+                    case NuGetInstallCode.Success:
+                        await Context.Actor.PrintMessageAsync(
+                            $"Successfully installed {result.Identity.Id} v{result.Identity.Version}.", Color.DarkGreen);
+                        anySuccessful = true;
+                        break;
+                    case NuGetInstallCode.NoUpdatesFound:
+                        await Context.Actor.PrintMessageAsync(
+                            $"No updates found for {result.Identity.Id}.", Color.DarkGreen);
+                        anySuccessful = true;
+                        break;
+                    default:
+                        await Context.Actor.PrintMessageAsync($"Failed to install \"{packageName}\": " + result.Code, Color.DarkRed);
+                        break;
+                }
             }
 
             if (anySuccessful)

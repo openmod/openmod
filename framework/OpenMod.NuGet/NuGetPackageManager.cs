@@ -105,22 +105,27 @@ namespace OpenMod.NuGet
             m_PackageResolver = new PackageResolver();
             m_LoadedPackageAssemblies = new Dictionary<string, List<NuGetAssembly>>();
             m_ResolveCache = new Dictionary<string, Assembly>();
-            m_IgnoredDependendencies = new HashSet<string>();
+            m_IgnoredDependendencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             InstallAssemblyResolver();
         }
 
         public virtual async Task<NuGetInstallResult> InstallAsync(PackageIdentity packageIdentity, bool allowPrereleaseVersions = false)
         {
             using var cacheContext = new SourceCacheContext();
-            IEnumerable<SourcePackageDependencyInfo> dependencyPackages;
+            NuGetQueryResult queryResult;
             try
             {
-                dependencyPackages = await QueryDependenciesAsync(packageIdentity, cacheContext);
+                queryResult = await QueryDependenciesAsync(packageIdentity, cacheContext);
             }
             catch (NuGetResolverInputException ex)
             {
                 Logger.LogDebug(ex.ToString());
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
+            }
+
+            if (queryResult.Code != NuGetInstallCode.Success)
+            {
+                return new NuGetInstallResult(queryResult.Code, queryResult.InstalledPackage);
             }
 
             var packageExtractionContext = new PackageExtractionContext(
@@ -129,11 +134,20 @@ namespace OpenMod.NuGet
                 ClientPolicyContext.GetClientPolicy(m_NugetSettings, Logger),
                 Logger);
 
-            foreach (var dependencyPackage in dependencyPackages)
+            foreach (var dependencyPackage in queryResult.Packages)
             {
-                if (await GetLatestPackageIdentityAsync(dependencyPackage.Id) != null)
+                if (m_IgnoredDependendencies.Contains(dependencyPackage.Id))
                 {
                     continue;
+                }
+
+                var installed = await GetLatestPackageIdentityAsync(dependencyPackage.Id);
+                if (installed != null)
+                {
+                    if (!dependencyPackage.HasVersion || installed.Version >= dependencyPackage.Version)
+                    {
+                        continue;
+                    }
                 }
 
                 var installedPath = m_PackagePathResolver.GetInstalledPath(dependencyPackage);
@@ -280,14 +294,13 @@ namespace OpenMod.NuGet
             m_IgnoredDependendencies.AddRange(packageIds);
         }
 
-        public virtual async Task<ICollection<PackageDependency>> GetDependenciesAsync(PackageIdentity identity)
+        public virtual Task<ICollection<PackageDependency>> GetDependenciesAsync(PackageIdentity identity)
         {
-            return await GetDependenciesInternalAsync(identity, new List<string>());
+            return GetDependenciesInternalAsync(identity, new List<string>());
         }
 
         private async Task<ICollection<PackageDependency>> GetDependenciesInternalAsync(PackageIdentity identity, List<string> lookedUpIds)
         {
-
             if (lookedUpIds.Any(d => string.Equals(d, identity.Id, StringComparison.OrdinalIgnoreCase)))
             {
                 return new List<PackageDependency>();
@@ -347,7 +360,7 @@ namespace OpenMod.NuGet
             m_AssemblyLoader = assemblyLoader;
         }
 
-        public virtual async Task<ICollection<SourcePackageDependencyInfo>> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext, bool ignoreInstalled = true)
+        public virtual async Task<NuGetQueryResult> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext)
         {
             var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
             var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, m_Providers);
@@ -355,7 +368,13 @@ namespace OpenMod.NuGet
             var sourceRepositories = sourceRepositoryProvider.GetRepositories();
 
             var availablePackages = new HashSet<SourcePackageDependencyInfo>(PackageIdentityComparer.Default);
-            await QueryPackageDependenciesAsync(identity, cacheContext, sourceRepositories, availablePackages, ignoreInstalled);
+            await QueryPackageDependenciesAsync(identity, cacheContext, sourceRepositories, availablePackages);
+
+            if (availablePackages.Count == 0)
+            {
+                // latest version already installed
+                return new NuGetQueryResult(identity, NuGetInstallCode.NoUpdatesFound);
+            }
 
             var resolverContext = new PackageResolverContext(
                 DependencyBehavior.Lowest,
@@ -367,11 +386,13 @@ namespace OpenMod.NuGet
                 sourceRepositoryProvider.GetRepositories().Select(s => s.PackageSource),
                 Logger);
 
-            return m_PackageResolver.Resolve(resolverContext, CancellationToken.None)
+            var resolvedPackages = m_PackageResolver.Resolve(resolverContext, CancellationToken.None)
                 .Select(p => availablePackages.Single(x
                     => PackageIdentityComparer.Default.Equals(x, p)))
                 .Where(d => !m_IgnoredDependendencies.Contains(d.Id))
                 .ToList();
+
+            return new NuGetQueryResult(resolvedPackages);
         }
 
         public virtual async Task<List<byte[]>> LoadAssembliesFromNuGetPackageRawAsync(string nupkgFile)
@@ -577,11 +598,11 @@ namespace OpenMod.NuGet
             return Path.Combine(dir, dirName + ".nupkg");
         }
 
-        protected virtual async Task QueryPackageDependenciesAsync(PackageIdentity package,
-                                                            SourceCacheContext cacheContext,
-                                                            IEnumerable<SourceRepository> repositories,
-                                                            ISet<SourcePackageDependencyInfo> availablePackages,
-                                                            bool ignoreInstalled = true)
+        protected virtual async Task QueryPackageDependenciesAsync(
+            PackageIdentity package,
+            SourceCacheContext cacheContext,
+            IEnumerable<SourceRepository> repositories,
+            ISet<SourcePackageDependencyInfo> availablePackages)
         {
             if (availablePackages.Contains(package))
             {
@@ -598,7 +619,6 @@ namespace OpenMod.NuGet
 
                 Logger.LogDebug("ResolvePackage");
                 var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFramework, cacheContext, Logger, CancellationToken.None);
-
                 if (dependencyInfo == null)
                 {
                     Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
@@ -607,24 +627,9 @@ namespace OpenMod.NuGet
 
                 Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
 
-                // ignore already installed packages
-                if (ignoreInstalled && await IsPackageInstalledAsync(dependencyInfo.Id))
-                {
-                    var installed = await GetLatestPackageIdentityAsync(dependencyInfo.Id);
-                    if (!dependencyInfo.HasVersion || installed.Version >= dependencyInfo.Version)
-                    {
-                        continue;
-                    }
-                }
-
                 availablePackages.Add(dependencyInfo);
                 foreach (var dependency in dependencyInfo.Dependencies)
                 {
-                    if (m_IgnoredDependendencies.Contains(dependency.Id))
-                    {
-                        continue;
-                    }
-
                     await QueryPackageDependenciesAsync(new PackageIdentity(dependency.Id, dependency.VersionRange.MaxVersion ?? dependency.VersionRange.MinVersion), cacheContext, repos, availablePackages);
                 }
 
@@ -725,7 +730,7 @@ namespace OpenMod.NuGet
 
             if (m_PackagesDataStore != null)
             {
-                await m_PackagesDataStore.AddOrUpdatePackageIdentity(packageIdentity);
+                await m_PackagesDataStore.RemovePackageAsync(packageIdentity.Id);
             }
 
             return true;

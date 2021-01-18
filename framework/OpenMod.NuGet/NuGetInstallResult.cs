@@ -17,6 +17,13 @@ namespace OpenMod.NuGet
             Code = NuGetInstallCode.Success;
         }
 
+        public NuGetInstallResult(NuGetInstallCode code, PackageIdentity identity)
+        {
+            Identity = identity;
+            Code = code;
+        }
+
+
         public NuGetInstallCode Code { get; set; }
     }
 }

@@ -92,7 +92,7 @@ namespace OpenMod.Core.Plugins.NuGet
             var packageIdentity = new PackageIdentity(package.Identity.Id, new NuGetVersion(version));
 
             var result = await m_NuGetPackageManager.InstallAsync(packageIdentity, isPreRelease);
-            if (result.Code != NuGetInstallCode.Success)
+            if (result.Code != NuGetInstallCode.Success && result.Code != NuGetInstallCode.NoUpdatesFound)
             {
                 return result;
             }

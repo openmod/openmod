@@ -47,6 +47,7 @@ namespace OpenMod.Unturned.Module
             var bootrapper = new OpenModDynamicBootstrapper();
 
             OpenModRuntime = bootrapper.Bootstrap(
+                m_SharedModule.GetNugetPackageManager(openModDirectory),
                 openModDirectory,
                 Environment.GetCommandLineArgs(),
                 new[] { "OpenMod.UnityEngine", "OpenMod.Unturned" },

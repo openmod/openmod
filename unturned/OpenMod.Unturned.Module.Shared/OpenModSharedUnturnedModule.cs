@@ -6,9 +6,9 @@ using System.Net;
 using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
-using System.Text.RegularExpressions;
 using HarmonyLib;
 using OpenMod.Common.Helpers;
+using OpenMod.NuGet;
 using SDG.Framework.Modules;
 using SDG.Unturned;
 
@@ -250,6 +250,37 @@ namespace OpenMod.Unturned.Module.Shared
         public void OnPostInitialize()
         {
 
+        }
+
+        public NuGetPackageManager GetNugetPackageManager(string openModDirectory)
+        {
+            try
+            {
+                var packagesDirectory = Path.Combine(openModDirectory, "packages");
+                if (!Directory.Exists(packagesDirectory))
+                {
+                    Directory.CreateDirectory(packagesDirectory);
+                }
+
+                var nugetPackageManager = new NuGetPackageManager(packagesDirectory)
+                { Logger = new NuGetConsoleLogger() };
+
+                // these dependencies are not required and cause issues
+                nugetPackageManager.IgnoreDependencies(
+                    "Microsoft.NETCore.Platforms",
+                    "Microsoft.Packaging.Tools",
+                    "NETStandard.Library",
+                    "OpenMod.UnityEngine.Redist",
+                    "OpenMod.Unturned.Redist",
+                    "System.IO.FileSystem.Watcher");
+
+                return nugetPackageManager;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         }
     }
 }
