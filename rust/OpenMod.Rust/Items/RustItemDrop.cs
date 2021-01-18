@@ -25,7 +25,7 @@ namespace OpenMod.Rust.Items
             Transform = new RustNetworkableTransform(droppedItem);
         }
 
-        IItem IItemObject.Item
+        IItem IItemInstance.Item
         {
             get { return Item; }
         }

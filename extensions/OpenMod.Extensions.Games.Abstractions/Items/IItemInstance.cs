@@ -1,6 +1,6 @@
 ﻿namespace OpenMod.Extensions.Games.Abstractions.Items
 {
-    public interface IItemObject
+    public interface IItemInstance
     {
         IItem Item { get; }
     }

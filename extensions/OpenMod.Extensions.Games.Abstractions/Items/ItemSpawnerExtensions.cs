@@ -6,7 +6,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
 {
     public static class ItemSpawnerExtensions
     {
-        public static Task<IItemObject> GiveItemAsync(this IItemSpawner spawner, 
+        public static Task<IItemInstance> GiveItemAsync(this IItemSpawner spawner, 
             IInventory inventory, 
             IItemAsset asset, 
             [CanBeNull] IItemState state = null)

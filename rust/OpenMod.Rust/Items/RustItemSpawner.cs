@@ -14,11 +14,11 @@ namespace OpenMod.Rust.Items
     [ServiceImplementation(Priority = Priority.Lowest)]
     public class RustItemSpawner : IItemSpawner
     {
-        public Task<IItemObject> GiveItemAsync(IInventory inventory, string itemId, IItemState state = null)
+        public Task<IItemInstance> GiveItemAsync(IInventory inventory, string itemId, IItemState state = null)
         {
             ValidateState(state);
 
-            async UniTask<IItemObject> GiveItemTask()
+            async UniTask<IItemInstance> GiveItemTask()
             {
                 await UniTask.SwitchToMainThread();
 

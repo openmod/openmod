@@ -23,9 +23,9 @@ namespace OpenMod.Unturned.Items
             s_InstanceCountField = typeof(ItemManager).GetField("instanceCount", BindingFlags.Static | BindingFlags.NonPublic);
         }
 
-        public Task<IItemObject> GiveItemAsync(IInventory inventory, string itemId, IItemState state = null)
+        public Task<IItemInstance> GiveItemAsync(IInventory inventory, string itemId, IItemState state = null)
         {
-            async UniTask<IItemObject> GiveItemTask()
+            async UniTask<IItemInstance> GiveItemTask()
             {
                 ValidateState(state);
 

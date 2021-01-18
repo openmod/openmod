@@ -4,7 +4,7 @@ using OpenMod.Extensions.Games.Abstractions.Transforms;
 
 namespace OpenMod.Extensions.Games.Abstractions.Items
 {
-    public interface IItemDrop : IItemObject
+    public interface IItemDrop : IItemInstance
     {
         public Vector3 Position { get; }
 

@@ -9,7 +9,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
     public interface IItemSpawner
     {
         [CanBeNull]
-        Task<IItemObject> GiveItemAsync(IInventory inventory, string itemId, [CanBeNull] IItemState state = null);
+        Task<IItemInstance> GiveItemAsync(IInventory inventory, string itemId, [CanBeNull] IItemState state = null);
 
         [CanBeNull]
         Task<IItemDrop> SpawnItemAsync(Vector3 position, string itemId, [CanBeNull] IItemState state = null);
