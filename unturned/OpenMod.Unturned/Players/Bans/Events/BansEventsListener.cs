@@ -14,7 +14,6 @@ namespace OpenMod.Unturned.Players.Bans.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -28,16 +27,24 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         public override void Unsubscribe()
         {
+            // ReSharper disable DelegateSubtraction
             Provider.onBanPlayerRequested -= OnBanPlayerRequested;
             Provider.onCheckBanStatusWithHWID -= OnCheckBanStatus;
             Provider.onUnbanPlayerRequested -= OnUnbanPlayerRequested;
+            // ReSharper restore DelegateSubtraction
+
             OnBanned -= Events_OnBanned;
             OnUnbanned -= Events_OnUnbanned;
         }
 
         private void OnBanPlayerRequested(CSteamID instigator, CSteamID playerToBan, uint ipToBan, ref string reason, ref uint duration, ref bool shouldVanillaBan)
         {
-            UnturnedPlayerBanningEvent @event = new UnturnedPlayerBanningEvent(instigator, playerToBan, ipToBan, reason, duration);
+            var @event =
+                new UnturnedPlayerBanningEvent(instigator, playerToBan, ipToBan, reason, duration)
+                {
+                    IsCancelled = !shouldVanillaBan
+                };
+
 
             Emit(@event);
 
@@ -48,7 +55,8 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         private void OnCheckBanStatus(SteamPlayerID playerId, uint remoteIP, ref bool isBanned, ref string banReason, ref uint banRemainingDuration)
         {
-            UnturnedPlayerCheckingBanEvent @event = new UnturnedPlayerCheckingBanEvent(playerId, remoteIP, isBanned, banReason, banRemainingDuration);
+            var @event =
+                new UnturnedPlayerCheckingBanEvent(playerId, remoteIP, isBanned, banReason, banRemainingDuration);
 
             Emit(@event);
 
@@ -59,7 +67,10 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         private void OnUnbanPlayerRequested(CSteamID instigator, CSteamID playerToUnban, ref bool shouldVanillaUnban)
         {
-            UnturnedPlayerUnbanningEvent @event = new UnturnedPlayerUnbanningEvent(instigator, playerToUnban);
+            var @event = new UnturnedPlayerUnbanningEvent(instigator, playerToUnban)
+            {
+                IsCancelled = !shouldVanillaUnban
+            };
 
             Emit(@event);
 
@@ -68,14 +79,14 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         private void Events_OnBanned(CSteamID instigator, CSteamID bannedPlayer, uint ip, string reason, uint duration)
         {
-            UnturnedPlayerBannedEvent @event = new UnturnedPlayerBannedEvent(instigator, bannedPlayer, ip, reason, duration);
+            var @event = new UnturnedPlayerBannedEvent(instigator, bannedPlayer, ip, reason, duration);
 
             Emit(@event);
         }
 
         private void Events_OnUnbanned(CSteamID unbannedPlayer)
         {
-            UnturnedPlayerUnbannedEvent @event = new UnturnedPlayerUnbannedEvent(unbannedPlayer);
+            var @event = new UnturnedPlayerUnbannedEvent(unbannedPlayer);
 
             Emit(@event);
         }

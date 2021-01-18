@@ -6,8 +6,8 @@ using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Items;
 using SDG.Unturned;
 using Steamworks;
-using System;
-using System.Security.Cryptography.Xml;
+using UnityEngine;
+// ReSharper disable DelegateSubtraction
 
 namespace OpenMod.Unturned.Players.Equipment.Events
 {
@@ -17,7 +17,6 @@ namespace OpenMod.Unturned.Players.Equipment.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -46,34 +45,36 @@ namespace OpenMod.Unturned.Players.Equipment.Events
 
         private void Events_OnItemEquipped(Player nativePlayer)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            Item item = new Item(
+            var item = new Item(
                 nativePlayer.equipment.itemID, 
                 1, 
                 nativePlayer.equipment.quality,
                 nativePlayer.equipment.state);
 
-            UnturnedPlayerItemEquippedEvent
-                @event = new UnturnedPlayerItemEquippedEvent(player, new UnturnedItem(item));
+            var @event = new UnturnedPlayerItemEquippedEvent(player, new UnturnedItem(item));
 
             Emit(@event);
         }
 
         private void Events_OnItemUnequipped(Player nativePlayer)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerItemUnequippedEvent @event = new UnturnedPlayerItemUnequippedEvent(player);
+            var @event = new UnturnedPlayerItemUnequippedEvent(player);
 
             Emit(@event);
         }
 
         private void OnEquipRequested(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(equipment.player);
+            var player = GetUnturnedPlayer(equipment.player);
 
-            UnturnedPlayerItemEquippingEvent @event = new UnturnedPlayerItemEquippingEvent(player, new UnturnedItem(jar.item));
+            var @event = new UnturnedPlayerItemEquippingEvent(player, new UnturnedItem(jar.item))
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -82,19 +83,22 @@ namespace OpenMod.Unturned.Players.Equipment.Events
 
         private void OnDequipRequested(PlayerEquipment equipment, ref bool shouldAllow)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(equipment.player);
+            var player = GetUnturnedPlayer(equipment.player);
 
-            PlayerInventory inv = player.Player.inventory;
+            var inv = player.Player.inventory;
 
-            byte page = equipment.equippedPage;
+            var page = equipment.equippedPage;
 
-            byte index = inv.getIndex(page, equipment.equipped_x, equipment.equipped_y);
+            var index = inv.getIndex(page, equipment.equipped_x, equipment.equipped_y);
 
-            ItemJar jar = inv.getItem(page, index);
+            var jar = inv.getItem(page, index);
 
             if (jar?.item == null) return;
 
-            UnturnedPlayerItemUnequippingEvent @event = new UnturnedPlayerItemUnequippingEvent(player, new UnturnedItem(jar.item));
+            var @event = new UnturnedPlayerItemUnequippingEvent(player, new UnturnedItem(jar.item))
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -136,7 +140,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
 
                 if (id != 0 && __instance.asset != null)
                 {
-                    Type type = Assets.useableTypes.getType(__instance.asset.useable);
+                    var type = Assets.useableTypes.getType(__instance.asset.useable);
 
                     if (type != null && typeof(Useable).IsAssignableFrom(type))
                     {

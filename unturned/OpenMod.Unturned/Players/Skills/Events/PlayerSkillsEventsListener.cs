@@ -6,6 +6,7 @@ using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using System.Collections.Generic;
 using System.Reflection;
+// ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Players.Skills.Events
 {
@@ -29,9 +30,9 @@ namespace OpenMod.Unturned.Players.Skills.Events
 
         private void Events_OnExperienceUpdated(Player nativePlayer, uint experience)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerExperienceUpdatedEvent @event = new UnturnedPlayerExperienceUpdatedEvent(player, experience);
+            var @event = new UnturnedPlayerExperienceUpdatedEvent(player, experience);
 
             Emit(@event);
         }
@@ -58,7 +59,7 @@ namespace OpenMod.Unturned.Players.Skills.Events
                     "onLifeUpdated"
                 };
 
-                foreach (string method in methods)
+                foreach (var method in methods)
                 {
                     yield return AccessTools.Method(typeof(PlayerSkills), method);
                 }

@@ -4,6 +4,8 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+// ReSharper disable DelegateSubtraction
+// ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Players.Inventory.Events
 {
@@ -13,7 +15,6 @@ namespace OpenMod.Unturned.Players.Inventory.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -53,10 +54,13 @@ namespace OpenMod.Unturned.Players.Inventory.Events
         private void OnTakeItemRequested(Player nativePlayer, byte x, byte y, uint instanceID, byte to_x, byte to_y, byte to_rot,
             byte to_page, ItemData itemData, ref bool shouldAllow)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerTakingItemEvent @event = new UnturnedPlayerTakingItemEvent(player, x, y, instanceID,
-                to_x, to_y, to_rot, to_page, itemData);
+            var @event = new UnturnedPlayerTakingItemEvent(player, x, y, instanceID,
+                to_x, to_y, to_rot, to_page, itemData)
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -65,9 +69,12 @@ namespace OpenMod.Unturned.Players.Inventory.Events
 
         private void OnDropItemRequested(PlayerInventory inventory, Item item, ref bool shouldAllow)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(inventory.player);
+            var player = GetUnturnedPlayer(inventory.player);
 
-            UnturnedPlayerDroppedItemEvent @event = new UnturnedPlayerDroppedItemEvent(player, item);
+            var @event = new UnturnedPlayerDroppedItemEvent(player, item)
+            {
+                IsCancelled = !shouldAllow
+            };
 
             Emit(@event);
 
@@ -76,24 +83,24 @@ namespace OpenMod.Unturned.Players.Inventory.Events
 
         private void Events_OnOpenedStorage(Player nativePlayer)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerOpenedStorageEvent @event = new UnturnedPlayerOpenedStorageEvent(player);
+            var @event = new UnturnedPlayerOpenedStorageEvent(player);
 
             Emit(@event);
         }
 
         private void OnInventoryResized(Player nativePlayer, byte page, byte width, byte height)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerInventoryResizedEvent @event = new UnturnedPlayerInventoryResizedEvent(player, page, width, height);
+            var @event = new UnturnedPlayerInventoryResizedEvent(player, page, width, height);
 
             Emit(@event);
 
             if (page == PlayerInventory.STORAGE && width == 0 && height == 0)
             {
-                UnturnedPlayerClosedStorageEvent closedStorageEvent = new UnturnedPlayerClosedStorageEvent(player);
+                var closedStorageEvent = new UnturnedPlayerClosedStorageEvent(player);
 
                 Emit(closedStorageEvent);
             }
@@ -101,36 +108,36 @@ namespace OpenMod.Unturned.Players.Inventory.Events
 
         private void OnInventoryStateUpdated(Player nativePlayer)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerInventoryUpdatedEvent @event = new UnturnedPlayerInventoryUpdatedEvent(player);
+            var @event = new UnturnedPlayerInventoryUpdatedEvent(player);
 
             Emit(@event);
         }
 
         private void OnInventoryAdded(Player nativePlayer, byte page, byte index, ItemJar jar)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerItemAddedEvent @event = new UnturnedPlayerItemAddedEvent(player, page, index, jar);
+            var @event = new UnturnedPlayerItemAddedEvent(player, page, index, jar);
 
             Emit(@event);
         }
 
         private void OnInventoryRemoved(Player nativePlayer, byte page, byte index, ItemJar jar)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerItemRemovedEvent @event = new UnturnedPlayerItemRemovedEvent(player, page, index, jar);
+            var @event = new UnturnedPlayerItemRemovedEvent(player, page, index, jar);
 
             Emit(@event);
         }
 
         private void OnInventoryUpdated(Player nativePlayer, byte page, byte index, ItemJar jar)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            UnturnedPlayerItemUpdatedEvent @event = new UnturnedPlayerItemUpdatedEvent(player, page, index, jar);
+            var @event = new UnturnedPlayerItemUpdatedEvent(player, page, index, jar);
 
             Emit(@event);
         }

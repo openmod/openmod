@@ -4,6 +4,7 @@ using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using UnityEngine;
+// ReSharper disable DelegateSubtraction
 
 namespace OpenMod.Unturned.Players.Chat.Events
 {
@@ -13,7 +14,6 @@ namespace OpenMod.Unturned.Players.Chat.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -30,9 +30,12 @@ namespace OpenMod.Unturned.Players.Chat.Events
 
         private void OnChatted(SteamPlayer steamPlayer, EChatMode mode, ref Color color, ref bool isRich, string text, ref bool isVisible)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(steamPlayer);
+            var player = GetUnturnedPlayer(steamPlayer);
 
-            UnturnedPlayerChattingEvent @event = new UnturnedPlayerChattingEvent(player, mode, color, isRich, text);
+            var @event = new UnturnedPlayerChattingEvent(player, mode, color, isRich, text)
+            {
+                IsCancelled = !isVisible
+            };
 
             Emit(@event);
 
@@ -46,10 +49,10 @@ namespace OpenMod.Unturned.Players.Chat.Events
             // If nativeToPlayer is null, this event will be called again for each player
             if (nativeToPlayer == null) return;
 
-            UnturnedPlayer fromPlayer = GetUnturnedPlayer(nativeFromPlayer);
-            UnturnedPlayer toPlayer = GetUnturnedPlayer(nativeToPlayer);
+            var fromPlayer = GetUnturnedPlayer(nativeFromPlayer);
+            var toPlayer = GetUnturnedPlayer(nativeToPlayer);
 
-            UnturnedServerSendingMessageEvent @event = new UnturnedServerSendingMessageEvent(fromPlayer, toPlayer, text, color, mode, iconURL, useRichTextFormatting);
+            var @event = new UnturnedServerSendingMessageEvent(fromPlayer, toPlayer, text, color, mode, iconURL, useRichTextFormatting);
 
             Emit(@event);
 

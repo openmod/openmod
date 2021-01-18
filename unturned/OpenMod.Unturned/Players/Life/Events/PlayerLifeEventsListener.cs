@@ -9,6 +9,7 @@ using SDG.Unturned;
 using Steamworks;
 using System.Linq;
 using UnityEngine;
+// ReSharper disable DelegateSubtraction
 
 namespace OpenMod.Unturned.Players.Life.Events
 {
@@ -18,7 +19,6 @@ namespace OpenMod.Unturned.Players.Life.Events
             IEventBus eventBus,
             IUserManager userManager) : base(openModHost, eventBus, userManager)
         {
-
         }
 
         public override void Subscribe()
@@ -55,7 +55,7 @@ namespace OpenMod.Unturned.Players.Life.Events
             // TODO: Split DoDamage into all possible forms of damage to allow multiple IDamageSource inputs
             if (killer != CSteamID.Nil)
             {
-                CSteamID temp = killer;
+                var temp = killer;
 
                 source = GetUnturnedPlayer(Provider.clients.FirstOrDefault(
                     x => x.playerID.steamID == temp));
@@ -68,28 +68,23 @@ namespace OpenMod.Unturned.Players.Life.Events
             ref EDeathCause cause, ref ELimb limb,
             ref CSteamID killer, ref bool trackKill,
             ref Vector3 ragdoll, ref ERagdollEffect ragdollEffect,
-            ref bool canCauseBleeding, out bool cancel)
+            ref bool canCauseBleeding, ref bool cancel)
         {
             cancel = false;
 
             if (amount == 0 || nativePlayer.life.isDead) return;
 
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            IDamageSource source = GetDamageSource(player, amount, cause, limb, killer);
-
-            UnturnedPlayerDamagingEvent @event;
-
-            if (amount >= nativePlayer.life.health)
-            {
-                @event = new UnturnedPlayerDyingEvent(player, amount, cause, limb, killer,
+            var source = GetDamageSource(player, amount, cause, limb, killer);
+            
+            var @event = amount >= nativePlayer.life.health
+                ? new UnturnedPlayerDyingEvent(player, amount, cause, limb, killer,
+                    source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding)
+                : new UnturnedPlayerDamagingEvent(player, amount, cause, limb, killer,
                     source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding);
-            }
-            else
-            {
-                @event = new UnturnedPlayerDamagingEvent(player, amount, cause, limb, killer,
-                    source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding);
-            }
+
+            @event.IsCancelled = cancel;
 
             Emit(@event);
 
@@ -106,42 +101,40 @@ namespace OpenMod.Unturned.Players.Life.Events
 
         private void OnHurt(Player nativePlayer, byte damage, Vector3 force, EDeathCause cause, ELimb limb, CSteamID killer)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-            IDamageSource source = GetDamageSource(player, damage, cause, limb, killer);
+            var source = GetDamageSource(player, damage, cause, limb, killer);
 
-            UnturnedPlayerDamagedEvent @event =
-                new UnturnedPlayerDamagedEvent(player, damage, cause, limb, killer, source);
+            var @event = new UnturnedPlayerDamagedEvent(player, damage, cause, limb, killer, source);
 
             Emit(@event);
         }
 
         private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(sender.player);
+            var player = GetUnturnedPlayer(sender.player);
 
-            UnturnedPlayerDeathEvent @event = new UnturnedPlayerDeathEvent(player, cause, limb, instigator);
+            var @event = new UnturnedPlayerDeathEvent(player, cause, limb, instigator);
 
             Emit(@event);
         }
 
         private void OnPlayerLifeUpdated(Player nativePlayer)
         {
-            if (!nativePlayer.life.isDead)
-            {
-                UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+            if (nativePlayer.life.isDead) return;
 
-                UnturnedPlayerRevivedEvent @event = new UnturnedPlayerRevivedEvent(player);
+            var player = GetUnturnedPlayer(nativePlayer);
 
-                Emit(@event);
-            }
+            var @event = new UnturnedPlayerRevivedEvent(player);
+
+            Emit(@event);
         }
 
         private delegate void DoDamageHandler(Player player, ref byte amount,
             ref EDeathCause cause, ref ELimb limb,
             ref CSteamID killer, ref bool trackKill,
             ref Vector3 ragdoll, ref ERagdollEffect ragdollEffect,
-            ref bool canCauseBleeding, out bool cancel);
+            ref bool canCauseBleeding, ref bool cancel);
 
         private static event DoDamageHandler OnDoDamage;
 
@@ -157,13 +150,13 @@ namespace OpenMod.Unturned.Players.Life.Events
                 ref Vector3 newRagdoll, ref ERagdollEffect newRagdollEffect,
                 ref bool canCauseBleeding)
             {
-                bool cancel = false;
+                var cancel = false;
 
                 OnDoDamage?.Invoke(__instance.player, ref amount,
                     ref newCause, ref newLimb,
                     ref newKiller, ref trackKill,
                     ref newRagdoll, ref newRagdollEffect,
-                    ref canCauseBleeding, out cancel);
+                    ref canCauseBleeding, ref cancel);
 
                 return !cancel;
             }
