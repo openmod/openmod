@@ -1,16 +1,23 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using OpenMod.API.Eventing;
+﻿using OpenMod.API.Eventing;
 using OpenMod.Core.Eventing;
 using OpenMod.Unturned.RocketMod.Events;
 using SDG.Unturned;
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.RocketMod
 {
     public class RocketModLoadedEventListener : IEventListener<RocketModReadyEvent>
     {
+        private static readonly FieldInfo m_DelegatesField;
+
+        static RocketModLoadedEventListener()
+        {
+            m_DelegatesField = typeof(MulticastDelegate).GetField("delegates", BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+
         [EventListener]
         public Task HandleEventAsync(object sender, RocketModReadyEvent @event)
         {
@@ -20,17 +27,13 @@ namespace OpenMod.Unturned.RocketMod
 
         private void RemoveRocketCommandListeners()
         {
-            var onCommandWindowInputtedField = typeof(CommandWindow).GetField("onCommandWindowInputted");
-            var onCommandWindowInputted = (CommandWindowInputted) onCommandWindowInputtedField.GetValue(null);
+            var onCommandWindowInputted = CommandWindow.onCommandWindowInputted;
 
-            var newInvocationList = onCommandWindowInputted.GetInvocationList()
+            var newInvocationArray = onCommandWindowInputted.GetInvocationList()
                 .Where(d => !d.GetMethodInfo().Name.Equals("<bindDelegates>b__16_0"))
-                .ToList();
+                .ToArray();
 
-            var invocationListField = onCommandWindowInputted.GetType().GetField("_invocationList", BindingFlags.NonPublic | BindingFlags.Instance);
-            var invocationListCountField = onCommandWindowInputted.GetType().GetField("_invocationCount", BindingFlags.NonPublic | BindingFlags.Instance);
-            invocationListField.SetValue(onCommandWindowInputted, new object[] { newInvocationList });
-            invocationListCountField.SetValue(onCommandWindowInputted, (IntPtr)newInvocationList.Count);
+            m_DelegatesField.SetValue(onCommandWindowInputted, newInvocationArray);
         }
     }
 }
