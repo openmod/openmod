@@ -1,10 +1,14 @@
-﻿namespace OpenMod.Unturned.Building.Events
+﻿using OpenMod.Unturned.Players;
+using Steamworks;
+
+namespace OpenMod.Unturned.Building.Events
 {
     public class UnturnedStructureSalvagingEvent : UnturnedBuildableSalvagingEvent, IUnturnedStructureEvent
     {
         public new UnturnedStructureBuildable Buildable => (UnturnedStructureBuildable)base.Buildable;
 
-        public UnturnedStructureSalvagingEvent(UnturnedStructureBuildable buildable) : base(buildable)
+        public UnturnedStructureSalvagingEvent(UnturnedBuildable buildable, UnturnedPlayer instigator,
+            CSteamID instigatorSteamId) : base(buildable, instigator, instigatorSteamId)
         {
         }
     }

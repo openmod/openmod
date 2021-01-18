@@ -76,7 +76,7 @@ namespace OpenMod.Unturned.Building.Events
             var data = region.barricades[index];
             var buildable = new UnturnedBarricadeBuildable(data, drop);
 
-            var nativePlayer = Provider.clients.FirstOrDefault(x => x?.playerID.steamID == instigatorSteamId)?.player;
+            var nativePlayer = PlayerTool.getPlayer(instigatorSteamId);
             var player = GetUnturnedPlayer(nativePlayer);
 
             var @event = pendingTotalDamage >= buildable.State.Health
@@ -104,7 +104,7 @@ namespace OpenMod.Unturned.Building.Events
                 var data = region.structures[index];
                 var buildable = new UnturnedStructureBuildable(data, drop);
 
-                var nativePlayer = Provider.clients.FirstOrDefault(x => x?.playerID.steamID == instigatorSteamId)?.player;
+                var nativePlayer = PlayerTool.getPlayer(instigatorSteamId);
                 var player = GetUnturnedPlayer(nativePlayer);
 
                 var @event = pendingTotalDamage >= buildable.State.Health
@@ -146,7 +146,10 @@ namespace OpenMod.Unturned.Building.Events
             var data = region.barricades[index];
             var drop = region.drops[index];
 
-            var @event = new UnturnedBarricadeSalvagingEvent(new UnturnedBarricadeBuildable(data, drop))
+            var nativePlayer = PlayerTool.getPlayer(steamId);
+            var player = GetUnturnedPlayer(nativePlayer);
+
+            var @event = new UnturnedBarricadeSalvagingEvent(new UnturnedBarricadeBuildable(data, drop), player, steamId)
             {
                 IsCancelled = !shouldAllow
             };
@@ -166,7 +169,10 @@ namespace OpenMod.Unturned.Building.Events
             var data = region.structures[index];
             var drop = region.drops[index];
 
-            var @event = new UnturnedStructureSalvagingEvent(new UnturnedStructureBuildable(data, drop))
+            var nativePlayer = PlayerTool.getPlayer(steamId);
+            var player = GetUnturnedPlayer(nativePlayer);
+
+            var @event = new UnturnedStructureSalvagingEvent(new UnturnedStructureBuildable(data, drop), player, steamId)
             {
                 IsCancelled = !shouldAllow
             };
@@ -202,7 +208,7 @@ namespace OpenMod.Unturned.Building.Events
             var data = region.barricades[index];
             var drop = region.drops[index];
 
-            var nativePlayer = Provider.clients.FirstOrDefault(cl => cl?.playerID.steamID == instigator)?.player;
+            var nativePlayer = PlayerTool.getPlayer(instigator);
             var player = GetUnturnedPlayer(nativePlayer);
 
             var @event = new UnturnedBarricadeTransformingEvent(
@@ -235,9 +241,8 @@ namespace OpenMod.Unturned.Building.Events
             var index = region.structures.FindIndex(k => k.instanceID == instanceId);
             var data = region.structures[index];
             var drop = region.drops[index];
-
-            var nativePlayer = Provider.clients.FirstOrDefault(cl => cl?.playerID.steamID == instigator)?.player;
-
+            
+            var nativePlayer = PlayerTool.getPlayer(instigator);
             var player = GetUnturnedPlayer(nativePlayer);
 
             var @event = new UnturnedStructureTransformingEvent(
@@ -259,17 +264,25 @@ namespace OpenMod.Unturned.Building.Events
             angleZ = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2);
         }
 
-        private void Events_OnBarricadeTransformed(BarricadeData data, BarricadeDrop drop)
+        private void Events_OnBarricadeTransformed(BarricadeData data, BarricadeDrop drop, CSteamID instigatorSteamId)
         {
-            var @event =
-                new UnturnedBarricadeTransformedEvent(new UnturnedBarricadeBuildable(data, drop));
+            var nativePlayer = PlayerTool.getPlayer(instigatorSteamId);
+            var player = GetUnturnedPlayer(nativePlayer);
+
+            var @event = new UnturnedBarricadeTransformedEvent(new UnturnedBarricadeBuildable(data, drop),
+                instigatorSteamId, player);
+
             Emit(@event);
         }
 
-        private void Events_OnStructureTransformed(StructureData data, StructureDrop drop)
+        private void Events_OnStructureTransformed(StructureData data, StructureDrop drop, CSteamID instigatorSteamId)
         {
-            var @event =
-                new UnturnedStructureTransformedEvent(new UnturnedStructureBuildable(data, drop));
+            var nativePlayer = PlayerTool.getPlayer(instigatorSteamId);
+            var player = GetUnturnedPlayer(nativePlayer);
+
+            var @event = new UnturnedStructureTransformedEvent(new UnturnedStructureBuildable(data, drop),
+                instigatorSteamId, player);
+
             Emit(@event);
         }
 
@@ -285,11 +298,13 @@ namespace OpenMod.Unturned.Building.Events
         private delegate void StructureDestroyed(StructureData data, StructureDrop drop);
         private static event StructureDestroyed OnStructureDestroyed;
 
-        private delegate void BarricadeTransformed(BarricadeData data, BarricadeDrop drop);
+        private delegate void BarricadeTransformed(BarricadeData data, BarricadeDrop drop, CSteamID instigatorSteamId);
         private static event BarricadeTransformed OnBarricadeTransformed;
 
-        private delegate void StructureTransformed(StructureData data, StructureDrop drop);
+        private delegate void StructureTransformed(StructureData data, StructureDrop drop, CSteamID instigatorSteamId);
         private static event StructureTransformed OnStructureTransformed;
+
+        private static CSteamID CurrentTransformingPlayerId = CSteamID.Nil;
 
         [HarmonyPatch]
         // ReSharper disable once UnusedType.Local
@@ -364,6 +379,33 @@ namespace OpenMod.Unturned.Building.Events
                 OnStructureDestroyed?.Invoke(data, drop);
             }
 
+            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.askTransformBarricade))]
+            [HarmonyPrefix]
+            private static void PreAskTransformBarricade(CSteamID steamID)
+            {
+                CurrentTransformingPlayerId = steamID;
+            }
+
+            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.askTransformBarricade))]
+            [HarmonyPostfix]
+            private static void PostAskTransformBarricade()
+            {
+                CurrentTransformingPlayerId = CSteamID.Nil;
+            }
+
+            [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.askTransformStructure))]
+            [HarmonyPrefix]
+            private static void PreAskTransformStructure(CSteamID steamID)
+            {
+                CurrentTransformingPlayerId = steamID;
+            }
+
+            [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.askTransformStructure))]
+            [HarmonyPostfix]
+            private static void PostAskTransformStructure()
+            {
+                CurrentTransformingPlayerId = CSteamID.Nil;
+            }
 
             [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.tellTransformBarricade))]
             [HarmonyPostfix]
@@ -381,7 +423,7 @@ namespace OpenMod.Unturned.Building.Events
                 var data = region.barricades[index];
                 var drop = region.drops[index];
 
-                OnBarricadeTransformed?.Invoke(data, drop);
+                OnBarricadeTransformed?.Invoke(data, drop, CurrentTransformingPlayerId);
             }
 
             [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.tellTransformStructure))]
@@ -400,7 +442,7 @@ namespace OpenMod.Unturned.Building.Events
                 var data = region.structures[index];
                 var drop = region.drops[index];
 
-                OnStructureTransformed?.Invoke(data, drop);
+                OnStructureTransformed?.Invoke(data, drop, CurrentTransformingPlayerId);
             }
         }
     }
