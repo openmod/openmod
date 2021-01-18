@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
@@ -18,13 +19,17 @@ namespace OpenMod.Core.Commands
         public const string CommandsKey = "commands";
         private readonly IDataStore m_DataStore;
         private readonly IRuntime m_Runtime;
+        private readonly ILogger<CommandDataStore> m_Logger;
         private IDisposable m_ChangeWatcher;
         private RegisteredCommandsData m_Cache;
 
-        public CommandDataStore(IOpenModDataStoreAccessor dataStoreAccessor, IRuntime runtime)
+        public CommandDataStore(IOpenModDataStoreAccessor dataStoreAccessor, 
+            IRuntime runtime, 
+            ILogger<CommandDataStore> logger)
         {
             m_DataStore = dataStoreAccessor.DataStore;
             m_Runtime = runtime;
+            m_Logger = logger;
         }
 
         public async Task<RegisteredCommandData> GetRegisteredCommandAsync(string commandId)
@@ -87,7 +92,11 @@ namespace OpenMod.Core.Commands
             }
 
             m_Cache = await LoadCommandsFromDisk();
-            m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () => m_Cache = AsyncHelper.RunSync(LoadCommandsFromDisk));
+            m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () =>
+            {
+                m_Logger.LogInformation("Commands have been reloaded.");
+                m_Cache = AsyncHelper.RunSync(LoadCommandsFromDisk);
+            });
             return m_Cache;
         }
 

@@ -103,8 +103,6 @@ namespace OpenMod.Core.Users
 
         public async Task SetUserDataAsync(UserData userData)
         {
-            m_Logger.LogDebug("SetUserDataAsync for user: " + userData.Id + "\n" + new StackTrace());
-
             var usersData = await GetUsersDataAsync();
             var idx = usersData.Users.FindIndex(c =>
                 c.Type.Equals(userData.Type, StringComparison.OrdinalIgnoreCase) &&
