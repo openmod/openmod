@@ -1,4 +1,5 @@
 ﻿using OpenMod.Unturned.Players;
+using Steamworks;
 
 namespace OpenMod.Unturned.Building.Events
 {
@@ -6,8 +7,8 @@ namespace OpenMod.Unturned.Building.Events
     {
         public new UnturnedBarricadeBuildable Buildable => (UnturnedBarricadeBuildable)base.Buildable;
 
-        public UnturnedBarricadeSalvagingEvent(UnturnedBarricadeBuildable buildable, UnturnedPlayer instigator)
-            : base(buildable, instigator)
+        public UnturnedBarricadeSalvagingEvent(UnturnedBuildable buildable, UnturnedPlayer instigator,
+            CSteamID instigatorSteamId) : base(buildable, instigator, instigatorSteamId)
         {
         }
     }

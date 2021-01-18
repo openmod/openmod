@@ -149,7 +149,7 @@ namespace OpenMod.Unturned.Building.Events
             var nativePlayer = PlayerTool.getPlayer(steamId);
             var player = GetUnturnedPlayer(nativePlayer);
 
-            var @event = new UnturnedBarricadeSalvagingEvent(new UnturnedBarricadeBuildable(data, drop), player)
+            var @event = new UnturnedBarricadeSalvagingEvent(new UnturnedBarricadeBuildable(data, drop), player, steamId)
             {
                 IsCancelled = !shouldAllow
             };
@@ -172,7 +172,7 @@ namespace OpenMod.Unturned.Building.Events
             var nativePlayer = PlayerTool.getPlayer(steamId);
             var player = GetUnturnedPlayer(nativePlayer);
 
-            var @event = new UnturnedStructureSalvagingEvent(new UnturnedStructureBuildable(data, drop), player)
+            var @event = new UnturnedStructureSalvagingEvent(new UnturnedStructureBuildable(data, drop), player, steamId)
             {
                 IsCancelled = !shouldAllow
             };
