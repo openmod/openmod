@@ -23,9 +23,9 @@ namespace OpenMod.Unturned.Items
             s_InstanceCountField = typeof(ItemManager).GetField("instanceCount", BindingFlags.Static | BindingFlags.NonPublic);
         }
 
-        public Task<IInventoryItem> GiveItemAsync(IInventory inventory, string itemId, IItemState state = null)
+        public Task<IItemObject> GiveItemAsync(IInventory inventory, string itemId, IItemState state = null)
         {
-            async UniTask<IInventoryItem> GiveItemTask()
+            async UniTask<IItemObject> GiveItemTask()
             {
                 ValidateState(state);
 
@@ -46,8 +46,7 @@ namespace OpenMod.Unturned.Items
 
                     if (!TryAddItem(item, playerInventory, out var itemJar))
                     {
-                        var (drop, _) = DropItem(item, playerInventory.Player.transform.position.ToSystemVector());
-                        itemJar = drop.interactableItem.jar;
+                        return DropItem(item, playerInventory.Player.transform.position.ToSystemVector());
                     }
 
                     return new UnturnedInventoryItem(itemJar, new UnturnedItem(item));
@@ -146,26 +145,20 @@ namespace OpenMod.Unturned.Items
                     return null;
                 }
 
-                var droppedItem = DropItem(item, position);
-                if (droppedItem.drop == null)
-                {
-                    return null;
-                }
-
-                return new UnturnedItemDrop(droppedItem.region, droppedItem.drop);
+                return DropItem(item, position);
             }
 
             return SpawnItemTask().AsTask();
         }
 
         // similar to ItemManager.dropItem but with some useful return values
-        private (ItemDrop drop, ItemRegion region) DropItem(Item item, Vector3 position)
+        private UnturnedItemDrop DropItem(Item item, Vector3 position)
         {
             var point = position.ToUnityVector();
 
             if (!Regions.tryGetCoordinate(point, out var x, out var y))
             {
-                return (null, null);
+                return null;
             }
 
             if (point.y > 0.0)
@@ -182,7 +175,7 @@ namespace OpenMod.Unturned.Items
             ItemManager.onServerSpawningItemDrop?.Invoke(item, ref point, ref shouldAllow);
             if (!shouldAllow)
             {
-                return (null, null);
+                return null;
             }
 
             EffectManager.sendEffect(6, EffectManager.SMALL, point);
@@ -199,8 +192,7 @@ namespace OpenMod.Unturned.Items
                 ESteamPacket.UPDATE_RELIABLE_BUFFER, x, y, item.id,
                 item.amount, item.quality, item.state, point, itemData.instanceID);
 
-            var drop = region.drops[region.drops.Count - 1];
-            return (drop, region);
+            return new UnturnedItemDrop(region, itemData);
         }
 
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local

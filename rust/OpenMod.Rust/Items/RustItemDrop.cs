@@ -1,13 +1,20 @@
+using System.Numerics;
 using System.Threading.Tasks;
+using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Items;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
 using OpenMod.Rust.Transforms;
 
 namespace OpenMod.Rust.Items
 {
-    public class RustItemDrop : IItemDrop
+    public class RustItemDrop : IItemDrop, IGameObject
     {
         public RustItem Item { get; }
+
+        public Vector3 Position
+        {
+            get { return Transform.Position; }
+        }
 
         public DroppedItem DroppedItem { get; }
 
@@ -18,7 +25,7 @@ namespace OpenMod.Rust.Items
             Transform = new RustNetworkableTransform(droppedItem);
         }
 
-        IItem IItemDrop.Item
+        IItem IItemObject.Item
         {
             get { return Item; }
         }

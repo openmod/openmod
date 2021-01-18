@@ -13,7 +13,7 @@ namespace OpenMod.Rust.Items
             Item = item;
         }
 
-        IItem IInventoryItem.Item
+        IItem IItemObject.Item
         {
             get { return Item; }
         }

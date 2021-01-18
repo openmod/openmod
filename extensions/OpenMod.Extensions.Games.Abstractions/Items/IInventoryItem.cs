@@ -2,10 +2,8 @@
 
 namespace OpenMod.Extensions.Games.Abstractions.Items
 {
-    public interface IInventoryItem
+    public interface IInventoryItem : IItemObject
     {
-        IItem Item { get; }
-
         Task DropAsync();
 
         Task DestroyAsync();
