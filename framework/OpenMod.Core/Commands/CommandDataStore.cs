@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
+using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
@@ -19,16 +20,19 @@ namespace OpenMod.Core.Commands
         public const string CommandsKey = "commands";
         private readonly IDataStore m_DataStore;
         private readonly IRuntime m_Runtime;
+        private readonly Lazy<ICommandStore> m_CommandStore;
         private readonly ILogger<CommandDataStore> m_Logger;
         private IDisposable m_ChangeWatcher;
         private RegisteredCommandsData m_Cache;
 
         public CommandDataStore(IOpenModDataStoreAccessor dataStoreAccessor, 
             IRuntime runtime, 
+            Lazy<ICommandStore> commandStore,
             ILogger<CommandDataStore> logger)
         {
             m_DataStore = dataStoreAccessor.DataStore;
             m_Runtime = runtime;
+            m_CommandStore = commandStore;
             m_Logger = logger;
         }
 
@@ -109,9 +113,13 @@ namespace OpenMod.Core.Commands
                 if ((commandsData?.Commands?.Count ?? 0) != 0)
                     return commandsData;
             }
+            else
+            {
+                commandsData = GetDefaultCommandsData();
+                await m_DataStore.SaveAsync(CommandsKey, m_Cache);
+            }
 
-            commandsData = GetDefaultCommandsData();
-            await m_DataStore.SaveAsync(CommandsKey, m_Cache);
+            await m_CommandStore.Value.InvalidateAsync();
             return commandsData;
         }
 
