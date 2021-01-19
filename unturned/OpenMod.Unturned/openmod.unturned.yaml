@@ -3,15 +3,15 @@ advertisePlugins: true
 
 # Configuration for RocketMod integration. Will have no effects if RocketMod is not installed.
 # RocketMod must be installed as a separate module for these to work. If using the legacy OpenMod RocketMod Bridge these will not work.
-rocketModIntegration:
-  # Set the permission system to use
+rocketmodIntegration:
+  # Sets the permission system to use
   # Available values:
   # - RocketMod: OpenMod will use RocketMod's permission system (default)
   # - OpenMod:   RocketMod will use OpenMod's permission system
   # - Separate:  OpenMod and RocketMod will not have synced permissions
   permissionSystem: RocketMod 
 
-  # Set the economy system to use
+  # Sets the economy system to use
   # Available values:
   # - RocketMod_Uconomy: OpenMod will use Uconomy for its economy system (default)
   # - OpenMod_Uconomy:   The installed OpenMod economy plugin will replace Uconomy

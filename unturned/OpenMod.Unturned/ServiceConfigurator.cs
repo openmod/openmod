@@ -23,9 +23,9 @@ namespace OpenMod.Unturned
     {
         public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
         {
-            var configuration = new OpenModUnturnedConfiguration(openModStartupContext.Runtime.WorkingDirectory);
+            var unturnedConfiguration = new OpenModUnturnedConfiguration(openModStartupContext.Runtime.WorkingDirectory);
 
-            serviceCollection.AddSingleton<IOpenModUnturnedConfiguration>(configuration);
+            serviceCollection.AddSingleton<IOpenModUnturnedConfiguration>(unturnedConfiguration);
 
             serviceCollection.Configure<PermissionCheckerOptions>(options =>
             {
@@ -47,18 +47,23 @@ namespace OpenMod.Unturned
                 options.AddCommandParameterResolveProvider<UnturnedPlayerCommandParameterResolveProvider>();
             });
 
-            var permissionSystem = configuration.Configuration
-                .GetSection("rocketModIntegration:permissionSystem")
-                .Get<string>();
-
-            if (RocketModIntegration.IsRocketModInstalled() && permissionSystem.Equals("RocketMod", StringComparison.OrdinalIgnoreCase))
+            if (RocketModIntegration.IsRocketModInstalled())
             {
-                serviceCollection.Configure<PermissionCheckerOptions>(options =>
-                {
-                    options.AddPermissionSource<RocketPermissionStore>();
-                });
+                serviceCollection.AddSingleton<IRocketModComponent, RocketModComponent>();
 
-                serviceCollection.AddTransient<IPermissionRoleStore, RocketPermissionRoleStore>();
+                var permissionSystem = unturnedConfiguration.Configuration
+                    .GetSection("rocketmodIntegration:permissionSystem")
+                    .Get<string>();
+
+                if (permissionSystem.Equals("RocketMod", StringComparison.OrdinalIgnoreCase))
+                {
+                    serviceCollection.Configure<PermissionCheckerOptions>(options =>
+                    {
+                        options.AddPermissionSource<RocketPermissionStore>();
+                    });
+
+                    serviceCollection.AddTransient<IPermissionRoleStore, RocketPermissionRoleStore>();
+                }
             }
 
             serviceCollection.AddSingleton<UnturnedCommandHandler>();

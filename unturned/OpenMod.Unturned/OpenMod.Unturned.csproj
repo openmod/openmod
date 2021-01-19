@@ -37,8 +37,4 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="RocketMod\Logging\" />
-  </ItemGroup>
-
 </Project>
