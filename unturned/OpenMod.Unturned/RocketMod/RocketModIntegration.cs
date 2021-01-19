@@ -198,5 +198,12 @@ namespace OpenMod.Unturned.RocketMod
             s_Installed = false;
             s_HarmonyInstance.UnpatchAll(c_HarmonyId);
         }
+
+        public static bool IsRocketModAssembly(Assembly assembly)
+        {
+            return IsRocketModUnturnedAssembly(assembly)
+                   || IsRocketModCoreAssembly(assembly)
+                   || IsRocketModApiAssembly(assembly);
+        }
     }
 }
