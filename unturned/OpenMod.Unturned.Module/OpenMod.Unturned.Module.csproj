@@ -6,6 +6,10 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
 
+  <PropertyGroup>
+    <PackageLicenseExpression>EUPL-1.2 AND MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\framework\OpenMod.Bootstrapper\OpenMod.Bootstrapper.csproj" />
     <ProjectReference Include="..\OpenMod.Unturned.Module.Shared\OpenMod.Unturned.Module.Shared.csproj" />
