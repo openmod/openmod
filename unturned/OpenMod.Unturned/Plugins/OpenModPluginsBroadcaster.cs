@@ -36,7 +36,7 @@ namespace OpenMod.Unturned.Plugins
 
         Task IEventListener<PluginLoadedEvent>.HandleEventAsync(object sender, PluginLoadedEvent @event)
         {
-            var advertisePlugins = m_UnturnedConfiguration.Configuration.GetSection("broadcastPlugins").Get<bool>();
+            var advertisePlugins = m_UnturnedConfiguration.Configuration.GetSection("advertisePlugins").Get<bool>();
             if (advertisePlugins)
             {
                 PluginAdvertising.Get().AddPlugin(@event.Plugin.DisplayName);
