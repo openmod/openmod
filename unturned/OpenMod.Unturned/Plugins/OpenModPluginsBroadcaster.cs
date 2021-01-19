@@ -1,12 +1,14 @@
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Eventing;
 using OpenMod.Core.Plugins.Events;
+using OpenMod.Unturned.Configuration;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Plugins
@@ -16,8 +18,13 @@ namespace OpenMod.Unturned.Plugins
     [EventListenerLifetime(ServiceLifetime.Singleton)]
     public class OpenModPluginsBroadcaster : IEventListener<PluginLoadedEvent>, IEventListener<PluginUnloadedEvent>
     {
-        public OpenModPluginsBroadcaster(IPluginActivator pluginActivator)
+        private readonly IOpenModUnturnedConfiguration m_UnturnedConfiguration;
+
+        public OpenModPluginsBroadcaster(
+            IPluginActivator pluginActivator, 
+            IOpenModUnturnedConfiguration unturnedConfiguration)
         {
+            m_UnturnedConfiguration = unturnedConfiguration;
             var pluginAdvertising = PluginAdvertising.Get();
             pluginAdvertising.PluginFrameworkName = "openmod";
 
@@ -29,7 +36,12 @@ namespace OpenMod.Unturned.Plugins
 
         Task IEventListener<PluginLoadedEvent>.HandleEventAsync(object sender, PluginLoadedEvent @event)
         {
-            PluginAdvertising.Get().AddPlugin(@event.Plugin.DisplayName);
+            var advertisePlugins = m_UnturnedConfiguration.Configuration.GetSection("broadcastPlugins").Get<bool>();
+            if (advertisePlugins)
+            {
+                PluginAdvertising.Get().AddPlugin(@event.Plugin.DisplayName);
+            }
+
             return Task.CompletedTask;
         }
 
