@@ -38,10 +38,10 @@ namespace OpenMod.Unturned
         private readonly IHostInformation m_HostInformation;
         private readonly IServiceProvider m_ServiceProvider;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
-        private readonly ICommandExecutor m_CommandExecutor;
+        private readonly Lazy<ICommandExecutor> m_CommandExecutor;
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
         private readonly Lazy<IEventBus> m_EventBus;
-        private readonly UnturnedCommandHandler m_UnturnedCommandHandler;
+        private readonly Lazy<UnturnedCommandHandler> m_UnturnedCommandHandler;
         private List<ICommandInputOutput> m_IoHandlers;
         private OpenModConsoleInputOutput m_OpenModIoHandler;
         private readonly HashSet<string> m_Capabilities;
@@ -69,10 +69,10 @@ namespace OpenMod.Unturned
             ILifetimeScope lifetimeScope,
             IDataStoreFactory dataStoreFactory,
             IConsoleActorAccessor consoleActorAccessor,
-            ICommandExecutor commandExecutor,
             ILogger<OpenModUnturnedHost> logger,
+            Lazy<ICommandExecutor> commandExecutor,
             Lazy<IEventBus> eventBus,
-            UnturnedCommandHandler unturnedCommandHandler)
+            Lazy<UnturnedCommandHandler> unturnedCommandHandler)
         {
             m_HostInformation = hostInformation;
             m_ServiceProvider = serviceProvider;
@@ -122,7 +122,7 @@ namespace OpenMod.Unturned
             m_Harmony = new Harmony(OpenModComponentId);
             m_Harmony.PatchAll(GetType().Assembly);
 
-            m_UnturnedCommandHandler.Subscribe();
+            m_UnturnedCommandHandler.Value.Subscribe();
             BindUnturnedEvents();
 
             var ioHandlers = (List<ICommandInputOutput>)typeof(CommandWindow)
@@ -249,7 +249,7 @@ namespace OpenMod.Unturned
             }
 
             AsyncHelper.Schedule("Console command execution",
-                () => m_CommandExecutor.ExecuteAsync(actor, args, string.Empty));
+                () => m_CommandExecutor.Value.ExecuteAsync(actor, args, string.Empty));
         }
 
         public Task ShutdownAsync()
