@@ -1,8 +1,11 @@
 ﻿extern alias JetBrainsAnnotations;
 using System;
+using Autofac;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.Core.Commands;
@@ -35,6 +38,9 @@ namespace OpenMod.Unturned
             serviceCollection.Configure<CommandStoreOptions>(options =>
             {
                 options.AddCommandSource<UnturnedCommandSource>();
+                var logger = openModStartupContext.LoggerFactory.CreateLogger<OpenModComponentCommandSource>();
+                var host = openModStartupContext.Runtime.LifetimeScope.Resolve<IOpenModHost>();
+                options.AddCommandSource(new OpenModComponentCommandSource(logger, host, typeof(OpenModUnturnedHost).Assembly));
             });
 
             serviceCollection.Configure<UserManagerOptions>(options =>
