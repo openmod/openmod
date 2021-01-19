@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,11 +20,15 @@ using Rocket.Unturned.Player;
 namespace OpenMod.Unturned.RocketMod.Commands
 {
     [EventListenerLifetime(ServiceLifetime.Transient)]
-    public class CommandEventListener : IEventListener<CommandExecutedEvent>
+    public class RocketModCommandEventListener : IEventListener<CommandExecutedEvent>
     {
+        private const string s_RocketPrefix = "rocket:";
         private static readonly MethodInfo s_CheckPermissionsMethod;
-        static CommandEventListener()
+        private static readonly Regex s_PrefixRegex;
+
+        static RocketModCommandEventListener()
         {
+            s_PrefixRegex = new Regex(Regex.Escape(s_RocketPrefix));
             s_CheckPermissionsMethod = typeof(UnturnedPermissions)
                 .GetMethod("CheckPermissions", BindingFlags.Static | BindingFlags.NonPublic);
         }
@@ -35,7 +40,6 @@ namespace OpenMod.Unturned.RocketMod.Commands
             {
                 // RocketMod commands must run on main thread
                 await UniTask.SwitchToMainThread();
-                const string rocketPrefix = "rocket:";
 
                 if (@event.CommandContext.Exception is CommandNotFoundException && R.Commands != null)
                 {
@@ -45,9 +49,10 @@ namespace OpenMod.Unturned.RocketMod.Commands
                         return;
                     }
 
-                    if (commandAlias.StartsWith(rocketPrefix))
+                    var isRocketPrefixed = commandAlias.StartsWith(s_RocketPrefix);
+                    if (isRocketPrefixed)
                     {
-                        commandAlias = commandAlias.Replace(rocketPrefix, string.Empty);
+                        commandAlias = s_PrefixRegex.Replace(commandAlias, string.Empty, 1);
                     }
 
                     IRocketPlayer rocketPlayer;
@@ -79,10 +84,13 @@ namespace OpenMod.Unturned.RocketMod.Commands
                         return;
                     }
 
-                    var args = new List<string> { commandAlias };
-                    args.AddRange(@event.CommandContext.Parameters);
+                    var commandLine = @event.CommandContext.GetCommandLine();
+                    if (isRocketPrefixed)
+                    {
+                        commandLine = s_PrefixRegex.Replace(commandLine, string.Empty, count: 1);
+                    }
 
-                    R.Commands.Execute(rocketPlayer, @event.CommandContext.GetCommandLine());
+                    R.Commands.Execute(rocketPlayer, commandLine);
                     @event.ExceptionHandled = true;
                 }
             }
