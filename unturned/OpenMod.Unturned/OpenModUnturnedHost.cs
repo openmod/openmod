@@ -23,7 +23,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenMod.API.Eventing;
-using OpenMod.API.Plugins;
+using OpenMod.Unturned.Configuration;
 using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.RocketMod.Events;
 using UnityEngine.LowLevel;
@@ -35,6 +35,7 @@ namespace OpenMod.Unturned
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
         private static bool s_UniTaskInited;
+        private readonly IOpenModUnturnedConfiguration m_UnturnedConfiguration;
         private readonly IHostInformation m_HostInformation;
         private readonly IServiceProvider m_ServiceProvider;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
@@ -64,6 +65,7 @@ namespace OpenMod.Unturned
 
         public OpenModUnturnedHost(
             IRuntime runtime,
+            IOpenModUnturnedConfiguration unturnedConfiguration,
             IHostInformation hostInformation,
             IServiceProvider serviceProvider,
             ILifetimeScope lifetimeScope,
@@ -74,6 +76,7 @@ namespace OpenMod.Unturned
             Lazy<IEventBus> eventBus,
             Lazy<UnturnedCommandHandler> unturnedCommandHandler)
         {
+            m_UnturnedConfiguration = unturnedConfiguration;
             m_HostInformation = hostInformation;
             m_ServiceProvider = serviceProvider;
             m_ConsoleActorAccessor = consoleActorAccessor;
