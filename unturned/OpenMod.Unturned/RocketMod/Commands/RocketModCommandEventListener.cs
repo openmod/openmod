@@ -33,7 +33,7 @@ namespace OpenMod.Unturned.RocketMod.Commands
                 .GetMethod("CheckPermissions", BindingFlags.Static | BindingFlags.NonPublic);
         }
 
-        [EventListener(Priority = EventListenerPriority.Highest)]
+        [EventListener(Priority = EventListenerPriority.Monitor)]
         public Task HandleEventAsync(object emitter, CommandExecutedEvent @event)
         {
             async UniTask Task()
