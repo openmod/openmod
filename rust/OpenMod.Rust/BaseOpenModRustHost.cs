@@ -72,8 +72,13 @@ namespace OpenMod.Rust
 
         public Task ShutdownAsync()
         {
-            Application.Quit();
-            return Task.CompletedTask;
+            async UniTask ShutdownTask()
+            {
+                await UniTask.SwitchToMainThread();
+                Application.Quit();
+            }
+
+            return ShutdownTask().AsTask();
         }
 
         public bool HasCapability(string capability)

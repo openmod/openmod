@@ -254,8 +254,13 @@ namespace OpenMod.Unturned
 
         public Task ShutdownAsync()
         {
-            Provider.shutdown();
-            return Task.CompletedTask;
+            async UniTask ShutdownTask()
+            {
+                await UniTask.SwitchToMainThread();
+                Provider.shutdown();
+            }
+
+            return ShutdownTask().AsTask();
         }
 
         public void Dispose()
