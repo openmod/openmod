@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.IO.Compression;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using OpenMod.API;
 using OpenMod.Common.Hotloading;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Commands.OpenModCommands;
 using SDG.Framework.Modules;
 using SDG.Unturned;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Command = OpenMod.Core.Commands.Command;
 
 namespace OpenMod.Unturned.Commands
@@ -22,27 +23,39 @@ namespace OpenMod.Unturned.Commands
     public class CommandOpenModUpgrade : Command
     {
         private readonly IRuntime m_Runtime;
+        private readonly IHostInformation m_HostInformation;
 
-        public CommandOpenModUpgrade(
-            IServiceProvider serviceProvider,
-            IRuntime runtime) : base(serviceProvider)
+        public CommandOpenModUpgrade(IServiceProvider serviceProvider, IRuntime runtime,
+            IHostInformation hostInformation) : base(serviceProvider)
         {
             m_Runtime = runtime;
+            m_HostInformation = hostInformation;
         }
+
+        private static readonly string[] s_IgnoredNameFiles =
+        {
+            "0Harmony.dll",
+            "OpenMod.Common.dll",
+            "OpenMod.Unturned.Module.dll",
+            "OpenMod.Unturned.Module.Shared.dll",
+            "System.Runtime.InteropServices.RuntimeInformation.dll",
+            "Readme.txt"
+        };
 
         protected override async Task OnExecuteAsync()
         {
-            var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
+            var OpenModModulePath = Path.Combine(ReadWrite.PATH, "Modules", "OpenMod.Unturned");
 
             using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("User-Agent", "request");
+
             var releaseData = await client.GetStringAsync("https://api.github.com/repos/openmod/openmod/releases/latest");
             var release = JsonConvert.DeserializeObject<LatestRelease>(releaseData);
 
             var moduleAsset = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"));
-            if (moduleAsset == null)
+            if (moduleAsset == null || m_HostInformation.HostVersion.CompareTo(release.TagName) >= 0)
             {
-                // todo: enumerator other releases until it finds OpenMod.Unturned.Module
-                await PrintAsync($"No update found...");
+                await PrintAsync("No update found...");
                 return;
             }
 
@@ -51,11 +64,11 @@ namespace OpenMod.Unturned.Commands
             var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
 
             await PrintAsync("Extracting update...");
-            await ExtractArchiveAsync(stream, modulesDirectory);
+            await ExtractArchiveAsync(stream, OpenModModulePath);
 
             if (Hotloader.Enabled)
             {
-                var modulePath = Path.Combine(modulesDirectory, "OpenMod.Unturned", "OpenMod.Unturned.Module.dll");
+                var modulePath = Path.Combine(OpenModModulePath, "OpenMod.Unturned.Module.dll");
                 var moduleAssembly = Hotloader.LoadAssembly(File.ReadAllBytes(modulePath));
                 var moduleNexusType = moduleAssembly.GetType("OpenMod.Unturned.Module.OpenModUnturnedModule");
 
@@ -75,10 +88,7 @@ namespace OpenMod.Unturned.Commands
 
                     // set OpenModUnturnedModule.IsDynamicLoad to true
                     var isDynamicPropertySetter = moduleNexusType.GetProperty("IsDynamicLoad")?.GetSetMethod(true);
-                    if (isDynamicPropertySetter != null)
-                    {
-                        isDynamicPropertySetter.Invoke(nexus, new object[] { true });
-                    }
+                    isDynamicPropertySetter?.Invoke(nexus, new object[] { true });
 
                     nexus.initialize();
                 }
@@ -106,23 +116,19 @@ namespace OpenMod.Unturned.Commands
             using var zip = new ZipArchive(archiveStream);
             foreach (var file in zip.Entries)
             {
-                if (string.Equals(file.Name, "Readme.txt", StringComparison.Ordinal))
+                if (string.IsNullOrEmpty(file.Name)
+                    || s_IgnoredNameFiles.Contains(file.Name))
                 {
                     continue;
                 }
 
-                var path = Path.Combine(directory, Path.GetFileName(file.FullName));
+                var path = Path.Combine(directory, file.Name);
 
                 using var fileStream = file.Open();
                 using var ms = new MemoryStream();
 
                 await fileStream.CopyToAsync(ms);
                 ms.Seek(offset: 0, SeekOrigin.Begin);
-
-                if (File.Exists(path))
-                {
-                    File.Delete(path);
-                }
 
                 File.WriteAllBytes(path, ms.ToArray());
             }
@@ -132,6 +138,9 @@ namespace OpenMod.Unturned.Commands
         {
             [JsonProperty("assets")]
             public List<Asset> Assets { get; set; }
+
+            [JsonProperty("tag_name")]
+            public string TagName { get; set; }
         }
 
         private class Asset
