@@ -30,7 +30,6 @@
 
 namespace System.Drawing
 {
-
 	public enum KnownColor
 	{
 		ActiveBorder = 1,
