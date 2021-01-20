@@ -48,7 +48,6 @@ namespace OpenMod.Unturned
         private OpenModConsoleInputOutput m_OpenModIoHandler;
         private readonly HashSet<string> m_Capabilities;
         private UnturnedEventsActivator m_UnturnedEventsActivator;
-        private RocketModIntegration m_RocketModIntegration;
         private Harmony m_Harmony;
         private bool m_IsDisposing;
 
@@ -111,14 +110,8 @@ namespace OpenMod.Unturned
 
         public Task InitAsync()
         {
-            if (RocketModIntegration.IsRocketModUnturnedLoaded(out var rocketAssembly))
-            {
-                OnRocketModUnturnedLoaded(rocketAssembly);
-            }
-            else
-            {
-                AppDomain.CurrentDomain.AssemblyLoad += RocketModAssemblyLoadListener;
-            }
+            var rocketModIntegration = ActivatorUtilities.CreateInstance<RocketModIntegration>(m_ServiceProvider, this);
+            rocketModIntegration.Install();
 
             // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
@@ -202,28 +195,6 @@ namespace OpenMod.Unturned
             // ReSharper restore PossibleNullReferenceException
         }
 
-        private void OnRocketModUnturnedLoaded(Assembly assembly)
-        {
-            m_RocketModIntegration = ActivatorUtilities.CreateInstance<RocketModIntegration>(m_ServiceProvider, this);
-            m_RocketModIntegration.Install();
-
-            AsyncHelper.RunSync(async () =>
-            {
-                await m_EventBus.Value.EmitAsync(this, this,
-                    new RocketModLoadedEvent(assembly));
-            });
-        }
-
-        private void RocketModAssemblyLoadListener(object sender, AssemblyLoadEventArgs args)
-        {
-            if (!RocketModIntegration.IsRocketModUnturnedAssembly(args.LoadedAssembly))
-            {
-                return;
-            }
-
-            OnRocketModUnturnedLoaded(args.LoadedAssembly);
-        }
-
         protected virtual void BindUnturnedEvents()
         {
             CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
@@ -269,9 +240,6 @@ namespace OpenMod.Unturned
 
         public void Dispose()
         {
-            AppDomain.CurrentDomain.AssemblyLoad -= RocketModAssemblyLoadListener;
-            m_RocketModIntegration?.Dispose();
-
             if (m_IsDisposing)
             {
                 return;
