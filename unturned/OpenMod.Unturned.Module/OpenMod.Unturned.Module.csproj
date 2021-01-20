@@ -28,7 +28,6 @@
     </PackageReference>
   </ItemGroup>
 
-  <!-- Todo: Delete Assembly-CSharp, Assembly-CSharp-firstpass, UnityEngine and UnityEngine.CoreModule from output -->
   <Target Name="CopyModuleFiles" AfterTargets="AfterBuild">
     <ItemGroup>
       <ModuleFiles Include="$(MSBuildThisFileDirectory)Module\*.*" />
