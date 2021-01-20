@@ -5,11 +5,11 @@ on:
     tags:
       - "*"
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'rust/oxide/OpenMod.Rust.Oxide.Extension/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'rust/oxide/OpenMod.Rust.Oxide.Extension/**'
 

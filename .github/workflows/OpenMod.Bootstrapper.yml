@@ -5,12 +5,12 @@ on:
     tags:
       - "*"
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/OpenMod.Bootstrapper/**'
       - 'framework/OpenMod.NuGet/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/OpenMod.Bootstrapper/**'
       - 'framework/OpenMod.NuGet/**'

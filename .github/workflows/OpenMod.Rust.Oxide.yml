@@ -5,12 +5,12 @@ on:
     tags:
       - "*"
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'rust/oxide/OpenMod.Rust.Oxide/**'
       - 'rust/oxide/tests/OpenMod.Rust.Oxide.Tests/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'rust/oxide/OpenMod.Rust.Oxide/**'
       - 'rust/oxide/tests/OpenMod.Rust.Oxide.Tests/**'

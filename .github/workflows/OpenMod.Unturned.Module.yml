@@ -4,13 +4,13 @@ on:
   release:
     types: [published]
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/**'
       - 'unityengine/**'      
       - 'unturned/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/**'
       - 'unityengine/**'      

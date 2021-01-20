@@ -6,7 +6,7 @@ on:
     tags:
       - "*"
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'unityengine/redist/**'        
 

@@ -5,11 +5,11 @@ on:
     tags:
       - "*"
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/OpenMod.EntityFrameworkCore/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/OpenMod.EntityFrameworkCore/**'
 

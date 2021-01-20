@@ -3,11 +3,11 @@ name: OpenMod.Standalone
 on:
   release:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'standalone/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'standalone/**'
 

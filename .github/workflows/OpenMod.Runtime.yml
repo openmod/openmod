@@ -5,14 +5,14 @@ on:
     tags:
       - "*"
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/OpenMod.Runtime/**'
       - 'framework/OpenMod.Core/**'
       - 'framework/OpenMod.NuGet/**'
       - 'framework/OpenMod.API/**'      
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/OpenMod.Runtime/**'
       - 'framework/OpenMod.Core/**'

@@ -5,12 +5,12 @@ on:
     tags:
       - "*"
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/**'
       - 'unityengine/OpenMod.UnityEngine/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/**'    
       - 'unityengine/OpenMod.UnityEngine/**'

@@ -5,13 +5,13 @@ on:
     tags:
       - "*"
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/**'
       - 'unityengine/**'
       - 'rust/OpenMod.Rust/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'framework/**'
       - 'unityengine/**'    
