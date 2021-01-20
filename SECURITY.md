@@ -5,7 +5,9 @@ Only the latest major version is supported. Other versions will not receive secu
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
+| 3.0.x   | :white_check_mark: |
+| 2.x.x   | :x:                |
+| 1.x.x   | :x:                |
 | < 1.0   | :x:                |
 
 ## Reporting an OpenMod Vulnerability
