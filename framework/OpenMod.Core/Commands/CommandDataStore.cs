@@ -25,8 +25,8 @@ namespace OpenMod.Core.Commands
         private IDisposable m_ChangeWatcher;
         private RegisteredCommandsData m_Cache;
 
-        public CommandDataStore(IOpenModDataStoreAccessor dataStoreAccessor, 
-            IRuntime runtime, 
+        public CommandDataStore(IOpenModDataStoreAccessor dataStoreAccessor,
+            IRuntime runtime,
             Lazy<ICommandStore> commandStore,
             ILogger<CommandDataStore> logger)
         {
@@ -99,7 +99,12 @@ namespace OpenMod.Core.Commands
             m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () =>
             {
                 m_Logger.LogInformation("Commands have been reloaded.");
-                m_Cache = AsyncHelper.RunSync(LoadCommandsFromDisk);
+                m_Cache = AsyncHelper.RunSync(async () =>
+                {
+                    var result = await LoadCommandsFromDisk();
+                    await m_CommandStore.Value.InvalidateAsync();
+                    return result;
+                });
             });
             return m_Cache;
         }
@@ -119,7 +124,6 @@ namespace OpenMod.Core.Commands
                 await m_DataStore.SaveAsync(CommandsKey, m_Cache);
             }
 
-            await m_CommandStore.Value.InvalidateAsync();
             return commandsData;
         }
 
@@ -167,7 +171,7 @@ namespace OpenMod.Core.Commands
             {
                 throw new Exception("Tried to save null or empty commands; this is a bug.");
             }
-            
+
             return new ValueTask(m_DataStore.SaveAsync(CommandsKey, m_Cache));
         }
     }
