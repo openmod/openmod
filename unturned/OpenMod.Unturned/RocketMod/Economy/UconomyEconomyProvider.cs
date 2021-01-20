@@ -16,7 +16,6 @@ namespace OpenMod.Unturned.RocketMod.Economy
 {
     public class UconomyEconomyProvider : IEconomyProvider, IDisposable
     {
-        private const string c_HarmonyId = "com.get-openmod.unturned.module.rocketmod.uconomy";
         private const BindingFlags c_BindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
 
         private readonly IRocketModComponent m_RocketModComponent;
@@ -43,14 +42,14 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
         private void PatchUconomy()
         {
-            m_HarmonyInstance = new Harmony(c_HarmonyId);
+            m_HarmonyInstance = new Harmony(UconomyIntegration.HarmonyId);
 
             var patchMethod = m_DatabaseType.GetMethod("IncreaseBalance", c_BindingFlags);
             var increaseBalancePostfix = typeof(UconomyBalanceIncreasePatch)
                 .GetMethod(nameof(UconomyBalanceIncreasePatch.IncreaseBalancePostfix), c_BindingFlags);
 
             m_HarmonyInstance.Patch(patchMethod, postfix: new HarmonyMethod(increaseBalancePostfix));
-            UconomyBalanceIncreasePatch.OnIncreaseBalance += OnBalanceUpdated;
+            UconomyBalanceIncreasePatch.OnPostIncreaseBalance += OnPostBalanceUpdated;
         }
 
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
@@ -66,9 +65,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
                 return false;
             }
 
-            var uconomyAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                .LastOrDefault(d => d.GetName().Name.Equals("Uconomy"));
-
+            var uconomyAssembly = UconomyIntegration.GetUconomyAssembly();
             if (uconomyAssembly == null)
             {
                 return false;
@@ -86,10 +83,10 @@ namespace OpenMod.Unturned.RocketMod.Economy
                 throw new Exception($"Failed to find Instance field in {uconomyType}");
             }
 
-            m_DatabaseType = uconomyAssembly.GetType("fr34kyn01535.Uconomy.DatabaseManager");
+            m_DatabaseField = uconomyType.GetField("Database", c_BindingFlags);
+            m_DatabaseType = m_DatabaseField.FieldType;
             m_GetBalanceMethod = m_DatabaseType.GetMethod("GetBalance", c_BindingFlags);
             m_IncreaseBalanceMethod = m_DatabaseType.GetMethod("IncreaseBalance", c_BindingFlags);
-            m_DatabaseField = uconomyType.GetField("Database", c_BindingFlags);
 
             var uconomyConfigurationType = uconomyAssembly.GetType("fr34kyn01535.Uconomy.UconomyConfiguration");
 
@@ -121,7 +118,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
             return true;
         }
 
-        private void OnBalanceUpdated(string id, decimal increaseBy, decimal amt)
+        private void OnPostBalanceUpdated(string id, decimal increaseBy, decimal amt)
         {
             var @event = new BalanceUpdatedEvent(id, KnownActorTypes.Player, amt - increaseBy, amt, null);
             AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_RocketModComponent, this, @event));
@@ -193,7 +190,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
         public void Dispose()
         {
-            m_HarmonyInstance?.UnpatchAll(c_HarmonyId);
+            m_HarmonyInstance?.UnpatchAll(UconomyIntegration.HarmonyId);
         }
     }
 }

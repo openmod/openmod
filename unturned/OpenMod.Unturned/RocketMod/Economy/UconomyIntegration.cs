@@ -1,16 +1,37 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace OpenMod.Unturned.RocketMod.Economy
 {
     public static class UconomyIntegration
     {
+        internal const string HarmonyId = "com.get-openmod.unturned.module.rocketmod.uconomy";
+
         /// <summary>
         /// Returns true if Uconomy is installed.
         /// </summary>
         public static bool IsUconomyInstalled()
         {
             return GetUconomyFile() != null;
+        }
+
+        /// <summary>
+        /// Returns true if the Uconomy assembly is loaded.
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsUconomyLoaded()
+        {
+            return GetUconomyAssembly() != null;
+        }
+
+        /// <summary>
+        /// Gets the Uconomy assembly if loaded or null.
+        /// </summary>
+        public static Assembly GetUconomyAssembly()
+        {
+            return AppDomain.CurrentDomain.GetAssemblies().LastOrDefault(d => d.GetName().Name.Equals("Uconomy"));
         }
 
         /// <summary>
