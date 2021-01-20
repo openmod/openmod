@@ -14,7 +14,7 @@ rocketmodIntegration:
   # Sets the economy system to use
   # Available values:
   # - RocketMod_Uconomy: OpenMod will use Uconomy for its economy system (default)
-  # - OpenMod_Uconomy:   The installed OpenMod economy plugin will replace Uconomy
+  # - OpenMod_Uconomy:   RocketMod Uconomy will use OpenMod's economy system
   # - Separate:          OpenMod and RocketMod will not have synced economy
   economySystem: RocketMod_Uconomy
 
