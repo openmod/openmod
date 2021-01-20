@@ -42,8 +42,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
             foreach (var plugin in plugins)
             {
-                // lgtm [cs/stringbuilder-creation-in-loop]
-                var sb = new StringBuilder();
+                var sb = new StringBuilder(); // lgtm [cs/stringbuilder-creation-in-loop]
                 sb.Append($"{plugin.DisplayName} v{plugin.Version}");
 
                 if (!string.IsNullOrEmpty(plugin.Author))

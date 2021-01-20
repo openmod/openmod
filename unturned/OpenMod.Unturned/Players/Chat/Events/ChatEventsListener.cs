@@ -28,8 +28,7 @@ namespace OpenMod.Unturned.Players.Chat.Events
             ChatManager.onServerSendingMessage -= OnServerSendingMessage;
         }
 
-        // lgtm [cs/too-many-ref-parameters]
-        private void OnChatted(SteamPlayer steamPlayer, EChatMode mode, ref Color color, ref bool isRich, string text, ref bool isVisible)
+        private void OnChatted(SteamPlayer steamPlayer, EChatMode mode, ref Color color, ref bool isRich, string text, ref bool isVisible) // lgtm [cs/too-many-ref-parameters]
         {
             var player = GetUnturnedPlayer(steamPlayer);
 
@@ -45,8 +44,7 @@ namespace OpenMod.Unturned.Players.Chat.Events
             isVisible = !@event.IsCancelled;
         }
 
-        // lgtm [cs/too-many-ref-parameters]
-        private void OnServerSendingMessage(ref string text, ref Color color, SteamPlayer nativeFromPlayer, SteamPlayer nativeToPlayer, EChatMode mode, ref string iconURL, ref bool useRichTextFormatting)
+        private void OnServerSendingMessage(ref string text, ref Color color, SteamPlayer nativeFromPlayer, SteamPlayer nativeToPlayer, EChatMode mode, ref string iconURL, ref bool useRichTextFormatting) // lgtm [cs/too-many-ref-parameters]
         {
             // If nativeToPlayer is null, this event will be called again for each player
             if (nativeToPlayer == null) return;

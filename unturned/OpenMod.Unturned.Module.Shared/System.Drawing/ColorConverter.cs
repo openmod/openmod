@@ -195,8 +195,7 @@ namespace System.Drawing
 					if (color == Color.Empty)
 						return string.Empty;
 
-					// lgtm [cs/constant-condition]
-					if (color.IsKnownColor || color.IsNamedColor)
+					if (color.IsKnownColor || color.IsNamedColor) // lgtm [cs/constant-condition]
 						return color.Name;
 
 					String numSeparator = culture.TextInfo.ListSeparator;

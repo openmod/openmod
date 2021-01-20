@@ -56,8 +56,7 @@ namespace OpenMod.Unturned.Zombies.Events
             cancel = @event.IsCancelled;
         }
 
-        // lgtm [cs/too-many-ref-parameters]
-        private void Events_OnZombieAlertingPosition(Zombie nativeZombie, ref Vector3 position, ref bool isStartling, ref bool cancel)
+        private void Events_OnZombieAlertingPosition(Zombie nativeZombie, ref Vector3 position, ref bool isStartling, ref bool cancel) // lgtm [cs/too-many-ref-parameters]
         {
             var zombie = new UnturnedZombie(nativeZombie);
 

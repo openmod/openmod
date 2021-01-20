@@ -196,8 +196,8 @@ namespace OpenMod.Unturned.Building.Events
             Emit(@event);
         }
 
-        // lgtm [cs/too-many-ref-parameters]
-        private void OnTransformBarricadeRequested(CSteamID instigator, byte x, byte y, ushort plant, uint instanceId,
+
+        private void OnTransformBarricadeRequested(CSteamID instigator, byte x, byte y, ushort plant, uint instanceId, // lgtm [cs/too-many-ref-parameters]
             ref Vector3 point, ref byte angleX, ref byte angleY, ref byte angleZ, ref bool shouldAllow)
         {
             if (!BarricadeManager.tryGetRegion(x, y, plant, out var region))
@@ -212,8 +212,7 @@ namespace OpenMod.Unturned.Building.Events
             var nativePlayer = PlayerTool.getPlayer(instigator);
             var player = GetUnturnedPlayer(nativePlayer);
 
-            // lgtm [cs/loss-of-precision]
-            var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2);
+            var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2); // lgtm [cs/loss-of-precision]
 
             var @event = new UnturnedBarricadeTransformingEvent(
                 new UnturnedBarricadeBuildable(data, drop), player, instigator, point, rot)
@@ -228,18 +227,13 @@ namespace OpenMod.Unturned.Building.Events
 
             var eulerAngles = @event.Rotation.eulerAngles;
 
-            // lgtm [cs/loss-of-precision]
-            angleX = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.x / 2f) * 2);
-
-            // lgtm [cs/loss-of-precision]
-            angleY = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.y / 2f) * 2);
-
-            // lgtm [cs/loss-of-precision]
-            angleZ = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2);
+            angleX = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.x / 2f) * 2); // lgtm [cs/loss-of-precision]
+            angleY = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.y / 2f) * 2); // lgtm [cs/loss-of-precision]
+            angleZ = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2); // lgtm [cs/loss-of-precision]
         }
 
-        // lgtm [cs/too-many-ref-parameters]
-        private void OnTransformStructureRequested(CSteamID instigator, byte x, byte y, uint instanceId,
+
+        private void OnTransformStructureRequested(CSteamID instigator, byte x, byte y, uint instanceId, // lgtm [cs/too-many-ref-parameters]
             ref Vector3 point, ref byte angleX, ref byte angleY, ref byte angleZ, ref bool shouldAllow)
         {
             if (!StructureManager.tryGetRegion(x, y, out var region))
@@ -269,14 +263,9 @@ namespace OpenMod.Unturned.Building.Events
 
             var eulerAngles = @event.Rotation.eulerAngles;
 
-            // lgtm [cs/loss-of-precision]
-            angleX = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.x / 2f) * 2);
-
-            // lgtm [cs/loss-of-precision]
-            angleY = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.y / 2f) * 2);
-
-            // lgtm [cs/loss-of-precision]
-            angleZ = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2);
+            angleX = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.x / 2f) * 2); // lgtm [cs/loss-of-precision]
+            angleY = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.y / 2f) * 2); // lgtm [cs/loss-of-precision]
+            angleZ = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2); // lgtm [cs/loss-of-precision]
         }
 
         private void Events_OnBarricadeTransformed(BarricadeData data, BarricadeDrop drop, CSteamID instigatorSteamId)

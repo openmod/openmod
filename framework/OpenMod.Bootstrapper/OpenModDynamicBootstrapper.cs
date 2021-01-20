@@ -81,37 +81,31 @@ namespace OpenMod.Bootstrapper
             foreach (var packageId in packageIds)
             {
                 var packageIdentity = await packageManager.GetLatestPackageIdentityAsync(packageId);
-                var shouldInstallOrUpdate = packageIdentity == null;
-
-                IPackageSearchMetadata openModPackage = null;
-                if (packageIdentity == null || shouldAutoUpdate)
-                {
-                    openModPackage = await packageManager.QueryPackageExactAsync(packageId, version: null, allowPrereleaseVersions);
-                }
-
-                if (packageIdentity != null && shouldAutoUpdate)
-                {
-                    var availableVersions = await openModPackage.GetVersionsAsync();
-                    shouldInstallOrUpdate = availableVersions.Any(d => d.Version > packageIdentity.Version);
-                }
+                var shouldInstallOrUpdate = packageIdentity == null || shouldAutoUpdate;
 
                 if (shouldInstallOrUpdate)
                 {
-                    logger.LogInformation($"Downloading {openModPackage.Identity.Id} v{openModPackage.Identity.Version} via NuGet");
-                    var installResult = await packageManager.InstallAsync(openModPackage.Identity, allowPrereleaseVersions);
-                    if (installResult.Code == NuGetInstallCode.Success || installResult.Code == NuGetInstallCode.NoUpdatesFound)
+                    var latestOpenModPackage = await packageManager.QueryPackageExactAsync(packageId, version: null, allowPrereleaseVersions);
+                    var latestPackageIdentity = latestOpenModPackage.Identity;
+
+                    if (packageIdentity == null || packageIdentity.Version < latestPackageIdentity.Version)
                     {
-                        packageIdentity = installResult.Identity;
-                        logger.LogInformation(installResult.Code == NuGetInstallCode.Success
-                            ? $"Finished downloading \"{packageId}\"."
-                            : $"Latest \"{packageId}\" is already installed.");
-                    }
-                    else
-                    {
-                        logger.LogError($"Downloading has failed for {openModPackage.Identity.Id} v{openModPackage.Identity.Version.OriginalVersion}: {installResult.Code}");
-                        if (packageIdentity == null)
+                        logger.LogInformation($"Downloading {latestPackageIdentity.Id} v{latestPackageIdentity.Version} via NuGet");
+                        var installResult = await packageManager.InstallAsync(latestPackageIdentity, allowPrereleaseVersions);
+                        if (installResult.Code == NuGetInstallCode.Success || installResult.Code == NuGetInstallCode.NoUpdatesFound)
                         {
-                            return null;
+                            packageIdentity = installResult.Identity;
+                            logger.LogInformation(installResult.Code == NuGetInstallCode.Success
+                                ? $"Finished downloading \"{packageId}\"."
+                                : $"Latest \"{packageId}\" is already installed.");
+                        }
+                        else
+                        {
+                            logger.LogError($"Downloading has failed for {latestPackageIdentity.Id} v{latestPackageIdentity.Version.OriginalVersion}: {installResult.Code}");
+                            if (packageIdentity == null)
+                            {
+                                return null;
+                            }
                         }
                     }
                 }

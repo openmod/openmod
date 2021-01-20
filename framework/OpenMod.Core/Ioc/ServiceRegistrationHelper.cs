@@ -64,7 +64,7 @@ namespace OpenMod.Core.Ioc
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning($"FindFromAssembly has failed for type: {type.FullName} while searching for {typeof(T).FullName}", ex);
+                    logger?.LogWarning($"FindFromAssembly has failed for type: {type.FullName} while searching for {typeof(T).FullName}", ex);
                     continue;
                 }
 

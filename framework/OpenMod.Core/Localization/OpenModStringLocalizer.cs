@@ -27,10 +27,9 @@ namespace OpenMod.Core.Localization
         }
 
 #pragma warning disable 618 // disable obsolete warning
-        // lgtm [cs/call-to-obsolete-method]
         public IStringLocalizer WithCulture(CultureInfo culture)
         {
-            return m_StringLocalizer.WithCulture(culture);
+            return m_StringLocalizer.WithCulture(culture); // lgtm [cs/call-to-obsolete-method]
         }
 #pragma warning restore 618
 
