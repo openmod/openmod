@@ -1,9 +1,6 @@
 name: OpenMod.Rust.Redist
 
 on:
-  create:
-    tags:
-      - "*"
   push:
     branches: [ main ]
     paths:

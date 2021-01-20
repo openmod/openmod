@@ -1,9 +1,6 @@
 name: OpenMod.Unturned.Redist
 
 on:
-  create:
-    tags:
-      - "*"
   push:
     branches: [ main ]
     paths:

@@ -1,9 +1,6 @@
 name: OpenMod.UnityEngine.Redist
 
 on:
-  create:
-    tags:
-      - "*"
   push:
     branches: [ main ]
     paths:

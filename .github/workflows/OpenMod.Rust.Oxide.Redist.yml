@@ -1,9 +1,6 @@
 name: OpenMod.Rust.Oxide.Redist
 
 on:
-  create:
-    tags:
-      - "*"
   push:
     branches: [ main ]
     paths:

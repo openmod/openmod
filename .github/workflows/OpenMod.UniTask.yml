@@ -1,9 +1,6 @@
 name: OpenMod.UniTask
 
 on:
-  create:
-    tags:
-      - "*"
   push:
     branches: [ main ]
     paths:
