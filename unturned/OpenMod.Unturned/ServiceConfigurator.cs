@@ -11,11 +11,13 @@ using OpenMod.API.Permissions;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Users;
+using OpenMod.Extensions.Economy.Abstractions;
 using OpenMod.Unturned.Commands;
 using OpenMod.Unturned.Configuration;
 using OpenMod.Unturned.Permissions;
 using OpenMod.Unturned.Players;
 using OpenMod.Unturned.RocketMod;
+using OpenMod.Unturned.RocketMod.Economy;
 using OpenMod.Unturned.RocketMod.Permissions;
 using OpenMod.Unturned.Users;
 
@@ -69,6 +71,23 @@ namespace OpenMod.Unturned
                     });
 
                     serviceCollection.AddTransient<IPermissionRoleStore, RocketPermissionRoleStore>();
+                }
+
+                var economySystem = unturnedConfiguration.Configuration
+                    .GetSection("rocketmodIntegration:economySystem")
+                    .Get<string>();
+
+                if (economySystem.Equals("RocketMod_Uconomy", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (UconomyIntegration.IsUconomyInstalled())
+                    {
+                        serviceCollection.AddSingleton<IEconomyProvider, UconomyEconomyProvider>();
+                    }
+                    else
+                    {
+                        var logger = openModStartupContext.LoggerFactory.CreateLogger<RocketModIntegration>();
+                        logger.LogWarning("Economy system was set to RocketMod_Uconomy but Uconomy is not installed. Defaulting to Separate.");
+                    }
                 }
             }
 

@@ -1,11 +1,9 @@
 ﻿using System;
-using System.IO;
 using Autofac;
 using OpenMod.API;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Ioc;
 using Rocket.Unturned;
-using SDG.Unturned;
 
 namespace OpenMod.Unturned.RocketMod
 {
@@ -28,7 +26,7 @@ namespace OpenMod.Unturned.RocketMod
 
         public string WorkingDirectory
         {
-            get => Path.Combine(ReadWrite.PATH, "Servers", Dedicator.serverID, "Rocket");
+            get => RocketModIntegration.GetRocketFolder();
         }
 
         public bool IsComponentAlive
