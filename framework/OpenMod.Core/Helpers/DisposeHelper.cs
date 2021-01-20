@@ -32,7 +32,7 @@ namespace OpenMod.Core.Helpers
             }
         }
 
-        public static async Task TryDispose(this object o)
+        public static async Task DisposeSyncOrAsync(this object o)
         {
             if (o is IAsyncDisposable asyncDisposable)
             {
