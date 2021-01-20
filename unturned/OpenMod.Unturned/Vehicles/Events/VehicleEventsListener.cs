@@ -78,6 +78,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             shouldAllow = !@event.IsCancelled;
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void OnExitVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow, ref Vector3 pendingLocation, ref float pendingYaw)
         {
             var player = GetUnturnedPlayer(nativePlayer);
@@ -139,6 +140,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             allow = !@event.IsCancelled;
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void OnSiphonVehicleRequested(InteractableVehicle vehicle, Player instigatingPlayer, ref bool shouldAllow, ref ushort desiredAmount)
         {
             var instigator = GetUnturnedPlayer(instigatingPlayer);
@@ -168,6 +170,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             shouldAllow = !@event.IsCancelled;
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void OnDamageVehicleRequested(CSteamID instigatorSteamId, InteractableVehicle vehicle, ref ushort pendingTotalDamage, ref bool canRepair, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
             var @event = new UnturnedVehicleDamagingEvent(new UnturnedVehicle(vehicle), instigatorSteamId,

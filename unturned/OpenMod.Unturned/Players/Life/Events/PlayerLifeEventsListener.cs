@@ -64,6 +64,7 @@ namespace OpenMod.Unturned.Players.Life.Events
             return source;
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void Events_OnDoDamage(Player nativePlayer, ref byte amount,
             ref EDeathCause cause, ref ELimb limb,
             ref CSteamID killer, ref bool trackKill,
@@ -142,6 +143,7 @@ namespace OpenMod.Unturned.Players.Life.Events
         [HarmonyPatch]
         private class Patches
         {
+            // lgtm [cs/too-many-ref-parameters]
             [HarmonyPatch(typeof(PlayerLife), "doDamage")]
             [HarmonyPrefix]
             private static bool DoDamage(PlayerLife __instance, ref byte amount,

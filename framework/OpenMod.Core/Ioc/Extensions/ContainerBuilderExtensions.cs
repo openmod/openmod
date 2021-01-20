@@ -88,7 +88,6 @@ namespace OpenMod.Core.Ioc.Extensions
                 }
                 else if (descriptor.ImplementationFactory != null)
                 {
-                    Log.Information($"Descriptor: factory {descriptor.ServiceType}, {descriptor.ImplementationFactory}");
                     var registrator = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
                         {
                             var serviceProvider = context.Resolve<IServiceProvider>();

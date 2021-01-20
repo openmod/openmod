@@ -112,11 +112,12 @@ namespace OpenMod.Core.Permissions
             // we will restore : later again
             permission = permission.Replace(":", "."); 
 
-            var parentPath = string.Empty;
+            var parentPath = new StringBuilder();
             foreach (var childPath in permission.Split('.'))
             {
                 permissions.Add($"{parentPath}{childPath}.*");
-                parentPath += $"{childPath}.";
+                parentPath.Append(childPath);
+                parentPath.Append(".");
             }
 
             // Remove last element because it should not contain "<permission>.*"

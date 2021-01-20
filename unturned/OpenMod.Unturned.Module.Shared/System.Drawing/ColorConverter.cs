@@ -195,6 +195,7 @@ namespace System.Drawing
 					if (color == Color.Empty)
 						return string.Empty;
 
+					// lgtm [cs/constant-condition]
 					if (color.IsKnownColor || color.IsNamedColor)
 						return color.Name;
 

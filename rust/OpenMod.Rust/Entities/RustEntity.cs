@@ -44,7 +44,6 @@ namespace OpenMod.Rust.Entities
                 await UniTask.SwitchToMainThread();
 
                 var entity = Entity;
-                var player = entity as BasePlayer;
 
                 var combatEntity = entity as BaseCombatEntity;
                 if (combatEntity != null && !combatEntity.IsAlive())

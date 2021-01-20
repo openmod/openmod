@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
@@ -26,8 +27,8 @@ namespace OpenMod.Core.Commands
         private readonly Dictionary<string, string> m_Cache = new Dictionary<string, string>();
         public virtual string GetPermission(ICommandRegistration registration)
         {
-            return m_Cache.TryGetValue(registration.Id, out var cachedValue) 
-                ? cachedValue 
+            return m_Cache.TryGetValue(registration.Id, out var cachedValue)
+                ? cachedValue
                 : GetPermission(registration, AsyncHelper.RunSync(() => m_CommandStore.Value.GetCommandsAsync()));
         }
 
@@ -38,16 +39,16 @@ namespace OpenMod.Core.Commands
                 return cachedValue;
             }
 
-            var permission = registration.Name;
-            
+            var commandPath = new StringBuilder(registration.Name);
+
             /* do reverse traversal from child to parent to build permission */
             var current = registration;
             while ((current = GetParentCommand(current, commands)) != null)
             {
-                permission = current.Name + "." + permission;
+                commandPath.Insert(0, current.Name + ".");
             }
 
-            permission = $"{registration.Component.OpenModComponentId}:commands.{permission}";
+            var permission = $"{registration.Component.OpenModComponentId}:commands.{commandPath}";
 
             m_Cache.Add(registration.Id, permission);
             return permission;

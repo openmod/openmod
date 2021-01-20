@@ -41,6 +41,7 @@ namespace OpenMod.Unturned.Players.Movement.Events
             player.stance.onStanceUpdated -= () => OnStanceUpdated(player);
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void Events_OnTeleporting(Player nativePlayer, ref Vector3 position, ref float yaw, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer);

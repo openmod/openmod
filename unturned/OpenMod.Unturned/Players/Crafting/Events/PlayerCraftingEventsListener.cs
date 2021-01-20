@@ -25,6 +25,7 @@ namespace OpenMod.Unturned.Players.Crafting.Events
             PlayerCrafting.onCraftBlueprintRequested -= OnCraftBlueprintRequested;
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void OnCraftBlueprintRequested(PlayerCrafting crafting, ref ushort itemId, ref byte blueprintIndex, ref bool shouldAllow)
         {
             var player = GetUnturnedPlayer(crafting.player);

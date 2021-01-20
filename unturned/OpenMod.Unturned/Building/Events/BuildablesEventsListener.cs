@@ -80,7 +80,7 @@ namespace OpenMod.Unturned.Building.Events
             var player = GetUnturnedPlayer(nativePlayer);
 
             var @event = pendingTotalDamage >= buildable.State.Health
-                ? (UnturnedBuildableDamagingEvent) new UnturnedBarricadeDestroyingEvent(buildable, pendingTotalDamage,
+                ? (UnturnedBuildableDamagingEvent)new UnturnedBarricadeDestroyingEvent(buildable, pendingTotalDamage,
                     damageOrigin, player, instigatorSteamId)
                 : new UnturnedBarricadeDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player,
                     instigatorSteamId);
@@ -108,7 +108,7 @@ namespace OpenMod.Unturned.Building.Events
                 var player = GetUnturnedPlayer(nativePlayer);
 
                 var @event = pendingTotalDamage >= buildable.State.Health
-                    ? (UnturnedBuildableDamagingEvent) new UnturnedStructureDestroyingEvent(buildable,
+                    ? (UnturnedBuildableDamagingEvent)new UnturnedStructureDestroyingEvent(buildable,
                         pendingTotalDamage, damageOrigin, player, instigatorSteamId)
                     : new UnturnedStructureDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player,
                         instigatorSteamId);
@@ -196,6 +196,7 @@ namespace OpenMod.Unturned.Building.Events
             Emit(@event);
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void OnTransformBarricadeRequested(CSteamID instigator, byte x, byte y, ushort plant, uint instanceId,
             ref Vector3 point, ref byte angleX, ref byte angleY, ref byte angleZ, ref bool shouldAllow)
         {
@@ -211,9 +212,11 @@ namespace OpenMod.Unturned.Building.Events
             var nativePlayer = PlayerTool.getPlayer(instigator);
             var player = GetUnturnedPlayer(nativePlayer);
 
+            // lgtm [cs/loss-of-precision]
+            var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2);
+
             var @event = new UnturnedBarricadeTransformingEvent(
-                new UnturnedBarricadeBuildable(data, drop), player, instigator, point,
-                Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2))
+                new UnturnedBarricadeBuildable(data, drop), player, instigator, point, rot)
             {
                 IsCancelled = !shouldAllow
             };
@@ -225,11 +228,17 @@ namespace OpenMod.Unturned.Building.Events
 
             var eulerAngles = @event.Rotation.eulerAngles;
 
+            // lgtm [cs/loss-of-precision]
             angleX = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.x / 2f) * 2);
+
+            // lgtm [cs/loss-of-precision]
             angleY = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.y / 2f) * 2);
+
+            // lgtm [cs/loss-of-precision]
             angleZ = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2);
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void OnTransformStructureRequested(CSteamID instigator, byte x, byte y, uint instanceId,
             ref Vector3 point, ref byte angleX, ref byte angleY, ref byte angleZ, ref bool shouldAllow)
         {
@@ -241,13 +250,14 @@ namespace OpenMod.Unturned.Building.Events
             var index = region.structures.FindIndex(k => k.instanceID == instanceId);
             var data = region.structures[index];
             var drop = region.drops[index];
-            
+
             var nativePlayer = PlayerTool.getPlayer(instigator);
             var player = GetUnturnedPlayer(nativePlayer);
+            // lgtm [cs/loss-of-precision]
+            var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2);
 
             var @event = new UnturnedStructureTransformingEvent(
-                new UnturnedStructureBuildable(data, drop), player, instigator, point,
-                Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2))
+                new UnturnedStructureBuildable(data, drop), player, instigator, point, rot)
             {
                 IsCancelled = !shouldAllow
             };
@@ -259,8 +269,13 @@ namespace OpenMod.Unturned.Building.Events
 
             var eulerAngles = @event.Rotation.eulerAngles;
 
+            // lgtm [cs/loss-of-precision]
             angleX = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.x / 2f) * 2);
+
+            // lgtm [cs/loss-of-precision]
             angleY = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.y / 2f) * 2);
+
+            // lgtm [cs/loss-of-precision]
             angleZ = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2);
         }
 

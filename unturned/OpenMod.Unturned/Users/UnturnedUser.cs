@@ -10,6 +10,7 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
@@ -87,7 +88,7 @@ namespace OpenMod.Unturned.Users
         {
             var words = line.Split(' ');
             var lines = new List<string>();
-            var currentLine = "";
+            var currentLine = new StringBuilder();
             var maxLength = 90;
 
             foreach (var currentWord in words)
@@ -95,23 +96,24 @@ namespace OpenMod.Unturned.Users
                 if ((currentLine.Length > maxLength) ||
                     ((currentLine.Length + currentWord.Length) > maxLength))
                 {
-                    lines.Add(currentLine);
-                    currentLine = "";
+                    lines.Add(currentLine.ToString());
+                    currentLine.Clear();
                 }
 
                 if (currentLine.Length > 0)
                 {
-                    currentLine += " " + currentWord;
+                    currentLine.Append(" ");
+                    currentLine.Append(currentWord);
                 }
                 else
                 {
-                    currentLine += currentWord;
+                    currentLine.Append(currentWord);
                 }
             }
 
             if (currentLine.Length > 0)
             {
-                lines.Add(currentLine);
+                lines.Add(currentLine.ToString());
             }
 
             return lines;

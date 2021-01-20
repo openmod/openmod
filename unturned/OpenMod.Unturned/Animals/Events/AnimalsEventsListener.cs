@@ -59,6 +59,7 @@ namespace OpenMod.Unturned.Animals.Events
             Emit(@event);
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void Events_OnAnimalDamaging(Animal nativeAnimal, ref ushort amount, ref Vector3 ragdoll,
             ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot, ref bool cancel)
         {
@@ -91,6 +92,7 @@ namespace OpenMod.Unturned.Animals.Events
             Emit(@event);
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void Events_OnAnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack, ref bool cancel)
         {
             var animal = new UnturnedAnimal(nativeAnimal);
@@ -107,6 +109,7 @@ namespace OpenMod.Unturned.Animals.Events
             cancel = @event.IsCancelled;
         }
 
+        // lgtm [cs/too-many-ref-parameters]
         private void Events_OnAnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack, ref bool cancel)
         {
             var animal = new UnturnedAnimal(nativeAnimal);
@@ -183,6 +186,7 @@ namespace OpenMod.Unturned.Animals.Events
                 OnAnimalRevived?.Invoke(__instance);
             }
 
+            // lgtm [cs/too-many-ref-parameters]
             [HarmonyPatch(typeof(Animal), "askDamage")]
             [HarmonyPrefix]
             private static bool AskDamage(Animal __instance, ref ushort amount, ref Vector3 newRagdoll,
