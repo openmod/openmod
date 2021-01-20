@@ -6,21 +6,23 @@ using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Autofac;
 using OpenMod.Common.Helpers;
+using OpenMod.Core.Ioc;
 
 namespace OpenMod.Unturned.Events
 {
     internal class UnturnedEventsActivator : IDisposable
     {
-        private readonly IServiceProvider m_ServiceProvider;
+        private readonly ILifetimeScope m_LifetimeScope;
         private readonly ILogger<UnturnedEventsActivator> m_Logger;
         private readonly List<IUnturnedEventsListener> m_UnturnedEventsListeners;
 
         public UnturnedEventsActivator(
-            IServiceProvider serviceProvider,
+            ILifetimeScope lifetimeScope,
             ILogger<UnturnedEventsActivator> logger)
         {
-            m_ServiceProvider = serviceProvider;
+            m_LifetimeScope = lifetimeScope;
             m_Logger = logger;
             m_UnturnedEventsListeners = new List<IUnturnedEventsListener>();
         }
@@ -29,16 +31,14 @@ namespace OpenMod.Unturned.Events
         {
             m_Logger.LogTrace("Activating unturned events listeners");
 
-            List<Type> listenerTypes = GetType().Assembly.FindTypes<IUnturnedEventsListener>(false).ToList();
-
-            foreach (Type type in listenerTypes)
+            var listenerTypes = GetType().Assembly.FindTypes<IUnturnedEventsListener>(false).ToList();
+            foreach (var type in listenerTypes)
             {
-                IUnturnedEventsListener eventsListener = (IUnturnedEventsListener)ActivatorUtilities.CreateInstance(m_ServiceProvider, type);
-
+                var eventsListener = (IUnturnedEventsListener)ActivatorUtilitiesEx.CreateInstance(m_LifetimeScope, type);
                 m_UnturnedEventsListeners.Add(eventsListener);
             }
 
-            foreach (IUnturnedEventsListener eventsListener in m_UnturnedEventsListeners)
+            foreach (var eventsListener in m_UnturnedEventsListeners)
             {
                 eventsListener.Subscribe();
             }

@@ -7,27 +7,24 @@ using SDG.Unturned;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Autofac;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using OpenMod.Core.Ioc;
 using OpenMod.Unturned.Configuration;
 using OpenMod.Unturned.RocketMod.Permissions;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 namespace OpenMod.Unturned.RocketMod
 {
-    public class RocketModLoadedEventListener : IEventListener<RocketModReadyEvent>
+    public class RocketModReadyEventListener : IEventListener<RocketModReadyEvent>
     {
-        private readonly IServiceProvider m_ServiceProvider;
         private readonly IRocketModComponent m_RocketModComponent;
         private readonly IOpenModUnturnedConfiguration m_UnturnedConfiguration;
         private RocketModPermissionProxyProvider m_PermissionProxyProvider;
 
-        public RocketModLoadedEventListener(
-            IRocketModComponent rocketModComponent, 
+        public RocketModReadyEventListener(
+            IRocketModComponent rocketModComponent,
             IOpenModUnturnedConfiguration unturnedConfiguration)
         {
-            m_ServiceProvider = rocketModComponent.LifetimeScope.Resolve<IServiceProvider>();
             m_RocketModComponent = rocketModComponent;
             m_UnturnedConfiguration = unturnedConfiguration;
         }
@@ -41,7 +38,8 @@ namespace OpenMod.Unturned.RocketMod
 
             if (permissionSystem.Equals("OpenMod", StringComparison.OrdinalIgnoreCase))
             {
-                m_PermissionProxyProvider = ActivatorUtilities.CreateInstance<RocketModPermissionProxyProvider>(m_ServiceProvider);
+                var scope = m_RocketModComponent.LifetimeScope;
+                m_PermissionProxyProvider = ActivatorUtilitiesEx.CreateInstance<RocketModPermissionProxyProvider>(scope);
                 m_PermissionProxyProvider.Install();
             }
 

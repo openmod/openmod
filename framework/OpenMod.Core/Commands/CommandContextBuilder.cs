@@ -9,6 +9,7 @@ using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Localization;
 using OpenMod.API.Prioritization;
+using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Commands
 {
@@ -45,7 +46,7 @@ namespace OpenMod.Core.Commands
                 return currentContext;
             }
 
-            var scope = childCommand.Component.LifetimeScope.BeginLifetimeScope();
+            var scope = childCommand.Component.LifetimeScope.BeginLifetimeScopeEx();
             var childContext = new CommandContext(childCommand, scope, currentContext) { CommandRegistration = childCommand };
             currentContext.ChildContext = childContext;
 
@@ -57,14 +58,14 @@ namespace OpenMod.Core.Commands
             var rootCommand = GetCommandRegistration(actor, args[0], commandRegistrations.Where(d => d.ParentId == null));
             if (rootCommand == null)
             {
-                var exceptionContext = new CommandContext(null, actor, args.First(), prefix,  args.Skip(1).ToList(), m_LifetimeScope.BeginLifetimeScope());
+                var exceptionContext = new CommandContext(null, actor, args.First(), prefix,  args.Skip(1).ToList(), m_LifetimeScope.BeginLifetimeScopeEx());
                 var localizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
                 exceptionContext.Exception = new CommandNotFoundException(localizer["commands:errors:not_found", new { CommandName = args[0], Args = args }]);
                 //await actor.PrintMessageAsync(Color.Red, exceptionContext.Exception.Message);
                 return exceptionContext;
             }
 
-            var scope = rootCommand.Component.LifetimeScope.BeginLifetimeScope("AutofacWebRequest");
+            var scope = rootCommand.Component.LifetimeScope.BeginLifetimeScopeEx("AutofacWebRequest");
             var rootContext = new CommandContext(rootCommand, actor, args.First(), prefix, args.Skip(1).ToList(), scope);
             return BuildContextTree(rootContext, commandRegistrations);
         }

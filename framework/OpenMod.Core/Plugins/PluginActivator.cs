@@ -110,8 +110,7 @@ namespace OpenMod.Core.Plugins
                 IOpenModPlugin pluginInstance;
                 try
                 {
-                    var serviceProvider = m_LifetimeScope.Resolve<IServiceProvider>();
-                    var lifetimeScope = m_LifetimeScope.BeginLifetimeScope(containerBuilder =>
+                    var lifetimeScope = m_LifetimeScope.BeginLifetimeScopeEx(containerBuilder =>
                     {
                         var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
 
@@ -191,8 +190,7 @@ namespace OpenMod.Core.Plugins
 
                         foreach (var type in pluginType.Assembly.FindTypes<IPluginContainerConfigurator>())
                         {
-                            var configurator =
-                                (IPluginContainerConfigurator)ActivatorUtilities.CreateInstance(serviceProvider, type);
+                            var configurator = (IPluginContainerConfigurator)ActivatorUtilitiesEx.CreateInstance(m_LifetimeScope, type);
                             configurator.ConfigureContainer(new PluginServiceConfigurationContext(m_LifetimeScope, configuration, containerBuilder));
                         }
 

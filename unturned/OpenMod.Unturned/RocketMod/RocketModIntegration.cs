@@ -21,12 +21,12 @@ namespace OpenMod.Unturned.RocketMod
         private const BindingFlags c_BindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
 
         private static bool s_IsReady;
-        
+
         private readonly OpenModUnturnedHost m_UnturnedHost;
         private readonly IEventBus m_EventBus;
         private readonly ILogger<RocketModIntegration> m_Logger;
         private readonly ILogger m_RocketModLogger;
-        
+
         private Harmony s_HarmonyInstance;
         private bool s_Installed;
 

@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
+using OpenMod.Core.Ioc;
 using OpenMod.Core.Permissions;
 
 namespace OpenMod.Core.Commands
@@ -92,7 +94,8 @@ namespace OpenMod.Core.Commands
         {
             if (CommandType != null)
             {
-                return (ICommand)ActivatorUtilities.CreateInstance(serviceProvider, CommandType);
+                var lifetime = serviceProvider.GetRequiredService<ILifetimeScope>();
+                return (ICommand)ActivatorUtilitiesEx.CreateInstance(lifetime, CommandType);
             }
 
             return new MethodCommandWrapper(CommandMethod, serviceProvider);

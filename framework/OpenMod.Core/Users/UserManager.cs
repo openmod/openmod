@@ -9,7 +9,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using OpenMod.API;
+using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Users
 {
@@ -21,12 +23,12 @@ namespace OpenMod.Core.Users
 
         private readonly List<IUserProvider> m_UserProviders;
 
-        public UserManager(IOptions<UserManagerOptions> options, IServiceProvider serviceProvider)
+        public UserManager(IOptions<UserManagerOptions> options, ILifetimeScope lifetimeScope)
         {
             m_UserProviders = new List<IUserProvider>();
             foreach (var provider in options.Value.UserProviderTypes)
             {
-                m_UserProviders.Add((IUserProvider)ActivatorUtilities.CreateInstance(serviceProvider, provider));
+                m_UserProviders.Add((IUserProvider)ActivatorUtilitiesEx.CreateInstance(lifetimeScope, provider));
             }
         }
 

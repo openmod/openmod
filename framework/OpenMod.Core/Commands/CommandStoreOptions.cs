@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Commands;
+using OpenMod.Core.Ioc;
 using OpenMod.Core.Prioritization;
 
 namespace OpenMod.Core.Commands
@@ -24,11 +26,12 @@ namespace OpenMod.Core.Commands
 
         public IReadOnlyCollection<ICommandSource> CreateCommandSources(IServiceProvider serviceProvider)
         {
+            var lifetime = serviceProvider.GetService<ILifetimeScope>();
             var sources = new List<ICommandSource>();
             sources.AddRange(m_CommandSources);
             foreach (var type in m_CommandSourceTypes)
             {
-                sources.Add((ICommandSource)ActivatorUtilities.CreateInstance(serviceProvider, type));
+                sources.Add((ICommandSource)ActivatorUtilitiesEx.CreateInstance(lifetime, type));
             }
 
             return sources;

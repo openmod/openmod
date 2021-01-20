@@ -19,6 +19,7 @@ using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.Common.Hotloading;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Persistence;
 using OpenMod.Core.Plugins.NuGet;
@@ -206,7 +207,7 @@ namespace OpenMod.Runtime
                 m_AppLifeTime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
 
                 Status = RuntimeStatus.Initialized;
-                LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>().BeginLifetimeScope(
+                LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>().BeginLifetimeScopeEx(
                     containerBuilder =>
                     {
                         containerBuilder.Register(ctx => this)

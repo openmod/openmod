@@ -9,8 +9,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
+using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Permissions
 {
@@ -21,19 +23,19 @@ namespace OpenMod.Core.Permissions
     {
         private bool m_IsDisposing;
 
-        private readonly IServiceProvider m_ServiceProvider;
+        private readonly ILifetimeScope m_LifetimeScope;
         private readonly IPermissionRegistry m_PermissionRegistry;
         private readonly IOptions<PermissionCheckerOptions> m_Options;
         private readonly List<IPermissionStore> m_PermissionSources;
         private readonly List<IPermissionCheckProvider> m_PermissionCheckProviders;
         private readonly ILogger<PermissionChecker> m_Logger;
         public PermissionChecker(
-            IServiceProvider serviceProvider,
+            ILifetimeScope lifetimeScope,
             IPermissionRegistry permissionRegistry,
             IOptions<PermissionCheckerOptions> options,
             ILogger<PermissionChecker> logger)
         {
-            m_ServiceProvider = serviceProvider;
+            m_LifetimeScope = lifetimeScope;
             m_PermissionRegistry = permissionRegistry;
             m_Options = options;
             m_Logger = logger;
@@ -72,12 +74,12 @@ namespace OpenMod.Core.Permissions
         {
             foreach (var permissionSourceType in m_Options.Value.PermissionSources)
             {
-                m_PermissionSources.Add((IPermissionStore)ActivatorUtilities.CreateInstance(m_ServiceProvider, permissionSourceType));
+                m_PermissionSources.Add((IPermissionStore)ActivatorUtilitiesEx.CreateInstance(m_LifetimeScope, permissionSourceType));
             }
 
             foreach (var permissionCheckProviderType in m_Options.Value.PermissionCheckProviders)
             {
-                m_PermissionCheckProviders.Add((IPermissionCheckProvider)ActivatorUtilities.CreateInstance(m_ServiceProvider, permissionCheckProviderType));
+                m_PermissionCheckProviders.Add((IPermissionCheckProvider)ActivatorUtilitiesEx.CreateInstance(m_LifetimeScope, permissionCheckProviderType));
             }
 
             return Task.CompletedTask;

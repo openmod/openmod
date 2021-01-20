@@ -12,6 +12,7 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 using OpenMod.Core.Ioc.Extensions;
 using OpenMod.Core.Prioritization;
 
@@ -46,7 +47,7 @@ namespace OpenMod.Core.Eventing
                 return;
 
             var attribute = GetEventListenerAttribute(callback.Method);
-            m_EventSubscriptions.Add(new EventSubscription(component, callback.Invoke, attribute, eventName, component.LifetimeScope.BeginLifetimeScope()));
+            m_EventSubscriptions.Add(new EventSubscription(component, callback.Invoke, attribute, eventName, component.LifetimeScope.BeginLifetimeScopeEx()));
         }
 
         public virtual void Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback) where TEvent : IEvent
@@ -55,7 +56,7 @@ namespace OpenMod.Core.Eventing
                 return;
 
             var attribute = GetEventListenerAttribute(callback.Method);
-            m_EventSubscriptions.Add(new EventSubscription(component, (serviceProvider, sender, @event) => callback.Invoke(serviceProvider, sender, (TEvent)@event), attribute, typeof(TEvent), component.LifetimeScope.BeginLifetimeScope()));
+            m_EventSubscriptions.Add(new EventSubscription(component, (serviceProvider, sender, @event) => callback.Invoke(serviceProvider, sender, (TEvent)@event), attribute, typeof(TEvent), component.LifetimeScope.BeginLifetimeScopeEx()));
         }
 
         public virtual void Subscribe(IOpenModComponent component, Type eventType, EventCallback callback)
@@ -64,7 +65,7 @@ namespace OpenMod.Core.Eventing
                 return;
 
             var attribute = GetEventListenerAttribute(callback.Method);
-            m_EventSubscriptions.Add(new EventSubscription(component, callback.Invoke, attribute, eventType, component.LifetimeScope.BeginLifetimeScope()));
+            m_EventSubscriptions.Add(new EventSubscription(component, callback.Invoke, attribute, eventType, component.LifetimeScope.BeginLifetimeScopeEx()));
         }
 
         public virtual void Subscribe(IOpenModComponent component, Assembly assembly)
@@ -75,7 +76,7 @@ namespace OpenMod.Core.Eventing
             }
 
             List<(Type eventListenerType, MethodInfo method, EventListenerAttribute eventListenerAttribute, Type eventType)> eventListeners = new List<(Type, MethodInfo, EventListenerAttribute, Type)>();
-            var scope = component.LifetimeScope.BeginLifetimeScope((builder =>
+            var scope = component.LifetimeScope.BeginLifetimeScopeEx((builder =>
             {
                 foreach (var type in assembly.FindTypes<IEventListener>(false))
                 {
@@ -202,7 +203,7 @@ namespace OpenMod.Core.Eventing
                     // has already been disposed." It means you injected a service to an IEventHandler
                     // that used the service *after* the event has finished (e.g. in a Task or by storing it somewhere).
 
-                    await using var newScope = group.Key.BeginLifetimeScope("AutofacWebRequest");
+                    await using var newScope = group.Key.BeginLifetimeScopeEx("AutofacWebRequest");
                     foreach (var subscription in group)
                     {
                         var cancellableEvent = @event as ICancellableEvent;

@@ -31,5 +31,17 @@ namespace OpenMod.Core.Helpers
                 }
             }
         }
+
+        public static async Task TryDispose(this object o)
+        {
+            if (o is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync();
+            }
+            else if (o is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
     }
 }

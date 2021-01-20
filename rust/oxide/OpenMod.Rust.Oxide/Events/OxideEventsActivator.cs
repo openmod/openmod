@@ -1,23 +1,25 @@
 using System;
 using System.Collections.Generic;
+using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.Common.Helpers;
+using OpenMod.Core.Ioc;
 using Oxide.Core;
 
 namespace OpenMod.Rust.Oxide.Events
 {
     internal class OxideEventsActivator : IDisposable
     {
-        private readonly IServiceProvider m_ServiceProvider;
+        private readonly ILifetimeScope m_LifetimeScope;
         private readonly ILogger<OxideEventsActivator> m_Logger;
         private readonly List<OxideEventsListenerBase> m_RustEventsListeners;
 
         public OxideEventsActivator(
-            IServiceProvider serviceProvider,
+            ILifetimeScope lifetimeScope,
             ILogger<OxideEventsActivator> logger)
         {
-            m_ServiceProvider = serviceProvider;
+            m_LifetimeScope = lifetimeScope;
             m_Logger = logger;
             m_RustEventsListeners = new List<OxideEventsListenerBase>();
         }
@@ -26,9 +28,9 @@ namespace OpenMod.Rust.Oxide.Events
         {
             m_Logger.LogTrace("Activating oxide events listeners");
 
-            foreach (Type type in FindListenerTypes())
+            foreach (var type in FindListenerTypes())
             {
-                var eventsListener = (OxideEventsListenerBase) ActivatorUtilities.CreateInstance(m_ServiceProvider, type);
+                var eventsListener = (OxideEventsListenerBase) ActivatorUtilitiesEx.CreateInstance(m_LifetimeScope, type);
                 m_RustEventsListeners.Add(eventsListener);
             }
 

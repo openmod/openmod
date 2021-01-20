@@ -3,6 +3,7 @@ using System.IO;
 using Autofac;
 using OpenMod.API;
 using OpenMod.API.Persistence;
+using OpenMod.Core.Ioc;
 using Rocket.Unturned;
 using SDG.Unturned;
 
@@ -15,7 +16,7 @@ namespace OpenMod.Unturned.RocketMod
         public RocketModComponent(IRuntime runtime)
         {
             m_Runtime = runtime;
-            LifetimeScope = runtime.LifetimeScope.BeginLifetimeScope(builder =>
+            LifetimeScope = runtime.LifetimeScope.BeginLifetimeScopeEx(builder =>
             {
                 builder.Register<IOpenModComponent>(_ => this)
                     .SingleInstance()

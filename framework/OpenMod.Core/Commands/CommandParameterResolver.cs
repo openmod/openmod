@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -10,6 +11,7 @@ using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Commands
 {
@@ -22,11 +24,11 @@ namespace OpenMod.Core.Commands
         private readonly List<ICommandParameterResolveProvider> m_CommandParameterResolveProviders;
 
         public CommandParameterResolver(
-            IServiceProvider serviceProvider,
+            ILifetimeScope lifetimeScope,
             IOptions<CommandParameterResolverOptions> options)
         {
             m_CommandParameterResolveProviders = options.Value.CommandParameterResolverTypes
-                .Select(type => (ICommandParameterResolveProvider)ActivatorUtilities.CreateInstance(serviceProvider, type))
+                .Select(type => (ICommandParameterResolveProvider)ActivatorUtilitiesEx.CreateInstance(lifetimeScope, type))
                 .ToList();
         }
 
