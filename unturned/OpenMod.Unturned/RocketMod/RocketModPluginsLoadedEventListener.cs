@@ -7,7 +7,6 @@ using SDG.Unturned;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Autofac;
 using HarmonyLib;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -21,16 +20,15 @@ using OpenMod.Unturned.RocketMod.Permissions;
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 namespace OpenMod.Unturned.RocketMod
 {
-    public class RocketModReadyEventListener : IEventListener<RocketModReadyEvent>
+    public class RocketModPluginsLoadedEventListener : IEventListener<RocketModPluginsLoadedEvent>
     {
         private const BindingFlags c_BindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
        
         private readonly ILoggerFactory m_LoggerFactory;
         private readonly IRocketModComponent m_RocketModComponent;
         private readonly IOpenModUnturnedConfiguration m_UnturnedConfiguration;
-        private RocketModPermissionProxyProvider m_PermissionProxyProvider;
 
-        public RocketModReadyEventListener(
+        public RocketModPluginsLoadedEventListener(
             ILoggerFactory loggerFactory,
             IRocketModComponent rocketModComponent,
             IOpenModUnturnedConfiguration unturnedConfiguration)
@@ -41,7 +39,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         [EventListener]
-        public Task HandleEventAsync(object sender, RocketModReadyEvent @event)
+        public Task HandleEventAsync(object sender, RocketModPluginsLoadedEvent @event)
         {
             var permissionSystem = m_UnturnedConfiguration.Configuration
                 .GetSection("rocketmodIntegration:permissionSystem")
@@ -50,10 +48,9 @@ namespace OpenMod.Unturned.RocketMod
             if (permissionSystem.Equals("OpenMod", StringComparison.OrdinalIgnoreCase))
             {
                 var scope = m_RocketModComponent.LifetimeScope;
-                m_PermissionProxyProvider = ActivatorUtilitiesEx.CreateInstance<RocketModPermissionProxyProvider>(scope);
-                m_PermissionProxyProvider.Install();
+                var permissionProxyProvider = ActivatorUtilitiesEx.CreateInstance<RocketModPermissionProxyProvider>(scope);
+                permissionProxyProvider.Install();
             }
-
 
             var economySystem = m_UnturnedConfiguration.Configuration
                 .GetSection("rocketmodIntegration:economySystem")
@@ -80,7 +77,7 @@ namespace OpenMod.Unturned.RocketMod
 
                     m_RocketModComponent.LifetimeScope.Disposer.AddInstanceForDisposal(new DisposeAction(() =>
                     {
-                        harmonyInstance?.UnpatchAll(UconomyIntegration.HarmonyId);
+                        harmonyInstance.UnpatchAll(UconomyIntegration.HarmonyId);
                     }));
                 }
                 else
