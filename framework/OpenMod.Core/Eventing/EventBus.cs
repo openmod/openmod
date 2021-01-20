@@ -257,11 +257,10 @@ namespace OpenMod.Core.Eventing
 
             const string suffix = "Event";
             var eventName = eventType.Name;
-            var idx = eventName.IndexOf(suffix, StringComparison.Ordinal);
 
-            return idx == -1
-                ? eventName
-                : eventName.Remove(idx, suffix.Length);
+            return eventName.EndsWith(suffix, StringComparison.Ordinal)
+                ? eventName.Substring(0, eventName.Length - suffix.Length)
+                : eventName;
         }
 
         protected virtual EventListenerAttribute GetEventListenerAttribute(MethodInfo method)
