@@ -7,10 +7,12 @@ on:
   push:
     branches: [ main ]
     paths:
+      - '.github/workflows/OpenMod.Rust.Oxide.Extension.yml'
       - 'rust/oxide/OpenMod.Rust.Oxide.Extension/**'
   pull_request:
     branches: [ main ]
     paths:
+      - '.github/workflows/OpenMod.Rust.Oxide.Extension.yml'
       - 'rust/oxide/OpenMod.Rust.Oxide.Extension/**'
 
 jobs:

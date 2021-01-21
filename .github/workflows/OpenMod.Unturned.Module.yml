@@ -6,12 +6,14 @@ on:
   push:
     branches: [ main ]
     paths:
+      - '.github/workflows/OpenMod.Unturned.Module.yml'
       - 'framework/**'
       - 'unityengine/**'
       - 'unturned/**'
   pull_request:
     branches: [ main ]
     paths:
+      - '.github/workflows/OpenMod.Unturned.Module.yml'
       - 'framework/**'
       - 'unityengine/**'
       - 'unturned/**'
