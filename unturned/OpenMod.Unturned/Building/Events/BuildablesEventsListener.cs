@@ -247,8 +247,8 @@ namespace OpenMod.Unturned.Building.Events
 
             var nativePlayer = PlayerTool.getPlayer(instigator);
             var player = GetUnturnedPlayer(nativePlayer);
-            // lgtm [cs/loss-of-precision]
-            var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2);
+            
+            var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2); // lgtm [cs/loss-of-precision]
 
             var @event = new UnturnedStructureTransformingEvent(
                 new UnturnedStructureBuildable(data, drop), player, instigator, point, rot)
