@@ -2,6 +2,7 @@ name: OpenMod.Standalone
 
 on:
   release:
+    types: [ published ]
   push:
     branches: [ main ]
     paths:

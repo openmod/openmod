@@ -2,7 +2,7 @@ name: OpenMod.Unturned.Module
 
 on:
   release:
-    types: [published]
+    types: [ published ]
   push:
     branches: [ main ]
     paths:
