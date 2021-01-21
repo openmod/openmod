@@ -28,6 +28,8 @@ namespace OpenMod.Unturned.RocketMod
         private readonly IRocketModComponent m_RocketModComponent;
         private readonly IOpenModUnturnedConfiguration m_UnturnedConfiguration;
 
+        private static bool s_RocketListenersRemoved;
+
         public RocketModPluginsLoadedEventListener(
             ILoggerFactory loggerFactory,
             IRocketModComponent rocketModComponent,
@@ -94,6 +96,11 @@ namespace OpenMod.Unturned.RocketMod
         [SuppressMessage("ReSharper", "DelegateSubtraction")]
         private void RemoveRocketCommandListeners()
         {
+            if (s_RocketListenersRemoved)
+            {
+                return;
+            }
+
             var commandWindowInputedInvocationList = CommandWindow.onCommandWindowInputted.GetInvocationList();
             foreach (var @delegate in commandWindowInputedInvocationList
                 .Where(IsRocketModDelegate))
@@ -107,12 +114,25 @@ namespace OpenMod.Unturned.RocketMod
             {
                 ChatManager.onCheckPermissions -= (CheckPermissions)@delegate;
             }
+
+            s_RocketListenersRemoved = true;
         }
 
         private bool IsRocketModDelegate(Delegate @delegate)
         {
+            if (@delegate == null)
+            {
+                return false;
+            }
+
             var methodInfo = @delegate.GetMethodInfo();
             var assembly = methodInfo?.DeclaringType?.Assembly;
+
+            if (assembly == null)
+            {
+                return false;
+            }
+
             return RocketModIntegration.IsRocketModAssembly(assembly);
         }
     }
