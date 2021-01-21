@@ -6,10 +6,12 @@ on:
     branches: [ main ]
     paths:
       - 'standalone/**'
+      - 'framework/**'
   pull_request:
     branches: [ main ]
     paths:
       - 'standalone/**'
+      - 'framework/**'
 
 jobs:
   build:
