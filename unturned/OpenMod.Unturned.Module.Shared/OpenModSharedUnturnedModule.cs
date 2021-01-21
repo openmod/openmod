@@ -28,7 +28,7 @@ namespace OpenMod.Unturned.Module.Shared
         {
             var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
             var openModDirPath = Path.GetDirectoryName(Directory
-                .GetFiles(modulesDirectory, "OpenMod.Unturned.module", SearchOption.AllDirectories)
+                .GetFiles(modulesDirectory, "OpenMod.Unturned.dll", SearchOption.AllDirectories)
                 .FirstOrDefault() ?? throw new Exception("Failed to find OpenMod directory"));
 
             if (HasIncompatibleModules(Path.GetFileName(openModDirPath), modulesDirectory))
