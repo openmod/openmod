@@ -5,15 +5,17 @@ on:
     tags:
       - "*"
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
+      - '.github/workflows/OpenMod.Core.yml'
       - 'framework/OpenMod.Core/**'
       - 'framework/OpenMod.NuGet/**'
       - 'framework/OpenMod.API/**'
       - 'framework/tests/OpenMod.Core.Tests/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
+      - '.github/workflows/OpenMod.Core.yml'
       - 'framework/OpenMod.Core/**'
       - 'framework/OpenMod.NuGet/**'
       - 'framework/OpenMod.API/**'
@@ -30,7 +32,7 @@ jobs:
         fetch-depth: 0
     - name: Extract version
       id: get_version
-      run: echo ::set-output name=VERSION::$(git describe --tags)        
+      run: echo ::set-output name=VERSION::$(git describe --tags)
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:

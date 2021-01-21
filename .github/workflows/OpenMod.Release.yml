@@ -4,7 +4,7 @@ on:
   create:
     tags:
       - "*"
-      
+
 jobs:
   gitHubRelease:
     if: github.event_name == 'create' && github.event.ref_type == 'tag'
@@ -17,7 +17,7 @@ jobs:
         fetch-depth: 0
     - name: Extract version
       id: get_version
-      run: echo ::set-output name=VERSION::$(git describe --tags)      
+      run: echo ::set-output name=VERSION::$(git describe --tags)
     - name: Create release
       id: create_release
       uses: sondreb/action-release@master

@@ -22,11 +22,11 @@ jobs:
       with:
         dotnet-version: 5.0.100
     - name: Update OpenMod Templates version
-      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" templates/OpenMod.Templates.csproj"  
+      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" templates/OpenMod.Templates.csproj"
     - name: Update OpenMod Templates Universal version
-      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" templates/templates/universal/PluginTemplate.csproj"  
+      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" templates/templates/universal/PluginTemplate.csproj"
     - name: Update OpenMod Templates Unturned version
-      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" templates/templates/unturned/PluginTemplate.csproj"      
+      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.VERSION }}#\" templates/templates/unturned/PluginTemplate.csproj"
     - name: Build
       run: dotnet build ./templates --configuration Release
     - name: Push to NuGet

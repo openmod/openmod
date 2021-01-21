@@ -10,7 +10,7 @@ using UserDatabasePlugin.Database;
 [assembly: PluginMetadata("UserDatabasePlugin", 
     Author = "OpenMod", 
     DisplayName = "User Database Plugin", 
-    Website = "https://github.com/openmod/openmod/tree/master/samples/UserDatabasePlugin")]
+    Website = "https://github.com/openmod/openmod/tree/main/samples/UserDatabasePlugin")]
 
 namespace UserDatabasePlugin
 {

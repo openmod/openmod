@@ -2,14 +2,19 @@ name: OpenMod.Standalone
 
 on:
   release:
+    types: [ published ]
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
+      - '.github/workflows/OpenMod.Standalone.yml'
       - 'standalone/**'
+      - 'framework/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
+      - '.github/workflows/OpenMod.Standalone.yml'
       - 'standalone/**'
+      - 'framework/**'
 
 jobs:
   build:
@@ -22,7 +27,7 @@ jobs:
         fetch-depth: 0
     - name: Extract version
       id: get_version
-      run: echo ::set-output name=VERSION::$(git describe --tags)        
+      run: echo ::set-output name=VERSION::$(git describe --tags)
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
@@ -30,7 +35,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore standalone/OpenMod.Standalone
     - name: Update version
-      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"  
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"
     - name: Build
       run: dotnet build standalone/OpenMod.Standalone --configuration Release --no-restore
 #    - name: Test
@@ -40,13 +45,13 @@ jobs:
       id: get-release
       uses: bruceadams/get-release@v1.2.0
       env:
-        GITHUB_TOKEN: ${{ github.token }}    
+        GITHUB_TOKEN: ${{ github.token }}
     - name: Install zip
       if: github.event_name == 'release'
       run: sudo apt-get install zip
     - name: Zip net461 artifacts
       if: github.event_name == 'release'
-      run: "cd ./standalone/OpenMod.Standalone/bin/Release/net461 && zip -qq -r ./release.zip *"      
+      run: "cd ./standalone/OpenMod.Standalone/bin/Release/net461 && zip -qq -r ./release.zip *"
     - name: Upload net461 release asset
       if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
@@ -59,7 +64,7 @@ jobs:
         asset_content_type: application/zip
     - name: Zip netcoreapp3.1 artifacts
       if: github.event_name == 'release'
-      run: "cd ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1 && zip -qq -r ./release.zip *"          
+      run: "cd ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1 && zip -qq -r ./release.zip *"
     - name: Upload netcoreapp3.1 release asset
       if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
@@ -69,4 +74,4 @@ jobs:
         upload_url: ${{ steps.get-release.outputs.upload_url }}
         asset_path: ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1/release.zip
         asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-netcoreapp3.1.zip
-        asset_content_type: application/zip        
+        asset_content_type: application/zip

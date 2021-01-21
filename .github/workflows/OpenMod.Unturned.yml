@@ -5,16 +5,18 @@ on:
     tags:
       - "*"
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
+      - '.github/workflows/OpenMod.Unturned.yml'
       - 'framework/**'
       - 'unityengine/**'
       - 'unturned/OpenMod.Unturned/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
+      - '.github/workflows/OpenMod.Unturned.yml'
       - 'framework/**'
-      - 'unityengine/**'    
+      - 'unityengine/**'
       - 'unturned/OpenMod.Unturned/**'
 
 jobs:
@@ -36,7 +38,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore unturned/OpenMod.Unturned
     - name: Update version
-      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"  
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"
     - name: Build
       run: dotnet build unturned/OpenMod.Unturned --configuration Release --no-restore
 #    - name: Test
