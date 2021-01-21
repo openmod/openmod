@@ -110,8 +110,11 @@ namespace OpenMod.Unturned
 
         public Task InitAsync()
         {
-            var rocketModIntegration = ActivatorUtilities.CreateInstance<RocketModIntegration>(m_ServiceProvider, this);
-            rocketModIntegration.Install();
+            if (RocketModIntegration.IsRocketModInstalled())
+            {
+                var rocketModIntegration = ActivatorUtilities.CreateInstance<RocketModIntegration>(m_ServiceProvider, this);
+                rocketModIntegration.Install();
+            }
 
             // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
