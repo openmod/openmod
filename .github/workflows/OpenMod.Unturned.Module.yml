@@ -7,27 +7,27 @@ on:
     branches: [ main ]
     paths:
       - 'framework/**'
-      - 'unityengine/**'      
+      - 'unityengine/**'
       - 'unturned/**'
   pull_request:
     branches: [ main ]
     paths:
       - 'framework/**'
-      - 'unityengine/**'      
+      - 'unityengine/**'
       - 'unturned/**'
 
 jobs:
   build:
     name: "OpenMod.Unturned.Module Build"
     runs-on: ubuntu-latest
-    steps:    
+    steps:
     - uses: actions/checkout@v2
       name: Checkout Repository
       with:
         fetch-depth: 0
     - name: Extract version
       id: get_version
-      run: echo ::set-output name=VERSION::$(git describe --tags)     
+      run: echo ::set-output name=VERSION::$(git describe --tags)
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
@@ -35,7 +35,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Update version
-      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"  
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"
     - name: Build
       run: dotnet build unturned/OpenMod.Unturned.Module --configuration Release --no-restore
 #    - name: Test
