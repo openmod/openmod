@@ -44,7 +44,10 @@ namespace OpenMod.Unturned.Commands
 
         protected override async Task OnExecuteAsync()
         {
-            var OpenModModulePath = Path.Combine(ReadWrite.PATH, "Modules", "OpenMod.Unturned");
+            var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
+            var openModDirPath = Path.GetDirectoryName(Directory
+                .GetFiles(modulesDirectory, "OpenMod.Unturned.module", SearchOption.AllDirectories)
+                .FirstOrDefault() ?? throw new Exception("Failed to find OpenMod directory"));
 
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Add("User-Agent", "request");
@@ -64,11 +67,11 @@ namespace OpenMod.Unturned.Commands
             var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
 
             await PrintAsync("Extracting update...");
-            await ExtractArchiveAsync(stream, OpenModModulePath);
+            await ExtractArchiveAsync(stream, openModDirPath);
 
             if (Hotloader.Enabled)
             {
-                var modulePath = Path.Combine(OpenModModulePath, "OpenMod.Unturned.Module.dll");
+                var modulePath = Path.Combine(openModDirPath, "OpenMod.Unturned.Module.dll");
                 var moduleAssembly = Hotloader.LoadAssembly(File.ReadAllBytes(modulePath));
                 var moduleNexusType = moduleAssembly.GetType("OpenMod.Unturned.Module.OpenModUnturnedModule");
 
