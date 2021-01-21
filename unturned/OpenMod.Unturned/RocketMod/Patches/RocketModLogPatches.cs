@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using Microsoft.Extensions.Logging;
 using Rocket.Core.Logging;
 
@@ -42,12 +41,6 @@ namespace OpenMod.Unturned.RocketMod.Patches
         public static bool PreLogException(Exception ex, string message)
         {
             OnRocketLog?.Invoke(LogLevel.Error, message, ex);
-            return false;
-        }
-
-        public static bool PreExternalLog()
-        {
-            // no-op external log as OpenMod handles this already
             return false;
         }
     }
