@@ -681,7 +681,7 @@ namespace OpenMod.NuGet
             return s_VersionRegex.Replace(fullAssemblyName, string.Empty);
         }
 
-        public async Task InstallMissingPackagesAsync(bool updateExisting = true)
+        public async Task<int> InstallMissingPackagesAsync(bool updateExisting = true)
         {
             if (m_PackagesDataStore == null)
             {
@@ -708,6 +708,8 @@ namespace OpenMod.NuGet
                 Logger.LogInformation($"Installing package: {package.Id}@{package.Version?.OriginalVersion ?? "latest"}");
                 await InstallAsync(package, allowPrereleaseVersions: true);
             }
+
+            return packages.Count;
         }
 
         public async Task<bool> RemoveAsync(PackageIdentity packageIdentity)
