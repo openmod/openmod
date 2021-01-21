@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
+using OpenMod.Core.Patching;
 using OpenMod.Core.Users;
 using OpenMod.Extensions.Economy.Abstractions;
 using OpenMod.Unturned.Configuration;
@@ -67,18 +68,28 @@ namespace OpenMod.Unturned.RocketMod
                 if (uconomyAssembly != null)
                 {
                     var databaseType = uconomyAssembly.GetType("fr34kyn01535.Uconomy.DatabaseManager");
-                    var getBalanceMethod = databaseType.GetMethod("GetBalance", c_BindingFlags);
-                    var increaseBalanceMethod = databaseType.GetMethod("IncreaseBalance", c_BindingFlags);
+                    var harmonyInstance = new Harmony(UconomyIntegration.HarmonyId);
 
+                    var getBalanceMethod = databaseType.GetMethod("GetBalance", c_BindingFlags);
                     var getBalancePrefixMethod = typeof(UconomyGetBalancePatch)
                         .GetMethod(nameof(UconomyGetBalancePatch.GetBalancePrefix), c_BindingFlags);
+                    harmonyInstance.Patch(getBalanceMethod, prefix: new HarmonyMethod(getBalancePrefixMethod));
 
                     var increaseBalancePrefixMethod = typeof(UconomyBalanceIncreasePatch)
                         .GetMethod(nameof(UconomyBalanceIncreasePatch.IncreaseBalancePrefix), c_BindingFlags);
-
-                    var harmonyInstance = new Harmony(UconomyIntegration.HarmonyId);
-                    harmonyInstance.Patch(getBalanceMethod, prefix: new HarmonyMethod(getBalancePrefixMethod));
+                    var increaseBalanceMethod = databaseType.GetMethod("IncreaseBalance", c_BindingFlags);
                     harmonyInstance.Patch(increaseBalanceMethod, prefix: new HarmonyMethod(increaseBalancePrefixMethod));
+
+                    var checkSchemaMethod = databaseType.GetMethod("CheckSchema", c_BindingFlags);
+                    harmonyInstance.NopPatch(checkSchemaMethod);
+
+                    var checkSetupAccount = databaseType.GetMethod("CheckSetupAccount", c_BindingFlags);
+                    harmonyInstance.NopPatch(checkSetupAccount);
+
+                    var executeQueryMethod = databaseType.GetMethod("ExecuteQuery", c_BindingFlags);
+                    var executeQueryPrefixMethod = typeof(UconomyExecuteQueryPatch)
+                        .GetMethod(nameof(UconomyExecuteQueryPatch.ExecuteQueryPrefix), c_BindingFlags);
+                    harmonyInstance.Patch(executeQueryMethod, prefix: new HarmonyMethod(executeQueryPrefixMethod));
 
                     UconomyGetBalancePatch.OnPreGetBalance += OnPreGetBalance;
                     UconomyBalanceIncreasePatch.OnPreIncreaseBalance += OnPreIncreaseBalance;
@@ -105,7 +116,7 @@ namespace OpenMod.Unturned.RocketMod
         private void OnPreIncreaseBalance(string id, decimal increaseby, ref decimal newbalance)
         {
             var economyProvider = m_RocketModComponent.LifetimeScope.Resolve<IEconomyProvider>();
-            AsyncHelper.RunSync(() => economyProvider.UpdateBalanceAsync(id, KnownActorTypes.Player, increaseby, null));
+            AsyncHelper.RunSync(() => economyProvider.UpdateBalanceAsync(id, KnownActorTypes.Player, increaseby, reason: null));
         }
 
         private void OnPreGetBalance(string id, ref decimal balance)

@@ -190,6 +190,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
         public void Dispose()
         {
+            UconomyBalanceIncreasePatch.OnPostIncreaseBalance -= OnPostBalanceUpdated;
             m_HarmonyInstance?.UnpatchAll(UconomyIntegration.HarmonyId);
         }
     }
