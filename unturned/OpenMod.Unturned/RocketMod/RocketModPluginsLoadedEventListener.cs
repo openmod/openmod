@@ -7,11 +7,14 @@ using SDG.Unturned;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Autofac;
 using HarmonyLib;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
+using OpenMod.Core.Users;
+using OpenMod.Extensions.Economy.Abstractions;
 using OpenMod.Unturned.Configuration;
 using OpenMod.Unturned.RocketMod.Economy;
 using OpenMod.Unturned.RocketMod.Economy.Patches;
@@ -23,7 +26,7 @@ namespace OpenMod.Unturned.RocketMod
     public class RocketModPluginsLoadedEventListener : IEventListener<RocketModPluginsLoadedEvent>
     {
         private const BindingFlags c_BindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
-       
+
         private readonly ILoggerFactory m_LoggerFactory;
         private readonly IRocketModComponent m_RocketModComponent;
         private readonly IOpenModUnturnedConfiguration m_UnturnedConfiguration;
@@ -77,9 +80,15 @@ namespace OpenMod.Unturned.RocketMod
                     harmonyInstance.Patch(getBalanceMethod, prefix: new HarmonyMethod(getBalancePrefixMethod));
                     harmonyInstance.Patch(increaseBalanceMethod, prefix: new HarmonyMethod(increaseBalancePrefixMethod));
 
+                    UconomyGetBalancePatch.OnPreGetBalance += OnPreGetBalance;
+                    UconomyBalanceIncreasePatch.OnPreIncreaseBalance += OnPreIncreaseBalance;
+
                     m_RocketModComponent.LifetimeScope.Disposer.AddInstanceForDisposal(new DisposeAction(() =>
                     {
                         harmonyInstance.UnpatchAll(UconomyIntegration.HarmonyId);
+
+                        UconomyGetBalancePatch.OnPreGetBalance -= OnPreGetBalance;
+                        UconomyBalanceIncreasePatch.OnPreIncreaseBalance -= OnPreIncreaseBalance;
                     }));
                 }
                 else
@@ -91,6 +100,18 @@ namespace OpenMod.Unturned.RocketMod
 
             RemoveRocketCommandListeners();
             return Task.CompletedTask;
+        }
+
+        private void OnPreIncreaseBalance(string id, decimal increaseby, ref decimal newbalance)
+        {
+            var economyProvider = m_RocketModComponent.LifetimeScope.Resolve<IEconomyProvider>();
+            AsyncHelper.RunSync(() => economyProvider.UpdateBalanceAsync(id, KnownActorTypes.Player, increaseby, null));
+        }
+
+        private void OnPreGetBalance(string id, ref decimal balance)
+        {
+            var economyProvider = m_RocketModComponent.LifetimeScope.Resolve<IEconomyProvider>();
+            balance = AsyncHelper.RunSync(() => economyProvider.GetBalanceAsync(id, KnownActorTypes.Player));
         }
 
         [SuppressMessage("ReSharper", "DelegateSubtraction")]
