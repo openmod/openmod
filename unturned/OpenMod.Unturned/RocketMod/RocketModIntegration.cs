@@ -49,7 +49,11 @@ namespace OpenMod.Unturned.RocketMod
         /// <returns></returns>
         public static bool IsRocketModInstalled()
         {
-            return File.Exists(Path.Combine(ReadWrite.PATH, "Modules", "Rocket.Unturned", "Rocket.Unturned.module"));
+            var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
+            const string rocketModuleFile = "Rocket.Unturned.module";
+
+            return Directory.GetFiles(modulesDirectory, rocketModuleFile, SearchOption.AllDirectories)
+                .Any();
         }
 
         /// <summary>
