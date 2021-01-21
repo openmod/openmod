@@ -24,6 +24,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenMod.API.Eventing;
+using OpenMod.Core.Ioc;
 using OpenMod.Unturned.Configuration;
 using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.RocketMod.Events;
@@ -112,7 +113,7 @@ namespace OpenMod.Unturned
         {
             if (RocketModIntegration.IsRocketModInstalled())
             {
-                var rocketModIntegration = ActivatorUtilities.CreateInstance<RocketModIntegration>(m_ServiceProvider, this);
+                var rocketModIntegration = ActivatorUtilitiesEx.CreateInstance<RocketModIntegration>(LifetimeScope);
                 rocketModIntegration.Install();
             }
 
