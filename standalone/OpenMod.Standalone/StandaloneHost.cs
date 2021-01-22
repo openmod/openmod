@@ -36,6 +36,7 @@ namespace OpenMod.Standalone
 
         public IDataStore DataStore { get; }
 
+        private readonly IRuntime m_Runtime;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
 
         private readonly ICommandExecutor m_CommandExecutor;
@@ -47,6 +48,7 @@ namespace OpenMod.Standalone
             IConsoleActorAccessor consoleActorAccessor,
             ICommandExecutor commandExecutor)
         {
+            m_Runtime = runtime;
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
@@ -79,6 +81,12 @@ namespace OpenMod.Standalone
         public bool HasCapability(string capability)
         {
             return false;
+        }
+
+        public Task PerformHardReloadAsync()
+        {
+            // todo
+            return m_Runtime.PerformSoftReloadAsync();
         }
 
         private void OnCommandExecute(string commandline)

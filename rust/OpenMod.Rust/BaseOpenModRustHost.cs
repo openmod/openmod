@@ -14,6 +14,7 @@ namespace OpenMod.Rust
 {
     public abstract class BaseOpenModRustHost : IOpenModHost, IDisposable
     {
+        private readonly IRuntime m_Runtime;
         public string OpenModComponentId { get; } = "OpenMod.Rust";
 
         public string WorkingDirectory { get; }
@@ -33,6 +34,7 @@ namespace OpenMod.Rust
             IDataStoreFactory dataStoreFactory
             )
         {
+            m_Runtime = runtime;
             LifetimeScope = lifetimeScope;
             WorkingDirectory = runtime.WorkingDirectory;
             DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters
@@ -94,6 +96,12 @@ namespace OpenMod.Rust
             }
 
             return false;
+        }
+
+        public Task PerformHardReloadAsync()
+        {
+            // todo
+            return m_Runtime.PerformSoftReloadAsync();
         }
 
         public void Dispose()
