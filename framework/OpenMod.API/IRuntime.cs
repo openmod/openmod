@@ -51,7 +51,7 @@ namespace OpenMod.API
         ///   Reloads all plugins, configurations, etc. and rebuilds the DI container
         /// </summary>
         /// <returns></returns>
-        Task ReloadAsync();
+        Task PerformSoftReloadAsync();
 
         /// <summary>
         ///     The .NET generic host instance.

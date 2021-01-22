@@ -17,17 +17,18 @@ using OpenMod.Unturned.Users;
 using SDG.Unturned;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenMod.API.Eventing;
+using OpenMod.Common.Hotloading;
 using OpenMod.Core.Ioc;
+using OpenMod.NuGet;
 using OpenMod.Unturned.Configuration;
+using OpenMod.Unturned.Module.Bootstrapper;
 using OpenMod.Unturned.RocketMod;
-using OpenMod.Unturned.RocketMod.Events;
 using UnityEngine.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
 
@@ -37,12 +38,14 @@ namespace OpenMod.Unturned
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
         private static bool s_UniTaskInited;
+        private readonly IRuntime m_Runtime;
         private readonly IOpenModUnturnedConfiguration m_UnturnedConfiguration;
         private readonly IHostInformation m_HostInformation;
         private readonly IServiceProvider m_ServiceProvider;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly Lazy<ICommandExecutor> m_CommandExecutor;
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
+        private readonly NuGetPackageManager m_NuGetPackageManager;
         private readonly Lazy<IEventBus> m_EventBus;
         private readonly Lazy<UnturnedCommandHandler> m_UnturnedCommandHandler;
         private List<ICommandInputOutput> m_IoHandlers;
@@ -73,16 +76,19 @@ namespace OpenMod.Unturned
             IDataStoreFactory dataStoreFactory,
             IConsoleActorAccessor consoleActorAccessor,
             ILogger<OpenModUnturnedHost> logger,
+            NuGetPackageManager nuGetPackageManager,
             Lazy<ICommandExecutor> commandExecutor,
             Lazy<IEventBus> eventBus,
             Lazy<UnturnedCommandHandler> unturnedCommandHandler)
         {
+            m_Runtime = runtime;
             m_UnturnedConfiguration = unturnedConfiguration;
             m_HostInformation = hostInformation;
             m_ServiceProvider = serviceProvider;
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
             m_Logger = logger;
+            m_NuGetPackageManager = nuGetPackageManager;
             m_EventBus = eventBus;
             m_UnturnedCommandHandler = unturnedCommandHandler;
             WorkingDirectory = runtime.WorkingDirectory;
@@ -197,6 +203,29 @@ namespace OpenMod.Unturned
 
             return Task.CompletedTask;
             // ReSharper restore PossibleNullReferenceException
+        }
+
+        public async Task PerformHardReloadAsync()
+        {
+            var shutdownPerformed = false;
+            try
+            {
+                await m_Runtime.ShutdownAsync();
+                shutdownPerformed = true;
+                m_NuGetPackageManager.ClearCache();
+
+                BootstrapperModule.Instance.initialize(Hotloader.LoadAssembly);
+            }
+            catch (Exception ex)
+            {
+                if (shutdownPerformed)
+                {
+                    // fallback to unturned log because our logger is disposed at this point
+                    UnturnedLog.exception(ex, "OpenMod has crashed.");
+                }
+
+                throw;
+            }
         }
 
         protected virtual void BindUnturnedEvents()

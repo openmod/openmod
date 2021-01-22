@@ -25,5 +25,10 @@ namespace OpenMod.API
         /// </summary>
 
         bool HasCapability(string capability);
+
+        /// <summary>
+        ///   Reloads OpenMod from zero.
+        /// </summary>
+        Task PerformHardReloadAsync();
     }
 }

@@ -58,7 +58,7 @@ namespace OpenMod.Unturned.Events
 
             Provider.clients.Do(UnsubscribePlayer);
 
-            foreach (IUnturnedEventsListener eventsListener in m_UnturnedEventsListeners)
+            foreach (var eventsListener in m_UnturnedEventsListeners)
             {
                 eventsListener.Unsubscribe();
             }
@@ -70,7 +70,7 @@ namespace OpenMod.Unturned.Events
         {
             if (player == null || player.player == null) return;
 
-            foreach (IUnturnedPlayerEventsListener eventsListener in m_UnturnedEventsListeners.OfType<IUnturnedPlayerEventsListener>())
+            foreach (var eventsListener in m_UnturnedEventsListeners.OfType<IUnturnedPlayerEventsListener>())
             {
                 eventsListener.SubscribePlayer(player.player);
             }
@@ -80,7 +80,7 @@ namespace OpenMod.Unturned.Events
         {
             if (player == null || player.player == null) return;
 
-            foreach (IUnturnedPlayerEventsListener eventsListener in m_UnturnedEventsListeners.OfType<IUnturnedPlayerEventsListener>())
+            foreach (var eventsListener in m_UnturnedEventsListeners.OfType<IUnturnedPlayerEventsListener>())
             {
                 eventsListener.UnsubscribePlayer(player.player);
             }

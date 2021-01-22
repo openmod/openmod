@@ -13,17 +13,35 @@ namespace OpenMod.Unturned.Module.Bootstrapper
     public class BootstrapperModule : IModuleNexus
     {
         private IModuleNexus m_BootstrappedModule;
+        public static BootstrapperModule Instance { get; private set; }
+        private string s_SelfLocation;
+
         public void initialize()
         {
-            var selfLocation = typeof(BootstrapperModule).Assembly.Location;
-            var openModModuleDir = Path.GetDirectoryName(selfLocation);
+            initialize(Assembly.Load);
+        }
 
+        public void initialize(Func<byte[], Assembly> assembyLoader)
+        {
+            Instance = this;
+
+            if (string.IsNullOrEmpty(s_SelfLocation))
+            {
+                s_SelfLocation = Path.GetFullPath(typeof(BootstrapperModule).Assembly.Location);
+            }
+
+            var openModModuleDir = Path.GetDirectoryName(s_SelfLocation);
             Assembly moduleAssembly = null;
 
             // ReSharper disable once AssignNullToNotNullAttribute
             foreach (var assemblyFile in Directory.GetFiles(openModModuleDir, "*.dll", SearchOption.TopDirectoryOnly))
             {
-                var assembly = Assembly.Load(File.ReadAllBytes(assemblyFile));
+                if (Path.GetFullPath(assemblyFile) == s_SelfLocation)
+                {
+                    continue;
+                }
+
+                var assembly = assembyLoader(File.ReadAllBytes(assemblyFile));
                 var fileName = Path.GetFileName(assemblyFile);
                 if ((fileName.Equals("OpenMod.Unturned.Module.dll") && moduleAssembly != null)
                     || fileName.Equals("OpenMod.Unturned.Module.Dev.dll"))
@@ -47,7 +65,6 @@ namespace OpenMod.Unturned.Module.Bootstrapper
                 types = ex.Types.Where(d => d != null).ToList();
             }
 
-
             var moduleType = types.SingleOrDefault(d => d.Name.Equals("OpenModUnturnedModule"));
             if (moduleType == null)
             {
@@ -61,6 +78,7 @@ namespace OpenMod.Unturned.Module.Bootstrapper
         public void shutdown()
         {
             m_BootstrappedModule?.shutdown();
+            Instance = null;
         }
     }
 }

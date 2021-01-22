@@ -255,7 +255,7 @@ namespace OpenMod.Runtime
             }
         }
 
-        public async Task ReloadAsync()
+        public async Task PerformSoftReloadAsync()
         {
             await ShutdownAsync();
             await InitAsync(m_OpenModHostAssemblies, m_RuntimeInitParameters, m_HostBuilderFunc);
