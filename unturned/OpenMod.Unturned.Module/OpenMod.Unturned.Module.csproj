@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\framework\OpenMod.Bootstrapper\OpenMod.Bootstrapper.csproj" />
+    <ProjectReference Include="..\OpenMod.Unturned.Module.Bootstrapper\OpenMod.Unturned.Module.Bootstrapper.csproj" />
     <ProjectReference Include="..\OpenMod.Unturned.Module.Shared\OpenMod.Unturned.Module.Shared.csproj" />
   </ItemGroup>
 

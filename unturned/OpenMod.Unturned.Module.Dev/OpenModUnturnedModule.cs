@@ -6,7 +6,6 @@ using SDG.Unturned;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using OpenMod.NuGet;
 
 namespace OpenMod.Unturned.Module.Dev
 {
