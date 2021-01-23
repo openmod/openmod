@@ -12,10 +12,15 @@
     <Copyright>Enes Sadık Özbek &lt;esozbek.me&gt;</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <LangVersion>9.0</LangVersion>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'== 'net461'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>	
   </ItemGroup>
    
   <PropertyGroup>
