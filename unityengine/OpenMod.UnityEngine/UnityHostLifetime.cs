@@ -1,9 +1,11 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenMod.API;
+using OpenMod.Core.Helpers;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace OpenMod.UnityEngine
@@ -12,16 +14,16 @@ namespace OpenMod.UnityEngine
     {
         private readonly IHostApplicationLifetime m_ApplicationLifetime;
         private readonly ILogger<UnityHostLifetime> m_Logger;
+        private readonly IOpenModHost m_OpenModHost;
         private readonly HostOptions m_HostOptions;
         private readonly ManualResetEvent m_ShutdownBlock;
 
-        public UnityHostLifetime(
-            IHostApplicationLifetime applicationLifetime,
-            ILogger<UnityHostLifetime> logger,
-            IOptions<HostOptions> hostOptions)
+        public UnityHostLifetime(IHostApplicationLifetime applicationLifetime, ILogger<UnityHostLifetime> logger,
+            IOptions<HostOptions> hostOptions, IOpenModHost openModHost)
         {
             m_ApplicationLifetime = applicationLifetime;
             m_Logger = logger;
+            m_OpenModHost = openModHost;
             m_HostOptions = hostOptions.Value;
             m_ShutdownBlock = new ManualResetEvent(false);
         }
@@ -29,7 +31,14 @@ namespace OpenMod.UnityEngine
         public Task WaitForStartAsync(CancellationToken cancellationToken)
         {
             Application.quitting += OnApplicationQuitting;
+            Console.CancelKeyPress += Console_CancelKeyPress;
             return Task.CompletedTask;
+        }
+
+        private void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        {
+            e.Cancel = true;
+            AsyncHelper.RunSync(m_OpenModHost.ShutdownAsync);
         }
 
         private void OnApplicationQuitting()
@@ -58,6 +67,7 @@ namespace OpenMod.UnityEngine
         {
             m_ShutdownBlock.Set();
             Application.quitting -= OnApplicationQuitting;
+            Console.CancelKeyPress -= Console_CancelKeyPress;
         }
     }
 }
