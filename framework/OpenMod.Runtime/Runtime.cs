@@ -288,25 +288,60 @@ namespace OpenMod.Runtime
 
         private void SetupSerilog()
         {
-            var loggingPath = Path.Combine(WorkingDirectory, "logging.yaml");
-            if (!File.Exists(loggingPath))
+            LoggerConfiguration loggerConfiguration;
+            try
             {
-                // First run, logging.yaml doesn't exist yet. We can not wait for auto-copy as it would be too late.
-                using var stream = typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yaml");
-                using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException("Couldn't find resource: OpenMod.Core.logging.yaml"));
+                var loggingPath = Path.Combine(WorkingDirectory, "logging.yaml");
+                if (!File.Exists(loggingPath))
+                {
+                    // First run, logging.yaml doesn't exist yet. We can not wait for auto-copy as it would be too late.
+                    using var stream =
+                        typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yaml");
+                    using var reader =
+                        new StreamReader(
+                            stream ?? throw new MissingManifestResourceException(
+                                "Couldn't find resource: OpenMod.Core.logging.yaml"));
 
-                var fileContent = reader.ReadToEnd();
-                File.WriteAllText(loggingPath, fileContent);
+                    var fileContent = reader.ReadToEnd();
+                    File.WriteAllText(loggingPath, fileContent);
+                }
+
+                var configuration = new ConfigurationBuilder()
+                    .SetBasePath(WorkingDirectory)
+                    .AddYamlFileEx(s =>
+                    {
+                        s.Path = "logging.yaml";
+                        s.Optional = false;
+                        s.Variables = new Dictionary<string, string>
+                        {
+                            {"workingDirectory", WorkingDirectory.Replace(@"\", @"/")},
+                            {"date", DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}
+                        };
+                        s.ResolveFileProvider();
+                    })
+                    .AddEnvironmentVariables()
+                    .Build();
+
+                loggerConfiguration = new LoggerConfiguration()
+                    .ReadFrom.Configuration(configuration);
+
             }
+            catch (Exception ex)
+            {
+                var previousColor = Console.ForegroundColor;
 
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(WorkingDirectory)
-                .AddYamlFile("logging.yaml")
-                .AddEnvironmentVariables()
-                .Build();
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("Failed to setup Serilog; logging will not work correctly.");
+                Console.WriteLine("Setting up console only logging as workaround.");
+                Console.WriteLine("Please fix your logging.yaml file or delete it to restore the default one.");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(ex);
 
-            var loggerConfiguration = new LoggerConfiguration()
-                .ReadFrom.Configuration(configuration);
+                Console.ForegroundColor = previousColor;
+
+                loggerConfiguration = new LoggerConfiguration()
+                    .WriteTo.Async(c => c.Console());
+            }
 
             var serilogLogger = Log.Logger = loggerConfiguration.CreateLogger();
             m_LoggerFactory = new SerilogLoggerFactory(serilogLogger);
