@@ -38,7 +38,7 @@ namespace UserDatabasePlugin
             m_Logger.LogInformation("UserDatabase has been loaded.");
 
             // this is actually just a silly demo for permission registrations
-            // the full permission which the user will see and manage will be "UserDatabasePlugin.anonymous" because RegisterPermission prefixes it with plugin ID
+            // the full permission which the user will see and manage will be "UserDatabasePlugin:anonymous" because RegisterPermission prefixes it with plugin ID
             // when you want to check against this permission you need to call IPermissionChecker.CheckPermissionAsync(actor, "anonymous"), it is again automatically prefixed;
             m_PermissionRegistry.RegisterPermission(this, "anonymous", description: "Prevents a user's name from getting logged.");
         }
