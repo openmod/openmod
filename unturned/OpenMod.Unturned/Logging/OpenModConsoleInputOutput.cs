@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Logging
 {
@@ -20,9 +21,9 @@ namespace OpenMod.Unturned.Logging
         private bool m_ReadLineEnabled;
         private readonly ConcurrentQueue<string> m_CommandQueue;
         private readonly ILogger m_Logger;
-        private Thread m_InputThread;
         private bool m_IsAlive;
         private TextReader m_PreviousConsoleIn;
+        private CancellationTokenSource m_Cts;
 
         public OpenModConsoleInputOutput(
             ILoggerFactory loggerFactory,
@@ -48,7 +49,7 @@ namespace OpenMod.Unturned.Logging
             System.Console.InputEncoding = encoding;
 
             m_PreviousConsoleIn = System.Console.In;
-            
+
             var enableHistory = m_Configuration.GetSection("console:history").Get<bool>();
             var enableAutoComplete = m_Configuration.GetSection("console:autocomplete").Get<bool>();
 
@@ -62,12 +63,9 @@ namespace OpenMod.Unturned.Logging
             }
 
             m_IsAlive = true;
-            m_InputThread = new Thread(OnInputThreadStart)
-            {
-                IsBackground = true
-            };
+            m_Cts = new CancellationTokenSource();
 
-            m_InputThread.Start();
+            Task.Run(InputTaskAsync, m_Cts.Token);
         }
 
         public void shutdown(CommandWindow commandWindow)
@@ -78,6 +76,7 @@ namespace OpenMod.Unturned.Logging
             }
 
             m_IsAlive = false;
+            m_Cts.Cancel();
             ReadLine.AutoCompletionHandler = null;
             ReadLine.HistoryEnabled = false;
             System.Console.SetIn(m_PreviousConsoleIn);
@@ -91,23 +90,27 @@ namespace OpenMod.Unturned.Logging
             }
         }
 
-        private void OnInputThreadStart()
+        private async Task InputTaskAsync()
         {
-            while (m_IsAlive)
+            using var s = System.Console.OpenStandardInput();
+            using var sr = new StreamReader(s);
+
+            while (!m_Cts.Token.IsCancellationRequested)
             {
-                if (System.Console.KeyAvailable)
+                var command = m_ReadLineEnabled
+                    ? ReadLine.Read()
+#if NET6
+                    : await sr.ReadLineAsync(m_Cts.Token);
+#else
+                    : await sr.ReadLineAsync();
+#endif
+                if (!string.IsNullOrWhiteSpace(command))
                 {
-                    string command = m_ReadLineEnabled ?
-                        ReadLine.Read() :
-                        System.Console.ReadLine();
+                    m_Cts.Token.ThrowIfCancellationRequested();
 
-                    if (!string.IsNullOrWhiteSpace(command))
-                    {
-                        m_CommandQueue.Enqueue(command); /* Enqueue command because inputCommitted is expected on main thread */
-                    }
+                    // Enqueue command because inputCommitted is expected to run on main thread
+                    m_CommandQueue.Enqueue(command); 
                 }
-
-                Thread.Sleep(10);
             }
         }
 
