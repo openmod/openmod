@@ -1,0 +1,69 @@
+﻿#
+# This file defines jobs to be executed automatically by OpenMod.
+# ----------
+# Scheduling
+# ----------
+# There are 4 types available for schedule:
+# - crontab: Executes a job periodically.
+# Must have args.period defined. Visit http://crontab.guru/ for more information on how to define the period.
+# - startup: Executes a job after OpenMod and all plugins have loaded.
+# - single_exec: Executes a job a single time and then removes it from this file.
+# Note: Time is based on local system time
+# ---------
+# Job types
+# ---------
+# OpenMod has 2 built-in job types:
+# - openmod_command: Executes openmod commands.
+# Must have args.commands defined!
+# - system_command: Executes a system command (working directory is set to the OpenMod directory).
+# Note that plugins can add their own job types.
+#
+jobs:
+  # Upgrade OpenMod every Sunday at 0:00 and then restart.
+  - name: OpenMod Auto Update
+    schedule: crontab
+    type: openmod_command
+    args:
+      period: 0 0 * * 0 # Every Sunday at 0:00
+      commands:
+      - openmod upgrade
+      - openmod restart
+    enabled: true
+
+  # Restart everyday at 3 AM.
+  - name: Auto Restart
+    schedule: crontab
+    type: openmod_command
+    args:
+      period: 0 3 * * *
+      commands:
+      - openmod restart
+    enabled: false
+
+  # Purge packages on every startup (note: this is not recommended and just an example)
+  - name: Package purge
+    schedule: startup
+    type: openmod_command
+    args:
+      commands:
+      - openmod purge
+    enabled: false
+
+  # Run wipe.sh on every first day of the month
+  - name: Wipe
+    schedule: crontab
+    type: system_command
+    args:
+      period: 0 0 1 * *
+      commands: 
+      - sh wipe.sh
+    enabled: false
+
+  # Migrate economy on startup (will only execute a single time)
+  - name: Economy Migration
+    schedule: single_exec
+    type: openmod_command
+    args:
+      commands: 
+      - economy migrate
+    enabled: false

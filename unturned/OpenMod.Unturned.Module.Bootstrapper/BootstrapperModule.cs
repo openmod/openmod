@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
+//using OpenMod.Common.Hotloading;
 using SDG.Framework.Modules;
 using Path = System.IO.Path;
 
@@ -17,11 +18,6 @@ namespace OpenMod.Unturned.Module.Bootstrapper
         private string s_SelfLocation;
 
         public void initialize()
-        {
-            initialize(Assembly.Load);
-        }
-
-        public void initialize(Func<byte[], Assembly> assembyLoader)
         {
             Instance = this;
 
@@ -41,7 +37,9 @@ namespace OpenMod.Unturned.Module.Bootstrapper
                     continue;
                 }
 
-                var assembly = assembyLoader(File.ReadAllBytes(assemblyFile));
+                //Hotloader.Enabled = true;
+                //var assembly = Hotloader.LoadAssembly(File.ReadAllBytes(assemblyFile));
+                var assembly = Assembly.Load(File.ReadAllBytes(assemblyFile));
                 var fileName = Path.GetFileName(assemblyFile);
                 if ((fileName.Equals("OpenMod.Unturned.Module.dll") && moduleAssembly != null)
                     || fileName.Equals("OpenMod.Unturned.Module.Dev.dll"))

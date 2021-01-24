@@ -146,7 +146,9 @@ namespace OpenMod.Core.Plugins
 
                         containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(new DataStoreCreationParameters
                         {
-                            Component = context.Resolve<IOpenModComponent>(),
+#pragma warning disable 618
+                            ComponentId = pluginMetadata.Id,
+#pragma warning restore 618
                             Prefix = null,
                             Suffix = "data",
                             WorkingDirectory = workingDirectory

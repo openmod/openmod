@@ -7,18 +7,21 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
+    <None Remove="autoexec.yaml" />
     <None Remove="logging.yaml" />
     <None Remove="openmod.translations.yaml" />
     <None Remove="openmod.yaml" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="autoexec.yaml" />
     <EmbeddedResource Include="logging.yaml" />
     <EmbeddedResource Include="openmod.translations.yaml" />
     <EmbeddedResource Include="openmod.yaml" />
   </ItemGroup>
 
   <ItemGroup>
+  	<PackageReference Include="Cronos" Version="0.7.0" />
   	<PackageReference Include="DotNet.Glob" Version="3.1.2" />
   	<PackageReference Include="Lib.Harmony" Version="2.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.11" />

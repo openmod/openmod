@@ -12,6 +12,7 @@ using OpenMod.Core.Permissions;
 using OpenMod.Core.Plugins;
 using OpenMod.Core.Users;
 using System;
+using OpenMod.Core.Jobs;
 
 namespace OpenMod.Core
 {
@@ -43,6 +44,12 @@ namespace OpenMod.Core
                 options.AddCommandParameterResolveProvider<TypeDescriptorCommandParameterResolveProvider>();
                 options.AddCommandParameterResolveProvider<UserCommandParameterResolveProvider>();
                 options.AddCommandParameterResolveProvider<TimeSpanCommandParameterResolveProvider>();
+            });
+
+            serviceCollection.Configure<JobExecutorOptions>(options =>
+            {
+                options.AddJobExecutor<OpenModCommandJobExecutor>();
+                options.AddJobExecutor<SystemCommandJobExecutor>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();

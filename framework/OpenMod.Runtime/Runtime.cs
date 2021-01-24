@@ -230,10 +230,11 @@ namespace OpenMod.Runtime
                         WorkingDirectory = WorkingDirectory
                     });
 
+                var openModHost = Host.Services.GetRequiredService<IOpenModHost>();
                 var eventBus = Host.Services.GetRequiredService<IEventBus>();
                 foreach (var assembly in openModHostAssemblies)
                 {
-                    eventBus.Subscribe(this, assembly);
+                    eventBus.Subscribe(openModHost, assembly);
                 }
 
                 try

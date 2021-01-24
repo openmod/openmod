@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Eventing;
+using OpenMod.API.Jobs;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Helpers;
@@ -23,6 +24,7 @@ namespace OpenMod.Runtime
         private readonly IPluginAssemblyStore m_PluginAssemblyStore;
         private readonly IPluginActivator m_PluginActivator;
         private readonly IEventBus m_EventBus;
+        private readonly IJobScheduler m_JobScheduler;
 
         public OpenModHostedService(
             ILogger<OpenModHostedService> logger,
@@ -31,7 +33,8 @@ namespace OpenMod.Runtime
             IOpenModHost host,
             IPluginAssemblyStore pluginAssemblyStore,
             IPluginActivator pluginActivator,
-            IEventBus eventBus
+            IEventBus eventBus,
+            IJobScheduler jobScheduler
         )
         {
             m_Logger = logger;
@@ -41,6 +44,7 @@ namespace OpenMod.Runtime
             m_PluginAssemblyStore = pluginAssemblyStore;
             m_PluginActivator = pluginActivator;
             m_EventBus = eventBus;
+            m_JobScheduler = jobScheduler;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -65,6 +69,7 @@ namespace OpenMod.Runtime
             m_Logger.LogInformation($"> {i} plugins loaded.");
 
             AsyncHelper.Schedule("OpenMod initialize event", () => m_EventBus.EmitAsync(m_Host, this, new OpenModInitializedEvent(m_Host)));
+            await m_JobScheduler.StartAsync();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
