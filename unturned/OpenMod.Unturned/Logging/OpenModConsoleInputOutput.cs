@@ -95,16 +95,23 @@ namespace OpenMod.Unturned.Logging
         {
             while (m_IsAlive)
             {
-                if (System.Console.KeyAvailable)
+                try
                 {
-                    string command = m_ReadLineEnabled ?
-                        ReadLine.Read() :
-                        System.Console.ReadLine();
-
-                    if (!string.IsNullOrWhiteSpace(command))
+                    if (System.Console.KeyAvailable)
                     {
-                        m_CommandQueue.Enqueue(command); /* Enqueue command because inputCommitted is expected on main thread */
+                        var command = m_ReadLineEnabled ? ReadLine.Read() : System.Console.ReadLine();
+
+                        if (!string.IsNullOrWhiteSpace(command))
+                        {
+                            m_CommandQueue
+                                .Enqueue(
+                                    command); /* Enqueue command because inputCommitted is expected on main thread */
+                        }
                     }
+                }
+                catch (IOException ex)
+                {
+                    m_Logger.LogDebug(ex, "Exception occured in Console Input Thread");
                 }
 
                 Thread.Sleep(10);
