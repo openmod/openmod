@@ -96,7 +96,7 @@ namespace OpenMod.Unturned
 
             DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters
             {
-                ComponentId = OpenModComponentId,
+                Component = this,
                 Prefix = "openmod.unturned",
                 Suffix = null,
                 WorkingDirectory = WorkingDirectory
@@ -214,7 +214,7 @@ namespace OpenMod.Unturned
                 shutdownPerformed = true;
                 m_NuGetPackageManager.ClearCache();
 
-                BootstrapperModule.Instance.initialize(Hotloader.LoadAssembly);
+                BootstrapperModule.Instance.initialize();
             }
             catch (Exception ex)
             {

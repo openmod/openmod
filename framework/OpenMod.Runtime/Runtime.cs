@@ -220,10 +220,11 @@ namespace OpenMod.Runtime
                             .InstancePerLifetimeScope()
                             .OwnedByLifetimeScope();
                     });
+
                 DataStore = Host.Services.GetRequiredService<IDataStoreFactory>().CreateDataStore(
                     new DataStoreCreationParameters
                     {
-                        ComponentId = OpenModComponentId,
+                        Component = this,
                         Prefix = "openmod",
                         Suffix = null,
                         WorkingDirectory = WorkingDirectory

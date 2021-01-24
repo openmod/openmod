@@ -39,7 +39,7 @@ namespace OpenMod.Rust
             WorkingDirectory = runtime.WorkingDirectory;
             DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters
             {
-                ComponentId = OpenModComponentId,
+                Component = this,
                 Prefix = "openmod.rust",
                 Suffix = null,
                 WorkingDirectory = WorkingDirectory

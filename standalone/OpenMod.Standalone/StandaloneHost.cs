@@ -57,7 +57,7 @@ namespace OpenMod.Standalone
 
             DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters
             {
-                ComponentId = OpenModComponentId,
+                Component = this,
                 Prefix = "openmod.standalone",
                 Suffix = null,
                 WorkingDirectory = WorkingDirectory
