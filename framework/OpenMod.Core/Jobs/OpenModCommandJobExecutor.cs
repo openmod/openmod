@@ -34,6 +34,11 @@ namespace OpenMod.Core.Jobs
 
         public async Task ExecuteAsync(ScheduledJob job)
         {
+            if (!job.Args.ContainsKey("commands"))
+            {
+                throw new Exception($"Job \"{job.Name}\" is missing the command list in args.commands!");
+            }
+
             var commands = (IEnumerable<object>) job.Args["commands"];
             foreach (string command in commands)
             {

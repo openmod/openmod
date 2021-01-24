@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 using Cronos;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MoreLinq.Extensions;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Jobs;
@@ -26,6 +25,7 @@ namespace OpenMod.Core.Jobs
         private readonly IDataStore m_DataStore;
         private readonly List<IJobExecutor> m_JobExecutors;
         private readonly List<ScheduledJob> m_ScheduledJobs;
+        private static bool s_RunRebootJobs = true;
         private ScheduledJobsFile m_File;
         private bool m_Started;
 
@@ -77,32 +77,62 @@ namespace OpenMod.Core.Jobs
 
             foreach (var job in m_File.Jobs.ToList())
             {
-                await ScheduleJobAsync(job, execStartup: !isFromFileChange);
+                await ScheduleJobInternalAsync(job, execStartup: !isFromFileChange, execReboot: s_RunRebootJobs);
             }
 
+            s_RunRebootJobs = false;
             m_Started = true;
         }
 
-        public async Task AddJobAsync(ScheduledJob job)
+        public async Task ScheduleJobAsync(ScheduledJob job)
         {
+            if (m_File.Jobs.Any(d => d.Name.Equals(job.Name)))
+            {
+                throw new Exception($"A job with this name already exists: {job.Name}");
+            }
+
             m_File.Jobs.Add(job);
             await WriteJobsFileAsync();
-            await ScheduleJobAsync(job, execStartup: false);
+            await ScheduleJobInternalAsync(job, execStartup: false, execReboot: false);
         }
 
-        public async Task RemoveJobAsync(ScheduledJob job)
+        public Task<ScheduledJob> FindJobAsync(string name)
+        {
+            return Task.FromResult(m_File.Jobs.FirstOrDefault(d => d.Name.Equals(name)));
+        }
+
+        public async Task<bool> RemoveJobAsync(string name)
+        {
+            var job = await FindJobAsync(name);
+            if (job == null)
+            {
+                return false;
+            }
+
+            return await RemoveJobAsync(job);
+        }
+
+        public async Task<bool> RemoveJobAsync(ScheduledJob job)
         {
             bool MatchedJobs(ScheduledJob d) => d.Name.Equals(job.Name, StringComparison.Ordinal);
 
             m_ScheduledJobs.RemoveAll(MatchedJobs);
-            m_File.Jobs.RemoveAll(MatchedJobs);
+            var result = m_File.Jobs.RemoveAll(MatchedJobs) > 0;
             job.Enabled = false;
-            await WriteJobsFileAsync();
+
+            if (result)
+            {
+                await WriteJobsFileAsync();
+            }
+
+            return result;
         }
 
-        public Task<ICollection<ScheduledJob>> GetScheduledJobsAsync()
+        public Task<ICollection<ScheduledJob>> GetScheduledJobsAsync(bool includeDisabled)
         {
-            return Task.FromResult<ICollection<ScheduledJob>>(m_File.Jobs);
+            return Task.FromResult<ICollection<ScheduledJob>>(m_File.Jobs
+                .Where(d => includeDisabled || d.Enabled)
+                .ToList());
         }
 
         private async Task ReadJobsFileAsync()
@@ -114,6 +144,15 @@ namespace OpenMod.Core.Jobs
             else
             {
                 m_File = await m_DataStore.LoadAsync<ScheduledJobsFile>(c_DataStoreKey);
+
+                var previousCount = m_File.Jobs.Count;
+                m_File.Jobs = m_File.Jobs.DistinctBy(d => d.Name).ToList();
+
+                // Duplicate jobs removed; save
+                if (m_File.Jobs.Count != previousCount)
+                {
+                    await WriteJobsFileAsync();
+                }
             }
         }
 
@@ -122,15 +161,14 @@ namespace OpenMod.Core.Jobs
             await m_DataStore.SaveAsync(c_DataStoreKey, m_File);
         }
 
-        private async Task ScheduleJobAsync(ScheduledJob job, bool execStartup)
+        private async Task ScheduleJobInternalAsync(ScheduledJob job, bool execStartup, bool execReboot)
         {
             if (!job.Enabled)
             {
                 return;
             }
 
-            // todo: fix this mess; move to their own classes
-            if (job.Schedule.Equals("single_exec", StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.Equals("@single_exec", StringComparison.OrdinalIgnoreCase))
             {
                 await ExecuteJobAsync(job);
                 await RemoveJobAsync(job);
@@ -138,7 +176,17 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Schedule.Equals("startup", StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.Equals("@reboot", StringComparison.OrdinalIgnoreCase))
+            {
+                if (execReboot)
+                {
+                    await ExecuteJobAsync(job);
+                }
+
+                return;
+            }
+
+            if (job.Schedule.Equals("@startup", StringComparison.OrdinalIgnoreCase))
             {
                 if (execStartup)
                 {
@@ -148,24 +196,23 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Schedule.Equals("period", StringComparison.OrdinalIgnoreCase))
-            {
-                if (!job.Args.ContainsKey("period"))
-                {
-                    m_Logger.LogError($"Job \"{job.Name}\" uses crontab for scheduling but args.period is not set!");
-                    return;
-                }
-
-                ScheduleCronJob(job);
-            }
+            ScheduleCronJob(job);
         }
 
         private void ScheduleCronJob(ScheduledJob job)
         {
-            var period = (string)job.Args["period"];
-
             var timezone = TimeZoneInfo.Local;
-            var expression = CronExpression.Parse(period);
+
+            CronExpression expression;
+            try
+            {
+                expression = CronExpression.Parse(job.Schedule);
+            }
+            catch (Exception ex)
+            {
+                m_Logger.LogError(ex, $"Invalid crontab syntax \"{job.Schedule}\" for job: {job.Name}");
+                return;
+            }
 
             var nextOccurence = expression.GetNextOccurrence(DateTimeOffset.Now, timezone);
             if (nextOccurence == null)
