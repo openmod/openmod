@@ -15,7 +15,7 @@ namespace OpenMod.Standalone
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-            var path = Path.GetFullPath("openmod");
+            var path = Path.Combine(AppContext.BaseDirectory, "openmod");
             var runtime = new Runtime.Runtime();
             var host = await runtime.InitAsync(new List<Assembly> { typeof(Program).Assembly }, new RuntimeInitParameters
             {
