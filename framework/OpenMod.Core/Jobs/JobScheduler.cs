@@ -197,10 +197,10 @@ namespace OpenMod.Core.Jobs
 
         private async Task ExecuteJobAsync(ScheduledJob job)
         {
-            var jobExecutor = m_JobExecutors.FirstOrDefault(d => d.SupportsType(job.Type));
+            var jobExecutor = m_JobExecutors.FirstOrDefault(d => d.SupportsType(job.Task));
             if (jobExecutor == null)
             {
-                m_Logger.LogError($"[{job.Name}] Unknown job type: {job.Type}");
+                m_Logger.LogError($"[{job.Name}] Unknown job type: {job.Task}");
                 return;
             }
 

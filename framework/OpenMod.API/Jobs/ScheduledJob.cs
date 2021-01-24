@@ -10,7 +10,7 @@ namespace OpenMod.API.Jobs
 
         public Dictionary<string, object> Args { get; set; }
 
-        public string Type { get; set; }
+        public string Task { get; set; }
 
         public string Schedule { get; set; }
 

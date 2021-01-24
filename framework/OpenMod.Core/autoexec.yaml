@@ -9,20 +9,22 @@
 # - startup: Executes a job after OpenMod and all plugins have loaded.
 # - single_exec: Executes a job a single time and then removes it from this file.
 # Note: Time is based on local system time
-# ---------
-# Job types
-# ---------
-# OpenMod has 2 built-in job types:
+# -----
+# Tasks
+# -----
+# OpenMod has 2 built-in tasks:
 # - openmod_command: Executes openmod commands.
 # Must have args.commands defined!
 # - system_command: Executes a system command (working directory is set to the OpenMod directory).
-# Note that plugins can add their own job types.
+# Must have args.commands defined!
+#
+# Note that plugins can add their own task types.
 #
 jobs:
   # Upgrade OpenMod every Sunday at 0:00 and then restart.
   - name: OpenMod Auto Update
     schedule: crontab
-    type: openmod_command
+    task: openmod_command
     args:
       period: '0 0 * * 0'
       commands:
@@ -33,7 +35,7 @@ jobs:
   # Restart everyday at 3 AM.
   - name: Auto Restart
     schedule: crontab
-    type: openmod_command
+    task: openmod_command
     args:
       period: '0 3 * * *'
       commands:
@@ -43,7 +45,7 @@ jobs:
   # Save every 5 minutes.
   - name: Save
     schedule: crontab
-    type: openmod_command
+    task: openmod_command
     args:
       period: '*/5 * * * *'
       commands:
@@ -53,7 +55,7 @@ jobs:
   # Purge packages on every startup (note: this is not recommended and just an example)
   - name: Package purge
     schedule: startup
-    type: openmod_command
+    task: openmod_command
     args:
       commands:
       - openmod purge
@@ -62,7 +64,7 @@ jobs:
   # Run wipe.sh on every first day of the month
   - name: Wipe
     schedule: crontab
-    type: system_command
+    task: system_command
     args:
       period: '0 0 1 * *'
       commands: 
@@ -72,7 +74,7 @@ jobs:
   # Migrate economy on startup (will only execute a single time)
   - name: Economy Migration
     schedule: single_exec
-    type: openmod_command
+    task: openmod_command
     args:
       commands: 
       - economy migrate
