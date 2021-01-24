@@ -48,7 +48,7 @@ namespace OpenMod.Unturned.Logging
             System.Console.InputEncoding = encoding;
 
             m_PreviousConsoleIn = System.Console.In;
-            
+
             var enableHistory = m_Configuration.GetSection("console:history").Get<bool>();
             var enableAutoComplete = m_Configuration.GetSection("console:autocomplete").Get<bool>();
 
@@ -81,6 +81,11 @@ namespace OpenMod.Unturned.Logging
             ReadLine.AutoCompletionHandler = null;
             ReadLine.HistoryEnabled = false;
             System.Console.SetIn(m_PreviousConsoleIn);
+
+            if (m_InputThread.IsAlive)
+            {
+                m_InputThread.Abort();
+            }
         }
 
         public void update()
