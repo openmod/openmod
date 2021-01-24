@@ -34,11 +34,7 @@ namespace OpenMod.Unturned.Commands
 
         private static readonly string[] s_IgnoredNameFiles =
         {
-            "0Harmony.dll",
-            "OpenMod.Common.dll",
-            "OpenMod.Unturned.Module.dll",
-            "OpenMod.Unturned.Module.Shared.dll",
-            "System.Runtime.InteropServices.RuntimeInformation.dll",
+            "OpenMod.Unturned.Module.Bootstrapper.dll",
             "Readme.txt"
         };
 
