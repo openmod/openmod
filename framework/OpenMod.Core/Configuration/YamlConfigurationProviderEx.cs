@@ -40,8 +40,6 @@ namespace OpenMod.Core.Configuration
             var yaml = reader.ReadToEnd();
 
             PreProcessYaml(ref yaml);
-            System.Console.WriteLine("yaml: ");
-            System.Console.WriteLine(yaml);
 
             using var outStream = new MemoryStream();
             using var writer = new StreamWriter(outStream, reader.CurrentEncoding);
@@ -53,7 +51,6 @@ namespace OpenMod.Core.Configuration
             try
             {
                 Data = (IDictionary<string, string>)s_ParseMethod.Invoke(parser, new object[] { outStream });
-                System.Console.WriteLine(JsonConvert.SerializeObject(Data));
             }
             catch (YamlException e)
             {
