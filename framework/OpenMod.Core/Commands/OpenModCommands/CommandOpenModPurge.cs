@@ -5,11 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNet.Globbing;
 using NuGet.Packaging;
+using OpenMod.API.Prioritization;
 using OpenMod.NuGet;
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {
-    [Command("purge")]
+    [Command("purge", Priority = Priority.Lowest)]
     [CommandParent(typeof(CommandOpenMod))]
     [CommandDescription("Purges and reinstall all OpenMod packages.")]
     [CommandSyntax("[wildcard1] [wildcard2] [wildcardN] [--no-restore]")]

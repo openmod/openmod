@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using OpenMod.API.Commands;
 using OpenMod.API.Localization;
+using OpenMod.API.Prioritization;
 using OpenMod.Core.Plugins.NuGet;
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {
-    [Command("uninstall")]
+    [Command("uninstall", Priority = Priority.High)]
     [CommandAlias("ui")]
     [CommandAlias("remove")]
     [CommandAlias("r")]

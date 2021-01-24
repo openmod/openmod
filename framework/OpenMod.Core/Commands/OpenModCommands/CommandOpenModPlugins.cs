@@ -8,7 +8,7 @@ using OpenMod.API.Prioritization;
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {
-    [Command("plugins", Priority = Priority.Highest)]
+    [Command("plugins", Priority = Priority.Lowest)]
     [CommandDescription("Lists loaded plugins")]
     [CommandSyntax("[page]")]
     [CommandParent(typeof(CommandOpenMod))]

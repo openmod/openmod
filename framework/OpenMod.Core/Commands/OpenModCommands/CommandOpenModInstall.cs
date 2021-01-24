@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using OpenMod.API.Commands;
 using OpenMod.API.Localization;
+using OpenMod.API.Prioritization;
 using OpenMod.Common.Hotloading;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {
-    [Command("install")]
+    [Command("install", Priority = Priority.High)]
     [CommandAlias("i")]
     [CommandDescription("Install plugins from NuGet")]
     [CommandSyntax("<id[:version]> [-Pre]")]
