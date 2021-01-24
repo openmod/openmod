@@ -186,8 +186,6 @@ namespace OpenMod.Unturned.RocketMod
             var logExceptionPrefixMethod = new HarmonyMethod(typeof(RocketModLogPatches).GetMethod(nameof(RocketModLogPatches.PreLogException), c_BindingFlags));
             m_HarmonyInstance.Patch(typeof(Logger).GetMethod("LogException", c_BindingFlags), prefix: logExceptionPrefixMethod);
 
-            m_HarmonyInstance.NopPatch(typeof(Logger).GetMethod("ExternalLog", c_BindingFlags));
-
             RocketModLogPatches.OnRocketLog += OnRocketLog;
         }
 
