@@ -62,13 +62,14 @@ jobs:
     enabled: false
 
   # Run wipe.sh on every first day of the month
+  # system_command works like terminal (Linux) or cmd (Windows), so you can use bat or anything else as well
   - name: Wipe
     schedule: crontab
     task: system_command
     args:
       period: '0 0 1 * *'
       commands: 
-      - sh wipe.sh
+      - ./wipe.sh
     enabled: false
 
   # Migrate economy on startup (will only execute a single time)
