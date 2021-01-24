@@ -29,34 +29,42 @@ namespace OpenMod.Core.Commands.OpenModCommands
             m_Logger = logger;
         }
 
-        protected override async Task OnExecuteAsync()
+        protected override Task OnExecuteAsync()
         {
             var args = Environment.GetCommandLineArgs();
-            var exe = Process.GetCurrentProcess().MainModule.FileName;
-            string arguments;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var binaryPath = Process.GetCurrentProcess().MainModule.FileName;
+
+            string arguments = string.Empty;
+
+            if (args.Length > 1)
             {
-                arguments = string.Join(" ", args.Select(d =>
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    if (d.Contains(" "))
-                    {
-                        return "\"" + d.Replace("\"", "^\"") + "\"";
-                    }
+                    arguments = string.Join(" ", args
+                        .Skip(1)
+                        .Select(d =>
+                        {
+                            if (d.Contains(" "))
+                            {
+                                return "\"" + d.Replace("\"", "^\"") + "\"";
+                            }
 
-                    return d.Replace("\"", "^\"");
-                }));
+                            return d.Replace("\"", "^\"");
+                        }));
+                }
+                else
+                {
+                    arguments = string.Join(" ", args.Skip(1)
+                        .Select(d => d.Replace("\"", "\\\"")));
+                }
             }
-            else
-            {
-                arguments = string.Join(" ", args.Select(d => d.Replace("\"", "\\\"")));
-            }
 
-            m_Logger.LogInformation($"Executing command after shutdown: {Environment.NewLine}{exe} {arguments}");
+            m_Logger.LogInformation($"Executing command after shutdown: {Environment.NewLine}{binaryPath} {arguments}");
 
-            var startInfo = new ProcessStartInfo(exe, arguments)
+            var startInfo = new ProcessStartInfo(binaryPath, arguments)
             {
                 UseShellExecute = false,
-                WorkingDirectory = Path.GetDirectoryName(exe)
+                WorkingDirectory = Path.GetDirectoryName(binaryPath)
             };
 
             foreach (DictionaryEntry kv in Environment.GetEnvironmentVariables())
@@ -71,8 +79,10 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 }
             }
 
-            await m_Host.ShutdownAsync();
             Process.Start(startInfo);
+            Task.Run(m_Host.ShutdownAsync);
+
+            return Task.CompletedTask;
         }
     }
 }
