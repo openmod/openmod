@@ -99,13 +99,14 @@ namespace OpenMod.Unturned.Logging
                 {
                     if (System.Console.KeyAvailable)
                     {
-                        var command = m_ReadLineEnabled ? ReadLine.Read() : System.Console.ReadLine();
+                        var command = m_ReadLineEnabled
+                            ? ReadLine.Read()
+                            : System.Console.ReadLine();
 
                         if (!string.IsNullOrWhiteSpace(command))
                         {
-                            m_CommandQueue
-                                .Enqueue(
-                                    command); /* Enqueue command because inputCommitted is expected on main thread */
+                            // Enqueue command because inputCommitted is expected on main thread/
+                            m_CommandQueue.Enqueue(command); 
                         }
                     }
                 }
