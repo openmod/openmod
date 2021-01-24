@@ -24,7 +24,7 @@ jobs:
     schedule: crontab
     type: openmod_command
     args:
-      period: 0 0 * * 0 # Every Sunday at 0:00
+      period: '0 0 * * 0'
       commands:
       - openmod upgrade
       - openmod restart
@@ -35,9 +35,19 @@ jobs:
     schedule: crontab
     type: openmod_command
     args:
-      period: 0 3 * * *
+      period: '0 3 * * *'
       commands:
       - openmod restart
+    enabled: false
+
+  # Save every 5 minutes.
+  - name: Save
+    schedule: crontab
+    type: openmod_command
+    args:
+      period: '*/5 * * * *'
+      commands:
+      - save
     enabled: false
 
   # Purge packages on every startup (note: this is not recommended and just an example)
@@ -54,7 +64,7 @@ jobs:
     schedule: crontab
     type: system_command
     args:
-      period: 0 0 1 * *
+      period: '0 0 1 * *'
       commands: 
       - sh wipe.sh
     enabled: false
