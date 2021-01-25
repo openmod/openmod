@@ -2,9 +2,12 @@
 
 namespace OpenMod.Extensions.Economy.Abstractions
 {
+    /// <summary>
+    /// The exception that is thrown when an actor does not have enough balance.
+    /// </summary>
     public class NotEnoughBalanceException : UserFriendlyException
     {
-        public decimal? Balance = null;
+        public decimal? Balance;
 
         public NotEnoughBalanceException(string message) : base(message)
         {
