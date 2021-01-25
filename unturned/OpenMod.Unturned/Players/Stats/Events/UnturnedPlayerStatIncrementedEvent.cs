@@ -4,11 +4,9 @@ namespace OpenMod.Unturned.Players.Stats.Events
 {
     public class UnturnedPlayerStatIncrementedEvent : UnturnedPlayerStatUpdatedEvent
     {
-        public EPlayerStat Stat { get; }
-
-        public UnturnedPlayerStatIncrementedEvent(UnturnedPlayer player, EPlayerStat stat) : base(player)
+        public UnturnedPlayerStatIncrementedEvent(UnturnedPlayer player, EPlayerStat stat) : base(player, stat)
         {
-            Stat = stat;
+
         }
     }
 }
