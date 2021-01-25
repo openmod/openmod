@@ -48,8 +48,8 @@ namespace OpenMod.Core
 
             serviceCollection.Configure<JobExecutorOptions>(options =>
             {
-                options.AddJobExecutor<OpenModCommandJobExecutor>();
-                options.AddJobExecutor<SystemCommandJobExecutor>();
+                options.AddJobExecutor<OpenModCommandTaskExecutor>();
+                options.AddJobExecutor<SystemCommandTaskExecutor>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();

@@ -1,66 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using OpenMod.API.Ioc;
 using Semver;
 
 namespace OpenMod.API
 {
     /// <summary>
-    ///     Defines the OpenMod Runtime. This class is responsible for initializing OpenMod.
+    /// The OpenMod runtime is responsible for initializing OpenMod.
     /// </summary>
     [Service]
     public interface IRuntime : IOpenModComponent
     {
-        /// <summary>
-        ///   Checks if the runtime is shutting down / disposing.
-        /// </summary>
+        /// <value>
+        /// <b>True</b> if the runtime is shutting down / disposing.
+        /// </value>
         public bool IsDisposing { get; }
 
         /// <summary>
-        ///     Initializes the runtime.
+        /// Initializes the runtime.
         /// </summary>
-        /// <returns></returns>
-        Task<IHost> InitAsync(List<Assembly> openModHostAssemblies, RuntimeInitParameters parameters, Func<IHostBuilder> hostBuilder);
+        /// <returns>The .NET Generic Host interface. Cannot return null.</returns>
+        [ItemNotNull]
+        Task<IHost> InitAsync(List<Assembly> openModHostAssemblies, RuntimeInitParameters parameters,
+            Func<IHostBuilder> hostBuilder);
 
         /// <summary>
-        ///     Shuts down OpenMod and disposes all services.
+        /// Shuts OpenMod down gracefully and disposes all services.
         /// </summary>
         Task ShutdownAsync();
 
-        /// <summary>
-        ///     Gets the OpenMod runtime version.
-        /// </summary>
+        /// <value>
+        /// The OpenMod runtime version. Cannot be null.
+        /// </value>
+        [NotNull]
         SemVersion Version { get; }
 
-        /// <summary>
-        ///    Commandline arguments.
-        /// </summary>
+        /// <value>
+        /// The commandline arguments. Cannot be null.
+        /// </value>
         string[] CommandlineArgs { get; }
 
-        /// <summary>
-        ///    The runtime status.
-        /// </summary>
+        /// <value>
+        /// The runtime status. 
+        /// </value>
         RuntimeStatus Status { get; }
 
         /// <summary>
-        ///   Reloads all plugins, configurations, etc. and rebuilds the DI container
+        /// Rebuilds the DI container and reloads all plugins, services, configurations etc.
         /// </summary>
-        /// <returns></returns>
         Task PerformSoftReloadAsync();
 
-        /// <summary>
-        ///     The .NET generic host instance.
-        /// </summary>
+        /// <value>
+        /// The .NET generic host instance. Can be null if the host is not loaded yet.
+        /// </value>
+        [CanBeNull]
         IHost Host { get; }
 
-        /// <summary>
-        ///    Information about the OpenMod host.
-        /// </summary>
+        /// <value>
+        ///  Information about the OpenMod host. Can be null if the host is not loaded yet.
+        /// </value>
         IHostInformation HostInformation { get; }
     }
 }

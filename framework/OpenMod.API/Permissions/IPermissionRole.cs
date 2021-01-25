@@ -1,25 +1,28 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace OpenMod.API.Permissions
 {
     /// <summary>
-    ///     A permission role contains a collection of permissions.
+    /// Represents a permission role.
     /// </summary>
     public interface IPermissionRole : IPermissionActor
     {
-        /// <summary>
-        ///     The permission priority of this role.
-        /// </summary>
+        /// <value>
+        /// The priority of this role.
+        /// </value>
         int Priority { get; set; }
 
-        /// <summary>
-        ///     Parents of the role
-        /// </summary>
+        /// <value>
+        /// Gets the parents of the role. Can be null but items cannot be null.
+        /// </value>
+        [ItemNotNull]
+        [CanBeNull]
         HashSet<string> Parents { get; }
 
-        /// <summary>
-        ///    If true, this role automatically gets assigned to new users
-        /// </summary>
+        /// <value>
+        /// True if this role should automatically get assigned to new users.
+        /// </value>
         bool IsAutoAssigned { get; set; }
     }
 }

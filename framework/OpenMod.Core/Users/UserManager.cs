@@ -37,23 +37,23 @@ namespace OpenMod.Core.Users
             get { return m_UserProviders; }
         }
 
-        public virtual async Task<IReadOnlyCollection<IUser>> GetUsersAsync(string type)
+        public virtual async Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType)
         {
             var list = new List<IUser>();
 
-            foreach (var userProvider in UserProviders.Where(d => d.SupportsUserType(type)))
+            foreach (var userProvider in UserProviders.Where(d => d.SupportsUserType(userType)))
             {
-                list.AddRange(await userProvider.GetUsersAsync(type));
+                list.AddRange(await userProvider.GetUsersAsync(userType));
             }
 
             return list;
         }
 
-        public virtual async Task<IUser> FindUserAsync(string type, string searchString, UserSearchMode searchMode)
+        public virtual async Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
         {
-            foreach (var userProvider in UserProviders.Where(d => d.SupportsUserType(type)))
+            foreach (var userProvider in UserProviders.Where(d => d.SupportsUserType(userType)))
             {
-                var user = await userProvider.FindUserAsync(type, searchString, searchMode);
+                var user = await userProvider.FindUserAsync(userType, searchString, searchMode);
                 if (user != null)
                 {
                     return user;

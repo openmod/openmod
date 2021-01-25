@@ -2,10 +2,13 @@
 
 namespace OpenMod.API.Commands
 {
+    /// <summary>
+    /// Represents a command.
+    /// </summary>
     public interface ICommand
     {
         /// <summary>
-        ///     Executes the command if no child command is found.
+        /// Executes the command.
         /// </summary>
         Task ExecuteAsync();
     }

@@ -18,7 +18,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
         /// <param name="vehicleAssetId">The ID of the vehicle asset.</param>
         /// <param name="state">The optional state of the vehicle.</param>
         /// <returns><b>The spawned vehicle</b> if successful; otherwise, <b>false</b>.</returns>
-        [CanBeNull]
+        [ItemCanBeNull]
         Task<IVehicle> SpawnVehicleAsync(Vector3 position, string vehicleAssetId, [CanBeNull] IVehicleState state = null);
     }
 }

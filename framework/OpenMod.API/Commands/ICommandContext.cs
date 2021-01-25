@@ -1,43 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace OpenMod.API.Commands
 {
+    /// <summary>
+    /// Represents a command context.
+    /// </summary>
     public interface ICommandContext : IAsyncDisposable
     {
-        /// <summary>
-        ///     The parent command context for Child Commands.
-        ///     <para>
-        ///         <b>This property can return null.</b>
-        ///     </para>
-        /// </summary>
+        /// <value>
+        /// The parent command context. Can be null.
+        /// </value>
         /// <example>
-        ///     If the command was entered as "/mycommand sub", this will return the parent context with parameters "sub".
+        /// If the command was entered as "/mycommand sub", this will return the parent context with parameters "sub".
         /// </example>
+        [CanBeNull]
         ICommandContext ParentContext { get; }
 
-        /// <summary>
-        ///     The child command context.
-        /// </summary>
+        /// <value>
+        /// The child command context. Can be null.
+        /// </value>
+        [CanBeNull]
         ICommandContext ChildContext { get; }
 
-        /// <summary>
-        ///     The root context.
-        ///     <para>
-        ///         <b>This property will never return null.</b>
-        ///     </para>
-        /// </summary>
+        /// <value>
+        ///     The root context. Cannot be null.
+        /// </value>
+        [NotNull]
         ICommandContext RootContext { get; }
 
-        /// <summary>
-        ///     <para>The prefix used to call this (sub) command.</para>
-        ///     <para>Useful when sending command usage messages.</para>
+        /// <value>
+        ///     <para>The prefix used to call the command. Cannot be null.</para>
+        ///     <para>Useful for sending command usage messages.</para>
         ///     <para>
-        ///         Child commands include their parents.
+        ///         Child commands will include their parents.
         ///     </para>
-        /// </summary>
-        /// <remarks>
-        /// </remarks>
+        /// </value>
         /// <example>
         ///     <para>
         ///         If the command was executed using "/mycommand", it will be "/", when it was executed using "!mycommand", it
@@ -47,35 +46,49 @@ namespace OpenMod.API.Commands
         ///         If the command was a ChildrenCommand "sub", "/mycommand sub" will return "/mycommand" as prefix.
         ///     </para>
         /// </example>
+        [NotNull]
         string CommandPrefix { get; }
 
-        /// <summary>
-        ///     The alias or name used to execute this (sub) command.
-        /// </summary>
+        /// <value>
+        /// The alias or name used to execute the command. Cannot be null.
+        /// </value>
+        [NotNull]
         string CommandAlias { get; }
 
-        /// <summary>
-        ///     <para>The actor executing command.</para>
-        ///     <para>
-        ///         <b>This property will never return null.</b>
-        ///     </para>
-        /// </summary>
+        /// <value>
+        /// The actor executing command. Cannot be null.
+        /// </value>
+        [NotNull]
         ICommandActor Actor { get; }
 
-        /// <summary>
-        ///     <para>The parameters of the (sub) command.</para>
-        ///     <para>
-        ///         <b>This property will never return null.</b>
-        ///     </para>
-        /// </summary>
+        /// <value>
+        /// The parameters of the command. Cannot be null.
+        /// </value>
+        [NotNull]
         ICommandParameters Parameters { get; }
 
+        /// <value>
+        /// The command registration. Can be null if the command was not found.
+        /// </value>
+        [CanBeNull]
         ICommandRegistration CommandRegistration { get; }
 
+        /// <value>
+        /// The exception thrown by the command, if one was thrown; otherwise, <b>null</b>.
+        /// </value>
+        [CanBeNull]
         Exception Exception { get; set; }
 
+        /// <value>
+        /// Container for arbitrary data for the command context. Cannot be null.
+        /// </value>
+        [NotNull]
         Dictionary<string, object> Data { get; }
 
+        /// <value>
+        /// The service provider for the command context. Cannot be null.
+        /// </value>
+        [NotNull]
         IServiceProvider ServiceProvider { get; }
     }
 }

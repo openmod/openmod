@@ -18,7 +18,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Building
         /// <param name="buildableAssetId">The ID of the buildable asset.</param>
         /// <param name="state">The optional state for the buildable.</param>
         /// <returns><b>The created buildable</b> if successful; otherwise, <b>>null</b>.</returns>
-        [CanBeNull]
+        [ItemCanBeNull]
         Task<IBuildable> SpawnBuildableAsync(Vector3 position, string buildableAssetId, [CanBeNull] IBuildableAsset state = null);
     }
 }

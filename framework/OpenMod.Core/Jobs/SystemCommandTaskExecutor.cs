@@ -9,34 +9,34 @@ using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Jobs
 {
-    public class SystemCommandJobExecutor : IJobExecutor
+    public class SystemCommandTaskExecutor : ITaskExecutor
     {
         private readonly IRuntime m_Runtime;
-        private readonly ILogger<SystemCommandJobExecutor> m_Logger;
+        private readonly ILogger<SystemCommandTaskExecutor> m_Logger;
 
-        public SystemCommandJobExecutor(
+        public SystemCommandTaskExecutor(
             IRuntime runtime,
-            ILogger<SystemCommandJobExecutor> logger)
+            ILogger<SystemCommandTaskExecutor> logger)
         {
             m_Runtime = runtime;
             m_Logger = logger;
         }
-        public bool SupportsType(string jobType)
+        public bool SupportsType(string taskType)
         {
-            return string.Equals(jobType, "system_command", StringComparison.OrdinalIgnoreCase);
+            return string.Equals(taskType, "system_command", StringComparison.OrdinalIgnoreCase);
         }
 
-        public async Task ExecuteAsync(ScheduledJob job)
+        public async Task ExecuteAsync(JobTask task)
         {
-            if (!job.Args.ContainsKey("commands"))
+            if (!task.Args.ContainsKey("commands"))
             {
-                throw new Exception($"Job \"{job.Name}\" is missing the command list in args.commands!");
+                throw new Exception($"Job \"{task.JobName}\" is missing the command list in args.commands!");
             }
 
-            var commands = (IEnumerable<object>)job.Args["commands"];
+            var commands = (IEnumerable<object>)task.Args["commands"];
             foreach (string command in commands)
             {
-                m_Logger.LogInformation($"[{job.Name}] Running system command: {command}");
+                m_Logger.LogInformation($"[{task.JobName}] Running system command: {command}");
                 var args = ArgumentsParser.ParseArguments(command);
                 var startInfo = new ProcessStartInfo(args[0], command.Replace(args[0] + " ", string.Empty))
                 {

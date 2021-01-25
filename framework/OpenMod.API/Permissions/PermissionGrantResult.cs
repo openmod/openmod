@@ -1,23 +1,22 @@
 ﻿namespace OpenMod.API.Permissions
 {
     /// <summary>
-    ///     Result of a permission check.
+    /// Defines permission check results.
     /// </summary>
     public enum PermissionGrantResult
     {
         /// <summary>
-        ///     The permission was neither denied nor granted. Default action (which is usually the same as deny) should be
-        ///     executed.
+        /// The permission was not explicitly granted or denied. Default action (which is usually the same as deny) should be performed.
         /// </summary>
         Default,
 
         /// <summary>
-        ///     The permission was explicitly granted.
+        /// The permission was explicitly granted.
         /// </summary>
         Grant,
 
         /// <summary>
-        ///     The permission was explicitly denied.
+        /// The permission was explicitly denied.
         /// </summary>
         Deny
     }

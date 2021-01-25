@@ -1,36 +1,45 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Permissions
 {
     /// <summary>
-    ///     Checks if an actor is authorized to do an action.
+    /// The service used to checking permission authorizations.
     /// </summary>
     [Service]
     public interface IPermissionChecker
     {
-        /// <summary>
-        ///    Permission check providers.
-        /// </summary>
+        /// <value>
+        /// The permission check providers. Cannot be null and the items can not be null either.
+        /// </value>
+        [NotNull]
+        [ItemNotNull]
         IReadOnlyCollection<IPermissionCheckProvider> PermissionCheckProviders { get; }
 
-        /// <summary>
-        ///   Permission sources.
-        /// </summary>
+        /// <value>
+        /// The permission sources. Cannot be null and the items can not be null either.
+        /// </value>
+        [NotNull]
+        [ItemNotNull]
         IReadOnlyCollection<IPermissionStore> PermissionStores { get; }
 
         /// <summary>
-        ///     Checks if an actor has permission to execute an action.
+        /// Checks if an actor has authorization to execute an action.
         /// </summary>
-        /// <param name="actor">The actor.</param>
+        /// <param name="actor">The actor to check.</param>
         /// <param name="permission">The permission to check.</param>
-        /// <returns></returns>
+        /// <returns>See <see cref="PermissionGrantResult"/>.</returns>
         Task<PermissionGrantResult> CheckPermissionAsync(IPermissionActor actor, string permission);
 
         /// <summary>
-        ///     Initializes the permission checker.
+        /// Initializes the permission checker.
         /// </summary>
+        /// <remarks>
+        /// <b>This method is for internal usage only and should not be called by plugins.</b>
+        /// </remarks>
+        [OpenModInternal]
         Task InitAsync();
     }
 }

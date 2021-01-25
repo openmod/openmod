@@ -3,20 +3,20 @@
 namespace OpenMod.API.Eventing
 {
     /// <summary>
-    ///     A listener for one or more events.
+    /// Listens for an events.
     /// </summary>
     public interface IEventListener { }
     /// <summary>
     ///     <inheritdoc />
     /// </summary>
-    /// <typeparam name="TEvent">The event to subscribe to.</typeparam>
+    /// <typeparam name="TEvent">The event to listen to.</typeparam>
     public interface IEventListener<in TEvent> : IEventListener where TEvent : IEvent
     {
         /// <summary>
-        ///     Called when an event got emitted.
+        /// Called when the event has been emitted.
         /// </summary>
         /// <param name="sender">The event sender.</param>
-        /// <param name="event">The event instance.</param>
+        /// <param name="event">The event object.</param>
         Task HandleEventAsync(object sender, TEvent @event);
     }
 }

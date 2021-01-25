@@ -17,14 +17,14 @@ namespace OpenMod.Core.Jobs
             m_JobExecutorTypes = new List<Type>();
         }
 
-        public void AddJobExecutor<TProvider>() where TProvider : IJobExecutor
+        public void AddJobExecutor<TProvider>() where TProvider : ITaskExecutor
         {
             AddJobExecutor(typeof(TProvider));
         }
 
         public void AddJobExecutor(Type type)
         {
-            if (!typeof(IJobExecutor).IsAssignableFrom(type))
+            if (!typeof(ITaskExecutor).IsAssignableFrom(type))
             {
                 throw new Exception($"Type {type} must be an instance of IJobExecutor!");
             }
@@ -43,7 +43,7 @@ namespace OpenMod.Core.Jobs
             return m_JobExecutorTypes.RemoveAll(d => d == type) > 0;
         }
 
-        public void RemoveJobExecutor<TProvider>() where TProvider : IJobExecutor
+        public void RemoveJobExecutor<TProvider>() where TProvider : ITaskExecutor
         {
             RemoveJobExecutor(typeof(TProvider));
         }

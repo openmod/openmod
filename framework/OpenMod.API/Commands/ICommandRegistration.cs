@@ -6,62 +6,67 @@ using OpenMod.API.Prioritization;
 
 namespace OpenMod.API.Commands
 {
+    /// <summary>
+    /// Represents a registered command.
+    /// </summary>
     public interface ICommandRegistration
     {
-        /// <summary>
-        ///     The owner component of the command
-        /// </summary>
+        /// <value>
+        /// The owner component of the command. Cannot be null.
+        /// </value>
+        [NotNull]
         IOpenModComponent Component { get; }
 
-        /// <summary>
-        ///    The unique ID of this command.
-        /// </summary>
+        /// <value>
+        /// The unique ID of the command. Cannot be null or empty.
+        /// </value>
+        [NotNull]
         string Id { get; }
 
-        /// <summary>
-        ///     <para>The primary name of the command, which will be used to execute it.</para>
+        /// <value>
+        ///     <para>The primary name of the command, which will be used to execute it. Cannot be null or empty.</para>
         ///     <para>The primary name overrides any <see cref="Aliases">aliases</see> of other commands by default.</para>
         ///     <para>
         ///         <b>This property must never return null.</b>
         ///     </para>
-        /// </summary>
+        /// </value>
         /// <example>
-        ///     If the name is "Help", the command will be usually be called using "/heal" (or just "heal" in console)
+        ///     If the name is "heal", the command will be usually be called using "/heal" (or just "heal" in console)
         /// </example>
+        [NotNull]
         string Name { get; }
 
-        /// <summary>
-        ///     <para>The aliases of the command, which are often shorter versions of the primary name.</para>
-        ///     <para>
-        ///         <b>This property can return null.</b>
-        ///     </para>
-        /// </summary>
+        /// <value>
+        /// The aliases of the command, which are often shorter versions of the primary name. Can be null but items cannot be null.
+        /// </value>
         /// <example>
-        ///     If the aliases are "h" and "he", the command will be callable using "/h" or "/he".
+        /// If the aliases are "h" and "he", the command can be executed using "/h" or "/he".
         /// </example>
         [CanBeNull]
+        [ItemNotNull]
         IReadOnlyCollection<string> Aliases { get; }
 
+        /// <summary>
+        /// The permission registrations for this command. Can be null but items cannot be null.
+        /// </summary>
         [CanBeNull]
+        [ItemNotNull]
         IReadOnlyCollection<IPermissionRegistration> PermissionRegistrations { get; }
 
-        /// <summary>
-        ///     The full description of the command.
-        ///     <para>
-        ///         <b>This property can return null</b>.
-        ///     </para>
-        /// </summary>
+        /// <value>
+        /// The description of the command. Can be null or empty.
+        /// </value>
         [CanBeNull]
         string Description { get; }
 
-        /// <summary>
-        ///     The command syntax will be shown to the <see cref="IUser" /> when the command was not used correctly.
+        /// <value>
+        ///     The command syntax will be shown to the actor when the command was not used correctly. Can be null or empty.
         ///     <para>An output for the above example could be "/heal [player] &lt;amount&gt;".</para>
         ///     <para>The syntax should not contain Child Command usage.</para>
         ///     <para>
         ///         <b>This property must never return null.</b>
         ///     </para>
-        /// </summary>
+        /// </value>
         /// <remarks>
         ///     [...] means optional argument and &lt;...&gt; means required argument, so in this case "player" is an optional
         ///     argument while "amount" is a required one.
@@ -73,30 +78,35 @@ namespace OpenMod.API.Commands
         [CanBeNull]
         string Syntax { get; }
 
-        /// <summary>
-        ///    The priority for this command. In case of conflicting commands, the one with higher priority will be used.
-        /// </summary>
+        /// <value>
+        /// The priority for this command. Used in case of conflicting commands for determining which command to execute.
+        /// The command with higher priority will be preferred.
+        /// </value>
         Priority Priority { get; }
 
         /// <summary>
-        ///    The ID of the parent command. Must be null if this is not a sub command.
+        /// The ID of the parent command. Can be null if this command does not have a parent command.
         /// </summary>
         [CanBeNull]
         string ParentId { get; }
-        
-        /// <summary>
-        ///    Checks if the given actor can use this command.
-        /// </summary>
-        bool SupportsActor(ICommandActor actor);
-        
-        /// <summary>
-        ///    Creates a new command instance for execution.
-        /// </summary>
-        ICommand Instantiate(IServiceProvider serviceProvider);
+
+        /// <value>
+        /// <b>True</b> if the command is enabled; otherwise, <b>false</b>.
+        /// </value>
+        bool IsEnabled { get; }
 
         /// <summary>
-        ///    Checks if the command is enabled.
+        /// Checks if the given actor can use this command.
         /// </summary>
-        bool IsEnabled { get; }
+        /// <param name="actor">The actor to check.</param>
+        bool SupportsActor(ICommandActor actor);
+
+        /// <summary>
+        /// Instantiates a new command instance for execution.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider of the command scope.</param>
+        /// <return>The instantiated command. Cannot return null.</return>
+        [NotNull]
+        ICommand Instantiate(IServiceProvider serviceProvider);
     }
 }

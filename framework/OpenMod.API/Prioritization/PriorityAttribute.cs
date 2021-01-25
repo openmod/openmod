@@ -2,6 +2,9 @@
 
 namespace OpenMod.API.Prioritization
 {
+    /// <summary>
+    /// Sets the priority for the given implementation.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class PriorityAttribute : Attribute
     {

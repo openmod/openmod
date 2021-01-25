@@ -1,41 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace OpenMod.API.Commands
 {
     /// <summary>
-    ///     Parameters of a command.
+    /// Represents the parameters of a command.
     /// </summary>
     /// <remarks>
-    ///     When a command was entered as "/mycommand test 5 b", this class will handle and represent "test", "a" and "b".
+    ///  When a command was entered as "/mycommand test 5 b", this class will handle and represent "test", "a" and "b".
     /// </remarks>
     public interface ICommandParameters : IReadOnlyCollection<string>
     {
-        /// <summary>
-        ///     Returns the n. command parameter.
+        /// <value>
+        ///     The n. command parameter starting from zero. Cannot be null.
         ///     <para>Index must be less than <see cref="Length">length</see> and not negative.</para>
         ///     <para>This property will never return null.</para>
-        /// </summary>
-        /// <exception cref="Length">
+        /// </value>
+        /// <exception cref="ArgumentException">
         ///     When <i>index</i> is equal or greater than
         ///     <see cref="Length">length</see> or negative.
         /// </exception>
         /// <param name="index">The zero-based index of the parameter.</param>
         /// <seealso cref="T:System.ArgumentOutOfRangeException" />
-        /// <returns>the n. command parameter as string.</returns>
+        /// <returns>The n. command parameter as string.</returns>
+        [NotNull]
         string this[int index] { get; }
 
-        /// <summary>
-        ///     The length (amount) of the parameters.
-        /// </summary>
+        /// <value>
+        /// The amount of parameters.
+        /// </value>
         /// <example>
-        ///     If the command was entered as "/mycommand test 5 b", it would return "3".
+        /// If the command was entered as "/mycommand test 5 b", it would return "3".
         /// </example>
         int Length { get; }
 
         /// <summary>
-        ///     <para>Gets the parameter value at the given index. The value will parsed to the given type. </para>
+        ///     <para>Gets the parameter value at the given index. The value will parsed to the given type.</para>
         ///     <para>Types like <i>IPlayer</i>, <i>IOnlinePlayer</i>, etc. are supported.</para>
         /// </summary>
         /// <example>

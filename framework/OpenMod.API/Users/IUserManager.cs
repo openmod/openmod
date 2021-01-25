@@ -1,21 +1,54 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Users
 {
+    /// <summary>
+    /// Service for managing users.
+    /// </summary>
     [Service]
     public interface IUserManager
     {
+        /// <value>
+        /// The user providers.
+        /// </value>
         IReadOnlyCollection<IUserProvider> UserProviders { get; }
 
-        Task<IReadOnlyCollection<IUser>> GetUsersAsync(string type);
+        /// <summary>
+        /// Gets all users of the given type.
+        /// </summary>
+        /// <param name="userType">The type of the users to look for.</param>
+        /// <returns>All users of the given type. Cannot return null and neither can the items be null.</returns>
+        [NotNull]
+        [ItemNotNull]
+        Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType);
 
-        Task<IUser> FindUserAsync(string type, string searchString, UserSearchMode searchMode);
+        /// <summary>
+        /// Searches for an user.
+        /// </summary>
+        /// <param name="userType">The user type.</param>
+        /// <param name="searchString">The user ID or name depending on the search mode.</param>
+        /// <param name="searchMode">The search mode.</param>
+        /// <returns><b>The user</b> if found; otherwise, null.</returns>
+        [ItemCanBeNull]
+        Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode);
 
+        /// <summary>
+        /// Broadcasts a message to all users.
+        /// </summary>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="color">The message color. May not be supported on all platforms.</param>
         Task BroadcastAsync(string message, Color? color = null);
 
+        /// <summary>
+        /// Broadcasts a message to all users of the given type.
+        /// </summary>
+        /// <param name="userType">The user type to broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="color">The message color. May not be supported on all platforms.</param>
         Task BroadcastAsync(string userType, string message, Color? color = null);
     }
 }

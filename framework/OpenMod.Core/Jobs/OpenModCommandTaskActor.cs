@@ -6,11 +6,11 @@ using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Jobs
 {
-    public class OpenModCommandJobActor : ICommandActor
+    public class OpenModCommandTaskActor : ICommandActor
     {
         private readonly ILogger m_Logger;
 
-        public OpenModCommandJobActor(ILogger logger)
+        public OpenModCommandTaskActor(ILogger logger)
         {
             m_Logger = logger;
         }
@@ -19,7 +19,7 @@ namespace OpenMod.Core.Jobs
 
         public string Type { get; } = KnownActorTypes.Console;
 
-        public string DisplayName { get; } = "OpenMod Auto Job Executor";
+        public string DisplayName { get; } = "OpenMod Task Executor";
 
         public Task PrintMessageAsync(string message)
         {

@@ -18,7 +18,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
         /// <param name="entityAssetId">The ID of the entity asset.</param>
         /// <param name="state">The optional state for the entity to spawn.</param>
         /// <returns><b>The spawn entity</b> if successful; otherwise <b>null</b>.</returns>
-        [CanBeNull]
+        [ItemCanBeNull]
         Task<IEntity> SpawnEntityAsync(Vector3 position, string entityAssetId, [CanBeNull] IEntityState state = null);
     }
 }

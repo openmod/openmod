@@ -23,7 +23,7 @@ namespace OpenMod.Core.Jobs
         private readonly IRuntime m_Runtime;
         private readonly ILogger<JobScheduler> m_Logger;
         private readonly IDataStore m_DataStore;
-        private readonly List<IJobExecutor> m_JobExecutors;
+        private readonly List<ITaskExecutor> m_JobExecutors;
         private readonly List<ScheduledJob> m_ScheduledJobs;
         private static bool s_RunRebootJobs = true;
         private ScheduledJobsFile m_File;
@@ -54,10 +54,10 @@ namespace OpenMod.Core.Jobs
                 AsyncHelper.RunSync(() => StartAsync(isFromFileChange: true));
             });
 
-            m_JobExecutors = new List<IJobExecutor>();
+            m_JobExecutors = new List<ITaskExecutor>();
             foreach (var provider in options.Value.JobExecutorTypes)
             {
-                m_JobExecutors.Add((IJobExecutor)ActivatorUtilitiesEx.CreateInstance(runtime.LifetimeScope, provider));
+                m_JobExecutors.Add((ITaskExecutor)ActivatorUtilitiesEx.CreateInstance(runtime.LifetimeScope, provider));
             }
         }
 
@@ -84,16 +84,26 @@ namespace OpenMod.Core.Jobs
             m_Started = true;
         }
 
-        public async Task ScheduleJobAsync(ScheduledJob job)
+        public async Task<ScheduledJob> ScheduleJobAsync(JobCreationParameters @params)
         {
-            if (m_File.Jobs.Any(d => d.Name.Equals(job.Name)))
+            if (m_File.Jobs.Any(d => d.Name.Equals(@params.Name)))
             {
-                throw new Exception($"A job with this name already exists: {job.Name}");
+                throw new Exception($"A job with this name already exists: {@params.Name}");
             }
+
+            var job = new ScheduledJob
+            {
+                Name = @params.Name,
+                Task = @params.Task,
+                Args = @params.Args,
+                Schedule = @params.Schedule,
+                Enabled = true,
+            };
 
             m_File.Jobs.Add(job);
             await WriteJobsFileAsync();
             await ScheduleJobInternalAsync(job, execStartup: false, execReboot: false);
+            return job;
         }
 
         public Task<ScheduledJob> FindJobAsync(string name)
@@ -253,7 +263,12 @@ namespace OpenMod.Core.Jobs
 
             try
             {
-                await jobExecutor.ExecuteAsync(job);
+                await jobExecutor.ExecuteAsync(new JobTask
+                {
+                    JobName = job.Name,
+                    Task = job.Task,
+                    Args = job.Args
+                });
             }
             catch (Exception ex)
             {

@@ -1,23 +1,23 @@
 ﻿namespace OpenMod.API.Permissions
 {
     /// <summary>
-    ///   Represents an actor that can be checked for permissions.
+    /// Represents an actor that can be checked for permissions.
     /// </summary>
     public interface IPermissionActor
     {
-        /// <summary>
-        ///   The unique to the actor type and persistent ID of the actor.
-        /// </summary>
+        /// <value>
+        /// The unique to the actor type and persistent ID of the actor.
+        /// </value>
         string Id { get; }
 
-        /// <summary>
-        ///   The type of the actor.
-        /// </summary>
+        /// <value>
+        /// The type of the actor.
+        /// </value>
         string Type { get; }
 
-        /// <summary>
-        ///     The human readable name
-        /// </summary>
+        /// <value>
+        /// The human readable name of the actor.
+        /// </value>
         string DisplayName { get; }
     }
 }

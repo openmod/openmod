@@ -4,6 +4,9 @@ using JetBrains.Annotations;
 
 namespace OpenMod.API.Commands
 {
+    /// <summary>
+    /// A provider for resolving command parameters.
+    /// </summary>
     public interface ICommandParameterResolveProvider
     {
         /// <summary>
