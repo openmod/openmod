@@ -296,7 +296,8 @@ namespace OpenMod.Runtime
                 var loggingPath = Path.Combine(WorkingDirectory, "logging.yaml");
                 if (!File.Exists(loggingPath))
                 {
-                    // First run, logging.yaml doesn't exist yet. We can not wait for auto-copy as it would be too late.
+                    // First run, logging.yaml doesn't exist yet.
+                    // We can't wait for auto-copy from the assembly as it would be too late.
                     using var stream =
                         typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yaml");
                     using var reader =

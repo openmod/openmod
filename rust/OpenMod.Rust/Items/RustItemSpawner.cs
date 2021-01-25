@@ -64,12 +64,12 @@ namespace OpenMod.Rust.Items
 
             if (state.ItemAmount < 1)
             {
-                throw new ArgumentException($"Item amount can not be less than 1", nameof(state));
+                throw new ArgumentException($"Item amount cannot be less than 1.", nameof(state));
             }
 
             if (state.ItemAmount > int.MaxValue)
             {
-                throw new ArgumentException($"Item amount can not be more than {int.MaxValue}", nameof(state));
+                throw new ArgumentException($"Item amount cannot be more than {int.MaxValue}.", nameof(state));
             }
         }
 

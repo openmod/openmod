@@ -36,7 +36,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
         {
             if (!(actor is IPermissionRole role))
             {
-                return Task.FromException<bool>(new NotSupportedException("Can not add permissions to RocketMod players"));
+                return Task.FromException<bool>(new NotSupportedException("Cannot add permissions to RocketMod players."));
             }
 
             return Task.FromResult(UpdateGroupPermission(role, permission, add: true));
@@ -46,7 +46,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
         {
             if (!(actor is IPermissionRole role))
             {
-                return Task.FromException<bool>(new NotSupportedException("Can not add permissions to RocketMod players"));
+                return Task.FromException<bool>(new NotSupportedException("Cannot add permissions to RocketMod players."));
             }
 
             return Task.FromResult(UpdateGroupPermission(role, $"!{permission}", add: true));
@@ -56,7 +56,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
         {
             if (!(actor is IPermissionRole role))
             {
-                return Task.FromException<bool>(new NotSupportedException("Can not remove permissions from RocketMod players"));
+                return Task.FromException<bool>(new NotSupportedException("Cannot remove permissions from RocketMod players."));
             }
 
             return Task.FromResult(UpdateGroupPermission(role, permission, add: false));
@@ -66,7 +66,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
         {
             if (!(actor is IPermissionRole role))
             {
-                return Task.FromException<bool>(new NotSupportedException("Can not remove permissions from RocketMod players"));
+                return Task.FromException<bool>(new NotSupportedException("Cannot remove permissions from RocketMod players."));
             }
 
             return Task.FromResult(UpdateGroupPermission(role, $"!{permission}", add: false));

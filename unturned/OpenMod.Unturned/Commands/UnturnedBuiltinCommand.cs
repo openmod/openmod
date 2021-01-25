@@ -29,8 +29,7 @@ namespace OpenMod.Unturned.Commands
             {
                 KnownActorTypes.Player => ((UnturnedUser)Context.Actor).SteamId,
                 KnownActorTypes.Console => CSteamID.Nil,
-                _ => throw new NotSupportedException(
-                    $"Can not execute unturned commands from actor: {Context.Actor.GetType()}")
+                _ => throw new NotSupportedException($"Cannot execute unturned commands from actor: {Context.Actor.GetType()}.")
             };
 
             // unturned builtin commands must run on main thread

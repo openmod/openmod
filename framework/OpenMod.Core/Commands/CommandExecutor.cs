@@ -49,7 +49,7 @@ namespace OpenMod.Core.Commands
         {
             if (args == null || args.Length == 0)
             {
-                throw new Exception("Can not execute command with null or empty args");
+                throw new Exception("Cannot execute command with null or empty args.");
             }
 
             m_Logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");

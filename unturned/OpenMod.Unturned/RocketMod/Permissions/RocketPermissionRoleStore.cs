@@ -76,7 +76,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             {
                 if (!IsPlayerActor(actor.Type))
                 {
-                    throw new NotSupportedException($"Can not add non-player actor {actor.Type} to a RocketMod group.");
+                    throw new NotSupportedException($"Cannot add non-player actor {actor.Type} to a RocketMod group.");
                 }
 
                 var result = R.Permissions.AddPlayerToGroup(roleId, ToRocketPlayer(actor));
@@ -92,7 +92,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             {
                 if (!IsPlayerActor(actor.Type))
                 {
-                    throw new NotSupportedException($"Can not remove non-player actor {actor.Type} from a RocketMod group.");
+                    throw new NotSupportedException($"Cannot remove non-player actor {actor.Type} from a RocketMod group.");
                 }
 
                 var result = R.Permissions.RemovePlayerFromGroup(roleId, ToRocketPlayer(actor));
@@ -135,7 +135,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
         {
             if (RocketModIntegrationEnabled() && IsRocketModRole(roleId))
             {
-                return Task.FromException(new System.NotSupportedException("Persistent data is not supported for RocketMod roles"));
+                return Task.FromException(new System.NotSupportedException("Persistent data is not supported for RocketMod roles."));
             }
 
             return m_BasePermissionRoleStore.SavePersistentDataAsync(roleId, key, data);
@@ -145,7 +145,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
         {
             if (RocketModIntegrationEnabled() && IsRocketModRole(roleId))
             {
-                return Task.FromException<T>(new NotSupportedException("Persistent data is not supported for RocketMod roles"));
+                return Task.FromException<T>(new NotSupportedException("Persistent data is not supported for RocketMod roles."));
             }
 
             return m_BasePermissionRoleStore.GetPersistentDataAsync<T>(roleId, key);

@@ -227,7 +227,7 @@ namespace OpenMod.Core.Eventing
                         {
                             await subscription.Callback.Invoke(serviceProvider, sender, @event);
 
-                            // Ensure monitor event listeners can not cancel or uncancel events
+                            // Ensure monitor event listeners can't cancel or uncancel events
                             if (cancellableEvent != null && subscription.EventListenerAttribute.Priority ==
                                 EventListenerPriority.Monitor)
                             {

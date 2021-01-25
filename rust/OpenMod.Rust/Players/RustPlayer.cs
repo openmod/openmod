@@ -49,7 +49,7 @@ namespace OpenMod.Rust.Players
 
             using (PlayerServerFall.Enable(Player))
             {
-                // Can not teleport if mounted
+                // Can't teleport if mounted
                 Player.EnsureDismounted();
                 Player.SetParent(entity: null, worldPositionStays: true, sendImmediate: true);
 

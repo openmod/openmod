@@ -72,7 +72,7 @@ namespace OpenMod.Unturned.Vehicles
             await UniTask.SwitchToMainThread();
             if (passenger is not UnturnedPlayer player)
             {
-                throw new NotSupportedException($"Can not add entity {passenger.GetType()} as passenger");
+                throw new NotSupportedException($"Cannot add entity {passenger.GetType()} as passenger.");
             }
 
             VehicleManager.instance.askEnterVehicle(player.SteamId, Vehicle.instanceID, Vehicle.asset.hash, (byte)Vehicle.asset.engine);
@@ -84,7 +84,7 @@ namespace OpenMod.Unturned.Vehicles
             await UniTask.SwitchToMainThread();
             if (passenger is not UnturnedPlayer player)
             {
-                throw new NotSupportedException($"Can not remove entity {passenger.GetType()} as passenger");
+                throw new NotSupportedException($"Cannot remove entity {passenger.GetType()} as passenger.");
             }
 
             VehicleManager.forceRemovePlayer(Vehicle, player.SteamId);

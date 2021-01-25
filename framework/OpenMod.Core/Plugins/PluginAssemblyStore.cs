@@ -94,12 +94,6 @@ namespace OpenMod.Core.Plugins
                 providerAssemblies.Remove(providerAssembly);
             }
 
-            //Lovely mono :(
-            /*if (assembliesWithMissingDependencies.Count != 0)
-            {
-                m_Logger.LogWarning($"Some plugins can not load until server restart: {string.Join(", ", assembliesWithMissingDependencies)}", Color.DarkRed);
-            }*/
-
             m_LoadedPluginAssemblies.AddRange(providerAssemblies.Select(d => new WeakReference(d)));
             return providerAssemblies;
         }
@@ -156,8 +150,8 @@ namespace OpenMod.Core.Plugins
                 if (result.Code == NuGetInstallCode.Success || result.Code == NuGetInstallCode.NoUpdatesFound)
                     continue;
 
-                m_Logger.LogWarning($"Failed to install \"{assembly.Key}\": " + result.Code, Color.DarkRed);
-                m_Logger.LogWarning($"Plugin {providerAssembly} can not load without it!", Color.DarkRed);
+                m_Logger.LogWarning($"Failed to install \"{assembly.Key}\": {result.Code}", Color.DarkRed);
+                m_Logger.LogWarning($"Plugin \"{providerAssembly.GetName().Name}\" can't load without it!", Color.DarkRed);
                 return false;
             }
 

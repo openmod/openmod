@@ -270,7 +270,7 @@ namespace OpenMod.Core.Persistence
         {
             if (string.IsNullOrEmpty(key))
             {
-                throw new Exception($"Invalid data store key: {key}. Key can not be null or empty.");
+                throw new Exception($"Invalid data store key: {key}. Key cannot be null or empty.");
             }
 
             if (!char.IsLetter(key[0]))

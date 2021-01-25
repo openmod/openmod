@@ -11,7 +11,7 @@ namespace OpenMod.EntityFrameworkCore
         {
             if (string.IsNullOrEmpty(name))
             {
-                throw new ArgumentException("Connectiong string name can not be null or empty", nameof(name));
+                throw new ArgumentException("Connection string name cannot be null or empty.", nameof(name));
             }
 
             Name = name;

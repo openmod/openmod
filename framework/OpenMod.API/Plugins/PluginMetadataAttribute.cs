@@ -21,7 +21,7 @@ namespace OpenMod.API.Plugins
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new Exception($"Invalid plugin ID: \"{value}\". Plugin IDs can not be empty.");
+                    throw new Exception($"Invalid plugin ID: \"{value}\". Plugin IDs cannot be null or empty.");
                 }
 
                 if (!char.IsLetter(value[0]))
