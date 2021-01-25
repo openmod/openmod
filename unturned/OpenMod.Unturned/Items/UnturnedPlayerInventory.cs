@@ -2,6 +2,7 @@
 using SDG.Unturned;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenMod.Unturned.Items
 {
@@ -45,6 +46,14 @@ namespace OpenMod.Unturned.Items
                 }
 
                 return list;
+            }
+        }
+
+        public bool IsFull
+        {
+            get
+            {
+                return Pages.All(d => d.IsFull);
             }
         }
     }

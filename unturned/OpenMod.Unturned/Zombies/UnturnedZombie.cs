@@ -99,5 +99,13 @@ namespace OpenMod.Unturned.Zombies
 
             return true;
         }
+
+        public string DamageSourceName
+        {
+            get
+            {
+                return Asset.Name;
+            }
+        }
     }
 }

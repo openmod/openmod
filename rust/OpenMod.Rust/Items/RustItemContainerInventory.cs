@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using OpenMod.Extensions.Games.Abstractions.Items;
 
 namespace OpenMod.Rust.Items
@@ -33,5 +34,13 @@ namespace OpenMod.Rust.Items
         }
 
         public IReadOnlyCollection<IInventoryPage> Pages { get; }
+
+        public bool IsFull
+        {
+            get
+            {
+                return Pages.All(d => d.IsFull);
+            }
+        }
     }
 }

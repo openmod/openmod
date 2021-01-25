@@ -61,5 +61,13 @@ namespace OpenMod.Rust.Entities
         {
             throw new NotImplementedException();
         }
+
+        public virtual string DamageSourceName
+        {
+            get
+            {
+                return Asset.Name;
+            }
+        }
     }
 }

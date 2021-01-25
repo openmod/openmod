@@ -9,32 +9,41 @@ namespace OpenMod.Extensions.Economy.Abstractions
     public interface IEconomyProvider
     {
         /// <value>
-        /// Name of the currency, e.g. "Dollar". Cannot be null.
+        /// The name of the currency, e.g. "Dollar". Cannot be null.
         /// </value>
         [NotNull]
         string CurrencyName { get; }
 
         /// <value>
-        /// Symbol of the currency, e.g. "$". Cannot be null.
+        /// The symbol of the currency, e.g. "$". Cannot be null.
         /// </value>
         [NotNull]
         string CurrencySymbol { get; }
 
         /// <summary>
-        /// Get's the balance of an user.
+        /// Gets the balance of an user.
         /// </summary>
+        /// <param name="ownerId">The ID of the owner.</param>
+        /// <param name="ownerType">The actor type of the owner.</param>
         Task<decimal> GetBalanceAsync(string ownerId, string ownerType);
 
         /// <summary>
-        /// Updates balance for a user.
+        /// Creates a transaction and updates the balance of a user.
         /// </summary>
         /// <exception cref="NotEnoughBalanceException">if the balance would become negative</exception>
+        /// <param name="ownerId">The ID of the owner.</param>
+        /// <param name="ownerType">The actor type of the owner.</param>
+        /// <param name="changeAmount">The amount to add or remove.</param>
+        /// <param name="reason">The optional reason for this transaction.</param>
         Task<decimal> UpdateBalanceAsync(string ownerId, string ownerType, decimal changeAmount, string reason);
 
         /// <summary>
         ///   Sets balance for a user.
         /// </summary>
-        /// <exception cref="NotSupportedException">may be thrown if setting to negative balance and it's not supported</exception>
+        /// <exception cref="NotSupportedException">may be thrown if setting to negative balance and it's not supported</exception>#
+        /// <param name="ownerId">The ID of the owner.</param>
+        /// <param name="ownerType">The actor type of the owner.</param>
+        /// <param name="balance">The balance to set to.</param>
         Task SetBalanceAsync(string ownerId, string ownerType, decimal balance);
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Enum = System.Enum;
 using OpenMod.Extensions.Games.Abstractions.Items;
 using OpenMod.Rust.Players;
@@ -56,6 +57,14 @@ namespace OpenMod.Rust.Items
         internal bool GiveItem(Item item, ItemContainer container = null)
         {
             return PlayerInventory.GiveItem(item, container);
+        }
+
+        public bool IsFull
+        {
+            get
+            {
+                return Pages.All(d => d.IsFull);
+            }
         }
     }
 }

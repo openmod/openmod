@@ -9,7 +9,7 @@ namespace OpenMod.Extensions.Economy.Abstractions
     public class BalanceUpdatedEvent : Event
     {
         /// <value>
-        /// The Id of the account owner. Cannot be null.
+        /// The ID of the account owner. Cannot be null.
         /// </value>
         [NotNull]
         public string OwnerId { get; }

@@ -1,5 +1,8 @@
 ﻿namespace OpenMod.Extensions.Games.Abstractions.Players
 {
+    /// <summary>
+    /// Represents common damage sources. Support depends on the game.
+    /// </summary>
     public class KnownDamageSources
     {
         public const string Entity = "entity";

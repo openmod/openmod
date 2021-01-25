@@ -1,5 +1,8 @@
 ﻿namespace OpenMod.Extensions.Games.Abstractions.Vehicles
 {
+    /// <summary>
+    /// Represents common vehicle types. Support depends on the game.
+    /// </summary>
     public static class KnownVehicleTypes
     {
         public const string Car = "car";

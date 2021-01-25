@@ -6,6 +6,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
 {
     public static class VehicleExtensions
     {
+        /// See <see cref="IVehicleSpawner.SpawnVehicleAsync"/>.
         public static async Task SpawnVehicleAsync(this IVehicleSpawner vehicleSpawner, IPlayer player, string vehicleAssetId)
         {
             // todo: spawn in vehicle in front of player

@@ -8,6 +8,10 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
 {
     public static class InventoryExtensions
     {
+        /// <summary>
+        /// Removes all items from the given inventory.
+        /// </summary>
+        /// <param name="inventory">The inventory to clear.</param>
         public static async Task ClearAsync(this IInventory inventory)
         {
             foreach (var item in inventory.SelectMany(d => d.Items))
@@ -16,51 +20,76 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
             }
         }
 
+        /// <summary>
+        /// Searches for items by the item type.
+        /// </summary>
+        /// <param name="inventory">The inventory to search in.</param>
+        /// <param name="itemType">The type of the item to search for.</param>
+        /// <param name="comparer">The optional item comparer.</param>
         [CanBeNull]
-        public static IInventoryItem FindByType(this IInventory inventory, string itemType, IComparer<IInventoryItem> comparer = null)
+        public static IEnumerable<IInventoryItem> FindByType(this IInventory inventory, string itemType, IComparer<IInventoryItem> comparer = null)
         {
             var query = inventory.SelectMany(d => d.Items);
             return FindByType(query, itemType, comparer);
         }
 
+        /// <summary>
+        /// Searches for items by the item type.
+        /// </summary>
+        /// <param name="page">The inventory page to search in.</param>
+        /// <param name="itemType">The type of the item to search for.</param>
+        /// <param name="comparer">The optional item comparer.</param>
         [CanBeNull]
-        public static IInventoryItem FindByType(this IInventoryPage page, string itemType, IComparer<IInventoryItem> comparer = null)
+        public static IEnumerable<IInventoryItem> FindByType(this IInventoryPage page, string itemType, IComparer<IInventoryItem> comparer = null)
         {
             return FindByType((IEnumerable<IInventoryItem>)page, itemType, comparer);
         }
 
-        private static IInventoryItem FindByType(IEnumerable<IInventoryItem> query, string itemType, IComparer<IInventoryItem> comparer)
+        private static IEnumerable<IInventoryItem> FindByType(IEnumerable<IInventoryItem> query, string itemType, IComparer<IInventoryItem> comparer)
         {
             if (comparer != null)
             {
                 query = query.OrderBy(x => x, comparer);
             }
 
-            return query.FirstOrDefault(item => item.Item.Asset.ItemType.Equals(itemType, StringComparison.OrdinalIgnoreCase));
+            return query.Where(item => item.Item.Asset.ItemType.Equals(itemType, StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// Searches for items by the item asset id.
+        /// </summary>
+        /// <param name="inventory">The inventory to search in.</param>
+        /// <param name="itemAssetId">The ID of the item to search for.</param>
+        /// <param name="comparer">The optional item comparer.</param>
+        /// <returns></returns>
         [CanBeNull]
-        public static IInventoryItem FindByAssetId(this IInventory inventory, string itemAssetId, IComparer<IInventoryItem> comparer = null)
+        public static IEnumerable<IInventoryItem> FindByAssetId(this IInventory inventory, string itemAssetId, IComparer<IInventoryItem> comparer = null)
         {
             var query = inventory.SelectMany(d => d.Items);
             return FindByAssetId(query, itemAssetId, comparer);
         }
 
+        /// <summary>
+        /// Searches for items by the item asset id.
+        /// </summary>
+        /// <param name="page">The inventory page to search in.</param>
+        /// <param name="itemAssetId">The ID of the item to search for.</param>
+        /// <param name="comparer">The optional item comparer.</param>
+        /// <returns></returns>
         [CanBeNull]
-        public static IInventoryItem FindByAssetId(this IInventoryPage page, string itemAssetId, IComparer<IInventoryItem> comparer = null)
+        public static IEnumerable<IInventoryItem> FindByAssetId(this IInventoryPage page, string itemAssetId, IComparer<IInventoryItem> comparer = null)
         {
             return FindByAssetId((IEnumerable<IInventoryItem>)page, itemAssetId, comparer);
-
         }
 
-        private static IInventoryItem FindByAssetId(IEnumerable<IInventoryItem> query, string itemType, IComparer<IInventoryItem> comparer)
+        private static IEnumerable<IInventoryItem> FindByAssetId(IEnumerable<IInventoryItem> query, string itemType, IComparer<IInventoryItem> comparer)
         {
             if (comparer != null)
             {
                 query = query.OrderBy(x => x, comparer);
             }
 
-            return query.FirstOrDefault(item => item.Item.Asset.ItemAssetId.Equals(itemType, StringComparison.OrdinalIgnoreCase));
+            return query.Where(item => item.Item.Asset.ItemAssetId.Equals(itemType, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

@@ -96,5 +96,13 @@ namespace OpenMod.Unturned.Animals
 
             return true;
         }
+
+        public string DamageSourceName
+        {
+            get
+            {
+                return Asset.Name;
+            }
+        }
     }
 }

@@ -7,7 +7,10 @@ namespace OpenMod.Extensions.Economy.Abstractions
     /// </summary>
     public class NotEnoughBalanceException : UserFriendlyException
     {
-        public decimal? Balance;
+        /// <value>
+        /// The current balance. Can be null.
+        /// </value>
+        public decimal? Balance { get; }
 
         public NotEnoughBalanceException(string message) : base(message)
         {

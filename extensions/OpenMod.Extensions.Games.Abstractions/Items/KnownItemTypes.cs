@@ -1,5 +1,8 @@
 ﻿namespace OpenMod.Extensions.Games.Abstractions.Items
 {
+    /// <summary>
+    /// Represents common item types. Support depends on the game.
+    /// </summary>
     public static class KnownItemTypes
     {
         public const string Melee = "melee";

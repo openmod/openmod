@@ -41,5 +41,13 @@ namespace OpenMod.Unturned.Building
 
             return DestroyTask().AsTask();
         }
+
+        public string DamageSourceName
+        {
+            get
+            {
+                return ((UnturnedBuildableAsset)Asset).Asset.name;
+            }
+        }
     }
 }

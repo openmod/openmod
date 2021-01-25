@@ -5,11 +5,9 @@ namespace OpenMod.Unturned.Players.Stats.Events
 {
     public abstract class UnturnedPlayerStatUpdatedEvent : UnturnedPlayerEvent
     {
-        public EPlayerStat Stat { get; }
-
-        protected UnturnedPlayerStatUpdatedEvent(UnturnedPlayer player, EPlayerStat stat) : base(player)
+        protected UnturnedPlayerStatUpdatedEvent(UnturnedPlayer player) : base(player)
         {
-            Stat = stat;
+           
         }
     }
 }

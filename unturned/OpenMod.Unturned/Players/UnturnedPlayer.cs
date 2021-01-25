@@ -15,7 +15,6 @@ using Steamworks;
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using IHasInventory = OpenMod.Extensions.Games.Abstractions.Entities.IHasInventory;
 using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players
@@ -152,6 +151,14 @@ namespace OpenMod.Unturned.Players
                 }
 
                 return new UnturnedVehicle(vehicle);
+            }
+        }
+
+        public string DamageSourceName
+        {
+            get
+            {
+                return Player.channel.owner.playerID.characterName;
             }
         }
     }

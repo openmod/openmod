@@ -1,5 +1,8 @@
 ﻿namespace OpenMod.Extensions.Games.Abstractions.Items
 {
+    /// <summary>
+    /// Represents the null item state for items that do not have a state.
+    /// </summary>
     public class NullItemState : IItemState
     {
         private static NullItemState m_ItemState;

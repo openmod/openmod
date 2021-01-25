@@ -1,5 +1,8 @@
 ﻿namespace OpenMod.Extensions.Games.Abstractions.Players
 {
+    /// <summary>
+    /// Represents common player stances. Support depends on the game.
+    /// </summary>
     public class KnownPlayerStances
     {
         public const string Climb = "climb";
