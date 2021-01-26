@@ -4,7 +4,7 @@ using OpenMod.Unturned.Players;
 namespace OpenMod.Unturned.Vehicles.Events
 {
     /// <summary>
-    /// The event that is triggered when a player tires to lockpick a vehicle.
+    /// The event that is triggered when a player tries to lockpick a vehicle.
     /// </summary>
     public class UnturnedVehicleLockpickingEvent : UnturnedVehicleEvent, ICancellableEvent
     {
