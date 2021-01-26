@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
+    <PropertyGroup>
         <PackageType>Template</PackageType>
         <PackageId>OpenMod.Templates</PackageId>
         <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
-	    <PackageAuthors>OpenMod</PackageAuthors>
+        <PackageAuthors>OpenMod</PackageAuthors>
         <PackageOwners>OpenMod</PackageOwners>
         <Title>OpenMod Plugin Templates</Title>
         <Description>OpenMod templates for "dotnet new".</Description>
@@ -16,15 +16,19 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <Version>0.0.0</Version>
         <PackageVersion>0.0.0</PackageVersion>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	</PropertyGroup>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>nullable</WarningsAsErrors>
+        <NoWarn>$(NoWarn);NU1701;NU1702;CS0436</NoWarn>
+        <LangVersion>9.0</LangVersion>	    
+    </PropertyGroup>
 
-	<ItemGroup>
-		<Content Include="templates/**/*.*" />
-	</ItemGroup>
+    <ItemGroup>
+        <Content Include="templates/**/*.*" />
+    </ItemGroup>
 
-	<!-- Ignore source code in the content folder; it's part of the template(s) -->
-	<ItemGroup>
-		<Compile Remove="templates/**/*.cs" />
-	</ItemGroup>
+    <!-- Ignore source code in the content folder; it's part of the template(s) -->
+    <ItemGroup>
+        <Compile Remove="templates/**/*.cs" />
+    </ItemGroup>
 </Project>
