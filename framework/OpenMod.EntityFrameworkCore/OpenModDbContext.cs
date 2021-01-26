@@ -2,18 +2,32 @@
 using System.Reflection;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Plugins;
 
 namespace OpenMod.EntityFrameworkCore
 {
+    /// <summary>
+    /// Base <see cref="DbContext"/> for OpenMod plugins.
+    /// </summary>
+    /// <typeparam name="TSelf">A type parameter pointing to the class implementing itself.</typeparam>
+    /// <example>
+    /// <code>
+    /// public class MyDbContext : OpenModDbContext&lt;MyDbContext&gt;
+    /// {
+    ///     // impl
+    /// }
+    /// </code>
+    /// </example>
     public abstract class OpenModDbContext<TSelf> : DbContext where TSelf : OpenModDbContext<TSelf>
     {
         private readonly IServiceProvider m_ServiceProvider;
         private readonly ILogger<TSelf> m_Logger;
 
+        /// <value>
+        /// The name of the migrations table.
+        /// </value>
         public virtual string MigrationsTableName
         {
             get
@@ -23,6 +37,9 @@ namespace OpenMod.EntityFrameworkCore
             }
         }
 
+        /// <value>
+        /// The prefix for the tables.
+        /// </value>
         public virtual string TablePrefix
         {
             get

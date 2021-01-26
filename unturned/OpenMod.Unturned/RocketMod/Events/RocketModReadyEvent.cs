@@ -3,7 +3,7 @@
 namespace OpenMod.Unturned.RocketMod.Events
 {
     /// <summary>
-    /// Fired when RocketMod is loaded and ready.
+    /// The event that is triggered when RocketMod is loaded and ready. It is fired before plugins are loaded.
     /// </summary>
     public class RocketModReadyEvent : Event
     {

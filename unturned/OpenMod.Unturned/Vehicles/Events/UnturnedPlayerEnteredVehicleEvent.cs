@@ -5,6 +5,9 @@ using OpenMod.Unturned.Players;
 
 namespace OpenMod.Unturned.Vehicles.Events
 {
+    /// <summary>
+    /// The event that is triggered when a player has entered a vehicle.
+    /// </summary>
     public class UnturnedPlayerEnteredVehicleEvent : UnturnedPlayerEvent, IPlayerEnteredVehicleEvent
     {
         public UnturnedVehicle Vehicle { get; }

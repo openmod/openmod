@@ -6,7 +6,7 @@
     public interface ICancellableEvent : IEvent
     {
         /// <summary>
-        ///     Gets or sets if the event action should be cancelled.
+        /// Gets or sets if the event action should be cancelled.
         /// </summary>
         bool IsCancelled { get; set; }
     }

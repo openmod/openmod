@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Nito.AsyncEx;
 using NuGet.Common;
 using NuGet.Packaging.Core;
@@ -13,13 +14,24 @@ using OpenMod.NuGet;
 namespace OpenMod.Bootstrapper
 {
     // NOTE TO DEVELOPER: THIS CLASS SHOULD NOT REFERENCE *ANY* OTHER OPENMOD CODE!
-    // OpenMod is not loaded at this stage (except for OpenMod.NuGet, which has no dependencies).
+    // OpenMod is not loaded at this stage (except for OpenMod.NuGet and OpenMod.Common).
     /// <summary>
-    ///     This class is responsible for downloading OpenMod.Core, OpenMod.API, the host package and their dependencies. <br/>
-    ///     After download, it will boot OpenMod and then initialize the IRuntime implementation.
+    /// This class is responsible for downloading OpenMod.Core, OpenMod.API, the host package and their dependencies. <br/>
+    /// After download, it will boot OpenMod and then initialize the IRuntime implementation.
     /// </summary>
     public class OpenModDynamicBootstrapper
     {
+        /// <summary>
+        /// Bootstrap OpenMod.
+        /// </summary>
+        /// <param name="packageManager">The optional package manager.</param>
+        /// <param name="openModFolder">The OpenMod working directory.</param>
+        /// <param name="commandLineArgs">The command line arguments.</param>
+        /// <param name="packageId">The ID of the host package.</param>
+        /// <param name="allowPrereleaseVersions">If true, will download pre-release versions.</param>
+        /// <param name="logger">The optional logger.</param>
+        /// <returns>The OpenMod runtime.</returns>
+        [ItemNotNull]
         public Task<object> BootstrapAsync(
             NuGetPackageManager packageManager,
             string openModFolder,
@@ -31,6 +43,17 @@ namespace OpenMod.Bootstrapper
             return BootstrapAsync(packageManager, openModFolder, commandLineArgs, new List<string> { packageId }, Enumerable.Empty<string>(), allowPrereleaseVersions, logger);
         }
 
+        /// <summary>
+        /// Bootstrap OpenMod.
+        /// </summary>
+        /// <param name="packageManager">The optional package manager.</param>
+        /// <param name="openModFolder">The OpenMod working directory.</param>
+        /// <param name="commandLineArgs">The command line arguments.</param>
+        /// <param name="packageIds">The IDs of the host package.</param>
+        /// <param name="allowPrereleaseVersions">If true, will download pre-release versions.</param>
+        /// <param name="logger">The optional logger.</param>
+        /// <returns>The OpenMod runtime.</returns>
+        [NotNull]
         public object Bootstrap(
             NuGetPackageManager packageManager,
             string openModFolder,
@@ -43,6 +66,17 @@ namespace OpenMod.Bootstrapper
             return AsyncContext.Run(() => BootstrapAsync(packageManager, openModFolder, commandLineArgs, packageIds, ignoredDependencies, allowPrereleaseVersions, logger));
         }
 
+        /// <summary>
+        /// Bootstrap OpenMod.
+        /// </summary>
+        /// <param name="packageManager">The optional package manager.</param>
+        /// <param name="openModFolder">The OpenMod working directory.</param>
+        /// <param name="commandLineArgs">The command line arguments.</param>
+        /// <param name="packageIds">The IDs of the host package.</param>
+        /// <param name="allowPrereleaseVersions">If true, will download pre-release versions.</param>
+        /// <param name="ignoredDependencies">Ignored dependencies.</param>
+        /// <param name="logger">The optional logger.</param>
+        /// <returns>The OpenMod runtime.</returns>
         public async Task<object> BootstrapAsync(
             NuGetPackageManager packageManager,
             string openModFolder,

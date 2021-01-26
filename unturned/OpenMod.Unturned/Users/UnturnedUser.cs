@@ -15,13 +15,22 @@ using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
 {
+    /// <summary>
+    /// Represents an Unturned user.
+    /// </summary>
     public class UnturnedUser : UserBase, IEquatable<UnturnedUser>, IEquatable<UnturnedPendingUser>, IPlayerUser<UnturnedPlayer>
     {
+        /// <summary>
+        /// See <see cref="SteamId"/>.
+        /// </summary>
         public override string Id
         {
             get { return SteamId.ToString(); }
         }
 
+        /// <summary>
+        /// The Steam ID of the Unturned user.
+        /// </summary>
         public CSteamID SteamId { get; }
 
         [OpenModInternal]

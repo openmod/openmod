@@ -11,18 +11,15 @@ namespace OpenMod.Core.Jobs
 {
     public class OpenModCommandTaskExecutor : ITaskExecutor
     {
-        private readonly IRuntime m_Runtime;
         private readonly ICommandExecutor m_CommandExecutor;
         private readonly ILogger<OpenModCommandTaskExecutor> m_Logger;
         private readonly OpenModCommandTaskActor m_Actor;
 
         public OpenModCommandTaskExecutor(
-            IRuntime runtime,
             ICommandExecutor commandExecutor,
             ILogger<OpenModCommandTaskExecutor> logger)
         {
             m_Actor = new OpenModCommandTaskActor(logger);
-            m_Runtime = runtime;
             m_CommandExecutor = commandExecutor;
             m_Logger = logger;
         }

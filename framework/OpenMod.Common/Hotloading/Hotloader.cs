@@ -8,9 +8,17 @@ using OpenMod.Common.Helpers;
 
 namespace OpenMod.Common.Hotloading
 {
+    /// <summary>
+    /// Adds support for hotloading assemblies.
+    /// Use <see cref="LoadAssembly"/> instead of <see cref="Assembly.Load(byte[])"/>.
+    /// </summary>
     public static class Hotloader
     {
         private static readonly Dictionary<string, Assembly> s_Assemblies;
+
+        /// <value>
+        /// <b>True</b> if hotloading should be enabled. Will redirect to Assembly.Load otherwise.
+        /// </value>
         public static bool Enabled { get; set; }
 
         static Hotloader()
@@ -76,6 +84,10 @@ namespace OpenMod.Common.Hotloading
             return assembly;
         }
 
+        /// <summary>
+        /// Removes an assembly from the hotloader cache.
+        /// </summary>
+        /// <param name="assembly">The assembly to remove.</param>
         public static void Remove(Assembly assembly)
         {
             foreach (var kv in s_Assemblies.Where(kv => kv.Value == assembly))
@@ -84,17 +96,36 @@ namespace OpenMod.Common.Hotloading
             }
         }
 
+        /// <summary>
+        /// Resolves a hotloaded assembly. Hotloaded assemblies have an auto generated assembly name.
+        /// </summary>
+        /// <param name="fullname">The assembly name to resolve.</param>
+        /// <returns><b>The hotloaded assembly</b> if found; otherwise, <b>null</b>.</returns>
         public static Assembly GetAssembly(string fullname)
         {
+            if (!s_Assemblies.ContainsKey(fullname))
+            {
+                return null;
+            }
+
             return s_Assemblies[fullname];
         }
 
+        /// <summary>
+        /// Gets all hotloaded assemblies.
+        /// </summary>
+        /// <returns>The hotloaded assemblies. Cannot be null and neither the items can be null.</returns>
         public static IReadOnlyCollection<Assembly> GetHotloadedAssemblies()
         {
             return s_Assemblies.Values;
         }
 
-        public static AssemblyName GetRealName(Assembly assembly)
+        /// <summary>
+        /// Gets the real assembly name of an hotloaded assembly. Hotloaded assemblies have an auto generated assembly name.
+        /// </summary>
+        /// <param name="assembly">The assembly to get the real name of.</param>
+        /// <returns><b>The real assembly name</b> of the hotloaded assembly. If the given assembly was not hotloaded, it will return <b>the assembly's name</b>.</returns>
+        public static AssemblyName GetRealAssemblyName(Assembly assembly)
         {
             foreach (var kv in s_Assemblies)
             {

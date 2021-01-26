@@ -7,6 +7,9 @@ using Rocket.Unturned;
 
 namespace OpenMod.Unturned.RocketMod
 {
+    /// <summary>
+    /// The OpenMod component for RocketMod. 
+    /// </summary>
     public class RocketModComponent : IRocketModComponent
     {
         private readonly IRuntime m_Runtime;

@@ -5,6 +5,9 @@ using OpenMod.Unturned.Players;
 
 namespace OpenMod.Unturned.Vehicles.Events
 {
+    /// <summary>
+    /// The event that is triggered when a player has exited a vehicle.
+    /// </summary>
     public class UnturnedPlayerExitedVehicleEvent : UnturnedPlayerEvent, IPlayerExitedVehicleEvent
     {
         public UnturnedVehicle Vehicle { get; }

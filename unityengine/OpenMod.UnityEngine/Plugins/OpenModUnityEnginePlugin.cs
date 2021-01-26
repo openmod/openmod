@@ -7,6 +7,9 @@ using OpenMod.Core.Plugins.Events;
 
 namespace OpenMod.UnityEngine.Plugins
 {
+    /// <summary>
+    /// Base class for all UnityEngine plugins.
+    /// </summary>
     public abstract class OpenModUnityEnginePlugin : OpenModPluginBase
     {
         protected OpenModUnityEnginePlugin(IServiceProvider serviceProvider) : base(serviceProvider)

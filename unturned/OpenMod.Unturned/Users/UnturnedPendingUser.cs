@@ -8,15 +8,27 @@ using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
 {
+    /// <summary>
+    /// Represents a pending unturned user.
+    /// </summary>
     public class UnturnedPendingUser : UserBase, IEquatable<UnturnedPendingUser>, IEquatable<UnturnedUser>
     {
+        /// <summary>
+        /// See <see cref="SteamId"/>.
+        /// </summary>
         public override string Id
         {
             get { return SteamId.ToString(); }
         }
 
+        /// <summary>
+        /// The Steam ID of the user.
+        /// </summary>
         public CSteamID SteamId { get; }
 
+        /// <summary>
+        /// The wrapped SteamPending.
+        /// </summary>
         public SteamPending SteamPending { get; }
 
         [OpenModInternal]

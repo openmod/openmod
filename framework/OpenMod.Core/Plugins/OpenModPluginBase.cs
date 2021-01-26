@@ -18,6 +18,9 @@ using Semver;
 
 namespace OpenMod.Core.Plugins
 {
+    /// <summary>
+    /// Base class for all OpenMod plugins.
+    /// </summary>
     public abstract class OpenModPluginBase : IOpenModPlugin, IAsyncDisposable
     {
         private readonly IServiceProvider m_ServiceProvider;

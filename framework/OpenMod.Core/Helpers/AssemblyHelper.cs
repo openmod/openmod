@@ -24,7 +24,7 @@ namespace OpenMod.Core.Helpers
 
             foreach (var resourceName in resourceNames)
             {
-                var assemblyName = Hotloader.GetRealName(assembly);
+                var assemblyName = Hotloader.GetRealAssemblyName(assembly);
 
                 if (!resourceName.Contains(assemblyName.Name + "."))
                 {

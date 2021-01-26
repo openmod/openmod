@@ -9,6 +9,18 @@ using MySql.Data.EntityFrameworkCore.Extensions;
 
 namespace OpenMod.EntityFrameworkCore
 {
+    /// <summary>
+    /// Boilerplate code for design time context factories. Must be implemented to support EF Core commands.
+    /// </summary>
+    /// <typeparam name="TDbContext">The DbContext the factory is for.</typeparam>
+    /// <example>
+    /// <code>
+    /// public class MyDbContextFactory : OpenModDbContextFactory&lt;MyDbContext&gt;
+    /// {
+    ///    // that's all needed
+    /// }
+    /// </code>
+    /// </example>
     public class OpenModDbContextFactory<TDbContext> : IDesignTimeDbContextFactory<TDbContext> where TDbContext : OpenModDbContext<TDbContext>
     {
         public TDbContext CreateDbContext(string[] args)

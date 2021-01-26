@@ -5,9 +5,12 @@ using OpenMod.Core.Plugins.Events;
 
 namespace OpenMod.Core.Plugins
 {
-    public class OpenModUniversalPlugin : OpenModPluginBase
+    /// <summary>
+    /// Base class for all OpenMod universal plugins.
+    /// </summary>
+    public abstract class OpenModUniversalPlugin : OpenModPluginBase
     {
-        public OpenModUniversalPlugin(IServiceProvider serviceProvider) : base(serviceProvider)
+        protected OpenModUniversalPlugin(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

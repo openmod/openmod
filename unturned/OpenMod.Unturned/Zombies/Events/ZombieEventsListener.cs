@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace OpenMod.Unturned.Zombies.Events
 {
+    [OpenModInternal]
     internal class ZombieEventsListener : UnturnedEventsListener
     {
         public ZombieEventsListener(IOpenModHost openModHost,

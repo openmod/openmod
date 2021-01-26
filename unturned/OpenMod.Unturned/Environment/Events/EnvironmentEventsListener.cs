@@ -6,6 +6,7 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Environment.Events
 {
+    [OpenModInternal]
     internal class EnvironmentEventsListener : UnturnedEventsListener
     {
         public EnvironmentEventsListener(IOpenModHost openModHost,

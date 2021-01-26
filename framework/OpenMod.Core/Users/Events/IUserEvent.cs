@@ -3,8 +3,14 @@ using OpenMod.API.Users;
 
 namespace OpenMod.Core.Users.Events
 {
+    /// <summary>
+    /// The base interface for all user related events.
+    /// </summary>
     public interface IUserEvent : IEvent
     {
+        /// <value>
+        /// The user related to the event.
+        /// </value>
         IUser User { get; }
     }
 }

@@ -5,6 +5,7 @@ using OpenMod.Unturned.Events;
 
 namespace OpenMod.Unturned.Server.Events
 {
+    [OpenModInternal]
     internal class ServerEventsListener : UnturnedEventsListener
     {
         public ServerEventsListener(IOpenModHost openModHost,

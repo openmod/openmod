@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Patching;
@@ -16,6 +17,9 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.RocketMod
 {
+    /// <summary>
+    /// The OpenMod integration for RocketMod.
+    /// </summary>
     public class RocketModIntegration : IDisposable
     {
         private const string c_HarmonyId = "com.get-openmod.unturned.module.rocketmod";
@@ -44,7 +48,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         /// <summary>
-        /// Returns true if RocketMod is installed as an Unturned module.
+        /// Checks if RocketMod is installed as an Unturned module.
         /// </summary>
         /// <returns></returns>
         public static bool IsRocketModInstalled()
@@ -57,7 +61,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         /// <summary>
-        /// Returns true if the given assembly is the Rocket.Unturned assembly.
+        /// Checks if the given assembly is the Rocket.Unturned assembly.
         /// </summary>
         public static bool IsRocketModUnturnedAssembly(Assembly assembly)
         {
@@ -65,7 +69,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         /// <summary>
-        /// Returns true if the given assembly is the Rocket.Core assembly.
+        /// Checks if the given assembly is the Rocket.Core assembly.
         /// </summary>
         public static bool IsRocketModCoreAssembly(Assembly assembly)
         {
@@ -73,7 +77,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         /// <summary>
-        /// Returns true if the given assembly is the Rocket.API assembly.
+        /// Checks if the given assembly is the Rocket.API assembly.
         /// </summary>
         public static bool IsRocketModApiAssembly(Assembly assembly)
         {
@@ -81,7 +85,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         /// <summary>
-        /// Returns true if the Rocket.Unturned assembly is loaded.
+        /// Checks if the Rocket.Unturned assembly is loaded.
         /// </summary>
         public static bool IsRocketModUnturnedLoaded(out Assembly assembly)
         {
@@ -90,7 +94,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         /// <summary>
-        /// Returns true if the Rocket.Core assembly is loaded.
+        /// Checks if the Rocket.Core assembly is loaded.
         /// </summary>
         public static bool IsRocketModCoreLoaded(out Assembly assembly)
         {
@@ -99,7 +103,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         /// <summary>
-        /// Returns true if the Rocket.API assembly is loaded.
+        /// Checks if the Rocket.API assembly is loaded.
         /// </summary>
         public static bool IsRocketModApiLoaded(out Assembly assembly)
         {
@@ -108,7 +112,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         /// <summary>
-        /// Returns true if RocketMod for Unturned is loaded and ready.
+        /// Checks if RocketMod for Unturned is loaded and ready.
         /// </summary>
         public static bool IsRocketModReady()
         {
@@ -116,7 +120,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         /// <summary>
-        /// Returns true if the given assembly is a RocketMod assembly.
+        /// Checks if the given assembly is a RocketMod assembly.
         /// </summary>
         public static bool IsRocketModAssembly(Assembly assembly)
         {
@@ -125,7 +129,13 @@ namespace OpenMod.Unturned.RocketMod
                    || IsRocketModApiAssembly(assembly);
         }
 
-
+        /// <summary>
+        /// Installs the RocketMod integration.
+        /// </summary>
+        /// <remarks>
+        /// <b>This API is for OpenMod internal usage only and should not be called by plugins.</b>
+        /// </remarks>
+        [OpenModInternal]
         public void Install()
         {
             if (!IsRocketModInstalled())
@@ -206,6 +216,13 @@ namespace OpenMod.Unturned.RocketMod
             m_Logger.LogInformation("RocketMod plugins have been loaded.");
         }
 
+        /// <summary>
+        /// Disposes the RocketMod integration.
+        /// </summary>
+        /// <remarks>
+        /// <b>This API is for OpenMod internal usage only and should not be called by plugins.</b>
+        /// </remarks>
+        [OpenModInternal]
         public void Dispose()
         {
             if (!m_Installed)

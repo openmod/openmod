@@ -13,6 +13,9 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Plugins
 {
+    /// <summary>
+    /// Adds plugins to and removes them from Unturned's plugin advertising.
+    /// </summary>
     [OpenModInternal]
     [UsedImplicitly]
     [EventListenerLifetime(ServiceLifetime.Singleton)]
