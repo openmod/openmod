@@ -30,10 +30,10 @@ namespace PLUGIN-NAMESPACE
 
         protected override async UniTask OnLoadAsync()
         {
-			// await UniTask.SwitchToMainThread(); uncomment if you have to access Unturned or UnityEngine APIs
+            // await UniTask.SwitchToMainThread(); uncomment if you have to access Unturned or UnityEngine APIs
             m_Logger.LogInformation("Hello World!");
-			
-			// await UniTask.SwitchToThreadPool(); // you can switch back to a different thread
+
+            // await UniTask.SwitchToThreadPool(); // you can switch back to a different thread
         }
 
         protected override async UniTask OnUnloadAsync()
