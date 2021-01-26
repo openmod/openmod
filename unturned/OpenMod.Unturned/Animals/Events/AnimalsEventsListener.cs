@@ -1,16 +1,17 @@
-﻿using HarmonyLib;
+﻿extern alias JetBrainsAnnotations;
+using HarmonyLib;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Players;
 using SDG.Unturned;
 using UnityEngine;
-// ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Animals.Events
 {
+    [UsedImplicitly]
     internal class AnimalsEventsListener : UnturnedEventsListener
     {
         public AnimalsEventsListener(IOpenModHost openModHost,
@@ -130,45 +131,47 @@ namespace OpenMod.Unturned.Animals.Events
 
             var player = GetUnturnedPlayer(nativePlayer);
 
-            var @event = new UnturnedAnimalAttackingPlayerEvent(animal, player, sendToPack)
+            var @event = new UnturnedAnimalAttackingPlayerEvent(animal, player!, sendToPack)
             {
                 IsCancelled = cancel
             };
 
             Emit(@event);
 
-            nativePlayer = @event.Player?.Player;
+            nativePlayer = @event.Player.Player;
             sendToPack = @event.SendToPack;
             cancel = @event.IsCancelled;
         }
 
         private delegate void AnimalSpawned(Animal nativeAnimal);
-        private static event AnimalSpawned OnAnimalAdded;
-        private static event AnimalSpawned OnAnimalRevived;
+        private static event AnimalSpawned? OnAnimalAdded;
+        private static event AnimalSpawned? OnAnimalRevived;
 
         private delegate void AnimalDamaging(Animal nativeAnimal, ref ushort amount, ref Vector3 ragdoll,
             ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot, ref bool cancel);
-        private static event AnimalDamaging OnAnimalDamaging;
+        private static event AnimalDamaging? OnAnimalDamaging;
 
         private delegate void AnimalDead(Animal nativeAnimal, Vector3 ragdoll, ERagdollEffect ragdollEffect);
-        private static event AnimalDead OnAnimalDead;
+        private static event AnimalDead? OnAnimalDead;
 
         private delegate void AnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack, ref bool cancel);
-        private static event AnimalFleeing OnAnimalFleeing;
+        private static event AnimalFleeing? OnAnimalFleeing;
 
         private delegate void AnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack, ref bool cancel);
-        private static event AnimalAttackingPoint OnAnimalAttackingPoint;
+        private static event AnimalAttackingPoint? OnAnimalAttackingPoint;
 
         private delegate void AnimalAttackingPlayer(Animal nativeAnimal, ref Player player, ref bool sendToPack,
             ref bool cancel);
-        private static event AnimalAttackingPlayer OnAnimalAttackingPlayer;
+        private static event AnimalAttackingPlayer? OnAnimalAttackingPlayer;
 
+        [UsedImplicitly]
         [HarmonyPatch]
-        private class Patches
+        internal static class Patches
         {
+            [UsedImplicitly]
             [HarmonyPatch(typeof(AnimalManager), "addAnimal")]
             [HarmonyPostfix]
-            private static void AddAnimal(Animal __result)
+            public static void AddAnimal(Animal __result)
             {
                 if (__result != null)
                 {
@@ -176,16 +179,18 @@ namespace OpenMod.Unturned.Animals.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(Animal), "tellAlive")]
             [HarmonyPostfix]
-            private static void TellAlive(Animal __instance)
+            public static void TellAlive(Animal __instance)
             {
                 OnAnimalRevived?.Invoke(__instance);
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(Animal), "askDamage")]
             [HarmonyPrefix]
-            private static bool AskDamage(Animal __instance, ref ushort amount, ref Vector3 newRagdoll, // lgtm [cs/too-many-ref-parameters]
+            public static bool AskDamage(Animal __instance, ref ushort amount, ref Vector3 newRagdoll, // lgtm [cs/too-many-ref-parameters]
                 ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot)
             {
                 var cancel = false;
@@ -198,16 +203,18 @@ namespace OpenMod.Unturned.Animals.Events
                 return !cancel;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(Animal), "tellDead")]
             [HarmonyPostfix]
-            private static void TellDead(Animal __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
+            public static void TellDead(Animal __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
             {
                 OnAnimalDead?.Invoke(__instance, newRagdoll, ragdollEffect);
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(Animal), "alertDirection")]
             [HarmonyPrefix]
-            private static bool AlertDirection(Animal __instance, ref Vector3 newDirection, ref bool sendToPack)
+            public static bool AlertDirection(Animal __instance, ref Vector3 newDirection, ref bool sendToPack)
             {
                 // Fleeing from given direction
                 var cancel = false;
@@ -217,9 +224,10 @@ namespace OpenMod.Unturned.Animals.Events
                 return !cancel;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(Animal), "alertGoToPoint")]
             [HarmonyPrefix]
-            private static bool AlertGoToPoint(Animal __instance, ref Vector3 point, ref bool sendToPack)
+            public static bool AlertGoToPoint(Animal __instance, ref Vector3 point, ref bool sendToPack)
             {
                 // Attacking point
                 var cancel = false;
@@ -229,9 +237,10 @@ namespace OpenMod.Unturned.Animals.Events
                 return !cancel;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(Animal), "alertPlayer")]
             [HarmonyPrefix]
-            private static bool AlertPlayer(Animal __instance, ref Player newPlayer, ref bool sendToPack)
+            public static bool AlertPlayer(Animal __instance, ref Player newPlayer, ref bool sendToPack)
             {
                 // Attacking player
                 var cancel = false;

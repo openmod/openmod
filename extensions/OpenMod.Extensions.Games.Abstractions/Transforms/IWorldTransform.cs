@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace OpenMod.Extensions.Games.Abstractions.Transforms
 {
@@ -14,19 +13,16 @@ namespace OpenMod.Extensions.Games.Abstractions.Transforms
         /// <value>
         /// The name of the transform. Can be null.
         /// </value>
-        [CanBeNull]
-        string TransformName { get; }
+        string? TransformName { get; }
 
         /// <value>
         /// The parent transform of this transform. Can be null.
         /// </value>
-        [CanBeNull]
-        IWorldTransform ParentTransform { get; }
+        IWorldTransform? ParentTransform { get; }
 
         /// <value>
-        /// The child transforms of this transform. Cannot be null but can be empty.
+        /// The child transforms of this transform.
         /// </value>
-        [NotNull]
         IReadOnlyCollection<IWorldTransform> ChildTransforms { get; }
 
         /// <value>

@@ -1,6 +1,8 @@
-﻿using System;
+﻿extern alias JetBrainsAnnotations;
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Bootstrapper;
 using OpenMod.NuGet;
 using OpenMod.Unturned.Module.Shared;
@@ -9,12 +11,13 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Module
 {
+    [UsedImplicitly]
     public class OpenModUnturnedModule : IModuleNexus
     {
-        public object OpenModRuntime { get; private set; }
+        public object? OpenModRuntime { get; private set; }
         public bool IsDynamicLoad { get; set; }
 
-        private OpenModSharedUnturnedModule m_SharedModule;
+        private OpenModSharedUnturnedModule? m_SharedModule;
 
         public void initialize()
         {
@@ -29,7 +32,8 @@ namespace OpenMod.Unturned.Module
 
         public void shutdown()
         {
-            m_SharedModule.Shutdown();
+            m_SharedModule?.Shutdown();
+            m_SharedModule = null;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -47,11 +51,10 @@ namespace OpenMod.Unturned.Module
             var bootrapper = new OpenModDynamicBootstrapper();
 
             OpenModRuntime = bootrapper.Bootstrap(
-                m_SharedModule.GetNugetPackageManager(openModDirectory),
+                m_SharedModule!.GetNugetPackageManager(openModDirectory),
                 openModDirectory,
                 Environment.GetCommandLineArgs(),
                 new[] { "OpenMod.UnityEngine", "OpenMod.Unturned" },
-                new[] { "OpenMod.Unturned.Redist", "OpenMod.UnityEngine.Redist" },
                 allowPrereleaseVersions: false,
                 new NuGetConsoleLogger());
 

@@ -4,8 +4,8 @@ namespace OpenMod.NuGet
 {
     public class SerializedNuGetPackage
     {
-        public string Id { get; set; }
-        public string Version { get; set; }
+        public string Id { get; set; } = null!;
+        public string Version { get; set; } = null!;
 
         public override bool Equals(object obj)
         {

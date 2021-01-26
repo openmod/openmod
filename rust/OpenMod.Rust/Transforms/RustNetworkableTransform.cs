@@ -35,12 +35,12 @@ namespace OpenMod.Rust.Transforms
             get { return m_BaseNetworkable.children.Count; }
         }
 
-        public string TransformName
+        public string? TransformName
         {
             get { return m_BaseNetworkable.name; }
         }
 
-        public IWorldTransform ParentTransform
+        public IWorldTransform? ParentTransform
         {
             get
             {

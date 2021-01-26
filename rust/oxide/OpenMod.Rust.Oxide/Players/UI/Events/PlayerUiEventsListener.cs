@@ -23,7 +23,7 @@ namespace OpenMod.Rust.Oxide.Players.UI.Events
         }
 
         [HookMethod("CanUseUI")]
-        private object CanUseUI(BasePlayer player, string json)
+        private object? CanUseUI(BasePlayer player, string json)
         {
             var @event = new RustPlayerOpeningUiEvent(new RustPlayer(player), json);
             return EmitCancellableReturnsObject(@event);

@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace OpenMod.Extensions.Games.Abstractions.Entities
+﻿namespace OpenMod.Extensions.Games.Abstractions.Entities
 {
     /// <summary>
     /// Represents the state of an entity.
@@ -10,7 +8,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
         /// <summary>
         /// The state of the entity. Can be null.
         /// </summary>
-        [CanBeNull]
-        byte[] StateData { get; }
+        byte[]? StateData { get; }
     }
 }

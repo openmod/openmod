@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Commands
@@ -12,10 +11,9 @@ namespace OpenMod.API.Commands
     public interface ICommandStore
     {
         /// <summary>
-        /// Gets the commands of all registered <see cref="ICommandSource"/>s. Can not return null or null items.
+        /// Gets the commands of all registered <see cref="ICommandSource"/>s.
         /// </summary>
         /// <returns></returns>
-        [ItemNotNull]
         Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync();
 
         /// <summary>

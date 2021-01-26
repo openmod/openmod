@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿extern alias JetBrainsAnnotations;
+using HarmonyLib;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
@@ -6,6 +7,8 @@ using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using System.Collections.Generic;
 using System.Reflection;
+using JetBrainsAnnotations::JetBrains.Annotations;
+
 // ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Players.Skills.Events
@@ -30,8 +33,7 @@ namespace OpenMod.Unturned.Players.Skills.Events
 
         private void Events_OnExperienceUpdated(Player nativePlayer, uint experience)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerExperienceUpdatedEvent(player, experience);
 
             Emit(@event);
@@ -39,10 +41,11 @@ namespace OpenMod.Unturned.Players.Skills.Events
 
         private delegate void ExperienceUpdated(Player player, uint experience);
 
-        private static event ExperienceUpdated OnExperienceUpdated;
+        private static event ExperienceUpdated? OnExperienceUpdated;
 
+        [UsedImplicitly]
         [HarmonyPatch]
-        private class ExperiencePatches
+        internal static class ExperiencePatches
         {
             static IEnumerable<MethodBase> TargetMethods()
             {
@@ -65,11 +68,13 @@ namespace OpenMod.Unturned.Players.Skills.Events
                 }
             }
 
+            [UsedImplicitly]
             static void Prefix(PlayerSkills __instance, out uint __state)
             {
                 __state = __instance.experience;
             }
 
+            [UsedImplicitly]
             static void Postfix(PlayerSkills __instance, uint __state)
             {
                 if (__instance.experience != __state)

@@ -2,12 +2,10 @@
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Users;
 using OpenMod.Core.Permissions;
-using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {

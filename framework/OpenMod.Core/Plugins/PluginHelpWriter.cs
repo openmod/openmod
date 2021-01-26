@@ -4,10 +4,12 @@ using OpenMod.API.Plugins;
 using OpenMod.Core.Permissions;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Plugins
 {
@@ -56,7 +58,8 @@ namespace OpenMod.Core.Plugins
                 .ToList();
 
             var rootCommands = commands
-                .Where(d => string.IsNullOrEmpty(d.ParentId));
+                .Where(d => string.IsNullOrEmpty(d.ParentId))
+                .ToList();
 
             if (rootCommands.Any())
             {
@@ -64,14 +67,16 @@ namespace OpenMod.Core.Plugins
                 markdownBuilder.AppendLine("## Commands");
                 foreach (var currentCommand in rootCommands)
                 {
-                    var ctx = m_CommandContextBuilder.CreateContext(null, new string[] { currentCommand.Name }, string.Empty, commands);
+                    var actor = new PseudoActor();
+                    var ctx = m_CommandContextBuilder.CreateContext(actor, new[] { currentCommand.Name }, string.Empty, commands);
                     AppendCommand(markdownBuilder, currentCommand, commands, ctx);
                 }
             }
 
             var permissions = m_PermissionRegistry.GetPermissions(m_Plugin)
                 .Where(d => !m_PrintedCommandPermissions.Any(e =>
-                    e.Permission.Equals(d.Permission, StringComparison.OrdinalIgnoreCase)));
+                    e.Permission.Equals(d.Permission, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
 
             if (permissions.Any())
             {
@@ -168,10 +173,30 @@ namespace OpenMod.Core.Plugins
                 .Where(d => string.Equals(d.ParentId, command.Id, StringComparison.OrdinalIgnoreCase));
             foreach (var child in childCommands)
             {
-                var ctx2 = m_CommandContextBuilder.CreateContext(null, new string[] { command.Name, child.Name }, string.Empty, commands);
+                var actor = new PseudoActor();
+                var ctx2 = m_CommandContextBuilder.CreateContext(actor, new[] { command.Name, child.Name }, string.Empty, commands);
                 AppendCommand(markdownBuilder, child, commands, ctx2);
             }
             commandContext.DisposeAsync().GetAwaiter().GetResult();
+        }
+
+        public class PseudoActor: ICommandActor
+        {
+            public string Id { get; } = "PseudoActor";
+
+            public string Type { get; } = KnownActorTypes.Console;
+
+            public string DisplayName { get; } = "PseudoActor";
+
+            public Task PrintMessageAsync(string message)
+            {
+                throw new NotSupportedException();
+            }
+
+            public Task PrintMessageAsync(string message, Color color)
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }

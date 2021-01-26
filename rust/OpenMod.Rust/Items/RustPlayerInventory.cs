@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Enum = System.Enum;
 using OpenMod.Extensions.Games.Abstractions.Items;
-using OpenMod.Rust.Players;
 
 namespace OpenMod.Rust.Items
 {
@@ -44,7 +43,7 @@ namespace OpenMod.Rust.Items
 
                     if (container != null)
                     {
-                        string name = Enum.GetName(typeof(PlayerInventory.Type), type);
+                        var name = Enum.GetName(typeof(PlayerInventory.Type), type);
                         var page = new RustInventoryPage(container, this, name);
                         list.Add(page);
                     }
@@ -54,7 +53,7 @@ namespace OpenMod.Rust.Items
             }
         }
 
-        internal bool GiveItem(Item item, ItemContainer container = null)
+        internal bool GiveItem(Item item, ItemContainer? container = null)
         {
             return PlayerInventory.GiveItem(item, container);
         }

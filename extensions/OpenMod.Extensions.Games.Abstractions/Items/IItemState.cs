@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace OpenMod.Extensions.Games.Abstractions.Items
+﻿namespace OpenMod.Extensions.Games.Abstractions.Items
 {
     /// <summary>
     /// Represents the state of an item.
@@ -25,7 +23,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// <summary>
         /// The state of the item. Can be null.
         /// </summary>
-        [CanBeNull]
-        byte[] StateData { get; }
+        byte[]? StateData { get; }
     }
 }

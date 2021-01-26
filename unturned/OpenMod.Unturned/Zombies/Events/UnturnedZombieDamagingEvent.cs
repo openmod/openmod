@@ -1,5 +1,4 @@
 ﻿extern alias JetBrainsAnnotations;
-using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API.Eventing;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
@@ -25,8 +24,7 @@ namespace OpenMod.Unturned.Zombies.Events
         /// <value>
         /// The player dealing the damage.
         /// </value>
-        [CanBeNull]
-        public UnturnedPlayer Instigator { get; set; }
+        public UnturnedPlayer? Instigator { get; set; }
 
         /// <value>
         /// The ragdoll effect.
@@ -40,7 +38,7 @@ namespace OpenMod.Unturned.Zombies.Events
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedZombieDamagingEvent(UnturnedZombie zombie, UnturnedPlayer user, ushort damageAmount,
+        public UnturnedZombieDamagingEvent(UnturnedZombie zombie, UnturnedPlayer? user, ushort damageAmount,
             Vector3 ragdoll, ERagdollEffect ragdollEffect, EZombieStunOverride stunOverride) : base(zombie)
         {
             DamageAmount = damageAmount;

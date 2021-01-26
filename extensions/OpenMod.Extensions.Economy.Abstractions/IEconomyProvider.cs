@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.Extensions.Economy.Abstractions
@@ -9,15 +8,13 @@ namespace OpenMod.Extensions.Economy.Abstractions
     public interface IEconomyProvider
     {
         /// <value>
-        /// The name of the currency, e.g. "Dollar". Cannot be null.
+        /// The name of the currency, e.g. "Dollar".
         /// </value>
-        [NotNull]
         string CurrencyName { get; }
 
         /// <value>
-        /// The symbol of the currency, e.g. "$". Cannot be null.
+        /// The symbol of the currency, e.g. "$".
         /// </value>
-        [NotNull]
         string CurrencySymbol { get; }
 
         /// <summary>
@@ -35,7 +32,7 @@ namespace OpenMod.Extensions.Economy.Abstractions
         /// <param name="ownerType">The actor type of the owner.</param>
         /// <param name="changeAmount">The amount to add or remove.</param>
         /// <param name="reason">The optional reason for this transaction.</param>
-        Task<decimal> UpdateBalanceAsync(string ownerId, string ownerType, decimal changeAmount, string reason);
+        Task<decimal> UpdateBalanceAsync(string ownerId, string ownerType, decimal changeAmount, string? reason);
 
         /// <summary>
         ///   Sets balance for a user.

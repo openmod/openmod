@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace OpenMod.Extensions.Games.Abstractions.Items
 {
@@ -10,21 +9,18 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
     public interface IItem
     {
         /// <value>
-        /// The unique instance ID of the item. Cannot be null.
+        /// The unique instance ID of the item.
         /// </value>
-        [NotNull]
         string ItemInstanceId { get; }
 
         /// <value>
-        /// The asset of the item. Cannot be null.
+        /// The asset of the item.
         /// </value>
-        [NotNull]
         IItemAsset Asset { get; }
 
         /// <value>
-        /// The state of the item. Cannot be null.
+        /// The state of the item.
         /// </value>
-        [NotNull]
         IItemState State { get; }
 
         /// <value>

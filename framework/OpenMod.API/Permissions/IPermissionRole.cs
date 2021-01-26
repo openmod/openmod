@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace OpenMod.API.Permissions
 {
@@ -14,10 +13,8 @@ namespace OpenMod.API.Permissions
         int Priority { get; set; }
 
         /// <value>
-        /// Gets the parents of the role. Can be null but items cannot be null.
+        /// Gets the parents of the role.
         /// </value>
-        [ItemNotNull]
-        [CanBeNull]
         HashSet<string> Parents { get; }
 
         /// <value>

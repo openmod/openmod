@@ -15,7 +15,7 @@ namespace OpenMod.Unturned.Users.Events
 
         public bool IsCancelled { get; set; }
 
-        public string RejectionReason { get; private set; }
+        public string? RejectionReason { get; private set; }
 
         public Task RejectAsync(string reason)
         {

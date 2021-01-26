@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using OpenMod.API.Eventing;
+﻿using OpenMod.API.Eventing;
 
 namespace OpenMod.Extensions.Games.Abstractions.Entities
 {
@@ -9,9 +8,8 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
     public interface IEntityEvent : IEvent
     {
         /// <value>
-        /// The entity related to the event. Cannot be null.
+        /// The entity related to the event.
         /// </value>
-        [NotNull]
         IEntity Entity { get; }
     }
 }

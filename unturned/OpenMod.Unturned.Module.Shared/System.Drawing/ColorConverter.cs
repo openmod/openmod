@@ -39,7 +39,7 @@ namespace System.Drawing
 {
 	public class ColorConverter : TypeConverter
 	{
-		static StandardValuesCollection cached;
+		static StandardValuesCollection? cached;
 		static object creatingCached = new object();
 
 		public ColorConverter() { }
@@ -175,7 +175,7 @@ namespace System.Drawing
 							CultureInfo culture,
 							object value)
 		{
-			string s = value as string;
+			string? s = value as string;
 			if (s == null)
 				return base.ConvertFrom(context, culture, value);
 

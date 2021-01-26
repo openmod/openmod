@@ -10,7 +10,7 @@ namespace OpenMod.Unturned.Module.Shared
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
         }
 
-        private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+        private static Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             if (args.Name.Contains("System.Drawing"))
             {

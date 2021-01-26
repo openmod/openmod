@@ -3,7 +3,6 @@ using OpenMod.UnityEngine.Transforms;
 using SDG.Unturned;
 using System.Threading.Tasks;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace OpenMod.Unturned.Building
 {

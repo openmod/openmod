@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using OpenMod.API.Ioc;
+﻿using OpenMod.API.Ioc;
 
 namespace OpenMod.EntityFrameworkCore
 {
@@ -14,7 +13,6 @@ namespace OpenMod.EntityFrameworkCore
         /// </summary>
         /// <param name="name">The name of the connection string.</param>
         /// <returns><b>The connection string</b> if found; otherwise, <b>null</b>.</returns>
-        [CanBeNull]
-        string GetConnectionString(string name);
+        string? GetConnectionString(string name);
     }
 }

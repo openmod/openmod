@@ -13,7 +13,7 @@ namespace OpenMod.UnityEngine.Transforms
     public class UnityTransform : IWorldTransform
     {
         private readonly Transform m_Transform;
-        private readonly Rigidbody m_Rigidbody;
+        private readonly Rigidbody? m_Rigidbody;
 
         public UnityTransform(Transform transform)
         {
@@ -35,7 +35,7 @@ namespace OpenMod.UnityEngine.Transforms
 
         public string TransformName => m_Transform.name;
 
-        public IWorldTransform ParentTransform => m_Transform.parent ? new UnityTransform(m_Transform.parent) : null;
+        public IWorldTransform? ParentTransform => m_Transform.parent ? new UnityTransform(m_Transform.parent) : null;
 
         public IReadOnlyCollection<IWorldTransform> ChildTransforms
         {

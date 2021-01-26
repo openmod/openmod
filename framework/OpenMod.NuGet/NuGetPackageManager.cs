@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,12 +21,7 @@ namespace OpenMod.NuGet
 {
     public class NuGetPackageManager : IDisposable
     {
-        private ILogger m_Logger;
-        public ILogger Logger
-        {
-            get { return m_Logger; }
-            set { m_Logger = value ?? new NullLogger(); }
-        }
+        public ILogger Logger { get; set; }
 
         public string PackagesDirectory { get; }
         private readonly List<Lazy<INuGetResourceProvider>> m_Providers;
@@ -39,10 +33,10 @@ namespace OpenMod.NuGet
         private readonly Dictionary<string, Assembly> m_ResolveCache;
         private readonly Dictionary<string, List<NuGetAssembly>> m_LoadedPackageAssemblies;
         private readonly HashSet<string> m_IgnoredDependendencies;
-        private readonly PackagesDataStore m_PackagesDataStore;
+        private readonly PackagesDataStore? m_PackagesDataStore;
 
-        private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new Dictionary<string, List<Assembly>>();
-        private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
+        private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new();
+        private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
         private Func<byte[], Assembly> m_AssemblyLoader;
 
@@ -53,6 +47,11 @@ namespace OpenMod.NuGet
 
         public NuGetPackageManager(string packagesDirectory, bool usePackagesFiles)
         {
+            if (string.IsNullOrEmpty(packagesDirectory))
+            {
+                throw new ArgumentException(nameof(packagesDirectory));
+            }
+
             m_AssemblyLoader = Hotloader.LoadAssembly;
 
             PackagesDirectory = packagesDirectory;
@@ -106,11 +105,18 @@ namespace OpenMod.NuGet
             m_LoadedPackageAssemblies = new Dictionary<string, List<NuGetAssembly>>();
             m_ResolveCache = new Dictionary<string, Assembly>();
             m_IgnoredDependendencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // ReSharper disable once VirtualMemberCallInConstructor
             InstallAssemblyResolver();
         }
 
         public virtual async Task<NuGetInstallResult> InstallAsync(PackageIdentity packageIdentity, bool allowPrereleaseVersions = false)
         {
+            if (packageIdentity == null)
+            {
+                throw new ArgumentNullException(nameof(packageIdentity));
+            }
+
             using var cacheContext = new SourceCacheContext();
             NuGetQueryResult queryResult;
             try
@@ -134,43 +140,48 @@ namespace OpenMod.NuGet
                 ClientPolicyContext.GetClientPolicy(m_NugetSettings, Logger),
                 Logger);
 
-            foreach (var dependencyPackage in queryResult.Packages)
+            if (queryResult.Packages != null)
             {
-                if (m_IgnoredDependendencies.Contains(dependencyPackage.Id))
+                foreach (var dependencyPackage in queryResult.Packages)
                 {
-                    continue;
-                }
-
-                var installed = await GetLatestPackageIdentityAsync(dependencyPackage.Id);
-                if (installed != null)
-                {
-                    if (!dependencyPackage.HasVersion || installed.Version >= dependencyPackage.Version)
+                    if (m_IgnoredDependendencies.Contains(dependencyPackage.Id))
                     {
                         continue;
                     }
+
+                    var installed = await GetLatestPackageIdentityAsync(dependencyPackage.Id);
+                    if (installed != null)
+                    {
+                        if (!dependencyPackage.HasVersion || installed.Version >= dependencyPackage.Version)
+                        {
+                            continue;
+                        }
+                    }
+
+                    var installedPath = m_PackagePathResolver.GetInstalledPath(dependencyPackage);
+                    if (installedPath == null)
+                    {
+                        Logger.LogInformation(
+                            $"Downloading: {dependencyPackage.Id} v{dependencyPackage.Version.OriginalVersion}");
+
+                        var downloadResource =
+                            await dependencyPackage.Source.GetResourceAsync<DownloadResource>(CancellationToken.None);
+                        var downloadResult = await downloadResource.GetDownloadResourceResultAsync(
+                            dependencyPackage,
+                            new PackageDownloadContext(cacheContext),
+                            SettingsUtility.GetGlobalPackagesFolder(m_NugetSettings),
+                            Logger, CancellationToken.None);
+
+                        await PackageExtractor.ExtractPackageAsync(
+                            downloadResult.PackageSource,
+                            downloadResult.PackageStream,
+                            m_PackagePathResolver,
+                            packageExtractionContext,
+                            CancellationToken.None);
+                    }
+
+                    await LoadAssembliesFromNuGetPackageAsync(GetNugetPackageFile(dependencyPackage));
                 }
-
-                var installedPath = m_PackagePathResolver.GetInstalledPath(dependencyPackage);
-                if (installedPath == null)
-                {
-                    Logger.LogInformation($"Downloading: {dependencyPackage.Id} v{dependencyPackage.Version.OriginalVersion}");
-
-                    var downloadResource = await dependencyPackage.Source.GetResourceAsync<DownloadResource>(CancellationToken.None);
-                    var downloadResult = await downloadResource.GetDownloadResourceResultAsync(
-                        dependencyPackage,
-                        new PackageDownloadContext(cacheContext),
-                        SettingsUtility.GetGlobalPackagesFolder(m_NugetSettings),
-                        Logger, CancellationToken.None);
-
-                    await PackageExtractor.ExtractPackageAsync(
-                        downloadResult.PackageSource,
-                        downloadResult.PackageStream,
-                        m_PackagePathResolver,
-                        packageExtractionContext,
-                        CancellationToken.None);
-                }
-
-                await LoadAssembliesFromNuGetPackageAsync(GetNugetPackageFile(dependencyPackage));
             }
 
             await RemoveOutdatedPackagesAsync();
@@ -194,7 +205,7 @@ namespace OpenMod.NuGet
 
                 if (!File.Exists(nupkgFile))
                 {
-                    m_Logger.LogDebug("Package not found:" + nupkgFile);
+                    Logger.LogDebug("Package not found:" + nupkgFile);
                     continue;
                 }
 
@@ -223,17 +234,27 @@ namespace OpenMod.NuGet
 
         public virtual async Task<bool> IsPackageInstalledAsync(string packageId)
         {
-            return (await GetLatestPackageIdentityAsync(packageId)) != null;
+            return await GetLatestPackageIdentityAsync(packageId) != null;
         }
 
-        public virtual async Task<IPackageSearchMetadata> QueryPackageExactAsync(string packageId, string version = null, bool includePreRelease = false)
+        public virtual async Task<IPackageSearchMetadata?> QueryPackageExactAsync(string packageId, string? version = null, bool includePreRelease = false)
         {
+            if (string.IsNullOrEmpty(packageId))
+            {
+                throw new ArgumentNullException(nameof(packageId));
+            }
+
             var matches = await QueryPackagesAsync(packageId, version, includePreRelease);
             return matches.FirstOrDefault(d => d.Identity.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
         }
 
-        public virtual async Task<IEnumerable<IPackageSearchMetadata>> QueryPackagesAsync(string packageId, string version = null, bool includePreRelease = false)
+        public virtual async Task<IEnumerable<IPackageSearchMetadata>> QueryPackagesAsync(string packageId, string? version = null, bool includePreRelease = false)
         {
+            if (string.IsNullOrEmpty(packageId))
+            {
+                throw new ArgumentNullException(nameof(packageId));
+            }
+
             var matches = new List<IPackageSearchMetadata>();
 
             Logger.LogInformation("Searching repository for package: " + packageId);
@@ -291,6 +312,11 @@ namespace OpenMod.NuGet
 
         public void IgnoreDependencies(params string[] packageIds)
         {
+            if (packageIds == null)
+            {
+                throw new ArgumentNullException(nameof(packageIds));
+            }
+
             m_IgnoredDependendencies.AddRange(packageIds);
         }
 
@@ -299,8 +325,18 @@ namespace OpenMod.NuGet
             return GetDependenciesInternalAsync(identity, new List<string>());
         }
 
-        private async Task<ICollection<PackageDependency>> GetDependenciesInternalAsync(PackageIdentity identity, List<string> lookedUpIds)
+        private async Task<ICollection<PackageDependency>> GetDependenciesInternalAsync(PackageIdentity identity, ICollection<string> lookedUpIds)
         {
+            if (identity == null)
+            {
+                throw new ArgumentNullException(nameof(identity));
+            }
+
+            if (lookedUpIds == null)
+            {
+                throw new ArgumentNullException(nameof(lookedUpIds));
+            }
+
             if (lookedUpIds.Any(d => string.Equals(d, identity.Id, StringComparison.OrdinalIgnoreCase)))
             {
                 return new List<PackageDependency>();
@@ -357,11 +393,21 @@ namespace OpenMod.NuGet
 
         public void SetAssemblyLoader(Func<byte[], Assembly> assemblyLoader)
         {
-            m_AssemblyLoader = assemblyLoader;
+            m_AssemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
         }
 
         public virtual async Task<NuGetQueryResult> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext)
         {
+            if (identity == null)
+            {
+                throw new ArgumentNullException(nameof(identity));
+            }
+
+            if (cacheContext == null)
+            {
+                throw new ArgumentNullException(nameof(cacheContext));
+            }
+
             var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
             var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, m_Providers);
 
@@ -395,8 +441,13 @@ namespace OpenMod.NuGet
             return new NuGetQueryResult(resolvedPackages);
         }
 
-        public virtual async Task<List<byte[]>> LoadAssembliesFromNuGetPackageRawAsync(string nupkgFile)
+        public virtual async Task<List<byte[]>> LoadAssemblyDataFromNuGetPackageAsync(string nupkgFile)
         {
+            if (string.IsNullOrEmpty(nupkgFile))
+            {
+                throw new ArgumentException(nameof(nupkgFile));
+            }
+
             using var packageReader = new PackageArchiveReader(nupkgFile);
 
             var libItems = packageReader.GetLibItems().ToList();
@@ -442,6 +493,11 @@ namespace OpenMod.NuGet
 
         public virtual async Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageAsync(string nupkgFile)
         {
+            if (string.IsNullOrEmpty(nupkgFile))
+            {
+                throw new ArgumentNullException(nameof(nupkgFile));
+            }
+
             if (s_LoadedPackages.ContainsKey(nupkgFile))
             {
                 return s_LoadedPackages[nupkgFile];
@@ -557,8 +613,13 @@ namespace OpenMod.NuGet
             return result;
         }
 
-        public virtual async Task<PackageIdentity> GetLatestPackageIdentityAsync(string packageId)
+        public virtual async Task<PackageIdentity?> GetLatestPackageIdentityAsync(string packageId)
         {
+            if (string.IsNullOrEmpty(packageId))
+            {
+                throw new ArgumentNullException(nameof(packageId));
+            }
+
             if (!Directory.Exists(PackagesDirectory))
             {
                 return null;
@@ -592,6 +653,11 @@ namespace OpenMod.NuGet
 
         public virtual string GetNugetPackageFile(PackageIdentity identity)
         {
+            if (identity == null)
+            {
+                throw new ArgumentNullException(nameof(identity));
+            }
+
             var dir = m_PackagePathResolver.GetInstallPath(identity);
             var dirName = new DirectoryInfo(dir).Name;
 
@@ -604,6 +670,26 @@ namespace OpenMod.NuGet
             IEnumerable<SourceRepository> repositories,
             ISet<SourcePackageDependencyInfo> availablePackages)
         {
+            if (package == null)
+            {
+                throw new ArgumentNullException(nameof(package));
+            }
+
+            if (cacheContext == null)
+            {
+                throw new ArgumentNullException(nameof(cacheContext));
+            }
+
+            if (repositories == null)
+            {
+                throw new ArgumentNullException(nameof(repositories));
+            }
+
+            if (availablePackages == null)
+            {
+                throw new ArgumentNullException(nameof(availablePackages));
+            }
+
             if (availablePackages.Contains(package))
             {
                 return;
@@ -648,7 +734,7 @@ namespace OpenMod.NuGet
             m_AssemblyResolverInstalled = true;
         }
 
-        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var name = GetVersionIndependentName(args.Name, out _);
             if (m_ResolveCache.ContainsKey(name))
@@ -661,13 +747,13 @@ namespace OpenMod.NuGet
                     .Where(d => d.Assembly.IsAlive && d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     .OrderByDescending(d => d.Version);
 
-            var result = (Assembly)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
+            var result = (Assembly?)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
             if (result != null)
             {
                 m_ResolveCache.Add(name, result);
             }
 
-            m_Logger.LogDebug(result == null
+            Logger.LogDebug(result == null
                 ? $"Failed to resolve {args.Name}"
                 : $"Resolved assembly from NuGet: {args.Name} @ v{result.GetName().Version}");
 
@@ -676,6 +762,11 @@ namespace OpenMod.NuGet
 
         protected static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
         {
+            if (string.IsNullOrEmpty(fullAssemblyName))
+            {
+                throw new ArgumentNullException(nameof(fullAssemblyName));
+            }
+
             var match = s_VersionRegex.Match(fullAssemblyName);
             extractedVersion = match.Groups[1].Value;
             return s_VersionRegex.Replace(fullAssemblyName, string.Empty);
@@ -696,7 +787,7 @@ namespace OpenMod.NuGet
                     if (updateExisting)
                     {
                         var installedPackage = await GetLatestPackageIdentityAsync(package.Id);
-                        if (package.HasVersion && installedPackage.Version != package.Version)
+                        if (package.HasVersion && installedPackage?.Version != package.Version)
                         {
                             await InstallAsync(package, allowPrereleaseVersions: true);
                         }
@@ -714,6 +805,11 @@ namespace OpenMod.NuGet
 
         public async Task<bool> RemoveAsync(PackageIdentity packageIdentity)
         {
+            if (packageIdentity == null)
+            {
+                throw new ArgumentNullException(nameof(packageIdentity));
+            }
+
             var installDir = m_PackagePathResolver.GetInstallPath(packageIdentity);
             if (installDir == null || !Directory.Exists(installDir))
             {
@@ -726,7 +822,7 @@ namespace OpenMod.NuGet
             }
             catch (Exception ex)
             {
-                m_Logger.LogWarning($"Failed to delete directory \"{installDir}\" " + ex.Message);
+                Logger.LogWarning($"Failed to delete directory \"{installDir}\" " + ex.Message);
                 return false;
             }
 

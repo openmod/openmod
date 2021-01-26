@@ -15,7 +15,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
         private readonly IPermissionChecker m_PermissionChecker;
         private readonly IPermissionRoleStore m_PermissionRoleStore;
         private readonly IPermissionRegistry m_PermissionRegistry;
-        private IRocketPermissionsProvider m_OriginalPermissionProvider;
+        private IRocketPermissionsProvider? m_OriginalPermissionProvider;
 
         public RocketModPermissionProxyProvider(
             IRocketModComponent rocketModComponent,
@@ -31,6 +31,11 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public bool HasPermission(IRocketPlayer player, List<string> requestedPermissions)
         {
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
             if (requestedPermissions.Any(string.IsNullOrEmpty))
             {
                 return true;
@@ -59,13 +64,18 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public List<RocketPermissionsGroup> GetGroups(IRocketPlayer player, bool includeParentGroups)
         {
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
             var actor = ConvertToActor(player);
             var result = new List<RocketPermissionsGroup>();
             AsyncHelper.RunSync(async () =>
             {
                 foreach (var group in await m_PermissionRoleStore.GetRolesAsync(actor))
                 {
-                    result.Add(GetGroup(group.Id));
+                    result.Add(GetGroup(group.Id)!);
                 }
             });
 
@@ -74,6 +84,11 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public List<Permission> GetPermissions(IRocketPlayer player)
         {
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
             var actor = ConvertToActor(player);
             var result = new List<Permission>();
             AsyncHelper.RunSync(async () =>
@@ -92,11 +107,26 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public List<Permission> GetPermissions(IRocketPlayer player, List<string> requestedPermissions)
         {
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
             return GetPermissions(player).Where(d => requestedPermissions.Any(e => e.Equals(d.Name, StringComparison.OrdinalIgnoreCase))).ToList();
         }
 
         public RocketPermissionsProviderResult AddPlayerToGroup(string groupId, IRocketPlayer player)
         {
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
+            if (string.IsNullOrEmpty(groupId))
+            {
+                throw new ArgumentException(nameof(groupId));
+            }
+
             var actor = ConvertToActor(player);
             return AsyncHelper.RunSync(async () =>
             {
@@ -111,6 +141,16 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public RocketPermissionsProviderResult RemovePlayerFromGroup(string groupId, IRocketPlayer player)
         {
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
+            if (string.IsNullOrEmpty(groupId))
+            {
+                throw new ArgumentException(nameof(groupId));
+            }
+
             var actor = ConvertToActor(player);
             return AsyncHelper.RunSync(async () =>
             {
@@ -123,17 +163,32 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             });
         }
 
-        public RocketPermissionsGroup GetGroup(string groupId)
+        public RocketPermissionsGroup? GetGroup(string groupId)
         {
+            if (string.IsNullOrEmpty(groupId))
+            {
+                throw new ArgumentException(nameof(groupId));
+            }
+
             return AsyncHelper.RunSync(async () =>
             {
                 var group = await m_PermissionRoleStore.GetRoleAsync(groupId);
+                if (@group == null)
+                {
+                    return null;
+                }
+
                 return new RocketPermissionsGroup(group.Id, group.DisplayName, null, new List<string>(), new List<Permission>());
             });
         }
 
         public RocketPermissionsProviderResult AddGroup(RocketPermissionsGroup @group)
         {
+            if (@group == null)
+            {
+                throw new ArgumentNullException(nameof(@group));
+            }
+
             var permissionGroup = ConvertToGroup(@group);
             return AsyncHelper.RunSync(async () =>
             {
@@ -148,6 +203,11 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public RocketPermissionsProviderResult SaveGroup(RocketPermissionsGroup @group)
         {
+            if (@group == null)
+            {
+                throw new ArgumentNullException(nameof(@group));
+            }
+
             var permissionGroup = ConvertToGroup(@group);
             return AsyncHelper.RunSync(async () =>
             {
@@ -162,6 +222,11 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public RocketPermissionsProviderResult DeleteGroup(string groupId)
         {
+            if (string.IsNullOrEmpty(groupId))
+            {
+                throw new ArgumentException(nameof(groupId));
+            }
+
             return AsyncHelper.RunSync(async () =>
             {
                 if (await m_PermissionRoleStore.DeleteRoleAsync(groupId))
@@ -182,7 +247,6 @@ namespace OpenMod.Unturned.RocketMod.Permissions
         {
             m_OriginalPermissionProvider = R.Permissions;
             R.Permissions = this;
-
             R.OnRockedInitialized += RocketModInitialized;
         }
 

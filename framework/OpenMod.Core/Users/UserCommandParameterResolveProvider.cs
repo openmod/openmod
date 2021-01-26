@@ -26,11 +26,26 @@ namespace OpenMod.Core.Users
 
         public bool Supports(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             return typeof(IUser).IsAssignableFrom(type);
         }
 
-        public async Task<object> ResolveAsync(Type type, string input)
+        public async Task<object?> ResolveAsync(Type type, string input)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+
             if (!Supports(type))
             {
                 throw new ArgumentException("The given type is not supported", nameof(type));

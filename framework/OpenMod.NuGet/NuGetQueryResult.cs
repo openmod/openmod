@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 
@@ -14,8 +15,8 @@ namespace OpenMod.NuGet
 
         public NuGetQueryResult(ICollection<SourcePackageDependencyInfo> packages)
         {
+            Packages = packages ?? throw new ArgumentNullException(nameof(packages));
             Code = NuGetInstallCode.Success;
-            Packages = packages;
         }
 
         public NuGetQueryResult(PackageIdentity identity, NuGetInstallCode code)
@@ -26,8 +27,8 @@ namespace OpenMod.NuGet
 
         public NuGetInstallCode Code { get; }
 
-        public ICollection<SourcePackageDependencyInfo> Packages { get; }
+        public ICollection<SourcePackageDependencyInfo>? Packages { get; }
 
-        public PackageIdentity InstalledPackage { get; }
+        public PackageIdentity? InstalledPackage { get; }
     }
 }

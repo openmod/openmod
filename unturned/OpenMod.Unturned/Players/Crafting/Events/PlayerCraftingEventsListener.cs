@@ -1,12 +1,14 @@
-﻿using OpenMod.API;
+﻿extern alias JetBrainsAnnotations;
+using JetBrainsAnnotations::JetBrains.Annotations;
+using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
-// ReSharper disable DelegateSubtraction
 
 namespace OpenMod.Unturned.Players.Crafting.Events
 {
+    [UsedImplicitly]
     internal class CraftingEventsListener : UnturnedEventsListener
     {
         public CraftingEventsListener(IOpenModHost openModHost,
@@ -27,8 +29,7 @@ namespace OpenMod.Unturned.Players.Crafting.Events
 
         private void OnCraftBlueprintRequested(PlayerCrafting crafting, ref ushort itemId, ref byte blueprintIndex, ref bool shouldAllow) // lgtm [cs/too-many-ref-parameters]
         {
-            var player = GetUnturnedPlayer(crafting.player);
-
+            var player = GetUnturnedPlayer(crafting.player)!;
             var @event = new UnturnedPlayerCraftingEvent(player, itemId, blueprintIndex)
             {
                 IsCancelled = !shouldAllow

@@ -1,14 +1,15 @@
-﻿using HarmonyLib;
+﻿extern alias JetBrainsAnnotations;
+using HarmonyLib;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
-// ReSharper disable DelegateSubtraction
-// ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Players.Stats.Events
 {
+    [UsedImplicitly]
     internal class PlayerStatsEventsListener : UnturnedPlayerEventsListener
     {
         public PlayerStatsEventsListener(IOpenModHost openModHost,
@@ -61,8 +62,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void Events_OnBleedingUpdated(Player nativePlayer, bool isBleeding)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerBleedingUpdatedEvent(player, isBleeding);
 
             Emit(@event);
@@ -70,8 +70,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void Events_OnBrokenUpdated(Player nativePlayer, bool isBroken)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerBrokenUpdatedEvent(player, isBroken);
 
             Emit(@event);
@@ -79,8 +78,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void Events_OnFoodUpdated(Player nativePlayer, byte food)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerFoodUpdatedEvent(player, food);
 
             Emit(@event);
@@ -88,8 +86,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void Events_OnHealthUpdated(Player nativePlayer, byte health)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerHealthUpdatedEvent(player, health);
 
             Emit(@event);
@@ -97,8 +94,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void OnPlayerStatIncremented(Player nativePlayer, EPlayerStat stat)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerStatIncrementedEvent(player, stat);
 
             Emit(@event);
@@ -106,8 +102,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void OnLifeUpdated(Player nativePlayer, bool isDead)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerLifeUpdatedEvent(player, isDead);
 
             Emit(@event);
@@ -115,8 +110,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void OnOxygenUpdated(Player nativePlayer, byte oxygen)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerOxygenUpdatedEvent(player, oxygen);
 
             Emit(@event);
@@ -124,8 +118,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void OnStaminaUpdated(Player nativePlayer, byte stamina)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerStaminaUpdatedEvent(player, stamina);
 
             Emit(@event);
@@ -133,8 +126,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void OnTemperatureUpdated(Player nativePlayer, EPlayerTemperature temperature)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerTemperatureUpdatedEvent(player, temperature);
 
             Emit(@event);
@@ -142,8 +134,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void Events_OnVirusUpdated(Player nativePlayer, byte virus)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerVirusUpdatedEvent(player, virus);
 
             Emit(@event);
@@ -151,8 +142,7 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void OnVisionUpdated(Player nativePlayer, bool viewing)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerVisionUpdatedEvent(player, viewing);
 
             Emit(@event);
@@ -160,32 +150,31 @@ namespace OpenMod.Unturned.Players.Stats.Events
 
         private void Events_OnWaterUpdated(Player nativePlayer, byte water)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
-
+            var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerWaterUpdatedEvent(player, water);
 
             Emit(@event);
         }
 
         private delegate void BleedingUpdated(Player player, bool isBleeding);
-        private static event BleedingUpdated OnBleedingUpdated;
+        private static event BleedingUpdated? OnBleedingUpdated;
 
         private delegate void BrokenUpdated(Player player, bool isBroken);
-        private static event BrokenUpdated OnBrokenUpdated;
+        private static event BrokenUpdated? OnBrokenUpdated;
 
         private delegate void FoodUpdated(Player player, byte food);
-        private static event FoodUpdated OnFoodUpdated;
+        private static event FoodUpdated? OnFoodUpdated;
 
         private delegate void HealthUpdated(Player player, byte health);
-        private static event HealthUpdated OnHealthUpdated;
+        private static event HealthUpdated? OnHealthUpdated;
 
         private delegate void VirusUpdated(Player player, byte stamina);
-        private static event VirusUpdated OnVirusUpdated;
+        private static event VirusUpdated? OnVirusUpdated;
 
         private delegate void WaterUpdated(Player player, byte water);
-        private static event WaterUpdated OnWaterUpdated;
+        private static event WaterUpdated? OnWaterUpdated;
 
-        private readonly struct PersistDoDamage
+        internal readonly struct PersistDoDamage
         {
             public readonly bool IsBleeding;
 
@@ -198,19 +187,22 @@ namespace OpenMod.Unturned.Players.Stats.Events
             }
         }
 
+        [UsedImplicitly]
         [HarmonyPatch]
-        private class Patches
+        internal static class Patches
         {
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "serverSetBleeding")]
             [HarmonyPrefix]
-            private static void PreServerSetBleeding(PlayerLife __instance, out bool __state)
+            public static void PreServerSetBleeding(PlayerLife __instance, out bool __state)
             {
                 __state = __instance.isBleeding;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "serverSetBleeding")]
             [HarmonyPostfix]
-            private static void PostServerSetBleeding(PlayerLife __instance, bool __state)
+            public static void PostServerSetBleeding(PlayerLife __instance, bool __state)
             {
                 if (__instance.isBleeding != __state)
                 {
@@ -218,16 +210,18 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "serverSetLegsBroken")]
             [HarmonyPrefix]
-            private static void PreServerSetLegsBroken(PlayerLife __instance, out bool __state)
+            public static void PreServerSetLegsBroken(PlayerLife __instance, out bool __state)
             {
                 __state = __instance.isBroken;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "serverSetLegsBroken")]
             [HarmonyPostfix]
-            private static void PostServerSetLegsBroken(PlayerLife __instance, bool __state)
+            public static void PostServerSetLegsBroken(PlayerLife __instance, bool __state)
             {
                 if (__instance.isBroken != __state)
                 {
@@ -235,16 +229,18 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "doDamage")]
             [HarmonyPrefix]
-            private static void PreDoDamage(PlayerLife __instance, out PersistDoDamage __state)
+            public static void PreDoDamage(PlayerLife __instance, out PersistDoDamage __state)
             {
                 __state = new PersistDoDamage(__instance);
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "doDamage")]
             [HarmonyPostfix]
-            private static void PostDoDamage(PlayerLife __instance, PersistDoDamage __state)
+            public static void PostDoDamage(PlayerLife __instance, PersistDoDamage __state)
             {
                 if (__instance.isBleeding != __state.IsBleeding)
                 {
@@ -257,16 +253,18 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askEat")]
             [HarmonyPrefix]
-            private static void PreAskEat(PlayerLife __instance, out byte __state)
+            public static void PreAskEat(PlayerLife __instance, out byte __state)
             {
                 __state = __instance.food;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askEat")]
             [HarmonyPostfix]
-            private static void PostAskEat(PlayerLife __instance, byte __state)
+            public static void PostAskEat(PlayerLife __instance, byte __state)
             {
                 if (__instance.food != __state)
                 {
@@ -274,16 +272,18 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askStarve")]
             [HarmonyPrefix]
-            private static void PreAskStarve(PlayerLife __instance, out byte __state)
+            public static void PreAskStarve(PlayerLife __instance, out byte __state)
             {
                 __state = __instance.food;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askStarve")]
             [HarmonyPostfix]
-            private static void PostAskStarve(PlayerLife __instance, byte __state)
+            public static void PostAskStarve(PlayerLife __instance, byte __state)
             {
                 if (__instance.food != __state)
                 {
@@ -291,16 +291,18 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askHeal")]
             [HarmonyPrefix]
-            private static void PreAskHeal(PlayerLife __instance, out byte __state)
+            public static void PreAskHeal(PlayerLife __instance, out byte __state)
             {
                 __state = __instance.health;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askHeal")]
             [HarmonyPostfix]
-            private static void PostAskHeal(PlayerLife __instance, byte __state)
+            public static void PostAskHeal(PlayerLife __instance, byte __state)
             {
                 if (__instance.health != __state)
                 {
@@ -308,16 +310,18 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askDisinfect")]
             [HarmonyPrefix]
-            private static void PreAskDisinfect(PlayerLife __instance, out byte __state)
+            public static void PreAskDisinfect(PlayerLife __instance, out byte __state)
             {
                 __state = __instance.virus;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askDisinfect")]
             [HarmonyPostfix]
-            private static void PostAskDisinfect(PlayerLife __instance, byte __state)
+            public static void PostAskDisinfect(PlayerLife __instance, byte __state)
             {
                 if (__instance.virus != __state)
                 {
@@ -325,16 +329,18 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askInfect")]
             [HarmonyPrefix]
-            private static void PreAskInfect(PlayerLife __instance, out byte __state)
+            public static void PreAskInfect(PlayerLife __instance, out byte __state)
             {
                 __state = __instance.virus;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askInfect")]
             [HarmonyPostfix]
-            private static void PostAskInfect(PlayerLife __instance, byte __state)
+            public static void PostAskInfect(PlayerLife __instance, byte __state)
             {
                 if (__instance.virus != __state)
                 {
@@ -342,16 +348,18 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askDrink")]
             [HarmonyPrefix]
-            private static void PreAskDrink(PlayerLife __instance, out byte __state)
+            public static void PreAskDrink(PlayerLife __instance, out byte __state)
             {
                 __state = __instance.water;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askDrink")]
             [HarmonyPostfix]
-            private static void PostAskDrink(PlayerLife __instance, byte __state)
+            public static void PostAskDrink(PlayerLife __instance, byte __state)
             {
                 if (__instance.water != __state)
                 {
@@ -359,16 +367,18 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askDehydrate")]
             [HarmonyPrefix]
-            private static void PreAskDehydrate(PlayerLife __instance, out byte __state)
+            public static void PreAskDehydrate(PlayerLife __instance, out byte __state)
             {
                 __state = __instance.water;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "askDehydrate")]
             [HarmonyPostfix]
-            private static void PostAskDehydrate(PlayerLife __instance, byte __state)
+            public static void PostAskDehydrate(PlayerLife __instance, byte __state)
             {
                 if (__instance.water != __state)
                 {

@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Microsoft.Extensions.FileProviders;
-using NetEscapades.Configuration.Yaml;
 using OpenMod.Core.Configuration;
 
 // ReSharper disable once CheckNamespace
@@ -81,8 +79,11 @@ namespace Microsoft.Extensions.Configuration
         /// <param name="optional">Whether the file is optional.</param>
         /// <param name="reloadOnChange">Whether the configuration should be reloaded if the file changes.</param>
         /// <returns>The <see cref="IConfigurationBuilder"/>.</returns>
-        public static IConfigurationBuilder AddYamlFileEx(this IConfigurationBuilder builder, IFileProvider provider,
-            string path, IDictionary<string, string> variables, bool optional, bool reloadOnChange)
+        public static IConfigurationBuilder AddYamlFileEx(
+            this IConfigurationBuilder builder,
+            IFileProvider? provider,
+            string path, IDictionary<string, string>? variables,
+            bool optional, bool reloadOnChange)
         {
             if (builder == null)
             {

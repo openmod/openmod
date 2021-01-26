@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Hosting;
 using OpenMod.API.Ioc;
 using Semver;
@@ -23,8 +22,7 @@ namespace OpenMod.API
         /// <summary>
         /// Initializes the runtime.
         /// </summary>
-        /// <returns>The .NET Generic Host interface. Cannot return null.</returns>
-        [ItemNotNull]
+        /// <returns>The .NET Generic Host interface.</returns>
         Task<IHost> InitAsync(List<Assembly> openModHostAssemblies, RuntimeInitParameters parameters,
             Func<IHostBuilder> hostBuilder);
 
@@ -34,13 +32,12 @@ namespace OpenMod.API
         Task ShutdownAsync();
 
         /// <value>
-        /// The OpenMod runtime version. Cannot be null.
+        /// The OpenMod runtime version.
         /// </value>
-        [NotNull]
         SemVersion Version { get; }
 
         /// <value>
-        /// The commandline arguments. Cannot be null.
+        /// The commandline arguments.
         /// </value>
         string[] CommandlineArgs { get; }
 
@@ -57,12 +54,11 @@ namespace OpenMod.API
         /// <value>
         /// The .NET generic host instance. Can be null if the host is not loaded yet.
         /// </value>
-        [CanBeNull]
-        IHost Host { get; }
+        IHost? Host { get; }
 
         /// <value>
         ///  Information about the OpenMod host. Can be null if the host is not loaded yet.
         /// </value>
-        IHostInformation HostInformation { get; }
+        IHostInformation? HostInformation { get; }
     }
 }

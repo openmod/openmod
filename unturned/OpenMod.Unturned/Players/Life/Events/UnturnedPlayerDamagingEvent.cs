@@ -25,7 +25,7 @@ namespace OpenMod.Unturned.Players.Life.Events
 
         public CSteamID Killer { get; set; }
 
-        public IDamageSource DamageSource { get; }
+        public IDamageSource? DamageSource { get; }
 
         public bool TrackKill { get; set; }
 
@@ -39,7 +39,7 @@ namespace OpenMod.Unturned.Players.Life.Events
 
         public UnturnedPlayerDamagingEvent(UnturnedPlayer player, byte amount,
             EDeathCause cause, ELimb limb,
-            CSteamID killer, IDamageSource source,
+            CSteamID killer, IDamageSource? source,
             bool trackKill,
             Vector3 ragdoll, ERagdollEffect ragdollEffect,
             bool canCauseBleeding) : base(player)

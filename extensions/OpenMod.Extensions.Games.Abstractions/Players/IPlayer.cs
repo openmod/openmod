@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using OpenMod.Extensions.Games.Abstractions.Entities;
+﻿using OpenMod.Extensions.Games.Abstractions.Entities;
 
 namespace OpenMod.Extensions.Games.Abstractions.Players
 {
@@ -9,9 +8,8 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
     public interface IPlayer : IEntity
     {
         /// <summary>
-        /// The stance of the player. Cannot be null.
+        /// The stance of the player.
         /// </summary>
-        [NotNull]
         string Stance { get; }
     }
 }

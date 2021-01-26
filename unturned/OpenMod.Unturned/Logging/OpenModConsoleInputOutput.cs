@@ -13,16 +13,16 @@ namespace OpenMod.Unturned.Logging
     [OpenModInternal]
     public class OpenModConsoleInputOutput : ICommandInputOutput
     {
-        public event CommandInputHandler inputCommitted;
+        public event CommandInputHandler? inputCommitted;
 
         private readonly IAutoCompleteHandler m_AutoCompleteHandler;
         private readonly IConfiguration m_Configuration;
-        private bool m_ReadLineEnabled;
         private readonly ConcurrentQueue<string> m_CommandQueue;
         private readonly ILogger m_Logger;
-        private Thread m_InputThread;
+        private Thread? m_InputThread;
+        private TextReader? m_PreviousConsoleIn;
+        private bool m_ReadLineEnabled;
         private bool m_IsAlive;
-        private TextReader m_PreviousConsoleIn;
 
         public OpenModConsoleInputOutput(
             ILoggerFactory loggerFactory,
@@ -80,7 +80,8 @@ namespace OpenMod.Unturned.Logging
             m_IsAlive = false;
             ReadLine.AutoCompletionHandler = null;
             ReadLine.HistoryEnabled = false;
-            System.Console.SetIn(m_PreviousConsoleIn);
+
+            System.Console.SetIn(m_PreviousConsoleIn ?? throw new InvalidOperationException("m_PreviousConsoleIn not found"));
         }
 
         public void update()

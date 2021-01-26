@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -76,12 +75,12 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 {
                     case NuGetInstallCode.Success:
                         await Context.Actor.PrintMessageAsync(
-                            $"Successfully installed {result.Identity.Id} v{result.Identity.Version}.", Color.DarkGreen);
+                            $"Successfully installed {result.Identity!.Id} v{result.Identity!.Version}.", Color.DarkGreen);
                         anySuccessful = true;
                         break;
                     case NuGetInstallCode.NoUpdatesFound:
                         await Context.Actor.PrintMessageAsync(
-                            $"No updates found for {result.Identity.Id}.", Color.DarkGreen);
+                            $"No updates found for {result.Identity!.Id}.", Color.DarkGreen);
                         anySuccessful = true;
                         break;
                     default:

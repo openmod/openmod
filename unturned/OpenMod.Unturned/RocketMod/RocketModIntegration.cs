@@ -32,7 +32,7 @@ namespace OpenMod.Unturned.RocketMod
         private readonly ILogger<RocketModIntegration> m_Logger;
         private readonly ILogger m_RocketModLogger;
 
-        private Harmony m_HarmonyInstance;
+        private Harmony? m_HarmonyInstance;
         private bool m_Installed;
 
         public RocketModIntegration(
@@ -87,7 +87,7 @@ namespace OpenMod.Unturned.RocketMod
         /// <summary>
         /// Checks if the Rocket.Unturned assembly is loaded.
         /// </summary>
-        public static bool IsRocketModUnturnedLoaded(out Assembly assembly)
+        public static bool IsRocketModUnturnedLoaded(out Assembly? assembly)
         {
             assembly = AppDomain.CurrentDomain.GetAssemblies().LastOrDefault(IsRocketModUnturnedAssembly);
             return assembly != null;
@@ -96,7 +96,7 @@ namespace OpenMod.Unturned.RocketMod
         /// <summary>
         /// Checks if the Rocket.Core assembly is loaded.
         /// </summary>
-        public static bool IsRocketModCoreLoaded(out Assembly assembly)
+        public static bool IsRocketModCoreLoaded(out Assembly? assembly)
         {
             assembly = AppDomain.CurrentDomain.GetAssemblies().LastOrDefault(IsRocketModCoreAssembly);
             return assembly != null;
@@ -105,7 +105,7 @@ namespace OpenMod.Unturned.RocketMod
         /// <summary>
         /// Checks if the Rocket.API assembly is loaded.
         /// </summary>
-        public static bool IsRocketModApiLoaded(out Assembly assembly)
+        public static bool IsRocketModApiLoaded(out Assembly? assembly)
         {
             assembly = AppDomain.CurrentDomain.GetAssemblies().LastOrDefault(IsRocketModApiAssembly);
             return assembly != null;
@@ -177,21 +177,21 @@ namespace OpenMod.Unturned.RocketMod
         private void PatchPluginsLoaded()
         {
             var loadPluginsPostfixMethod = new HarmonyMethod(typeof(RocketModPluginManagerPatches).GetMethod(nameof(RocketModPluginManagerPatches.LoadPluginsPostfix), c_BindingFlags));
-            m_HarmonyInstance.Patch(typeof(RocketPluginManager).GetMethod("loadPlugins", c_BindingFlags), postfix: loadPluginsPostfixMethod);
+            m_HarmonyInstance!.Patch(typeof(RocketPluginManager).GetMethod("loadPlugins", c_BindingFlags), postfix: loadPluginsPostfixMethod);
             RocketModPluginManagerPatches.OnPostRocketPluginsLoaded += OnRocketModPluginsLoaded;
         }
 
         private void PatchInitialize()
         {
             var intializePostfixMethod = new HarmonyMethod(typeof(RocketModLoadPatch).GetMethod(nameof(RocketModLoadPatch.PostInitialize), c_BindingFlags));
-            m_HarmonyInstance.Patch(typeof(U).GetMethod("Initialize", c_BindingFlags), postfix: intializePostfixMethod);
+            m_HarmonyInstance!.Patch(typeof(U).GetMethod("Initialize", c_BindingFlags), postfix: intializePostfixMethod);
             RocketModLoadPatch.OnRocketModIntialized += OnRocketModIntialized;
         }
 
         private void PatchLogging()
         {
             var logInternalPrefixMethod = new HarmonyMethod(typeof(RocketModLogPatches).GetMethod(nameof(RocketModLogPatches.PreLogInternal), c_BindingFlags));
-            m_HarmonyInstance.Patch(typeof(Logger).GetMethod("ProcessInternalLog", c_BindingFlags), prefix: logInternalPrefixMethod);
+            m_HarmonyInstance!.Patch(typeof(Logger).GetMethod("ProcessInternalLog", c_BindingFlags), prefix: logInternalPrefixMethod);
 
             var logExceptionPrefixMethod = new HarmonyMethod(typeof(RocketModLogPatches).GetMethod(nameof(RocketModLogPatches.PreLogException), c_BindingFlags));
             m_HarmonyInstance.Patch(typeof(Logger).GetMethod("LogException", c_BindingFlags), prefix: logExceptionPrefixMethod);
@@ -199,7 +199,7 @@ namespace OpenMod.Unturned.RocketMod
             RocketModLogPatches.OnRocketLog += OnRocketLog;
         }
 
-        private void OnRocketLog(LogLevel level, string message, Exception ex)
+        private void OnRocketLog(LogLevel level, string message, Exception? ex)
         {
             m_RocketModLogger.Log(level, ex, message);
         }
@@ -210,6 +210,7 @@ namespace OpenMod.Unturned.RocketMod
             m_Logger.LogInformation("RocketMod is ready.");
             s_IsReady = true;
         }
+
         private void OnRocketModPluginsLoaded()
         {
             AsyncHelper.RunSync(async () => await m_EventBus.EmitAsync(m_RocketModComponent, this, new RocketModPluginsLoadedEvent()));
@@ -240,7 +241,7 @@ namespace OpenMod.Unturned.RocketMod
 
             s_IsReady = false;
             m_Installed = false;
-            m_HarmonyInstance.UnpatchAll(c_HarmonyId);
+            m_HarmonyInstance?.UnpatchAll(c_HarmonyId);
         }
 
         public static string GetRocketFolder()

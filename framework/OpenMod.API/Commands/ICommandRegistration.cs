@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 
@@ -12,60 +11,46 @@ namespace OpenMod.API.Commands
     public interface ICommandRegistration
     {
         /// <value>
-        /// The owner component of the command. Cannot be null.
+        /// The owner component of the command.
         /// </value>
-        [NotNull]
         IOpenModComponent Component { get; }
 
         /// <value>
-        /// The unique ID of the command. Cannot be null or empty.
+        /// The unique ID of the command.
         /// </value>
-        [NotNull]
         string Id { get; }
 
         /// <value>
-        ///     <para>The primary name of the command, which will be used to execute it. Cannot be null or empty.</para>
+        ///     <para>The primary name of the command, which will be used to execute it.</para>
         ///     <para>The primary name overrides any <see cref="Aliases">aliases</see> of other commands by default.</para>
-        ///     <para>
-        ///         <b>This property must never return null.</b>
-        ///     </para>
         /// </value>
         /// <example>
         ///     If the name is "heal", the command will be usually be called using "/heal" (or just "heal" in console)
         /// </example>
-        [NotNull]
         string Name { get; }
 
         /// <value>
-        /// The aliases of the command, which are often shorter versions of the primary name. Can be null but items cannot be null.
+        /// The aliases of the command, which are often shorter versions of the primary name.
         /// </value>
         /// <example>
         /// If the aliases are "h" and "he", the command can be executed using "/h" or "/he".
         /// </example>
-        [CanBeNull]
-        [ItemNotNull]
-        IReadOnlyCollection<string> Aliases { get; }
+        IReadOnlyCollection<string>? Aliases { get; }
 
         /// <summary>
-        /// The permission registrations for this command. Can be null but items cannot be null.
+        /// The permission registrations for this command.
         /// </summary>
-        [CanBeNull]
-        [ItemNotNull]
-        IReadOnlyCollection<IPermissionRegistration> PermissionRegistrations { get; }
+        IReadOnlyCollection<IPermissionRegistration>? PermissionRegistrations { get; }
 
         /// <value>
         /// The description of the command. Can be null or empty.
         /// </value>
-        [CanBeNull]
-        string Description { get; }
+        string? Description { get; }
 
         /// <value>
         ///     The command syntax will be shown to the actor when the command was not used correctly. Can be null or empty.
         ///     <para>An output for the above example could be "/heal [player] &lt;amount&gt;".</para>
         ///     <para>The syntax should not contain Child Command usage.</para>
-        ///     <para>
-        ///         <b>This property must never return null.</b>
-        ///     </para>
         /// </value>
         /// <remarks>
         ///     [...] means optional argument and &lt;...&gt; means required argument, so in this case "player" is an optional
@@ -75,8 +60,7 @@ namespace OpenMod.API.Commands
         ///     <c>"[player] &lt;amount&gt;"</c>
         /// </example>
         ///
-        [CanBeNull]
-        string Syntax { get; }
+        string? Syntax { get; }
 
         /// <value>
         /// The priority for this command. Used in case of conflicting commands for determining which command to execute.
@@ -87,8 +71,7 @@ namespace OpenMod.API.Commands
         /// <summary>
         /// The ID of the parent command. Can be null if this command does not have a parent command.
         /// </summary>
-        [CanBeNull]
-        string ParentId { get; }
+        string? ParentId { get; }
 
         /// <value>
         /// <b>True</b> if the command is enabled; otherwise, <b>false</b>.
@@ -105,8 +88,7 @@ namespace OpenMod.API.Commands
         /// Instantiates a new command instance for execution.
         /// </summary>
         /// <param name="serviceProvider">The service provider of the command scope.</param>
-        /// <return>The instantiated command. Cannot return null.</return>
-        [NotNull]
+        /// <return>The instantiated command.</return>
         ICommand Instantiate(IServiceProvider serviceProvider);
     }
 }

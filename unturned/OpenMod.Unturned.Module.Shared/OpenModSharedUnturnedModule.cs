@@ -17,19 +17,19 @@ namespace OpenMod.Unturned.Module.Shared
     public sealed class OpenModSharedUnturnedModule
     {
         private const string c_HarmonyInstanceId = "com.get-openmod.unturned.module";
-        private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new Dictionary<string, Assembly>();
-        private Harmony m_HarmonyInstance;
+        private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new();
+        private readonly Dictionary<string, Assembly> m_ResolvedAssemblies = new();
         private readonly string[] m_IncompatibleModules = { "Redox.Unturned" };
         private readonly string[] m_CompatibleModules = { "AviRockets", "Rocket.Unturned" };
-        private RemoteCertificateValidationCallback m_OldCallBack;
-        private readonly Dictionary<string, Assembly> m_ResolvedAssemblies = new Dictionary<string, Assembly>();
+        private RemoteCertificateValidationCallback? m_OldCallBack;
+        private Harmony? m_HarmonyInstance;
 
         public bool Initialize(Assembly moduleAssembly, bool isDynamicLoad)
         {
             var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
             var openModDirPath = Path.GetDirectoryName(Directory
                 .GetFiles(modulesDirectory, "OpenMod.Unturned.dll", SearchOption.AllDirectories)
-                .FirstOrDefault() ?? throw new Exception("Failed to find OpenMod directory"));
+                .FirstOrDefault() ?? throw new Exception("Failed to find OpenMod directory"))!;
 
             if (HasIncompatibleModules(Path.GetFileName(openModDirPath), modulesDirectory))
             {
@@ -48,7 +48,6 @@ namespace OpenMod.Unturned.Module.Shared
                 InstallAssemblyResolver();
             }
 
-            // ReSharper disable once AssignNullToNotNullAttribute
             foreach (var file in Directory.GetFiles(openModDirPath))
             {
                 if (file.EndsWith(".dll"))
@@ -111,13 +110,11 @@ namespace OpenMod.Unturned.Module.Shared
 
         private void InstallNewtonsoftJson(string openModDir)
         {
-            var managedDir = Path.GetDirectoryName(typeof(IModuleNexus).Assembly.Location);
+            var managedDir = Path.GetDirectoryName(typeof(IModuleNexus).Assembly.Location)!;
 
-            // ReSharper disable once AssignNullToNotNullAttribute
             var unturnedNewtonsoftFile = Path.GetFullPath(Path.Combine(managedDir, "Newtonsoft.Json.dll"));
             var newtonsoftBackupFile = unturnedNewtonsoftFile + ".bak";
             var openModNewtonsoftFile = Path.GetFullPath(Path.Combine(openModDir, "Newtonsoft.Json.dll"));
-            // ReSharper restore once AssignNullToNotNullAttribute
 
             const string runtimeSerialization = "System.Runtime.Serialization.dll";
             var unturnedRuntimeSerialization = Path.GetFullPath(Path.Combine(managedDir, runtimeSerialization));
@@ -128,7 +125,6 @@ namespace OpenMod.Unturned.Module.Shared
             var openModXmlLinq = Path.GetFullPath(Path.Combine(openModDir, xmlLinq));
 
             // Copy Libraries of Newtonsoft.Json
-
             if (!File.Exists(unturnedRuntimeSerialization))
             {
                 File.Copy(openModRuntimeSerialization, unturnedRuntimeSerialization);
@@ -140,8 +136,8 @@ namespace OpenMod.Unturned.Module.Shared
             }
 
             // Copy Newtonsoft.Json
-            var asm = AssemblyName.GetAssemblyName(unturnedNewtonsoftFile);
-            ReflectionExtensions.GetVersionIndependentName(asm.FullName, out var version);
+            var assembly = AssemblyName.GetAssemblyName(unturnedNewtonsoftFile);
+            ReflectionExtensions.GetVersionIndependentName(assembly.FullName, out var version);
             if (!version.StartsWith("7.", StringComparison.OrdinalIgnoreCase))
             {
                 return;
@@ -161,7 +157,7 @@ namespace OpenMod.Unturned.Module.Shared
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
         }
 
-        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var name = ReflectionExtensions.GetVersionIndependentName(args.Name, out _);
             if (m_ResolvedAssemblies.ContainsKey(name))
@@ -207,7 +203,7 @@ namespace OpenMod.Unturned.Module.Shared
                 return true;
             }
 
-            foreach (X509ChainStatus chainStatus in chain.ChainStatus)
+            foreach (var chainStatus in chain.ChainStatus)
             {
                 if (chainStatus.Status != X509ChainStatusFlags.RevocationStatusUnknown)
                 {

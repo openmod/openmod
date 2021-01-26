@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.Extensions.Games.Abstractions.Items
@@ -18,8 +17,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// <param name="itemAssetId">The ID of the item asset.</param>
         /// <param name="state">The optional state of the item.</param>
         /// <returns><b><see cref="IInventoryItem"/></b> if the inventory was not full; otherwise, <see cref="IItemDrop"/>. If spawning was not successful, <b>null</b>.</returns>
-        [ItemCanBeNull]
-        Task<IItemInstance> GiveItemAsync(IInventory inventory, string itemAssetId, [CanBeNull] IItemState state = null);
+        Task<IItemInstance?> GiveItemAsync(IInventory inventory, string itemAssetId, IItemState? state = null);
 
         /// <summary>
         /// Spawns an item.
@@ -28,7 +26,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// <param name="itemAssetId">The ID of the item asset.</param>
         /// <param name="state">The optional state of the item.</param>
         /// <returns><b>The dropped item</b> if successful; otherwise, <b>null</b>.</returns>
-        [ItemCanBeNull]
-        Task<IItemDrop> SpawnItemAsync(Vector3 position, string itemAssetId, [CanBeNull] IItemState state = null);
+        Task<IItemDrop?> SpawnItemAsync(Vector3 position, string itemAssetId, IItemState? state = null);
     }
 }

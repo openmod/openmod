@@ -9,11 +9,11 @@ namespace OpenMod.Rust.Items
     {
         public ItemContainer ItemContainer { get; }
 
-        public RustInventoryPage(ItemContainer itemContainer, IInventory inventory, string name = "Unknown name")
+        public RustInventoryPage(ItemContainer itemContainer, IInventory inventory, string? name)
         {
             ItemContainer = itemContainer;
             Inventory = inventory;
-            Name = name;
+            Name = name ?? "Unknown name";
         }
 
         public IEnumerator<IInventoryItem> GetEnumerator()

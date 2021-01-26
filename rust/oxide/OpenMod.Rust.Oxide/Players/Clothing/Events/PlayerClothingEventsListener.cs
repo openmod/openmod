@@ -16,7 +16,7 @@ namespace OpenMod.Rust.Oxide.Players.Clothing.Events
         }
 
         [HookMethod("CanWearItem")]
-        private object CanWearItem(PlayerInventory inventory, Item item, int targetSlot)
+        private object? CanWearItem(PlayerInventory inventory, Item item, int targetSlot)
         {
             var @event = new RustPlayerWearingClothingEvent(new RustPlayer(inventory._baseEntity), item, targetSlot);
             return EmitCancellableReturnsObject(@event);

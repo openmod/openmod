@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace OpenMod.Extensions.Games.Abstractions.Vehicles
+﻿namespace OpenMod.Extensions.Games.Abstractions.Vehicles
 {
     /// <value>
     /// Represents entities that can enter vehicles.
@@ -10,7 +8,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
         /// <value>
         /// The current vehicle. Can be null.
         /// </value>
-        [CanBeNull]
-        public IVehicle CurrentVehicle { get; }
+        public IVehicle? CurrentVehicle { get; }
     }
 }

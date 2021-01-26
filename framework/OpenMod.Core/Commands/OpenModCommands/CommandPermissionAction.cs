@@ -41,7 +41,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 throw new CommandWrongUsageException(Context);
             }
 
-            IPermissionActor target;
+            IPermissionActor? target;
 
             var actorType = Context.Parameters[0].ToLower();
             var permission = "permissions.manage." + actorType;
@@ -56,7 +56,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                     target = await m_PermissionRoleStore.GetRoleAsync(targetName);
                     
                     // todo: register on startup instead of here so it can get written to a help file
-                    m_PermissionRegistry.RegisterPermission(Context.CommandRegistration.Component, permission, description: $"Manage role: {targetName}");
+                    m_PermissionRegistry.RegisterPermission(Context.CommandRegistration!.Component, permission, description: $"Manage role: {targetName}");
 
                     if (target == null)
                     {
@@ -75,7 +75,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 default:
                     var idOrName = await Context.Parameters.GetAsync<string>(1);
                     var user = await m_UserManager.FindUserAsync(actorType, idOrName, UserSearchMode.FindByNameOrId);
-                    m_PermissionRegistry.RegisterPermission(Context.CommandRegistration.Component, permission, description: $"Manage actor: {actorType}");
+                    m_PermissionRegistry.RegisterPermission(Context.CommandRegistration!.Component, permission, description: $"Manage actor: {actorType}");
 
                     if (user == null)
                     {
@@ -83,7 +83,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                         throw new UserFriendlyException($"Player not found: {idOrName}");
                     }
 
-                    var userData = await m_UserDataStore.GetUserDataAsync(user.Id, actorType);
+                    var userData = await m_UserDataStore.GetUserDataAsync(user.Id, actorType) ?? new UserData();
                     target = (UserDataPermissionActor)userData;
                     break;
             }

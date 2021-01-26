@@ -1,5 +1,4 @@
-﻿using System;
-using OpenMod.API.Commands;
+﻿using OpenMod.API.Commands;
 using OpenMod.Core.Eventing;
 
 namespace OpenMod.Core.Commands.Events

@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Semver;
 
 namespace OpenMod.API.Plugins
@@ -12,25 +11,21 @@ namespace OpenMod.API.Plugins
         /// <value>
         /// The human readable name of the plugin. Must not be null or empty.
         /// </value>
-        [NotNull]
         string DisplayName { get; }
 
         /// <value>
         /// The plugin author. Can be null.
         /// </value>
-        [CanBeNull]
-        string Author { get; }
+        string? Author { get; }
 
         /// <value>
         /// The plugin website. Can be null.
         /// </value>
-        [CanBeNull]
-        string Website { get; }
+        string? Website { get; }
 
         /// <value>
         /// The plugin version. Must not be null.
         /// </value>
-        [NotNull]
         SemVersion Version { get; }
 
         /// <summary>

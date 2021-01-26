@@ -21,7 +21,7 @@ namespace OpenMod.Core.Persistence
 
         public IDataStore DataStore
         {
-            get { return m_Runtime.DataStore; }
+            get { return m_Runtime.DataStore!; }
         }
     }
 }

@@ -11,11 +11,14 @@ namespace OpenMod.Core.Helpers
         {
             if (process.HasExited) return Task.CompletedTask;
 
-            var tcs = new TaskCompletionSource<object>();
+            var tcs = new TaskCompletionSource<object?>();
             process.EnableRaisingEvents = true;
-            process.Exited += (sender, args) => tcs.TrySetResult(null);
+            process.Exited += (_, _) => tcs.TrySetResult(result: null);
+
             if (cancellationToken != default)
+            {
                 cancellationToken.Register(() => tcs.SetCanceled());
+            }
 
             return process.HasExited ? Task.CompletedTask : tcs.Task;
         }

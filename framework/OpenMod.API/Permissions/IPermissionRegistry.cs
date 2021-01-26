@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Permissions
@@ -18,18 +17,16 @@ namespace OpenMod.API.Permissions
         /// <param name="description">The optional description.</param>
         /// <param name="defaultGrant">The optional default grant. Will default to <see cref="PermissionGrantResult.Default"/>. See <see cref="IPermissionRegistration.DefaultGrant"/>.</param>
         void RegisterPermission(
-            [NotNull] IOpenModComponent component, 
-            [NotNull] string permission, 
-            string description = null, 
+            IOpenModComponent component, 
+            string permission, 
+            string? description = null, 
             PermissionGrantResult? defaultGrant = null);
 
         /// <summary>
         /// Gets the registered permissions for the given component.
         /// </summary>
         /// <param name="component">The component to get the permissions of.</param>
-        /// <returns>The registered permissions of the given component. Cannot return null and neither can the items be null.</returns>
-        [NotNull]
-        [ItemNotNull]
+        /// <returns>The registered permissions of the given component.</returns>
         IReadOnlyCollection<IPermissionRegistration> GetPermissions(IOpenModComponent component);
 
         /// <summary>
@@ -37,8 +34,7 @@ namespace OpenMod.API.Permissions
         /// </summary>
         /// <param name="permission">The permission to search for.</param>
         /// <returns><b>The registered permission</b> if founds; otherwise, <b>null</b>.</returns>
-        [CanBeNull]
-        IPermissionRegistration FindPermission(string permission);
+        IPermissionRegistration? FindPermission(string permission);
 
         /// <summary>
         /// Searches for a permission registration.
@@ -46,7 +42,6 @@ namespace OpenMod.API.Permissions
         /// <param name="component">The component that has registered the permission.</param>
         /// <param name="permission">The permission to search for.</param>
         /// <returns><b>The registered permission</b> if founds; otherwise, <b>null</b>.</returns>
-        [CanBeNull]
-        IPermissionRegistration FindPermission(IOpenModComponent component, string permission);
+        IPermissionRegistration? FindPermission(IOpenModComponent component, string permission);
     }
 }

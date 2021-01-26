@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Acl;
 using OpenMod.Extensions.Games.Abstractions.Building;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
 using OpenMod.Rust.Networkables;
 using OpenMod.Rust.Transforms;
-using OpenMod.UnityEngine.Transforms;
 
 namespace OpenMod.Rust.Building
 {
@@ -19,11 +19,16 @@ namespace OpenMod.Rust.Building
             Transform = new RustNetworkableTransform(buildingBlock);
             State = new RustBuildingBlockState(buildingBlock);
             BuildableInstanceId = buildingBlock.GetInstanceID().ToString();
-
             // Rust todo: set Ownership
         }
 
-        public IOwnership Ownership { get; }
+        public IOwnership Ownership
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public IBuildableAsset Asset { get; }
 

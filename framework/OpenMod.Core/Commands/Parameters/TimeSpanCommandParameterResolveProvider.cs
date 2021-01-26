@@ -11,17 +11,22 @@ namespace OpenMod.Core.Commands.Parameters
     {
         public bool Supports(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             return typeof(TimeSpan) == type;
         }
 
-        public Task<object> ResolveAsync(Type type, string input)
+        public Task<object?> ResolveAsync(Type type, string input)
         {
             if (!Supports(type))
             {
                 throw new ArgumentException("The given type is not supported", nameof(type));
             }
 
-            return Task.FromResult((object)TimeSpanHelper.Parse(input));
+            return Task.FromResult((object?)TimeSpanHelper.Parse(input));
         }
     }
 }

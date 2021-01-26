@@ -1,4 +1,5 @@
-﻿using OpenMod.API;
+﻿using System;
+using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
@@ -22,20 +23,28 @@ namespace OpenMod.Unturned.Events
             m_UserManager = userManager;
         }
 
-        protected UnturnedPlayer GetUnturnedPlayer(Player player)
+        protected UnturnedPlayer? GetUnturnedPlayer(Player? player)
         {
-            if (player == null) return null;
+            if (player == null)
+            {
+                return null;
+            }
 
             return new UnturnedPlayer(player);
         }
 
-        protected UnturnedPlayer GetUnturnedPlayer(SteamPlayer player)
+        protected UnturnedPlayer? GetUnturnedPlayer(SteamPlayer? player)
         {
             return GetUnturnedPlayer(player?.player);
         }
 
         protected void Emit(IEvent @event)
         {
+            if (@event == null)
+            {
+                throw new ArgumentNullException(nameof(@event));
+            }
+
             AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_OpenModHost, this, @event));
         }
 

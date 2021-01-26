@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using OpenMod.API.Users;
@@ -15,24 +16,29 @@ namespace OpenMod.Core.Users
             m_UserDataStore = userDataStore;
         }
 
-        public virtual string Id { get; protected set; }
-        
-        public virtual IUserProvider Provider { get; }
+        public virtual string Id { get; protected set; } = null!;
 
-        public virtual string Type { get; protected set; }
+        public virtual string Type { get; protected set; } = null!;
 
-        public virtual string DisplayName { get; protected set; }
+        public virtual string DisplayName { get; protected set; } = null!;
 
-        public virtual IUserSession Session { get; protected set; }
+        public virtual IUserProvider? Provider { get; }
+
+        public virtual IUserSession? Session { get; protected set; }
 
         public abstract Task PrintMessageAsync(string message);
 
         public abstract Task PrintMessageAsync(string message, Color color);
 
-        public async Task SavePersistentDataAsync<T>(string key, T data)
+        public async Task SavePersistentDataAsync<T>(string key, T? data)
         {
-            var userData = await m_UserDataStore.GetUserDataAsync(Id, Type);
-            userData.Data ??= new Dictionary<string, object>();
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
+
+            var userData = await m_UserDataStore.GetUserDataAsync(Id, Type) ?? new UserData();
+            userData.Data ??= new Dictionary<string, object?>();
             if (userData.Data.ContainsKey(key))
             {
                 userData.Data[key] = data;
@@ -45,9 +51,14 @@ namespace OpenMod.Core.Users
             await m_UserDataStore.SetUserDataAsync(userData);
         }
 
-        public async Task<T> GetPersistentDataAsync<T>(string key)
+        public Task<T?> GetPersistentDataAsync<T>(string key)
         {
-            return await m_UserDataStore.GetUserDataAsync<T>(Id, Type, key);
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
+
+            return m_UserDataStore.GetUserDataAsync<T>(Id, Type, key);
         }
 
         public override string ToString()

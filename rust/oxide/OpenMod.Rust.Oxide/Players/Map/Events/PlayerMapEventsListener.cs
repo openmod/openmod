@@ -26,14 +26,14 @@ namespace OpenMod.Rust.Oxide.Players.Map.Events
         }
 
         [HookMethod("OnMapMarkerAdd")]
-        private object OnMapMarkerAdd(BasePlayer player, MapNote note)
+        private object? OnMapMarkerAdd(BasePlayer player, MapNote note)
         {
             var @event = new RustPlayerMapMarkerAddingEvent(new RustPlayer(player), note);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("OnMapMarkerRemove")]
-        private object OnMapMarkerRemove(BasePlayer player, MapNote note)
+        private object? OnMapMarkerRemove(BasePlayer player, MapNote note)
         {
             var @event = new RustPlayerMapMarkerRemovingEvent(new RustPlayer(player), note);
             return EmitCancellableReturnsObject(@event);
@@ -47,7 +47,7 @@ namespace OpenMod.Rust.Oxide.Players.Map.Events
         }
 
         [HookMethod("OnMapMarkersClear")]
-        private object OnMapMarkersClear(BasePlayer player, List<MapNote> notes)
+        private object? OnMapMarkersClear(BasePlayer player, List<MapNote> notes)
         {
             var @event = new RustPlayerMapMarkersClearingEvent(new RustPlayer(player), notes);
             return EmitCancellableReturnsObject(@event);

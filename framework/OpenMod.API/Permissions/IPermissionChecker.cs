@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Permissions
@@ -12,17 +11,13 @@ namespace OpenMod.API.Permissions
     public interface IPermissionChecker
     {
         /// <value>
-        /// The permission check providers. Cannot be null and the items can not be null either.
+        /// The permission check providers.
         /// </value>
-        [NotNull]
-        [ItemNotNull]
         IReadOnlyCollection<IPermissionCheckProvider> PermissionCheckProviders { get; }
 
         /// <value>
-        /// The permission sources. Cannot be null and the items can not be null either.
+        /// The permission sources.
         /// </value>
-        [NotNull]
-        [ItemNotNull]
         IReadOnlyCollection<IPermissionStore> PermissionStores { get; }
 
         /// <summary>

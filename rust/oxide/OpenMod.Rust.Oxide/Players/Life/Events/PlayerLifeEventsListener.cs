@@ -16,21 +16,21 @@ namespace OpenMod.Rust.Oxide.Players.Life.Events
         }
 
         [HookMethod("OnPlayerAssist")]
-        private object OnPlayerAssist(BasePlayer target, BasePlayer player)
+        private object? OnPlayerAssist(BasePlayer target, BasePlayer player)
         {
             var @event = new RustPlayerAssistingEvent(new RustPlayer(player), new RustPlayer(target));
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("OnPlayerAttack")]
-        private object OnPlayerAttack(BasePlayer attacker, HitInfo info)
+        private object? OnPlayerAttack(BasePlayer attacker, HitInfo info)
         {
             var @event = new RustPlayerAttackingEvent(new RustPlayer(attacker), info);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("OnPlayerDeath")]
-        private object OnPlayerDeath(BasePlayer player, HitInfo info)
+        private object? OnPlayerDeath(BasePlayer player, HitInfo info)
         {
             var @event = new RustPlayerDeathEvent(new RustPlayer(player), info);
             Emit(@event);
@@ -38,7 +38,7 @@ namespace OpenMod.Rust.Oxide.Players.Life.Events
         }
 
         [HookMethod("OnPlayerWound")]
-        private object OnPlayerWound(BasePlayer player, BasePlayer source)
+        private object? OnPlayerWound(BasePlayer player, BasePlayer source)
         {
             var @event = new RustPlayerGettingWoundedEvent(
                 new RustPlayer(player),
@@ -48,14 +48,14 @@ namespace OpenMod.Rust.Oxide.Players.Life.Events
         }
 
         [HookMethod("OnPlayerHealthChange")]
-        private object OnPlayerHealthChange(BasePlayer player, float oldValue, float newValue)
+        private object? OnPlayerHealthChange(BasePlayer player, float oldValue, float newValue)
         {
             var @event = new RustPlayerHealthUpdatingEvent(new RustPlayer(player), oldValue, newValue);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("OnMeleeAttack")]
-        private object OnMeleeAttack(BasePlayer player, HitInfo info)
+        private object? OnMeleeAttack(BasePlayer player, HitInfo info)
         {
             var @event = new RustPlayerMeleeAttackingEvent(new RustPlayer(player), info);
             return EmitCancellableReturnsObject(@event);
@@ -69,7 +69,7 @@ namespace OpenMod.Rust.Oxide.Players.Life.Events
         }
 
         [HookMethod("OnPlayerRecover")]
-        private object OnPlayerRecover(BasePlayer player)
+        private object? OnPlayerRecover(BasePlayer player)
         {
             var @event = new RustPlayerRecoveringEvent(new RustPlayer(player));
             return EmitCancellableReturnsObject(@event);
@@ -83,14 +83,14 @@ namespace OpenMod.Rust.Oxide.Players.Life.Events
         }
 
         [HookMethod("OnPlayerRespawn")]
-        private object OnPlayerRespawn(BasePlayer player)
+        private object? OnPlayerRespawn(BasePlayer player)
         {
             var @event = new RustPlayerRespawningEvent(new RustPlayer(player));
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("OnPlayerRevive")]
-        private object OnPlayerRevive(BasePlayer reviver, BasePlayer player)
+        private object? OnPlayerRevive(BasePlayer reviver, BasePlayer player)
         {
             var @event = new RustPlayerRevivingEvent(new RustPlayer(player), new RustPlayer(player));
             return EmitCancellableReturnsObject(@event);
@@ -104,7 +104,7 @@ namespace OpenMod.Rust.Oxide.Players.Life.Events
         }
 
         [HookMethod("OnPlayerSleep")]
-        private object OnPlayerSleep(BasePlayer player)
+        private object? OnPlayerSleep(BasePlayer player)
         {
             var @event = new RustPlayerSleepStartingEvent(new RustPlayer(player));
             return EmitCancellableReturnsObject(@event);

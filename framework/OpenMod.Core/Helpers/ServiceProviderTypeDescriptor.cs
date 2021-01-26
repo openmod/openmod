@@ -30,8 +30,8 @@ namespace OpenMod.Core.Helpers
             throw new NotImplementedException();
         }
 
-        public IContainer Container { get; set; }
-        public object Instance { get; set; }
-        public PropertyDescriptor PropertyDescriptor { get; }
+        public IContainer? Container { get; set; }
+        public object? Instance { get; set; }
+        public PropertyDescriptor? PropertyDescriptor { get; } = null;
     }
 }

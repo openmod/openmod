@@ -9,28 +9,24 @@ namespace OpenMod.Core.Permissions
     [OpenModInternal]
     public sealed class PermissionRole : IPermissionRole
     {
-        public PermissionRole()
-        {
-            Parents = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-        }
         public PermissionRole(PermissionRoleData data)
         {
-            Id = data.Id;
+            Id = data.Id ?? throw new ArgumentException("Permission role is missing ID!");
             Priority = data.Priority;
-            DisplayName = data.DisplayName;
-            Parents = data.Parents;
+            DisplayName = data.DisplayName ?? data.Id;
+            Parents = data.Parents ?? new HashSet<string>();
             IsAutoAssigned = data.IsAutoAssigned;
-            Permissions = data.Permissions;
+            Permissions = data.Permissions ?? new HashSet<string>();
         }
 
         public static implicit operator PermissionRole(PermissionRoleData data)
         {
-            return new PermissionRole(data);
+            return new(data);
         }
 
         public static explicit operator PermissionRoleData(PermissionRole role)
         {
-            return new PermissionRoleData
+            return new()
             {
                 Id = role.Id,
                 Priority = role.Priority,
@@ -41,7 +37,7 @@ namespace OpenMod.Core.Permissions
             };
         }
 
-        public string Id { get; }
+        public string Id { get; } 
         public int Priority { get; set; }
         public string DisplayName { get; }
         public HashSet<string> Parents { get; }

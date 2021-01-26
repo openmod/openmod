@@ -9,7 +9,7 @@ namespace OpenMod.Unturned.Zombies.Events
     /// </summary>
     public class UnturnedZombieDyingEvent : UnturnedZombieDamagingEvent
     {
-        public UnturnedZombieDyingEvent(UnturnedZombie zombie, UnturnedPlayer player, ushort damageAmount,
+        public UnturnedZombieDyingEvent(UnturnedZombie zombie, UnturnedPlayer? player, ushort damageAmount,
             Vector3 ragdoll, ERagdollEffect ragdollEffect, EZombieStunOverride stunOverride)
                 : base(zombie, player, damageAmount, ragdoll, ragdollEffect, stunOverride)
         {

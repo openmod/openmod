@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using OpenMod.Extensions.Games.Abstractions.Entities;
+﻿using OpenMod.Extensions.Games.Abstractions.Entities;
 
 namespace OpenMod.Extensions.Games.Abstractions.Players
 {
@@ -11,8 +10,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
         /// <value>
         /// The damage source. Can be null.
         /// </value>
-        [CanBeNull]
-        public IDamageSource DamageSource { get; }
+        public IDamageSource? DamageSource { get; }
 
         /// <summary>
         /// The amount of the damage.

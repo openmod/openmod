@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.Extensions.Games.Abstractions.Vehicles
@@ -18,7 +17,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
         /// <param name="vehicleAssetId">The ID of the vehicle asset.</param>
         /// <param name="state">The optional state of the vehicle.</param>
         /// <returns><b>The spawned vehicle</b> if successful; otherwise, <b>false</b>.</returns>
-        [ItemCanBeNull]
-        Task<IVehicle> SpawnVehicleAsync(Vector3 position, string vehicleAssetId, [CanBeNull] IVehicleState state = null);
+        Task<IVehicle?> SpawnVehicleAsync(Vector3 position, string vehicleAssetId, IVehicleState? state = null);
     }
 }

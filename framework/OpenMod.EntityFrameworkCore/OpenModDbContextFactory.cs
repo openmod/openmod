@@ -25,6 +25,11 @@ namespace OpenMod.EntityFrameworkCore
     {
         public TDbContext CreateDbContext(string[] args)
         {
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
             var config = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
                 .AddYamlFile("config.yaml", optional: false)
@@ -57,7 +62,7 @@ namespace OpenMod.EntityFrameworkCore
             serviceCollection.AddSingleton(config);
             serviceCollection.AddSingleton<IConfiguration>(config);
             serviceCollection.AddTransient<IConnectionStringAccessor, ConfigurationBasedConnectionStringAccessor>();
-            addDbContextMethod.Invoke(null, new object[] { serviceCollection, null, ServiceLifetime.Scoped, ServiceLifetime.Scoped });
+            addDbContextMethod.Invoke(obj: null, new object?[] { serviceCollection, null, ServiceLifetime.Scoped, ServiceLifetime.Scoped });
            
             var serviceProvider = serviceCollection.BuildServiceProvider();
 

@@ -8,7 +8,7 @@ namespace OpenMod.Core.Permissions
     {
         public string Permission { get; }
         
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public PermissionGrantResult? DefaultGrant { get; set; }
 

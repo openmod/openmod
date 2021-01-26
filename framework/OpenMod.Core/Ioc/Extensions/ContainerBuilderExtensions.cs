@@ -33,7 +33,7 @@ namespace OpenMod.Core.Ioc.Extensions
 
         public static ContainerBuilder PopulateServices(this ContainerBuilder containerBuilder, 
             ServiceCollection serviceCollection, 
-            Func<ServiceDescriptor, bool> serviceFilter = null, 
+            Func<ServiceDescriptor, bool>? serviceFilter = null, 
             bool replaceServices = false,
             bool autowire = true)
         {
@@ -88,7 +88,7 @@ namespace OpenMod.Core.Ioc.Extensions
                 }
                 else if (descriptor.ImplementationFactory != null)
                 {
-                    var registrator = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, parameters) =>
+                    var registrator = RegistrationBuilder.ForDelegate(descriptor.ServiceType, (context, _) =>
                         {
                             var serviceProvider = context.Resolve<IServiceProvider>();
                             return descriptor.ImplementationFactory(serviceProvider);

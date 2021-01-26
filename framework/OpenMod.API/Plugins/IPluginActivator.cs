@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Plugins
@@ -14,10 +13,8 @@ namespace OpenMod.API.Plugins
     public interface IPluginActivator
     {
         /// <value>
-        /// Activated plugins. Cannot be null and neither items can be null.
+        /// The activated plugins.
         /// </value>
-        [NotNull]
-        [ItemNotNull]
         IReadOnlyCollection<IOpenModPlugin> ActivatedPlugins { get; }
 
         /// <summary>
@@ -25,7 +22,6 @@ namespace OpenMod.API.Plugins
         /// </summary>
         /// <param name="assembly">The plugin assembly.</param>
         /// <returns><b>The plugin instance</b> if activation was successful; otherwise, <b>null</b>.</returns>
-        [ItemCanBeNull]
-        Task<IOpenModPlugin> TryActivatePluginAsync(Assembly assembly);
+        Task<IOpenModPlugin?> TryActivatePluginAsync(Assembly assembly);
     }
 }

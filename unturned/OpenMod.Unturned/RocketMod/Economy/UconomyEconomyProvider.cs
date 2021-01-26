@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using HarmonyLib;
@@ -21,16 +20,16 @@ namespace OpenMod.Unturned.RocketMod.Economy
         private readonly IRocketModComponent m_RocketModComponent;
         private readonly IEventBus m_EventBus;
         private bool m_UconomyReady;
-        private Harmony m_HarmonyInstance;
-        private Type m_DatabaseType;
-        private MethodInfo m_GetBalanceMethod;
-        private MethodInfo m_IncreaseBalanceMethod;
-        private FieldInfo m_DatabaseField;
-        private object m_UconomyInstance;
-        private object m_DatabaseInstance;
-        private FieldInfo m_MoneySymbolField;
-        private FieldInfo m_MoneyNameField;
-        private object m_UconomyConfigurationInstance;
+        private Harmony? m_HarmonyInstance;
+        private Type? m_DatabaseType;
+        private MethodInfo? m_GetBalanceMethod;
+        private MethodInfo? m_IncreaseBalanceMethod;
+        private FieldInfo? m_DatabaseField;
+        private object? m_UconomyInstance;
+        private object? m_DatabaseInstance;
+        private FieldInfo? m_MoneySymbolField;
+        private FieldInfo? m_MoneyNameField;
+        private object? m_UconomyConfigurationInstance;
 
         public UconomyEconomyProvider(
             IRocketModComponent rocketModComponent,
@@ -44,7 +43,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
         {
             m_HarmonyInstance = new Harmony(UconomyIntegration.HarmonyId);
 
-            var patchMethod = m_DatabaseType.GetMethod("IncreaseBalance", c_BindingFlags);
+            var patchMethod = m_DatabaseType!.GetMethod("IncreaseBalance", c_BindingFlags);
             var increaseBalancePostfix = typeof(UconomyBalanceIncreasePatch)
                 .GetMethod(nameof(UconomyBalanceIncreasePatch.IncreaseBalancePostfix), c_BindingFlags);
 
@@ -128,7 +127,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
         {
             get
             {
-                return (string)m_MoneyNameField.GetValue(m_UconomyConfigurationInstance);
+                return (string)m_MoneyNameField!.GetValue(m_UconomyConfigurationInstance);
             }
         }
 
@@ -136,7 +135,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
         {
             get
             {
-                return (string)m_MoneySymbolField.GetValue(m_UconomyConfigurationInstance);
+                return (string)m_MoneySymbolField!.GetValue(m_UconomyConfigurationInstance);
             }
         }
 
@@ -149,11 +148,11 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
             ValidateActorType(ownerType);
 
-            var result = (decimal)m_GetBalanceMethod.Invoke(m_DatabaseInstance, new object[] { ownerId });
+            var result = (decimal)m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId });
             return Task.FromResult(result);
         }
 
-        public Task<decimal> UpdateBalanceAsync(string ownerId, string ownerType, decimal changeAmount, string reason)
+        public Task<decimal> UpdateBalanceAsync(string ownerId, string ownerType, decimal changeAmount, string? reason)
         {
             if (!EnsureUconomyReady())
             {
@@ -162,7 +161,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
             ValidateActorType(ownerType);
 
-            var result = (decimal)m_IncreaseBalanceMethod.Invoke(m_DatabaseInstance, new object[] { ownerId, changeAmount });
+            var result = (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId, changeAmount });
             return Task.FromResult(result);
         }
 
@@ -175,8 +174,8 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
             ValidateActorType(ownerType);
 
-            var currentBalance = (decimal)m_GetBalanceMethod.Invoke(m_DatabaseInstance, new object[] { ownerId });
-            var result = (decimal)m_IncreaseBalanceMethod.Invoke(m_DatabaseInstance, new object[] { ownerId, balance - currentBalance });
+            var currentBalance = (decimal)m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId });
+            var result = (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId, balance - currentBalance });
             return Task.FromResult(result);
         }
 

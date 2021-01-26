@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace OpenMod.Extensions.Games.Abstractions.Acl
+﻿namespace OpenMod.Extensions.Games.Abstractions.Acl
 {
     /// <summary>
     /// Defines that an object can have an owner.
@@ -8,9 +6,8 @@ namespace OpenMod.Extensions.Games.Abstractions.Acl
     public interface IHasOwnership
     {
         /// <value>
-        /// The owner of this object. Cannot be null.
+        /// The owner of this object.
         /// </value>
-        [NotNull]
         public IOwnership Ownership { get; }
     }
 }

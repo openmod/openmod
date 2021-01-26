@@ -12,9 +12,9 @@ namespace OpenMod.Unturned.Users
     public class UnturnedUserSession : UserSessionBase
     {
         [OpenModInternal]
-        public UnturnedUserSession(UnturnedUser user, IUserSession baseSession = null) : base(user)
+        public UnturnedUserSession(UnturnedUser user, IUserSession? baseSession = null) : base(user)
         {
-            SessionData = baseSession?.SessionData ?? new Dictionary<string, object>();
+            SessionData = baseSession?.SessionData ?? new Dictionary<string, object?>();
             SessionStartTime = baseSession?.SessionStartTime ?? DateTime.Now;
 
             if (baseSession != null)

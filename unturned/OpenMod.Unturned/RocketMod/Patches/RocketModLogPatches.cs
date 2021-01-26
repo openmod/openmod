@@ -6,12 +6,17 @@ namespace OpenMod.Unturned.RocketMod.Patches
 {
     internal static class RocketModLogPatches
     {
-        public delegate void RocketLog(LogLevel level, string message, Exception ex);
+        public delegate void RocketLog(LogLevel level, string message, Exception? ex);
 
-        public static event RocketLog OnRocketLog;
+        public static event RocketLog? OnRocketLog;
 
         public static bool PreLogInternal(ELogType type, string message)
         {
+            if (string.IsNullOrEmpty(message))
+            {
+                return false;
+            }
+
             LogLevel logLevel;
             switch (type)
             {

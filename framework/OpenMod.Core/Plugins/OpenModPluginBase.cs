@@ -28,19 +28,19 @@ namespace OpenMod.Core.Plugins
         public virtual string WorkingDirectory { get; }
         public virtual bool IsComponentAlive { get; protected set; }
         public virtual string DisplayName { get; }
-        public virtual string Author { get; }
-        public string Website { get; }
+        public virtual string? Author { get; }
+        public virtual string? Website { get; }
         public virtual SemVersion Version { get; }
         public virtual IDataStore DataStore { get; }
         public virtual ILifetimeScope LifetimeScope { get; }
         public virtual IConfiguration Configuration { get; protected set; }
         public IRuntime Runtime { get; }
         public IEventBus EventBus { get; }
-        protected ILogger Logger { get; set; }
-        protected Harmony Harmony { get; private set; }
+        protected ILogger Logger { get; set; } = null!;
+        protected Harmony Harmony { get; private set; } = null!;
         private readonly IOptions<CommandStoreOptions> m_CommandStoreOptions;
         private readonly ILoggerFactory m_LoggerFactory;
-        private OpenModComponentCommandSource m_CommandSource;
+        private OpenModComponentCommandSource m_CommandSource = null!;
 
         protected OpenModPluginBase(IServiceProvider serviceProvider)
         {
@@ -58,7 +58,7 @@ namespace OpenMod.Core.Plugins
             Version = GetPluginVersion();
 
             DisplayName = !string.IsNullOrEmpty(metadata.DisplayName)
-                ? metadata.DisplayName
+                ? metadata.DisplayName!
                 : metadata.Id;
 
             Author = metadata.Author;

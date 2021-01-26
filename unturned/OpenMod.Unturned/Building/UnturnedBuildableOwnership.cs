@@ -2,15 +2,14 @@
 using OpenMod.Extensions.Games.Abstractions.Players;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
-using System;
 using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Building
 {
     public class UnturnedBuildableOwnership : IOwnership
     {
-        private readonly StructureData m_Structure;
-        private readonly BarricadeData m_Barricade;
+        private readonly StructureData? m_Structure;
+        private readonly BarricadeData? m_Barricade;
 
         public bool HasOwner
         {
@@ -29,12 +28,12 @@ namespace OpenMod.Unturned.Building
 
         private ulong PlayerId
         {
-            get { return m_Barricade?.owner ?? m_Structure.owner; }
+            get { return m_Barricade?.owner ?? m_Structure!.owner; }
         }
 
         private ulong GroupId
         {
-            get { return m_Barricade?.group ?? m_Structure.group; }
+            get { return m_Barricade?.group ?? m_Structure!.group; }
         }
 
         public UnturnedBuildableOwnership(BarricadeData barricade)

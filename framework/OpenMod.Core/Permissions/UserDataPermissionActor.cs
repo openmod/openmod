@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using OpenMod.API.Permissions;
 using OpenMod.API.Users;
 
@@ -8,20 +9,20 @@ namespace OpenMod.Core.Permissions
     {
         public UserDataPermissionActor(UserData userData)
         {
-            Id = userData.Id;
-            Type = userData.Type;
+            Id = userData.Id ?? throw new InvalidOperationException("userData.Id was null!");
+            Type = userData.Type ?? throw new InvalidOperationException("userData.Type was null!"); ;
             Data = userData.Data;
-            DisplayName = userData.LastDisplayName;
+            DisplayName = userData.LastDisplayName ?? Id;
         }
 
         public string Id { get; }
 
         public string Type { get; }
 
-        public Dictionary<string, object> Data { get; }
+        public Dictionary<string, object?>? Data { get; }
 
         public string DisplayName { get; }
 
-        public static implicit operator UserDataPermissionActor(UserData d) => new UserDataPermissionActor(d);
+        public static implicit operator UserDataPermissionActor(UserData d) => new(d);
     }
 }

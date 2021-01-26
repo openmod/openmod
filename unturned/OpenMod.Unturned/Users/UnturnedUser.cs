@@ -38,7 +38,7 @@ namespace OpenMod.Unturned.Users
             UnturnedUserProvider userProvider,
             IUserDataStore userDataStore,
             Player player,
-            UnturnedPendingUser pending = null) : base(userProvider, userDataStore)
+            UnturnedPendingUser? pending = null) : base(userProvider, userDataStore)
         {
             var steamPlayerIdId = player.channel.owner.playerID;
             SteamId = steamPlayerIdId.steamID;
@@ -60,6 +60,11 @@ namespace OpenMod.Unturned.Users
 
         public Task PrintMessageAsync(string message, Color color, bool isRich, string iconUrl)
         {
+            if(string.IsNullOrEmpty(message))
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
             async UniTask PrintMessageTask()
             {
                 var lines = message.Replace(System.Environment.NewLine, "\n").Split('\n');

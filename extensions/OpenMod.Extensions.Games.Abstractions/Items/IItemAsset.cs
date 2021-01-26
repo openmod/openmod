@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace OpenMod.Extensions.Games.Abstractions.Items
+﻿namespace OpenMod.Extensions.Games.Abstractions.Items
 {
     /// <summary>
     /// Represents an item asset.
@@ -8,21 +6,18 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
     public interface IItemAsset
     {
         /// <summary>
-        /// The ID of the asset. Cannot be null.
+        /// The ID of the asset.
         /// </summary>
-        [NotNull]
         string ItemAssetId { get; }
 
         /// <summary>
-        /// The human readable name of the asset. Cannot be null. 
+        /// The human readable name of the asset.
         /// </summary>
-        [NotNull]
         string ItemName { get; }
 
         /// <summary>
-        /// The type of the item. Cannot be null.
+        /// The type of the item.
         /// </summary>
-        [NotNull]
         string ItemType { get; }
     }
 }

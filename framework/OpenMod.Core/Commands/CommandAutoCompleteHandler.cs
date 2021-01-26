@@ -44,7 +44,7 @@ namespace OpenMod.Core.Commands
             {
                 matchingCommands = commands.Where(d =>
                     !string.IsNullOrEmpty(d.ParentId)
-                    && d.ParentId.Equals(context.CommandRegistration.Id, StringComparison.OrdinalIgnoreCase)
+                    && (d.ParentId?.Equals(context.CommandRegistration.Id, StringComparison.OrdinalIgnoreCase) ?? false)
                     && d.Name.StartsWith(commandStart, StringComparison.OrdinalIgnoreCase));
             }
 

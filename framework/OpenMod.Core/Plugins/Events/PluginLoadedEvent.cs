@@ -1,5 +1,4 @@
-﻿using OpenMod.API.Eventing;
-using OpenMod.API.Plugins;
+﻿using OpenMod.API.Plugins;
 using OpenMod.Core.Eventing;
 
 namespace OpenMod.Core.Plugins.Events

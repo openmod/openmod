@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿extern alias JetBrainsAnnotations;
+using HarmonyLib;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
@@ -6,15 +7,12 @@ using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
 using System.Linq;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using UnityEngine;
-// ReSharper disable RedundantAssignment
-// ReSharper disable DelegateSubtraction
-// ReSharper disable UnusedMember.Global
-// ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Building.Events
 {
-    // ReSharper disable once UnusedMember.Global
+    [UsedImplicitly]
     internal class BuildablesEventsListener : UnturnedEventsListener
     {
         public BuildablesEventsListener(IOpenModHost openModHost,
@@ -81,8 +79,8 @@ namespace OpenMod.Unturned.Building.Events
 
             var @event = pendingTotalDamage >= buildable.State.Health
                 ? (UnturnedBuildableDamagingEvent)new UnturnedBarricadeDestroyingEvent(buildable, pendingTotalDamage,
-                    damageOrigin, player, instigatorSteamId)
-                : new UnturnedBarricadeDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player,
+                    damageOrigin, player!, instigatorSteamId)
+                : new UnturnedBarricadeDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player!,
                     instigatorSteamId);
 
             @event.IsCancelled = !shouldAllow;
@@ -109,8 +107,8 @@ namespace OpenMod.Unturned.Building.Events
 
                 var @event = pendingTotalDamage >= buildable.State.Health
                     ? (UnturnedBuildableDamagingEvent)new UnturnedStructureDestroyingEvent(buildable,
-                        pendingTotalDamage, damageOrigin, player, instigatorSteamId)
-                    : new UnturnedStructureDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player,
+                        pendingTotalDamage, damageOrigin, player!, instigatorSteamId)
+                    : new UnturnedStructureDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player!,
                         instigatorSteamId);
 
                 @event.IsCancelled = !shouldAllow;
@@ -149,7 +147,7 @@ namespace OpenMod.Unturned.Building.Events
             var nativePlayer = PlayerTool.getPlayer(steamId);
             var player = GetUnturnedPlayer(nativePlayer);
 
-            var @event = new UnturnedBarricadeSalvagingEvent(new UnturnedBarricadeBuildable(data, drop), player, steamId)
+            var @event = new UnturnedBarricadeSalvagingEvent(new UnturnedBarricadeBuildable(data, drop), player!, steamId)
             {
                 IsCancelled = !shouldAllow
             };
@@ -172,7 +170,7 @@ namespace OpenMod.Unturned.Building.Events
             var nativePlayer = PlayerTool.getPlayer(steamId);
             var player = GetUnturnedPlayer(nativePlayer);
 
-            var @event = new UnturnedStructureSalvagingEvent(new UnturnedStructureBuildable(data, drop), player, steamId)
+            var @event = new UnturnedStructureSalvagingEvent(new UnturnedStructureBuildable(data, drop), player!, steamId)
             {
                 IsCancelled = !shouldAllow
             };
@@ -215,7 +213,7 @@ namespace OpenMod.Unturned.Building.Events
             var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2); // lgtm [cs/loss-of-precision]
 
             var @event = new UnturnedBarricadeTransformingEvent(
-                new UnturnedBarricadeBuildable(data, drop), player, instigator, point, rot)
+                new UnturnedBarricadeBuildable(data, drop), player!, instigator, point, rot)
             {
                 IsCancelled = !shouldAllow
             };
@@ -247,11 +245,11 @@ namespace OpenMod.Unturned.Building.Events
 
             var nativePlayer = PlayerTool.getPlayer(instigator);
             var player = GetUnturnedPlayer(nativePlayer);
-            
+
             var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2); // lgtm [cs/loss-of-precision]
 
             var @event = new UnturnedStructureTransformingEvent(
-                new UnturnedStructureBuildable(data, drop), player, instigator, point, rot)
+                new UnturnedStructureBuildable(data, drop), player!, instigator, point, rot)
             {
                 IsCancelled = !shouldAllow
             };
@@ -274,7 +272,7 @@ namespace OpenMod.Unturned.Building.Events
             var player = GetUnturnedPlayer(nativePlayer);
 
             var @event = new UnturnedBarricadeTransformedEvent(new UnturnedBarricadeBuildable(data, drop),
-                instigatorSteamId, player);
+                instigatorSteamId, player!);
 
             Emit(@event);
         }
@@ -285,39 +283,39 @@ namespace OpenMod.Unturned.Building.Events
             var player = GetUnturnedPlayer(nativePlayer);
 
             var @event = new UnturnedStructureTransformedEvent(new UnturnedStructureBuildable(data, drop),
-                instigatorSteamId, player);
+                instigatorSteamId, player!);
 
             Emit(@event);
         }
 
         private delegate void BarricadeDeployed(BarricadeData data, BarricadeDrop drop);
-        private static event BarricadeDeployed OnBarricadeDeployed;
+        private static event BarricadeDeployed? OnBarricadeDeployed;
 
         private delegate void StructureDeployed(StructureData data, StructureDrop drop);
-        private static event StructureDeployed OnStructureDeployed;
+        private static event StructureDeployed? OnStructureDeployed;
 
         private delegate void BarricadeDestroyed(BarricadeData data, BarricadeDrop drop);
-        private static event BarricadeDestroyed OnBarricadeDestroyed;
+        private static event BarricadeDestroyed? OnBarricadeDestroyed;
 
         private delegate void StructureDestroyed(StructureData data, StructureDrop drop);
-        private static event StructureDestroyed OnStructureDestroyed;
+        private static event StructureDestroyed? OnStructureDestroyed;
 
         private delegate void BarricadeTransformed(BarricadeData data, BarricadeDrop drop, CSteamID instigatorSteamId);
-        private static event BarricadeTransformed OnBarricadeTransformed;
+        private static event BarricadeTransformed? OnBarricadeTransformed;
 
         private delegate void StructureTransformed(StructureData data, StructureDrop drop, CSteamID instigatorSteamId);
-        private static event StructureTransformed OnStructureTransformed;
+        private static event StructureTransformed? OnStructureTransformed;
 
         private static CSteamID CurrentTransformingPlayerId = CSteamID.Nil;
 
+        [UsedImplicitly]
         [HarmonyPatch]
-        // ReSharper disable once UnusedType.Local
         private class Patches
         {
+            [UsedImplicitly]
             [HarmonyPatch(typeof(BarricadeManager), "dropBarricadeIntoRegionInternal")]
             [HarmonyPostfix]
-            private static void DropBarricade(BarricadeRegion region, BarricadeData data, ref Transform result,
-                ref uint instanceID)
+            private static void DropBarricade(BarricadeRegion region, BarricadeData data, ref Transform result, ref uint instanceID)
             {
                 if (result == null)
                 {
@@ -331,6 +329,7 @@ namespace OpenMod.Unturned.Building.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.dropReplicatedStructure))]
             [HarmonyPostfix]
             private static void DropStructure(Vector3 point, bool __result, uint ___instanceCount)
@@ -359,6 +358,7 @@ namespace OpenMod.Unturned.Building.Events
                 }
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.destroyBarricade))]
             [HarmonyPrefix]
             private static void DestroyBarricade(BarricadeRegion region, ushort index)
@@ -371,6 +371,7 @@ namespace OpenMod.Unturned.Building.Events
                 OnBarricadeDestroyed?.Invoke(data, drop);
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.destroyStructure))]
             [HarmonyPrefix]
             private static void DestroyStructure(StructureRegion region, ushort index)
@@ -383,6 +384,7 @@ namespace OpenMod.Unturned.Building.Events
                 OnStructureDestroyed?.Invoke(data, drop);
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.askTransformBarricade))]
             [HarmonyPrefix]
             private static void PreAskTransformBarricade(CSteamID steamID)
@@ -390,6 +392,7 @@ namespace OpenMod.Unturned.Building.Events
                 CurrentTransformingPlayerId = steamID;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.askTransformBarricade))]
             [HarmonyPostfix]
             private static void PostAskTransformBarricade()
@@ -397,6 +400,7 @@ namespace OpenMod.Unturned.Building.Events
                 CurrentTransformingPlayerId = CSteamID.Nil;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.askTransformStructure))]
             [HarmonyPrefix]
             private static void PreAskTransformStructure(CSteamID steamID)
@@ -404,6 +408,7 @@ namespace OpenMod.Unturned.Building.Events
                 CurrentTransformingPlayerId = steamID;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.askTransformStructure))]
             [HarmonyPostfix]
             private static void PostAskTransformStructure()
@@ -411,6 +416,7 @@ namespace OpenMod.Unturned.Building.Events
                 CurrentTransformingPlayerId = CSteamID.Nil;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.tellTransformBarricade))]
             [HarmonyPostfix]
             private static void TellTransformBarricade(BarricadeManager __instance, CSteamID steamID, byte x, byte y, ushort plant, uint instanceID)
@@ -430,6 +436,7 @@ namespace OpenMod.Unturned.Building.Events
                 OnBarricadeTransformed?.Invoke(data, drop, CurrentTransformingPlayerId);
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.tellTransformStructure))]
             [HarmonyPostfix]
             private static void TellTransformStructure(StructureManager __instance, CSteamID steamID, byte x, byte y, uint instanceID)

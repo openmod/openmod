@@ -1,13 +1,15 @@
-﻿using Cysharp.Threading.Tasks;
+﻿extern alias JetBrainsAnnotations;
+using Cysharp.Threading.Tasks;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
-// ReSharper disable DelegateSubtraction
 
 namespace OpenMod.Unturned.Players.Connections.Events
 {
+    [UsedImplicitly]
     internal class PlayerConnectionsEventsListener : UnturnedEventsListener
     {
         public PlayerConnectionsEventsListener(IOpenModHost openModHost,
@@ -32,12 +34,11 @@ namespace OpenMod.Unturned.Players.Connections.Events
         {
             async UniTaskVoid EmitPlayerConnected(SteamPlayer nativePlayer)
             {
-                UnturnedPlayer player = GetUnturnedPlayer(nativePlayer);
+                var player = GetUnturnedPlayer(nativePlayer)!;
 
                 await UniTask.DelayFrame(1);
 
-                UnturnedPlayerConnectedEvent @event = new UnturnedPlayerConnectedEvent(player);
-
+                var @event = new UnturnedPlayerConnectedEvent(player);
                 Emit(@event);
             }
 
@@ -46,10 +47,9 @@ namespace OpenMod.Unturned.Players.Connections.Events
 
         private void OnPlayerDisconnected(SteamPlayer steamPlayer)
         {
-            UnturnedPlayer player = GetUnturnedPlayer(steamPlayer);
+            var player = GetUnturnedPlayer(steamPlayer)!;
 
-            UnturnedPlayerDisconnectedEvent @event = new UnturnedPlayerDisconnectedEvent(player);
-
+            var @event = new UnturnedPlayerDisconnectedEvent(player);
             Emit(@event);
         }
     }

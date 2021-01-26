@@ -22,16 +22,24 @@ namespace OpenMod.Core.Commands
 
         public MethodCommandWrapper(MethodInfo methodInfo, IServiceProvider serviceProvider)
         {
-            m_MethodInfo = methodInfo;
-            m_ServiceProvider = serviceProvider;
-            m_CommandParameters = serviceProvider.GetRequiredService<ICurrentCommandContextAccessor>().Context.Parameters;
+            m_MethodInfo = methodInfo ?? throw new ArgumentNullException(nameof(methodInfo));
+            m_ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            var contextAccessor = serviceProvider.GetRequiredService<ICurrentCommandContextAccessor>();
+
+            var context = contextAccessor.Context;
+            if (context == null)
+            {
+                throw new InvalidOperationException("contextAccessor.Context was null");
+            }
+
+            m_CommandParameters = context.Parameters;
             m_ParametersTypes = m_MethodInfo.GetParameters().GetParametersTypes();
         }
 
         public async Task ExecuteAsync()
         {
             object[] values = await CommandHelper.GetServiceOrCommandParameter(m_ParametersTypes, m_ServiceProvider, m_CommandParameters);
-            await m_MethodInfo.InvokeWithTaskSupportAsync(null, values);
+            await m_MethodInfo.InvokeWithTaskSupportAsync(instance: null, values);
         }
     }
 }

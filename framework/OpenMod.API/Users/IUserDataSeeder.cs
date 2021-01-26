@@ -13,6 +13,6 @@ namespace OpenMod.API.Users
         /// <summary>
         /// Seeds initial user data.
         /// </summary>
-        Task SeedUserDataAsync(string actorId, string actorType, string displayName, Dictionary<string, object> data = null);
+        Task SeedUserDataAsync(string actorId, string actorType, string? displayName, Dictionary<string, object?>? data = null);
     }
 }

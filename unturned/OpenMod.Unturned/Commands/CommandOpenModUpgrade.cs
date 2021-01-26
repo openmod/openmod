@@ -63,7 +63,7 @@ namespace OpenMod.Unturned.Commands
             var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
 
             await PrintAsync("Extracting update...");
-            await ExtractArchiveAsync(stream, openModDirPath);
+            await ExtractArchiveAsync(stream, openModDirPath!);
 
             if (Hotloader.Enabled)
             {
@@ -136,19 +136,19 @@ namespace OpenMod.Unturned.Commands
         private class LatestRelease
         {
             [JsonProperty("assets")]
-            public List<Asset> Assets { get; set; }
+            public List<Asset> Assets { get; set; } = null!;
 
             [JsonProperty("tag_name")]
-            public string TagName { get; set; }
+            public string TagName { get; set; } = null!;
         }
 
         private class Asset
         {
             [JsonProperty("name")]
-            public string AssetName { get; set; }
+            public string AssetName { get; set; } = null!;
 
             [JsonProperty("browser_download_url")]
-            public string BrowserDownloadUrl { get; set; }
+            public string BrowserDownloadUrl { get; set; } = null!;
         }
     }
 }

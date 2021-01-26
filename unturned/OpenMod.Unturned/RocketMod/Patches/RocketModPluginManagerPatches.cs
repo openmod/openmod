@@ -3,7 +3,7 @@
     internal static class RocketModPluginManagerPatches
     {
         public delegate void PostRocketPluginsLoaded();
-        public static event PostRocketPluginsLoaded OnPostRocketPluginsLoaded;
+        public static event PostRocketPluginsLoaded? OnPostRocketPluginsLoaded;
 
         public static void LoadPluginsPostfix()
         {

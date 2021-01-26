@@ -2,7 +2,6 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using OpenMod.API.Ioc;
-using OpenMod.API.Prioritization;
 
 namespace OpenMod.API.Eventing
 {
@@ -12,14 +11,14 @@ namespace OpenMod.API.Eventing
     /// <typeparam name="TEvent">The event type.</typeparam>
     /// <param name="sender">The event sender.</param>
     /// <param name="event">The event instance.</param>
-    public delegate Task EventCallback<in TEvent>(IServiceProvider serviceProvider, object sender, TEvent @event) where TEvent : IEvent;
+    public delegate Task EventCallback<in TEvent>(IServiceProvider serviceProvider, object? sender, TEvent @event) where TEvent : IEvent;
 
     /// <summary>
     /// The callback for event notifications.
     /// </summary>
     /// <param name="sender">The event sender.</param>
     /// <param name="event">The event instance.</param>
-    public delegate Task EventCallback(IServiceProvider serviceProvider, object sender, IEvent @event);
+    public delegate Task EventCallback(IServiceProvider serviceProvider, object? sender, IEvent @event);
 
     /// <summary>
     /// The callback called after an event has been emitted and all listeners have been notified.
@@ -99,6 +98,6 @@ namespace OpenMod.API.Eventing
         /// <param name="sender">The object emitting the event.</param>
         /// <param name="event">The event object.</param>
         /// <param name="callback">The optional event callback. See <see cref="EventExecutedCallback" />.</param>
-        Task EmitAsync(IOpenModComponent component, object sender, IEvent @event, EventExecutedCallback callback = null);
+        Task EmitAsync(IOpenModComponent component, object? sender, IEvent @event, EventExecutedCallback? callback = null);
     }
 }

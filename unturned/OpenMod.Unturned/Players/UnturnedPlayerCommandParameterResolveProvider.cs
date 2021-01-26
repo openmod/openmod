@@ -16,20 +16,20 @@ namespace OpenMod.Unturned.Players
             return typeof(IPlayer).IsAssignableFrom(type);
         }
 
-        public Task<object> ResolveAsync(Type type, string input)
+        public Task<object?> ResolveAsync(Type type, string input)
         {
             if (!Supports(type))
             {
                 var ex = new ArgumentException("The given type is not supported", nameof(type));
-                return Task.FromException<object>(ex);
+                return Task.FromException<object?>(ex);
             }
 
-            SteamPlayer steamPlayer = Provider.clients
+            var steamPlayer = Provider.clients
                 .FirstOrDefault(x => input == x.playerID.steamID.ToString() || input.Equals(x.playerID.playerName, StringComparison.OrdinalIgnoreCase));
 
             var player = steamPlayer == null ? null : new UnturnedPlayer(steamPlayer.player);
 
-            return Task.FromResult<object>(player);
+            return Task.FromResult<object?>(player);
         }
     }
 }

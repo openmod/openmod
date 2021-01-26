@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace OpenMod.API.Plugins
+﻿namespace OpenMod.API.Plugins
 {
     /// <summary>
     /// Service used for resolving plugin instances. Must be lazy accessed on global scope services. 
@@ -11,7 +9,6 @@ namespace OpenMod.API.Plugins
         /// <value>
         /// The plugin instance. Can be null if the plugin is not loaded or found.
         /// </value>
-        [CanBeNull]
-        TPlugin Instance { get; }
+        TPlugin? Instance { get; }
     }
 }

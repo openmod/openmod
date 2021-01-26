@@ -4,11 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Nito.AsyncEx;
 using NuGet.Common;
 using NuGet.Packaging.Core;
-using NuGet.Protocol.Core.Types;
 using OpenMod.NuGet;
 
 namespace OpenMod.Bootstrapper
@@ -31,16 +29,15 @@ namespace OpenMod.Bootstrapper
         /// <param name="allowPrereleaseVersions">If true, will download pre-release versions.</param>
         /// <param name="logger">The optional logger.</param>
         /// <returns>The OpenMod runtime.</returns>
-        [ItemNotNull]
-        public Task<object> BootstrapAsync(
-            NuGetPackageManager packageManager,
+        public Task<object?> BootstrapAsync(
+            NuGetPackageManager? packageManager,
             string openModFolder,
             string[] commandLineArgs,
             string packageId,
             bool allowPrereleaseVersions = false,
-            ILogger logger = null)
+            ILogger? logger = null)
         {
-            return BootstrapAsync(packageManager, openModFolder, commandLineArgs, new List<string> { packageId }, Enumerable.Empty<string>(), allowPrereleaseVersions, logger);
+            return BootstrapAsync(packageManager, openModFolder, commandLineArgs, new List<string> { packageId }, allowPrereleaseVersions, logger);
         }
 
         /// <summary>
@@ -53,17 +50,15 @@ namespace OpenMod.Bootstrapper
         /// <param name="allowPrereleaseVersions">If true, will download pre-release versions.</param>
         /// <param name="logger">The optional logger.</param>
         /// <returns>The OpenMod runtime.</returns>
-        [NotNull]
-        public object Bootstrap(
-            NuGetPackageManager packageManager,
+        public object? Bootstrap(
+            NuGetPackageManager? packageManager,
             string openModFolder,
             string[] commandLineArgs,
             IEnumerable<string> packageIds,
-            IEnumerable<string> ignoredDependencies,
             bool allowPrereleaseVersions = false,
-            ILogger logger = null)
+            ILogger? logger = null)
         {
-            return AsyncContext.Run(() => BootstrapAsync(packageManager, openModFolder, commandLineArgs, packageIds, ignoredDependencies, allowPrereleaseVersions, logger));
+            return AsyncContext.Run(() => BootstrapAsync(packageManager, openModFolder, commandLineArgs, packageIds, allowPrereleaseVersions, logger));
         }
 
         /// <summary>
@@ -74,17 +69,15 @@ namespace OpenMod.Bootstrapper
         /// <param name="commandLineArgs">The command line arguments.</param>
         /// <param name="packageIds">The IDs of the host package.</param>
         /// <param name="allowPrereleaseVersions">If true, will download pre-release versions.</param>
-        /// <param name="ignoredDependencies">Ignored dependencies.</param>
         /// <param name="logger">The optional logger.</param>
         /// <returns>The OpenMod runtime.</returns>
-        public async Task<object> BootstrapAsync(
-            NuGetPackageManager packageManager,
+        public async Task<object?> BootstrapAsync(
+            NuGetPackageManager? packageManager,
             string openModFolder,
             string[] commandLineArgs,
             IEnumerable<string> packageIds,
-            IEnumerable<string> ignoredDependencies,
             bool allowPrereleaseVersions = false,
-            ILogger logger = null)
+            ILogger? logger = null)
         {
             var shouldAutoUpdate = commandLineArgs.Any(arg => arg.Equals("-OpenModAutoUpdate", StringComparison.InvariantCultureIgnoreCase));
             if (!shouldAutoUpdate)
@@ -120,12 +113,17 @@ namespace OpenMod.Bootstrapper
                 if (shouldInstallOrUpdate)
                 {
                     var latestOpenModPackage = await packageManager.QueryPackageExactAsync(packageId, version: null, allowPrereleaseVersions);
-                    var latestPackageIdentity = latestOpenModPackage.Identity;
+                    var latestPackageIdentity = latestOpenModPackage?.Identity;
 
-                    if (packageIdentity == null || packageIdentity.Version < latestPackageIdentity.Version)
+                    if (latestPackageIdentity == null && packageId == null)
                     {
-                        logger.LogInformation($"Downloading {latestPackageIdentity.Id} v{latestPackageIdentity.Version} via NuGet");
-                        var installResult = await packageManager.InstallAsync(latestPackageIdentity, allowPrereleaseVersions);
+                        throw new Exception($"Failed to find package: {packageId}");
+                    }
+
+                    if (packageIdentity == null || packageIdentity.Version < latestPackageIdentity!.Version)
+                    {
+                        logger.LogInformation($"Downloading {latestPackageIdentity!.Id} v{latestPackageIdentity!.Version} via NuGet");
+                        var installResult = await packageManager.InstallAsync(latestPackageIdentity!, allowPrereleaseVersions);
                         if (installResult.Code == NuGetInstallCode.Success || installResult.Code == NuGetInstallCode.NoUpdatesFound)
                         {
                             packageIdentity = installResult.Identity;
@@ -144,7 +142,7 @@ namespace OpenMod.Bootstrapper
                     }
                 }
 
-                logger.LogInformation($"Loading {packageIdentity.Id} v{packageIdentity.Version}");
+                logger.LogInformation($"Loading {packageIdentity!.Id} v{packageIdentity!.Version}");
                 var packageAssemblies = await LoadPackageAsync(packageManager, packageIdentity);
                 hostAssemblies.AddRange(packageAssemblies);
             }
@@ -163,6 +161,11 @@ namespace OpenMod.Bootstrapper
             var runtimeAssembly = FindAssemblyInCurrentDomain("OpenMod.Runtime");
             var apiAssembly = FindAssemblyInCurrentDomain("OpenMod.API");
             var runtimeType = runtimeAssembly.GetType("OpenMod.Runtime.Runtime");
+            if (runtimeType == null)
+            {
+                throw new Exception($"Failed to find Runtime class in: {runtimeAssembly}");
+            }
+
             var runtime = Activator.CreateInstance(runtimeType);
 
             var parametersType = apiAssembly.GetType("OpenMod.API.RuntimeInitParameters");
@@ -172,6 +175,11 @@ namespace OpenMod.Bootstrapper
             SetParameter(parameters, "PackageManager", packageManager);
 
             var initMethod = runtimeType.GetMethod("InitAsync", BindingFlags.Instance | BindingFlags.Public);
+            if (initMethod == null)
+            {
+                throw new Exception($"Failed to find InitAsync in: {runtimeType.FullName}");
+            }
+
             await (Task)initMethod.Invoke(runtime, new[] { hostAssemblies, parameters, null /* hostBuilderFunc */});
             return runtime;
         }
@@ -184,8 +192,8 @@ namespace OpenMod.Bootstrapper
 
         private void SetParameter(object parametersObject, string name, object value)
         {
-            var field = parametersObject.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
-            field?.SetValue(parametersObject, value);
+            var property = parametersObject.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+            property?.SetValue(parametersObject, value);
         }
     }
 }

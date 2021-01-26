@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
@@ -11,24 +10,21 @@ using OpenMod.API.Prioritization;
 
 namespace OpenMod.Core.Permissions
 {
-    [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Priority = Priority.Lowest, Lifetime = ServiceLifetime.Singleton)]
     public class PermissionRegistry : IPermissionRegistry
     {
         private readonly Dictionary<IOpenModComponent, List<PermissionRegistration>> m_PermissionRegistrations;
-        private readonly ILogger<PermissionRegistry> m_Logger;
 
-        public PermissionRegistry(ILogger<PermissionRegistry> logger)
+        public PermissionRegistry()
         {
-            m_Logger = logger;
             m_PermissionRegistrations = new Dictionary<IOpenModComponent, List<PermissionRegistration>>();
         }
 
         public void RegisterPermission(
             IOpenModComponent component,
             string permission,
-            string description = null,
+            string? description = null,
             PermissionGrantResult? defaultGrant = null)
         {
             if (!m_PermissionRegistrations.ContainsKey(component))
@@ -57,14 +53,14 @@ namespace OpenMod.Core.Permissions
             return m_PermissionRegistrations[component].AsReadOnly();
         }
 
-        public IPermissionRegistration FindPermission(string permission)
+        public IPermissionRegistration? FindPermission(string permission)
         {
             return m_PermissionRegistrations.Values
                 .SelectMany(d => d)
                 .FirstOrDefault(registration => registration.Owner.IsComponentAlive && permission.Equals($"{registration.Owner.OpenModComponentId}:{registration.Permission}", StringComparison.OrdinalIgnoreCase));
         }
 
-        public IPermissionRegistration FindPermission(IOpenModComponent component, string permission)
+        public IPermissionRegistration? FindPermission(IOpenModComponent component, string permission)
         {
             if (!component.IsComponentAlive || !m_PermissionRegistrations.ContainsKey(component))
             {

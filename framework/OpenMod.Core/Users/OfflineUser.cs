@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Threading.Tasks;
 using OpenMod.API.Users;
 
@@ -10,9 +11,14 @@ namespace OpenMod.Core.Users
 
         public OfflineUser(IUserProvider userProvider, IUserDataStore userDataStore,  UserData data) : base(userProvider, userDataStore)
         {
-            Id = data.Id;
-            Type = data.Type;
-            DisplayName = data.LastDisplayName;
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            Id = data.Id ?? throw new InvalidOperationException("UserData.Id was null");
+            Type = data.Type ?? throw new InvalidOperationException("UserData.Type was null");
+            DisplayName = data.LastDisplayName ?? Id;
             m_Data = data;
         }
 

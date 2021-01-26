@@ -1,10 +1,11 @@
-﻿using NuGet.Packaging.Core;
+﻿using System;
+using NuGet.Packaging.Core;
 
 namespace OpenMod.NuGet
 {
     public sealed class NuGetInstallResult
     {
-        public PackageIdentity Identity { get; }
+        public PackageIdentity? Identity { get; }
 
         public NuGetInstallResult(NuGetInstallCode code)
         {
@@ -13,11 +14,11 @@ namespace OpenMod.NuGet
 
         public NuGetInstallResult(PackageIdentity identity)
         {
-            Identity = identity;
+            Identity = identity ?? throw new ArgumentNullException(nameof(identity));
             Code = NuGetInstallCode.Success;
         }
 
-        public NuGetInstallResult(NuGetInstallCode code, PackageIdentity identity)
+        public NuGetInstallResult(NuGetInstallCode code, PackageIdentity? identity)
         {
             Identity = identity;
             Code = code;

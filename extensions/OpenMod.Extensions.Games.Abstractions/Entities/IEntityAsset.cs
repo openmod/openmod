@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace OpenMod.Extensions.Games.Abstractions.Entities
+﻿namespace OpenMod.Extensions.Games.Abstractions.Entities
 {
     /// <summary>
     /// Represents an entity asset.
@@ -8,21 +6,18 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
     public interface IEntityAsset
     {
         /// <value>
-        /// The human-readable name of the asset. Cannot be null.
+        /// The human-readable name of the asset.
         /// </value>
-        [NotNull]
         string Name { get; }
 
         /// <value>
-        /// The ID of the asset. Cannot be null.
+        /// The ID of the asset.
         /// </value>
-        [NotNull]
         string EntityAssetId { get; }
 
         /// <value>
-        /// The type of the asset. Cannot be null.
+        /// The type of the asset.
         /// </value>
-        [NotNull]
         string EntityType { get; }
     }
 }

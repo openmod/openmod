@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Commands
@@ -18,7 +17,6 @@ namespace OpenMod.API.Commands
         /// <param name="prefix">The prefix for the command. Can be empty.</param>
         /// <param name="commandRegistrations">The command registrations used for looking up commands and their child commands. See <see cref="ICommandStore.GetCommandsAsync"/>.</param>
         /// <returns>The created command context.</returns>
-        [NotNull]
-        ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, IEnumerable<ICommandRegistration> commandRegistrations);
+        ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, IReadOnlyCollection<ICommandRegistration> commandRegistrations);
     }
 }

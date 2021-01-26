@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using JetBrains.Annotations;
 using OpenMod.API.Persistence;
 
 namespace OpenMod.API
@@ -10,15 +9,13 @@ namespace OpenMod.API
     public interface IOpenModComponent
     {
         /// <value>
-        /// The component ID. Cannot be null or empty.
+        /// The component ID.
         /// </value>
-        [NotNull]
         string OpenModComponentId { get; }
 
         /// <value>
-        /// The working directory. Cannot be null or empty.
+        /// The working directory.
         /// </value>
-        [NotNull]
         string WorkingDirectory { get; }
 
         /// <value>
@@ -27,15 +24,13 @@ namespace OpenMod.API
         bool IsComponentAlive { get; }
 
         /// <value>
-        /// The components lifetime scope. Cannot be null.
+        /// The components lifetime scope.
         /// </value>
-        [NotNull]
         ILifetimeScope LifetimeScope { get; }
 
         /// <value>
-        /// The components data store. Can be null.
+        /// The components data store.
         /// </value>
-        [CanBeNull]
-        IDataStore DataStore { get; }
+        IDataStore? DataStore { get; }
     }
 }

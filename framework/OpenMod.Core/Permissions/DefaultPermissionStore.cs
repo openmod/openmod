@@ -82,18 +82,25 @@ namespace OpenMod.Core.Permissions
         {
             if (actor is IPermissionRole)
             {
-                var roleData = m_PermissionRolesDataStore.Roles.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
+                var roleData = m_PermissionRolesDataStore.Roles.First(d => d.Id?.Equals(actor.Id, StringComparison.OrdinalIgnoreCase) ?? false);
                 if (roleData == null)
                 {
                     return false;
                 }
 
+                roleData.Permissions ??= new ();
                 roleData.Permissions.Add(permission);
                 await m_PermissionRolesDataStore.SaveChangesAsync();
                 return true;
             }
 
             var userData = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
+            if(userData == null)
+            {
+                return false;
+            }
+
+            userData.Permissions ??= new();
             userData.Permissions.Add(permission);
             await m_UserDataStore.SetUserDataAsync(userData);
             return true;
@@ -108,22 +115,26 @@ namespace OpenMod.Core.Permissions
         {
             if (actor is IPermissionRole)
             {
-                var roleData = m_PermissionRolesDataStore.Roles.First(d => d.Id.Equals(actor.Id, StringComparison.OrdinalIgnoreCase));
-                if (roleData == null)
+                var roleData = m_PermissionRolesDataStore.Roles.First(d => d.Id?.Equals(actor.Id, StringComparison.OrdinalIgnoreCase) ?? false);
+                if (roleData?.Permissions == null)
                 {
                     return false;
                 }
 
-                if (!roleData.Permissions.Remove(permission)) 
+                if (!roleData.Permissions.Remove(permission))
+                {
                     return false;
+                }
 
                 await m_PermissionRolesDataStore.SaveChangesAsync();
                 return true;
             }
 
             var userData = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
-            if (!userData.Permissions.Remove(permission))
+            if (userData?.Permissions == null ||!userData.Permissions.Remove(permission))
+            {
                 return false;
+            }
 
             await m_UserDataStore.SetUserDataAsync(userData);
             return true;

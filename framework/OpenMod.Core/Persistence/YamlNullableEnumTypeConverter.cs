@@ -16,7 +16,7 @@ namespace OpenMod.Core.Persistence
             return Nullable.GetUnderlyingType(type)?.IsEnum ?? false;
         }
 
-        public object ReadYaml(IParser parser, Type type)
+        public object? ReadYaml(IParser parser, Type type)
         {
             type = Nullable.GetUnderlyingType(type) ?? throw new ArgumentException("Expected nullable enum type for ReadYaml");
             var scalar = parser.Consume<Scalar>();
@@ -36,7 +36,7 @@ namespace OpenMod.Core.Persistence
             }
         }
 
-        public void WriteYaml(IEmitter emitter, object value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
             type = Nullable.GetUnderlyingType(type) ?? throw new ArgumentException("Expected nullable enum type for WriteYaml");
 

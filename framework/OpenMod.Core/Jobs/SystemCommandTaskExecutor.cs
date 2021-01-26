@@ -33,19 +33,24 @@ namespace OpenMod.Core.Jobs
                 throw new Exception($"Job \"{task.JobName}\" is missing the command list in args.commands!");
             }
 
-            var commands = (IEnumerable<object>)task.Args["commands"];
-            foreach (string command in commands)
+            var commands = (IEnumerable<object?>)task.Args["commands"]!;
+            foreach (string? command in commands)
             {
-                m_Logger.LogInformation($"[{task.JobName}] Running system command: {command}");
-                var args = ArgumentsParser.ParseArguments(command);
-                var startInfo = new ProcessStartInfo(args[0], command.Replace(args[0] + " ", string.Empty))
+                if (string.IsNullOrEmpty(command))
+                {
+                    continue;
+                }
+
+                m_Logger.LogInformation($"[{task.JobName}] Running system command: {command!}");
+                var args = ArgumentsParser.ParseArguments(command!);
+                var startInfo = new ProcessStartInfo(args[0], command!.Replace(args[0] + " ", string.Empty))
                 {
                     UseShellExecute = false,
                     WorkingDirectory = m_Runtime.WorkingDirectory
                 };
 
                 var process = Process.Start(startInfo);
-                await process.WaitForExitAsync();
+                await process!.WaitForExitAsync();
             }
         }
     }

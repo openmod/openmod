@@ -22,8 +22,8 @@ namespace OpenMod.Core.Commands
         private readonly IRuntime m_Runtime;
         private readonly Lazy<ICommandStore> m_CommandStore;
         private readonly ILogger<CommandDataStore> m_Logger;
-        private IDisposable m_ChangeWatcher;
-        private RegisteredCommandsData m_Cache;
+        private IDisposable? m_ChangeWatcher;
+        private RegisteredCommandsData? m_Cache;
 
         public CommandDataStore(IOpenModDataStoreAccessor dataStoreAccessor,
             IRuntime runtime,
@@ -36,25 +36,41 @@ namespace OpenMod.Core.Commands
             m_Logger = logger;
         }
 
-        public async Task<RegisteredCommandData> GetRegisteredCommandAsync(string commandId)
+        public async Task<RegisteredCommandData?> GetRegisteredCommandAsync(string commandId)
         {
+            if (string.IsNullOrEmpty(commandId))
+            {
+                throw new ArgumentException(nameof(commandId));
+            }
+
             var commandsData = await GetRegisteredCommandsAsync();
-            return commandsData.Commands.FirstOrDefault(d =>
-                d.Id.Equals(commandId, StringComparison.OrdinalIgnoreCase));
+
+            return commandsData.Commands?.FirstOrDefault(d =>
+                d.Id?.Equals(commandId, StringComparison.OrdinalIgnoreCase) ?? false);
         }
 
         public Task SetRegisteredCommandsAsync(RegisteredCommandsData data)
         {
-            m_Cache = data;
+            m_Cache = data ?? throw new ArgumentNullException(nameof(data));
             return m_DataStore.SaveAsync(CommandsKey, data);
         }
 
-        public async Task SetCommandDataAsync<T>(string commandId, string key, T value)
+        public async Task SetCommandDataAsync<T>(string commandId, string key, T? value)
         {
-            var commandData = await GetRegisteredCommandAsync(commandId);
+            if (string.IsNullOrEmpty(commandId))
+            {
+                throw new ArgumentNullException(nameof(commandId));
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            var commandData = await GetRegisteredCommandAsync(commandId) ?? new RegisteredCommandData();
             if (commandData.Data == null)
             {
-                commandData.Data = new Dictionary<string, object>();
+                commandData.Data = new Dictionary<string, object?>();
             }
             else if (commandData.Data.ContainsKey(key))
             {
@@ -67,23 +83,31 @@ namespace OpenMod.Core.Commands
 
         public async Task SetCommandDataAsync(RegisteredCommandData commandData)
         {
-            var commandsData = await GetRegisteredCommandsAsync();
-            var idx = commandsData.Commands.FindIndex(c =>
-                c.Id.Equals(commandData.Id, StringComparison.OrdinalIgnoreCase));
+            if (commandData == null)
+            {
+                throw new ArgumentNullException(nameof(commandData));
+            }
 
-            commandsData.Commands.RemoveAll(c =>
-                c.Id.Equals(commandData.Id, StringComparison.OrdinalIgnoreCase));
+            var commandsData = await GetRegisteredCommandsAsync();
+            var commands = commandsData.Commands ?? new List<RegisteredCommandData>();
+
+            var idx = commands.FindIndex(c =>
+                c.Id?.Equals(commandData.Id, StringComparison.OrdinalIgnoreCase) ?? false);
+
+            commands.RemoveAll(c =>
+                c.Id?.Equals(commandData.Id, StringComparison.OrdinalIgnoreCase) ?? false);
 
             // preserve location in data
             if (idx >= 0)
             {
-                commandsData.Commands.Insert(idx, commandData);
+                commands.Insert(idx, commandData);
             }
             else
             {
-                commandsData.Commands.Add(commandData);
+                commands.Add(commandData);
             }
 
+            commandsData.Commands = commands;
             m_Cache = commandsData;
             await m_DataStore.SaveAsync(CommandsKey, commandsData);
         }
@@ -114,9 +138,13 @@ namespace OpenMod.Core.Commands
             RegisteredCommandsData commandsData;
             if (await m_DataStore.ExistsAsync(CommandsKey))
             {
-                commandsData = await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey);
-                if ((commandsData?.Commands?.Count ?? 0) != 0)
+                commandsData = await m_DataStore.LoadAsync<RegisteredCommandsData>(CommandsKey)
+                               ?? throw new InvalidOperationException("Failed to load commands data");
+
+                if ((commandsData.Commands?.Count ?? 0) != 0)
+                {
                     return commandsData;
+                }
             }
             else
             {
@@ -129,16 +157,26 @@ namespace OpenMod.Core.Commands
 
         private RegisteredCommandsData GetDefaultCommandsData()
         {
-            return new RegisteredCommandsData
+            return new()
             {
                 Commands = new List<RegisteredCommandData>()
             };
         }
 
-        public async Task<T> GetCommandDataAsync<T>(string commandId, string key)
+        public async Task<T?> GetCommandDataAsync<T>(string commandId, string key)
         {
+            if (string.IsNullOrEmpty(commandId))
+            {
+                throw new ArgumentNullException(nameof(commandId));
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
             var data = await GetRegisteredCommandAsync(commandId);
-            if (!data.Data.ContainsKey(key))
+            if (data?.Data == null || !data.Data.ContainsKey(key))
             {
                 return default;
             }
@@ -149,9 +187,13 @@ namespace OpenMod.Core.Commands
                 return obj;
             }
 
+            if (dataObject == null)
+            {
+                return default;
+            }
+
             if (dataObject.GetType().HasConversionOperator(typeof(T)))
             {
-                // ReSharper disable once PossibleInvalidCastException
                 return (T)dataObject;
             }
 

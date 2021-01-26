@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,7 +21,7 @@ namespace OpenMod.Core.Users
             return true;
         }
 
-        public async Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
+        public async Task<IUser?> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
         {
             if (searchMode != UserSearchMode.FindById && searchMode != UserSearchMode.FindByNameOrId)
             {

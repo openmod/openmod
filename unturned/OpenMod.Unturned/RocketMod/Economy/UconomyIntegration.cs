@@ -29,7 +29,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
         /// <summary>
         /// Gets the Uconomy assembly if loaded or null.
         /// </summary>
-        public static Assembly GetUconomyAssembly()
+        public static Assembly? GetUconomyAssembly()
         {
             return AppDomain.CurrentDomain.GetAssemblies().LastOrDefault(d => d.GetName().Name.Equals("Uconomy"));
         }
@@ -37,7 +37,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
         /// <summary>
         /// Gets the path to the Uconomy assembly. Will return null if not found.
         /// </summary>
-        public static string GetUconomyFile()
+        public static string? GetUconomyFile()
         {
             var pluginsFolder = Path.Combine(RocketModIntegration.GetRocketFolder(), "Plugins");
 
@@ -59,7 +59,6 @@ namespace OpenMod.Unturned.RocketMod.Economy
                 catch
                 {
                     // ignored
-                    continue;
                 }
             }
 

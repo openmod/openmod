@@ -22,40 +22,50 @@ namespace OpenMod.Core.Commands
 
         public bool Supports(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             return TryGetSupportedConverter(type, out _);
         }
 
-        public Task<object> ResolveAsync(Type type, string input)
+        public Task<object?> ResolveAsync(Type type, string input)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             if (!TryGetSupportedConverter(type, out TypeConverter converter))
             {
                 var ex = new ArgumentException("The given type is not supported", nameof(type));
-                return Task.FromException<object>(ex);
+                return Task.FromException<object?>(ex);
             }
 
             var descriptor = new ServiceProviderTypeDescriptor(m_ServiceProvider);
 
             try
             {
-                object result = converter.ConvertFromString(descriptor, input);
-                return Task.FromResult(result);
+                var result = converter.ConvertFromString(descriptor, input);
+                return Task.FromResult<object?>(result);
             }
             catch (Exception ex) when (ex.InnerException is OverflowException)
             {
                 var parseException = new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:overflow_error", new { Value = input, Type = type }], input, type);
-                return Task.FromException<object>(parseException);
+                return Task.FromException<object?>(parseException);
             }
             catch (Exception ex) when (ex.InnerException is FormatException)
             {
                 var parseException = new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:parse_error", new { Value = input, Type = type }], input, type);
-                return Task.FromException<object>(parseException);
+                return Task.FromException<object?>(parseException);
             }
         }
 
         private bool TryGetSupportedConverter(Type type, out TypeConverter converter)
         {
             converter = TypeDescriptor.GetConverter(type);
-            return converter != null && converter.CanConvertFrom(typeof(string));
+            return converter.CanConvertFrom(typeof(string));
         }
     }
 }

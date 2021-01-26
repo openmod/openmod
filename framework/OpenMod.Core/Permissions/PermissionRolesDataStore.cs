@@ -24,10 +24,10 @@ namespace OpenMod.Core.Permissions
         private readonly IDataStore m_DataStore;
         private readonly ILogger<PermissionRolesDataStore> m_Logger;
         private readonly IRuntime m_Runtime;
-        private IDisposable m_FileChangeWatcher;
-        private PermissionRolesData m_CachedPermissionRolesData;
+        private IDisposable? m_FileChangeWatcher;
+        private PermissionRolesData? m_CachedPermissionRolesData;
 
-        public List<PermissionRoleData> Roles { get => m_CachedPermissionRolesData.Roles; }
+        public List<PermissionRoleData> Roles { get => m_CachedPermissionRolesData!.Roles ?? new List<PermissionRoleData>(); }
 
         public PermissionRolesDataStore(
             ILogger<PermissionRolesDataStore> logger,
@@ -48,12 +48,12 @@ namespace OpenMod.Core.Permissions
                 {
                     Roles = new List<PermissionRoleData>
                     {
-                        new PermissionRoleData
+                        new()
                         {
                             Id = "default",
                             DisplayName = "Default",
                             Priority = 0,
-                            Data = new Dictionary<string, object>(),
+                            Data = new Dictionary<string, object?>(),
                             Parents = new HashSet<string>(),
                             Permissions = new HashSet<string>
                             {
@@ -61,7 +61,7 @@ namespace OpenMod.Core.Permissions
                             },
                             IsAutoAssigned = true
                         },
-                        new PermissionRoleData
+                        new ()
                         {
                             Id = "vip",
                             Priority = 1,
@@ -69,7 +69,7 @@ namespace OpenMod.Core.Permissions
                             {
                                 "default"
                             },
-                            Data = new Dictionary<string, object>(),
+                            Data = new Dictionary<string, object?>(),
                             DisplayName = "VIP",
                             Permissions = new HashSet<string>
                             {
@@ -90,41 +90,60 @@ namespace OpenMod.Core.Permissions
             m_FileChangeWatcher = m_DataStore.AddChangeWatcher(RolesKey, m_Runtime, () => AsyncHelper.RunSync(ReloadAsync));
         }
 
-        public Task<PermissionRoleData> GetRoleAsync(string id)
+        public Task<PermissionRoleData?> GetRoleAsync(string id)
         {
-            var role = Roles.Find(d => d.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-            return Task.FromResult(role);
-        }
-
-        public Task<T> GetRoleDataAsync<T>(string roleId, string key)
-        {
-            var role = Roles.Find(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase));
-            if (role == null)
+            if (string.IsNullOrEmpty(id))
             {
-                return Task.FromException<T>(new Exception($"Role does not exist: {roleId}"));
+                throw new ArgumentException(nameof(id));
             }
 
-            if (!role.Data.ContainsKey(key))
+            var role = Roles.Find(d => d.Id?.Equals(id, StringComparison.OrdinalIgnoreCase) ?? false);
+            return Task.FromResult<PermissionRoleData?>(role);
+        }
+
+        public Task<T?> GetRoleDataAsync<T>(string roleId, string key)
+        {
+            if (string.IsNullOrEmpty(roleId))
             {
-                return Task.FromResult<T>(default);
+                throw new ArgumentException(nameof(roleId));
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
+
+            var role = Roles.Find(d => d.Id?.Equals(roleId, StringComparison.OrdinalIgnoreCase) ?? false);
+            if (role == null)
+            {
+                return Task.FromException<T?>(new Exception($"Role does not exist: {roleId}"));
+            }
+
+            if (role.Data == null || !role.Data.ContainsKey(key))
+            {
+                return Task.FromResult<T?>(default);
             }
 
             var dataObject = role.Data[key];
-
             if (dataObject is T obj)
             {
-                return Task.FromResult(obj);
+                return Task.FromResult<T?>(obj);
+            }
+
+            if(dataObject == null)
+            {
+                return Task.FromResult<T?>(default);
             }
 
             if (dataObject.GetType().HasConversionOperator(typeof(T)))
             {
                 // ReSharper disable once PossibleInvalidCastException
-                return Task.FromResult((T)dataObject);
+                return Task.FromResult<T?>((T)dataObject);
             }
 
             if (dataObject is Dictionary<object, object> dict)
             {
-                return Task.FromResult(dict.ToObject<T>());
+                return Task.FromResult(dict.ToObject<T?>());
             }
 
             throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");

@@ -23,13 +23,13 @@ namespace OpenMod.API.Users
         /// <param name="searchString">The user ID or name depending on the search mode.</param>
         /// <param name="searchMode">The search mode.</param>
         /// <returns><b>The user</b> if found; otherwise, null.</returns>
-        Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode);
+        Task<IUser?> FindUserAsync(string userType, string searchString, UserSearchMode searchMode);
 
         /// <summary>
         /// Gets all users of the given type.
         /// </summary>
         /// <param name="userType">The type of the users to look for.</param>
-        /// <returns>All users of the given type. Cannot return null and neither can the items be null.</returns>
+        /// <returns>All users of the given type.</returns>
         Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType);
 
         /// <summary>

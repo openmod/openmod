@@ -11,12 +11,12 @@ namespace OpenMod.Common.Helpers
 {
     public static class ReflectionExtensions
     {
-        public static MethodBase GetCallingMethod(Type[] skipTypes = null, MethodBase[] skipMethods = null, bool applyAsyncMethodPatch = true)
+        public static MethodBase? GetCallingMethod(Type[]? skipTypes = null, MethodBase[]? skipMethods = null, bool applyAsyncMethodPatch = true)
         {
             var skipList = new List<Type>(skipTypes ?? new Type[0]) { typeof(ReflectionExtensions) };
 
             var st = new StackTrace();
-            var frameTarget = (StackFrame)null;
+            var frameTarget = (StackFrame?)null;
             for (var i = 0; i < st.FrameCount; i++)
             {
                 var frame = st.GetFrame(i);
@@ -28,7 +28,7 @@ namespace OpenMod.Common.Helpers
                 // If current frame method is called "MoveNext" and parent frame is from "AsyncMethodBuilderCore" type 
                 //   it's an async method wrapper, so we need to skip these two frames to get the original calling async method
                 // Tested on .NET Core 2.1; should be tested on full .NET and mono too
-                if (applyAsyncMethodPatch && frameMethod is MethodInfo currentMethodFrameInfo && currentMethodFrameInfo.Name == "MoveNext")
+                if (applyAsyncMethodPatch && frameMethod is MethodInfo {Name: "MoveNext"})
                 {
                     var tmpIndex = i;
                     var frameOriginal = frame;
@@ -67,10 +67,10 @@ namespace OpenMod.Common.Helpers
             return frameTarget?.GetMethod();
         }
 
-        public static MethodBase GetCallingMethod(params Assembly[] skipAssemblies)
+        public static MethodBase? GetCallingMethod(params Assembly[] skipAssemblies)
         {
             var st = new StackTrace();
-            var frameTarget = (StackFrame)null;
+            var frameTarget = (StackFrame?)null;
             for (var i = 0; i < st.FrameCount; i++)
             {
                 var frame = st.GetFrame(i);
@@ -85,8 +85,13 @@ namespace OpenMod.Common.Helpers
 
         public static IEnumerable<Type> GetTypeHierarchy(this Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             var types = new List<Type> { type };
-            while ((type = type.BaseType) != null)
+            while ((type = type.BaseType!) != null)
             {
                 types.Add(type);
             }
@@ -94,11 +99,16 @@ namespace OpenMod.Common.Helpers
             return types;
         }
 
-        public static IEnumerable<Type> FindAllTypes(this Assembly @object, bool includeAbstractAndInterfaces = false)
+        public static IEnumerable<Type> FindAllTypes(this Assembly assembly, bool includeAbstractAndInterfaces = false)
         {
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
+
             try
             {
-                return @object.GetTypes()
+                return assembly.GetTypes()
                               .Where(c => includeAbstractAndInterfaces || !c.IsAbstract && !c.IsInterface);
             }
             catch (ReflectionTypeLoadException e)
@@ -112,28 +122,46 @@ namespace OpenMod.Common.Helpers
             return assembly.FindAllTypes(includeAbstractAndInterfaces).Where(c => typeof(T).IsAssignableFrom(c));
         }
 
-        public static string GetVersionIndependentName(string name)
+        public static string GetVersionIndependentName(string assemblyName)
         {
-            return GetVersionIndependentName(name, out _);
+            return GetVersionIndependentName(assemblyName, out _);
         }
 
-        private static readonly Regex VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
-        public static string GetVersionIndependentName(string name, out string extractedVersion)
+        private static readonly Regex VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
+        public static string GetVersionIndependentName(string assemblyName, out string extractedVersion)
         {
-            var match = VersionRegex.Match(name);
+            if (assemblyName == null)
+            {
+                throw new ArgumentNullException(nameof(assemblyName));
+            }
+
+            var match = VersionRegex.Match(assemblyName);
             extractedVersion = match.Groups[1].Value;
-            return VersionRegex.Replace(name, string.Empty);
+            return VersionRegex.Replace(assemblyName, string.Empty);
         }
 
         public static string GetDebugName(this MethodBase mb)
         {
-            if (mb is MemberInfo mi && mi.DeclaringType != null) return mi.DeclaringType.Name + "." + mi.Name;
+            if (mb == null)
+            {
+                throw new ArgumentNullException(nameof(mb));
+            }
+
+            if (mb is MemberInfo mi && mi.DeclaringType != null)
+            {
+                return mi.DeclaringType.Name + "." + mi.Name;
+            }
 
             return "<anonymous>#" + mb.Name;
         }
 
-        public static async Task InvokeWithTaskSupportAsync(this MethodBase method, object instance, object[] @params)
+        public static async Task InvokeWithTaskSupportAsync(this MethodBase method, object? instance, object?[] @params)
         {
+            if (method == null)
+            {
+                throw new ArgumentNullException(nameof(method));
+            }
+
             var isAsync = false;
             if (method is MethodInfo methodInfo)
             {
@@ -153,6 +181,11 @@ namespace OpenMod.Common.Helpers
 
         public static T ToObject<T>(this Dictionary<object, object> dict)
         {
+            if (dict == null)
+            {
+                throw new ArgumentNullException(nameof(dict));
+            }
+
             const BindingFlags bindingFlags =
                 BindingFlags.Instance
                 | BindingFlags.Public
@@ -179,6 +212,16 @@ namespace OpenMod.Common.Helpers
 
         public static bool HasConversionOperator(this Type from, Type to)
         {
+            if (@from == null)
+            {
+                throw new ArgumentNullException(nameof(@from));
+            }
+
+            if (to == null)
+            {
+                throw new ArgumentNullException(nameof(to));
+            }
+
             UnaryExpression BodyFunction(Expression body) => Expression.Convert(body, to);
             ParameterExpression inp = Expression.Parameter(from, "inp");
             try

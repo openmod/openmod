@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Autofac;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.Common.Helpers;
 using OpenMod.Core.Ioc;

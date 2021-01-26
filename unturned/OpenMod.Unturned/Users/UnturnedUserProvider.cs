@@ -85,8 +85,7 @@ namespace OpenMod.Unturned.Users
             async UniTaskVoid EmitDelayedEvent(UnturnedUserConnectedEvent @event)
             {
                 await UniTask.DelayFrame(1);
-
-                await m_EventBus.EmitAsync(m_Runtime, this, connectedEvent);
+                await m_EventBus.EmitAsync(m_Runtime, this, @event);
             }
 
             EmitDelayedEvent(connectedEvent).Forget();
@@ -94,7 +93,7 @@ namespace OpenMod.Unturned.Users
 
         protected virtual void OnPlayerDisconnected(SteamPlayer steamPlayer)
         {
-            var user = GetUser(steamPlayer);
+            var user = GetUser(steamPlayer.playerID.steamID);
 
             if (user == null)
             {
@@ -131,10 +130,10 @@ namespace OpenMod.Unturned.Users
 
         public virtual UnturnedUser GetUser(SteamPlayer player)
         {
-            return GetUser(player.playerID.steamID);
+            return GetUser(player.playerID.steamID)!;
         }
 
-        public virtual UnturnedUser GetUser(CSteamID id)
+        public virtual UnturnedUser? GetUser(CSteamID id)
         {
             return m_Users.FirstOrDefault(d => d.SteamId == id);
         }
@@ -165,7 +164,7 @@ namespace OpenMod.Unturned.Users
             });
         }
 
-        protected virtual void OnPendingPlayerConnecting(ValidateAuthTicketResponse_t callback, ref bool isValid, ref string explanation)
+        protected virtual void OnPendingPlayerConnecting(ValidateAuthTicketResponse_t callback, ref bool isValid, ref string? explanation)
         {
             if (m_PendingUsers.Any(d => d.SteamId == callback.m_SteamID))
             {
@@ -194,6 +193,7 @@ namespace OpenMod.Unturned.Users
                 }
                 else
                 {
+                    userData ??= new();
                     userData.LastSeen = DateTime.Now;
                     userData.LastDisplayName = pendingUser.DisplayName;
                     await m_UserDataStore.SetUserDataAsync(userData);
@@ -243,10 +243,10 @@ namespace OpenMod.Unturned.Users
             return userType.Equals(KnownActorTypes.Player, StringComparison.OrdinalIgnoreCase);
         }
 
-        public Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
+        public Task<IUser?> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
         {
             var confidence = 0;
-            var unturnedUser = (IUser)null;
+            var unturnedUser = (IUser?)null;
 
             foreach (var user in m_Users)
             {
@@ -255,7 +255,7 @@ namespace OpenMod.Unturned.Users
                     case UserSearchMode.FindByNameOrId:
                     case UserSearchMode.FindById:
                         if (user.Id.Equals(searchString, StringComparison.OrdinalIgnoreCase))
-                            return Task.FromResult((IUser)user);
+                            return Task.FromResult((IUser?)user);
 
                         if (searchMode == UserSearchMode.FindByNameOrId)
                             goto case UserSearchMode.FindByName;
@@ -354,12 +354,10 @@ namespace OpenMod.Unturned.Users
             m_Users.Clear();
             m_PendingUsers.Clear();
 
-            // ReSharper disable DelegateSubtraction
             Provider.onCheckValidWithExplanation -= OnPendingPlayerConnecting;
             Provider.onEnemyConnected -= OnPlayerConnected;
             Provider.onEnemyDisconnected -= OnPlayerDisconnected;
             Provider.onRejectingPlayer -= OnRejectingPlayer;
-            // ReSharper restore DelegateSubtraction
         }
     }
 }

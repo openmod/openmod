@@ -24,21 +24,21 @@ namespace OpenMod.Rust.Oxide.Players.Entities.Events
         }
 
         [HookMethod("CanUseMailbox")]
-        private bool CanUseMailbox(BasePlayer player, Mailbox mailbox)
+        private bool? CanUseMailbox(BasePlayer player, Mailbox mailbox)
         {
             var @event = new RustPlayerAccessingMailboxEvent(new RustPlayer(player), mailbox);
             return EmitCancellableReturnsBool(@event);
         }
 
         [HookMethod("CanAssignBed")]
-        private object CanAssignBed(BasePlayer player, SleepingBag bag, ulong targetPlayerId)
+        private object? CanAssignBed(BasePlayer player, SleepingBag bag, ulong targetPlayerId)
         {
             var @event = new RustPlayerAssigningSleepingBagEvent(new RustPlayer(player), bag, targetPlayerId);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("CanChangeCode")]
-        private object CanChangeCode(BasePlayer player, CodeLock codeLock, string newCode, bool isGuestCode)
+        private object? CanChangeCode(BasePlayer player, CodeLock codeLock, string newCode, bool isGuestCode)
         {
             var @event = new RustPlayerChangingLockCodeEvent(new RustPlayer(player), codeLock, newCode, isGuestCode);
             return EmitCancellableReturnsObject(@event);
@@ -52,35 +52,35 @@ namespace OpenMod.Rust.Oxide.Players.Entities.Events
         }
 
         [HookMethod("CanDeployItem")]
-        private object CanDeployItem(BasePlayer player, Deployer deployer, uint entityId)
+        private object? CanDeployItem(BasePlayer player, Deployer deployer, uint entityId)
         {
             var @event = new RustPlayerDeployingEntityEvent(new RustPlayer(player), deployer, entityId);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("CanDismountEntity")]
-        private object CanDismountEntity(BasePlayer player, BaseMountable entity)
+        private object? CanDismountEntity(BasePlayer player, BaseMountable entity)
         {
             var @event = new RustPlayerDismountingEntityEvent(new RustPlayer(player), entity);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("CanHackCrate")]
-        private object CanHackCrate(BasePlayer player, HackableLockedCrate crate)
+        private object? CanHackCrate(BasePlayer player, HackableLockedCrate crate)
         {
             var @event = new RustPlayerHackingCrateEvent(new RustPlayer(player), crate);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("CanHideStash")]
-        private object CanHideStash(BasePlayer player, StashContainer stash)
+        private object? CanHideStash(BasePlayer player, StashContainer stash)
         {
             var @event = new RustPlayerHidingStashEvent(new RustPlayer(player), stash);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("CanLock")]
-        private object CanLock(BasePlayer player, BaseLock @lock)
+        private object? CanLock(BasePlayer player, BaseLock @lock)
         {
             var @event = new RustPlayerLockingLockEvent(new RustPlayer(player), @lock);
             return EmitCancellableReturnsObject(@event);
@@ -94,7 +94,7 @@ namespace OpenMod.Rust.Oxide.Players.Entities.Events
         }
 
         [HookMethod("CanLootEntity")]
-        private object CanLootEntity(BasePlayer player, BaseEntity entity)
+        private object? CanLootEntity(BasePlayer player, BaseEntity entity)
         {
             var @event = new RustPlayerLootingEntityEvent(new RustPlayer(player), new RustEntity(entity));
             return EmitCancellableReturnsObject(@event);
@@ -108,7 +108,7 @@ namespace OpenMod.Rust.Oxide.Players.Entities.Events
         }
 
         [HookMethod("CanMountEntity")]
-        private object CanMountEntity(BasePlayer player, BaseMountable entity)
+        private object? CanMountEntity(BasePlayer player, BaseMountable entity)
         {
             var @event = new RustPlayerMountingEntityEvent(new RustPlayer(player), entity);
             return EmitCancellableReturnsObject(@event);
@@ -122,21 +122,21 @@ namespace OpenMod.Rust.Oxide.Players.Entities.Events
         }
 
         [HookMethod("CanRenameBed")]
-        private object CanRenameBed(BasePlayer player, SleepingBag bed, string bedName)
+        private object? CanRenameBed(BasePlayer player, SleepingBag bed, string bedName)
         {
             var @event = new RustPlayerRenamingSleepingBagEvent(new RustPlayer(player), bed, bedName);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("CanSeeStash")]
-        private object CanSeeStash(BasePlayer player, StashContainer stash)
+        private object? CanSeeStash(BasePlayer player, StashContainer stash)
         {
             var @event = new RustPlayerRevealingStashEvent(new RustPlayer(player), stash);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("CanUnlock")]
-        private object CanUnlock(BasePlayer player, BaseLock @lock)
+        private object? CanUnlock(BasePlayer player, BaseLock @lock)
         {
             var @event = new RustPlayerUnlockingLockEvent(new RustPlayer(player), @lock);
             return EmitCancellableReturnsObject(@event);

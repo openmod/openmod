@@ -28,7 +28,7 @@ namespace OpenMod.API.Permissions
         /// Gets a permission role.
         /// </summary>
         /// <returns>the permission role if found; otherwise, <b>null</b>.</returns>
-        Task<IPermissionRole> GetRoleAsync(string id);
+        Task<IPermissionRole?> GetRoleAsync(string roleId);
 
         /// <summary>
         /// Updates a role.
@@ -75,11 +75,11 @@ namespace OpenMod.API.Permissions
         /// <summary>
         /// Saves persistent data. T must be serializable.
         /// </summary>
-        Task SavePersistentDataAsync<T>(string roleId, string key, T data);
+        Task SavePersistentDataAsync<T>(string roleId, string key, T? data);
 
         /// <summary>
         /// Gets persistent data. T must be serializable.
         /// </summary>
-        Task<T> GetPersistentDataAsync<T>(string roleId, string key);
+        Task<T?> GetPersistentDataAsync<T>(string roleId, string key);
     }
 }

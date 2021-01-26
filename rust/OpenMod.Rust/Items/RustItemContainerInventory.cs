@@ -14,7 +14,7 @@ namespace OpenMod.Rust.Items
             ItemContainer = itemContainer;
             Pages = new IInventoryPage[]
             {
-                new RustInventoryPage(ItemContainer, this, ItemContainer?.parent.info.displayName.translated)
+                new RustInventoryPage(ItemContainer, this, ItemContainer.parent?.info?.displayName?.translated)
             };
         }
 

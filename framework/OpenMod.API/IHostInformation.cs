@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using Semver;
+﻿using Semver;
 
 namespace OpenMod.API
 {
@@ -9,18 +8,16 @@ namespace OpenMod.API
     public interface IHostInformation
     {
         /// <value>
-        /// The version of the OpenMod host implementation. Cannot be null.
+        /// The version of the OpenMod host implementation.
         /// </value>
-        [NotNull]
         SemVersion HostVersion { get; }
 
         /// <value>
-        /// The Name of the host implementation. Cannot be null or empty.
+        /// The Name of the host implementation.
         /// </value>
         /// <example>
         /// OpenMod for Unturned
         /// </example>
-        [NotNull]
         string HostName { get; }
     }
 }

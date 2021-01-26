@@ -18,14 +18,14 @@ namespace OpenMod.Rust.Oxide.Players.Communications.Events
         }
 
         [HookMethod("OnPlayerChat")]
-        private object OnPlayerChat(BasePlayer player, string message, Chat.ChatChannel channel)
+        private object? OnPlayerChat(BasePlayer player, string message, Chat.ChatChannel channel)
         {
             var @event = new RustPlayerChattingEvent(new RustPlayer(player), message, channel);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("OnPlayerVoice")]
-        private object OnPlayerVoice(BasePlayer player, byte[] data)
+        private object? OnPlayerVoice(BasePlayer player, byte[] data)
         {
             var @event = new RustPlayerVoiceReceivedEvent(new RustPlayer(player), data);
             return EmitCancellableReturnsObject(@event);

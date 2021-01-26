@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace OpenMod.Extensions.Games.Abstractions.Vehicles
+﻿namespace OpenMod.Extensions.Games.Abstractions.Vehicles
 {
     /// <summary>
     /// Represents the state of a vehicle.
@@ -10,7 +8,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
         /// <summary>
         /// The vehicle state. Can be null.
         /// </summary>
-        [CanBeNull]
-        byte[] StateData { get; }
+        byte[]? StateData { get; }
     }
 }

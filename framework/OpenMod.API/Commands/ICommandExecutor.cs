@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Commands
@@ -17,7 +16,6 @@ namespace OpenMod.API.Commands
         /// <param name="args">The command args.</param>
         /// <param name="prefix">The command prefix. Can be empty.</param>
         /// <returns>The created command context.</returns>
-        [ItemNotNull]
         Task<ICommandContext> ExecuteAsync(ICommandActor actor, string[] args, string prefix);
     }
 }

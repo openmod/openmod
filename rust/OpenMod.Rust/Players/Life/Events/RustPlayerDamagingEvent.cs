@@ -11,7 +11,7 @@ namespace OpenMod.Rust.Players.Life.Events
 
         public bool IsCancelled { get; set; }
 
-        public IDamageSource DamageSource { get; }
+        public IDamageSource? DamageSource { get; }
 
         public double DamageAmount { get; set; }
 

@@ -24,9 +24,9 @@ namespace OpenMod.Unturned.Vehicles
             m_AddVehicleMethod = AccessTools.Method(typeof(VehicleManager), "addVehicle");
         }
 
-        public Task<IVehicle> SpawnVehicleAsync(Vector3 position, string vehicleId, IVehicleState state = null)
+        public Task<IVehicle?> SpawnVehicleAsync(Vector3 position, string vehicleId, IVehicleState? state = null)
         {
-            async UniTask<IVehicle> VehicleSpawnTask()
+            async UniTask<IVehicle?> VehicleSpawnTask()
             {
                 await UniTask.SwitchToMainThread();
                 if (!ushort.TryParse(vehicleId, out var parsedVehicleId))
@@ -39,18 +39,18 @@ namespace OpenMod.Unturned.Vehicles
                     return null;
                 }
 
-                UnturnedVehicle vehicle = null;
-                if (state != null && state is UnturnedVehicleState)
+                UnturnedVehicle? vehicle = null;
+                if (state is UnturnedVehicleState && state.StateData?.Length > 0)
                 {
-                    ReadState(state.StateData, out _ /* id doesn't require i guess? */, out ushort skinID, out ushort mythicID,
-                        out float roadPosition, out ushort fuel, out ushort health, out ushort batteryCharge,
-                        out CSteamID owner, out CSteamID group, out bool locked, out byte[][] turrets,
-                        out uint instanceID, out byte tireAliveMask, out ItemJar[] items);
+                    ReadState(state.StateData, out _ /* id doesn't require i guess? */, out var skinID, out var mythicID,
+                        out var roadPosition, out var fuel, out var health, out var batteryCharge,
+                        out var owner, out var group, out var locked, out byte[][] turrets,
+                        out var instanceID, out var tireAliveMask, out var items);
 
                     // ushort id, ushort skinID, ushort mythicID, float roadPosition, Vector3 point, Quaternion angle, bool sirens,
                     // bool blimp, bool headlights, bool taillights, ushort fuel, bool isExploded, ushort health, ushort batteryCharge,
                     // CSteamID owner, CSteamID group, bool locked, CSteamID[] passengers, byte[][] turrets, uint instanceID, byte tireAliveMask
-                    var iVehicle = (InteractableVehicle)m_AddVehicleMethod.Invoke(VehicleManager.instance, new object[] { vehicleId, skinID,
+                    var iVehicle = (InteractableVehicle)m_AddVehicleMethod.Invoke(VehicleManager.instance, new object?[] { vehicleId, skinID,
                         mythicID, roadPosition, position.ToUnityVector(), Quaternion.identity, false, false, false, false, fuel, false, health,
                         batteryCharge, owner, group, locked, null, turrets, instanceID, tireAliveMask });
 
@@ -85,7 +85,7 @@ namespace OpenMod.Unturned.Vehicles
         private void ReadState(byte[] buffer, out ushort id, out ushort skinID, out ushort mythicID,
             out float roadPosition, out ushort fuel, out ushort health, out ushort batteryCharge, out CSteamID owner,
             out CSteamID group, out bool locked, out byte[][] turrets, out uint instanceID, out byte tireAliveMask,
-            out ItemJar[] items)
+            out ItemJar[]? items)
 
         {
             var step = 0;

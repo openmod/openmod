@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace OpenMod.API.Commands
 {
@@ -14,9 +13,8 @@ namespace OpenMod.API.Commands
     public interface ICommandParameters : IReadOnlyCollection<string>
     {
         /// <value>
-        ///     The n. command parameter starting from zero. Cannot be null.
+        ///     The n. command parameter starting from zero.
         ///     <para>Index must be less than <see cref="Length">length</see> and not negative.</para>
-        ///     <para>This property will never return null.</para>
         /// </value>
         /// <exception cref="ArgumentException">
         ///     When <i>index</i> is equal or greater than
@@ -25,7 +23,6 @@ namespace OpenMod.API.Commands
         /// <param name="index">The zero-based index of the parameter.</param>
         /// <seealso cref="T:System.ArgumentOutOfRangeException" />
         /// <returns>The n. command parameter as string.</returns>
-        [NotNull]
         string this[int index] { get; }
 
         /// <value>
@@ -85,7 +82,7 @@ namespace OpenMod.API.Commands
         ///     the parsed parameter value if the given index was valid and the parameter could be parsed to the given type;
         ///     otherwise <i>defaultValue</i>.
         /// </returns>
-        Task<T> GetAsync<T>(int index, T defaultValue);
+        Task<T?> GetAsync<T>(int index, T? defaultValue);
 
         /// <summary>
         ///     <inheritdoc cref="GetAsync{T}(int, T)" />
@@ -98,7 +95,7 @@ namespace OpenMod.API.Commands
         /// <returns>
         ///     <inheritdoc cref="GetAsync{T}(int, T)" />
         /// </returns>
-        Task<object> GetAsync(int index, Type type, object defaultValue);
+        Task<object?> GetAsync(int index, Type type, object? defaultValue);
 
         /// <summary>
         ///     Tries to get and parse a parameter. See <see cref="GetAsync{T}(int)" />.
@@ -141,6 +138,7 @@ namespace OpenMod.API.Commands
         ///     <see cref="Length">length</see>.
         /// </exception>
         /// <exception cref="ArgumentException">If startPosition is greater than or equal endPosition.</exception>
+        /// <exception cref="IndexOutOfRangeException">If startPosition or endPosition is greather than <see cref="Length"/>.</exception>
         /// <returns>he joined arguments starting from the given position</returns>
         string GetArgumentLine(int startPosition, int endPosition);
 
@@ -155,7 +153,7 @@ namespace OpenMod.API.Commands
         /// <returns>
         ///     <inheritdoc cref="TryGet{T}" />
         /// </returns>
-        bool TryGet(int index, Type type, out object value);
+        bool TryGet(int index, Type type, out object? value);
 
         /// <summary>
         ///     Gets the parameters as string array.

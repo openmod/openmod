@@ -19,27 +19,26 @@ namespace OpenMod.Rust.Oxide.Players.Building.Events
         [HookMethod("CanDemolish")]
         private bool CanDemolish(BasePlayer player, BuildingBlock block, BuildingGrade.Enum grade)
         {
-            var @event =
-                new RustPlayerDemolishingBuildingBlockEvent(new RustPlayer(player), new RustBuildingBlock(block));
+            var @event = new RustPlayerDemolishingBuildingBlockEvent(new RustPlayer(player), new RustBuildingBlock(block));
             return EmitCancellableReturnsBool(@event);
         }
 
         [HookMethod("OnPayForPlacement")]
-        private object OnPayForPlacement(BasePlayer player, Planner planner, Construction construction)
+        private object? OnPayForPlacement(BasePlayer player, Planner planner, Construction construction)
         {
             var @event = new RustPlayerPlacingConstructionEvent(new RustPlayer(player), planner, construction);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("OnPayForUpgrade")]
-        private object OnPayForUpgrade(BasePlayer player, BuildingBlock block, ConstructionGrade gradeTarget)
+        private object? OnPayForUpgrade(BasePlayer player, BuildingBlock block, ConstructionGrade gradeTarget)
         {
             var @event = new RustPlayerUpgradingBuildingBlockEvent(new RustPlayer(player), new RustBuildingBlock(block), gradeTarget);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("CanUseWires")]
-        private object CanUseWires(BasePlayer player)
+        private object? CanUseWires(BasePlayer player)
         {
             var @event = new RustPlayerUsingWiresEvent(new RustPlayer(player));
             return EmitCancellableReturnsObject(@event);

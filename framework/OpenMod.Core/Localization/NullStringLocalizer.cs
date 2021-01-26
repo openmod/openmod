@@ -7,7 +7,7 @@ namespace OpenMod.Core.Localization
 {
     public class NullStringLocalizer : IStringLocalizer
     {
-        private static NullStringLocalizer m_Instance;
+        private static NullStringLocalizer? m_Instance;
 
         public static NullStringLocalizer Instance
         {
@@ -31,7 +31,7 @@ namespace OpenMod.Core.Localization
 
         public LocalizedString this[string name]
         {
-            get { return new LocalizedString(name, name, true); }
+            get { return new(name, name, true); }
 
         }
 
@@ -39,7 +39,7 @@ namespace OpenMod.Core.Localization
         {
             get
             {
-                return new LocalizedString(name, name, true);
+                return new(name, name, true);
             }
         }
     }

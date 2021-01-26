@@ -80,10 +80,10 @@ namespace OpenMod.Unturned.RocketMod
                     var increaseBalanceMethod = databaseType.GetMethod("IncreaseBalance", c_BindingFlags);
                     harmonyInstance.Patch(increaseBalanceMethod, prefix: new HarmonyMethod(increaseBalancePrefixMethod));
 
-                    var checkSchemaMethod = databaseType.GetMethod("CheckSchema", c_BindingFlags);
+                    var checkSchemaMethod = databaseType.GetMethod("CheckSchema", c_BindingFlags)!;
                     harmonyInstance.NopPatch(checkSchemaMethod);
 
-                    var checkSetupAccount = databaseType.GetMethod("CheckSetupAccount", c_BindingFlags);
+                    var checkSetupAccount = databaseType.GetMethod("CheckSetupAccount", c_BindingFlags)!;
                     harmonyInstance.NopPatch(checkSetupAccount);
 
                     var executeQueryMethod = databaseType.GetMethod("ExecuteQuery", c_BindingFlags);
@@ -119,13 +119,13 @@ namespace OpenMod.Unturned.RocketMod
             AsyncHelper.RunSync(() => economyProvider.UpdateBalanceAsync(id, KnownActorTypes.Player, increaseby, reason: null));
         }
 
+        // ReSharper disable once RedundantAssignment
         private void OnPreGetBalance(string id, ref decimal balance)
         {
             var economyProvider = m_RocketModComponent.LifetimeScope.Resolve<IEconomyProvider>();
             balance = AsyncHelper.RunSync(() => economyProvider.GetBalanceAsync(id, KnownActorTypes.Player));
         }
 
-        [SuppressMessage("ReSharper", "DelegateSubtraction")]
         private void RemoveRocketCommandListeners()
         {
             if (s_RocketListenersRemoved)
@@ -150,7 +150,7 @@ namespace OpenMod.Unturned.RocketMod
             s_RocketListenersRemoved = true;
         }
 
-        private bool IsRocketModDelegate(Delegate @delegate)
+        private bool IsRocketModDelegate(Delegate? @delegate)
         {
             if (@delegate == null)
             {

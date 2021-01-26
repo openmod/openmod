@@ -1,13 +1,15 @@
-﻿using OpenMod.API;
+﻿extern alias JetBrainsAnnotations;
+using JetBrainsAnnotations::JetBrains.Annotations;
+using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using UnityEngine;
-// ReSharper disable DelegateSubtraction
 
 namespace OpenMod.Unturned.Players.Chat.Events
 {
+    [UsedImplicitly]
     internal class ChatEventsListener : UnturnedEventsListener
     {
         public ChatEventsListener(IOpenModHost openModHost,
@@ -30,7 +32,7 @@ namespace OpenMod.Unturned.Players.Chat.Events
 
         private void OnChatted(SteamPlayer steamPlayer, EChatMode mode, ref Color color, ref bool isRich, string text, ref bool isVisible) // lgtm [cs/too-many-ref-parameters]
         {
-            var player = GetUnturnedPlayer(steamPlayer);
+            var player = GetUnturnedPlayer(steamPlayer)!;
 
             var @event = new UnturnedPlayerChattingEvent(player, mode, color, isRich, text)
             {
@@ -44,7 +46,7 @@ namespace OpenMod.Unturned.Players.Chat.Events
             isVisible = !@event.IsCancelled;
         }
 
-        private void OnServerSendingMessage(ref string text, ref Color color, SteamPlayer nativeFromPlayer, SteamPlayer nativeToPlayer, EChatMode mode, ref string iconURL, ref bool useRichTextFormatting) // lgtm [cs/too-many-ref-parameters]
+        private void OnServerSendingMessage(ref string text, ref Color color, SteamPlayer? nativeFromPlayer, SteamPlayer? nativeToPlayer, EChatMode mode, ref string iconURL, ref bool useRichTextFormatting) // lgtm [cs/too-many-ref-parameters]
         {
             // If nativeToPlayer is null, this event will be called again for each player
             if (nativeToPlayer == null) return;

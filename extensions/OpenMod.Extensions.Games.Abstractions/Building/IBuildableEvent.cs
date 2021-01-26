@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using OpenMod.API.Eventing;
+﻿using OpenMod.API.Eventing;
 
 namespace OpenMod.Extensions.Games.Abstractions.Building
 {
@@ -9,9 +8,8 @@ namespace OpenMod.Extensions.Games.Abstractions.Building
     public interface IBuildableEvent : IEvent
     {
         /// <value>
-        /// The buildable related to the event. Cannot be null.
+        /// The buildable related to the event.
         /// </value>
-        [NotNull]
         IBuildable Buildable { get; }
     }
 }

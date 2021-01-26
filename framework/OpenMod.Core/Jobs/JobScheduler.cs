@@ -26,7 +26,7 @@ namespace OpenMod.Core.Jobs
         private readonly List<ITaskExecutor> m_JobExecutors;
         private readonly List<ScheduledJob> m_ScheduledJobs;
         private static bool s_RunRebootJobs = true;
-        private ScheduledJobsFile m_File;
+        private ScheduledJobsFile m_File = null!;
         private bool m_Started;
 
         public JobScheduler(
@@ -57,7 +57,8 @@ namespace OpenMod.Core.Jobs
             m_JobExecutors = new List<ITaskExecutor>();
             foreach (var provider in options.Value.JobExecutorTypes)
             {
-                m_JobExecutors.Add((ITaskExecutor)ActivatorUtilitiesEx.CreateInstance(runtime.LifetimeScope, provider));
+                m_JobExecutors.Add(
+                    (ITaskExecutor) ActivatorUtilitiesEx.CreateInstance(runtime.LifetimeScope, provider));
             }
         }
 
@@ -75,9 +76,12 @@ namespace OpenMod.Core.Jobs
 
             await ReadJobsFileAsync();
 
-            foreach (var job in m_File.Jobs.ToList())
+            if (m_File.Jobs != null)
             {
-                await ScheduleJobInternalAsync(job, execStartup: !isFromFileChange, execReboot: s_RunRebootJobs);
+                foreach (var job in m_File.Jobs.ToList())
+                {
+                    await ScheduleJobInternalAsync(job, execStartup: !isFromFileChange, execReboot: s_RunRebootJobs);
+                }
             }
 
             s_RunRebootJobs = false;
@@ -86,29 +90,33 @@ namespace OpenMod.Core.Jobs
 
         public async Task<ScheduledJob> ScheduleJobAsync(JobCreationParameters @params)
         {
-            if (m_File.Jobs.Any(d => d.Name.Equals(@params.Name)))
+            if (@params == null)
+            {
+                throw new ArgumentNullException(nameof(@params));
+            }
+
+            m_File.Jobs ??= new();
+            if (m_File.Jobs.Any(d => d.Name?.Equals(@params.Name) ?? false))
             {
                 throw new Exception($"A job with this name already exists: {@params.Name}");
             }
 
-            var job = new ScheduledJob
-            {
-                Name = @params.Name,
-                Task = @params.Task,
-                Args = @params.Args,
-                Schedule = @params.Schedule,
-                Enabled = true,
-            };
-
+            var job = new ScheduledJob(@params.Name, @params.Task, @params.Args, @params.Schedule);
             m_File.Jobs.Add(job);
+
             await WriteJobsFileAsync();
             await ScheduleJobInternalAsync(job, execStartup: false, execReboot: false);
             return job;
         }
 
-        public Task<ScheduledJob> FindJobAsync(string name)
+        public Task<ScheduledJob?> FindJobAsync(string name)
         {
-            return Task.FromResult(m_File.Jobs.FirstOrDefault(d => d.Name.Equals(name)));
+            if (m_File.Jobs == null)
+            {
+                return Task.FromResult<ScheduledJob?>(null);
+            }
+
+            return Task.FromResult<ScheduledJob?>(m_File.Jobs.FirstOrDefault(d => d.Name?.Equals(name) ?? false));
         }
 
         public async Task<bool> RemoveJobAsync(string name)
@@ -124,24 +132,34 @@ namespace OpenMod.Core.Jobs
 
         public async Task<bool> RemoveJobAsync(ScheduledJob job)
         {
-            bool MatchedJobs(ScheduledJob d) => d.Name.Equals(job.Name, StringComparison.Ordinal);
+            bool MatchedJobs(ScheduledJob d) => d.Name?.Equals(job.Name, StringComparison.Ordinal) ?? false;
 
             m_ScheduledJobs.RemoveAll(MatchedJobs);
-            var result = m_File.Jobs.RemoveAll(MatchedJobs) > 0;
             job.Enabled = false;
 
-            if (result)
+            if (m_File.Jobs == null)
+            {
+                return false;
+            }
+
+            var found = m_File.Jobs.RemoveAll(MatchedJobs) > 0;
+            if (found)
             {
                 await WriteJobsFileAsync();
             }
 
-            return result;
+            return found;
         }
 
         public Task<ICollection<ScheduledJob>> GetScheduledJobsAsync(bool includeDisabled)
         {
+            if (m_File.Jobs == null)
+            {
+                return Task.FromResult<ICollection<ScheduledJob>>(new List<ScheduledJob>());
+            }
+
             return Task.FromResult<ICollection<ScheduledJob>>(m_File.Jobs
-                .Where(d => includeDisabled || d.Enabled)
+                .Where(d => includeDisabled || (d.Enabled ?? true))
                 .ToList());
         }
 
@@ -153,8 +171,10 @@ namespace OpenMod.Core.Jobs
             }
             else
             {
-                m_File = await m_DataStore.LoadAsync<ScheduledJobsFile>(c_DataStoreKey);
+                m_File = await m_DataStore.LoadAsync<ScheduledJobsFile>(c_DataStoreKey)
+                         ?? throw new InvalidOperationException("Failed to load jobs from autoexec.yaml!");
 
+                m_File.Jobs ??= new();
                 var previousCount = m_File.Jobs.Count;
                 m_File.Jobs = m_File.Jobs.DistinctBy(d => d.Name).ToList();
 
@@ -168,21 +188,44 @@ namespace OpenMod.Core.Jobs
 
         private async Task WriteJobsFileAsync()
         {
+            m_File.Jobs ??= new();
             await m_DataStore.SaveAsync(c_DataStoreKey, m_File);
         }
 
         private async Task ScheduleJobInternalAsync(ScheduledJob job, bool execStartup, bool execReboot)
         {
-            if (!job.Enabled)
+            if (job == null)
+            {
+                throw new ArgumentNullException(nameof(job));
+            }
+
+            if (!(job.Enabled ?? true))
             {
                 return;
             }
 
-            if (job.Schedule.Equals("@single_exec", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(job.Name))
+            {
+                m_Logger.LogError($"Job of type {job.Task} has no name set.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(job.Task))
+            {
+                m_Logger.LogError($"Job \"{job.Name}\" has no task set.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(job.Schedule))
+            {
+                m_Logger.LogError($"Job \"{job.Name}\" has no schedule set.");
+                return;
+            }
+
+            if (job.Schedule!.Equals("@single_exec", StringComparison.OrdinalIgnoreCase))
             {
                 await ExecuteJobAsync(job);
                 await RemoveJobAsync(job);
-
                 return;
             }
 
@@ -211,6 +254,11 @@ namespace OpenMod.Core.Jobs
 
         private void ScheduleCronJob(ScheduledJob job)
         {
+            if (job == null)
+            {
+                throw new ArgumentNullException(nameof(job));
+            }
+
             var timezone = TimeZoneInfo.Local;
 
             CronExpression expression;
@@ -242,7 +290,7 @@ namespace OpenMod.Core.Jobs
             {
                 await Task.Delay(delay);
 
-                if (!job.Enabled || !m_ScheduledJobs.Contains(job) || !m_Runtime.IsComponentAlive)
+                if (!(job.Enabled ?? true) || !m_ScheduledJobs.Contains(job) || !m_Runtime.IsComponentAlive)
                 {
                     return;
                 }
@@ -254,7 +302,12 @@ namespace OpenMod.Core.Jobs
 
         private async Task ExecuteJobAsync(ScheduledJob job)
         {
-            var jobExecutor = m_JobExecutors.FirstOrDefault(d => d.SupportsType(job.Task));
+            if (job == null)
+            {
+                throw new ArgumentNullException(nameof(job));
+            }
+
+            var jobExecutor = m_JobExecutors.FirstOrDefault(d => d.SupportsType(job.Task!));
             if (jobExecutor == null)
             {
                 m_Logger.LogError($"[{job.Name}] Unknown job type: {job.Task}");
@@ -263,12 +316,8 @@ namespace OpenMod.Core.Jobs
 
             try
             {
-                await jobExecutor.ExecuteAsync(new JobTask
-                {
-                    JobName = job.Name,
-                    Task = job.Task,
-                    Args = job.Args
-                });
+                await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!,
+                    job.Args ?? new Dictionary<string, object?>()));
             }
             catch (Exception ex)
             {

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿extern alias JetBrainsAnnotations;
+using HarmonyLib;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
@@ -6,6 +7,7 @@ using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using System;
 using System.Linq;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using UnityEngine;
 // ReSharper disable InconsistentNaming
 
@@ -40,20 +42,20 @@ namespace OpenMod.Unturned.Zombies.Events
             OnZombieRevived -= Events_OnZombieRevived;
         }
 
-        private void Events_OnZombieAlertingPlayer(Zombie nativeZombie, ref Player nativePlayer, ref bool cancel)
+        private void Events_OnZombieAlertingPlayer(Zombie nativeZombie, ref Player? nativePlayer, ref bool cancel)
         {
             var zombie = new UnturnedZombie(nativeZombie);
 
             var player = GetUnturnedPlayer(nativePlayer);
 
-            var @event = new UnturnedZombieAlertingPlayerEvent(zombie, player)
+            var @event = new UnturnedZombieAlertingPlayerEvent(zombie, player!)
             {
                 IsCancelled = cancel
             };
 
             Emit(@event);
 
-            nativePlayer = @event.Player?.Player;
+            nativePlayer = @event.Player.Player;
             cancel = @event.IsCancelled;
         }
 
@@ -93,7 +95,7 @@ namespace OpenMod.Unturned.Zombies.Events
             parameters.damage = @event.DamageAmount;
             parameters.direction = @event.Ragdoll;
             parameters.ragdollEffect = @event.RagdollEffect;
-            parameters.instigator = @event.Instigator.Player;
+            parameters.instigator = @event.Instigator?.Player;
             parameters.zombieStunOverride = @event.StunOverride;
             shouldAllow = !@event.IsCancelled;
         }
@@ -125,26 +127,28 @@ namespace OpenMod.Unturned.Zombies.Events
             Emit(@event);
         }
 
-        private delegate void ZombieAlertingPlayer(Zombie nativeZombie, ref Player player, ref bool cancel);
-        private static event ZombieAlertingPlayer OnZombieAlertingPlayer;
+        private delegate void ZombieAlertingPlayer(Zombie nativeZombie, ref Player? player, ref bool cancel);
+        private static event ZombieAlertingPlayer? OnZombieAlertingPlayer;
 
         private delegate void ZombieAlertingPosition(Zombie nativeZombie, ref Vector3 position, ref bool isStartling,
             ref bool cancel);
-        private static event ZombieAlertingPosition OnZombieAlertingPosition;
+        private static event ZombieAlertingPosition? OnZombieAlertingPosition;
 
         private delegate void ZombieSpawned(Zombie nativeZombie);
-        private static event ZombieSpawned OnZombieAdded;
-        private static event ZombieSpawned OnZombieRevived;
+        private static event ZombieSpawned? OnZombieAdded;
+        private static event ZombieSpawned? OnZombieRevived;
 
         private delegate void ZombieDead(Zombie nativeZombie, Vector3 ragdoll, ERagdollEffect ragdollEffect);
-        private static event ZombieDead OnZombieDead;
+        private static event ZombieDead? OnZombieDead;
 
+        [UsedImplicitly]
         [HarmonyPatch]
-        private class ZombiePatches
+        internal static class ZombiePatches
         {
+            [UsedImplicitly]
             [HarmonyPatch(typeof(Zombie), "alert", typeof(Player))]
             [HarmonyPrefix]
-            private static bool AlertPlayer(Zombie __instance, ref Player newPlayer, Player ___player)
+            public static bool AlertPlayer(Zombie __instance, ref Player? newPlayer, Player ___player)
             {
                 if (__instance.isDead || newPlayer == ___player) return true;
 
@@ -155,10 +159,11 @@ namespace OpenMod.Unturned.Zombies.Events
                 return !cancel;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(Zombie), "alert", typeof(Vector3), typeof(bool))]
             [HarmonyPrefix]
-            private static bool AlertPosition(Zombie __instance, ref Vector3 newPosition, ref bool isStartling,
-                Player ___player)
+            public static bool AlertPosition(Zombie __instance, ref Vector3 newPosition, ref bool isStartling,
+                    Player ___player)
             {
                 if (__instance.isDead || ___player != null) return true;
 
@@ -169,23 +174,26 @@ namespace OpenMod.Unturned.Zombies.Events
                 return !cancel;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(Zombie), "tellDead")]
             [HarmonyPostfix]
-            private static void TellDead(Zombie __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
+            public static void TellDead(Zombie __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
             {
                 OnZombieDead?.Invoke(__instance, newRagdoll, ragdollEffect);
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(Zombie), "tellAlive")]
             [HarmonyPostfix]
-            private static void TellAlive(Zombie __instance)
+            public static void TellAlive(Zombie __instance)
             {
                 OnZombieRevived?.Invoke(__instance);
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(ZombieManager), "addZombie")]
             [HarmonyPostfix]
-            private static void AddZombie(byte bound)
+            public static void AddZombie(byte bound)
             {
                 var zombie = ZombieManager.regions[bound].zombies.LastOrDefault();
 

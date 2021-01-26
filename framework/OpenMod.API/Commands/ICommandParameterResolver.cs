@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Commands
@@ -14,7 +13,6 @@ namespace OpenMod.API.Commands
         /// <summary>
         /// Resolves an object of the given type from the input.
         /// </summary>
-        [ItemCanBeNull]
-        Task<object> ResolveAsync([NotNull] Type type, [NotNull] string input);
+        Task<object?> ResolveAsync(Type type, string input);
     }
 }

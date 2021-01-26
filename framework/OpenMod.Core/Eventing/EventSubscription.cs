@@ -2,12 +2,10 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.Common.Helpers;
-using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Eventing
 {
@@ -32,7 +30,7 @@ namespace OpenMod.Core.Eventing
             IOpenModComponent ownerComponent,
             Type eventListener,
             MethodBase method,
-            EventListenerAttribute attribute, 
+            EventListenerAttribute attribute,
             Type eventType,
             ILifetimeScope scope)
         {
@@ -41,7 +39,7 @@ namespace OpenMod.Core.Eventing
             Callback = (serviceProvider, sender, @event) =>
             {
                 var listener = serviceProvider.GetRequiredService(eventListener);
-                return method.InvokeWithTaskSupportAsync(listener, new[] {sender, @event});
+                return method.InvokeWithTaskSupportAsync(listener, new[] { sender, @event });
             };
             EventListenerAttribute = attribute;
             EventName = eventType.Name;
@@ -52,7 +50,7 @@ namespace OpenMod.Core.Eventing
         public EventSubscription(
             IOpenModComponent ownerComponent,
             EventCallback callback,
-            EventListenerAttribute attribute, 
+            EventListenerAttribute attribute,
             Type eventType,
             ILifetimeScope scope)
         {
@@ -68,8 +66,7 @@ namespace OpenMod.Core.Eventing
 
         public ILifetimeScope Scope { get; }
 
-        [CanBeNull]
-        public Type EventType { get; set; }
+        public Type? EventType { get; set; }
 
         public WeakReference Owner { get; set; }
 
@@ -77,8 +74,7 @@ namespace OpenMod.Core.Eventing
 
         public EventListenerAttribute EventListenerAttribute { get; }
 
-        [CanBeNull]
-        public Type EventListener { get; }
+        public Type? EventListener { get; }
 
         public ValueTask DisposeAsync()
         {

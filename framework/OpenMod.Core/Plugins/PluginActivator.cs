@@ -25,7 +25,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Primitives;
 
 namespace OpenMod.Core.Plugins
 {
@@ -73,8 +72,7 @@ namespace OpenMod.Core.Plugins
             }
         }
 
-        [CanBeNull]
-        public async Task<IOpenModPlugin> TryActivatePluginAsync(Assembly assembly)
+        public async Task<IOpenModPlugin?> TryActivatePluginAsync(Assembly assembly)
         {
             try
             {
@@ -91,7 +89,7 @@ namespace OpenMod.Core.Plugins
                     return null;
                 }
 
-                var pluginTypes = assembly.FindTypes<IOpenModPlugin>(false).ToList();
+                var pluginTypes = assembly.FindTypes<IOpenModPlugin>().ToList();
                 if (pluginTypes.Count == 0)
                 {
                     m_Logger.LogError(
@@ -126,7 +124,7 @@ namespace OpenMod.Core.Plugins
                             .AddEnvironmentVariables(pluginMetadata.Id.Replace(".", "_") + "_")
                             .Build();
 
-                        containerBuilder.Register(context => configuration)
+                        containerBuilder.Register(_ => configuration)
                             .As<IConfiguration>()
                             .As<IConfigurationRoot>()
                             .SingleInstance()
@@ -144,7 +142,7 @@ namespace OpenMod.Core.Plugins
                             .InstancePerLifetimeScope()
                             .OwnedByLifetimeScope();
 
-                        containerBuilder.Register(context => m_DataStoreFactory.CreateDataStore(new DataStoreCreationParameters
+                        containerBuilder.Register(_ => m_DataStoreFactory.CreateDataStore(new DataStoreCreationParameters
                         {
 #pragma warning disable 618
                             ComponentId = pluginMetadata.Id,
@@ -161,7 +159,7 @@ namespace OpenMod.Core.Plugins
                             ? m_StringLocalizerFactory.Create("translations", workingDirectory)
                             : NullStringLocalizer.Instance;
 
-                        containerBuilder.Register(context => stringLocalizer)
+                        containerBuilder.Register(_ => stringLocalizer)
                             .As<IStringLocalizer>()
                             .SingleInstance()
                             .OwnedByLifetimeScope();

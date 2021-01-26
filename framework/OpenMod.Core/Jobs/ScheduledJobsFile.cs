@@ -5,6 +5,6 @@ namespace OpenMod.Core.Jobs
 {
     public class ScheduledJobsFile
     {
-        public List<ScheduledJob> Jobs { get; set; } = new();
+        public List<ScheduledJob>? Jobs { get; set; } = new();
     }
 }

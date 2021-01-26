@@ -14,7 +14,7 @@ namespace OpenMod.Rust.Oxide
     public class OpenModRustOxideHost : BaseOpenModRustHost
     {
         private readonly IServiceProvider m_ServiceProvider;
-        private OxideEventsActivator m_OxideEventsActivator;
+        private OxideEventsActivator? m_OxideEventsActivator;
 
         public OpenModRustOxideHost(
             IServiceProvider serviceProvider,
@@ -36,7 +36,7 @@ namespace OpenMod.Rust.Oxide
 
         protected override void OnDispose()
         {
-            m_OxideEventsActivator.Dispose();
+            m_OxideEventsActivator?.Dispose();
         }
     }
 }

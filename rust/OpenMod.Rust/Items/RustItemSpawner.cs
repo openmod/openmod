@@ -14,17 +14,21 @@ namespace OpenMod.Rust.Items
     [ServiceImplementation(Priority = Priority.Lowest)]
     public class RustItemSpawner : IItemSpawner
     {
-        public Task<IItemInstance> GiveItemAsync(IInventory inventory, string itemId, IItemState state = null)
+        public Task<IItemInstance?> GiveItemAsync(IInventory inventory, string itemId, IItemState? state = null)
         {
             ValidateState(state);
 
-            async UniTask<IItemInstance> GiveItemTask()
+            async UniTask<IItemInstance?> GiveItemTask()
             {
                 await UniTask.SwitchToMainThread();
 
                 if (inventory is RustPlayerInventory playerInventory)
                 {
-                    RustItem item = CreateItem(itemId, state);
+                    var item = CreateItem(itemId, state);
+                    if (item == null)
+                    {
+                        return null;
+                    }
 
                     playerInventory.GiveItem(item.Item);
                     return new RustInventoryItem(item);
@@ -36,15 +40,19 @@ namespace OpenMod.Rust.Items
             return GiveItemTask().AsTask();
         }
 
-        public Task<IItemDrop> SpawnItemAsync(Vector3 position, string itemId, IItemState state = null)
+        public Task<IItemDrop?> SpawnItemAsync(Vector3 position, string itemId, IItemState? state = null)
         {
             ValidateState(state);
 
-            async UniTask<IItemDrop> SpawnItemTask()
+            async UniTask<IItemDrop?> SpawnItemTask()
             {
                 await UniTask.SwitchToMainThread();
 
-                RustItem item = CreateItem(itemId, state);
+                var item = CreateItem(itemId, state);
+                if (item == null)
+                {
+                    return null;
+                }
 
                 var droppedItem = item.Item
                     .Drop(position.ToUnityVector(), UnityVector3.zero, UnityQuaternion.identity) as DroppedItem;
@@ -55,9 +63,9 @@ namespace OpenMod.Rust.Items
             return SpawnItemTask().AsTask();
         }
 
-        private void ValidateState(IItemState state)
+        private void ValidateState(IItemState? state)
         {
-            if (state == null || state is NullItemState)
+            if (state is NullItemState or null)
             {
                 return;
             }
@@ -73,21 +81,20 @@ namespace OpenMod.Rust.Items
             }
         }
 
-        private RustItem CreateItem(string itemId, IItemState state)
+        private RustItem? CreateItem(string itemId, IItemState? state)
         {
-            if (!int.TryParse(itemId, out int parsedItemId))
+            if (!int.TryParse(itemId, out var parsedItemId))
             {
                 throw new ArgumentException($"Invalid Item ID: {itemId}", nameof(itemId));
             }
 
-            Item item = ItemManager.CreateByItemID(parsedItemId);
+            var item = ItemManager.CreateByItemID(parsedItemId);
             if (item == null)
             {
                 return null;
             }
 
             var rustItem = new RustItem(item);
-
             if (state != null && !(state is NullItemState))
             {
                 rustItem.SetItemAmountAsync(state.ItemAmount);

@@ -6,9 +6,9 @@ namespace OpenMod.Unturned.Players.Chat.Events
 {
     public class UnturnedServerSendingMessageEvent : Event
     {
-        public UnturnedPlayer FromPlayer { get; }
+        public UnturnedPlayer? FromPlayer { get; }
 
-        public UnturnedPlayer ToPlayer { get; }
+        public UnturnedPlayer? ToPlayer { get; }
 
         public string Text { get; set; }
 
@@ -20,7 +20,7 @@ namespace OpenMod.Unturned.Players.Chat.Events
 
         public bool IsRich { get; set; }
 
-        public UnturnedServerSendingMessageEvent(UnturnedPlayer fromPlayer, UnturnedPlayer toPlayer, string text, Color color, EChatMode mode, string iconUrl, bool isRich)
+        public UnturnedServerSendingMessageEvent(UnturnedPlayer? fromPlayer, UnturnedPlayer? toPlayer, string text, Color color, EChatMode mode, string iconUrl, bool isRich)
         {
             FromPlayer = fromPlayer;
             ToPlayer = toPlayer;

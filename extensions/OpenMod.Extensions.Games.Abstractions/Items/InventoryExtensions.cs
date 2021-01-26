@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace OpenMod.Extensions.Games.Abstractions.Items
 {
@@ -26,8 +25,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// <param name="inventory">The inventory to search in.</param>
         /// <param name="itemType">The type of the item to search for.</param>
         /// <param name="comparer">The optional item comparer.</param>
-        [CanBeNull]
-        public static IEnumerable<IInventoryItem> FindByType(this IInventory inventory, string itemType, IComparer<IInventoryItem> comparer = null)
+        public static IEnumerable<IInventoryItem> FindByType(this IInventory inventory, string itemType, IComparer<IInventoryItem>? comparer = null)
         {
             var query = inventory.SelectMany(d => d.Items);
             return FindByType(query, itemType, comparer);
@@ -39,13 +37,12 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// <param name="page">The inventory page to search in.</param>
         /// <param name="itemType">The type of the item to search for.</param>
         /// <param name="comparer">The optional item comparer.</param>
-        [CanBeNull]
-        public static IEnumerable<IInventoryItem> FindByType(this IInventoryPage page, string itemType, IComparer<IInventoryItem> comparer = null)
+        public static IEnumerable<IInventoryItem> FindByType(this IInventoryPage page, string itemType, IComparer<IInventoryItem>? comparer = null)
         {
             return FindByType((IEnumerable<IInventoryItem>)page, itemType, comparer);
         }
 
-        private static IEnumerable<IInventoryItem> FindByType(IEnumerable<IInventoryItem> query, string itemType, IComparer<IInventoryItem> comparer)
+        private static IEnumerable<IInventoryItem> FindByType(IEnumerable<IInventoryItem> query, string itemType, IComparer<IInventoryItem>? comparer)
         {
             if (comparer != null)
             {
@@ -62,8 +59,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// <param name="itemAssetId">The ID of the item to search for.</param>
         /// <param name="comparer">The optional item comparer.</param>
         /// <returns></returns>
-        [CanBeNull]
-        public static IEnumerable<IInventoryItem> FindByAssetId(this IInventory inventory, string itemAssetId, IComparer<IInventoryItem> comparer = null)
+        public static IEnumerable<IInventoryItem> FindByAssetId(this IInventory inventory, string itemAssetId, IComparer<IInventoryItem>? comparer = null)
         {
             var query = inventory.SelectMany(d => d.Items);
             return FindByAssetId(query, itemAssetId, comparer);
@@ -76,13 +72,12 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// <param name="itemAssetId">The ID of the item to search for.</param>
         /// <param name="comparer">The optional item comparer.</param>
         /// <returns></returns>
-        [CanBeNull]
-        public static IEnumerable<IInventoryItem> FindByAssetId(this IInventoryPage page, string itemAssetId, IComparer<IInventoryItem> comparer = null)
+        public static IEnumerable<IInventoryItem> FindByAssetId(this IInventoryPage page, string itemAssetId, IComparer<IInventoryItem>? comparer = null)
         {
             return FindByAssetId((IEnumerable<IInventoryItem>)page, itemAssetId, comparer);
         }
 
-        private static IEnumerable<IInventoryItem> FindByAssetId(IEnumerable<IInventoryItem> query, string itemType, IComparer<IInventoryItem> comparer)
+        private static IEnumerable<IInventoryItem> FindByAssetId(IEnumerable<IInventoryItem> query, string itemType, IComparer<IInventoryItem>? comparer)
         {
             if (comparer != null)
             {

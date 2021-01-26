@@ -5,6 +5,6 @@
     /// </summary>
     public class NullVehicleState : IVehicleState
     {
-        public byte[] StateData { get; } = null;
+        public byte[]? StateData { get; } = null;
     }
 }

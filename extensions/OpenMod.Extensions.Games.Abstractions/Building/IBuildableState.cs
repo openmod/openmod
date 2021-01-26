@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace OpenMod.Extensions.Games.Abstractions.Building
+﻿namespace OpenMod.Extensions.Games.Abstractions.Building
 {
     /// <summary>
     /// Represents the state of a buildable.
@@ -15,7 +13,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Building
         /// <value>
         /// State of the buildable. Can be null.
         /// </value>
-        [CanBeNull]
-        byte[] StateData { get; }
+        byte[]? StateData { get; }
     }
 }

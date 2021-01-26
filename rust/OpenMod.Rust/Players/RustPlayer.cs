@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Items;
 using OpenMod.Extensions.Games.Abstractions.Players;
 using OpenMod.Rust.Entities;
@@ -10,7 +9,7 @@ using IHasInventory = OpenMod.Extensions.Games.Abstractions.Items.IHasInventory;
 
 namespace OpenMod.Rust.Players
 {
-    public class RustPlayer : RustEntity, IPlayer, IComparable<RustPlayer>, IDamageSource, IHasInventory
+    public class RustPlayer : RustEntity, IPlayer, IComparable<RustPlayer>, IHasInventory
     {
         public BasePlayer Player { get; }
 
@@ -23,7 +22,13 @@ namespace OpenMod.Rust.Players
             // Rust todo: set stance
         }
 
-        public string Stance { get; }
+        public string Stance
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public int CompareTo(RustPlayer other)
         {

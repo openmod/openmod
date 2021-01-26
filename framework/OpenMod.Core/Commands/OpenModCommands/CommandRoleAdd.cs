@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Users;
-using OpenMod.Core.Users;
 
 namespace OpenMod.Core.Commands.OpenModCommands
 {

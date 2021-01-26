@@ -41,7 +41,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
             m_Runtime = runtime;
 
             // get global permission checker instead of scoped
-            m_PermissionChecker = m_Runtime.Host.Services.GetRequiredService<IPermissionChecker>();
+            m_PermissionChecker = m_Runtime.Host!.Services.GetRequiredService<IPermissionChecker>();
 
             m_CommandStore = commandStore;
             m_PermissionRegistry = permissionRegistry;
@@ -74,19 +74,19 @@ namespace OpenMod.Core.Commands.OpenModCommands
             else if (Context.Parameters.Length > 0)
             {
                 var context = m_CommandContextBuilder.CreateContext(Context.Actor, Context.Parameters.ToArray(), Context.CommandPrefix, commands);
-                var permission = GetPermission(context.CommandRegistration, commands);
+                var permission = GetPermission(context.CommandRegistration!, commands);
 
                 if (context.CommandRegistration == null)
                 {
-                    await PrintAsync(m_StringLocalizer["commands:errors:not_found", new { CommandName = context.GetCommandLine(false) }],
-                        Color.Red);
+                    await PrintAsync(m_StringLocalizer["commands:errors:not_found",
+                        arguments: new { CommandName = context.GetCommandLine(includeArguments: false) }],
+                        color: Color.Red);
                     return;
                 }
 
-                if (!string.IsNullOrEmpty(permission)
-                    && await m_PermissionChecker.CheckPermissionAsync(Context.Actor, permission) != PermissionGrantResult.Grant)
+                if (!string.IsNullOrEmpty(permission) && await m_PermissionChecker.CheckPermissionAsync(Context.Actor, permission!) != PermissionGrantResult.Grant)
                 {
-                    throw new NotEnoughPermissionException(m_StringLocalizer, permission);
+                    throw new NotEnoughPermissionException(m_StringLocalizer, permission!);
                 }
 
                 await PrintCommandHelpAsync(context, permission, commands);
@@ -94,11 +94,9 @@ namespace OpenMod.Core.Commands.OpenModCommands
             }
         }
 
-        protected virtual string GetPermission(ICommandRegistration commandRegistration, IReadOnlyCollection<ICommandRegistration> commands)
+        protected virtual string? GetPermission(ICommandRegistration commandRegistration, IReadOnlyCollection<ICommandRegistration> commands)
         {
-            var permission = commandRegistration == null
-                ? null
-                : m_CommandPermissionBuilder.GetPermission(commandRegistration, commands).Split(':')[1];
+            var permission = m_CommandPermissionBuilder.GetPermission(commandRegistration, commands).Split(':')[1];
             if (permission == null)
             {
                 return null;
@@ -113,9 +111,9 @@ namespace OpenMod.Core.Commands.OpenModCommands
             return $"{registeredPermission.Owner.OpenModComponentId}:{registeredPermission.Permission}";
         }
 
-        private async Task PrintCommandHelpAsync(ICommandContext context, string permission, IEnumerable<ICommandRegistration> commands)
+        private async Task PrintCommandHelpAsync(ICommandContext context, string? permission, IEnumerable<ICommandRegistration> commands)
         {
-            var usage = $"Usage: {context.CommandRegistration.Name}";
+            var usage = $"Usage: {context.CommandRegistration!.Name}";
             if (!string.IsNullOrEmpty(context.CommandRegistration.Syntax))
             {
                 usage += $" {context.CommandRegistration.Syntax}";

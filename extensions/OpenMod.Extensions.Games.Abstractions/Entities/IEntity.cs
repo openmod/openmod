@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace OpenMod.Extensions.Games.Abstractions.Entities
 {
@@ -10,21 +9,18 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
     public interface IEntity : IGameObject
     {
         /// <value>
-        /// The asset of the entity. Cannot be null.
+        /// The asset of the entity.
         /// </value>
-        [NotNull]
         IEntityAsset Asset { get; }
 
         /// <value>
-        /// The state of the entity. Cannot be null.
+        /// The state of the entity.
         /// </value>
-        [NotNull]
         IEntityState State { get; }
 
         /// <value>
-        /// The unique instance ID of the entity. Cannot be null.
+        /// The unique instance ID of the entity.
         /// </value>
-        [NotNull]
         string EntityInstanceId { get; }
 
         /// <summary>

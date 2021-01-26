@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.Extensions.Games.Abstractions.Acl;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
@@ -13,39 +12,33 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
     public interface IVehicle : IHasOwnership
     {
         /// <value>
-        /// The asset of the vehicle. Cannot be null.
+        /// The asset of the vehicle.
         /// </value>
-        [NotNull]
         IVehicleAsset Asset { get; }
 
         /// <value>
-        /// The state of the vehicle. Cannot be null.
+        /// The state of the vehicle.
         /// </value>
-        [NotNull]
         IVehicleState State { get; }
 
         /// <value>
-        /// The transform of the vehicle. Cannot be null.
+        /// The transform of the vehicle.
         /// </value>
-        [NotNull]
         IWorldTransform Transform { get; }
 
         /// <summary>
-        /// The unique instance ID of the vehicle. Cannot be null.
+        /// The unique instance ID of the vehicle.
         /// </summary>
-        [NotNull]
         string VehicleInstanceId { get; }
 
         /// <summary>
-        /// The driver of the vehicle. Can be null.
+        /// The driver of the vehicle.
         /// </summary>
-        [CanBeNull]
-        IEntity Driver { get; }
+        IEntity? Driver { get; }
 
         /// <summary>
-        /// List of the passengers of this vehicle. Cannot be null but empty.
+        /// List of the passengers of this vehicle.
         /// </summary>
-        [NotNull]
         IReadOnlyCollection<IEntity> Passengers { get; }
 
         /// <summary>

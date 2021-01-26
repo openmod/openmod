@@ -77,20 +77,19 @@ namespace OpenMod.Core.Commands
 
                 currentCommandAccessor.Context = commandContext;
 
-                var permission = m_CommandPermissionBuilder.GetPermission(commandContext.CommandRegistration);
-                var permissionChecker = m_Runtime.Host.Services.GetRequiredService<IPermissionChecker>();
+                var permission = m_CommandPermissionBuilder.GetPermission(commandContext.CommandRegistration!);
+                var permissionChecker = m_Runtime.LifetimeScope.Resolve<IPermissionChecker>();
 
                 if (!string.IsNullOrWhiteSpace(permission) && await permissionChecker.CheckPermissionAsync(actor, permission) != PermissionGrantResult.Grant)
                 {
                     throw new NotEnoughPermissionException(stringLocalizer, permission);
                 }
 
-                Stopwatch sw = new Stopwatch();
+                var sw = new Stopwatch();
                 sw.Start();
-                var command = commandContext.CommandRegistration.Instantiate(commandContext.ServiceProvider);
+                var command = commandContext.CommandRegistration!.Instantiate(commandContext.ServiceProvider);
                 await command.ExecuteAsync();
                 m_Logger.LogDebug($"Command \"{string.Join(" ", args)}\" executed in {sw.ElapsedMilliseconds}ms");
-                sw.Reset();
 
                 currentCommandAccessor.Context = null;
             }

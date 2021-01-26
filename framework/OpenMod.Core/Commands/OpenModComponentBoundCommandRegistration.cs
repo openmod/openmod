@@ -16,27 +16,41 @@ namespace OpenMod.Core.Commands
     [OpenModInternal]
     public class OpenModComponentBoundCommandRegistration : ICommandRegistration
     {
-        private ICollection<Type> m_CommandActorTypes;
         public IOpenModComponent Component { get; }
-        public Type CommandType { get; }
-        public MethodInfo CommandMethod { get; }
+        public string? Syntax { get; private set; }
+        public string Id { get; set; } = null!;
+        public string Name { get; set; } = null!;
+        public string? Description { get; set; }
+        public Priority Priority { get; set; }
+        public IReadOnlyCollection<IPermissionRegistration>? PermissionRegistrations { get; set; }
+        public IReadOnlyCollection<string>? Aliases { get; set; }
+        public string? ParentId { get; set; }
+        public Type? CommandType { get; }
+        public MethodInfo? CommandMethod { get; }
+
+        private ICollection<Type>? m_CommandActorTypes;
 
         public OpenModComponentBoundCommandRegistration(IOpenModComponent component, Type commandType)
         {
-            Component = component;
-            CommandType = commandType;
+            Component = component ?? throw new ArgumentNullException(nameof(component));
+            CommandType = commandType ?? throw new ArgumentNullException(nameof(commandType));
             ReadAttributes(commandType);
         }
 
         public OpenModComponentBoundCommandRegistration(IOpenModComponent component, MethodInfo methodInfo)
         {
-            Component = component;
-            CommandMethod = methodInfo;
+            Component = component ?? throw new ArgumentNullException(nameof(component));
+            CommandMethod = methodInfo ?? throw new ArgumentNullException(nameof(methodInfo));
             ReadAttributes(methodInfo);
         }
 
         private void ReadAttributes(MemberInfo memberInfo)
         {
+            if (memberInfo == null)
+            {
+                throw new ArgumentNullException(nameof(memberInfo));
+            }
+
             var commandAttribute = memberInfo.GetCustomAttribute<CommandAttribute>();
             Name = commandAttribute.Name;
             Description = memberInfo.GetCustomAttribute<CommandDescriptionAttribute>()?.Description;
@@ -55,8 +69,8 @@ namespace OpenMod.Core.Commands
                 .ToList();
 
             Id = CommandType != null
-                ? CommandType.FullName
-                : $"{CommandMethod.DeclaringType.FullName}.{CommandMethod.Name}";
+                ? CommandType.FullName!
+                : $"{CommandMethod!.DeclaringType!.FullName}.{CommandMethod!.Name}";
 
             m_CommandActorTypes = memberInfo.GetCustomAttributes<CommandActorAttribute>().Select(d => d.ActorType).ToList();
 
@@ -65,24 +79,18 @@ namespace OpenMod.Core.Commands
             {
                 ParentId = parent.CommandType != null
                     ? parent.CommandType.FullName
-                    : $"{parent.DeclaringType.FullName}.{parent.MethodName}";
+                    : $"{parent.DeclaringType!.FullName}.{parent.MethodName}";
             }
         }
 
-        public string Syntax { get; private set; }
-        public string Id { get; set; }
-        public string Name { get; set; }
-
-
-        public string Description { get; set; }
-        public Priority Priority { get; set; }
-        public IReadOnlyCollection<IPermissionRegistration> PermissionRegistrations { get; set; }
-        public IReadOnlyCollection<string> Aliases { get; set; }
-        public string ParentId { get; set; }
-
         public bool SupportsActor(ICommandActor actor)
         {
-            if (m_CommandActorTypes.Count == 0)
+            if (actor == null)
+            {
+                throw new ArgumentNullException(nameof(actor));
+            }
+
+            if (m_CommandActorTypes == null || m_CommandActorTypes.Count == 0)
             {
                 return true;
             }
@@ -92,13 +100,18 @@ namespace OpenMod.Core.Commands
 
         public ICommand Instantiate(IServiceProvider serviceProvider)
         {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
             if (CommandType != null)
             {
                 var lifetime = serviceProvider.GetRequiredService<ILifetimeScope>();
                 return (ICommand)ActivatorUtilitiesEx.CreateInstance(lifetime, CommandType);
             }
 
-            return new MethodCommandWrapper(CommandMethod, serviceProvider);
+            return new MethodCommandWrapper(CommandMethod!, serviceProvider);
         }
 
         public bool IsEnabled

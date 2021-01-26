@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using OpenMod.API;
 
@@ -12,8 +11,7 @@ namespace OpenMod.Core.Configuration
     [OpenModInternal]
     public class YamlConfigurationSourceEx : FileConfigurationSource
     {
-        [CanBeNull]
-        public IDictionary<string, string> Variables { get; set; }
+        public IDictionary<string, string>? Variables { get; set; }
 
         public override IConfigurationProvider Build(IConfigurationBuilder builder)
         {

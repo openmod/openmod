@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.Extensions.Games.Abstractions.Players;
 
 namespace OpenMod.Extensions.Games.Abstractions.Acl
@@ -18,14 +17,12 @@ namespace OpenMod.Extensions.Games.Abstractions.Acl
         /// <value>
         /// The ID of the player owning this object. Can be null.
         /// </value>
-        [CanBeNull]
-        string OwnerPlayerId { get; }
+        string? OwnerPlayerId { get; }
 
         /// <value>
         /// The ID of the group owning this object. Can be null.
         /// </value>
-        [CanBeNull]
-        string OwnerGroupId { get; }
+        string? OwnerGroupId { get; }
 
         /// <summary>
         /// Checks if the given player has access to this object.

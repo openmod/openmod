@@ -17,7 +17,7 @@ namespace OpenMod.Rust.Oxide.Players.Violations.Events
         }
 
         [HookMethod("OnPlayerViolation")]
-        private object OnPlayerViolation(BasePlayer player, AntiHackType type, float amount)
+        private object? OnPlayerViolation(BasePlayer player, AntiHackType type, float amount)
         {
             var @event = new RustPlayerAntiHackViolationEvent(new RustPlayer(player), type, amount);
             return EmitCancellableReturnsObject(@event);

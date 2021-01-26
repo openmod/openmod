@@ -12,7 +12,7 @@ namespace OpenMod.Core.Users.Events
         /// <value>
         /// The rejection reason. If not null; will reject the user. Use <see cref="RejectAsync"/> to set the value.
         /// </value>
-        public string RejectionReason { get; }
+        public string? RejectionReason { get; }
 
         /// <summary>
         /// Rejects a players connection attempt.

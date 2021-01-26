@@ -10,7 +10,7 @@ namespace OpenMod.Unturned.Zombies.Events
         /// <summary>
         /// The player alerting the zombie.
         /// </summary>
-        public UnturnedPlayer Player { get; set; }
+        public UnturnedPlayer Player { get; }
 
         public UnturnedZombieAlertingPlayerEvent(UnturnedZombie zombie, UnturnedPlayer player) : base(zombie)
         {

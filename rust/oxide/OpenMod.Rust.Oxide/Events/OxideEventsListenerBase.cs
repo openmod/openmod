@@ -1,5 +1,3 @@
-using System;
-using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.Core.Helpers;
@@ -32,7 +30,7 @@ namespace OpenMod.Rust.Oxide.Events
             return !@event.IsCancelled;
         }
 
-        protected object EmitCancellableReturnsObject(ICancellableEvent @event)
+        protected object? EmitCancellableReturnsObject(ICancellableEvent @event)
         {
             Emit(@event);
             return @event.IsCancelled ? new object() : null;

@@ -17,14 +17,14 @@ namespace OpenMod.Rust.Oxide.Players.Spectating.Events
         }
 
         [HookMethod("OnPlayerSpectateEnd")]
-        private object OnPlayerSpectateEnd(BasePlayer player, string spectateFilter)
+        private object? OnPlayerSpectateEnd(BasePlayer player, string spectateFilter)
         {
             var @event = new RustPlayerSpectateEndingEvent(new RustPlayer(player), spectateFilter);
             return EmitCancellableReturnsObject(@event);
         }
 
         [HookMethod("OnPlayerSpectate")]
-        private object OnPlayerSpectate(BasePlayer player, string spectateFilter)
+        private object? OnPlayerSpectate(BasePlayer player, string spectateFilter)
         {
             var @event = new RustPlayerSpectateStartingEvent(new RustPlayer(player), spectateFilter);
             return EmitCancellableReturnsObject(@event);

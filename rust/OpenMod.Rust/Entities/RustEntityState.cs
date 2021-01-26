@@ -1,13 +1,12 @@
-﻿using System.IO;
-using OpenMod.Extensions.Games.Abstractions.Entities;
+﻿using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Rust.Serialization;
 
 namespace OpenMod.Rust.Entities
 {
     public class RustEntityState : IEntityState
     {
-        private readonly BaseEntity m_Entity;
-        private readonly byte[] m_StateData;
+        private readonly BaseEntity? m_Entity;
+        private readonly byte[]? m_StateData;
 
         public RustEntityState(BaseEntity entity)
         {
@@ -19,7 +18,7 @@ namespace OpenMod.Rust.Entities
             m_StateData = data;
         }
 
-        public byte[] StateData
+        public byte[]? StateData
         {
             get
             {

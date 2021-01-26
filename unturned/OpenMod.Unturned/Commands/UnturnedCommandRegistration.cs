@@ -36,7 +36,7 @@ namespace OpenMod.Unturned.Commands
         public string Syntax { get; }
         public string Id { get; }
         public Priority Priority { get; } = Priority.Lowest;
-        public string ParentId { get; } = null;
+        public string? ParentId { get; } = null;
 
         public bool SupportsActor(ICommandActor actor)
         {

@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using OpenMod.API.Ioc;
-using OpenMod.UnityEngine;
 
 namespace OpenMod.Rust
 {

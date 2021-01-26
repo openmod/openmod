@@ -18,9 +18,11 @@ namespace OpenMod.Core.Commands
         protected CommandBase(IServiceProvider serviceProvider)
         {
             var contextAccessor = serviceProvider.GetRequiredService<ICurrentCommandContextAccessor>();
-            Context = contextAccessor.Context;
+            Context = contextAccessor.Context ?? throw new InvalidOperationException("contextAccessor.Context was null");
             m_PermissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
-            m_CommandPermission = serviceProvider.GetRequiredService<ICommandPermissionBuilder>().GetPermission(Context.CommandRegistration);
+
+            var permissionBuilder = serviceProvider.GetRequiredService<ICommandPermissionBuilder>();
+            m_CommandPermission = permissionBuilder.GetPermission(Context.CommandRegistration ?? throw new InvalidOperationException("context.CommandRegistration was null"));
         }
 
         public abstract Task ExecuteAsync();

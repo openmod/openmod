@@ -1,4 +1,5 @@
-﻿using OpenMod.Extensions.Games.Abstractions.Building;
+﻿using System;
+using OpenMod.Extensions.Games.Abstractions.Building;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Building
@@ -23,8 +24,17 @@ namespace OpenMod.Unturned.Building
 
         protected UnturnedBuildableAsset(Asset asset)
         {
-            Asset = asset;
+            Asset = asset ?? throw new ArgumentNullException(nameof(asset));
             BuildableAssetId = asset.id.ToString();
+
+            BuildableType = asset switch
+            {
+                ItemStructureAsset => "structure",
+                ItemBarricadeAsset => "barricade",
+                _ => throw new ArgumentException(
+                    $"The given asset is not a structure or barricade asset. Id: {asset.id}, type: {asset.GetType().Name}",
+                    nameof(asset))
+            };
         }
     }
 }

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using OpenMod.API.Permissions;
-using OpenMod.Core.Users;
 using Rocket.API.Serialisation;
 
 namespace OpenMod.Unturned.RocketMod.Permissions
@@ -16,7 +14,8 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             Priority = rocketGroup.Priority;
             Parents = !string.IsNullOrEmpty(rocketGroup.ParentGroup)
                 ? new HashSet<string> { rocketGroup.ParentGroup }
-                : null;
+                : new HashSet<string>();
+
             IsAutoAssigned = false; // todo check if default role
         }
 

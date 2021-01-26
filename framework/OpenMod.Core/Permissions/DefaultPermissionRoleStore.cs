@@ -29,6 +29,11 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task<IReadOnlyCollection<IPermissionRole>> GetRolesAsync(IPermissionActor actor, bool inherit = true)
         {
+            if (actor == null)
+            {
+                throw new ArgumentNullException(nameof(actor));
+            }
+
             var roles = new List<IPermissionRole>();
             var roleIds = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -58,7 +63,7 @@ namespace OpenMod.Core.Permissions
             }
 
             var userData = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
-            if (userData == null)
+            if (userData?.Roles == null)
             {
                 return GetAutoAssignRoles().ToList();
             }
@@ -66,8 +71,10 @@ namespace OpenMod.Core.Permissions
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var roleId in userData.Roles)
             {
-                if (roleIds.Contains(roleId)) //prevent add roles that was already by parent for example
+                if (roleIds.Contains(roleId))
+                {
                     continue;
+                }
 
                 var userRole = await GetRoleAsync(roleId);
                 if (userRole == null)
@@ -99,11 +106,6 @@ namespace OpenMod.Core.Permissions
 
         public virtual Task<IReadOnlyCollection<IPermissionRole>> GetRolesAsync()
         {
-            if (m_PermissionRolesDataStore.Roles == null)
-            {
-                return Task.FromResult<IReadOnlyCollection<IPermissionRole>>(new List<IPermissionRole>());
-            }
-
             //cast is neccessary, OfType<> or Cast<> does not work with cast operators
             return Task.FromResult<IReadOnlyCollection<IPermissionRole>>(m_PermissionRolesDataStore.Roles
                 .Where(d => d != null)
@@ -111,38 +113,48 @@ namespace OpenMod.Core.Permissions
                 .ToList());
         }
 
-        public virtual Task<IPermissionRole> GetRoleAsync(string id)
+        public virtual Task<IPermissionRole?> GetRoleAsync(string roleId)
         {
-            if (m_PermissionRolesDataStore.Roles == null)
+            if (string.IsNullOrEmpty(roleId))
             {
-                return Task.FromResult<IPermissionRole>(null);
+                throw new ArgumentNullException(nameof(roleId));
+            }
+
+            if (m_PermissionRolesDataStore.Roles.Count < 1)
+            {
+                return Task.FromResult<IPermissionRole?>(result: null);
             }
 
             //cast is neccessary, OfType<> or Cast<> does not work with cast operators
-            return Task.FromResult(m_PermissionRolesDataStore.Roles
+            return Task.FromResult<IPermissionRole?>(m_PermissionRolesDataStore.Roles
                 .Select(d => (IPermissionRole)(PermissionRole)d)
-                .FirstOrDefault(d => d.Id.Equals(id, StringComparison.OrdinalIgnoreCase)));
+                .FirstOrDefault(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase)));
         }
 
         public virtual async Task<bool> UpdateRoleAsync(IPermissionRole role)
         {
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+
             if (await GetRoleAsync(role.Id) == null)
             {
                 return false;
             }
 
-            if (m_PermissionRolesDataStore.Roles == null)
+            var roleData = m_PermissionRolesDataStore.Roles.FirstOrDefault(d => d?.Id?.EndsWith(role.Id) ?? false);
+            if (roleData == null)
             {
-                return false;
+                throw new Exception($"Role does not exist: {role.Id}");
             }
 
-            var roleData = m_PermissionRolesDataStore.Roles.First(d => d.Id.EndsWith(role.Id));
             roleData.DisplayName = role.DisplayName;
             roleData.IsAutoAssigned = role.IsAutoAssigned;
             roleData.Parents = role.Parents;
             roleData.Permissions = role.Parents;
             roleData.Priority = role.Priority;
-            roleData.Data ??= new Dictionary<string, object>();
+            roleData.Data ??= new Dictionary<string, object?>();
 
             await m_PermissionRolesDataStore.SaveChangesAsync();
             return true;
@@ -150,7 +162,23 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task<bool> AddRoleToActorAsync(IPermissionActor actor, string roleId)
         {
+            if (actor == null)
+            {
+                throw new ArgumentNullException(nameof(actor));
+            }
+
+            if (string.IsNullOrEmpty(roleId))
+            {
+                throw new ArgumentNullException(nameof(roleId));
+            }
+
             var userData = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
+            if (userData == null)
+            {
+                return false;
+            }
+
+            userData.Roles ??= new HashSet<string>();
             if (userData.Roles.Contains(roleId))
             {
                 return true;
@@ -163,7 +191,22 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task<bool> RemoveRoleFromActorAsync(IPermissionActor actor, string roleId)
         {
+            if (actor == null)
+            {
+                throw new ArgumentNullException(nameof(actor));
+            }
+
+            if (string.IsNullOrEmpty(roleId))
+            {
+                throw new ArgumentNullException(nameof(roleId));
+            }
+
             var userData = await m_UserDataStore.GetUserDataAsync(actor.Id, actor.Type);
+            if (userData?.Roles == null)
+            {
+                return false;
+            }
+
             userData.Roles.Remove(roleId);
             await m_UserDataStore.SetUserDataAsync(userData);
             return true;
@@ -171,6 +214,11 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task<bool> CreateRoleAsync(IPermissionRole role)
         {
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+
             if (await GetRoleAsync(role.Id) != null)
             {
                 return false;
@@ -192,9 +240,9 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task<bool> DeleteRoleAsync(string roleId)
         {
-            if (m_PermissionRolesDataStore.Roles == null)
+            if (string.IsNullOrEmpty(roleId))
             {
-                return false;
+                throw new ArgumentNullException(nameof(roleId));
             }
 
             if (m_PermissionRolesDataStore.Roles.RemoveAll(c => roleId.Equals(c.Id, StringComparison.OrdinalIgnoreCase)) == 0)
@@ -208,21 +256,41 @@ namespace OpenMod.Core.Permissions
 
         public Task<IReadOnlyCollection<string>> GetAutoAssignedRolesAsync(string actorId, string actorType)
         {
+            if (string.IsNullOrEmpty(actorId))
+            {
+                throw new ArgumentNullException(nameof(actorId));
+            }
+
+            if (string.IsNullOrEmpty(actorType))
+            {
+                throw new ArgumentNullException(nameof(actorType));
+            }
+
             IReadOnlyCollection<string> result = GetAutoAssignRoles().Select(d => d.Id).ToList();
             return Task.FromResult(result);
         }
 
-        public async Task SavePersistentDataAsync<T>(string roleId, string key, T data)
+        public async Task SavePersistentDataAsync<T>(string roleId, string key, T? data)
         {
-            if (m_PermissionRolesDataStore.Roles == null)
+            if (string.IsNullOrEmpty(roleId))
             {
-                return;
+                throw new ArgumentNullException(nameof(roleId));
             }
 
-            var roleData = m_PermissionRolesDataStore.Roles.FirstOrDefault(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            var roleData = m_PermissionRolesDataStore.Roles.FirstOrDefault(d => d.Id?.Equals(roleId, StringComparison.OrdinalIgnoreCase) ?? false);
             if (roleData == null)
             {
                 throw new Exception($"Role does not exist: {roleId}");
+            }
+
+            if(roleData.Data == null)
+            {
+                roleData.Data = new Dictionary<string, object?>();
             }
 
             if (roleData.Data.ContainsKey(key))
@@ -237,20 +305,23 @@ namespace OpenMod.Core.Permissions
             await m_PermissionRolesDataStore.SaveChangesAsync();
         }
 
-        public Task<T> GetPersistentDataAsync<T>(string roleId, string key)
+        public Task<T?> GetPersistentDataAsync<T>(string roleId, string key)
         {
-            return m_PermissionRolesDataStore.Roles == null 
-                ? default 
-                : m_PermissionRolesDataStore.GetRoleDataAsync<T>(roleId, key);
+            if (string.IsNullOrEmpty(roleId))
+            {
+                throw new ArgumentNullException(nameof(roleId));
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            return m_PermissionRolesDataStore.GetRoleDataAsync<T>(roleId, key);
         }
 
         protected IEnumerable<IPermissionRole> GetAutoAssignRoles()
         {
-            if (m_PermissionRolesDataStore.Roles == null)
-            {
-                return Enumerable.Empty<IPermissionRole>();
-            }
-
             //cast is neccessary, OfType<> or Cast<> does not work with cast operators
             return m_PermissionRolesDataStore.Roles
                 .Select(d => (PermissionRole)d)

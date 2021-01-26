@@ -11,9 +11,9 @@ namespace OpenMod.Unturned.Module.Dev
 {
     public class OpenModUnturnedModule : IModuleNexus
     {
-        public Runtime.Runtime OpenModRuntime { get; private set; }
+        public Runtime.Runtime? OpenModRuntime { get; private set; }
 
-        private OpenModSharedUnturnedModule m_SharedModule;
+        private OpenModSharedUnturnedModule? m_SharedModule;
 
         public void initialize()
         {
@@ -29,7 +29,7 @@ namespace OpenMod.Unturned.Module.Dev
 
         public void shutdown()
         {
-            m_SharedModule.Shutdown();
+            m_SharedModule?.Shutdown();
             OpenModRuntime = null;
         }
 
@@ -46,7 +46,7 @@ namespace OpenMod.Unturned.Module.Dev
             {
                 CommandlineArgs = System.Environment.GetCommandLineArgs(),
                 WorkingDirectory = openModDirectory,
-                PackageManager = m_SharedModule.GetNugetPackageManager(openModDirectory)
+                PackageManager = m_SharedModule!.GetNugetPackageManager(openModDirectory)
             };
 
             var assemblies = new List<Assembly>

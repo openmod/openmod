@@ -21,6 +21,11 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public async Task<IReadOnlyCollection<IPermissionRole>> GetRolesAsync(IPermissionActor actor, bool inherit = true)
         {
+            if (actor == null)
+            {
+                throw new ArgumentNullException(nameof(actor));
+            }
+
             var list = new List<IPermissionRole>();
             list.AddRange(await m_BasePermissionRoleStore.GetRolesAsync(actor, inherit));
 
@@ -50,18 +55,28 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             return list;
         }
 
-        public async Task<IPermissionRole> GetRoleAsync(string id)
+        public async Task<IPermissionRole?> GetRoleAsync(string roleId)
         {
-            if (RocketModIntegrationEnabled() && IsRocketModRole(id))
+            if (string.IsNullOrEmpty(roleId))
             {
-                return new RocketGroupWrapper(R.Permissions.GetGroup(id));
+                throw new ArgumentException(nameof(roleId));
             }
 
-            return await m_BasePermissionRoleStore.GetRoleAsync(id);
+            if (RocketModIntegrationEnabled() && IsRocketModRole(roleId))
+            {
+                return new RocketGroupWrapper(R.Permissions.GetGroup(roleId));
+            }
+
+            return await m_BasePermissionRoleStore.GetRoleAsync(roleId);
         }
 
         public Task<bool> UpdateRoleAsync(IPermissionRole role)
         {
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+
             if (RocketModIntegrationEnabled() && IsRocketModRole(role.Id))
             {
                 Task.FromException(new NotSupportedException("Updating RocketMod roles from OpenMod is not supported."));
@@ -72,6 +87,16 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public Task<bool> AddRoleToActorAsync(IPermissionActor actor, string roleId)
         {
+            if (actor == null)
+            {
+                throw new ArgumentNullException(nameof(actor));
+            }
+
+            if (string.IsNullOrEmpty(roleId))
+            {
+                throw new ArgumentException(nameof(roleId));
+            }
+
             if (RocketModIntegrationEnabled() && IsRocketModRole(roleId))
             {
                 if (!IsPlayerActor(actor.Type))
@@ -88,6 +113,16 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public Task<bool> RemoveRoleFromActorAsync(IPermissionActor actor, string roleId)
         {
+            if (actor == null)
+            {
+                throw new ArgumentNullException(nameof(actor));
+            }
+
+            if (string.IsNullOrEmpty(roleId))
+            {
+                throw new ArgumentException(nameof(roleId));
+            }
+
             if (RocketModIntegrationEnabled() && IsRocketModRole(roleId))
             {
                 if (!IsPlayerActor(actor.Type))
@@ -104,11 +139,21 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public Task<bool> CreateRoleAsync(IPermissionRole role)
         {
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+
             return m_BasePermissionRoleStore.CreateRoleAsync(role);
         }
 
         public Task<bool> DeleteRoleAsync(string roleId)
         {
+            if (string.IsNullOrEmpty(roleId))
+            {
+                throw new ArgumentException(nameof(roleId));
+            }
+
             if (RocketModIntegrationEnabled() && IsRocketModRole(roleId))
             {
                 var result = R.Permissions.DeleteGroup(roleId);
@@ -120,6 +165,16 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         public async Task<IReadOnlyCollection<string>> GetAutoAssignedRolesAsync(string actorId, string actorType)
         {
+            if (string.IsNullOrEmpty(actorId))
+            {
+                throw new ArgumentException(nameof(actorId));
+            }
+
+            if (string.IsNullOrEmpty(actorType))
+            {
+                throw new ArgumentException(nameof(actorType));
+            }
+
             var list = new List<string>();
             list.AddRange(await m_BasePermissionRoleStore.GetAutoAssignedRolesAsync(actorId, actorType));
 
@@ -131,21 +186,41 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             return list;
         }
 
-        public Task SavePersistentDataAsync<T>(string roleId, string key, T data)
+        public Task SavePersistentDataAsync<T>(string roleId, string key, T? data)
         {
+            if (string.IsNullOrEmpty(roleId))
+            {
+                throw new ArgumentException(nameof(roleId));
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
+
             if (RocketModIntegrationEnabled() && IsRocketModRole(roleId))
             {
-                return Task.FromException(new System.NotSupportedException("Persistent data is not supported for RocketMod roles."));
+                return Task.FromException(new NotSupportedException("Persistent data is not supported for RocketMod roles."));
             }
 
             return m_BasePermissionRoleStore.SavePersistentDataAsync(roleId, key, data);
         }
 
-        public Task<T> GetPersistentDataAsync<T>(string roleId, string key)
+        public Task<T?> GetPersistentDataAsync<T>(string roleId, string key)
         {
+            if (string.IsNullOrEmpty(roleId))
+            {
+                throw new ArgumentException(nameof(roleId));
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
+
             if (RocketModIntegrationEnabled() && IsRocketModRole(roleId))
             {
-                return Task.FromException<T>(new NotSupportedException("Persistent data is not supported for RocketMod roles."));
+                return Task.FromException<T?>(new NotSupportedException("Persistent data is not supported for RocketMod roles."));
             }
 
             return m_BasePermissionRoleStore.GetPersistentDataAsync<T>(roleId, key);
@@ -159,7 +234,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
         private RocketPlayer ToRocketPlayer(IPermissionActor actor)
         {
-            return new RocketPlayer(actor.Id, actor.DisplayName);
+            return new(actor.Id, actor.DisplayName);
         }
 
         private bool IsPlayerActor(string actorType)

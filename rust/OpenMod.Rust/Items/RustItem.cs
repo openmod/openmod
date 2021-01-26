@@ -54,6 +54,6 @@ namespace OpenMod.Rust.Items
             return SetItemAmountTask().AsTask();
         }
 
-        public IInventory Inventory { get; }
+        public IInventory? Inventory { get; }
     }
 }

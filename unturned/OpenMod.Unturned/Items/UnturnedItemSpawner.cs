@@ -20,12 +20,16 @@ namespace OpenMod.Unturned.Items
 
         static UnturnedItemSpawner()
         {
-            s_InstanceCountField = typeof(ItemManager).GetField("instanceCount", BindingFlags.Static | BindingFlags.NonPublic);
+            s_InstanceCountField = typeof(ItemManager).GetField("instanceCount", BindingFlags.Static | BindingFlags.NonPublic)!;
+            if (s_InstanceCountField == null)
+            {
+                throw new Exception("Failed to find instanceCount field in ItemManager");
+            }
         }
 
-        public Task<IItemInstance> GiveItemAsync(IInventory inventory, string itemId, IItemState state = null)
+        public Task<IItemInstance?> GiveItemAsync(IInventory inventory, string itemId, IItemState? state = null)
         {
-            async UniTask<IItemInstance> GiveItemTask()
+            async UniTask<IItemInstance?> GiveItemTask()
             {
                 ValidateState(state);
 
@@ -49,7 +53,7 @@ namespace OpenMod.Unturned.Items
                         return DropItem(item, playerInventory.Player.transform.position.ToSystemVector());
                     }
 
-                    return new UnturnedInventoryItem(itemJar, new UnturnedItem(item));
+                    return new UnturnedInventoryItem(itemJar!, new UnturnedItem(item));
                 }
 
                 throw new NotSupportedException($"Inventory type not supported: {inventory.GetType().FullName}");
@@ -58,7 +62,7 @@ namespace OpenMod.Unturned.Items
             return GiveItemTask().AsTask();
         }
 
-        private bool TryAddItem(Item item, UnturnedPlayerInventory playerInventory, out ItemJar itemJar)
+        private bool TryAddItem(Item? item, UnturnedPlayerInventory playerInventory, out ItemJar? itemJar)
         {
             var inventory = playerInventory.Inventory;
             var player = playerInventory.Player;
@@ -69,7 +73,7 @@ namespace OpenMod.Unturned.Items
                 return false;
             }
 
-            ItemAsset itemAsset = (ItemAsset)Assets.find(EAssetType.ITEM, item.id);
+            var itemAsset = (ItemAsset?)Assets.find(EAssetType.ITEM, item.id);
             if (itemAsset == null || itemAsset.isPro)
             {
                 return false;
@@ -126,9 +130,9 @@ namespace OpenMod.Unturned.Items
             return true;
         }
 
-        public Task<IItemDrop> SpawnItemAsync(Vector3 position, string itemId, IItemState state = null)
+        public Task<IItemDrop?> SpawnItemAsync(Vector3 position, string itemId, IItemState? state = null)
         {
-            async UniTask<IItemDrop> SpawnItemTask()
+            async UniTask<IItemDrop?> SpawnItemTask()
             {
                 ValidateState(state);
 
@@ -152,7 +156,7 @@ namespace OpenMod.Unturned.Items
         }
 
         // similar to ItemManager.dropItem but with some useful return values
-        private UnturnedItemDrop DropItem(Item item, Vector3 position)
+        private UnturnedItemDrop? DropItem(Item item, Vector3 position)
         {
             var point = position.ToUnityVector();
 
@@ -195,10 +199,9 @@ namespace OpenMod.Unturned.Items
             return new UnturnedItemDrop(region, itemData);
         }
 
-        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-        private void ValidateState(IItemState state)
+        private void ValidateState(IItemState? state)
         {
-            if (state is NullItemState)
+            if (state is NullItemState or null)
             {
                 return;
             }
@@ -214,15 +217,15 @@ namespace OpenMod.Unturned.Items
             }
         }
 
-        private Item CreateItem(ushort id, IItemState state)
+        private Item? CreateItem(ushort id, IItemState? state)
         {
-            var itemAsset = (ItemAsset)Assets.find(EAssetType.ITEM, id);
+            var itemAsset = (ItemAsset?)Assets.find(EAssetType.ITEM, id);
             if (itemAsset == null || itemAsset.isPro)
             {
                 return null;
             }
 
-            Item item = new Item(itemAsset.id, EItemOrigin.WORLD);
+            var item = new Item(itemAsset.id, EItemOrigin.WORLD);
             if (state != null && !(state is NullItemState))
             {
                 item.state = state.StateData ?? itemAsset.getState(EItemOrigin.WORLD); /* item.state must not be null */

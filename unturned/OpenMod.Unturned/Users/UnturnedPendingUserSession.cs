@@ -13,7 +13,7 @@ namespace OpenMod.Unturned.Users
         public UnturnedPendingUserSession(UnturnedPendingUser user) : base(user)
         {
             SessionStartTime = DateTime.Now;
-            SessionData = new Dictionary<string, object>();
+            SessionData = new Dictionary<string, object?>();
         }
 
         public override Task DisconnectAsync(string reason = "")

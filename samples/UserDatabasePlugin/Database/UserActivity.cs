@@ -12,13 +12,13 @@ namespace UserDatabasePlugin.Database
 
         public DateTime Date { get; set; }
 
-        public string UserName { get; set; }
+        public string UserName { get; set; } = null!;
 
         [StringLength(32)]
-        public string Type { get; set; }
+        public string Type { get; set; } = null!;
 
         [Required]
-        public string UserId { get; set; }
-        public virtual User User { get; set; }
+        public string UserId { get; set; } = null!;
+        public virtual User User { get; set; } = null!;
     }
 }

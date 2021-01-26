@@ -27,9 +27,9 @@ namespace OpenMod.Common.Hotloading
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
         }
 
-        private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+        private static Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            Assembly match = null;
+            Assembly? match = null;
             var name = ReflectionExtensions.GetVersionIndependentName(args.Name);
 
             foreach (var kv in s_Assemblies)
@@ -101,7 +101,7 @@ namespace OpenMod.Common.Hotloading
         /// </summary>
         /// <param name="fullname">The assembly name to resolve.</param>
         /// <returns><b>The hotloaded assembly</b> if found; otherwise, <b>null</b>.</returns>
-        public static Assembly GetAssembly(string fullname)
+        public static Assembly? GetAssembly(string fullname)
         {
             if (!s_Assemblies.ContainsKey(fullname))
             {
@@ -114,7 +114,7 @@ namespace OpenMod.Common.Hotloading
         /// <summary>
         /// Gets all hotloaded assemblies.
         /// </summary>
-        /// <returns>The hotloaded assemblies. Cannot be null and neither the items can be null.</returns>
+        /// <returns>The hotloaded assemblies.</returns>
         public static IReadOnlyCollection<Assembly> GetHotloadedAssemblies()
         {
             return s_Assemblies.Values;

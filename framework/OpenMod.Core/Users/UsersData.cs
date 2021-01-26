@@ -7,6 +7,6 @@ namespace OpenMod.Core.Users
     [Serializable]
     internal class UsersData
     {
-        public List<UserData> Users { get; set; }
+        public List<UserData>? Users { get; set; }
     }
 }

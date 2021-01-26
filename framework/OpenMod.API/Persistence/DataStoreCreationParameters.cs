@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 
 namespace OpenMod.API.Persistence
 {
@@ -15,32 +14,27 @@ namespace OpenMod.API.Persistence
         /// <b>Obsolete:</b> Use <see cref="Component"/> instead.
         /// </remarks>
         [Obsolete("Use the Component property instead.")]
-        [CanBeNull]
-        public string ComponentId { get; set; }
+        public string? ComponentId { get; set; }
 
         /// <value>
         /// The owning component. Must not be null if <see cref="ComponentId"/> is not set.
         /// </value>
-        [CanBeNull]
-        public IOpenModComponent Component { get; set; }
+        public IOpenModComponent? Component { get; set; }
 
         /// <value>
-        /// The working directory. Cannot be null.
+        /// The working directory.
         /// </value>
-        [NotNull]
-        public string WorkingDirectory { get; set; }
+        public string WorkingDirectory { get; set; } = null!;
 
         /// <value>
         /// The prefix. Can be null or empty.
         /// </value>
-        [CanBeNull]
-        public string Prefix { get; set; }
+        public string? Prefix { get; set; } 
 
         /// <value>
         /// The suffix. Can be null or empty.
         /// </value>
-        [CanBeNull]
-        public string Suffix { get; set; }
+        public string? Suffix { get; set; }
 
         /// <value>
         /// <b>True</b> if changes should be logged.

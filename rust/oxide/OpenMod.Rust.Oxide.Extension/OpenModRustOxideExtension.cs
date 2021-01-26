@@ -12,6 +12,11 @@ namespace OpenMod.Rust.Oxide.Extension
     {
         public OpenModRustOxideExtension(ExtensionManager manager) : base(manager)
         {
+            if (manager == null)
+            {
+                throw new ArgumentNullException(nameof(manager));
+            }
+
             var assemblyVersion = GetType().Assembly.GetName().Version;
             Version = new VersionNumber(assemblyVersion.Major, assemblyVersion.Minor, assemblyVersion.Build);
         }
@@ -26,17 +31,18 @@ namespace OpenMod.Rust.Oxide.Extension
 
             var bootrapper = new OpenModDynamicBootstrapper();
 
+            // todo create package manager and ignore:
+            //  "OpenMod.Rust.Redist", "OpenMod.UnityEngine.Redist", "OpenMod.Rust.Oxide.Redist"
             OpenModRuntime = bootrapper.Bootstrap(
-                null, // todo create package manager
+                packageManager: null,
                 openModDirectory,
                 Environment.GetCommandLineArgs(),
                 new[] { "OpenMod.UnityEngine", "OpenMod.Rust", "OpenMod.Rust.Oxide" },
-                new[] { "OpenMod.Rust.Redist", "OpenMod.UnityEngine.Redist", "OpenMod.Rust.Oxide.Redist" },
                 allowPrereleaseVersions: false,
                 new NuGetConsoleLogger());
         }
 
-        public object OpenModRuntime { get; private set; }
+        public object? OpenModRuntime { get; private set; }
 
         public override string Name { get; } = "OpenMod for Rust OxideMod";
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -55,7 +54,7 @@ namespace OpenMod.EntityFrameworkCore
             m_Logger = serviceProvider.GetRequiredService<ILogger<TSelf>>();
         }
 
-        protected OpenModDbContext([NotNull] DbContextOptions<TSelf> options, IServiceProvider serviceProvider) :
+        protected OpenModDbContext(DbContextOptions<TSelf> options, IServiceProvider serviceProvider) :
             base(options)
         {
             m_ServiceProvider = serviceProvider;

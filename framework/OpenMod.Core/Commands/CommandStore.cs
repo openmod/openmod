@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -116,7 +114,7 @@ namespace OpenMod.Core.Commands
 
             foreach (var command in commands
                 .Where(d => !commandsData.Commands.Any(c =>
-                    c.Id.Equals(d.Id, StringComparison.OrdinalIgnoreCase))))
+                    c.Id?.Equals(d.Id, StringComparison.OrdinalIgnoreCase) ?? false)))
             {
                 commandsData.Commands.Add(CreateDefaultCommandData(command));
             }
@@ -153,7 +151,7 @@ namespace OpenMod.Core.Commands
                     }
 
                     var commandData = await GetOrCreateCommandData(command);
-                    if (!commandData.Enabled)
+                    if (!commandData.Enabled ?? true)
                     {
                         continue;
                     }
@@ -167,17 +165,27 @@ namespace OpenMod.Core.Commands
 
         private async Task<RegisteredCommandData> GetOrCreateCommandData(ICommandRegistration command)
         {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
             var commandData = await m_CommandDataStore.GetRegisteredCommandAsync(command.Id);
             return commandData ?? CreateDefaultCommandData(command);
         }
 
         private RegisteredCommandData CreateDefaultCommandData(ICommandRegistration command)
         {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
             return new RegisteredCommandData
             {
                 Name = command.Name,
                 Priority = command.Priority,
-                Data = new Dictionary<string, object>(),
+                Data = new Dictionary<string, object?>(),
                 ParentId = command.ParentId,
                 Aliases = command.Aliases?.ToList(),
                 Enabled = true,

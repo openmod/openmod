@@ -11,7 +11,7 @@ namespace OpenMod.Core.Commands
     public class CommandStoreOptions
     {
         public delegate void CommandSourcesChanged();
-        public event CommandSourcesChanged OnCommandSourcesChanged;
+        public event CommandSourcesChanged? OnCommandSourcesChanged;
 
         private readonly List<Type> m_CommandSourceTypes;
         private readonly List<ICommandSource> m_CommandSources;
@@ -26,9 +26,15 @@ namespace OpenMod.Core.Commands
 
         public IReadOnlyCollection<ICommandSource> CreateCommandSources(IServiceProvider serviceProvider)
         {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
             var lifetime = serviceProvider.GetService<ILifetimeScope>();
             var sources = new List<ICommandSource>();
             sources.AddRange(m_CommandSources);
+
             foreach (var type in m_CommandSourceTypes)
             {
                 sources.Add((ICommandSource)ActivatorUtilitiesEx.CreateInstance(lifetime, type));
@@ -39,12 +45,22 @@ namespace OpenMod.Core.Commands
 
         public void AddCommandSource(ICommandSource commandSource)
         {
+            if (commandSource == null)
+            {
+                throw new ArgumentNullException(nameof(commandSource));
+            }
+
             m_CommandSources.Add(commandSource);
             OnCommandSourcesChanged?.Invoke();
         }
 
         public void RemoveCommandSource(ICommandSource commandSource)
         {
+            if (commandSource == null)
+            {
+                throw new ArgumentNullException(nameof(commandSource));
+            }
+
             m_CommandSources.Remove(commandSource);
             OnCommandSourcesChanged?.Invoke();
         }
@@ -56,6 +72,11 @@ namespace OpenMod.Core.Commands
 
         public void AddCommandSource(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             if (!typeof(ICommandSource).IsAssignableFrom(type))
             {
                 throw new Exception($"Type {type} must be an instance of ICommandSource!");
@@ -78,6 +99,11 @@ namespace OpenMod.Core.Commands
 
         public bool RemoveCommandSource(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             var result = m_CommandSourceTypes.RemoveAll(d => d == type) > 0;
             OnCommandSourcesChanged?.Invoke();
             return result;

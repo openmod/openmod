@@ -34,8 +34,11 @@ namespace OpenMod.Unturned.Building
                 await UniTask.SwitchToMainThread();
 
                 var barricadeRegions = BarricadeManager.regions.Cast<BarricadeRegion>()
-                    .Concat(BarricadeManager.vehicleRegions);
-                var structureRegions = StructureManager.regions.Cast<StructureRegion>();
+                    .Concat(BarricadeManager.vehicleRegions)
+                    .ToList();
+
+                var structureRegions = StructureManager.regions.Cast<StructureRegion>()
+                    .ToList();
 
                 var barricadeDatas = barricadeRegions.SelectMany(brd => brd.barricades);
                 var barricadeDrops = barricadeRegions.SelectMany(brd => brd.drops);
@@ -55,6 +58,7 @@ namespace OpenMod.Unturned.Building
                         return drop == null ? null : new UnturnedStructureBuildable(k, drop);
                     }))
                     .Where(d => d != null)
+                    .Select(d => d!)
                     .ToList();
             }
             

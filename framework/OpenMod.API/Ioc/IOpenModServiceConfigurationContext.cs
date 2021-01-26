@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using OpenMod.API.Persistence;
 
 namespace OpenMod.API.Ioc
 {
@@ -26,7 +25,7 @@ namespace OpenMod.API.Ioc
         IOpenModStartup OpenModStartup { get; }
 
         /// <summary>
-        /// The OpenMod data store. See <see cref="IDataStore"/>.
+        /// Data store for startup.
         /// </summary>
         Dictionary<string, object> DataStore { get; }
 

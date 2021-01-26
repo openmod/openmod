@@ -24,17 +24,17 @@ namespace OpenMod.Core.Commands
 
         public string Name => CommandData?.Name ?? BaseCommandRegistration.Name;
 
-        public IReadOnlyCollection<string> Aliases => CommandData.Aliases ?? BaseCommandRegistration.Aliases;
+        public IReadOnlyCollection<string> Aliases => CommandData.Aliases ?? BaseCommandRegistration.Aliases!;
 
-        public IReadOnlyCollection<IPermissionRegistration> PermissionRegistrations => BaseCommandRegistration.PermissionRegistrations;
+        public IReadOnlyCollection<IPermissionRegistration> PermissionRegistrations => BaseCommandRegistration.PermissionRegistrations!;
 
-        public string Description => BaseCommandRegistration.Description;
+        public string? Description => BaseCommandRegistration.Description;
 
-        public string Syntax => BaseCommandRegistration.Syntax;
+        public string? Syntax => BaseCommandRegistration.Syntax;
 
         public Priority Priority => CommandData.Priority ?? BaseCommandRegistration.Priority;
 
-        public string ParentId => CommandData.ParentId ?? BaseCommandRegistration.ParentId;
+        public string? ParentId => CommandData.ParentId ?? BaseCommandRegistration.ParentId;
 
         public bool SupportsActor(ICommandActor actor)
         {
@@ -50,7 +50,7 @@ namespace OpenMod.Core.Commands
         {
             get
             {
-                return BaseCommandRegistration.IsEnabled && CommandData.Enabled;
+                return BaseCommandRegistration.IsEnabled && (CommandData.Enabled ?? true);
             }
         }
     }

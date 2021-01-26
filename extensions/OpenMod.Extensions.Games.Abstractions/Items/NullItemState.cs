@@ -5,7 +5,7 @@
     /// </summary>
     public class NullItemState : IItemState
     {
-        private static NullItemState m_ItemState;
+        private static NullItemState? m_ItemState;
         public static NullItemState Instance
         {
             get
@@ -25,6 +25,6 @@
 
         public double ItemAmount { get; } = 0;
 
-        public byte[] StateData { get; } = null;
+        public byte[]? StateData { get; } = null;
     }
 }

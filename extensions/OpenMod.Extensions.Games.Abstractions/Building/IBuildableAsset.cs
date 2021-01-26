@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace OpenMod.Extensions.Games.Abstractions.Building
+﻿namespace OpenMod.Extensions.Games.Abstractions.Building
 {
     /// <summary>
     /// Represents a buildable asset.
@@ -8,15 +6,13 @@ namespace OpenMod.Extensions.Games.Abstractions.Building
     public interface IBuildableAsset
     {
         /// <value>
-        /// The ID of the asset. Cannot be null.
+        /// The ID of the asset.
         /// </value>
-        [NotNull]
         string BuildableAssetId { get; }
 
         /// <value>
-        /// The type of the asset. Cannot be null.
+        /// The type of the asset.
         /// </value>
-        [NotNull]
         string BuildableType { get; }
     }
 }

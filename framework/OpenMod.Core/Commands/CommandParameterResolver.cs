@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenMod.API;
@@ -32,7 +31,7 @@ namespace OpenMod.Core.Commands
                 .ToList();
         }
 
-        public async Task<object> ResolveAsync([NotNull] Type type, [NotNull] string input)
+        public async Task<object?> ResolveAsync(Type type, string input)
         {
             if (type == null)
             {
@@ -46,14 +45,15 @@ namespace OpenMod.Core.Commands
 
             foreach (var resolver in m_CommandParameterResolveProviders)
             {
-                if (resolver.Supports(type))
+                if (!resolver.Supports(type))
                 {
-                    object value = await resolver.ResolveAsync(type, input);
+                    continue;
+                }
 
-                    if (value != null)
-                    {
-                        return value;
-                    }
+                var value = await resolver.ResolveAsync(type, input);
+                if (value != null)
+                {
+                    return value;
                 }
             }
 
@@ -66,8 +66,8 @@ namespace OpenMod.Core.Commands
             {
                 return;
             }
-            m_IsDisposing = true;
 
+            m_IsDisposing = true;
             await m_CommandParameterResolveProviders.DisposeAllAsync();
         }
     }

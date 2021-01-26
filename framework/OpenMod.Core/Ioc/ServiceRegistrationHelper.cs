@@ -12,7 +12,7 @@ namespace OpenMod.Core.Ioc
     [OpenModInternal]
     public static class ServiceRegistrationHelper
     {
-        public static IEnumerable<ServiceRegistration> FindFromAssembly<T>(Assembly assembly, ILogger logger = null) where T : ServiceImplementationAttribute
+        public static IEnumerable<ServiceRegistration> FindFromAssembly<T>(Assembly assembly, ILogger? logger = null) where T : ServiceImplementationAttribute
         {
             List<Type> types;
             try

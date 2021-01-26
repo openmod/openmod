@@ -6,11 +6,11 @@ namespace OpenMod.Core.Permissions
     [OpenModInternal]
     public class PermissionRegistration : IPermissionRegistration
     {
-        public IOpenModComponent Owner { get; set; }    
+        public IOpenModComponent Owner { get; set; } = null!;    
 
-        public string Permission { get; set; }
+        public string Permission { get; set; } = null!;
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public PermissionGrantResult DefaultGrant { get; set; } = PermissionGrantResult.Default;
     }

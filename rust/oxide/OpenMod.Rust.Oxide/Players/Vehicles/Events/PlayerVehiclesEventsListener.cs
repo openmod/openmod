@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.API.Eventing;
@@ -18,7 +17,7 @@ namespace OpenMod.Rust.Oxide.Players.Vehicles.Events
         }
 
         [HookMethod("CanPushBoat")]
-        private object CanPushBoat(BasePlayer player, MotorRowboat boat)
+        private object? CanPushBoat(BasePlayer player, MotorRowboat boat)
         {
             var @event = new RustPlayerPushingBoatEvent(new RustPlayer(player), boat);
             return EmitCancellableReturnsObject(@event);

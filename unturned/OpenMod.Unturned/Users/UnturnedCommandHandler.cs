@@ -41,7 +41,6 @@ namespace OpenMod.Unturned.Users
                 return;
             }
 
-            // ReSharper disable once DelegateSubtraction
             ChatManager.onCheckPermissions -= OnCheckCommandPermissions;
             m_Subscribed = false;
         }

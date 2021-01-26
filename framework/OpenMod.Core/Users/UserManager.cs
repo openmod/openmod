@@ -26,6 +26,7 @@ namespace OpenMod.Core.Users
         public UserManager(IOptions<UserManagerOptions> options, ILifetimeScope lifetimeScope)
         {
             m_UserProviders = new List<IUserProvider>();
+
             foreach (var provider in options.Value.UserProviderTypes)
             {
                 m_UserProviders.Add((IUserProvider)ActivatorUtilitiesEx.CreateInstance(lifetimeScope, provider));
@@ -39,6 +40,11 @@ namespace OpenMod.Core.Users
 
         public virtual async Task<IReadOnlyCollection<IUser>> GetUsersAsync(string userType)
         {
+            if (string.IsNullOrEmpty(userType))
+            {
+                throw new ArgumentException(nameof(userType));
+            }
+
             var list = new List<IUser>();
 
             foreach (var userProvider in UserProviders.Where(d => d.SupportsUserType(userType)))
@@ -49,8 +55,18 @@ namespace OpenMod.Core.Users
             return list;
         }
 
-        public virtual async Task<IUser> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
+        public virtual async Task<IUser?> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
         {
+            if(string.IsNullOrEmpty(userType))
+            {
+                throw new ArgumentException(nameof(userType));
+            }
+
+            if (string.IsNullOrEmpty(searchString))
+            {
+                throw new ArgumentException(nameof(searchString));
+            }
+
             foreach (var userProvider in UserProviders.Where(d => d.SupportsUserType(userType)))
             {
                 var user = await userProvider.FindUserAsync(userType, searchString, searchMode);
@@ -65,6 +81,11 @@ namespace OpenMod.Core.Users
 
         public virtual async Task BroadcastAsync(string message)
         {
+            if (string.IsNullOrEmpty(message))
+            {
+                throw new ArgumentException(nameof(message));
+            }
+
             foreach (var provider in UserProviders)
             {
                 await provider.BroadcastAsync(message);
@@ -73,6 +94,16 @@ namespace OpenMod.Core.Users
 
         public virtual async Task BroadcastAsync(string userType, string message)
         {
+            if (string.IsNullOrEmpty(userType))
+            {
+                throw new ArgumentException(nameof(userType));
+            }
+
+            if (string.IsNullOrEmpty(message))
+            {
+                throw new ArgumentException(nameof(message));
+            }
+
             var provider = UserProviders.FirstOrDefault(d => d.SupportsUserType(userType));
             if (provider == null)
             {
@@ -84,6 +115,11 @@ namespace OpenMod.Core.Users
 
         public virtual async Task BroadcastAsync(string message, Color? color)
         {
+            if (string.IsNullOrEmpty(message))
+            {
+                throw new ArgumentException(nameof(message));
+            }
+
             foreach (var provider in UserProviders)
             {
                 await provider.BroadcastAsync(message, color);
@@ -92,6 +128,16 @@ namespace OpenMod.Core.Users
 
         public virtual async Task BroadcastAsync(string userType, string message, Color? color)
         {
+            if (string.IsNullOrEmpty(userType))
+            {
+                throw new ArgumentException(nameof(userType));
+            }
+
+            if (string.IsNullOrEmpty(message))
+            {
+                throw new ArgumentException(nameof(message));
+            }
+
             var provider = UserProviders.FirstOrDefault(d => d.SupportsUserType(userType));
             if (provider == null)
             {

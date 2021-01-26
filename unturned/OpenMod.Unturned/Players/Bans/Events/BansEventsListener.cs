@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿extern alias JetBrainsAnnotations;
+using HarmonyLib;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
@@ -27,11 +29,9 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         public override void Unsubscribe()
         {
-            // ReSharper disable DelegateSubtraction
             Provider.onBanPlayerRequested -= OnBanPlayerRequested;
             Provider.onCheckBanStatusWithHWID -= OnCheckBanStatus;
             Provider.onUnbanPlayerRequested -= OnUnbanPlayerRequested;
-            // ReSharper restore DelegateSubtraction
 
             OnBanned -= Events_OnBanned;
             OnUnbanned -= Events_OnUnbanned;
@@ -92,24 +92,27 @@ namespace OpenMod.Unturned.Players.Bans.Events
         }
 
         private delegate void Banned(CSteamID instigator, CSteamID bannedPlayer, uint ip, string reason, uint duration);
-        private static event Banned OnBanned;
+        private static event Banned? OnBanned;
 
         private delegate void Unbanned(CSteamID unbannedPlayer);
-        private static event Unbanned OnUnbanned;
+        private static event Unbanned? OnUnbanned;
 
         [HarmonyPatch]
-        private class Patches
+        [UsedImplicitly]
+        internal static class Patches
         {
+            [UsedImplicitly]
             [HarmonyPatch(typeof(SteamBlacklist), "ban", typeof(CSteamID), typeof(uint), typeof(CSteamID), typeof(string), typeof(uint))]
             [HarmonyPostfix]
-            private static void Ban(CSteamID playerID, uint ip, CSteamID judgeID, string reason, uint duration)
+            public static void Ban(CSteamID playerID, uint ip, CSteamID judgeID, string reason, uint duration)
             {
                 OnBanned?.Invoke(judgeID, playerID, ip, reason, duration);
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(SteamBlacklist), "unban")]
             [HarmonyPostfix]
-            private static void Unban(CSteamID playerID, bool __result)
+            public static void Unban(CSteamID playerID, bool __result)
             {
                 if (__result)
                 {

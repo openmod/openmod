@@ -13,7 +13,7 @@ namespace OpenMod.Unturned.Vehicles
             m_Vehicle = vehicle;
         }
 
-        public byte[] StateData
+        public byte[]? StateData
         {
             get
             {
@@ -94,20 +94,30 @@ namespace OpenMod.Unturned.Vehicles
 
                     foreach (var item in m_Vehicle.trunkItems.items)
                     {
-                        buffer[step] = (item != null) ? item.x : 0;
+                        buffer[step] = item?.x ?? 0;
                         step++;
-                        buffer[step] = (item != null) ? item.y : 0;
+
+                        buffer[step] = item?.y ?? 0;
                         step++;
-                        buffer[step] = (item != null) ? item.rot : 0;
+
+                        buffer[step] = item?.rot ?? 0;
                         step++;
-                        CopyBytes(buffer, BitConverter.GetBytes(item.item.id), step);
-                        step += 2;
-                        buffer[step] = (item != null) ? item.item.amount : 0;
+
+                        if (item != null)
+                        {
+                            CopyBytes(buffer, BitConverter.GetBytes(item.item.id), step);
+                        }
+                        step += sizeof(ushort);
+
+                        buffer[step] = item?.item.amount ?? 0;
                         step++;
-                        buffer[step] = (item != null) ? item.item.quality : 0;
+
+                        buffer[step] = item?.item.quality ?? 0;
                         step++;
+
                         var state = (item != null) ? item.item.state : Array.Empty<byte>();
                         buffer[step] = (byte)state.Length;
+
                         step++;
                         CopyBytes(buffer, state, step);
                     }

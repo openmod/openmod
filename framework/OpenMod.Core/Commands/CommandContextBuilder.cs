@@ -13,32 +13,38 @@ using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Commands
 {
-    // todo: add CreateContext from an ICommandRegistration instance directly 
-
     [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Transient, Priority = Priority.Lowest)]
     public class CommandContextBuilder : ICommandContextBuilder
     {
-        private readonly IOpenModStringLocalizer m_StringLocalizer;
         private readonly ILifetimeScope m_LifetimeScope;
 
         public CommandContextBuilder(
             IOpenModStringLocalizer stringLocalizer,
             ILifetimeScope lifetimeScope)
         {
-            m_StringLocalizer = stringLocalizer;
             m_LifetimeScope = lifetimeScope;
         }
 
-        public virtual CommandContext BuildContextTree(CommandContext currentContext, IEnumerable<ICommandRegistration> commandRegistrations)
+        public virtual CommandContext BuildContextTree(CommandContext currentContext, IReadOnlyCollection<ICommandRegistration> commandRegistrations)
         {
+            if (currentContext == null)
+            {
+                throw new ArgumentNullException(nameof(currentContext));
+            }
+
             if (currentContext.Parameters.Count == 0)
             {
                 return currentContext;
             }
 
             var childCommandName = currentContext.Parameters.First();
+            if (currentContext.CommandRegistration == null)
+            {
+                return currentContext;
+            }
+
             var children = CommandRegistrationHelper.GetChildren(currentContext.CommandRegistration, commandRegistrations);
             var childCommand = GetCommandRegistration(currentContext.Actor, childCommandName, children);
             if (childCommand == null)
@@ -53,8 +59,18 @@ namespace OpenMod.Core.Commands
             return BuildContextTree(childContext, commandRegistrations);
         }
 
-        public ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, IEnumerable<ICommandRegistration> commandRegistrations)
+        public ICommandContext CreateContext(ICommandActor actor, string[] args, string prefix, IReadOnlyCollection<ICommandRegistration> commandRegistrations)
         {
+            if (actor == null)
+            {
+                throw new ArgumentNullException(nameof(actor));
+            }
+
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
             var rootCommand = GetCommandRegistration(actor, args[0], commandRegistrations.Where(d => d.ParentId == null));
             if (rootCommand == null)
             {
@@ -70,8 +86,13 @@ namespace OpenMod.Core.Commands
             return BuildContextTree(rootContext, commandRegistrations);
         }
 
-        private ICommandRegistration GetCommandRegistration(ICommandActor actor, string name, IEnumerable<ICommandRegistration> commandRegistrations)
+        private ICommandRegistration? GetCommandRegistration(ICommandActor? actor, string name, IEnumerable<ICommandRegistration> commandRegistrations)
         {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             var baseQuery = commandRegistrations;
 
             if (actor != null)

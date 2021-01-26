@@ -10,9 +10,9 @@ namespace OpenMod.Unturned.Entities
     [ServiceImplementation(Priority = Priority.Lowest)]
     public class UnturnedEntitySpawner : IEntitySpawner
     {
-        public Task<IEntity> SpawnEntityAsync(Vector3 position, string entityId, IEntityState state = null)
+        public Task<IEntity?> SpawnEntityAsync(Vector3 position, string entityId, IEntityState? state = null)
         {
-            return Task.FromException<IEntity>(new NotSupportedException("Unturned does not support spawning entities"));
+            return Task.FromException<IEntity?>(new NotSupportedException("Unturned does not support spawning entities"));
         }
     }
 }

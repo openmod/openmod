@@ -392,10 +392,10 @@ namespace System.Drawing
 			"MenuHighlight"
 		};
 
-		static Dictionary<String, uint> argbByName = null;
-		static Dictionary<uint, String> nameByArgb = null;
+		static Dictionary<String, uint>? argbByName = null;
+		static Dictionary<uint, String>? nameByArgb = null;
 
-		static internal Dictionary<String, uint> ArgbByName
+		internal static Dictionary<String, uint> ArgbByName
 		{
 			get
 			{
@@ -409,7 +409,7 @@ namespace System.Drawing
 			}
 		}
 
-		static internal Dictionary<uint, String> NameByArgb
+		internal static Dictionary<uint, String> NameByArgb
 		{
 			get
 			{

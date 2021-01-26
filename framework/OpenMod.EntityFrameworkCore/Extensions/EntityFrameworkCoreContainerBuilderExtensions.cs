@@ -19,12 +19,12 @@ namespace OpenMod.EntityFrameworkCore.Extensions
             return AddDbContextInternal(containerBuilder, typeof(T), null, serviceLifetime);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder> optionsBuilder) where T : OpenModDbContext<T>
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder>? optionsBuilder) where T : OpenModDbContext<T>
         {
             return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, null);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder> optionsBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext<T>
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder>? optionsBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext<T>
         {
             return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, serviceLifetime);
         }
@@ -39,12 +39,12 @@ namespace OpenMod.EntityFrameworkCore.Extensions
             return AddDbContextInternal(containerBuilder, dbContextType, null, serviceLifetime);
         }
 
-        public static ContainerBuilder AddDbContext(this ContainerBuilder containerBuilder, Type dbContextType, Action<DbContextOptionsBuilder> optionsBuilder)
+        public static ContainerBuilder AddDbContext(this ContainerBuilder containerBuilder, Type dbContextType, Action<DbContextOptionsBuilder>? optionsBuilder)
         {
             return AddDbContextInternal(containerBuilder, dbContextType, optionsBuilder, null);
         }
 
-        public static ContainerBuilder AddDbContext(this ContainerBuilder containerBuilder, Type dbContextType, Action<DbContextOptionsBuilder> optionsBuilder, ServiceLifetime serviceLifetime)
+        public static ContainerBuilder AddDbContext(this ContainerBuilder containerBuilder, Type dbContextType, Action<DbContextOptionsBuilder>? optionsBuilder, ServiceLifetime serviceLifetime)
         {
             return AddDbContextInternal(containerBuilder, dbContextType, optionsBuilder, serviceLifetime);
         }
@@ -62,7 +62,7 @@ namespace OpenMod.EntityFrameworkCore.Extensions
 
         private static ContainerBuilder AddDbContextInternal(this ContainerBuilder containerBuilder,
             Type dbContextType,
-            Action<DbContextOptionsBuilder> optionsBuilderAction,
+            Action<DbContextOptionsBuilder>? optionsBuilderAction,
             ServiceLifetime? serviceLifetime)
         {
             serviceLifetime ??= ServiceLifetime.Scoped;

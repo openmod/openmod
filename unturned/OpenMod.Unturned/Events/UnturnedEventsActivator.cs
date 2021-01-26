@@ -1,7 +1,5 @@
 ﻿using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenMod.Core.Helpers;
 using SDG.Unturned;
 using System;
 using System.Collections.Generic;

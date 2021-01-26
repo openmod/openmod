@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using OpenMod.API.Ioc;
+﻿using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Commands
 {
@@ -12,7 +11,6 @@ namespace OpenMod.API.Commands
         /// <value>
         /// The command context processed by the current thread. Can be null if the current thread does not handle a command.
         /// </value>
-        [CanBeNull]
-        ICommandContext Context { get; set; }
+        ICommandContext? Context { get; set; }
     }
 }

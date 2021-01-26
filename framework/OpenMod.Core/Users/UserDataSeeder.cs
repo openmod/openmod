@@ -25,8 +25,18 @@ namespace OpenMod.Core.Users
             m_PermissionRoleStore = permissionRoleStore;
         }
 
-        public async Task SeedUserDataAsync(string actorId, string actorType, string displayName, Dictionary<string, object> data = null)
+        public async Task SeedUserDataAsync(string actorId, string actorType, string? displayName, Dictionary<string, object?>? data = null)
         {
+            if(string.IsNullOrEmpty(actorId))
+            {
+                throw new ArgumentException(nameof(actorId));
+            }
+
+            if (string.IsNullOrEmpty(actorType))
+            {
+                throw new ArgumentException(nameof(actorType));
+            }
+
             var userData = await m_UserDataStore.GetUserDataAsync(actorId, actorType);
             if (userData != null)
             {
@@ -37,7 +47,7 @@ namespace OpenMod.Core.Users
 
             userData = new UserData
             {
-                Data = data ?? new Dictionary<string, object>(),
+                Data = data ?? new Dictionary<string, object?>(),
                 Id = actorId,
                 Type = actorType,
                 LastSeen = DateTime.Now,

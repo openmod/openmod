@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+﻿using System;
 using OpenMod.Core.Eventing;
 
 namespace OpenMod.Extensions.Economy.Abstractions
@@ -9,15 +9,13 @@ namespace OpenMod.Extensions.Economy.Abstractions
     public class BalanceUpdatedEvent : Event
     {
         /// <value>
-        /// The ID of the account owner. Cannot be null.
+        /// The ID of the account owner.
         /// </value>
-        [NotNull]
         public string OwnerId { get; }
 
         /// <value>
-        /// The actor type of the account owner. Cannot be null.
+        /// The actor type of the account owner.
         /// </value>
-        [NotNull]
         public string OwnerType { get; }
 
         /// <value>
@@ -31,13 +29,22 @@ namespace OpenMod.Extensions.Economy.Abstractions
         public decimal NewBalance { get; }
 
         /// <value>
-        /// The reason for the balance update. Can be null.
+        /// The reason for the balance update.
         /// </value>
-        [CanBeNull]
-        public string Reason { get; }
+        public string? Reason { get; }
 
-        public BalanceUpdatedEvent(string ownerId, string ownerType, decimal oldBalance, decimal newBalance, string reason)
+        public BalanceUpdatedEvent(string ownerId, string ownerType, decimal oldBalance, decimal newBalance, string? reason)
         {
+            if (string.IsNullOrEmpty(ownerId))
+            {
+                throw new ArgumentException(nameof(ownerId));
+            }
+
+            if (string.IsNullOrEmpty(ownerType))
+            {
+                throw new ArgumentException(nameof(ownerType));
+            }
+
             OwnerId = ownerId;
             OwnerType = ownerType;
             OldBalance = oldBalance;

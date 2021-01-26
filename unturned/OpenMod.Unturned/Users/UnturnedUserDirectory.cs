@@ -24,26 +24,36 @@ namespace OpenMod.Unturned.Users
 
         public UnturnedUser GetUser(Player player)
         {
-            return GetOnlineUsers().FirstOrDefault(d => d.Player.Player == player);
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
+            return GetOnlineUsers().First(d => d.Player.Player == player);
         }
 
         public UnturnedPendingUser GetPendingUser(SteamPending pending)
         {
-            return GetPendingUsers().FirstOrDefault(d => d.SteamPending == pending);
+            if (pending == null)
+            {
+                throw new ArgumentNullException(nameof(pending));
+            }
+
+            return GetPendingUsers().First(d => d.SteamPending == pending);
         }
 
-        public UnturnedUser FindUser(CSteamID steamId)
+        public UnturnedUser? FindUser(CSteamID steamId)
         {
             return GetOnlineUsers().FirstOrDefault(d => d.Player.SteamId == steamId);
         }
 
-        public UnturnedPendingUser FindPendingUser(CSteamID steamId)
+        public UnturnedPendingUser? FindPendingUser(CSteamID steamId)
         {
             return GetPendingUsers().FirstOrDefault(d => d.SteamId == steamId);
 
         }
 
-        public UnturnedUser FindUser(string searchString, UserSearchMode searchMode)
+        public UnturnedUser? FindUser(string searchString, UserSearchMode searchMode)
         {
             return AsyncHelper.RunSync(async () =>
             {
@@ -61,7 +71,13 @@ namespace OpenMod.Unturned.Users
 
         protected UnturnedUserProvider GetUnturnedUserProvider()
         {
-            return (UnturnedUserProvider) m_UserManager.UserProviders.FirstOrDefault(d => d is UnturnedUserProvider);
+            var result = (UnturnedUserProvider?) m_UserManager.UserProviders.FirstOrDefault(d => d is UnturnedUserProvider);
+            if (result == null)
+            {
+                throw new Exception("Failed to find UnturnedUserProvider");
+            }
+
+            return result;
         }
 
         public ICollection<UnturnedUser> GetOnlineUsers()

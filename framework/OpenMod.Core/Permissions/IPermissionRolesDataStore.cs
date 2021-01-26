@@ -11,7 +11,7 @@ namespace OpenMod.Core.Permissions
         Task ReloadAsync();
         Task SaveChangesAsync();
         List<PermissionRoleData> Roles { get; }
-        Task<PermissionRoleData> GetRoleAsync(string id);
-        Task<T> GetRoleDataAsync<T>(string roleId, string key);
+        Task<PermissionRoleData?> GetRoleAsync(string id);
+        Task<T?> GetRoleDataAsync<T>(string roleId, string key);
     }
 }

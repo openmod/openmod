@@ -11,20 +11,20 @@ using OpenMod.API.Localization;
 namespace OpenMod.Core.Commands
 {
     [OpenModInternal]
-    public class CommandParameters : ICommandParameters, IEnumerable<string>
+    public class CommandParameters : ICommandParameters
     {
         private readonly IOpenModStringLocalizer m_OpenModStringLocalizer;
         private readonly ICommandParameterResolver m_CommandParameterResolver;
 
-        public CommandParameters(CommandContext commandContext, ICollection<string> args)
+        public CommandParameters(ICommandContext commandContext, ICollection<string> args)
         {
-            m_OpenModStringLocalizer = commandContext.ServiceProvider.GetRequiredService<IOpenModStringLocalizer>();
             RawParameters = args;
+            m_OpenModStringLocalizer = commandContext.ServiceProvider.GetRequiredService<IOpenModStringLocalizer>();
             m_CommandParameterResolver = commandContext.ServiceProvider.GetRequiredService<ICommandParameterResolver>();
         }
 
         /// <summary>
-        ///     The internal stored raw parameter list
+        /// The internal stored raw parameter list.
         /// </summary>
         protected ICollection<string> RawParameters { get; }
 
@@ -41,7 +41,9 @@ namespace OpenMod.Core.Commands
         public async Task<object> GetAsync(int index, Type type)
         {
             if (type == null)
+            {
                 throw new ArgumentNullException(nameof(type));
+            }
 
             if (Length <= index)
             {
@@ -49,10 +51,12 @@ namespace OpenMod.Core.Commands
             }
 
             if (index < 0)
+            {
                 throw new IndexOutOfRangeException();
+            }
 
-            string arg = ToArray()[index];
-            object value = await m_CommandParameterResolver.ResolveAsync(type, arg);
+            var arg = ToArray()[index];
+            var value = await m_CommandParameterResolver.ResolveAsync(type, arg);
 
             if (value != null)
             {
@@ -63,24 +67,33 @@ namespace OpenMod.Core.Commands
         }
 
         /// <inheritdoc />
-        public async Task<T> GetAsync<T>(int index, T defaultValue) => (T)await GetAsync(index, typeof(T), defaultValue);
+        public async Task<T?> GetAsync<T>(int index, T? defaultValue)
+        {
+            var result = await GetAsync(index, typeof(T), defaultValue);
+
+            // ReSharper disable once MergeCastWithTypeCheck
+            return result is T? ? (T?)result : default;
+        }
 
         /// <inheritdoc />
-        public Task<object> GetAsync(int index, Type type, object defaultValue)
+        public Task<object?> GetAsync(int index, Type type, object? defaultValue)
         {
-            if (TryGet(index, type, out object val))
+            if (TryGet(index, type, out var val))
+            {
                 return Task.FromResult(val);
+            }
 
             return Task.FromResult(defaultValue);
         }
 
         /// <inheritdoc />
-        public bool TryGet<T>(int index, out T value)
+        public bool TryGet<T>(int index, out T? value)
         {
-            bool result = TryGet(index, typeof(T), out object tmp);
+            var result = TryGet(index, typeof(T), out var tmp);
             if (result)
             {
-                value = (T)tmp;
+                // ReSharper disable once MergeCastWithTypeCheck
+                value = tmp is T? ? (T?)tmp : default;
             }
             else
             {
@@ -94,7 +107,9 @@ namespace OpenMod.Core.Commands
         public string GetArgumentLine(int startPosition)
         {
             if (startPosition > Length)
+            {
                 throw new IndexOutOfRangeException();
+            }
 
             return string.Join(" ", ToArray().Skip(startPosition).ToArray());
         }
@@ -103,20 +118,31 @@ namespace OpenMod.Core.Commands
         public string GetArgumentLine(int startPosition, int endPosition)
         {
             if (startPosition > Length)
+            {
                 throw new IndexOutOfRangeException();
+            }
 
             if (endPosition > Length)
+            {
                 throw new IndexOutOfRangeException();
+            }
 
             if (endPosition - startPosition < 1)
+            {
                 throw new ArgumentException();
+            }
 
             return string.Join(" ", ToArray().Skip(startPosition).Take(endPosition - startPosition).ToArray());
         }
 
         /// <inheritdoc />
-        public bool TryGet(int index, Type type, out object value)
+        public bool TryGet(int index, Type type, out object? value)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             value = null;
             try
             {

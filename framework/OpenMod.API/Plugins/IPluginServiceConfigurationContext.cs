@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 
 namespace OpenMod.API.Plugins
@@ -10,21 +9,18 @@ namespace OpenMod.API.Plugins
     public interface IPluginServiceConfigurationContext
     {
         /// <value>
-        /// The parent lifetime scope. Cannot be null. This is not the plugins lifetime scope.
+        /// The parent lifetime scope.
         /// </value>
-        [NotNull]
         ILifetimeScope ParentLifetimeScope { get; }
 
         /// <value>
-        /// The plugin configuration. Cannot be null.
+        /// The plugin configuration.
         /// </value>
-        [NotNull]
         IConfiguration Configuration { get; }
 
         /// <value>
-        /// The container builder. Cannot be null.
+        /// The container builder.
         /// </value>
-        [NotNull]
         ContainerBuilder ContainerBuilder { get; }
     }
 }

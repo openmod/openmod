@@ -37,7 +37,7 @@ namespace OpenMod.Unturned.Vehicles
 
         public string VehicleInstanceId { get; }
 
-        public IEntity Driver
+        public IEntity? Driver
         {
             get
             {

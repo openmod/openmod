@@ -18,15 +18,19 @@ namespace OpenMod.Rust.Entities
             Entity = entity;
             Transform = new RustNetworkableTransform(entity);
             EntityInstanceId = entity.GetInstanceID().ToString();
-
-            // Rust todo: asset and state impl
             State = new RustEntityState(entity);
-            Asset = null;
+            // Rust todo: asset impl
         }
 
         public IWorldTransform Transform { get; }
 
-        public IEntityAsset Asset { get; }
+        public IEntityAsset Asset
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public IEntityState State { get; }
 

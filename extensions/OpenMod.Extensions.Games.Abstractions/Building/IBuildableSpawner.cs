@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using OpenMod.API.Ioc;
 
 namespace OpenMod.Extensions.Games.Abstractions.Building
@@ -18,7 +17,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Building
         /// <param name="buildableAssetId">The ID of the buildable asset.</param>
         /// <param name="state">The optional state for the buildable.</param>
         /// <returns><b>The created buildable</b> if successful; otherwise, <b>>null</b>.</returns>
-        [ItemCanBeNull]
-        Task<IBuildable> SpawnBuildableAsync(Vector3 position, string buildableAssetId, [CanBeNull] IBuildableAsset state = null);
+        Task<IBuildable?> SpawnBuildableAsync(Vector3 position, string buildableAssetId, IBuildableState? state = null);
     }
 }

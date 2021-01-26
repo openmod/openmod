@@ -15,7 +15,7 @@ namespace OpenMod.Core.Permissions
 
         public ScopedPermissionChecker(IRuntime runtime, Lazy<IOpenModComponent> component)
         {
-            m_Parent = runtime.Host.Services.GetRequiredService<IPermissionChecker>();
+            m_Parent = runtime.Host!.Services.GetRequiredService<IPermissionChecker>();
             m_Component = component;
         }
 

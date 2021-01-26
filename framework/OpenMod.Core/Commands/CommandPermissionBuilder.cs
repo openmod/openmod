@@ -24,7 +24,7 @@ namespace OpenMod.Core.Commands
             m_CommandStore = commandStore;
         }
 
-        private readonly Dictionary<string, string> m_Cache = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> m_Cache = new();
         public virtual string GetPermission(ICommandRegistration registration)
         {
             return m_Cache.TryGetValue(registration.Id, out var cachedValue)
@@ -54,7 +54,7 @@ namespace OpenMod.Core.Commands
             return permission;
         }
 
-        private ICommandRegistration GetParentCommand(ICommandRegistration registration, IEnumerable<ICommandRegistration> commands)
+        private ICommandRegistration? GetParentCommand(ICommandRegistration registration, IEnumerable<ICommandRegistration> commands)
         {
             // ReSharper disable once ConvertIfStatementToReturnStatement
             if (registration.ParentId == null)

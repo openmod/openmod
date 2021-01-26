@@ -10,11 +10,11 @@ namespace OpenMod.Runtime
     [OpenModInternal]
     public sealed class OpenModStartupContext : IOpenModServiceConfigurationContext
     {
-        public IRuntime Runtime { get; internal set; }
-        public IConfigurationRoot Configuration { get; internal set; }
-        public IOpenModStartup OpenModStartup { get; internal set; }
-        public NuGetPackageManager NuGetPackageManager { get; internal set; }
-        public Dictionary<string, object> DataStore { get; internal set; }
-        public ILoggerFactory LoggerFactory { get; internal set; }
+        public IRuntime Runtime { get; internal set; } = null!;
+        public IConfigurationRoot Configuration { get; internal set; } = null!;
+        public IOpenModStartup OpenModStartup { get; internal set; } = null!;
+        public NuGetPackageManager NuGetPackageManager { get; internal set; } = null!;
+        public Dictionary<string, object> DataStore { get; internal set; } = null!;
+        public ILoggerFactory LoggerFactory { get; internal set; } = null!;
     }
 }

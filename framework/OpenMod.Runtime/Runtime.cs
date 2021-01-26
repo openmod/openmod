@@ -30,8 +30,6 @@ using Serilog.Extensions.Logging;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-#pragma warning disable CS4014
-
 namespace OpenMod.Runtime
 {
     [UsedImplicitly]
@@ -49,30 +47,32 @@ namespace OpenMod.Runtime
 
         public bool IsComponentAlive => Status != RuntimeStatus.Unloaded && Status != RuntimeStatus.Crashed;
 
-        public ILifetimeScope LifetimeScope { get; private set; }
+        public ILifetimeScope LifetimeScope { get; private set; } = null!;
 
         public RuntimeStatus Status { get; private set; } = RuntimeStatus.Unloaded;
 
-        public string WorkingDirectory { get; private set; }
+        public string WorkingDirectory { get; private set; } = null!;
 
-        public string[] CommandlineArgs { get; private set; }
+        public string[] CommandlineArgs { get; private set; } = new string[0];
 
-        public IDataStore DataStore { get; private set; }
+        public IDataStore DataStore { get; private set; } = null!;
 
-        public IHostInformation HostInformation { get; private set; }
+        public IHostInformation? HostInformation { get; private set; }
 
-        public IHost Host { get; private set; }
+        public IHost? Host { get; private set; }
+
         public bool IsDisposing { get; private set; }
 
-        private SerilogLoggerFactory m_LoggerFactory;
-        private ILogger<Runtime> m_Logger;
+        private SerilogLoggerFactory? m_LoggerFactory;
+        private ILogger<Runtime>? m_Logger;
+        private IHostApplicationLifetime? m_AppLifeTime;
 
-        // these variables are used for runtime restart
-        private List<Assembly> m_OpenModHostAssemblies;
-        private Func<IHostBuilder> m_HostBuilderFunc;
-        private RuntimeInitParameters m_RuntimeInitParameters; private IHostApplicationLifetime m_AppLifeTime;
+        // these variables are used for soft reloads
+        private List<Assembly>? m_OpenModHostAssemblies;
+        private Func<IHostBuilder>? m_HostBuilderFunc;
+        private RuntimeInitParameters? m_RuntimeInitParameters;
 
-        public void Init(List<Assembly> openModAssemblies, RuntimeInitParameters parameters, Func<IHostBuilder> hostBuilderFunc = null)
+        public void Init(List<Assembly> openModAssemblies, RuntimeInitParameters parameters, Func<IHostBuilder>? hostBuilderFunc = null)
         {
             AsyncHelper.RunSync(() => InitAsync(openModAssemblies, parameters, hostBuilderFunc));
         }
@@ -80,8 +80,18 @@ namespace OpenMod.Runtime
         public async Task<IHost> InitAsync(
             List<Assembly> openModHostAssemblies,
             RuntimeInitParameters parameters,
-            Func<IHostBuilder> hostBuilderFunc = null)
+            Func<IHostBuilder>? hostBuilderFunc = null)
         {
+            if (openModHostAssemblies == null)
+            {
+                throw new ArgumentNullException(nameof(openModHostAssemblies));
+            }
+
+            if (parameters == null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
             try
             {
                 IsDisposing = false;
@@ -122,16 +132,16 @@ namespace OpenMod.Runtime
 
                 m_Logger.LogInformation($"OpenMod v{Version} is starting...");
 
-                if (!(parameters.PackageManager is NuGetPackageManager nugetPackageManager))
+                if (parameters.PackageManager is not NuGetPackageManager nugetPackageManager)
                 {
                     var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
                     nugetPackageManager = new NuGetPackageManager(packagesDirectory)
                     {
-                        Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"))
+                        Logger = new OpenModNuGetLogger(m_LoggerFactory!.CreateLogger("NuGet"))
                     };
                 }
 
-                nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
+                nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory!.CreateLogger("NuGet"));
 
                 await nugetPackageManager.RemoveOutdatedPackagesAsync();
                 nugetPackageManager.InstallAssemblyResolver();
@@ -140,7 +150,7 @@ namespace OpenMod.Runtime
                 var startupContext = new OpenModStartupContext
                 {
                     Runtime = this,
-                    LoggerFactory = m_LoggerFactory,
+                    LoggerFactory = m_LoggerFactory!,
                     NuGetPackageManager = nugetPackageManager,
                     DataStore = new Dictionary<string, object>()
                 };
@@ -210,7 +220,7 @@ namespace OpenMod.Runtime
                 LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>().BeginLifetimeScopeEx(
                     containerBuilder =>
                     {
-                        containerBuilder.Register(ctx => this)
+                        containerBuilder.Register(_ => this)
                             .As<IOpenModComponent>()
                             .SingleInstance()
                             .ExternallyOwned();
@@ -260,7 +270,7 @@ namespace OpenMod.Runtime
         public async Task PerformSoftReloadAsync()
         {
             await ShutdownAsync();
-            await InitAsync(m_OpenModHostAssemblies, m_RuntimeInitParameters, m_HostBuilderFunc);
+            await InitAsync(m_OpenModHostAssemblies!, m_RuntimeInitParameters!, m_HostBuilderFunc);
         }
 
         private void ConfigureConfiguration(IConfigurationBuilder builder, OpenModStartup startup)
@@ -355,7 +365,7 @@ namespace OpenMod.Runtime
         {
             IsDisposing = true;
             m_Logger.LogInformation("OpenMod is shutting down...");
-            Host.Dispose();
+            Host?.Dispose();
             Status = RuntimeStatus.Unloaded;
             Log.CloseAndFlush();
             return Task.CompletedTask;

@@ -10,7 +10,7 @@ namespace OpenMod.Unturned.Players.Life.Events
     {
         public UnturnedPlayerDyingEvent(UnturnedPlayer player, byte amount,
             EDeathCause cause, ELimb limb,
-            CSteamID killer, IDamageSource source,
+            CSteamID killer, IDamageSource? source,
             bool trackKill,
             Vector3 ragdoll, ERagdollEffect ragdollEffect,
             bool canCauseBleeding) : base(player, amount, cause, limb,

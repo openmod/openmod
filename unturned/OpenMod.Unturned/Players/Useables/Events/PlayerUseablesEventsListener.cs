@@ -29,7 +29,7 @@ namespace OpenMod.Unturned.Players.Useables.Events
             var instigator = GetUnturnedPlayer(nativeInstigator);
             var target = GetUnturnedPlayer(nativeTarget);
 
-            var @event = new UnturnedPlayerPerformingAidEvent(instigator, target, asset)
+            var @event = new UnturnedPlayerPerformingAidEvent(instigator!, target!, asset)
             {
                 IsCancelled = !shouldAllow
             };

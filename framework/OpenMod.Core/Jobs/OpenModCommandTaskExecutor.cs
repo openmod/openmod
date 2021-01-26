@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Jobs;
 using OpenMod.Core.Helpers;
@@ -36,12 +35,17 @@ namespace OpenMod.Core.Jobs
                 throw new Exception($"Job \"{task.JobName}\" is missing the command list in args.commands!");
             }
 
-            var commands = (IEnumerable<object>)task.Args["commands"];
-            foreach (string command in commands)
+            var commands = (IEnumerable<object?>)task.Args["commands"]!;
+            foreach (string? command in commands)
             {
-                m_Logger.LogInformation($"[{task.JobName}] Running OpenMod command: {command}");
+                if(string.IsNullOrEmpty(command))
+                {
+                    continue;
+                }
 
-                var args = ArgumentsParser.ParseArguments(command);
+                m_Logger.LogInformation($"[{task.JobName}] Running OpenMod command: {command!}");
+
+                var args = ArgumentsParser.ParseArguments(command!);
                 await m_CommandExecutor.ExecuteAsync(m_Actor, args, string.Empty);
             }
         }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace OpenMod.API.Persistence
 {
@@ -14,7 +13,7 @@ namespace OpenMod.API.Persistence
         /// </summary>
         /// <param name="key">The key to store to.</param>
         /// <param name="data">The data to store to.</param>
-        Task SaveAsync<T>(string key, T data) where T: class;
+        Task SaveAsync<T>(string key, T? data) where T: class;
 
         /// <summary>
         /// Checks if the give key exists.
@@ -26,7 +25,7 @@ namespace OpenMod.API.Persistence
         /// Loads data from the given key.
         /// </summary>
         /// <param name="key">The key to load from.</param>
-        Task<T> LoadAsync<T>(string key) where T : class;
+        Task<T?> LoadAsync<T>(string key) where T : class;
 
         /// <summary>
         /// Adds a change watcher if the data has changed externally. Does not trigger for calls to <see cref="SaveAsync{T}"/>.
@@ -35,7 +34,6 @@ namespace OpenMod.API.Persistence
         /// <param name="component">The component registering the change watcher.</param>
         /// <param name="onChange">The on change callback.</param>
         /// <returns>An <see cref="IDisposable"/> that will unregister the change watcher on disposal.</returns>
-        [NotNull]
         IDisposable AddChangeWatcher(string key, IOpenModComponent component, Action onChange);
     }
 }

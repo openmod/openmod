@@ -18,9 +18,9 @@ namespace OpenMod.Unturned.Players.Life.Events
 
         public CSteamID Killer { get; set; }
 
-        public IDamageSource DamageSource { get; }
+        public IDamageSource? DamageSource { get; }
 
-        public UnturnedPlayerDamagedEvent(UnturnedPlayer player, byte damageAmount, EDeathCause cause, ELimb limb, CSteamID killer, IDamageSource damageSource) : base(player)
+        public UnturnedPlayerDamagedEvent(UnturnedPlayer player, byte damageAmount, EDeathCause cause, ELimb limb, CSteamID killer, IDamageSource? damageSource) : base(player)
         {
             DamageAmount = damageAmount;
             Cause = cause;

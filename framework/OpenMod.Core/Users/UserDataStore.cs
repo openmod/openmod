@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,9 +23,10 @@ namespace OpenMod.Core.Users
         private readonly IRuntime m_Runtime;
         public const string UsersKey = "users";
         private readonly IDataStore m_DataStore;
-        private IDisposable m_FileChangeWatcher;
         private UsersData m_CachedUsersData;
+        private IDisposable m_FileChangeWatcher;
         private bool m_IsUpdating;
+
 
         public UserDataStore(
             ILogger<UserDataStore> logger,
@@ -38,103 +37,18 @@ namespace OpenMod.Core.Users
             m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
 
+            // suppress errors because the compiler can't analyze that the values are set from the statements below
+            m_CachedUsersData = null!;
+            m_FileChangeWatcher = null!;
+
             AsyncHelper.RunSync(async () =>
             {
-                m_CachedUsersData = await LoadUsersDataFromDiskAsync();
+                m_CachedUsersData = await EnsureUserDataCreatedAsync();
             });
         }
 
-        public async Task<UserData> GetUserDataAsync(string userId, string userType)
+        private async Task<UsersData> EnsureUserDataCreatedAsync()
         {
-            var usersData = await GetUsersDataAsync();
-            return usersData.Users.FirstOrDefault(d => d.Type.Equals(userType, StringComparison.OrdinalIgnoreCase)
-                                               && d.Id.Equals(userId, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public async Task<T> GetUserDataAsync<T>(string userId, string userType, string key)
-        {
-            var data = await GetUserDataAsync(userId, userType);
-            if (!data.Data.ContainsKey(key))
-            {
-                return default;
-            }
-
-            var dataObject = data.Data[key];
-            if (dataObject is T obj)
-            {
-                return obj;
-            }
-
-            if (dataObject.GetType().HasConversionOperator(typeof(T)))
-            {
-                // ReSharper disable once PossibleInvalidCastException
-                return (T)dataObject;
-            }
-
-            if (dataObject is Dictionary<object, object> dict)
-            {
-                return dict.ToObject<T>();
-            }
-
-            throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
-        }
-
-        public async Task SetUserDataAsync<T>(string userId, string userType, string key, T value)
-        {
-            var userData = await GetUserDataAsync(userId, userType);
-            if (userData.Data == null)
-            {
-                userData.Data = new Dictionary<string, object>();
-            }
-            else if (userData.Data.ContainsKey(key))
-            {
-                userData.Data.Remove(key);
-            }
-
-            userData.Data.Add(key, value);
-            await SetUserDataAsync(userData);
-        }
-
-        public async Task<IReadOnlyCollection<UserData>> GetUsersDataAsync(string type)
-        {
-            var usersData = await GetUsersDataAsync();
-            return usersData.Users.Where(d => d.Type.Equals(type, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
-
-        public async Task SetUserDataAsync(UserData userData)
-        {
-            var usersData = await GetUsersDataAsync();
-            var idx = usersData.Users.FindIndex(c =>
-                c.Type.Equals(userData.Type, StringComparison.OrdinalIgnoreCase) &&
-                c.Id.Equals(userData.Id, StringComparison.OrdinalIgnoreCase));
-
-            usersData.Users.RemoveAll(c =>
-                c.Type.Equals(userData.Type, StringComparison.OrdinalIgnoreCase) &&
-                c.Id.Equals(userData.Id, StringComparison.OrdinalIgnoreCase));
-
-            // preserve location in data
-            if (idx >= 0)
-            {
-                usersData.Users.Insert(idx, userData);
-            }
-            else
-            {
-                usersData.Users.Add(userData);
-            }
-
-            m_CachedUsersData = usersData;
-
-            m_IsUpdating = true;
-            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
-        }
-
-        private async Task<UsersData> GetUsersDataAsync()
-        {
-            if (m_CachedUsersData != null)
-            {
-                return m_CachedUsersData;
-            }
-
             var created = false;
             if (!await m_DataStore.ExistsAsync(UsersKey))
             {
@@ -158,7 +72,159 @@ namespace OpenMod.Core.Users
             {
                 m_CachedUsersData = await LoadUsersDataFromDiskAsync();
             }
+
             return m_CachedUsersData;
+        }
+
+        public async Task<UserData?> GetUserDataAsync(string userId, string userType)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentException(nameof(userId));
+            }
+
+            if (string.IsNullOrEmpty(userType))
+            {
+                throw new ArgumentException(nameof(userType));
+            }
+            
+            var usersData = await GetUsersDataAsync();
+            return usersData.Users?.FirstOrDefault(d => (d.Type?.Equals(userType, StringComparison.OrdinalIgnoreCase) ?? false)
+                                                        && (d.Id?.Equals(userId, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        public async Task<T?> GetUserDataAsync<T>(string userId, string userType, string key)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentException(nameof(userId));
+            }
+
+            if (string.IsNullOrEmpty(userType))
+            {
+                throw new ArgumentException(nameof(userType));
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
+
+            var data = await GetUserDataAsync(userId, userType) ?? new UserData();
+            if (data.Data == null)
+            {
+                return default;
+            }
+
+            if (!data.Data.ContainsKey(key))
+            {
+                return default;
+            }
+
+            var dataObject = data.Data[key];
+            if (dataObject is T obj)
+            {
+                return obj;
+            }
+
+            if(dataObject == null)
+            {
+                return default;
+            }
+
+            if (dataObject.GetType().HasConversionOperator(typeof(T)))
+            {
+                return (T)dataObject;
+            }
+
+            if (dataObject is Dictionary<object, object> dict)
+            {
+                return dict.ToObject<T>();
+            }
+
+            throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
+        }
+
+        public async Task SetUserDataAsync<T>(string userId, string userType, string key, T? value)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentException(nameof(userId));
+            }
+
+            if (string.IsNullOrEmpty(userType))
+            {
+                throw new ArgumentException(nameof(userType));
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
+
+            var userData = await GetUserDataAsync(userId, userType) ?? new UserData();
+            userData.Data ??= new();
+
+            if (userData.Data.ContainsKey(key))
+            {
+                userData.Data.Remove(key);
+            }
+
+            userData.Data.Add(key, value);
+            await SetUserDataAsync(userData);
+        }
+
+        public async Task<IReadOnlyCollection<UserData>> GetUsersDataAsync(string type)
+        {
+            if (string.IsNullOrEmpty(type))
+            {
+                throw new ArgumentException(nameof(type));
+            }
+
+            var usersData = await GetUsersDataAsync();
+            return usersData.Users?
+                       .Where(d => d.Type?.Equals(type, StringComparison.OrdinalIgnoreCase) ?? false)
+                       .ToList()
+                ?? new List<UserData>();
+        }
+
+        public async Task SetUserDataAsync(UserData userData)
+        {
+            if (userData == null)
+            {
+                throw new ArgumentNullException(nameof(userData));
+            }
+
+            var usersData = await GetUsersDataAsync();
+            usersData.Users ??= new();
+
+            var idx = usersData.Users.FindIndex(c =>
+                (c.Type?.Equals(userData.Type, StringComparison.OrdinalIgnoreCase) ?? false) &&
+                (c.Id?.Equals(userData.Id, StringComparison.OrdinalIgnoreCase) ?? false));
+
+            usersData.Users.RemoveAll(c => 
+                (c.Type?.Equals(userData.Type, StringComparison.OrdinalIgnoreCase) ?? false) &&
+                (c.Id?.Equals(userData.Id, StringComparison.OrdinalIgnoreCase) ?? false));
+
+            // preserve location in data
+            if (idx >= 0)
+            {
+                usersData.Users.Insert(idx, userData);
+            }
+            else
+            {
+                usersData.Users.Add(userData);
+            }
+
+            m_CachedUsersData = usersData;
+            m_IsUpdating = true;
+
+            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+        }
+
+        private Task<UsersData> GetUsersDataAsync()
+        {
+            return Task.FromResult(m_CachedUsersData);
         }
 
         private async Task<UsersData> LoadUsersDataFromDiskAsync()
@@ -182,9 +248,9 @@ namespace OpenMod.Core.Users
 
         public async ValueTask DisposeAsync()
         {
-            m_FileChangeWatcher?.Dispose();
+            m_FileChangeWatcher.Dispose();
 
-            if (m_CachedUsersData?.Users == null)
+            if (m_CachedUsersData.Users == null)
             {
                 throw new Exception("Tried to save null users data");
             }

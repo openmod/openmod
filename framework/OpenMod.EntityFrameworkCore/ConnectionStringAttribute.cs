@@ -16,7 +16,7 @@ namespace OpenMod.EntityFrameworkCore
         /// <summary>
         /// Sets the connection string to use for a<see cref="OpenModDbContext{TSelf}"/>.
         /// </summary>
-        /// <param name="name">The connection string name. Cannot be null or empty.</param>
+        /// <param name="name">The connection string name.</param>
         public ConnectionStringAttribute(string name)
         {
             if (string.IsNullOrEmpty(name))

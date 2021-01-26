@@ -120,13 +120,12 @@ namespace OpenMod.Analyzers
 
         private static bool HasInternalAttribute(ISymbol symbol)
         {
-            return symbol != null &&
-                   symbol.GetAttributes().Any(a => a.AttributeClass.Name == "OpenModInternalAttribute");
+            return symbol.GetAttributes().Any(a => a.AttributeClass?.Name == "OpenModInternalAttribute");
         }
 
         private static bool IsInInternalNamespace(ISymbol symbol)
         {
-            if (!(symbol?.ContainingNamespace?.ToDisplayString() is string ns))
+            if (symbol.ContainingNamespace?.ToDisplayString() is not string ns)
             {
                 return false;
             }

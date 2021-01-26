@@ -140,7 +140,7 @@ namespace OpenMod.Unturned.Players
 
         public IInventory Inventory { get; }
 
-        public IVehicle CurrentVehicle
+        public IVehicle? CurrentVehicle
         {
             get
             {

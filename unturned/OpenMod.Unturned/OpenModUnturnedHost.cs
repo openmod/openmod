@@ -22,11 +22,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenMod.API.Eventing;
-using OpenMod.Common.Hotloading;
 using OpenMod.Core.Ioc;
 using OpenMod.NuGet;
-using OpenMod.Unturned.Configuration;
 using OpenMod.Unturned.Module.Bootstrapper;
 using OpenMod.Unturned.RocketMod;
 using UnityEngine.LowLevel;
@@ -39,20 +36,18 @@ namespace OpenMod.Unturned
     {
         private static bool s_UniTaskInited;
         private readonly IRuntime m_Runtime;
-        private readonly IOpenModUnturnedConfiguration m_UnturnedConfiguration;
         private readonly IHostInformation m_HostInformation;
         private readonly IServiceProvider m_ServiceProvider;
         private readonly IConsoleActorAccessor m_ConsoleActorAccessor;
         private readonly Lazy<ICommandExecutor> m_CommandExecutor;
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
         private readonly NuGetPackageManager m_NuGetPackageManager;
-        private readonly Lazy<IEventBus> m_EventBus;
         private readonly Lazy<UnturnedCommandHandler> m_UnturnedCommandHandler;
-        private List<ICommandInputOutput> m_IoHandlers;
-        private OpenModConsoleInputOutput m_OpenModIoHandler;
         private readonly HashSet<string> m_Capabilities;
-        private UnturnedEventsActivator m_UnturnedEventsActivator;
-        private Harmony m_Harmony;
+        private OpenModConsoleInputOutput? m_OpenModIoHandler;
+        private List<ICommandInputOutput>? m_IoHandlers;
+        private UnturnedEventsActivator? m_UnturnedEventsActivator;
+        private Harmony? m_Harmony;
         private bool m_IsDisposing;
 
         public string OpenModComponentId { get; } = "OpenMod.Unturned";
@@ -65,11 +60,8 @@ namespace OpenMod.Unturned
 
         public IDataStore DataStore { get; }
 
-        // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */
-
         public OpenModUnturnedHost(
             IRuntime runtime,
-            IOpenModUnturnedConfiguration unturnedConfiguration,
             IHostInformation hostInformation,
             IServiceProvider serviceProvider,
             ILifetimeScope lifetimeScope,
@@ -78,18 +70,15 @@ namespace OpenMod.Unturned
             ILogger<OpenModUnturnedHost> logger,
             NuGetPackageManager nuGetPackageManager,
             Lazy<ICommandExecutor> commandExecutor,
-            Lazy<IEventBus> eventBus,
             Lazy<UnturnedCommandHandler> unturnedCommandHandler)
         {
             m_Runtime = runtime;
-            m_UnturnedConfiguration = unturnedConfiguration;
             m_HostInformation = hostInformation;
             m_ServiceProvider = serviceProvider;
             m_ConsoleActorAccessor = consoleActorAccessor;
             m_CommandExecutor = commandExecutor;
             m_Logger = logger;
             m_NuGetPackageManager = nuGetPackageManager;
-            m_EventBus = eventBus;
             m_UnturnedCommandHandler = unturnedCommandHandler;
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
@@ -136,7 +125,7 @@ namespace OpenMod.Unturned
                 .GetField("ioHandlers", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(Dedicator.commandWindow);
 
-            CommandLineFlag shouldManageConsole = null;
+            CommandLineFlag? shouldManageConsole = null;
             var previousShouldManageConsoleValue = true;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -214,7 +203,7 @@ namespace OpenMod.Unturned
                 shutdownPerformed = true;
                 m_NuGetPackageManager.ClearCache();
 
-                BootstrapperModule.Instance.initialize();
+                BootstrapperModule.Instance!.initialize();
             }
             catch (Exception ex)
             {
@@ -238,13 +227,11 @@ namespace OpenMod.Unturned
 
         protected virtual void UnbindUnturnedEvents()
         {
-            // ReSharper disable DelegateSubtraction
             CommandWindow.onCommandWindowInputted -= OnCommandWindowInputted;
-            // ReSharper restore DelegateSubtraction
-
-            m_UnturnedEventsActivator.Dispose();
+            m_UnturnedEventsActivator?.Dispose();
         }
 
+        // ReSharper disable once RedundantAssignment
         private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
         {
             shouldExecuteCommand = false;
@@ -280,19 +267,22 @@ namespace OpenMod.Unturned
 
             Dedicator.commandWindow.removeIOHandler(m_OpenModIoHandler);
 
-            m_IoHandlers.Reverse();
-            foreach (var ioHandler in m_IoHandlers)
+            if (m_IoHandlers is not null)
             {
-                Dedicator.commandWindow.addIOHandler(ioHandler);
-            }
+                m_IoHandlers.Reverse();
+                foreach (var ioHandler in m_IoHandlers)
+                {
+                    Dedicator.commandWindow.addIOHandler(ioHandler);
+                }
 
-            m_IoHandlers.Clear();
+                m_IoHandlers.Clear();
+            }
 
             IsComponentAlive = false;
             m_IsDisposing = true;
             TlsWorkaround.Uninstalll();
 
-            m_Harmony.UnpatchAll(OpenModComponentId);
+            m_Harmony?.UnpatchAll(OpenModComponentId);
             UnbindUnturnedEvents();
         }
     }

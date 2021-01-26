@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace OpenMod.API.Plugins
 {
@@ -18,17 +17,13 @@ namespace OpenMod.API.Plugins
         /// Loads plugin assemblies from the given assembly source.
         /// </summary>
         /// <param name="source">The assemblies source.</param>
-        /// <returns>The loaded plugin asemblies. Cannot return null and neither can items be null.</returns>
-        [NotNull]
-        [ItemNotNull]
+        /// <returns>The loaded plugin asemblies.</returns>
         [OpenModInternal]
         Task<ICollection<Assembly>> LoadPluginAssembliesAsync(IPluginAssembliesSource source);
 
         /// <value>
-        /// The loaded plugin assemblies. Cannot return null and neither can items be null.
+        /// The loaded plugin assemblies.
         /// </value>
-        [NotNull]
-        [ItemNotNull]
         [OpenModInternal]
         IReadOnlyCollection<Assembly> LoadedPluginAssemblies { get; }
     }

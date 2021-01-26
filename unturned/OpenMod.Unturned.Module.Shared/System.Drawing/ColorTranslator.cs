@@ -30,7 +30,6 @@
 //
 
 using System.ComponentModel;
-using System.Globalization;
 
 namespace System.Drawing
 {

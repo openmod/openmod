@@ -44,9 +44,9 @@ namespace OpenMod.Runtime
             m_Assemblies = new HashSet<Assembly>(new AssemblyEqualityComparer());
             m_ServiceRegistrations = new List<ServiceRegistration>();
             m_RegisteredAssemblies = new HashSet<AssemblyName>();
-            m_PluginAssemblyStore =
-                new PluginAssemblyStore(openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>(),
-                    m_NuGetPackageManager);
+
+            var logger = openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>();
+            m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.Configuration, logger, m_NuGetPackageManager);
             m_PluginAssembliesSources = new List<IPluginAssembliesSource>();
         }
 
@@ -117,7 +117,7 @@ namespace OpenMod.Runtime
         internal void ConfigureConfiguration(IConfigurationBuilder builder)
         {
             var containerConfiguratorTypes = m_Assemblies
-                .SelectMany(d => d.FindTypes<IConfigurationConfigurator>(false))
+                .SelectMany(d => d.FindTypes<IConfigurationConfigurator>())
                 .OrderBy(d => d.GetPriority(), new PriorityComparer(PriortyComparisonMode.LowestFirst));
 
             foreach (var configurationConfiguratorType in containerConfiguratorTypes)
@@ -143,7 +143,7 @@ namespace OpenMod.Runtime
             }
 
             var containerConfiguratorTypes = m_Assemblies
-                .SelectMany(d => d.FindTypes<IContainerConfigurator>(false))
+                .SelectMany(d => d.FindTypes<IContainerConfigurator>())
                 .OrderBy(d => d.GetPriority(), new PriorityComparer(PriortyComparisonMode.LowestFirst));
 
             foreach (var containerConfiguratorType in containerConfiguratorTypes)
@@ -177,7 +177,7 @@ namespace OpenMod.Runtime
 
             serviceCollection.AddSingleton<IPluginAssemblyStore>(m_PluginAssemblyStore);
             var serviceConfiguratorTypes = m_Assemblies
-                .SelectMany(d => d.FindTypes<IServiceConfigurator>(false))
+                .SelectMany(d => d.FindTypes<IServiceConfigurator>())
                 .OrderBy(d => d.GetPriority(), new PriorityComparer(PriortyComparisonMode.LowestFirst));
 
             foreach (var serviceConfiguratorType in serviceConfiguratorTypes)
@@ -214,7 +214,6 @@ namespace OpenMod.Runtime
         {
             try
             {
-                m_PluginAssemblyStore.Configuration = Context.Configuration;
                 await RegisterPluginAssembliesAsync(new NuGetPluginAssembliesSource(m_NuGetPackageManager));
             }
             catch (Exception ex)

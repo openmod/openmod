@@ -5,7 +5,7 @@
     /// </summary>
     public sealed class NullEntityState : IEntityState
     {
-        private static NullEntityState m_Instance;
+        private static NullEntityState? m_Instance;
         public static NullEntityState Instance
         {
             get
@@ -14,7 +14,7 @@
             }
         }
 
-        public byte[] StateData { get; } = null;
+        public byte[]? StateData { get; } = null;
 
         private NullEntityState() { }
     }

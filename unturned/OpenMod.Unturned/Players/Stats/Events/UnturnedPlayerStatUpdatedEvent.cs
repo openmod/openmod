@@ -1,5 +1,4 @@
 ﻿using OpenMod.Unturned.Events;
-using SDG.Unturned;
 
 namespace OpenMod.Unturned.Players.Stats.Events
 {

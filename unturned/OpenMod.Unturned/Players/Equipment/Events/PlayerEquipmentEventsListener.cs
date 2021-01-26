@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿extern alias JetBrainsAnnotations;
+using HarmonyLib;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
@@ -7,10 +9,10 @@ using OpenMod.Unturned.Items;
 using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
-// ReSharper disable DelegateSubtraction
 
 namespace OpenMod.Unturned.Players.Equipment.Events
 {
+    [UsedImplicitly]
     internal class PlayerEquipmentEventsListener : UnturnedPlayerEventsListener
     {
         public PlayerEquipmentEventsListener(IOpenModHost openModHost,
@@ -45,7 +47,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
 
         private void Events_OnItemEquipped(Player nativePlayer)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             var item = new Item(
                 nativePlayer.equipment.itemID, 
@@ -60,7 +62,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
 
         private void Events_OnItemUnequipped(Player nativePlayer)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             var @event = new UnturnedPlayerItemUnequippedEvent(player);
 
@@ -69,7 +71,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
 
         private void OnEquipRequested(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
-            var player = GetUnturnedPlayer(equipment.player);
+            var player = GetUnturnedPlayer(equipment.player)!;
 
             var @event = new UnturnedPlayerItemEquippingEvent(player, new UnturnedItem(jar.item))
             {
@@ -83,7 +85,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
 
         private void OnDequipRequested(PlayerEquipment equipment, ref bool shouldAllow)
         {
-            var player = GetUnturnedPlayer(equipment.player);
+            var player = GetUnturnedPlayer(equipment.player)!;
 
             var inv = player.Player.inventory;
 
@@ -106,25 +108,28 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         }
 
         private delegate void ItemEquipped(Player player);
-        private static event ItemEquipped OnItemEquipped;
+        private static event ItemEquipped? OnItemEquipped;
 
         private delegate void ItemUnequipped(Player player);
-        private static event ItemUnequipped OnItemUnequipped;
+        private static event ItemUnequipped? OnItemUnequipped;
 
+        [UsedImplicitly]
         [HarmonyPatch]
-        private static class Patches
+        internal static class Patches
         {
             // ReSharper disable InconsistentNaming
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerEquipment), "tellEquip")]
             [HarmonyPrefix]
-            private static void PreTellEquip(PlayerEquipment __instance, out ushort __state)
+            public static void PreTellEquip(PlayerEquipment __instance, out ushort __state)
             {
                 __state = __instance.itemID;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerEquipment), "tellEquip")]
             [HarmonyPostfix]
-            private static void PostTellEquip(PlayerEquipment __instance, ushort __state, Transform[] ___thirdSlots,
+            public static void PostTellEquip(PlayerEquipment __instance, ushort __state, Transform[] ___thirdSlots,
                 CSteamID steamID, ushort id)
             {
                 if (!__instance.channel.checkServer(steamID)) return;

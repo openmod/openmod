@@ -1,7 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
 using OpenMod.API.Eventing;
-using OpenMod.API.Prioritization;
 
 namespace OpenMod.Core.Eventing
 {

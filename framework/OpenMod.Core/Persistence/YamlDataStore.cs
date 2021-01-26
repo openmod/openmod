@@ -5,9 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Persistence;
@@ -21,12 +19,10 @@ namespace OpenMod.Core.Persistence
     [OpenModInternal]
     public class YamlDataStore : IDataStore, IDisposable
     {
-        [CanBeNull]
-        private readonly string m_Prefix;
+        private readonly string? m_Prefix;
+        private readonly string? m_Suffix;
         private readonly string m_BasePath;
 
-        [CanBeNull]
-        private readonly string m_Suffix;
         private readonly ISerializer m_Serializer;
         private readonly IDeserializer m_Deserializer;
         private readonly List<RegisteredChangeListener> m_ChangeListeners;
@@ -37,7 +33,7 @@ namespace OpenMod.Core.Persistence
         private readonly bool m_LogOnChange;
         private readonly Dictionary<string, int> m_WriteCounter;
         private readonly HashSet<string> m_KnownKeys;
-        private FileSystemWatcher m_FileSystemWatcher;
+        private FileSystemWatcher? m_FileSystemWatcher;
 
         public YamlDataStore(DataStoreCreationParameters parameters,
             ILogger<YamlDataStore> logger,
@@ -88,7 +84,7 @@ namespace OpenMod.Core.Persistence
                 EnableRaisingEvents = true
             };
 
-            m_FileSystemWatcher.Changed += (s, a) =>
+            m_FileSystemWatcher.Changed += (_, a) =>
             {
                 try
                 {
@@ -126,11 +122,15 @@ namespace OpenMod.Core.Persistence
             };
         }
 
-        public virtual Task SaveAsync<T>(string key, T data) where T : class
+        public virtual Task SaveAsync<T>(string key, T? data) where T : class
         {
             CheckKeyValid(key);
 
-            var serializedYaml = m_Serializer.Serialize(data);
+            var serializedYaml =
+                data == null
+                ? string.Empty
+                : m_Serializer.Serialize(data);
+
             var encodedData = Encoding.UTF8.GetBytes(serializedYaml);
             var filePath = GetFilePathForKey(key);
             RegisterKnownKey(key);
@@ -186,7 +186,7 @@ namespace OpenMod.Core.Persistence
             return Task.FromResult(File.Exists(filePath));
         }
 
-        public virtual Task<T> LoadAsync<T>(string key) where T : class
+        public virtual Task<T?> LoadAsync<T>(string key) where T : class
         {
             CheckKeyValid(key);
 
@@ -205,11 +205,21 @@ namespace OpenMod.Core.Persistence
 
             var encodedData = File.ReadAllBytes(filePath);
             var serializedYaml = Encoding.UTF8.GetString(encodedData);
-            return Task.FromResult(m_Deserializer.Deserialize<T>(serializedYaml));
+            return Task.FromResult<T?>(m_Deserializer.Deserialize<T>(serializedYaml));
         }
 
         public IDisposable AddChangeWatcher(string key, IOpenModComponent component, Action onChange)
         {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            if (onChange == null)
+            {
+                throw new ArgumentNullException(nameof(onChange));
+            }
+
             CheckKeyValid(key);
             RegisterKnownKey(key);
 
@@ -251,7 +261,7 @@ namespace OpenMod.Core.Persistence
                     continue;
                 }
 
-                listener.Callback?.Invoke();
+                listener.Callback.Invoke();
             }
         }
 

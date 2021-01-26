@@ -27,8 +27,7 @@ namespace OpenMod.Core.Eventing
         private readonly ILogger<EventBus> m_Logger;
         private readonly List<EventSubscription> m_EventSubscriptions;
 
-        private static readonly Type[] s_OmittedTypes = new[]
-        {
+        private static readonly Type[] s_OmittedTypes = {
             typeof(IEvent),
             typeof(ICancellableEvent),
             typeof(EventBase),
@@ -43,8 +42,25 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Subscribe(IOpenModComponent component, string eventName, EventCallback callback)
         {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            if (string.IsNullOrEmpty(eventName))
+            {
+                throw new ArgumentException(eventName);
+            }
+
             if (!component.IsComponentAlive)
+            {
                 return;
+            }
 
             var attribute = GetEventListenerAttribute(callback.Method);
             m_EventSubscriptions.Add(new EventSubscription(component, callback.Invoke, attribute, eventName, component.LifetimeScope.BeginLifetimeScopeEx()));
@@ -52,8 +68,20 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback) where TEvent : IEvent
         {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             if (!component.IsComponentAlive)
+            {
                 return;
+            }
 
             var attribute = GetEventListenerAttribute(callback.Method);
             m_EventSubscriptions.Add(new EventSubscription(component, (serviceProvider, sender, @event) => callback.Invoke(serviceProvider, sender, (TEvent)@event), attribute, typeof(TEvent), component.LifetimeScope.BeginLifetimeScopeEx()));
@@ -61,8 +89,20 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Subscribe(IOpenModComponent component, Type eventType, EventCallback callback)
         {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             if (!component.IsComponentAlive)
+            {
                 return;
+            }
 
             var attribute = GetEventListenerAttribute(callback.Method);
             m_EventSubscriptions.Add(new EventSubscription(component, callback.Invoke, attribute, eventType, component.LifetimeScope.BeginLifetimeScopeEx()));
@@ -70,6 +110,16 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Subscribe(IOpenModComponent component, Assembly assembly)
         {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
+
             if (!component.IsComponentAlive)
             {
                 return;
@@ -78,7 +128,7 @@ namespace OpenMod.Core.Eventing
             List<(Type eventListenerType, MethodInfo method, EventListenerAttribute eventListenerAttribute, Type eventType)> eventListeners = new List<(Type, MethodInfo, EventListenerAttribute, Type)>();
             var scope = component.LifetimeScope.BeginLifetimeScopeEx((builder =>
             {
-                foreach (var type in assembly.FindTypes<IEventListener>(false))
+                foreach (var type in assembly.FindTypes<IEventListener>())
                 {
                     if (m_EventSubscriptions.Any(c => c.EventListener == type))
                     {
@@ -90,6 +140,11 @@ namespace OpenMod.Core.Eventing
                     foreach (var @interface in type.GetInterfaces().Where(c => typeof(IEventListener).IsAssignableFrom(c) && c.GetGenericArguments().Length > 0))
                     {
                         var interfaceMethod = @interface.GetMethods().Single();
+                        if (interfaceMethod.DeclaringType == null)
+                        {
+                            continue;
+                        }
+
                         var map = type.GetInterfaceMap(interfaceMethod.DeclaringType);
                         var index = Array.IndexOf(map.InterfaceMethods, interfaceMethod);
 
@@ -116,46 +171,83 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Unsubscribe(IOpenModComponent component)
         {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
             if (!component.IsComponentAlive)
+            {
                 return;
+            }
 
             m_EventSubscriptions.RemoveAll(c => !c.Owner.IsAlive || c.Owner.Target == component);
         }
 
         public virtual void Unsubscribe(IOpenModComponent component, string eventName)
         {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
             if (!component.IsComponentAlive)
+            {
                 return;
+            }
 
             m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && c.EventName.Equals(eventName, StringComparison.OrdinalIgnoreCase));
         }
 
         public virtual void Unsubscribe<TEvent>(IOpenModComponent component) where TEvent : IEvent
         {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
             if (!component.IsComponentAlive)
+            {
                 return;
+            }
 
             m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == typeof(TEvent) || c.EventName.Equals(typeof(TEvent).Name, StringComparison.OrdinalIgnoreCase)));
         }
 
         public virtual void Unsubscribe(IOpenModComponent component, Type eventType)
         {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
             if (!component.IsComponentAlive)
+            {
                 return;
+            }
 
             m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == eventType || c.EventName.Equals(eventType.Name, StringComparison.OrdinalIgnoreCase)));
         }
 
-        public virtual async Task EmitAsync(IOpenModComponent component, object sender, IEvent @event,
-            EventExecutedCallback callback = null)
+        public virtual async Task EmitAsync(IOpenModComponent component, object? sender, IEvent @event,
+            EventExecutedCallback? callback = null)
         {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            if (@event == null)
+            {
+                throw new ArgumentNullException(nameof(@event));
+            }
+
             if (!component.IsComponentAlive)
             {
                 return;
             }
 
             var eventTypes = new List<Type>();
-
             var currentType = @event.GetType();
 
             while (currentType != null && typeof(IEvent).IsAssignableFrom(currentType))
@@ -163,7 +255,7 @@ namespace OpenMod.Core.Eventing
                 eventTypes.Add(currentType);
                 currentType = currentType.BaseType;
             }
-            
+
             eventTypes.AddRange(@event.GetType().GetInterfaces().Where(d => typeof(IEvent).IsAssignableFrom(d)));
 
             foreach (var eventType in eventTypes.Except(s_OmittedTypes))

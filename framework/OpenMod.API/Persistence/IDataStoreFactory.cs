@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using OpenMod.API.Ioc;
+﻿using OpenMod.API.Ioc;
 
 namespace OpenMod.API.Persistence
 {
@@ -14,8 +13,7 @@ namespace OpenMod.API.Persistence
         /// Creates a new datastore.
         /// </summary>
         /// <param name="parameters">The data store creation parameters</param>
-        /// <returns>The created data store. Cannot return null.</returns>
-        [NotNull]
+        /// <returns>The created data store.</returns>
         IDataStore CreateDataStore(DataStoreCreationParameters parameters);
     }
 }

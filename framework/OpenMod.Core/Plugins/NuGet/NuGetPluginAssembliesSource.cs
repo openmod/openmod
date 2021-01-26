@@ -45,13 +45,13 @@ namespace OpenMod.Core.Plugins.NuGet
             return assemblies;
         }
 
-        public async Task<NuGetInstallResult> InstallPackageAsync(string packageName, string version = null, bool isPreRelease = false)
+        public async Task<NuGetInstallResult> InstallPackageAsync(string packageName, string? version = null, bool isPreRelease = false)
         {
             var exists = await m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
             return await InstallOrUpdateAsync(packageName, version, isPreRelease, exists);
         }
 
-        public Task<NuGetInstallResult> UpdatePackageAsync(string packageName, string version = null, bool isPreRelease = false)
+        public Task<NuGetInstallResult> UpdatePackageAsync(string packageName, string? version = null, bool isPreRelease = false)
         {
             return InstallOrUpdateAsync(packageName, version, isPreRelease, true);
         }
@@ -72,8 +72,13 @@ namespace OpenMod.Core.Plugins.NuGet
             return m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
         }
 
-        private async Task<NuGetInstallResult> InstallOrUpdateAsync(string packageName, string version = null, bool isPreRelease = false, bool isUpdate = false)
+        private async Task<NuGetInstallResult> InstallOrUpdateAsync(string packageName, string? version = null, bool isPreRelease = false, bool isUpdate = false)
         {
+            if (string.IsNullOrEmpty(packageName))
+            {
+                throw new ArgumentException(nameof(packageName));
+            }
+
             var previousVersion = await m_NuGetPackageManager.GetLatestPackageIdentityAsync(packageName);
 
             if (isUpdate && previousVersion == null)
@@ -97,16 +102,17 @@ namespace OpenMod.Core.Plugins.NuGet
                 return result;
             }
 
-            if (isUpdate)
+            if (previousVersion != null)
             {
                 await m_NuGetPackageManager.RemoveAsync(previousVersion);
             }
+
             return result;
         }
 
         public void Dispose()
         {
-            m_NuGetPackageManager?.Dispose();
+            m_NuGetPackageManager.Dispose();
         }
     }
 }
