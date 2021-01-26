@@ -12,17 +12,16 @@ using OpenMod.API.Prioritization;
 namespace OpenMod.Core.Commands.OpenModCommands
 {
     [Command("restart", Priority = Priority.Lowest)]
-    [CommandParent(typeof(CommandOpenMod))]
     [CommandDescription("Restarts the server.")]
-    public class CommandOpenModRestart : Command
+    public class CommandRestart : Command
     {
         private readonly IOpenModHost m_Host;
-        private readonly ILogger<CommandOpenModRestart> m_Logger;
+        private readonly ILogger<CommandRestart> m_Logger;
 
-        public CommandOpenModRestart(
+        public CommandRestart(
             IServiceProvider serviceProvider,
             IOpenModHost host,
-            ILogger<CommandOpenModRestart> logger) : base(serviceProvider)
+            ILogger<CommandRestart> logger) : base(serviceProvider)
         {
             m_Host = host;
             m_Logger = logger;
