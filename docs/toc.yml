@@ -1,7 +1,7 @@
-- name: User Docs
+- name: Users
   href: userdoc/
-- name: Developer Docs
+- name: Developers
   href: devdoc/
-- name: Api Docs
+- name: Api Documentation
   href: api/
   homepage: api/index.md

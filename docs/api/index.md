@@ -1,2 +1,3 @@
-# PLACEHOLDER
-TODO: Add .NET projects to the *src* folder and run `docfx` to generate **REAL** *API Documentation*!
+# OpenMod API Documentation
+
+Here you can browse the OpenMod API documentation.
