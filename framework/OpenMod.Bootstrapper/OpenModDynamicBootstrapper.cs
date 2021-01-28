@@ -115,7 +115,7 @@ namespace OpenMod.Bootstrapper
                     var latestOpenModPackage = await packageManager.QueryPackageExactAsync(packageId, version: null, allowPrereleaseVersions);
                     var latestPackageIdentity = latestOpenModPackage?.Identity;
 
-                    if (latestPackageIdentity == null && packageId == null)
+                    if (latestPackageIdentity == null && packageIdentity == null)
                     {
                         throw new Exception($"Failed to find package: {packageId}");
                     }
@@ -133,7 +133,7 @@ namespace OpenMod.Bootstrapper
                         }
                         else
                         {
-                            logger.LogError($"Downloading has failed for {latestPackageIdentity.Id} v{latestPackageIdentity.Version.OriginalVersion}: {installResult.Code}");
+                            logger.LogError($"Downloading has failed for {latestPackageIdentity!.Id} v{latestPackageIdentity!.Version.OriginalVersion}: {installResult.Code}");
                             if (packageIdentity == null)
                             {
                                 return null;
