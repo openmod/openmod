@@ -19,7 +19,7 @@ namespace OpenMod.API
         string WorkingDirectory { get; }
 
         /// <value>
-        /// Checks if the component is alive. The component must not be able to execute any actions if its not alive.
+        /// Checks if the component is alive. The component must not be able to execute any actions if false.
         /// </value>
         bool IsComponentAlive { get; }
 
@@ -29,7 +29,7 @@ namespace OpenMod.API
         ILifetimeScope LifetimeScope { get; }
 
         /// <value>
-        /// The components data store.
+        /// The optional data store of the component.
         /// </value>
         IDataStore? DataStore { get; }
     }
