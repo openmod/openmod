@@ -9,6 +9,11 @@ namespace OpenMod.API.Jobs
     [Serializable]
     public sealed class ScheduledJob : IEquatable<ScheduledJob>
     {
+        public ScheduledJob()
+        {
+            
+        }
+
         public ScheduledJob(string name, string task, Dictionary<string, object?> args, string schedule)
         {
             if (string.IsNullOrEmpty(name))
