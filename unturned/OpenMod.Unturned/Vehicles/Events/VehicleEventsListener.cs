@@ -287,7 +287,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             var @event = new UnturnedVehicleLockUpdatingEvent(instigator: player!,
                 vehicle: new UnturnedVehicle(vehicle),
                 group: group == CSteamID.Nil ? null : group,
-                isLocked: isLocked)
+                isLocking: isLocked)
             {
                 IsCancelled = cancel
             };

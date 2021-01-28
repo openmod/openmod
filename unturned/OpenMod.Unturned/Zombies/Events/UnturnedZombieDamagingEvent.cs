@@ -11,29 +11,29 @@ namespace OpenMod.Unturned.Zombies.Events
     /// </summary>
     public class UnturnedZombieDamagingEvent : UnturnedZombieEvent, ICancellableEvent
     {
-        /// <value>
-        /// The amount of damage to deal.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the amount of damage to deal.
+        /// </summary>
         public ushort DamageAmount { get; set; }
 
-        /// <value>
-        /// The ragdoll position.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the ragdoll position.
+        /// </summary>
         public Vector3 Ragdoll { get; set; }
 
-        /// <value>
-        /// The player dealing the damage.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the player dealing the damage.
+        /// </summary>
         public UnturnedPlayer? Instigator { get; set; }
 
-        /// <value>
-        /// The ragdoll effect.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the ragdoll effect.
+        /// </summary>
         public ERagdollEffect RagdollEffect { get; set; }
 
-        /// <value>
-        /// The stun override.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the stun override.
+        /// </summary>
         public EZombieStunOverride StunOverride { get; set; }
 
         public bool IsCancelled { get; set; }

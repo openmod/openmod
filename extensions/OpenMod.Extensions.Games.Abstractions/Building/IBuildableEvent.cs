@@ -7,9 +7,9 @@ namespace OpenMod.Extensions.Games.Abstractions.Building
     /// </summary>
     public interface IBuildableEvent : IEvent
     {
-        /// <value>
-        /// The buildable related to the event.
-        /// </value>
+        /// <summary>
+        /// Gets the buildable related to the event.
+        /// </summary>
         IBuildable Buildable { get; }
     }
 }

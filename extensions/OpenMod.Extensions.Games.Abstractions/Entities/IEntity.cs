@@ -8,19 +8,19 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
     /// </summary>
     public interface IEntity : IGameObject
     {
-        /// <value>
-        /// The asset of the entity.
-        /// </value>
+        /// <summary>
+        /// Gets the asset of the entity.
+        /// </summary>
         IEntityAsset Asset { get; }
 
-        /// <value>
-        /// The state of the entity.
-        /// </value>
+        /// <summary>
+        /// Gets the state of the entity.
+        /// </summary>
         IEntityState State { get; }
 
-        /// <value>
-        /// The unique instance ID of the entity.
-        /// </value>
+        /// <summary>
+        /// Gets the unique instance ID of the entity.
+        /// </summary>
         string EntityInstanceId { get; }
 
         /// <summary>

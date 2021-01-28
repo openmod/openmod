@@ -8,14 +8,14 @@ namespace OpenMod.Unturned.Vehicles.Events
     /// </summary>
     public class UnturnedVehicleRepairingEvent : UnturnedVehicleEvent, ICancellableEvent
     {
-        /// <value>
-        /// The player repairing the vehicle.
-        /// </value>
+        /// <summary>
+        /// Gets the player repairing the vehicle.
+        /// </summary>
         public CSteamID Instigator { get; }
 
-        /// <value>
-        /// The amount of health to restore.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the amount of health to restore.
+        /// </summary>
         public ushort PendingTotalHealing { get; set; }
 
         public bool IsCancelled { get; set; }

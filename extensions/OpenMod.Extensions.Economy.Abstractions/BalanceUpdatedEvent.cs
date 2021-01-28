@@ -8,29 +8,29 @@ namespace OpenMod.Extensions.Economy.Abstractions
     /// </summary>
     public class BalanceUpdatedEvent : Event
     {
-        /// <value>
-        /// The ID of the account owner.
-        /// </value>
+        /// <summary>
+        /// Gets the ID of the account owner.
+        /// </summary>
         public string OwnerId { get; }
 
-        /// <value>
-        /// The actor type of the account owner.
-        /// </value>
+        /// <summary>
+        /// Gets the actor type of the account owner.
+        /// </summary>
         public string OwnerType { get; }
 
-        /// <value>
-        /// The old balance.
-        /// </value>
+        /// <summary>
+        /// Gets the old balance.
+        /// </summary>
         public decimal OldBalance { get; }
 
-        /// <value>
-        /// The new balance.
-        /// </value>
+        /// <summary>
+        /// Gets the new balance.
+        /// </summary>
         public decimal NewBalance { get; }
 
-        /// <value>
-        /// The reason for the balance update.
-        /// </value>
+        /// <summary>
+        /// Gets the reason for the balance update.
+        /// </summary>
         public string? Reason { get; }
 
         public BalanceUpdatedEvent(string ownerId, string ownerType, decimal oldBalance, decimal newBalance, string? reason)

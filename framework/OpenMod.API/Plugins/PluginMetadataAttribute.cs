@@ -16,9 +16,9 @@ namespace OpenMod.API.Plugins
             Id = id;
         }
 
-        /// <value>
-        /// The plugin ID. Must start with a letter and can only contain alphanumeric characters including dots.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the plugin ID. Must start with a letter and can only contain alphanumeric characters including dots.
+        /// </summary>
         public string Id
         {
             get { return m_Id!; }
@@ -44,18 +44,18 @@ namespace OpenMod.API.Plugins
             }
         }
 
-        /// <value>
-        /// The human-readable name of the plugin.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the human-readable name of the plugin.
+        /// </summary>
         public string? DisplayName { get; set; }
 
         /// <summary>
-        /// The author of the plugin.
+        /// Gets or sets the author of the plugin.
         /// </summary>
         public string? Author { get; set; }
 
         /// <summary>
-        /// The website of the plugin.
+        /// Gets or sets the website of the plugin.
         /// </summary>
         public string? Website { get; set; }
     }

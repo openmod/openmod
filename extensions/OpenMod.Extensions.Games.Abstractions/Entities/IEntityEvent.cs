@@ -7,9 +7,9 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
     /// </summary>
     public interface IEntityEvent : IEvent
     {
-        /// <value>
-        /// The entity related to the event.
-        /// </value>
+        /// <summary>
+        /// Gets the entity related to the event.
+        /// </summary>
         IEntity Entity { get; }
     }
 }

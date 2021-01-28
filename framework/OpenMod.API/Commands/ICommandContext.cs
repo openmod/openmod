@@ -8,31 +8,31 @@ namespace OpenMod.API.Commands
     /// </summary>
     public interface ICommandContext : IAsyncDisposable
     {
-        /// <value>
-        /// The parent command context.
-        /// </value>
+        /// <summary>
+        /// Gets the parent command context.
+        /// </summary>
         /// <example>
         /// If the command was entered as "/mycommand sub", this will return the parent context with parameters "sub".
         /// </example>
         ICommandContext? ParentContext { get; }
 
-        /// <value>
-        /// The child command context.
-        /// </value>
+        /// <summary>
+        /// Gets the child command context.
+        /// </summary>
         ICommandContext? ChildContext { get; }
 
-        /// <value>
-        ///     The root context.
-        /// </value>
+        /// <summary>
+        /// Gets the root context.
+        /// </summary>
         ICommandContext RootContext { get; }
 
-        /// <value>
-        ///     <para>The prefix used to call the command.</para>
+        /// <summary>
+        ///     <para>Gets the prefix used to call the command.</para>
         ///     <para>Useful for sending command usage messages.</para>
         ///     <para>
         ///         Child commands will include their parents.
         ///     </para>
-        /// </value>
+        /// </summary>
         /// <example>
         ///     <para>
         ///         If the command was executed using "/mycommand", it will be "/", when it was executed using "!mycommand", it
@@ -44,39 +44,39 @@ namespace OpenMod.API.Commands
         /// </example>
         string CommandPrefix { get; }
 
-        /// <value>
-        /// The alias or name used to execute the command.
-        /// </value>
+        /// <summary>
+        /// Gets the alias or name used to execute the command.
+        /// </summary>
         string CommandAlias { get; }
 
-        /// <value>
-        /// The actor executing command.
-        /// </value>
+        /// <summary>
+        /// Gets the actor executing command.
+        /// </summary>
         ICommandActor Actor { get; }
 
-        /// <value>
-        /// The parameters of the command.
-        /// </value>
+        /// <summary>
+        /// Gets the parameters of the command.
+        /// </summary>
         ICommandParameters Parameters { get; }
 
-        /// <value>
-        /// The command registration. Can be null if the command was not found.
-        /// </value>
+        /// <summary>
+        /// Gets the command registration. Returns null if the command was not found.
+        /// </summary>
         ICommandRegistration? CommandRegistration { get; }
 
-        /// <value>
-        /// The exception thrown by the command, if one was thrown; otherwise, <b>null</b>.
-        /// </value>
+        /// <summary>
+        /// Gets the exception thrown by the command if one was thrown; otherwise, <b>null</b>.
+        /// </summary>
         Exception? Exception { get; set; }
 
-        /// <value>
-        /// Container for arbitrary data for the command context.
-        /// </value>
+        /// <summary>
+        /// Gets the data for the context. Can be used by plugins for passing arbritrary data to the command context.
+        /// </summary>
         Dictionary<string, object> Data { get; }
 
-        /// <value>
-        /// The service provider for the command context.
-        /// </value>
+        /// <summary>
+        /// Gets the service provider for the command context.
+        /// </summary>
         IServiceProvider ServiceProvider { get; }
     }
 }

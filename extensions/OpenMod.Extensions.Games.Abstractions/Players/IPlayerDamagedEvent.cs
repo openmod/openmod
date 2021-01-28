@@ -7,13 +7,13 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
     /// </summary>
     public interface IPlayerDamagedEvent : IPlayerEvent
     {
-        /// <value>
-        /// The damage source. Can be null.
-        /// </value>
+        /// <summary>
+        /// GEts the damage source.
+        /// </summary>
         public IDamageSource? DamageSource { get; }
 
         /// <summary>
-        /// The amount of the damage.
+        /// Gets the amount of the damage dealt.
         /// </summary>
         public double DamageAmount { get; }
     }

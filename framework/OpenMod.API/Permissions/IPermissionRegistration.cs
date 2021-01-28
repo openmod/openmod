@@ -5,24 +5,24 @@
     /// </summary>
     public interface IPermissionRegistration
     {
-        /// <value>
-        /// The owner component.
-        /// </value>
+        /// <summary>
+        /// Gets the owner component.
+        /// </summary>
         IOpenModComponent Owner { get; }
 
-        /// <value>
-        /// The permission.
-        /// </value>
+        /// <summary>
+        /// Gets the permission.
+        /// </summary>
         string Permission { get; }
 
-        /// <value>
-        /// The permission description. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the permission description.
+        /// </summary>
         string? Description { get; }
 
-        /// <value>
-        /// The default grant result if the permission not explicitly granted or denied.
-        /// </value>
+        /// <summary>
+        /// Gets the default grant result if the permission not explicitly granted or denied.
+        /// </summary>
         PermissionGrantResult DefaultGrant { get; }
     }
 }

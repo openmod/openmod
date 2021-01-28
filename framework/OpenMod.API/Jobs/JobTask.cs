@@ -22,19 +22,19 @@ namespace OpenMod.API.Jobs
             Args = args ?? throw new ArgumentNullException(nameof(args));
         }
 
-        /// <value>
-        /// The name of the job.
-        /// </value>
+        /// <summary>
+        /// Gets the name of the job.
+        /// </summary>
         public string JobName { get; }
 
-        /// <value>
-        /// The task arguments.
-        /// </value>
+        /// <summary>
+        /// Gets the task arguments.
+        /// </summary>
         public Dictionary<string, object?> Args { get; }
 
-        /// <value>
-        /// The task type.
-        /// </value>
+        /// <summary>
+        /// Gets the task type.
+        /// </summary>
         public string Task { get; }
     }
 }

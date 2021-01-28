@@ -11,11 +11,13 @@ namespace Microsoft.Extensions.Configuration
 {
     /// <summary>
     /// Extension methods for adding <see cref="YamlConfigurationExtensions"/>.
+    /// Ex: supports variables.
     /// </summary>
     public static class YamlConfigurationExtensions
     {
         /// <summary>
         /// Adds the YAML configuration provider at <paramref name="path"/> to <paramref name="builder"/>.
+        /// Ex: supports variables.
         /// </summary>
         /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
         /// <param name="path">Path relative to the base path stored in 
@@ -28,6 +30,7 @@ namespace Microsoft.Extensions.Configuration
 
         /// <summary>
         /// Adds the YAML configuration provider at <paramref name="path"/> to <paramref name="builder"/>.
+        /// Ex: supports variables.
         /// </summary>
         /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
         /// <param name="path">Path relative to the base path stored in 
@@ -41,6 +44,7 @@ namespace Microsoft.Extensions.Configuration
 
         /// <summary>
         /// Adds the YAML configuration provider at <paramref name="path"/> to <paramref name="builder"/>.
+        /// Ex: supports variables.
         /// </summary>
         /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
         /// <param name="path">Path relative to the base path stored in 
@@ -55,6 +59,7 @@ namespace Microsoft.Extensions.Configuration
 
         /// <summary>
         /// Adds the YAML configuration provider at <paramref name="path"/> to <paramref name="builder"/>.
+        /// Ex: supports variables.
         /// </summary>
         /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
         /// <param name="path">Path relative to the base path stored in 
@@ -70,6 +75,7 @@ namespace Microsoft.Extensions.Configuration
 
         /// <summary>
         /// Adds a YAML configuration source to <paramref name="builder"/>.
+        /// Ex: supports variables.
         /// </summary>
         /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
         /// <param name="provider">The <see cref="IFileProvider"/> to use to access the file.</param>
@@ -107,6 +113,7 @@ namespace Microsoft.Extensions.Configuration
 
         /// <summary>
         /// Adds a YAML configuration source to <paramref name="builder"/>.
+        /// Ex: supports variables.
         /// </summary>
         /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
         /// <param name="configureSource">Configures the source.</param>

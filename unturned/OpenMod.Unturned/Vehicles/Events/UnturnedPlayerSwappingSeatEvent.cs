@@ -14,14 +14,14 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         IVehicle IVehicleEvent.Vehicle => Vehicle;
 
-        /// <value>
-        /// The seat the player is swapping from.
-        /// </value>
+        /// <summary>
+        /// Gets the seat the player is swapping from.
+        /// </summary>
         public byte FromSeatIndex { get; }
 
-        /// <value>
-        /// The seat the player is swapping to.
-        /// </value>
+        /// <summary>
+        /// Gets the seat the player is swapping to.
+        /// </summary>
         public byte ToSeatIndex { get; set; }
 
         public bool IsCancelled { get; set; }

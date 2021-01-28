@@ -8,9 +8,9 @@ namespace OpenMod.API.Commands
     [Service]
     public interface ICurrentCommandContextAccessor
     {
-        /// <value>
-        /// The command context processed by the current thread. Can be null if the current thread does not handle a command.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the command context processed by the current thread. Returns null if the current thread does not handle a command currently.
+        /// </summary>
         ICommandContext? Context { get; set; }
     }
 }

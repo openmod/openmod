@@ -7,9 +7,9 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
     /// </summary>
     public interface IPlayerChattingEvent : IPlayerEvent, ICancellableEvent
     {
-        /// <value>
-        /// The chat message to be broadcasted.
-        /// </value>
+        /// <summary>
+        /// Gets the chat message to be broadcasted.
+        /// </summary>
         string Message { get; }
     }
 }

@@ -7,40 +7,46 @@ namespace OpenMod.Extensions.Games.Abstractions
     /// </summary>
     public interface IGameHostInformation : IHostInformation
     {
-        /// <value>
-        ///<b>True</b> if the current host is a game client; otherwsie, <b>false</b>. Keep in mind that a host can be both server and client at the same time.
-        /// </value>
+        /// <summary>
+        /// Checks if the current host is a client.
+        /// </summary>
+        /// <remarks>
+        /// A host can be both server and client at the same time.
+        /// </remarks>
         bool IsClient { get; }
 
-        /// <value>
-        /// <b>True</b> if the current host is a game server; otherwise, <b>false</b>. Keep in mind that a host can be both server and client at the same time.
-        /// </value>
+        /// <summary>
+        /// Checks if the current host is a server.
+        /// </summary>
+        /// <remarks>
+        /// A host can be both server and client at the same time.
+        /// </remarks>
         bool IsServer { get; }
 
-        /// <value>
-        /// The port used to connect to the server. <b>Null</b> if the current host is not a server or is not listening yet.
-        /// </value>
+        /// <summary>
+        /// Gets the port used to connect to the server. <b>Null</b> if the current host is not a server or is not listening yet.
+        /// </summary>
         ushort? ServerPort { get; }
 
-        /// <value>
-        /// The current server instance for games that support multiple server instances per installation.
-        /// <b>default</b> for games that do not support multiple instances. <b>Null</b> if the host is a client.
-        /// </value>
+        /// <summary>
+        /// Gets the current server instance for games that support multiple server instances per installation. Returns
+        /// <b>default</b> for games that do not support multiple instances. Returns <b>null</b> if the host is not a server.
+        /// </summary>
         public string ServerInstance { get; }
 
-        /// <value>
-        /// The name of the server. <b>Null </b> if the host is a client.
-        /// </value>
+        /// <summary>
+        /// Gets the name of the server. Returns <b>null</b> if the host is not a server.
+        /// </summary>
         string? ServerName { get; }
 
-        /// <value>
-        /// The name of the game.
-        /// </value>
+        /// <summary>
+        /// Gets the name of the game.
+        /// </summary>
         string GameDisplayName { get; }
 
-        /// <value>
-        /// The version of the running game.
-        /// </value>
+        /// <summary>
+        /// Gets the version of the running game.
+        /// </summary>
         string GameVersion { get; }
     }
 }

@@ -7,11 +7,11 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
     /// </summary>
     public interface IInventory : IReadOnlyCollection<IInventoryPage>
     {
-        /// <value>
-        /// The pages of the inventory.
+        /// <summary>
+        /// Gets the pages of the inventory.
         /// Page support depends on the game and owner object.
         /// Some games and objects only suppport a single page.
-        /// </value>
+        /// </summary>
         /// <example>
         /// <para>In the game Unturned, the player inventory consists of multiple pages. These pages<br/> are:</para>
         /// * Hands<br/>
@@ -22,9 +22,9 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// </example>
         IReadOnlyCollection<IInventoryPage> Pages { get; }
 
-        /// <value>
-        /// <b>True</b> if the inventory is full; <b>false</b> otherwise.
-        /// </value>
+        /// <summary>
+        /// Checks if the inventory is full.
+        /// </summary>
         bool IsFull { get; }
     }
 }

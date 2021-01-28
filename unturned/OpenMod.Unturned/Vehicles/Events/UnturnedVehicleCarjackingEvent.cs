@@ -9,19 +9,19 @@ namespace OpenMod.Unturned.Vehicles.Events
     /// </summary>
     public class UnturnedVehicleCarjackingEvent : UnturnedVehicleEvent, ICancellableEvent
     {
-        /// <value>
-        /// The player trying to carjack.
-        /// </value>
+        /// <summary>
+        /// Gets the player trying to carjack.
+        /// </summary>
         public UnturnedPlayer Instigator { get; }
 
-        /// <value>
-        /// The force to be applied.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the force to be applied.
+        /// </summary>
         public Vector3 Force { get; set; }
 
-        /// <value>
-        /// The torque to be applied.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the torque to be applied.
+        /// </summary>
         public Vector3 Torque { get; set; }
 
         public bool IsCancelled { get; set; }

@@ -8,14 +8,14 @@ namespace OpenMod.Unturned.Zombies.Events
     /// </summary>
     public class UnturnedZombieDeadEvent : UnturnedZombieEvent
     {
-        /// <value>
-        /// The ragdoll position.
-        /// </value>
+        /// <summary>
+        /// Gets the ragdoll position.
+        /// </summary>
         public Vector3 Ragdoll { get; }
 
-        /// <value>
-        /// The ragdoll effect.
-        /// </value>
+        /// <summary>
+        /// Gets the ragdoll effect.
+        /// </summary>
         public ERagdollEffect RagdollEffect { get; }
 
         public UnturnedZombieDeadEvent(UnturnedZombie zombie, Vector3 ragdoll, ERagdollEffect ragdollEffect) : base(zombie)

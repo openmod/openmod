@@ -15,14 +15,14 @@ namespace OpenMod.Unturned.Vehicles.Events
 
         IVehicle IVehicleEvent.Vehicle => Vehicle;
 
-        /// <value>
-        /// The exit location to be teleported to.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the location the player will get teleported to.
+        /// </summary>
         public Vector3 PendingLocation { get; set; }
 
-        /// <value>
-        /// The exit yaw to be set.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the yaw to be set of the player.
+        /// </summary>
         public float PendingYaw { get; set; }
 
         public bool IsCancelled { get; set; }

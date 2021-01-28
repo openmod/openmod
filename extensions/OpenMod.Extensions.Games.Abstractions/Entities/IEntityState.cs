@@ -6,7 +6,7 @@
     public interface IEntityState
     {
         /// <summary>
-        /// The state of the entity. Can be null.
+        /// The state of the entity.
         /// </summary>
         byte[]? StateData { get; }
     }

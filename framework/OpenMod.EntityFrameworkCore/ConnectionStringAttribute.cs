@@ -2,9 +2,9 @@
 
 namespace OpenMod.EntityFrameworkCore
 {
-    /// <value>
+    /// <summary>
     /// Sets the connection string to use for a <see cref="OpenModDbContext{TSelf}"/>. 
-    /// </value>
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class ConnectionStringAttribute : Attribute
     {

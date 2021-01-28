@@ -5,23 +5,23 @@
     /// </summary>
     public interface IItemState
     {
-        /// <value>
-        /// The quality of the item.
-        /// </value>
+        /// <summary>
+        /// Gets the quality of the item.
+        /// </summary>
         double ItemQuality { get; }
 
-        /// <value>
-        /// The durability of the item.
-        /// </value>
+        /// <summary>
+        /// Gets the durability of the item.
+        /// </summary>
         double ItemDurability { get; }
 
-        /// <value>
-        /// The amount of the item.
-        /// </value>
+        /// <summary>
+        /// Gets the amount of the item.
+        /// </summary>
         double ItemAmount { get; }
 
         /// <summary>
-        /// The state of the item. Can be null.
+        /// Gets the state of the item.
         /// </summary>
         byte[]? StateData { get; }
     }

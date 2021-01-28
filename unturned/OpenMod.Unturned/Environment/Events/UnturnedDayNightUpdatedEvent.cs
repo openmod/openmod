@@ -7,14 +7,14 @@ namespace OpenMod.Unturned.Environment.Events
     /// </summary>
     public class UnturnedDayNightUpdatedEvent : Event
     {
-        /// <value>
-        /// The current time.
-        /// </value>
+        /// <summary>
+        /// Gets the current world time.
+        /// </summary>
         public WorldTime WorldTime { get; }
 
-        /// <value>
-        /// True if it is night and full moon.
-        /// </value>
+        /// <summary>
+        /// Checks if its full moon.
+        /// </summary>
         public bool IsFullMoon { get; }
 
         public UnturnedDayNightUpdatedEvent(WorldTime worldTime, bool isFullMoon)

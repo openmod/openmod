@@ -5,19 +5,19 @@
     /// </summary>
     public interface IEntityAsset
     {
-        /// <value>
-        /// The human-readable name of the asset.
-        /// </value>
+        /// <summary>
+        /// Gets the human-readable name of the asset.
+        /// </summary>
         string Name { get; }
 
-        /// <value>
-        /// The ID of the asset.
-        /// </value>
+        /// <summary>
+        /// Gets the ID of the asset.
+        /// </summary>
         string EntityAssetId { get; }
 
-        /// <value>
-        /// The type of the asset.
-        /// </value>
+        /// <summary>
+        /// Gets the type of the asset.
+        /// </summary>
         string EntityType { get; }
     }
 }

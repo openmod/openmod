@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users.Events
 {
-    /// <value>
+    /// <summary>
     /// The event that is triggered when an Unturned user is connecting.
-    /// </value>
+    /// </summary>
     public class UnturnedUserConnectingEvent : UnturnedPendingUserEvent, IUserConnectingEvent
     {
         public UnturnedUserConnectingEvent(UnturnedPendingUser user) : base(user)

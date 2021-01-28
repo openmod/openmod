@@ -8,14 +8,14 @@ namespace OpenMod.Unturned.Vehicles.Events
     /// </summary>
     public class UnturnedVehicleReplacingBatteryEvent : UnturnedVehicleEvent, ICancellableEvent
     {
-        /// <value>
-        /// The player replacing the battery.
-        /// </value>
+        /// <summary>
+        /// Gets the player replacing the battery.
+        /// </summary>
         public UnturnedPlayer Instigator { get; }
 
-        /// <value>
-        /// The new battery quality.
-        /// </value>
+        /// <summary>
+        /// Gets the new battery quality value.
+        /// </summary>
         public byte BatteryQuality { get; }
 
         public bool IsCancelled { get; set; }

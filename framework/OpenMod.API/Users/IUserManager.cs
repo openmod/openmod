@@ -11,9 +11,9 @@ namespace OpenMod.API.Users
     [Service]
     public interface IUserManager
     {
-        /// <value>
-        /// The user providers.
-        /// </value>
+        /// <summary>
+        /// Gets the user providers.
+        /// </summary>
         IReadOnlyCollection<IUserProvider> UserProviders { get; }
 
         /// <summary>

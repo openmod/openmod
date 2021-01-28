@@ -7,14 +7,14 @@ namespace OpenMod.API
     /// </summary>
     public interface IHostInformation
     {
-        /// <value>
-        /// The version of the OpenMod host implementation.
-        /// </value>
+        /// <summary>
+        /// Gets the version of the OpenMod host implementation.
+        /// </summary>
         SemVersion HostVersion { get; }
 
-        /// <value>
-        /// The name of the host implementation.
-        /// </value>
+        /// <summary>
+        /// Gets the name of the host implementation.
+        /// </summary>
         /// <example>
         /// OpenMod for Unturned
         /// </example>

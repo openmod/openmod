@@ -8,9 +8,9 @@ namespace OpenMod.Core.Users.Events
     /// </summary>
     public interface IUserEvent : IEvent
     {
-        /// <value>
-        /// The user related to the event.
-        /// </value>
+        /// <summary>
+        /// Gets the user related to the event.
+        /// </summary>
         IUser User { get; }
     }
 }

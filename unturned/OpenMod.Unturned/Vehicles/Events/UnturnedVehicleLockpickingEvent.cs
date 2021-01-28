@@ -8,9 +8,9 @@ namespace OpenMod.Unturned.Vehicles.Events
     /// </summary>
     public class UnturnedVehicleLockpickingEvent : UnturnedVehicleEvent, ICancellableEvent
     {
-        /// <value>
-        /// The player trying to lockpick the vehicle.
-        /// </value>
+        /// <summary>
+        /// Gets the player trying to lockpick the vehicle.
+        /// </summary>
         public UnturnedPlayer Instigator { get; }
 
         public bool IsCancelled { get; set; }

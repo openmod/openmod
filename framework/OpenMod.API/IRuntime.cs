@@ -14,9 +14,9 @@ namespace OpenMod.API
     [Service]
     public interface IRuntime : IOpenModComponent
     {
-        /// <value>
-        /// <b>True</b> if the runtime is shutting down / disposing.
-        /// </value>
+        /// <summary>
+        /// Checks if the runtime is shutting down or disposing.
+        /// </summary>
         public bool IsDisposing { get; }
 
         /// <summary>
@@ -31,19 +31,19 @@ namespace OpenMod.API
         /// </summary>
         Task ShutdownAsync();
 
-        /// <value>
-        /// The OpenMod runtime version.
-        /// </value>
+        /// <summary>
+        /// Gets the OpenMod runtime version.
+        /// </summary>
         SemVersion Version { get; }
 
-        /// <value>
-        /// The commandline arguments.
-        /// </value>
+        /// <summary>
+        /// Gets the commandline arguments.
+        /// </summary>
         string[] CommandlineArgs { get; }
 
-        /// <value>
-        /// The runtime status. 
-        /// </value>
+        /// <summary>
+        /// Gets the runtime status. 
+        /// </summary>
         RuntimeStatus Status { get; }
 
         /// <summary>
@@ -51,14 +51,14 @@ namespace OpenMod.API
         /// </summary>
         Task PerformSoftReloadAsync();
 
-        /// <value>
-        /// The .NET generic host instance. Can be null if the host is not loaded yet.
-        /// </value>
+        /// <summary>
+        /// Gets the .NET generic host instance. Returns null if the host is not loaded yet.
+        /// </summary>
         IHost? Host { get; }
 
-        /// <value>
-        ///  Information about the OpenMod host. Can be null if the host is not loaded yet.
-        /// </value>
+        /// <summary>
+        /// Information about the OpenMod host. Returns null if the host is not loaded yet.
+        /// </summary>
         IHostInformation? HostInformation { get; }
     }
 }

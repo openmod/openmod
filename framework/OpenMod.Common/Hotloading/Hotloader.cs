@@ -16,9 +16,9 @@ namespace OpenMod.Common.Hotloading
     {
         private static readonly Dictionary<string, Assembly> s_Assemblies;
 
-        /// <value>
-        /// <b>True</b> if hotloading should be enabled. Will redirect to Assembly.Load otherwise.
-        /// </value>
+        /// <summary>
+        /// Defines if hotloading is enabled.
+        /// </summary>
         public static bool Enabled { get; set; }
 
         static Hotloader()
@@ -48,6 +48,11 @@ namespace OpenMod.Common.Hotloading
             return match;
         }
 
+        /// <summary>
+        /// Hotloads an assembly. Redirects to <see cref="Assembly.Load(byte[])"/> if <see cref="Enabled"/> is set to false.
+        /// </summary>
+        /// <param name="assemblyData">The assembly to hotload.</param>
+        /// <returns>The loaded assembly.</returns>
         public static Assembly LoadAssembly(byte[] assemblyData)
         {
             if (!Enabled)

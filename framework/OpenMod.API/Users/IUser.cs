@@ -18,14 +18,14 @@ namespace OpenMod.API.Users
         /// </summary>
         Task<T?> GetPersistentDataAsync<T>(string key);
 
-        /// <value>
-        /// Represents the current user session. Can be null if the user is not online.
-        /// </value>
+        /// <summary>
+        /// Gets the current user session. Returns null if the user is not online.
+        /// </summary>
         IUserSession? Session { get; }
 
-        /// <value>
-        /// The user provider for this user type. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the user provider for the user type.
+        /// </summary>
         IUserProvider? Provider { get; }
     }
 }

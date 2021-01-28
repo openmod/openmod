@@ -8,9 +8,9 @@ namespace OpenMod.Unturned.Vehicles.Events
     /// </summary>
     public class UnturnedVehicleStealingBatteryEvent : UnturnedVehicleEvent, ICancellableEvent
     {
-        /// <value>
-        /// The player removing the battery.
-        /// </value>
+        /// <summary>
+        /// Gets the player removing the battery.
+        /// </summary>
         public UnturnedPlayer Instigator { get; }
 
         public bool IsCancelled { get; set; }

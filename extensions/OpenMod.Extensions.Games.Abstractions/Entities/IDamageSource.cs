@@ -5,9 +5,9 @@
     /// </summary>
     public interface IDamageSource
     {
-        /// <value>
-        /// The human readable name of the damage source.
-        /// </value>
+        /// <summary>
+        /// Gets the human-readable name of the damage source.
+        /// </summary>
         string DamageSourceName { get; }
     }
 }

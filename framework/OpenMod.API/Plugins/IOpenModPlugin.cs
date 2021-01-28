@@ -8,24 +8,24 @@ namespace OpenMod.API.Plugins
     /// </summary>
     public interface IOpenModPlugin : IOpenModComponent
     {
-        /// <value>
-        /// The human readable name of the plugin. Must not be null or empty.
-        /// </value>
+        /// <summary>
+        /// Gets the human readable name of the plugin.
+        /// </summary>
         string DisplayName { get; }
 
-        /// <value>
-        /// The plugin author. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the plugin author.
+        /// </summary>
         string? Author { get; }
 
-        /// <value>
-        /// The plugin website. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the plugin website.
+        /// </summary>
         string? Website { get; }
 
-        /// <value>
-        /// The plugin version. Must not be null.
-        /// </value>
+        /// <summary>
+        /// Gets the plugin version.
+        /// </summary>
         SemVersion Version { get; }
 
         /// <summary>

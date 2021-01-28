@@ -6,7 +6,7 @@
     public interface IVehicleState
     {
         /// <summary>
-        /// The vehicle state. Can be null.
+        /// The vehicle state.
         /// </summary>
         byte[]? StateData { get; }
     }

@@ -1,13 +1,13 @@
 ﻿namespace OpenMod.Extensions.Games.Abstractions.Vehicles
 {
-    /// <value>
+    /// <summary>
     /// Represents entities that can enter vehicles.
-    /// </value>
+    /// </summary>
     public interface ICanEnterVehicle
     {
-        /// <value>
-        /// The current vehicle. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the current vehicle. Returns null if the entity is not a passenger.
+        /// </summary>
         public IVehicle? CurrentVehicle { get; }
     }
 }

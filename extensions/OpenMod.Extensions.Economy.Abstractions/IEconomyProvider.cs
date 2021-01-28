@@ -7,14 +7,14 @@ namespace OpenMod.Extensions.Economy.Abstractions
     [Service]
     public interface IEconomyProvider
     {
-        /// <value>
-        /// The name of the currency, e.g. "Dollar".
-        /// </value>
+        /// <summary>
+        /// Gets the name of the currency, e.g. "Dollar".
+        /// </summary>
         string CurrencyName { get; }
 
-        /// <value>
-        /// The symbol of the currency, e.g. "$".
-        /// </value>
+        /// <summary>
+        /// Gets the symbol of the currency, e.g. "$".
+        /// </summary>
         string CurrencySymbol { get; }
 
         /// <summary>

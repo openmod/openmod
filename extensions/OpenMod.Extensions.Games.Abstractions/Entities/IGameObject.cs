@@ -7,9 +7,9 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
     /// </summary>
     public interface IGameObject
     {
-        /// <value>
-        /// The transform of the object.
-        /// </value>
+        /// <summary>
+        /// Gets the transform of the object.
+        /// </summary>
         IWorldTransform Transform { get; }
     }
 }

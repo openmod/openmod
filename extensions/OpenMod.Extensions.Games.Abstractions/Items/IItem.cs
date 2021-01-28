@@ -8,31 +8,31 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
     /// </summary>
     public interface IItem
     {
-        /// <value>
-        /// The unique instance ID of the item.
-        /// </value>
+        /// <summary>
+        /// Gets the unique instance ID of the item.
+        /// </summary>
         string ItemInstanceId { get; }
 
-        /// <value>
-        /// The asset of the item.
-        /// </value>
+        /// <summary>
+        /// Gets the asset of the item.
+        /// </summary>
         IItemAsset Asset { get; }
 
-        /// <value>
-        /// The state of the item.
-        /// </value>
+        /// <summary>
+        /// Gets the state of the item.
+        /// </summary>
         IItemState State { get; }
 
-        /// <value>
+        /// <summary>
         /// Sets the quality of the item.
-        /// </value>
+        /// </summary>
         /// <param name="quality">The quality to set to.</param>
         /// <exception cref="ArgumentException">Thrown when the quality is invalid, e.g. non-positive or larger than the maxmimum quality allowed by the game.</exception>
         Task SetItemQualityAsync(double quality);
 
-        /// <value>
+        /// <summary>
         /// Sets the amount of the item.
-        /// </value>
+        /// </summary>
         /// <param name="amount">The amount to set to.</param>
         /// <exception cref="ArgumentException">Thrown when the amount is invalid, e.g. non-positive or larger than the maxmimum amount allowed by the game.</exception>
         Task SetItemAmountAsync(double amount);

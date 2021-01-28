@@ -14,9 +14,9 @@ namespace OpenMod.Unturned.Users.Events
             User = user;
         }
 
-        /// <value>
-        /// The Unturned user related to the event.
-        /// </value>
+        /// <summary>
+        /// Gets the Unturned user related to the event.
+        /// </summary>
         public UnturnedUser User { get; }
 
         IUser IUserEvent.User => User;

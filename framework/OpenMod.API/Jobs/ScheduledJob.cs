@@ -38,29 +38,29 @@ namespace OpenMod.API.Jobs
             Enabled = true;
         }
 
-        /// <value>
-        /// The unique name of the job.
-        /// </value>
+        /// <summary>
+        /// Gets the unique name of the job.
+        /// </summary>
         public string? Name { get; }
 
-        /// <value>
-        /// The job arguments.
-        /// </value>
+        /// <summary>
+        /// Gets the job arguments.
+        /// </summary>
         public Dictionary<string, object?>? Args { get; }
 
-        /// <value>
-        /// The task type of the job.
-        /// </value>
+        /// <summary>
+        /// Gets the task type of the job.
+        /// </summary>
         public string? Task { get; }
 
-        /// <value>
-        /// The schedule expression.
-        /// </value>
+        /// <summary>
+        /// Gets the schedule expression.
+        /// </summary>
         public string? Schedule { get; }
 
-        /// <value>
-        /// <b>True</b> if the job is enabled; otherwise, <b>false</b>.
-        /// </value>
+        /// <summary>
+        /// Checks if the job is enabled.
+        /// </summary>
         public bool? Enabled { get; set; }
 
         public bool Equals(ScheduledJob other)

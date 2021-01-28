@@ -9,28 +9,28 @@ namespace OpenMod.Unturned.Vehicles.Events
     /// </summary>
     public class UnturnedVehicleLockUpdatingEvent : UnturnedVehicleEvent, ICancellableEvent
     {
-        /// <value>
-        /// The player updating the lock status.
-        /// </value>
+        /// <summary>
+        /// Gets the player locking or unlocking the vehicle.
+        /// </summary>
         public UnturnedPlayer Instigator { get; }
 
-        /// <value>
-        /// The new lock owner group.
-        /// </value>
+        /// <summary>
+        /// Gets the new lock owner group.
+        /// </summary>
         public CSteamID? Group { get; }
 
-        /// <value>
-        /// <b>True</b> if the vehicle is getting locked; otherwise, if it is getting unlocked, <b>false</b>.
-        /// </value>
-        public bool IsLocked { get; }
+        /// <summary>
+        /// Gets if the vehicle is to be locked or unlocked.
+        /// </summary>
+        public bool IsLocking { get; }
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedVehicleLockUpdatingEvent(UnturnedPlayer instigator, UnturnedVehicle vehicle, CSteamID? group, bool isLocked) : base(vehicle)
+        public UnturnedVehicleLockUpdatingEvent(UnturnedPlayer instigator, UnturnedVehicle vehicle, CSteamID? group, bool isLocking) : base(vehicle)
         {
             Instigator = instigator;
             Group = group;
-            IsLocked = isLocked;
+            IsLocking = isLocking;
         }
     }
 }

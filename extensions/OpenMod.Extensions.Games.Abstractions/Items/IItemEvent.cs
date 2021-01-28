@@ -7,9 +7,9 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
     /// </summary>
     public interface IItemEvent : IEvent
     {
-        /// <value>
-        /// The item related to the event.
-        /// </value>
+        /// <summary>
+        /// Gets the item related to the event.
+        /// </summary>
         IItem Item { get; }
     }
 }

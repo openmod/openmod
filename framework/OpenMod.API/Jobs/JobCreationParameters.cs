@@ -7,24 +7,24 @@ namespace OpenMod.API.Jobs
     /// </summary>
     public class JobCreationParameters
     {
-        /// <value>
-        /// The unique name of the job.
-        /// </value>
+        /// <summary>
+        /// Gets the unique name of the job.
+        /// </summary>
         public string Name { get; set; } = null!;
 
-        /// <value>
-        /// The job arguments.
-        /// </value>
+        /// <summary>
+        /// Gets the job arguments.
+        /// </summary>
         public Dictionary<string, object?> Args { get; set; } = null!;
 
-        /// <value>
-        /// The task type of the job. Requires a <see cref="ITaskExecutor"/> that can execute the given type.
-        /// </value>
+        /// <summary>
+        /// Gets the task type of the job. Requires a <see cref="ITaskExecutor"/> that can execute the given type.
+        /// </summary>
         public string Task { get; set; } = null!;
 
-        /// <value>
-        /// The schedule expression.
-        /// </value>
+        /// <summary>
+        /// Gets the schedule expression.
+        /// </summary>
         public string Schedule { get; set; } = null!;
     }
 }

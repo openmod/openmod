@@ -5,9 +5,9 @@
     /// </summary>
     public static class ConnectionStrings
     {
-        /// <value>
-        /// The default connection string.
-        /// </value>
+        /// <summary>
+        /// Gets the default connection string.
+        /// </summary>
         public const string Default = "default";
     }
 }

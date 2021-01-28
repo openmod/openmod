@@ -5,9 +5,9 @@
     /// </summary>
     public interface IHasInventory
     {
-        /// <value>
-        /// The inventory of the object.
-        /// </value>
+        /// <summary>
+        /// Gets the inventory of the object.
+        /// </summary>
         IInventory? Inventory { get; }
     }
 }

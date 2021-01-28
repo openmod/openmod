@@ -5,14 +5,14 @@
     /// </summary>
     public interface IBuildableState
     {
-        /// <value>
-        /// The heal of the buildable.
-        /// </value>
+        /// <summary>
+        /// Gets the healh of the buildable.
+        /// </summary>
         double Health { get; }
 
-        /// <value>
-        /// State of the buildable. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the state of the buildable.
+        /// </summary>
         byte[]? StateData { get; }
     }
 }

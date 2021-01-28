@@ -11,33 +11,33 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
     /// </summary>
     public interface IVehicle : IHasOwnership
     {
-        /// <value>
-        /// The asset of the vehicle.
-        /// </value>
+        /// <summary>
+        /// Gets the asset of the vehicle.
+        /// </summary>
         IVehicleAsset Asset { get; }
 
-        /// <value>
-        /// The state of the vehicle.
-        /// </value>
+        /// <summary>
+        /// Gets the state of the vehicle.
+        /// </summary>
         IVehicleState State { get; }
 
-        /// <value>
-        /// The transform of the vehicle.
-        /// </value>
+        /// <summary>
+        /// Gets the transform of the vehicle.
+        /// </summary>
         IWorldTransform Transform { get; }
 
         /// <summary>
-        /// The unique instance ID of the vehicle.
+        /// Gets the unique instance ID of the vehicle.
         /// </summary>
         string VehicleInstanceId { get; }
 
         /// <summary>
-        /// The driver of the vehicle.
+        /// Gets the driver of the vehicle.
         /// </summary>
         IEntity? Driver { get; }
 
         /// <summary>
-        /// List of the passengers of this vehicle.
+        /// Gets the passengers of the vehicle.
         /// </summary>
         IReadOnlyCollection<IEntity> Passengers { get; }
 

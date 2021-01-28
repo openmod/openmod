@@ -8,19 +8,19 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
     /// </summary>
     public interface IHasHealth
     {
-        /// <value>
-        /// <b>True</b> if the entity is alive; otherwise, <b>false</b>.
-        /// </value>
+        /// <summary>
+        /// Checks if the entity is alive.
+        /// </summary>
         bool IsAlive { get; }
 
-        /// <value>
-        /// The max health the entity can have.
-        /// </value>
+        /// <summary>
+        /// Gets the max health the entity can have.
+        /// </summary>
         double MaxHealth { get; }
 
-        /// <value>
-        /// The health of the entity.
-        /// </value>
+        /// <summary>
+        /// Gets the health of the entity.
+        /// </summary>
         double Health { get; }
 
         /// <summary>

@@ -8,14 +8,14 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
     /// </summary>
     public interface IItemDrop : IItemInstance
     {
-        /// <value>
-        /// The position of the item.
-        /// </value>
+        /// <summary>
+        /// Gets the position of the item.
+        /// </summary>
         public Vector3 Position { get; }
 
-        /// <value>
+        /// <summary>
         /// Destroys the item.
-        /// </value>
+        /// </summary>
         Task<bool> DestroyAsync();
     }
 }

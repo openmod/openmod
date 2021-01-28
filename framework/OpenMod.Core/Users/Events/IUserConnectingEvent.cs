@@ -9,9 +9,9 @@ namespace OpenMod.Core.Users.Events
     /// </summary>
     public interface IUserConnectingEvent : IUserEvent, ICancellableEvent
     {
-        /// <value>
-        /// The rejection reason. If not null; will reject the user. Use <see cref="RejectAsync"/> to set the value.
-        /// </value>
+        /// <summary>
+        /// Gets the rejection reason. If not null; will reject the user. Use <see cref="RejectAsync"/> to set the value.
+        /// </summary>
         public string? RejectionReason { get; }
 
         /// <summary>

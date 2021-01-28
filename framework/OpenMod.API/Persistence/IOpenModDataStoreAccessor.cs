@@ -12,9 +12,9 @@ namespace OpenMod.API.Persistence
     [Service]
     public interface IOpenModDataStoreAccessor
     {
-        /// <value>
-        /// The OpenMod datastore.
-        /// </value>
+        /// <summary>
+        /// Gets OpenMod's own datastore.
+        /// </summary>
         IDataStore DataStore { get; }
     }
 }

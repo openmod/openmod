@@ -8,29 +8,29 @@ namespace OpenMod.API
     /// </summary>
     public interface IOpenModComponent
     {
-        /// <value>
-        /// The component ID.
-        /// </value>
+        /// <summary>
+        /// Gets the component ID.
+        /// </summary>
         string OpenModComponentId { get; }
 
-        /// <value>
-        /// The working directory.
-        /// </value>
+        /// <summary>
+        /// Gets the working directory.
+        /// </summary>
         string WorkingDirectory { get; }
 
-        /// <value>
-        /// Checks if the component is alive. The component must not be able to execute any actions if false.
-        /// </value>
+        /// <summary>
+        /// Checks if the component is alive. The component must not be able to execute any actions if this returns false.
+        /// </summary>
         bool IsComponentAlive { get; }
 
-        /// <value>
-        /// The components lifetime scope.
-        /// </value>
+        /// <summary>
+        /// Gets the components lifetime scope.
+        /// </summary>
         ILifetimeScope LifetimeScope { get; }
 
-        /// <value>
-        /// The optional data store of the component.
-        /// </value>
+        /// <summary>
+        /// Gets the optional data store of the component.
+        /// </summary>
         IDataStore? DataStore { get; }
     }
 }

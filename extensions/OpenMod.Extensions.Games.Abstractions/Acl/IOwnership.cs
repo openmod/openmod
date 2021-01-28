@@ -9,19 +9,19 @@ namespace OpenMod.Extensions.Games.Abstractions.Acl
     public interface IOwnership
     {
         /// <summary>Checks if the object has an owner. Either <see cref="OwnerPlayerId"/> or <see cref="OwnerGroupId"/> will not be null if true.</summary>
-        /// <value>
+        /// <returns>
         /// <b>True</b> if the object has an owner; otherwise, <b>false</b>.
-        /// </value>
+        /// </returns>
         bool HasOwner { get; }
 
-        /// <value>
-        /// The ID of the player owning this object. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the ID of the player owning this object. Returns null if no player owns the object.
+        /// </summary>
         string? OwnerPlayerId { get; }
 
-        /// <value>
-        /// The ID of the group owning this object. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the ID of the group owning this object. Returns null if no group owns the object.
+        /// </summary>
         string? OwnerGroupId { get; }
 
         /// <summary>

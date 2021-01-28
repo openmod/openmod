@@ -9,30 +9,30 @@ namespace OpenMod.API.Users
     /// </summary>
     public interface IUserSession
     {
-        /// <value>
-        /// The time the session has begun. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the time the session has begun. Returns null if the session has not started.
+        /// </summary>
         /// <example>
         /// The time a user has joined a server.
         /// </example>
         DateTime? SessionStartTime { get; }
 
-        /// <value>
-        /// The time the users session has ended. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the time the users session has ended. Return null if the session has not started or has not ended yet.
+        /// </summary>
         /// <example>
         /// The time a user has left a server.
         /// </example>
         DateTime? SessionEndTime { get; }
 
-        /// <value>
-        /// The user data for this session.
-        /// </value>
+        /// <summary>
+        /// Gets the user data for this session.
+        /// </summary>
         Dictionary<string, object?> SessionData { get; }
 
-        /// <value>
-        /// The user data that is stored for process lifetime and will survive reloads.
-        /// </value>
+        /// <summary>
+        /// Gets the user data that is stored for process lifetime and will survive reloads.
+        /// </summary>
         Dictionary<string, object?> InstanceData { get; }
 
         /// <summary>

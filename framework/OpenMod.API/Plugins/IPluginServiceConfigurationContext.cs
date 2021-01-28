@@ -8,19 +8,19 @@ namespace OpenMod.API.Plugins
     /// </summary>
     public interface IPluginServiceConfigurationContext
     {
-        /// <value>
-        /// The parent lifetime scope.
-        /// </value>
+        /// <summary>
+        /// Gets the parent lifetime scope.
+        /// </summary>
         ILifetimeScope ParentLifetimeScope { get; }
 
-        /// <value>
-        /// The plugin configuration.
-        /// </value>
+        /// <summary>
+        /// Gets the plugin configuration.
+        /// </summary>
         IConfiguration Configuration { get; }
 
-        /// <value>
-        /// The container builder.
-        /// </value>
+        /// <summary>
+        /// Gets the container builder.
+        /// </summary>
         ContainerBuilder ContainerBuilder { get; }
     }
 }

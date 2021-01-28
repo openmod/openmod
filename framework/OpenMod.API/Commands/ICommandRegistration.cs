@@ -10,28 +10,28 @@ namespace OpenMod.API.Commands
     /// </summary>
     public interface ICommandRegistration
     {
-        /// <value>
-        /// The owner component of the command.
-        /// </value>
+        /// <summary>
+        /// Gets the owner component of the command.
+        /// </summary>
         IOpenModComponent Component { get; }
 
-        /// <value>
-        /// The unique ID of the command.
-        /// </value>
+        /// <summary>
+        /// Gets the unique ID of the command.
+        /// </summary>
         string Id { get; }
 
-        /// <value>
-        ///     <para>The primary name of the command, which will be used to execute it.</para>
+        /// <summary>
+        ///     <para>Gets the primary name of the command, which will be used to execute it.</para>
         ///     <para>The primary name overrides any <see cref="Aliases">aliases</see> of other commands by default.</para>
-        /// </value>
+        /// </summary>
         /// <example>
         ///     If the name is "heal", the command will be usually be called using "/heal" (or just "heal" in console)
         /// </example>
         string Name { get; }
 
-        /// <value>
-        /// The aliases of the command, which are often shorter versions of the primary name.
-        /// </value>
+        /// <summary>
+        /// Gets the aliases of the command, which are often shorter versions of the primary name.
+        /// </summary>
         /// <example>
         /// If the aliases are "h" and "he", the command can be executed using "/h" or "/he".
         /// </example>
@@ -42,16 +42,16 @@ namespace OpenMod.API.Commands
         /// </summary>
         IReadOnlyCollection<IPermissionRegistration>? PermissionRegistrations { get; }
 
-        /// <value>
-        /// The description of the command. Can be null or empty.
-        /// </value>
+        /// <summary>
+        /// Gets the description of the command.
+        /// </summary>
         string? Description { get; }
 
-        /// <value>
-        ///     The command syntax will be shown to the actor when the command was not used correctly. Can be null or empty.
+        /// <summary>
+        ///     Gets the command syntax will be shown to the actor when the command was not used correctly.
         ///     <para>An output for the above example could be "/heal [player] &lt;amount&gt;".</para>
         ///     <para>The syntax should not contain Child Command usage.</para>
-        /// </value>
+        /// </summary>
         /// <remarks>
         ///     [...] means optional argument and &lt;...&gt; means required argument, so in this case "player" is an optional
         ///     argument while "amount" is a required one.
@@ -62,20 +62,20 @@ namespace OpenMod.API.Commands
         ///
         string? Syntax { get; }
 
-        /// <value>
-        /// The priority for this command. Used in case of conflicting commands for determining which command to execute.
+        /// <summary>
+        /// Gets the priority for this command. Used in case of conflicting commands for determining which command to execute.
         /// The command with higher priority will be preferred.
-        /// </value>
+        /// </summary>
         Priority Priority { get; }
 
         /// <summary>
-        /// The ID of the parent command. Can be null if this command does not have a parent command.
+        /// Gets the ID of the parent command. Returns if the command does not have a parent command.
         /// </summary>
         string? ParentId { get; }
 
-        /// <value>
+        /// <summary>
         /// <b>True</b> if the command is enabled; otherwise, <b>false</b>.
-        /// </value>
+        /// </summary>
         bool IsEnabled { get; }
 
         /// <summary>

@@ -8,14 +8,14 @@ namespace OpenMod.Unturned.Environment.Events
     /// </summary>
     public class UnturnedWeatherUpdatedEvent : Event
     {
-        /// <value>
-        /// The rain status.
-        /// </value>
+        /// <summary>
+        /// Gets the rain status.
+        /// </summary>
         public ELightingRain Rain { get; }
 
-        /// <value>
-        /// The snow status.
-        /// </value>
+        /// <summary>
+        /// Gets the snow status.
+        /// </summary>
         public ELightingSnow Snow { get; }
 
         public UnturnedWeatherUpdatedEvent(ELightingRain rain, ELightingSnow snow)

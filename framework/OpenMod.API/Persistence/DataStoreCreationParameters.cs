@@ -7,38 +7,38 @@ namespace OpenMod.API.Persistence
     /// </summary>
     public class DataStoreCreationParameters
     {
-        /// <value>
-        /// The owning component id. Must not be null if <see cref="Component"/> is not set.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the owning component id. Must not be null if <see cref="Component"/> is not set.
+        /// </summary>
         /// <remarks>
         /// <b>Obsolete:</b> Use <see cref="Component"/> instead.
         /// </remarks>
         [Obsolete("Use the Component property instead.")]
         public string? ComponentId { get; set; }
 
-        /// <value>
-        /// The owning component. Must not be null if <see cref="ComponentId"/> is not set.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the owning component. Must not be null if <see cref="ComponentId"/> is not set.
+        /// </summary>
         public IOpenModComponent? Component { get; set; }
 
-        /// <value>
-        /// The working directory.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the working directory.
+        /// </summary>
         public string WorkingDirectory { get; set; } = null!;
 
-        /// <value>
-        /// The prefix. Can be null or empty.
-        /// </value>
-        public string? Prefix { get; set; } 
+        /// <summary>
+        /// Gets or sets the prefix.
+        /// </summary>
+        public string? Prefix { get; set; }
 
-        /// <value>
-        /// The suffix. Can be null or empty.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the suffix.
+        /// </summary>
         public string? Suffix { get; set; }
 
-        /// <value>
-        /// <b>True</b> if changes should be logged.
-        /// </value>
+        /// <summary>
+        /// Defines if detected file changes should be logged.
+        /// </summary>
         public bool LogOnChange { get; set; } = true;
     }
 }

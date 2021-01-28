@@ -9,19 +9,19 @@ namespace OpenMod.Extensions.Games.Abstractions.Building
     /// </summary>
     public interface IBuildable : IHasOwnership, IGameObject
     {
-        /// <value>
-        /// The asset of the object.
-        /// </value>
+        /// <summary>
+        /// Gets the asset of the object.
+        /// </summary>
         IBuildableAsset Asset { get; }
 
-        /// <value>
-        /// The state of the object.
-        /// </value>
+        /// <summary>
+        /// Gets the state of the object.
+        /// </summary>
         IBuildableState State { get; }
 
-        /// <value>
-        /// The unique instance ID of the object.
-        /// </value>
+        /// <summary>
+        /// Gets the unique instance ID of the object.
+        /// </summary>
         string BuildableInstanceId { get; }
 
         /// <summary>

@@ -9,34 +9,34 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
     /// </summary>
     public interface IInventoryPage : IReadOnlyCollection<IInventoryItem>
     {
-        /// <value>
+        /// <summary>
         /// The inventory this page belongs to.
-        /// </value>
+        /// </summary>
         IInventory Inventory { get; }
 
-        /// <value>
-        /// The name of this page.
-        /// </value>
+        /// <summary>
+        /// Gets the name of this page.
+        /// </summary>
         string Name { get; }
 
-        /// <value>
-        /// The maximum amount of items this page can hold.
-        /// </value>
+        /// <summary>
+        /// Gets the maximum amount of items this page can hold.
+        /// </summary>
         int Capacity { get; }
 
-        /// <value>
-        /// <b>True</b> if the player can only view items; otherwise, <b>false</b>.
-        /// </value>
+        /// <summary>
+        /// Checks if the player can only view the content.
+        /// </summary>
         bool IsReadOnly { get; }
 
-        /// <value>
-        /// <b>True</b> if the page is full; otherwise, <b>false</b>.
-        /// </value>
+        /// <summary>
+        /// Checks if the page is full.
+        /// </summary>
         bool IsFull { get; }
 
-        /// <value>
-        /// The items this page holds.
-        /// </value>
+        /// <summary>
+        /// Gets the items this page holds.
+        /// </summary>
         IReadOnlyCollection<IInventoryItem> Items { get; }
     }
 }

@@ -5,9 +5,9 @@
     /// </summary>
     public interface IHasOwnership
     {
-        /// <value>
-        /// The owner of this object.
-        /// </value>
+        /// <summary>
+        /// Gets the ownership of this object.
+        /// </summary>
         public IOwnership Ownership { get; }
     }
 }

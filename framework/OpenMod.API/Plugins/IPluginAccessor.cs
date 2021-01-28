@@ -6,9 +6,9 @@
     /// <typeparam name="TPlugin">The plugin to resolve.</typeparam>
     public interface IPluginAccessor<out TPlugin> where TPlugin : IOpenModPlugin
     {
-        /// <value>
-        /// The plugin instance. Can be null if the plugin is not loaded or found.
-        /// </value>
+        /// <summary>
+        /// Gets the plugin instance. Returns null if the plugin is not loaded or found.
+        /// </summary>
         TPlugin? Instance { get; }
     }
 }

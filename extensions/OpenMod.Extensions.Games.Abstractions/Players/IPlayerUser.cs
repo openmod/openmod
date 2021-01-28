@@ -7,9 +7,9 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
     /// </summary>
     public interface IPlayerUser : IUser
     {
-        /// <value>
-        /// The player.
-        /// </value>
+        /// <summary>
+        /// Gets the player.
+        /// </summary>
         public IPlayer Player { get; }
     }
 
@@ -19,9 +19,9 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
     /// <typeparam name="T">The player type.</typeparam>
     public interface IPlayerUser<out T> : IPlayerUser where T : IPlayer
     {
-        /// <value>
-        /// The player.
-        /// </value>
+        /// <summary>
+        /// Gets the player.
+        /// </summary>
         public new T Player { get; }
     }
 }

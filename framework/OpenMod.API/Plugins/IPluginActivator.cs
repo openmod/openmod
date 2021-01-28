@@ -12,9 +12,9 @@ namespace OpenMod.API.Plugins
     [Service]
     public interface IPluginActivator
     {
-        /// <value>
-        /// The activated plugins.
-        /// </value>
+        /// <summary>
+        /// Gets the activated plugins.
+        /// </summary>
         IReadOnlyCollection<IOpenModPlugin> ActivatedPlugins { get; }
 
         /// <summary>

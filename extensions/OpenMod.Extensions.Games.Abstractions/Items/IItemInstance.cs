@@ -5,9 +5,9 @@
     /// </summary>
     public interface IItemInstance
     {
-        /// <value>
-        /// The item.
-        /// </value>
+        /// <summary>
+        /// Gets the item.
+        /// </summary>
         IItem Item { get; }
     }
 }

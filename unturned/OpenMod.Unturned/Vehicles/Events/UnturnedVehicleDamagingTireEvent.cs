@@ -9,19 +9,19 @@ namespace OpenMod.Unturned.Vehicles.Events
     /// </summary>
     public class UnturnedVehicleDamagingTireEvent : UnturnedVehicleEvent, ICancellableEvent
     {
-        /// <value>
-        /// The ID of the entity causing the damage.
-        /// </value>
+        /// <summary>
+        /// Gets the Steam ID of the entity causing the damage.
+        /// </summary>
         public CSteamID? Instigator { get; }
 
-        /// <value>
-        /// The index of the tire that is getting damaged.
-        /// </value>
+        /// <summary>
+        /// Gets the index of the tire that is getting damaged.
+        /// </summary>
         public int TireIndex { get; }
 
-        /// <value>
-        /// The damage origin.
-        /// </value>
+        /// <summary>
+        /// Gets the damage origin.
+        /// </summary>
         public EDamageOrigin DamageOrigin { get; }
 
         public bool IsCancelled { get; set; }

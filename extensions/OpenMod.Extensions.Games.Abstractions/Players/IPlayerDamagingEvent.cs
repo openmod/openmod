@@ -9,7 +9,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
     public interface IPlayerDamagingEvent : IPlayerEvent, ICancellableEvent
     {
         /// <summary>
-        /// The damage source. Can be null.
+        /// The damage source.
         /// </summary>
         public IDamageSource? DamageSource { get; }
 

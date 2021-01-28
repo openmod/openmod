@@ -5,14 +5,14 @@
     /// </summary>
     public interface IBuildableAsset
     {
-        /// <value>
-        /// The ID of the asset.
-        /// </value>
+        /// <summary>
+        /// Gets the ID of the asset.
+        /// </summary>
         string BuildableAssetId { get; }
 
-        /// <value>
-        /// The type of the asset.
-        /// </value>
+        /// <summary>
+        /// Gets the type of the asset.
+        /// </summary>
         string BuildableType { get; }
     }
 }

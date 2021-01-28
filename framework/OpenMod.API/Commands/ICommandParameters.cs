@@ -12,10 +12,10 @@ namespace OpenMod.API.Commands
     /// </remarks>
     public interface ICommandParameters : IReadOnlyCollection<string>
     {
-        /// <value>
-        ///     The n. command parameter starting from zero.
+        /// <summary>
+        ///     Gets the n. command parameter starting from zero.
         ///     <para>Index must be less than <see cref="Length">length</see> and not negative.</para>
-        /// </value>
+        /// </summary>
         /// <exception cref="ArgumentException">
         ///     When <i>index</i> is equal or greater than
         ///     <see cref="Length">length</see> or negative.
@@ -25,9 +25,9 @@ namespace OpenMod.API.Commands
         /// <returns>The n. command parameter as string.</returns>
         string this[int index] { get; }
 
-        /// <value>
-        /// The amount of parameters.
-        /// </value>
+        /// <summary>
+        /// Gets the amount of parameters.
+        /// </summary>
         /// <example>
         /// If the command was entered as "/mycommand test 5 b", it would return "3".
         /// </example>

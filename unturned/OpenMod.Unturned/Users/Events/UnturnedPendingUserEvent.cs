@@ -5,7 +5,7 @@ using OpenMod.Core.Users.Events;
 namespace OpenMod.Unturned.Users.Events
 {
     /// <summary>
-    /// The base event for all Unturned pending user related events.
+    /// The base event for all pending Unturned user related events.
     /// </summary>
     public abstract class UnturnedPendingUserEvent : Event, IUserEvent
     {
@@ -14,9 +14,9 @@ namespace OpenMod.Unturned.Users.Events
             User = user;
         }
 
-        /// <value>
-        /// The Unturned pending user related to the event.
-        /// </value>
+        /// <summary>
+        /// Gets the pending Unturned user related to the event.
+        /// </summary>
         public UnturnedPendingUser User { get; }
 
         IUser IUserEvent.User => User;

@@ -5,14 +5,14 @@
     /// </summary>
     public interface IVehicleAsset
     {
-        /// <value>
-        /// The ID of the vehicle asset.
-        /// </value>
+        /// <summary>
+        /// Gets the ID of the vehicle asset.
+        /// </summary>
         string VehicleAssetId { get; }
 
-        /// <value>
-        /// The type of the vehicle asset.
-        /// </value>
+        /// <summary>
+        /// Gets the type of the vehicle asset.
+        /// </summary>
         string VehicleType { get; }
     }
 }

@@ -10,14 +10,14 @@ namespace OpenMod.API.Permissions
     [Service]
     public interface IPermissionChecker
     {
-        /// <value>
-        /// The permission check providers.
-        /// </value>
+        /// <summary>
+        /// Gets the permission check providers.
+        /// </summary>
         IReadOnlyCollection<IPermissionCheckProvider> PermissionCheckProviders { get; }
 
-        /// <value>
-        /// The permission sources.
-        /// </value>
+        /// <summary>
+        /// Gets the permission sources.
+        /// </summary>
         IReadOnlyCollection<IPermissionStore> PermissionStores { get; }
 
         /// <summary>

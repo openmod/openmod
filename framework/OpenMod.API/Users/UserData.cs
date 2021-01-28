@@ -9,44 +9,44 @@ namespace OpenMod.API.Users
     [Serializable]
     public class UserData
     {
-        /// <value>
-        /// The ID of the user.
-        /// </value>
-        public string? Id { get; set; } = null!;
+        /// <summary>
+        /// Gets or sets the ID of the user.
+        /// </summary>
+        public string? Id { get; set; }
 
-        /// <value>
-        /// The actor type of the user.
-        /// </value>
-        public string? Type { get; set; } = null!;
+        /// <summary>
+        /// Gets or sets the actor type of the user.
+        /// </summary>
+        public string? Type { get; set; } 
 
-        /// <value>
-        /// The last known display name of the user.
-        /// </value>
-        public string? LastDisplayName { get; set; } = null!;
+        /// <summary>
+        /// Gets or sets the last known display name of the user.
+        /// </summary>
+        public string? LastDisplayName { get; set; }
 
-        /// <value>
-        /// The first time the user has been seen.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the first time the user has been seen.
+        /// </summary>
         public DateTime? FirstSeen { get; set; }
 
-        /// <value>
-        /// The last time the user has been seen.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the last time the user has been seen.
+        /// </summary>
         public DateTime? LastSeen { get; set; }
 
-        /// <value>
-        /// The permissions of the user.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the permissions of the user.
+        /// </summary>
         public HashSet<string>? Permissions { get; set; }
 
-        /// <value>
-        /// The roles of the user.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the roles of the user.
+        /// </summary>
         public HashSet<string>? Roles { get; set; }
 
-        /// <value>
-        /// The user data. Can be null. Plugins should use <see cref="IUserDataStore"/> to interact with this data.
-        /// </value>
+        /// <summary>
+        /// Gets the user data. Plugins should use the <see cref="IUserDataStore"/> service to interact with this data.
+        /// </summary>
         public Dictionary<string, object?>? Data { get; set; }
 
         public UserData()

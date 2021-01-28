@@ -10,34 +10,34 @@ namespace OpenMod.Extensions.Games.Abstractions.Transforms
     /// </summary>
     public interface IWorldTransform : IReadOnlyCollection<IWorldTransform>
     {
-        /// <value>
-        /// The name of the transform. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the name of the transform.
+        /// </summary>
         string? TransformName { get; }
 
-        /// <value>
-        /// The parent transform of this transform. Can be null.
-        /// </value>
+        /// <summary>
+        /// Gets the parent transform of this transform.
+        /// </summary>
         IWorldTransform? ParentTransform { get; }
 
-        /// <value>
-        /// The child transforms of this transform.
-        /// </value>
+        /// <summary>
+        /// Gets the child transforms of this transform.
+        /// </summary>
         IReadOnlyCollection<IWorldTransform> ChildTransforms { get; }
 
-        /// <value>
-        /// The position of the transform.
-        /// </value>
+        /// <summary>
+        /// Gets the position of the transform.
+        /// </summary>
         Vector3 Position { get; }
 
-        /// <value>
-        /// The velocity of the transform.
-        /// </value>
+        /// <summary>
+        /// Gets the velocity of the transform.
+        /// </summary>
         Vector3 Velocity { get; }
 
-        /// <value>
-        /// The rotation in euler angles of the transform.
-        /// </value>
+        /// <summary>
+        /// Gets the euler angles rotation of the transform.
+        /// </summary>
         Vector3 Rotation { get; }
 
         /// <summary>

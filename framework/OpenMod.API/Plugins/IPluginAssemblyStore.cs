@@ -21,9 +21,9 @@ namespace OpenMod.API.Plugins
         [OpenModInternal]
         Task<ICollection<Assembly>> LoadPluginAssembliesAsync(IPluginAssembliesSource source);
 
-        /// <value>
-        /// The loaded plugin assemblies.
-        /// </value>
+        /// <summary>
+        /// Gets the loaded plugin assemblies.
+        /// </summary>
         [OpenModInternal]
         IReadOnlyCollection<Assembly> LoadedPluginAssemblies { get; }
     }

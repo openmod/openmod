@@ -24,9 +24,9 @@ namespace OpenMod.EntityFrameworkCore
         private readonly IServiceProvider m_ServiceProvider;
         private readonly ILogger<TSelf> m_Logger;
 
-        /// <value>
-        /// The name of the migrations table.
-        /// </value>
+        /// <summary>
+        /// Gets the name of the migrations table.
+        /// </summary>
         public virtual string MigrationsTableName
         {
             get
@@ -36,9 +36,9 @@ namespace OpenMod.EntityFrameworkCore
             }
         }
 
-        /// <value>
-        /// The prefix for the tables.
-        /// </value>
+        /// <summary>
+        /// Gets the prefix for the tables.
+        /// </summary>
         public virtual string TablePrefix
         {
             get

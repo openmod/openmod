@@ -9,24 +9,24 @@ namespace OpenMod.Unturned.Vehicles.Events
     /// </summary>
     public class UnturnedVehicleDamagingEvent : UnturnedVehicleEvent, ICancellableEvent
     {
-        /// <value>
-        /// The ID of the entity causing the damage.
-        /// </value>
+        /// <summary>
+        /// Gets the ID of the entity causing the damage.
+        /// </summary>
         public CSteamID? Instigator { get; }
 
-        /// <value>
-        /// The total damage to be dealt.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the total damage to be dealt.
+        /// </summary>
         public ushort PendingTotalDamage { get; set; }
 
-        /// <value>
-        /// The damage origin.
-        /// </value>
+        /// <summary>
+        /// Gets the damage origin.
+        /// </summary>
         public EDamageOrigin DamageOrigin { get; }
 
-        /// <value>
-        /// True, the damage will not explode the vehicle if its greater than the current health.
-        /// </value>
+        /// <summary>
+        /// If set to true, the damage will not explode the vehicle if its greater than the current health.
+        /// </summary>
         public bool CanRepair { get; set; }
 
         public bool IsCancelled { get; set; }

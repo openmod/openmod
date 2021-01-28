@@ -7,9 +7,9 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
     /// </summary>
     public interface IVehicleEvent : IEvent
     {
-        /// <value>
-        /// The vehicle related to the event.
-        /// </value>
+        /// <summary>
+        /// Gets the vehicle related to the event.
+        /// </summary>
         IVehicle Vehicle { get; }
     }
 }

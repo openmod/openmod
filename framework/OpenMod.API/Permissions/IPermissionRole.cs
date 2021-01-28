@@ -7,19 +7,19 @@ namespace OpenMod.API.Permissions
     /// </summary>
     public interface IPermissionRole : IPermissionActor
     {
-        /// <value>
-        /// The priority of this role.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the priority of this role.
+        /// </summary>
         int Priority { get; set; }
 
-        /// <value>
-        /// Gets the parents of the role.
-        /// </value>
+        /// <summary>
+        /// Gets or sets the parents of the role.
+        /// </summary>
         HashSet<string> Parents { get; }
 
-        /// <value>
-        /// True if this role should automatically get assigned to new users.
-        /// </value>
+        /// <summary>
+        /// Defines if the role should be automatically assigned to new users.
+        /// </summary>
         bool IsAutoAssigned { get; set; }
     }
 }

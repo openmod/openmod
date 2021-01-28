@@ -5,19 +5,19 @@
     /// </summary>
     public interface IPermissionActor
     {
-        /// <value>
-        /// The unique to the actor type and persistent ID of the actor.
-        /// </value>
+        /// <summary>
+        /// Gets the unique to the actor type and persistent ID of the actor.
+        /// </summary>
         string Id { get; }
 
-        /// <value>
-        /// The type of the actor.
-        /// </value>
+        /// <summary>
+        /// Gets the type of the actor.
+        /// </summary>
         string Type { get; }
 
-        /// <value>
-        /// The human readable name of the actor.
-        /// </value>
+        /// <summary>
+        /// Gets the human readable name of the actor.
+        /// </summary>
         string DisplayName { get; }
     }
 }
