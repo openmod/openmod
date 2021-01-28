@@ -1,4 +1,4 @@
-# OpenMod [![Discord](https://img.shields.io/discord/666327627124047872?label=Discord )](https://discord.com/invite/jRrCJVm)
+# OpenMod [![Discord](https://img.shields.io/discord/666327627124047872?label=Discord&style=for-the-badge)](https://discord.com/invite/jRrCJVm)
 
 OpenMod is a plugin framework for .NET. 
 
