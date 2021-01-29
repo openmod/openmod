@@ -24,23 +24,23 @@ Sets the name of the job. Must be unique.
 ## Schedule
 Schedule defines when the job will run.  
 
-**@startup**: Executes a job after OpenMod and all plugins have loaded, including reloads.
-**@reboot**: Executes a job after OpenMod and all plugins have loaded, excluding reloads.
-**@single_exec**: Executes a job a single time and then removes it from the file.
-**crontab expression**: Executes the job periodically, like every minute, every Sunday, every third Monday, etc. Visit https://crontab.guru/ for more information.
+**@startup**: Executes a job after OpenMod and all plugins have loaded, including reloads.  
+**@reboot**: Executes a job after OpenMod and all plugins have loaded, excluding reloads.  
+**@single_exec**: Executes a job a single time and then removes it from the file.  
+**crontab expression**: Executes the job periodically, like every minute, every Sunday, every third Monday, etc. Visit https://crontab.guru/ for more information.  
 
 Here are some example crontab expressions:  
-- **0 0 * * 0**: Every Sunday at 0:00 AM.  
-- **0 3 * * ***: Everyday at 3 AM.   
-- ***/5 * * * ***: Every 5 minutes.  
-- **0 0 1 * ***: At the first day of every month at 0:00 AM.
+- **0 0 \* \* 0**: Every Sunday at 0:00 AM.  
+- **0 3 \* \* \***: Everyday at 3 AM.   
+- **\*/5 \* \* \* \***: Every 5 minutes.  
+- **0 0 1 \* \***: At the first day of every month at 0:00 AM.
 
 ## Task
 The task to execute. There are 2 built-in tasks:
 - **openmod_command**: Executes one or more OpenMod commands. Needs args.commands to be defined. 
 - **system_command**: Executes one or more system commands. Needs args.commands to be defined. 
   
-Plugins may add more tasks.
+Plugins can add more task types.
 
 ## Enabled
 Sets if the job is enabled.

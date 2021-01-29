@@ -22,7 +22,7 @@ The generic part (`T` in `ILogger<T>`) must be the class that is using the logge
 
 ## Implementing your own logger
 To implement your own logger, you must implement the `ILoggerFactory` and `ILogger<>` services.  
-After that you must register them via a [ServiceConfigurator](../services/#registering-your-own-services):
+After that you must register them via a [ServiceConfigurator](services.md):
 ```c#
 public class ServiceConfigurator : IServiceConfigurator
 {

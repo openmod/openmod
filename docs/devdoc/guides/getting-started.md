@@ -113,7 +113,8 @@ For more, visit the [commands documentation](../concepts/commands.md).
 
 ## Best Practices
 > [!CAUTION]
-> **Do not** use static plugin instances, instead always pass instances by reference. OpenMod dynamically creates and destroys your plugin instances, which would result in wrong instances being used after reloads.
+> **Do not** use static plugin instances, instead always pass instances by reference. OpenMod dynamically creates and destroys your plugin instances, which would result in wrong instances being used after reloads.  
+>   
 > Here is a bad example:
 > ```c#
 > public static MyPlugin Instance { get; set; }
