@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OpenMod.API.Localization;
@@ -94,14 +95,21 @@ namespace OpenMod.Core.Tests.Commands
             Task<object> resolveTask = m_TypeDescriptorCommandParameterResolveProvider.ResolveAsync(type, input);
 
             // Assert
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await resolveTask, "The given type is not supported");
+            await Assert.ThrowsExceptionAsync<ArgumentException>(
+                async () => await resolveTask, "The given type is not supported");
         }
 
         [DataTestMethod]
         [DataRow(typeof(byte), "-1")]
         [DataRow(typeof(byte), "word")]
-        public async Task ResolveAsync_ShouldThrowCommandParameterParseException_WhenPassingInvalidArgument(Type type, string input)
+        public async Task ResolveAsync_ShouldThrowCommandParameterParseException_WhenPassingInvalidArgument(
+            Type type, string input)
         {
+            // Arrange
+            m_OpenModStringLocalizerMock
+                .Setup(localizer => localizer[It.IsAny<string>(), It.IsAny<object[]>()])
+                .Returns(new LocalizedString(name: "", value: ""));
+
             // Act
             Task<object> resolveTask = m_TypeDescriptorCommandParameterResolveProvider.ResolveAsync(type, input);
 
