@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace OpenMod.API.Jobs
 {
+    /// <summary>
+    /// Represents a task instance for a job.
+    /// </summary>
     public sealed class JobTask
     {
         public JobTask(string jobName, string task, Dictionary<string, object?> args)
