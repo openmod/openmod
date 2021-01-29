@@ -25,7 +25,7 @@ jobs:
         args: docs/docfx.json
     - uses: peaceiris/actions-gh-pages@v3
       name: Publish Documentation on GitHub Pages
-      env:
+      with:
         publish_dir: docs/_site
         github_token: ${{ secrets.GH_PAT }}
         external_repository: openmod/openmod-docs
