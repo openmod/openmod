@@ -1,3 +1,5 @@
+name: Publish Documentation
+
 on:
   workflow_dispatch:
   create:
@@ -21,8 +23,9 @@ jobs:
       name: Build Documentation
       with:
         args: docs/docfx.json
-    - uses: maxheld83/ghpages@master
+    - uses: peaceiris/actions-gh-pages
       name: Publish Documentation on GitHub Pages
       env:
-        BUILD_DIR: docs/_site
-        GH_PAT: ${{ secrets.GH_PAT }} # See https://github.com/maxheld83/ghpages
+        publish_dir: docs/_site
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        external_repository: openmod/openmod-docs
