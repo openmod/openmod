@@ -9,15 +9,15 @@
 - name: OpenMod concepts
   items:          
   - name: Plugins
-    href: plugins.md
+    href: concepts/plugins.md
   - name: Configuration files
-    href: configurations.md
+    href: concepts/configurations.md
   - name: Translation files
-    href: translations.md
+    href: concepts/translations.md
   - name: Permissions
-    href: permissions.md
+    href: concepts/permissions.md
   - name: Logging
-    href: logging.md  
+    href: concepts/logging.md  
   - name: Jobs
     href: concepts/jobs.md        
 - name: Integrations

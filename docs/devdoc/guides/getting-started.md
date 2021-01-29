@@ -114,3 +114,38 @@ For more, visit the [commands documentation](../concepts/commands.md).
 ## Best Practices
 > [!CAUTION]
 > **Do not** use static plugin instances, instead always pass instances by reference. OpenMod dynamically creates and destroys your plugin instances, which would result in wrong instances being used after reloads.
+> Here is a bad example:
+> ```c#
+> public static MyPlugin Instance { get; set; }
+> public class MyCommand : Command
+> {
+>      public MyCommand(IServiceProvider serviceProvider) : base(serviceProvider)
+>      {
+>      }
+>
+>      public async Task OnExecuteAsync()
+>      {
+>          MyPlugin.Instance.DoSomething();
+>      }
+> }
+> ```  
+> 
+> Use this instead:
+> ```cs
+> public class MyCommand : Command
+> {
+>      private readonly MyPlugin m_MyPlugin;
+> 
+>      public MyCommand(
+>          MyPlugin myPlugin,
+>          IServiceProvider serviceProvider) : base(serviceProvider)
+>      {
+>          m_MyPlugin = myPlugin;
+>      }
+>
+>      public async Task OnExecuteAsync()
+>      {
+>          m_MyPlugin.DoSomething();
+>      }
+> }
+> ```

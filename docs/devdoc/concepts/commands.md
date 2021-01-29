@@ -77,7 +77,7 @@ public class CommandAwesome : Command
 If you are not developing universal plugins, you may want to limit who can execute commands.  
 The `[CommandActor(Type)]` attribute allows you to specify such restrictions.
 
-For example, if you would like to restrict a command's usage to UnturnedUser and ConsoleActor, you could add the following:
+For example, if you want to restrict a commands usage to UnturnedUser and ConsoleActor, you can add the following:
 ```c#
 //...
 [CommandActor(typeof(UnturnedUser))]
