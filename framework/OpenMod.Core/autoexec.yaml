@@ -1,4 +1,5 @@
-﻿#
+﻿# Vist https://openmod.github.io/openmod-docs/userdoc/concepts/jo
+#
 # This file defines jobs to be executed automatically by OpenMod.
 #
 # Name
@@ -46,7 +47,7 @@ jobs:
     task: openmod_command
     args:
       commands:
-      - openmod restart
+      - restart
     enabled: false
 
   # Save every 5 minutes.
