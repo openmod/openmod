@@ -20,6 +20,17 @@
     <NoWarn>$(NoWarn);NU1701;NU1702;CS0436</NoWarn>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <WeaverConfiguration>
+      <Weavers>
+        <RuntimeNullables CheckNonPublic="true" />
+        <InlineIL />
+        <Undisposed />
+        <Stamp />
+      </Weavers>
+    </WeaverConfiguration>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
