@@ -29,3 +29,4 @@ jobs:
         publish_dir: docs/_site
         github_token: ${{ secrets.GITHUB_TOKEN }}
         external_repository: openmod/openmod-docs
+        publish_branch: gh-pages
