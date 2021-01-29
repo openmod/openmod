@@ -27,6 +27,6 @@ jobs:
       name: Publish Documentation on GitHub Pages
       with:
         publish_dir: docs/_site
-        github_token: ${{ secrets.GH_PAT }}
+        personal_token: ${{ secrets.GH_PAT }}
         external_repository: openmod/openmod-docs
         publish_branch: gh-pages
