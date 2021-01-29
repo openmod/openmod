@@ -1,2 +1,40 @@
 - name: Introduction
   href: intro.md
+- name: Guides
+  items: 
+  - name: Making your first plugin
+    href: guides/getting-started.md
+  - name: Publishing to nuget.org
+    href: guides/publishing.md  
+- name: OpenMod concepts
+  items:
+  - name: Commands
+    href: concepts/commands.md
+  - name: Configuration
+    href: concepts/configuration.md
+  - name: Localization
+    href: concepts/localization.md
+  - name: Scheduling
+    href: concepts/scheduling.md
+  - name: Services
+    href: concepts/services.md
+  - name: Logging
+    href: concepts/logging.md
+  - name: Permissions
+    href: concepts/permissions.md
+  - name: Persistence
+    href: concepts/persistence.md  
+ 
+- name: Events
+  items:
+  - name: Events and event listeners 
+    href: events/events.md
+  - name: OpenMod Core events
+    href: events/openmod-core.md
+  - name: Economy events
+    href: events/economy.md
+  - name: Universal game events
+    href: events/universal-game.md
+  - name: Unturned events
+    href: events/unturned.md
+    

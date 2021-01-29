@@ -128,6 +128,6 @@ This will grant all permissions from above. You can also use TeleportPlugin:* to
 > Just adding the TeleportPlugin:teleport permission will **not** grant the child permissions like TeleportPlugin:teleport.bring.
 
 ## Finding Command Permissions
-If you do not know what permission a command requires, you can use `help <command>` to find it. Permissions for subcommands are not granted automatically and must be given either by using wildcards on the parent command permission or by specifying them directly.
+If you do not know what permission a command requires, you can use `help <command>` to find it. Permissions for child commands are not granted automatically and must be given either by using wildcards on the parent command permission or by specifying them directly.
 
-You can also look up permissions by checking out the help.md file generated in each plugin's folder.
+You can also look up permissions by checking out the help.md file generated in each plugins folder.

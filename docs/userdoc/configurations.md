@@ -1,4 +1,4 @@
-# Configuration Files
+# Configuration files
 
 OpenMod uses [YAML](https://yaml.org/) for configurations.  
 You can find a quick YAML guide [here](https://blog.codemagic.io/what-you-can-do-with-yaml/).

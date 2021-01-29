@@ -6,6 +6,6 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
 <script type="text/javascript" src="{{_rel}}styles/jquery.twbsPagination.js"></script>
 <script type="text/javascript" src="{{_rel}}styles/url.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>-->
 <script type="text/javascript" src="{{_rel}}styles/docfx.js"></script>
 <script type="text/javascript" src="{{_rel}}styles/main.js"></script>

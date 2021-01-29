@@ -10,7 +10,7 @@ If you would like to install OpenMod, installation guides for the following plat
 - [Unturned](userdoc/installation/unturned.md)
 
 # Developing Plugins
-If you want to make plugins for OpenMod, you can get started by reading the [Making your first plugin page](devdoc/intro.md).
+If you want to make plugins for OpenMod, you can get started by reading the [Making your first plugin page](devdoc/guides/getting-started.md).
 
 # Links
 [![](https://img.shields.io/github/stars/openmod/openmod?style=for-the-badge&logo=GitHub) GitHub](https://github.com/openmod/openmod)  

@@ -4,21 +4,23 @@
   items:
   - name: 'Installing OpenMod for Unturned'
     href: 'installation/unturned.md'
-  - name: 'Enabling Auto Updates'
+  - name: 'Enabling auto updates'
     href: 'installation/auto-updates.md'  
-- name: OpenMod Concepts
+- name: OpenMod concepts
   items:          
   - name: Plugins
     href: plugins.md
-  - name: Configuration Files
+  - name: Configuration files
     href: configurations.md
-  - name: Translation Files
+  - name: Translation files
     href: translations.md
   - name: Permissions
     href: permissions.md
   - name: Logging
     href: logging.md  
+  - name: Jobs
+    href: concepts/jobs.md        
 - name: Integrations
   items:
-  - name: 'RocketMod Integration'
+  - name: 'RocketMod integration'
     href: 'integrations/unturned-rocketmod.md'    
