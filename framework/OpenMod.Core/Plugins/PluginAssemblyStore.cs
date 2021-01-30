@@ -23,7 +23,7 @@ namespace OpenMod.Core.Plugins
         private readonly IConfiguration? m_Configuration;
 
         public PluginAssemblyStore(
-            IConfiguration configuration,
+            IConfiguration? configuration,
             ILogger<PluginAssemblyStore> logger,
             NuGetPackageManager nuGetPackageManager)
         {
