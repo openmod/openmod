@@ -12,7 +12,7 @@ Option 1: **Installing plugins from NuGet**. You can install plugins from NuGet 
 Option 2: **Installing plugins manually**. You can install plugins manually by moving the plugin dll file and all libraries of the plugin to the `openmod/plugins` folder. You can also install libraries with `openmod install <package id>` instead. To update plugins replace the .dll file with the newer one.
 
 > [!NOTE]
-> Youu must reload OpenMod with `openmod reload` to apply changes after installing or updating plugins.
+> You must reload OpenMod with `openmod reload` to apply changes after installing or updating plugins.
 
 ## Removing plugins
 To remove  plugins which have been installed using `openmod install`, use `openmod remove <package id>`. If you installed the plugin manually instead, delete the .dll file.

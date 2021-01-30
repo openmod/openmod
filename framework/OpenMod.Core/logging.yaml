@@ -1,6 +1,6 @@
 ﻿# Configuration for Serilog
 # This is the yaml equivalent of this: https://github.com/serilog/serilog-settings-configuration
-# For more, see https://openmod.github.io/openmod-docs/user-guide/logging/
+# For more, see https://openmod.github.io/openmod-docs/userdoc/concepts/logging.html
 Serilog:
   Using:
   - Serilog

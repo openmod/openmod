@@ -6,7 +6,7 @@ using Cysharp.Threading.Tasks;
 using OpenMod.Unturned.Plugins;
 using OpenMod.API.Plugins;
 
-// For more, visit https://openmod.github.io/openmod-docs/development-guide/making-your-first-plugin/
+// For more, visit https://openmod.github.io/openmod-docs/devdoc/guides/getting-started.html
 
 [assembly: PluginMetadata("PLUGIN-ID", DisplayName = "PLUGIN-NAME")]
 namespace PLUGIN-NAMESPACE
@@ -18,9 +18,9 @@ namespace PLUGIN-NAMESPACE
         private readonly ILogger<MyOpenModPlugin> m_Logger;
 
         public MyOpenModPlugin(
-            IConfiguration configuration, 
+            IConfiguration configuration,
             IStringLocalizer stringLocalizer,
-            ILogger<MyOpenModPlugin> logger, 
+            ILogger<MyOpenModPlugin> logger,
             IServiceProvider serviceProvider) : base(serviceProvider)
         {
             m_Configuration = configuration;

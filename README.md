@@ -1,6 +1,6 @@
 # OpenMod [![Discord](https://img.shields.io/discord/666327627124047872?label=Discord&style=for-the-badge)](https://discord.com/invite/jRrCJVm)
 
-OpenMod is a plugin framework for .NET. 
+OpenMod is a plugin framework for .NET.
 
 It supports authorization, plugin configurations, internalization, command handling and much more. OpenMod can be used for games, bot frameworks, web servers or anything else and has official implementations for Unturned, Rust (WIP) and a standalone console.
 
@@ -20,9 +20,9 @@ OpenMod is based on modern C# code and best practices.
 To get started, visit the [OpenMod Documentation](https://openmod.github.io/openmod-docs/).
 
 If you would like to install OpenMod, installation guides for the following platforms are available:
-- [Unturned](https://openmod.github.io/openmod-docs/user-guide/installation/unturned/)
+- [Unturned](https://openmod.github.io/openmod-docs/userdoc/installation/unturned.html)
 
-If you want to make plugins for OpenMod, you can get started by reading the [Making your first plugin](https://openmod.github.io/openmod-docs/development-guide/making-your-first-plugin/) page.
+If you want to make plugins for OpenMod, you can get started by reading the [Making your first plugin](https://openmod.github.io/openmod-docs/devdoc/guides/getting-started.html) page.
 
 ## Supported Games
 Currently Unturned is the only supported game. More games might follow in the future.

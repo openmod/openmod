@@ -2,9 +2,6 @@ name: Publish Documentation
 
 on:
   workflow_dispatch:
-  create:
-    tags:
-      - "*"
   push:
     branches: [ main ]
     paths:
