@@ -1,4 +1,4 @@
-﻿# Vist https://openmod.github.io/openmod-docs/userdoc/concepts/jo
+﻿# Vist https://openmod.github.io/openmod-docs/userdoc/concepts/jobs.html
 #
 # This file defines jobs to be executed automatically by OpenMod.
 #
@@ -11,7 +11,7 @@
 # ----------
 # OpenMod uses crontab syntax for defining when jobs will run.
 # Visit http://crontab.guru/ for more information.
-# Some special schedules exist: 
+# Some special schedules exist:
 # - @startup: Executes a job after OpenMod and all plugins have loaded, including reloads.
 # - @reboot: Executes a job after OpenMod and all plugins have loaded, excluding reloads.
 # - @single_exec: Executes a job a single time and then removes it from this file.
@@ -75,7 +75,7 @@ jobs:
     schedule: '0 0 1 * *'
     task: system_command
     args:
-      commands: 
+      commands:
       - ./wipe.sh
     enabled: false
 
@@ -84,6 +84,6 @@ jobs:
     schedule: '@single_exec'
     task: openmod_command
     args:
-      commands: 
+      commands:
       - economy migrate
     enabled: false
