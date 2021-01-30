@@ -37,6 +37,7 @@
       {
         "files": [
           "images/**",
+          "favicon.ico",
           "logo.png"
         ]
       }
@@ -60,6 +61,7 @@
     "globalMetadata": {
       "_appName": "OpenMod Docs",
       "_appTitle": "OpenMod Docs",
+      "_appFaviconPath": "favicon.ico",
       "_appLogoPath": "logo.png",
       "_enableSearch": true,
       "_disableAffix": true,
