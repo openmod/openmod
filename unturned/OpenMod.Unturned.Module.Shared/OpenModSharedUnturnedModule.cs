@@ -81,17 +81,7 @@ namespace OpenMod.Unturned.Module.Shared
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("================================================================");
                     Console.WriteLine($"Incompatible module detected: {moduleDirName}");
-
-                    if (moduleDirName.Equals("Rocket.Unturned", StringComparison.OrdinalIgnoreCase))
-                    {
-                        Console.WriteLine("RocketMod detected! Read how to migrate from RocketMod:");
-                        Console.WriteLine("https://openmod.github.io/openmod-docs/user-guide/migration/rocketmod/");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Please remove the module in order to use OpenMod.");
-                    }
-
+                    Console.WriteLine("Please remove the module in order to use OpenMod.");
                     Console.WriteLine("OpenMod will abort loading.");
                     Console.WriteLine("================================================================");
                     Console.ForegroundColor = previousColor;
