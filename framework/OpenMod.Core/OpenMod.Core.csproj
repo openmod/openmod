@@ -45,7 +45,7 @@
     </PackageReference>
     <PackageReference Include="Nito.AsyncEx.Context" Version="5.1.0" />
     <PackageReference Include="Nito.AsyncEx.Tasks" Version="5.1.0" />
-    <PackageReference Include="RuntimeNullables.Fody" Version="0.9.5" />
+    <PackageReference Include="RuntimeNullables.Fody" Version="0.9.6" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="SmartFormat.NET" Version="2.5.3" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
