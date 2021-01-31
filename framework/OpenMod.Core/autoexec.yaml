@@ -51,7 +51,7 @@ jobs:
     enabled: false
 
   # Save every 5 minutes.
-  - name: Save
+  - name: Auto save
     schedule: '*/5 * * * *'
     task: openmod_command
     args:

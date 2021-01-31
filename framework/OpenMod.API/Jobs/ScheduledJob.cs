@@ -9,54 +9,25 @@ namespace OpenMod.API.Jobs
     [Serializable]
     public sealed class ScheduledJob : IEquatable<ScheduledJob>
     {
-        public ScheduledJob()
-        {
-            
-        }
-
-        public ScheduledJob(string name, string task, Dictionary<string, object?> args, string schedule)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentException(nameof(name));
-            }
-
-            if (string.IsNullOrEmpty(task))
-            {
-                throw new ArgumentException(nameof(task));
-            }
-
-            if (string.IsNullOrEmpty(schedule))
-            {
-                throw new ArgumentException(nameof(schedule));
-            }
-
-            Name = name;
-            Schedule = schedule;
-            Task = task;
-            Args = args ?? throw new ArgumentNullException(nameof(schedule));
-            Enabled = true;
-        }
-
         /// <summary>
         /// Gets the unique name of the job.
         /// </summary>
-        public string? Name { get; }
+        public string? Name { get; set; } 
 
         /// <summary>
         /// Gets the job arguments.
         /// </summary>
-        public Dictionary<string, object?>? Args { get; }
+        public Dictionary<string, object?>? Args { get; set; }
 
         /// <summary>
         /// Gets the task type of the job.
         /// </summary>
-        public string? Task { get; }
+        public string? Task { get; set; }
 
         /// <summary>
         /// Gets the schedule expression.
         /// </summary>
-        public string? Schedule { get; }
+        public string? Schedule { get; set; }
 
         /// <summary>
         /// Checks if the job is enabled.

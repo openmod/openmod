@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Cronos;
@@ -58,7 +59,7 @@ namespace OpenMod.Core.Jobs
             foreach (var provider in options.Value.JobExecutorTypes)
             {
                 m_JobExecutors.Add(
-                    (ITaskExecutor) ActivatorUtilitiesEx.CreateInstance(runtime.LifetimeScope, provider));
+                    (ITaskExecutor)ActivatorUtilitiesEx.CreateInstance(runtime.LifetimeScope, provider));
             }
         }
 
@@ -101,7 +102,14 @@ namespace OpenMod.Core.Jobs
                 throw new Exception($"A job with this name already exists: {@params.Name}");
             }
 
-            var job = new ScheduledJob(@params.Name, @params.Task, @params.Args, @params.Schedule);
+            var job = new ScheduledJob
+            {
+                Name = @params.Name ?? throw new ArgumentException(nameof(@params)),
+                Task = @params.Task ?? throw new ArgumentException(nameof(@params)),
+                Args = @params.Args ?? throw new ArgumentException(nameof(@params)),
+                Schedule = @params.Schedule ?? throw new ArgumentException(nameof(@params)),
+                Enabled = true,
+            };
             m_File.Jobs.Add(job);
 
             await WriteJobsFileAsync();
@@ -132,9 +140,9 @@ namespace OpenMod.Core.Jobs
 
         public async Task<bool> RemoveJobAsync(ScheduledJob job)
         {
-            bool MatchedJobs(ScheduledJob d) => d.Name?.Equals(job.Name, StringComparison.Ordinal) ?? false;
+            bool MatchJob(ScheduledJob d) => d.Name?.Equals(job.Name, StringComparison.Ordinal) ?? false;
 
-            m_ScheduledJobs.RemoveAll(MatchedJobs);
+            m_ScheduledJobs.RemoveAll(MatchJob);
             job.Enabled = false;
 
             if (m_File.Jobs == null)
@@ -142,7 +150,7 @@ namespace OpenMod.Core.Jobs
                 return false;
             }
 
-            var found = m_File.Jobs.RemoveAll(MatchedJobs) > 0;
+            var found = m_File.Jobs.RemoveAll(MatchJob) > 0;
             if (found)
             {
                 await WriteJobsFileAsync();
@@ -175,6 +183,7 @@ namespace OpenMod.Core.Jobs
                          ?? throw new InvalidOperationException("Failed to load jobs from autoexec.yaml!");
 
                 m_File.Jobs ??= new();
+
                 var previousCount = m_File.Jobs.Count;
                 m_File.Jobs = m_File.Jobs.DistinctBy(d => d.Name).ToList();
 
@@ -249,6 +258,7 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
+            m_Logger.LogInformation($"Scheduling job \"{job.Name}\" with schedule \"{job.Schedule}\"");
             ScheduleCronJob(job);
         }
 
@@ -314,10 +324,11 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
+            m_Logger.LogInformation($"Executing job \"{job.Name}\"...");
+
             try
             {
-                await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!,
-                    job.Args ?? new Dictionary<string, object?>()));
+                await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!, job.Args ?? new Dictionary<string, object?>()));
             }
             catch (Exception ex)
             {
@@ -327,7 +338,7 @@ namespace OpenMod.Core.Jobs
 
         public void Dispose()
         {
-            m_ScheduledJobs?.Clear();
+            m_ScheduledJobs.Clear();
             m_JobExecutors.Clear();
         }
     }
