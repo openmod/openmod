@@ -24,6 +24,7 @@ namespace OpenMod.Runtime
         private readonly IPluginActivator m_PluginActivator;
         private readonly IEventBus m_EventBus;
         private readonly IJobScheduler m_JobScheduler;
+        private readonly IRuntime m_Runtime;
 
         public OpenModHostedService(
             ILogger<OpenModHostedService> logger,
@@ -33,7 +34,8 @@ namespace OpenMod.Runtime
             IPluginAssemblyStore pluginAssemblyStore,
             IPluginActivator pluginActivator,
             IEventBus eventBus,
-            IJobScheduler jobScheduler
+            IJobScheduler jobScheduler,
+            IRuntime runtime
         )
         {
             m_Logger = logger;
@@ -44,6 +46,7 @@ namespace OpenMod.Runtime
             m_PluginActivator = pluginActivator;
             m_EventBus = eventBus;
             m_JobScheduler = jobScheduler;
+            m_Runtime = runtime;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -53,6 +56,11 @@ namespace OpenMod.Runtime
 
             m_Logger.LogInformation($"Initializing for host: {m_HostInformation.HostName} v{m_HostInformation.HostVersion}");
             await m_Host.InitAsync();
+
+            foreach (var assembly in m_Runtime.HostAssemblies)
+            {
+                m_EventBus.Subscribe(m_Host, assembly);
+            }
 
             m_Logger.LogInformation("Loading plugins...");
 

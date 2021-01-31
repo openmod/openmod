@@ -59,6 +59,7 @@ namespace OpenMod.Core.Eventing
 
             if (!component.IsComponentAlive)
             {
+                m_Logger.LogDebug($"{component.OpenModComponentId} tried to subscribe a callback but the component is not alive.");
                 return;
             }
 
@@ -80,6 +81,7 @@ namespace OpenMod.Core.Eventing
 
             if (!component.IsComponentAlive)
             {
+                m_Logger.LogDebug($"{component.OpenModComponentId} tried to subscribe a callback but the component is not alive.");
                 return;
             }
 
@@ -101,6 +103,7 @@ namespace OpenMod.Core.Eventing
 
             if (!component.IsComponentAlive)
             {
+                m_Logger.LogDebug($"{component.OpenModComponentId} tried to subscribe a callback but the component is not alive.");
                 return;
             }
 
@@ -122,8 +125,11 @@ namespace OpenMod.Core.Eventing
 
             if (!component.IsComponentAlive)
             {
+                m_Logger.LogDebug($"{component.OpenModComponentId} tried to subscribe \"{assembly.FullName}\" but the component is not alive.");
                 return;
             }
+
+            m_Logger.LogDebug($"Subscribing assembly \"{assembly.FullName}\" for {component.OpenModComponentId}.");
 
             List<(Type eventListenerType, MethodInfo method, EventListenerAttribute eventListenerAttribute, Type eventType)> eventListeners = new List<(Type, MethodInfo, EventListenerAttribute, Type)>();
             var scope = component.LifetimeScope.BeginLifetimeScopeEx((builder =>
@@ -176,11 +182,6 @@ namespace OpenMod.Core.Eventing
                 throw new ArgumentNullException(nameof(component));
             }
 
-            if (!component.IsComponentAlive)
-            {
-                return;
-            }
-
             m_EventSubscriptions.RemoveAll(c => !c.Owner.IsAlive || c.Owner.Target == component);
         }
 
@@ -189,11 +190,6 @@ namespace OpenMod.Core.Eventing
             if (component == null)
             {
                 throw new ArgumentNullException(nameof(component));
-            }
-
-            if (!component.IsComponentAlive)
-            {
-                return;
             }
 
             m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && c.EventName.Equals(eventName, StringComparison.OrdinalIgnoreCase));
@@ -206,11 +202,6 @@ namespace OpenMod.Core.Eventing
                 throw new ArgumentNullException(nameof(component));
             }
 
-            if (!component.IsComponentAlive)
-            {
-                return;
-            }
-
             m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == typeof(TEvent) || c.EventName.Equals(typeof(TEvent).Name, StringComparison.OrdinalIgnoreCase)));
         }
 
@@ -219,11 +210,6 @@ namespace OpenMod.Core.Eventing
             if (component == null)
             {
                 throw new ArgumentNullException(nameof(component));
-            }
-
-            if (!component.IsComponentAlive)
-            {
-                return;
             }
 
             m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == eventType || c.EventName.Equals(eventType.Name, StringComparison.OrdinalIgnoreCase)));
@@ -244,6 +230,7 @@ namespace OpenMod.Core.Eventing
 
             if (!component.IsComponentAlive)
             {
+                m_Logger.LogDebug($"EmitAsync called by {component.OpenModComponentId} for {@event.GetType().Name} but the component is not alive.");
                 return;
             }
 
@@ -273,6 +260,7 @@ namespace OpenMod.Core.Eventing
 
                 if (eventSubscriptions.Count == 0)
                 {
+                    m_Logger.LogTrace($"No event subscriptions found for: {eventName}");
                     continue;
                 }
 

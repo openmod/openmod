@@ -34,7 +34,7 @@ namespace OpenMod.Unturned.RocketMod
 
         public bool IsComponentAlive
         {
-            get => m_Runtime.IsComponentAlive && RocketModIntegration.IsRocketModReady() && U.Instance != null;
+            get => m_Runtime.IsComponentAlive && RocketModIntegration.IsRocketModCoreLoaded(out _);
         }
 
         public ILifetimeScope LifetimeScope { get; }

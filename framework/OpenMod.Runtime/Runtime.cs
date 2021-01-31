@@ -39,6 +39,7 @@ namespace OpenMod.Runtime
         public Runtime()
         {
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
+            HostAssemblies = new List<Assembly>();
         }
 
         public SemVersion Version { get; }
@@ -58,6 +59,8 @@ namespace OpenMod.Runtime
         public IDataStore DataStore { get; private set; } = null!;
 
         public IHostInformation? HostInformation { get; private set; }
+
+        public IReadOnlyCollection<Assembly> HostAssemblies { get; private set; }
 
         public IHost? Host { get; private set; }
 
@@ -82,15 +85,12 @@ namespace OpenMod.Runtime
             RuntimeInitParameters parameters,
             Func<IHostBuilder>? hostBuilderFunc = null)
         {
-            if (openModHostAssemblies == null)
-            {
-                throw new ArgumentNullException(nameof(openModHostAssemblies));
-            }
-
             if (parameters == null)
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
+
+            HostAssemblies = openModHostAssemblies ?? throw new ArgumentNullException(nameof(openModHostAssemblies));
 
             try
             {
@@ -239,13 +239,6 @@ namespace OpenMod.Runtime
                         Suffix = null,
                         WorkingDirectory = WorkingDirectory
                     });
-
-                var openModHost = Host.Services.GetRequiredService<IOpenModHost>();
-                var eventBus = Host.Services.GetRequiredService<IEventBus>();
-                foreach (var assembly in openModHostAssemblies)
-                {
-                    eventBus.Subscribe(openModHost, assembly);
-                }
 
                 try
                 {

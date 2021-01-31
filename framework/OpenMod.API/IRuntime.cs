@@ -60,5 +60,10 @@ namespace OpenMod.API
         /// Information about the OpenMod host. Returns null if the host is not loaded yet.
         /// </summary>
         IHostInformation? HostInformation { get; }
+
+        /// <summary>
+        /// Gets the OpenMod host assemblies.
+        /// </summary>
+        IReadOnlyCollection<Assembly> HostAssemblies { get; }
     }
 }
