@@ -41,6 +41,34 @@ Let's have a closer look at `CheckPermissionAsync`.
 
 Usually you want to check if the result equals to `PermissionGrantResult.Grant` to permit an action. This means that if no explicit permission is set, the action will be denied by default. If you want to execute an action unless it is explicitly denied, use `CheckPermissionAsync(..) != PermissionGrantResult.Deny` instead.
 
+## Register your own permissions
+Plugins that use custom permissions need to register them before checking them, if they are not registered when you go to check them you will get a exception.
+
+To register your permission u need to use `IPermissionRegistry` service and follow the example:
+```c#
+// read the event documentation for more information about event listeners
+public class MyPlugin : OpenModUniversalPlugin
+{
+    private readonly IPermissionRegistry m_PermissionRegistry;
+
+    public UserConnectEventListener(IPermissionChecker permissionRegistry)
+    {
+        m_PermissionRegistry = permissionRegistry;
+    }
+
+    public async Task OnLoadAsync()
+    {
+        m_PermissionRegistry.RegisterPermission(this, "example.permission", "This is a example description for my example permission");
+        return Task.CompletedTask;
+    }
+}
+```
+In the example we registered the permission as `example.permission` but it will be `MyPlugin:example.permission` to check.
+
+> [!NOTE]
+> You should always register your permissions at plugin load.
+> Incase of command related permission there is better way to register them, please check [commands](commands.md).
+
 ## Adding your own permission store
 You can add your own permissions store (e.g. to store permissions in MySQL):
 
