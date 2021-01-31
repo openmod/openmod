@@ -24,7 +24,7 @@
   <PropertyGroup>
     <WeaverConfiguration>
       <Weavers>
-        <RuntimeNullables CheckNonPublic="true" />
+        <RuntimeNullables CheckNonPublic="true" CheckOutputs="false" />
         <InlineIL />
         <Undisposed />
         <Stamp />
