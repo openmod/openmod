@@ -197,6 +197,7 @@ public class CommandAwesomeMore : Command
 
     public async Task OnExecuteAsync()
     {
+        //MyPlugin:AwesomeMore.child.permission
         if (await CheckPermissionAsync("child.permission") == PermissionGrantResult.Grant)
         {
             //User have the child permission
