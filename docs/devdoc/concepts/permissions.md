@@ -46,7 +46,6 @@ Plugins that use custom permissions need to be registered before being checked, 
 
 To register your permission you need to use `IPermissionRegistry` service and follow the example:
 ```c#
-// read the event documentation for more information about event listeners
 public class MyPlugin : OpenModUniversalPlugin
 {
     private readonly IPermissionRegistry m_PermissionRegistry;
