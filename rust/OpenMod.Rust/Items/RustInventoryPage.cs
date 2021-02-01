@@ -42,7 +42,7 @@ namespace OpenMod.Rust.Items
 
         public bool IsReadOnly
         {
-            get { return false; }
+            get { return ItemContainer.IsLocked(); }
         }
 
         public bool IsFull
