@@ -154,7 +154,7 @@ public async Task OnExecuteAsync()
 > **Do not** manually send missing permission messages. *Always* throw NotEnoughPermissionException instead. 
 
 ## Adding child commands
-You can add child commands to a command by using the `[CommandParent]` attribute. This allows OpenMod to discover your child bcommands and provide additional help and tab autocompletion.
+You can add child commands to a command by using the `[CommandParent]` attribute. This allows OpenMod to discover your child commands and provide additional help and tab autocompletion.
 
 The following command will execute when a user types "/awesome more". The `CommandAwesome.OnExecuteAsync` method will not execute in this case.
 ```c#
@@ -178,3 +178,33 @@ public class CommandAwesomeMore : Command
 
 > [!CAUTION] 
 > **Do not** handle child commands yourself (e.g. `if(Context.Parameters[0] == "add")`). When manually handling child commands, OpenMod can't discover your child commands and provide additional help, permissions or tab autocompletion. 
+
+## Adding subpermissions
+You can add subpermissions for your commands, they need to be register using `[RegisterCommandPermission("subpermission")]`,
+to check if the user have the permission you will just need to call `await CheckPermissionAsync("subpermission")`and check the result.
+
+Example:
+```c#
+[Command("more")] 
+[RegisterCommandPermission("subpermission", Description = "My awesome permission description", DefaultGrant = PermissionGrantResult.Default)]
+//Description and DefaultGrant are optional
+
+public class CommandAwesomeMore : Command
+{
+    public CommandAwesomeMore(IServiceProvider serviceProvider) : base(serviceProvider)
+    {
+    }
+
+    public async Task OnExecuteAsync()
+    {
+        if (await CheckPermissionAsync("subpermission") == PermissionGrantResult.Grant)
+        {
+            //User have the subpermission
+        }
+        else
+        {
+            //User do not have the subpermission
+        }
+    }
+}
+```
