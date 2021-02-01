@@ -44,7 +44,7 @@ Usually you want to check if the result equals to `PermissionGrantResult.Grant` 
 ## Register your own permissions
 Plugins that use custom permissions need to be registered before being checked, if they are not registered when you check them you will get an exception.
 
-To register your permission u need to use `IPermissionRegistry` service and follow the example:
+To register your permission you need to use `IPermissionRegistry` service and follow the example:
 ```c#
 // read the event documentation for more information about event listeners
 public class MyPlugin : OpenModUniversalPlugin
@@ -67,7 +67,7 @@ In the example we registered the permission as `example.permission` but it will 
 
 > [!NOTE]
 > You should always register your permissions at plugin load.
-> Incase of command related permission there is better way to register them, please check [commands](commands.md).
+> In case of command related permission there is a better way to register them, please check [commands](commands.md).
 
 ## Adding your own permission store
 You can add your own permissions store (e.g. to store permissions in MySQL):
