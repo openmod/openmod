@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenMod.Unturned.Items
 {
@@ -62,7 +63,14 @@ namespace OpenMod.Unturned.Items
 
         public bool IsReadOnly { get; } = false;
 
-        public bool IsFull => Page.getItemCount() >= Capacity;
+        public bool IsFull
+        {
+            get
+            {
+                var slotsOccupied = Page.items.Sum(item => item.size_x * item.size_y);
+                return slotsOccupied >= Capacity;
+            }
+        }
 
         public IReadOnlyCollection<IInventoryItem> Items
         {
