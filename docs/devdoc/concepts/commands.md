@@ -154,7 +154,7 @@ public async Task OnExecuteAsync()
 > **Do not** manually send missing permission messages. *Always* throw NotEnoughPermissionException instead. 
 
 ## Adding child commands
-You can add child commands to a command by using the `[CommandParent]` attribute. This allows OpenMod to discover your child bcommands and provide additional help and tab autocompletion.
+You can add child commands to a command by using the `[CommandParent]` attribute. This allows OpenMod to discover your child commands and provide additional help and tab autocompletion.
 
 The following command will execute when a user types "/awesome more". The `CommandAwesome.OnExecuteAsync` method will not execute in this case.
 ```c#
@@ -178,3 +178,34 @@ public class CommandAwesomeMore : Command
 
 > [!CAUTION] 
 > **Do not** handle child commands yourself (e.g. `if(Context.Parameters[0] == "add")`). When manually handling child commands, OpenMod can't discover your child commands and provide additional help, permissions or tab autocompletion. 
+
+## Adding child permissions
+You can add child permissions for your commands, they need to be registered using `[RegisterCommandPermission("child.permission")]`,
+to check if the user has the permission you will just need to call `await CheckPermissionAsync("child.permission")`and check the result.
+
+Example:
+```c#
+[Command("more")] 
+[RegisterCommandPermission("child.permission", Description = "My awesome permission description", DefaultGrant = PermissionGrantResult.Default)]
+//Description and DefaultGrant are optional
+
+public class CommandAwesomeMore : Command
+{
+    public CommandAwesomeMore(IServiceProvider serviceProvider) : base(serviceProvider)
+    {
+    }
+
+    public async Task OnExecuteAsync()
+    {
+        //MyPlugin:AwesomeMore.child.permission
+        if (await CheckPermissionAsync("child.permission") == PermissionGrantResult.Grant)
+        {
+            //User have the child permission
+        }
+        else
+        {
+            //User do not have the child permission
+        }
+    }
+}
+```

@@ -24,11 +24,11 @@
     href: concepts/permissions.md
   - name: Persistence
     href: concepts/persistence.md  
+  - name: Events
+    href: concepts/events.md
  
 - name: Events
   items:
-  - name: Events and event listeners 
-    href: events/events.md
   - name: OpenMod Core events
     href: events/openmod-core.md
   - name: Economy events
