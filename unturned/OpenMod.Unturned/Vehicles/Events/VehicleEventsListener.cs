@@ -135,7 +135,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
             var @event = new UnturnedVehicleLockpickingEvent(new UnturnedVehicle(vehicle), instigator!)
             {
-                IsCancelled = allow
+                IsCancelled = !allow
             };
 
             Emit(@event);
@@ -341,6 +341,7 @@ namespace OpenMod.Unturned.Vehicles.Events
         [UsedImplicitly]
         internal static class VehiclePatches
         {
+            // ReSharper disable InconsistentNaming
             [HarmonyPatch(typeof(InteractableVehicle), "explode")]
             [HarmonyPrefix]
             [UsedImplicitly]
@@ -381,15 +382,11 @@ namespace OpenMod.Unturned.Vehicles.Events
             {
                 __state = null;
 
-                if (seatIndex < __instance.passengers?.Length)
-                {
-                    var passenger = __instance.passengers[seatIndex];
+                if (__instance.passengers is null || seatIndex >= __instance.passengers.Length)
+                    return;
 
-                    if (passenger?.player?.player != null)
-                    {
-                        __state = passenger.player.player;
-                    }
-                }
+                var passenger = __instance.passengers[seatIndex];
+                __state = passenger.player?.player;
             }
 
             [HarmonyPatch(typeof(InteractableVehicle), "removePlayer")]
@@ -397,10 +394,10 @@ namespace OpenMod.Unturned.Vehicles.Events
             [UsedImplicitly]
             public static void PostRemovePlayer(InteractableVehicle __instance, Player __state)
             {
-                if (__state != null)
-                {
-                    OnVehicleExited?.Invoke(__instance, __state);
-                }
+                if (__state == null)
+                    return;
+
+                OnVehicleExited?.Invoke(__instance, __state);
             }
 
             [HarmonyPatch(typeof(InteractableVehicle), "swapPlayer")]
@@ -408,17 +405,15 @@ namespace OpenMod.Unturned.Vehicles.Events
             [UsedImplicitly]
             public static void SwapPlayer(InteractableVehicle __instance, byte fromSeatIndex, byte toSeatIndex)
             {
-                if (fromSeatIndex < __instance.passengers?.Length && toSeatIndex < __instance.passengers?.Length)
-                {
-                    var passenger = __instance.passengers[toSeatIndex];
+                if (__instance.passengers is null || fromSeatIndex >= __instance.passengers.Length || toSeatIndex >= __instance.passengers.Length)
+                    return;
 
-                    var player = passenger?.player?.player;
+                var passenger = __instance.passengers[toSeatIndex];
+                var player = passenger?.player?.player;
+                if (player is null)
+                    return;
 
-                    if (player != null)
-                    {
-                        OnVehicleSwapped?.Invoke(__instance, player, fromSeatIndex, toSeatIndex);
-                    }
-                }
+                OnVehicleSwapped?.Invoke(__instance, player, fromSeatIndex, toSeatIndex);
             }
 
             [HarmonyPatch(typeof(InteractableVehicle), "stealBattery")]
@@ -448,20 +443,13 @@ namespace OpenMod.Unturned.Vehicles.Events
             [HarmonyPatch(typeof(VehicleManager), "askVehicleLock")]
             [HarmonyPrefix]
             [UsedImplicitly]
-            public static bool PreVehicleLock(VehicleManager __instance, CSteamID steamID)
+            public static bool PreVehicleLock(CSteamID steamID)
             {
                 var cancel = false;
 
                 var player = PlayerTool.getPlayer(steamID);
-
-                if (player == null)
-                {
-                    return false;
-                }
-
-                var vehicle = player.movement.getVehicle();
-
-                if (vehicle == null || vehicle.asset == null)
+                var vehicle = player?.movement.getVehicle();
+                if (vehicle?.asset is null)
                 {
                     return false;
                 }
@@ -471,15 +459,13 @@ namespace OpenMod.Unturned.Vehicles.Events
                     return false;
                 }
 
-                var isLocked = vehicle.isLocked;
-                var flag = vehicle.asset.canBeLocked && !isLocked;
-
-                if (isLocked == flag)
+                var toLock = !vehicle.isLocked;
+                if (toLock && !vehicle.asset.canBeLocked)
                 {
                     return false;
                 }
 
-                OnVehicleLockUpdating?.Invoke(vehicle, player, player.quests.groupID, flag, ref cancel);
+                OnVehicleLockUpdating?.Invoke(vehicle, player!, player!.quests.groupID, toLock, ref cancel);
 
                 return !cancel;
             }
@@ -487,25 +473,23 @@ namespace OpenMod.Unturned.Vehicles.Events
             [HarmonyPatch(typeof(VehicleManager), "tellVehicleLock")]
             [HarmonyPostfix]
             [UsedImplicitly]
-            public static void PostVehicleLock(VehicleManager __instance, uint instanceID, CSteamID owner, CSteamID group, bool locked)
+            public static void PostVehicleLock(uint instanceID, CSteamID owner, CSteamID group, bool locked)
             {
                 var vehicle = VehicleManager.findVehicleByNetInstanceID(instanceID);
-                if (vehicle == null)
+                if (vehicle is null)
                 {
                     return;
                 }
 
                 var nativePlayer = PlayerTool.getPlayer(owner);
-                if (nativePlayer == null)
+                if (nativePlayer is null)
                 {
                     return;
                 }
 
-                if (locked)
-                {
-                    OnVehicleLockUpdated?.Invoke(vehicle, nativePlayer, group, locked);
-                }
+                OnVehicleLockUpdated?.Invoke(vehicle, nativePlayer, group, locked);
             }
+            // ReSharper restore InconsistentNaming
         }
     }
 }
