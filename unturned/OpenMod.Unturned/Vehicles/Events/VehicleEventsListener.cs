@@ -410,7 +410,7 @@ namespace OpenMod.Unturned.Vehicles.Events
 
                 var passenger = __instance.passengers[toSeatIndex];
                 var player = passenger?.player?.player;
-                if (player is null)
+                if (player == null)
                     return;
 
                 OnVehicleSwapped?.Invoke(__instance, player, fromSeatIndex, toSeatIndex);
@@ -448,8 +448,13 @@ namespace OpenMod.Unturned.Vehicles.Events
                 var cancel = false;
 
                 var player = PlayerTool.getPlayer(steamID);
-                var vehicle = player?.movement.getVehicle();
-                if (vehicle?.asset is null)
+                if (player == null)
+                {
+                    return false;
+                }
+
+                var vehicle = player.movement.getVehicle();
+                if (vehicle == null ||vehicle.asset == null)
                 {
                     return false;
                 }
@@ -465,7 +470,7 @@ namespace OpenMod.Unturned.Vehicles.Events
                     return false;
                 }
 
-                OnVehicleLockUpdating?.Invoke(vehicle, player!, player!.quests.groupID, toLock, ref cancel);
+                OnVehicleLockUpdating?.Invoke(vehicle, player, player.quests.groupID, toLock, ref cancel);
 
                 return !cancel;
             }
@@ -476,13 +481,13 @@ namespace OpenMod.Unturned.Vehicles.Events
             public static void PostVehicleLock(uint instanceID, CSteamID owner, CSteamID group, bool locked)
             {
                 var vehicle = VehicleManager.findVehicleByNetInstanceID(instanceID);
-                if (vehicle is null)
+                if (vehicle == null)
                 {
                     return;
                 }
 
                 var nativePlayer = PlayerTool.getPlayer(owner);
-                if (nativePlayer is null)
+                if (nativePlayer == null)
                 {
                     return;
                 }
