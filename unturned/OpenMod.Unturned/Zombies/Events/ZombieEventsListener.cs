@@ -130,8 +130,7 @@ namespace OpenMod.Unturned.Zombies.Events
         private delegate void ZombieAlertingPlayer(Zombie nativeZombie, ref Player? player, ref bool cancel);
         private static event ZombieAlertingPlayer? OnZombieAlertingPlayer;
 
-        private delegate void ZombieAlertingPosition(Zombie nativeZombie, ref Vector3 position, ref bool isStartling,
-            ref bool cancel);
+        private delegate void ZombieAlertingPosition(Zombie nativeZombie, ref Vector3 position, ref bool isStartling, ref bool cancel);
         private static event ZombieAlertingPosition? OnZombieAlertingPosition;
 
         private delegate void ZombieSpawned(Zombie nativeZombie);
@@ -148,29 +147,30 @@ namespace OpenMod.Unturned.Zombies.Events
             [UsedImplicitly]
             [HarmonyPatch(typeof(Zombie), "alert", typeof(Player))]
             [HarmonyPrefix]
-            public static bool AlertPlayer(Zombie __instance, ref Player? newPlayer, Player ___player)
+            public static bool AlertPlayer(Zombie __instance, ref Player? newPlayer)
             {
-                if (__instance.isDead || newPlayer == ___player) return true;
+                if (__instance.isDead)
+                {
+                    return true;
+                }
 
                 var cancel = false;
-
                 OnZombieAlertingPlayer?.Invoke(__instance, ref newPlayer, ref cancel);
-
                 return !cancel;
             }
 
             [UsedImplicitly]
             [HarmonyPatch(typeof(Zombie), "alert", typeof(Vector3), typeof(bool))]
             [HarmonyPrefix]
-            public static bool AlertPosition(Zombie __instance, ref Vector3 newPosition, ref bool isStartling,
-                    Player ___player)
+            public static bool AlertPosition(Zombie __instance, ref Vector3 newPosition, ref bool isStartling)
             {
-                if (__instance.isDead || ___player != null) return true;
+                if (__instance.isDead)
+                {
+                    return true;
+                }
 
                 var cancel = false;
-
                 OnZombieAlertingPosition?.Invoke(__instance, ref newPosition, ref isStartling, ref cancel);
-
                 return !cancel;
             }
 
