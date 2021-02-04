@@ -26,8 +26,8 @@ namespace OpenMod.Core.Persistence
         private readonly ISerializer m_Serializer;
         private readonly IDeserializer m_Deserializer;
         private readonly List<RegisteredChangeListener> m_ChangeListeners;
-        private readonly ILogger<YamlDataStore> m_Logger;
-        private readonly IRuntime m_Runtime;
+        private readonly ILogger<YamlDataStore>? m_Logger;
+        private readonly IRuntime? m_Runtime;
         private readonly List<string> m_WatchedFiles;
         private readonly ConcurrentDictionary<string, object> m_Locks;
         private readonly bool m_LogOnChange;
@@ -35,9 +35,14 @@ namespace OpenMod.Core.Persistence
         private readonly HashSet<string> m_KnownKeys;
         private FileSystemWatcher? m_FileSystemWatcher;
 
+        private YamlDataStore(DataStoreCreationParameters parameters) : this(parameters, null, null)
+        {
+            
+        }
+
         public YamlDataStore(DataStoreCreationParameters parameters,
-            ILogger<YamlDataStore> logger,
-            IRuntime runtime)
+            ILogger<YamlDataStore>? logger,
+            IRuntime? runtime)
         {
             m_LogOnChange = parameters.LogOnChange;
             m_Logger = logger;
@@ -70,7 +75,7 @@ namespace OpenMod.Core.Persistence
                 .Build();
 
             m_ChangeListeners = new List<RegisteredChangeListener>();
-            m_Locks = new ConcurrentDictionary<string, object>();
+            m_Locks = new ConcurrentDictionary<string, object>();?
 
             CreateFileSystemWatcher();
         }
@@ -107,7 +112,7 @@ namespace OpenMod.Core.Persistence
                         {
                             if (DecrementWriteCounter(key))
                             {
-                                m_Logger.LogDebug($"File changed: {a.FullPath} ({a.ChangeType:X})");
+                                m_Logger?.LogDebug($"File changed: {a.FullPath} ({a.ChangeType:X})");
                                 OnFileChange(key);
                             }
                         }
@@ -117,7 +122,7 @@ namespace OpenMod.Core.Persistence
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, $"Error occured on file change for: {a.FullPath}");
+                    m_Logger?.LogError(ex, $"Error occured on file change for: {a.FullPath}");
                 }
             };
         }
@@ -303,7 +308,7 @@ namespace OpenMod.Core.Persistence
             {
                 m_WatchedFiles.Add(key);
 
-                AddChangeWatcher(key, m_Runtime, () =>
+                AddChangeWatcher(key, m_Runtime!, () =>
                 {
                     m_Logger.LogInformation($"Reloaded {m_Prefix ?? string.Empty}{key}{m_Suffix ?? string.Empty}.yaml.");
                 });
