@@ -37,11 +37,7 @@ runs:
 
     - name: Check Prerelease
       id: check-prerelease
-      run: if [[ ${{ steps.get-version.outputs.version }} =~ \- ]]; then \ 
-               echo ::set-output name=is_prerelease::true \ 
-           else \ 
-               echo ::set-output name=is_prerelease::false \ 
-           fi
+      run: "if [[ ${{ steps.get-version.outputs.version }} =~ \- ]]; then echo ::set-output name=is_prerelease::true; else echo ::set-output name=is_prerelease::false; fi"
       shell: bash
 
     # Install dependencies (this needs to be a separate step from build for caching)
