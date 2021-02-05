@@ -6,13 +6,13 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.Standalone.yml'
+      - '.github/workflows/OpenMod.Standalone.yaml'
       - 'standalone/**'
       - 'framework/**'
   pull_request:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.Standalone.yml'
+      - '.github/workflows/OpenMod.Standalone.yaml'
       - 'standalone/**'
       - 'framework/**'
 
@@ -28,9 +28,9 @@ jobs:
     - uses: actions/setup-dotnet@v1
       name: Setup .NET
       with:
-        dotnet-version: 5.0.100        
+        dotnet-version: 5.0.100
     - uses: ./.github/actions/project-build
-      id: project-build    
+      id: project-build
       with:
         project_path: unturned/OpenMod.Unturned.Module
         nuget_push: false

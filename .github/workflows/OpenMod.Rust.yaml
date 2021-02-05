@@ -7,14 +7,14 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.Rust.yml'
+      - '.github/workflows/OpenMod.Rust.yaml'
       - 'framework/**'
       - 'unityengine/**'
       - 'rust/OpenMod.Rust/**'
   pull_request:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.Rust.yml'
+      - '.github/workflows/OpenMod.Rust.yaml'
       - 'framework/**'
       - 'unityengine/**'
       - 'rust/OpenMod.Rust/**'
@@ -23,16 +23,16 @@ jobs:
   build:
     name: "OpenMod.Rust Build"
     runs-on: ubuntu-latest
-    steps: 
+    steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
     - uses: actions/setup-dotnet@v1
       name: Setup .NET
       with:
-        dotnet-version: 5.0.100        
+        dotnet-version: 5.0.100
     - uses: ././.github/actions/project-build
-      id: project-build    
+      id: project-build
       with:
         project_path: rust/OpenMod.Rust
         github_token: ${{ secrets.GITHUB_TOKEN }}
