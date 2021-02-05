@@ -1,0 +1,32 @@
+name: 'Project Build'
+inputs:
+  nuspec_path:
+    description: 'Path to .nuspec'
+    required: true
+  nuget_push:
+    description: 'Push to Nuget?'
+    required: false
+    default: false  
+  nuget_key: 
+    description: 'NuGet deploy key'
+    required: false
+runs:
+  using: "Build"
+  steps:
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.100
+    - uses: nuget/setup-nuget@v1
+      name: Setup NuGet
+      with:
+        nuget-api-key: ${{ inputs.nuget_key }}
+        nuget-version: '5.x'
+    - name: Pack
+      run: nuget pack ${{ inputs.nuspec_path }}
+    - name: Push to NuGet (Release)
+      if: inputs.nuget_push
+      run: dotnet nuget push *.nupkg
+             --skip-duplicate
+             --api-key ${{ inputs.nuget_key }}
+             --source https://api.nuget.org/v3/index.json

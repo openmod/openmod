@@ -24,28 +24,18 @@ jobs:
     - uses: actions/checkout@v2
       name: Checkout Repository
       with:
-        fetch-depth: 0
-    - name: Extract version
-      id: get_version
-      run: echo ::set-output name=VERSION::$(git describe --tags)
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+        fetch-depth: 2
+    - uses: .github/actions/project-build
+      id: project-build    
       with:
-        dotnet-version: 5.0.100
-    - name: Install dependencies
-      run: dotnet restore standalone/OpenMod.Standalone
-    - name: Update version
-      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get_version.outputs.VERSION }}</Version>#\" props/SharedProjectProps.props"
-    - name: Build
-      run: dotnet build standalone/OpenMod.Standalone --configuration Release --no-restore
-#    - name: Test
-#      run: dotnet test --no-restore --verbosity normal
+        project_path: unturned/OpenMod.Unturned.Module
+        nuget_push: false
     - name: Get Release
       if: github.event_name == 'release'
       id: get-release
       uses: bruceadams/get-release@v1.2.0
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install zip
       if: github.event_name == 'release'
       run: sudo apt-get install zip
@@ -56,11 +46,11 @@ jobs:
       if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get-release.outputs.upload_url }}
         asset_path: ./standalone/OpenMod.Standalone/bin/Release/net461/release.zip
-        asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-net461.zip
+        asset_name: OpenMod.Standalone-v${{ steps.project-build.outputs.version }}-net461.zip
         asset_content_type: application/zip
     - name: Zip netcoreapp3.1 artifacts
       if: github.event_name == 'release'
@@ -69,9 +59,9 @@ jobs:
       if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get-release.outputs.upload_url }}
         asset_path: ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1/release.zip
-        asset_name: OpenMod.Standalone-v${{ steps.get_version.outputs.VERSION }}-netcoreapp3.1.zip
+        asset_name: OpenMod.Standalone-v${{ steps.project-build.outputs.version }}-netcoreapp3.1.zip
         asset_content_type: application/zip

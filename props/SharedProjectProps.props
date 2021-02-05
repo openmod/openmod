@@ -6,10 +6,12 @@
     <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
     <PackageProjectUrl>https://openmod.github.io/openmod-docs</PackageProjectUrl>
     <PackageOwners>OpenMod;Enes Sadık Özbek&lt;esozbek.me&gt;</PackageOwners>
+    <PackageVersion>0.0.0</PackageVersion>
     <RepositoryUrl>https://github.com/openmod/openmod</RepositoryUrl>
     <RepositoryType>git</RepositoryType> 
     <Authors>OpenMod</Authors>
     <Version>0.0.0</Version>
+    <InformationalVersion>0.0.0</InformationalVersion>
     <Company>OpenMod</Company>
     <Copyright>Enes Sadık Özbek &lt;esozbek.me&gt;</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

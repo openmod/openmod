@@ -1,0 +1,67 @@
+name: 'Project Build'
+inputs:
+  project_path:
+    description: 'Path to project'
+    required: true
+  nuget_push:
+    description: 'Push to Nuget on release?'
+    required: false
+    default: false  
+  nuget_key: 
+    description: 'NuGet deploy key'
+    required: false
+  github_token:
+    description: 'GitHub token'
+    required: false
+outputs:
+  version:
+    description: "Generated version (SemVersion compatible)"
+    value: ${{ steps.get_version.outputs.version }}
+runs:
+  using: "Build"
+  steps:
+    # Generate semver compatible version & attach current tag and commit information    
+    - name: Create version
+      id: get_version
+      run: echo ::set-output name=version::$(git describe --tags)+$(git rev-parse --short HEAD)
+    - name: Parse version
+      id: semver_parser 
+      uses: booxmedialtd/ws-action-parse-semver@v1
+      with:
+        input_string: ${{ steps.get_version.outputs.version }}         
+    
+    # Install .NET Core        
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.100
+    
+    # Install dependencies (this needs to be a separate step from build for caching)
+    - name: Install dependencies
+      run: dotnet restore ${{ inputs.project_path }}
+    
+    # Update project versions
+    - name: Update version
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.semver_parser.outputs.major }}.${{ steps.semver_parser.outputs.minor }}.${{ steps.semver_parser.outputs.patch }}</Version>#\" props/SharedProjectProps.props"
+    - name: Update package version
+      run: "sed -i \"s#<PackageVersion>0.0.0</PackageVersion>#<PackageVersion>${{ steps.get_version.outputs.version }}</PackageVersion>#\" props/SharedProjectProps.props"     
+    - name: Update informational version
+      run: "sed -i \"s#<InformationalVersion>0.0.0</InformationalVersion>#<InformationalVersion>${{ steps.get_version.outputs.version }}</InformationalVersion>#\" props/SharedProjectProps.props"            
+    
+    # Build project
+    - name: Build
+      run: dotnet build ${{ inputs.project_path }} --configuration Release --no-restore
+
+    # Push to GitHub packages on each commit  
+    - name: Push to NuGet (Nightly)
+      if: inputs.nuget_push && github.event_name == 'push' && inputs.github_token > 0
+      run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
+             --api-key ${{ inputs.github_token }}
+             --source https://nuget.pkg.github.com/openmod/index.json
+             
+    # Push to NuGet on each tag, but only if the tag is not a pre-release version         
+    - name: Push to NuGet (Release)
+      if: inputs.nuget_push && github.event_name == 'create' && github.event.ref_type == 'tag' && !(steps.semver_parser.outputs.prerelease > 0) && inputs.nuget_key > 0
+      run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
+             --api-key ${{ inputs.nuget_key }}
+             --source https://api.nuget.org/v3/index.json

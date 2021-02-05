@@ -8,26 +8,13 @@ on:
 
 jobs:
   build:
-    name: "OpenMod.UnityEngine.Redist"
+    name: "OpenMod.UnityEngine.Redist Pack"
     runs-on: ubuntu-latest
-    steps:
+    steps: 
     - uses: actions/checkout@v2
-      name: Checkout Repository
+    - uses: .github/actions/nuget-pack
+      id: nuget-pack
       with:
-        fetch-depth: 0
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.100
-    - uses: nuget/setup-nuget@v1
-      name: Setup NuGet
-      with:
-        nuget-api-key: ${{ secrets.NUGET_DEPLOY_KEY }}
-        nuget-version: '5.x'
-    - name: Pack
-      run: nuget pack unityengine/redist/OpenMod.UnityEngine.Redist.nuspec
-    - name: Push to NuGet
-      run: dotnet nuget push *.nupkg
-             --skip-duplicate
-             --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
-             --source https://api.nuget.org/v3/index.json
+        nuspec_path: unityengine/redist/OpenMod.UnityEngine.Redist.nuspec
+        nuget_key: ${{ secrets.NUGET_DEPLOY_KEY }}
+        nuget_push: true
