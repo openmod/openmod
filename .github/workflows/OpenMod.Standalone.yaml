@@ -25,7 +25,7 @@ jobs:
       name: Checkout Repository
       with:
         fetch-depth: 2
-    - uses: .github/actions/project-build
+    - uses: ./.github/actions/project-build
       id: project-build    
       with:
         project_path: unturned/OpenMod.Unturned.Module
