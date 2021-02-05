@@ -10,7 +10,7 @@ jobs:
   build:
     name: "OpenMod.UnityEngine.Redist Pack"
     runs-on: ubuntu-latest
-    steps: 
+    steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-dotnet@v1
       name: Setup .NET
@@ -19,8 +19,8 @@ jobs:
     - uses: nuget/setup-nuget@v1
       name: Setup NuGet
       with:
-        nuget-api-key: ${{ inputs.nuget_key }}
-        nuget-version: '5.x'        
+        nuget-api-key: ${{ secrets.NUGET_DEPLOY_KEY }}
+        nuget-version: '5.x'
     - uses: ./.github/actions/nuget-pack
       id: nuget-pack
       with:
