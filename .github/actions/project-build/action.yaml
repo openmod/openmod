@@ -24,11 +24,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    # Install prerequisites
-    - name: Install prerequisites
-      run: npm install -g node-semver
-      shell: bash  
-
     # Generate semver compatible version from current tag and commit hash
     - name: Create version
       id: get-version

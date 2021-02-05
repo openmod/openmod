@@ -35,6 +35,7 @@ jobs:
       run: "if [[ ${{ steps.get-version.outputs.version }} =~ \\- ]]; then echo ::set-output name=is_prerelease::true; else echo ::set-output name=is_prerelease::false; fi"
       shell: bash  
 
+    # Update project versions
     - name: Update OpenMod Templates version
       run: "sed -i \"s#0.0.0#${{ steps.get-version.outputs.version }}#\" templates/OpenMod.Templates.csproj"
     - name: Update OpenMod Templates Universal version
