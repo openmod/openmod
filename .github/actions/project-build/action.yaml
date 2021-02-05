@@ -32,7 +32,7 @@ runs:
 
     - name: Check Prerelease
       id: check-prerelease
-      run: "if [[ ${{ steps.get-version.outputs.version }} =~ \\- ]]; then
+      run: "if [[ ${{ steps.get-version.outputs.version }} =~ - ]]; then
               echo ::set-output name=is_prerelease::true; 
             else 
               echo ::set-output name=is_prerelease::false; 
@@ -69,7 +69,7 @@ runs:
 
     # Push to NuGet on each tag, but only if the tag is not a pre-release version         
     - name: Push to NuGet (Release)
-      run: if [[ ${{ inputs.nuget_push && github.event_name == 'create' && github.event.ref_type == 'tag' && steps.check-prerelease.outputs.is_prerelease != 'true' && inputs.nuget_key > 0 }} ]]; then 
+      run: if [[ ${{ inputs.nuget_push && github.event_name == 'create' && github.event.ref_type == 'tag' && !steps.check-prerelease.outputs.is_prerelease && inputs.nuget_key > 0 }} ]]; then 
              dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg --api-key ${{ inputs.nuget_key }} --skip-duplicate --source https://api.nuget.org/v3/index.json;
            fi  
       shell: bash
