@@ -1,4 +1,5 @@
-name: 'Project Build'
+name: 'NuGet Pack'
+description: 'Packs OpenMod NuGet packages'
 inputs:
   nuspec_path:
     description: 'Path to .nuspec'
@@ -11,7 +12,7 @@ inputs:
     description: 'NuGet deploy key'
     required: false
 runs:
-  using: "Build"
+  using: "composite"
   steps:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
