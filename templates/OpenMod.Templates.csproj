@@ -8,6 +8,8 @@
         <Title>OpenMod Plugin Templates</Title>
         <Description>OpenMod templates for "dotnet new".</Description>
         <Tags>OpenMod;dotnet-new;templates</Tags>
+        <RepositoryUrl>https://github.com/openmod/openmod</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
         <Authors>OpenMod</Authors>
         <Company>OpenMod</Company>
         <IncludeContentInPack>true</IncludeContentInPack>
