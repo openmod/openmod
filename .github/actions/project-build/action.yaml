@@ -62,7 +62,7 @@ runs:
 
     # Push to GitHub packages on each commit  
     - name: Push to NuGet (Nightly)
-      run: if [[ ${{ (inputs.nuget_push == 'true' && github.event_name == 'push' || (github.event_name == 'create' && github.event.ref_type == 'tag')) && inputs.github_token > 0 }} ]]; then 
+      run: if [[ ${{ inputs.nuget_push == 'true' && (github.event_name == 'push' || (github.event_name == 'create' && github.event.ref_type == 'tag')) && inputs.github_token > 0 }} ]]; then 
              dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg --api-key ${{ inputs.github_token }} --skip-duplicate --source https://nuget.pkg.github.com/openmod/index.json;
            fi  
       shell: bash
