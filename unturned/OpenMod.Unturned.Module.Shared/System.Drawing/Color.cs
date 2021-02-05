@@ -86,9 +86,9 @@ namespace System.Drawing
 		public bool IsNamedColor
 		{
 			get
-			{
-				throw new NotImplementedException();
-			}
+            {
+                return !string.IsNullOrEmpty(Name);
+            }
 		}
 		#endregion
 
