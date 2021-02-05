@@ -75,7 +75,7 @@ namespace OpenMod.Core.Persistence
                 .Build();
 
             m_ChangeListeners = new List<RegisteredChangeListener>();
-            m_Locks = new ConcurrentDictionary<string, object>();?
+            m_Locks = new ConcurrentDictionary<string, object>();
 
             CreateFileSystemWatcher();
         }
