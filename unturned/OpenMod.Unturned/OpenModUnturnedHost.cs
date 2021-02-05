@@ -24,7 +24,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using OpenMod.Core.Ioc;
 using OpenMod.NuGet;
-using OpenMod.Unturned.Module.Bootstrapper;
 using OpenMod.Unturned.RocketMod;
 using UnityEngine.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
@@ -203,7 +202,15 @@ namespace OpenMod.Unturned
                 shutdownPerformed = true;
                 m_NuGetPackageManager.ClearCache();
 
-                BootstrapperModule.Instance!.initialize();
+                var bootstrapperAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(d => d.GetName().Name.Equals("OpenMod.Unturned.Module.Bootstrapper"));
+
+                var bootstrapperClass = bootstrapperAssembly!.GetType("OpenMod.Unturned.Module.Bootstrapper.BootstrapperModule");
+                var instanceProperty = bootstrapperClass.GetProperty("Instance", BindingFlags.Public |  BindingFlags.Static);
+                var initializeMethod = bootstrapperClass.GetMethod("initialize", BindingFlags.Instance | BindingFlags.Public);
+                var moduleInstance = instanceProperty!.GetValue(null);
+
+                initializeMethod!.Invoke(moduleInstance, new object[0]);
             }
             catch (Exception ex)
             {

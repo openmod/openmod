@@ -24,7 +24,6 @@
     <ProjectReference Include="..\..\extensions\OpenMod.Extensions.Games.Abstractions\OpenMod.Extensions.Games.Abstractions.csproj" />
     <ProjectReference Include="..\..\framework\OpenMod.Runtime\OpenMod.Runtime.csproj" />
     <ProjectReference Include="..\..\unityengine\OpenMod.UnityEngine\OpenMod.UnityEngine.csproj" />
-    <ProjectReference Include="..\OpenMod.Unturned.Module.Bootstrapper\OpenMod.Unturned.Module.Bootstrapper.csproj" />
   </ItemGroup>
 
   <ItemGroup>
