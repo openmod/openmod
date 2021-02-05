@@ -17,7 +17,7 @@ jobs:
     # Generate semver compatible version from current tag and commit hash    
     - name: Create version
       id: get-version
-      run: echo ::set-output name=version::$(git describe --tags)+$(git rev-parse --short HEAD)
+      run: echo ::set-output name=version::$(git describe --tags)
       shell: bash
 
     - name: Check Prerelease
@@ -29,12 +29,13 @@ jobs:
             fi"
       shell: bash
 
+    # Create a new draft release
     - name: Create release
       id: create_release
-      uses: sondreb/action-release@master
+      uses: actions/create-release@main
       with:
         token: ${{ secrets.RELEASE_TOKEN }}
-        tag: ${{ steps.get-version.outputs.version }}
-        name: OpenMod Release v${{ steps.get-version.outputs.version }}
+        tag_name: ${{ steps.get-version.outputs.version }}
+        release_name: OpenMod Release v${{ steps.get-version.outputs.version }}
         draft: true
         prerelease: ${{ steps.check-prerelease.outputs.is_prerelease }}
