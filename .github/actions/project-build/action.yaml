@@ -32,7 +32,7 @@ runs:
 
     - name: Check Prerelease
       id: check-prerelease
-      run: "if ${{ steps.get-version.outputs.version }} =~ -; then
+      run: "if ${{ contains(steps.get-version.outputs.version, '-') }}; then
               echo ::set-output name=is_prerelease::true;
             else
               echo ::set-output name=is_prerelease::false;
