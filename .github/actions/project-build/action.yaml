@@ -25,6 +25,7 @@ runs:
     - name: Create version
       id: get_version
       run: echo ::set-output name=version::$(git describe --tags)+$(git rev-parse --short HEAD)
+      shell: bash
     - name: Parse version
       id: semver_parser 
       uses: booxmedialtd/ws-action-parse-semver@v1
@@ -32,7 +33,7 @@ runs:
         input_string: ${{ steps.get_version.outputs.version }}         
     
     # Install .NET Core        
-    - name: Setup .NET Core
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.100
@@ -40,18 +41,23 @@ runs:
     # Install dependencies (this needs to be a separate step from build for caching)
     - name: Install dependencies
       run: dotnet restore ${{ inputs.project_path }}
+      shell: bash
     
     # Update project versions
     - name: Update version
       run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.semver_parser.outputs.major }}.${{ steps.semver_parser.outputs.minor }}.${{ steps.semver_parser.outputs.patch }}</Version>#\" props/SharedProjectProps.props"
+      shell: bash
     - name: Update package version
       run: "sed -i \"s#<PackageVersion>0.0.0</PackageVersion>#<PackageVersion>${{ steps.get_version.outputs.version }}</PackageVersion>#\" props/SharedProjectProps.props"     
+      shell: bash
     - name: Update informational version
       run: "sed -i \"s#<InformationalVersion>0.0.0</InformationalVersion>#<InformationalVersion>${{ steps.get_version.outputs.version }}</InformationalVersion>#\" props/SharedProjectProps.props"            
-    
+      shell: bash
+
     # Build project
     - name: Build
       run: dotnet build ${{ inputs.project_path }} --configuration Release --no-restore
+      shell: bash
 
     # Push to GitHub packages on each commit  
     - name: Push to NuGet (Nightly)
@@ -59,10 +65,12 @@ runs:
       run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
              --api-key ${{ inputs.github_token }}
              --source https://nuget.pkg.github.com/openmod/index.json
-             
+      shell: bash
+
     # Push to NuGet on each tag, but only if the tag is not a pre-release version         
     - name: Push to NuGet (Release)
       if: inputs.nuget_push && github.event_name == 'create' && github.event.ref_type == 'tag' && !(steps.semver_parser.outputs.prerelease > 0) && inputs.nuget_key > 0
       run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
              --api-key ${{ inputs.nuget_key }}
              --source https://api.nuget.org/v3/index.json
+      shell: bash

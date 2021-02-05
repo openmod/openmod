@@ -14,7 +14,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup .NET Core
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.100
@@ -25,9 +25,11 @@ runs:
         nuget-version: '5.x'
     - name: Pack
       run: nuget pack ${{ inputs.nuspec_path }}
+      shell: bash
     - name: Push to NuGet (Release)
       if: inputs.nuget_push
       run: dotnet nuget push *.nupkg
              --skip-duplicate
              --api-key ${{ inputs.nuget_key }}
              --source https://api.nuget.org/v3/index.json
+      shell: bash
