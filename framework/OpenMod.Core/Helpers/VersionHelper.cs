@@ -9,6 +9,12 @@ namespace OpenMod.Core.Helpers
     {
         public static SemVersion ParseAssemblyVersion(Assembly assembly)
         {
+            var informationalAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            if(informationalAttribute != null)
+            {
+                return SemVersion.Parse(informationalAttribute.InformationalVersion);
+            }
+
             var version = assembly.GetName().Version;
             return new SemVersion(version.Major, version.Minor, version.Build, build: version.Revision != 0 ? version.Revision.ToString() : string.Empty);
         }
