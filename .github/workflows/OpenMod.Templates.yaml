@@ -24,7 +24,7 @@ jobs:
       with:
         dotnet-version: 5.0.100
 
-    # Generate semver compatible version from current tag and commit hash    
+    # Generate semver compatible version from current tag and commit hash
     - name: Create version
       id: get-version
       run: echo ::set-output name=version::$(git describe --tags)+$(git rev-parse --short HEAD)
@@ -32,10 +32,10 @@ jobs:
 
     - name: Check Prerelease
       id: check-prerelease
-      run: "if [[ ${{ steps.get-version.outputs.version }} =~ - ]]; then
-              echo ::set-output name=is_prerelease::true; 
-            else 
-              echo ::set-output name=is_prerelease::false; 
+      run: "if ${{ steps.get-version.outputs.version }} =~ -; then
+              echo ::set-output name=is_prerelease::true;
+            else
+              echo ::set-output name=is_prerelease::false;
             fi"
       shell: bash
 
@@ -49,15 +49,15 @@ jobs:
     - name: Build
       run: dotnet build ./templates --configuration Release
 
-    # Push to GitHub packages on each commit        
+    # Push to GitHub packages on each commit
     - name: Push to NuGet (Nightly)
       if: github.event_name == 'push' || (github.event_name == 'create' && github.event.ref_type == 'tag')
       run: dotnet nuget push templates/bin/Release/*.nupkg
              --skip-duplicate
              --api-key ${{ secrets.GITHUB_TOKEN }}
              --source https://nuget.pkg.github.com/openmod/index.json
-             
-    # Push to NuGet on each tag, but only if the tag is not a pre-release version         
+
+    # Push to NuGet on each tag, but only if the tag is not a pre-release version
     - name: Push to NuGet (Release)
       if: github.event_name == 'create' && github.event.ref_type == 'tag' && steps.check-prerelease.outputs.is_prerelease == 'false'
       run: dotnet nuget push templates/bin/Release/*.nupkg

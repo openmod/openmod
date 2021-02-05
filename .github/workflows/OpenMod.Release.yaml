@@ -14,7 +14,7 @@ jobs:
     - uses: actions/checkout@v2
       name: Checkout Repository
 
-    # Generate semver compatible version from current tag and commit hash    
+    # Generate semver compatible version from current tag and commit hash
     - name: Create version
       id: get-version
       run: echo ::set-output name=version::$(git describe --tags)
@@ -22,10 +22,10 @@ jobs:
 
     - name: Check Prerelease
       id: check-prerelease
-      run: "if [[ ${{ steps.get-version.outputs.version }} =~ - ]]; then
-              echo ::set-output name=is_prerelease::true; 
-            else 
-              echo ::set-output name=is_prerelease::false; 
+      run: "if ${{ steps.get-version.outputs.version }} =~ -; then
+              echo ::set-output name=is_prerelease::true;
+            else
+              echo ::set-output name=is_prerelease::false;
             fi"
       shell: bash
 
@@ -34,7 +34,7 @@ jobs:
       id: create_release
       uses: actions/create-release@main
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.get-version.outputs.version }}
         release_name: OpenMod Release v${{ steps.get-version.outputs.version }}

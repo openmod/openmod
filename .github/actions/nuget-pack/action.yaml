@@ -7,8 +7,8 @@ inputs:
   nuget_push:
     description: 'Push to Nuget?'
     required: false
-    default: false  
-  nuget_key: 
+    default: false
+  nuget_key:
     description: 'NuGet deploy key'
     required: false
 runs:
@@ -18,7 +18,7 @@ runs:
       run: nuget pack ${{ inputs.nuspec_path }}
       shell: bash
     - name: Push to NuGet (Release)
-      run: if [[ ${{ inputs.nuget_push == 'true' }} ]]; then 
-             dotnet nuget push *.nupkg --skip-duplicate --api-key ${{ inputs.nuget_key }} --source https://api.nuget.org/v3/index.json; 
-           fi  
+      run: if ${{ inputs.nuget_push == 'true' }}; then
+             dotnet nuget push *.nupkg --skip-duplicate --api-key ${{ inputs.nuget_key }} --source https://api.nuget.org/v3/index.json;
+           fi
       shell: bash
