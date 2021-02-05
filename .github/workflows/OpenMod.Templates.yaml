@@ -43,13 +43,13 @@ jobs:
     # Push to GitHub packages on each commit        
     - name: Push to NuGet (Nightly)
       if: inputs.nuget_push && github.event_name == 'push'
-      run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
+      run: dotnet nuget push templates/bin/Release/*.nupkg
              --api-key ${{ secrets.GITHUB_TOKEN }}
              --source https://nuget.pkg.github.com/openmod/index.json
              
     # Push to NuGet on each tag, but only if the tag is not a pre-release version         
     - name: Push to NuGet (Release)
       if: inputs.nuget_push && github.event_name == 'create' && github.event.ref_type == 'tag' && !(steps.semver_parser.outputs.prerelease > 0)
-      run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
+      run: dotnet nuget push templates/bin/Release/*.nupkg
              --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
              --source https://api.nuget.org/v3/index.json
