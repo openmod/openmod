@@ -25,6 +25,10 @@ jobs:
       name: Checkout Repository
       with:
         fetch-depth: 2
+    - uses: actions/setup-dotnet@v1
+      name: Setup .NET
+      with:
+        dotnet-version: 5.0.100        
     - uses: ./.github/actions/project-build
       id: project-build    
       with:

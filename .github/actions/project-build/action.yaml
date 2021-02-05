@@ -2,7 +2,7 @@ name: 'Project Build'
 description:  'Builds OpenMod projects'
 inputs:
   project_path:
-    description: 'Path to project'
+    description: 'Path to project folder'
     required: true
   nuget_push:
     description: 'Push to Nuget on release?'
@@ -17,27 +17,33 @@ inputs:
 outputs:
   version:
     description: "Generated version (SemVersion compatible)"
-    value: ${{ steps.get_version.outputs.version }}
+    value: ${{ steps.get-version.outputs.version }}
+  is_prerelease:
+    description: 'Gets if the version is a prerelease' 
+    value: ${{ steps.check-prerelease.outputs.is_prerelease }}   
 runs:
   using: "composite"
   steps:
+    # Install prerequisites
+    - name: Install prerequisites
+      run: npm install -g node-semver
+      shell: bash  
+
     # Generate semver compatible version & attach current tag and commit information    
     - name: Create version
-      id: get_version
+      id: get-version
       run: echo ::set-output name=version::$(git describe --tags)+$(git rev-parse --short HEAD)
       shell: bash
-    - name: Parse version
-      id: semver_parser 
-      uses: booxmedialtd/ws-action-parse-semver@v1
-      with:
-        input_string: ${{ steps.get_version.outputs.version }}         
-    
-    # Install .NET Core        
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.100
-    
+
+    - name: Check Prerelease
+      id: check-prerelease
+      run: |
+        if [[ ${{ steps.get-version.outputs.version }} =~ \- ]]; then 
+            echo ::set-output name=is_prerelease::true 
+        else 
+            echo ::set-output name=is_prerelease::false       
+        fi
+
     # Install dependencies (this needs to be a separate step from build for caching)
     - name: Install dependencies
       run: dotnet restore ${{ inputs.project_path }}
@@ -45,13 +51,13 @@ runs:
     
     # Update project versions
     - name: Update version
-      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.semver_parser.outputs.major }}.${{ steps.semver_parser.outputs.minor }}.${{ steps.semver_parser.outputs.patch }}</Version>#\" props/SharedProjectProps.props"
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ steps.get-version.outputs.version }}</Version>#\" props/SharedProjectProps.props"
       shell: bash
     - name: Update package version
-      run: "sed -i \"s#<PackageVersion>0.0.0</PackageVersion>#<PackageVersion>${{ steps.get_version.outputs.version }}</PackageVersion>#\" props/SharedProjectProps.props"     
+      run: "sed -i \"s#<PackageVersion>0.0.0</PackageVersion>#<PackageVersion>${{ steps.get-version.outputs.version }}</PackageVersion>#\" props/SharedProjectProps.props"     
       shell: bash
     - name: Update informational version
-      run: "sed -i \"s#<InformationalVersion>0.0.0</InformationalVersion>#<InformationalVersion>${{ steps.get_version.outputs.version }}</InformationalVersion>#\" props/SharedProjectProps.props"            
+      run: "sed -i \"s#<InformationalVersion>0.0.0</InformationalVersion>#<InformationalVersion>${{ steps.get-version.outputs.version }}</InformationalVersion>#\" props/SharedProjectProps.props"            
       shell: bash
 
     # Build project
@@ -69,7 +75,7 @@ runs:
 
     # Push to NuGet on each tag, but only if the tag is not a pre-release version         
     - name: Push to NuGet (Release)
-      if: inputs.nuget_push && github.event_name == 'create' && github.event.ref_type == 'tag' && !(steps.semver_parser.outputs.prerelease > 0) && inputs.nuget_key > 0
+      if: inputs.nuget_push && github.event_name == 'create' && github.event.ref_type == 'tag' && !steps.check-prerelease.outputs.is_prerelease && inputs.nuget_key > 0
       run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
              --api-key ${{ inputs.nuget_key }}
              --source https://api.nuget.org/v3/index.json

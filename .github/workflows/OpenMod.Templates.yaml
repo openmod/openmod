@@ -19,25 +19,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      name: Checkout Repository
+    - uses: actions/setup-dotnet@v1
+      name: Setup .NET
+      with:
+        dotnet-version: 5.0.100
     - name: Create version
-      id: get_version
+      id: get-version
       run: echo ::set-output name=version::$(git describe --tags)+$(git rev-parse --short HEAD)
     - name: Parse version
       id: semver_parser 
       uses: booxmedialtd/ws-action-parse-semver@v1
       with:
-        input_string: ${{ steps.get_version.outputs.version }}     
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.100
+        input_string: ${{ steps.get-version.outputs.version }}     
     - name: Update OpenMod Templates version
-      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.version }}#\" templates/OpenMod.Templates.csproj"
+      run: "sed -i \"s#0.0.0#${{ steps.get-version.outputs.version }}#\" templates/OpenMod.Templates.csproj"
     - name: Update OpenMod Templates Universal version
-      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.version }}#\" templates/templates/universal/PluginTemplate.csproj"
+      run: "sed -i \"s#0.0.0#${{ steps.get-version.outputs.version }}#\" templates/templates/universal/PluginTemplate.csproj"
     - name: Update OpenMod Templates Unturned version
-      run: "sed -i \"s#0.0.0#${{ steps.get_version.outputs.version }}#\" templates/templates/unturned/PluginTemplate.csproj"
+      run: "sed -i \"s#0.0.0#${{ steps.get-version.outputs.version }}#\" templates/templates/unturned/PluginTemplate.csproj"
     - name: Build
       run: dotnet build ./templates --configuration Release
 

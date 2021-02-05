@@ -16,19 +16,19 @@ jobs:
       with:
         fetch-depth: 0
     - name: Extract version
-      id: get_version
+      id: get-version
       run: echo ::set-output name=version::$(git describe --tags)
     - name: Parse version
       id: semver_parser 
       uses: booxmedialtd/ws-action-parse-semver@v1
       with:
-        input_string: ${{ steps.get_version.outputs.version }}
+        input_string: ${{ steps.get-version.outputs.version }}
     - name: Create release
       id: create_release
       uses: sondreb/action-release@master
       with:
         token: ${{ secrets.RELEASE_TOKEN }}
-        tag: ${{ steps.get_version.outputs.version }}
-        name: OpenMod Release v${{ steps.get_version.outputs.version }}
+        tag: ${{ steps.get-version.outputs.version }}
+        name: OpenMod Release v${{ steps.get-version.outputs.version }}
         draft: false
         prerelease: ${{ steps.semver_parser.outputs.prerelease > 0 }}

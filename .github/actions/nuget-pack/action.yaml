@@ -14,15 +14,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.100
-    - uses: nuget/setup-nuget@v1
-      name: Setup NuGet
-      with:
-        nuget-api-key: ${{ inputs.nuget_key }}
-        nuget-version: '5.x'
     - name: Pack
       run: nuget pack ${{ inputs.nuspec_path }}
       shell: bash
