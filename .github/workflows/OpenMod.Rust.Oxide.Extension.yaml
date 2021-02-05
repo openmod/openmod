@@ -31,6 +31,4 @@ jobs:
       id: project-build
       with:
         project_path: rust/oxide/OpenMod.Rust.Oxide.Extension
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        nuget_key: ${{ secrets.NUGET_DEPLOY_KEY }}
-        nuget_push: true
+        nuget_push: false
