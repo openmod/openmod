@@ -29,7 +29,7 @@ runs:
       run: npm install -g node-semver
       shell: bash  
 
-    # Generate semver compatible version & attach current tag and commit information    
+    # Generate semver compatible version from current tag and commit hash
     - name: Create version
       id: get-version
       run: echo ::set-output name=version::$(git describe --tags)+$(git rev-parse --short HEAD)
@@ -63,16 +63,14 @@ runs:
 
     # Push to GitHub packages on each commit  
     - name: Push to NuGet (Nightly)
-      if: inputs.nuget_push && github.event_name == 'push' && inputs.github_token > 0
-      run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
+      run: ${{ (inputs.nuget_push && github.event_name == 'push' || (github.event_name == 'create' && github.event.ref_type == 'tag')) && inputs.github_token > 0 }} && dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
              --api-key ${{ inputs.github_token }}
              --source https://nuget.pkg.github.com/openmod/index.json
       shell: bash
 
     # Push to NuGet on each tag, but only if the tag is not a pre-release version         
     - name: Push to NuGet (Release)
-      if: inputs.nuget_push && github.event_name == 'create' && github.event.ref_type == 'tag' && !steps.check-prerelease.outputs.is_prerelease && inputs.nuget_key > 0
-      run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
+      run: ${{ inputs.nuget_push && github.event_name == 'create' && github.event.ref_type == 'tag' && !steps.check-prerelease.outputs.is_prerelease && inputs.nuget_key > 0 }} && dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg
              --api-key ${{ inputs.nuget_key }}
              --source https://api.nuget.org/v3/index.json
       shell: bash

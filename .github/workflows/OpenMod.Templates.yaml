@@ -23,14 +23,18 @@ jobs:
       name: Setup .NET
       with:
         dotnet-version: 5.0.100
+
+    # Generate semver compatible version from current tag and commit hash    
     - name: Create version
       id: get-version
       run: echo ::set-output name=version::$(git describe --tags)+$(git rev-parse --short HEAD)
-    - name: Parse version
-      id: semver_parser 
-      uses: booxmedialtd/ws-action-parse-semver@v1
-      with:
-        input_string: ${{ steps.get-version.outputs.version }}     
+      shell: bash
+
+    - name: Check Prerelease
+      id: check-prerelease
+      run: "if [[ ${{ steps.get-version.outputs.version }} =~ \- ]]; then echo ::set-output name=is_prerelease::true; else echo ::set-output name=is_prerelease::false; fi"
+      shell: bash  
+
     - name: Update OpenMod Templates version
       run: "sed -i \"s#0.0.0#${{ steps.get-version.outputs.version }}#\" templates/OpenMod.Templates.csproj"
     - name: Update OpenMod Templates Universal version
@@ -42,14 +46,14 @@ jobs:
 
     # Push to GitHub packages on each commit        
     - name: Push to NuGet (Nightly)
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' || (github.event_name == 'create' && github.event.ref_type == 'tag')
       run: dotnet nuget push templates/bin/Release/*.nupkg
              --api-key ${{ secrets.GITHUB_TOKEN }}
              --source https://nuget.pkg.github.com/openmod/index.json
              
     # Push to NuGet on each tag, but only if the tag is not a pre-release version         
     - name: Push to NuGet (Release)
-      if: github.event_name == 'create' && github.event.ref_type == 'tag' && !(steps.semver_parser.outputs.prerelease > 0)
+      if: github.event_name == 'create' && github.event.ref_type == 'tag' && !steps.check-prerelease.outputs.is_prerelease
       run: dotnet nuget push templates/bin/Release/*.nupkg
              --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
              --source https://api.nuget.org/v3/index.json
