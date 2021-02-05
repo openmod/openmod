@@ -7,26 +7,26 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.Rust.Oxide.Extension.yml'
+      - '.github/workflows/OpenMod.Rust.Oxide.Extension.yaml'
       - 'rust/oxide/OpenMod.Rust.Oxide.Extension/**'
   pull_request:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.Rust.Oxide.Extension.yml'
+      - '.github/workflows/OpenMod.Rust.Oxide.Extension.yaml'
       - 'rust/oxide/OpenMod.Rust.Oxide.Extension/**'
 
 jobs:
   build:
     name: "OpenMod.Rust.Oxide.Extension Build"
     runs-on: ubuntu-latest
-    steps: 
+    steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
     - uses: actions/setup-dotnet@v1
       name: Setup .NET
       with:
-        dotnet-version: 5.0.100            
+        dotnet-version: 5.0.100
     - uses: ././.github/actions/project-build
       id: project-build
       with:

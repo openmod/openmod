@@ -7,28 +7,28 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.NuGet.yml'
+      - '.github/workflows/OpenMod.NuGet.yaml'
       - 'framework/OpenMod.NuGet/**'
   pull_request:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.NuGet.yml'
+      - '.github/workflows/OpenMod.NuGet.yaml'
       - 'framework/OpenMod.NuGet/**'
 
 jobs:
   build:
     name: "OpenMod.NuGet Build"
     runs-on: ubuntu-latest
-    steps: 
+    steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 2  
+        fetch-depth: 2
     - uses: actions/setup-dotnet@v1
       name: Setup .NET
       with:
-        dotnet-version: 5.0.100          
+        dotnet-version: 5.0.100
     - uses: ./.github/actions/project-build
-      id: project-build    
+      id: project-build
       with:
         project_path: framework/OpenMod.NuGet
         github_token: ${{ secrets.GITHUB_TOKEN }}

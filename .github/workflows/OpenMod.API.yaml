@@ -7,30 +7,30 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.API.yml'
+      - '.github/workflows/OpenMod.API.yaml'
       - 'framework/OpenMod.API/**'
   pull_request:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.API.yml'
+      - '.github/workflows/OpenMod.API.yaml'
       - 'framework/OpenMod.API/**'
 
 jobs:
   build:
     name: "OpenMod.API Build"
     runs-on: ubuntu-latest
-    steps: 
+    steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 2      
+        fetch-depth: 2
     - uses: actions/setup-dotnet@v1
       name: Setup .NET
       with:
-        dotnet-version: 5.0.100        
+        dotnet-version: 5.0.100
     - uses: ./.github/actions/project-build
-      id: project-build    
+      id: project-build
       with:
         project_path: framework/OpenMod.API
-        github_token: ${{ secrets.GITHUB_TOKEN }}        
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         nuget_key: ${{ secrets.NUGET_DEPLOY_KEY }}
         nuget_push: true

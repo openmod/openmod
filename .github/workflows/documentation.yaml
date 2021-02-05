@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/documentation.yml'
+      - '.github/workflows/documentation.yaml'
       - 'docs/**'
 jobs:
   deploy:
