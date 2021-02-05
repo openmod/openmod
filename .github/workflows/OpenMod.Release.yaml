@@ -34,7 +34,7 @@ jobs:
       id: create_release
       uses: actions/create-release@main
       with:
-        token: ${{ secrets.RELEASE_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: ${{ steps.get-version.outputs.version }}
         release_name: OpenMod Release v${{ steps.get-version.outputs.version }}
         draft: true
