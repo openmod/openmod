@@ -54,7 +54,7 @@ jobs:
              
     # Push to NuGet on each tag, but only if the tag is not a pre-release version         
     - name: Push to NuGet (Release)
-      if: github.event_name == 'create' && github.event.ref_type == 'tag' && !steps.check-prerelease.outputs.is_prerelease
+      if: github.event_name == 'create' && github.event.ref_type == 'tag' && steps.check-prerelease.outputs.is_prerelease != 'true'
       run: dotnet nuget push templates/bin/Release/*.nupkg
              --api-key ${{ secrets.NUGET_DEPLOY_KEY }}
              --source https://api.nuget.org/v3/index.json
