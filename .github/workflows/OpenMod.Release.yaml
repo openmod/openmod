@@ -13,16 +13,22 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       name: Checkout Repository
-      with:
-        fetch-depth: 0
-    - name: Extract version
+
+    # Generate semver compatible version from current tag and commit hash    
+    - name: Create version
       id: get-version
-      run: echo ::set-output name=version::$(git describe --tags)
-    - name: Parse version
-      id: semver_parser 
-      uses: booxmedialtd/ws-action-parse-semver@v1
-      with:
-        input_string: ${{ steps.get-version.outputs.version }}
+      run: echo ::set-output name=version::$(git describe --tags)+$(git rev-parse --short HEAD)
+      shell: bash
+
+    - name: Check Prerelease
+      id: check-prerelease
+      run: "if [[ ${{ steps.get-version.outputs.version }} =~ - ]]; then
+              echo ::set-output name=is_prerelease::true; 
+            else 
+              echo ::set-output name=is_prerelease::false; 
+            fi"
+      shell: bash
+
     - name: Create release
       id: create_release
       uses: sondreb/action-release@master
@@ -30,5 +36,5 @@ jobs:
         token: ${{ secrets.RELEASE_TOKEN }}
         tag: ${{ steps.get-version.outputs.version }}
         name: OpenMod Release v${{ steps.get-version.outputs.version }}
-        draft: false
-        prerelease: ${{ steps.semver_parser.outputs.prerelease > 0 }}
+        draft: true
+        prerelease: ${{ steps.check-prerelease.outputs.is_prerelease }}
