@@ -1,4 +1,9 @@
-﻿using System;
+﻿using HarmonyLib;
+using OpenMod.Common.Helpers;
+using OpenMod.NuGet;
+using SDG.Framework.Modules;
+using SDG.Unturned;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,11 +11,6 @@ using System.Net;
 using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
-using HarmonyLib;
-using OpenMod.Common.Helpers;
-using OpenMod.NuGet;
-using SDG.Framework.Modules;
-using SDG.Unturned;
 
 namespace OpenMod.Unturned.Module.Shared
 {
@@ -28,7 +28,7 @@ namespace OpenMod.Unturned.Module.Shared
         {
             var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
             var openModDirPath = Path.GetDirectoryName(Directory
-                .GetFiles(modulesDirectory, "OpenMod.Unturned.dll", SearchOption.AllDirectories)
+                .GetFiles(modulesDirectory, "OpenMod.Unturned.Module.Shared.dll", SearchOption.AllDirectories)
                 .FirstOrDefault() ?? throw new Exception("Failed to find OpenMod directory"))!;
 
             if (HasIncompatibleModules(Path.GetFileName(openModDirPath), modulesDirectory))
@@ -48,12 +48,9 @@ namespace OpenMod.Unturned.Module.Shared
                 InstallAssemblyResolver();
             }
 
-            foreach (var file in Directory.GetFiles(openModDirPath))
+            foreach (var file in Directory.GetFiles(openModDirPath, "*.dll"))
             {
-                if (file.EndsWith(".dll"))
-                {
-                    LoadAssembly(openModDirPath, file);
-                }
+                LoadAssembly(openModDirPath, file);
             }
 
             return true;
