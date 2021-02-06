@@ -21,7 +21,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <Nullable>enable</Nullable>	
     <WarningsAsErrors>nullable</WarningsAsErrors>
-    <NoWarn>$(NoWarn);NU1701;NU1702;CS0436</NoWarn>
+    <NoWarn>$(NoWarn);NU1701;NU1702;CS0436;CS1591</NoWarn>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
   
