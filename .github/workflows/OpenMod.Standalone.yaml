@@ -32,7 +32,7 @@ jobs:
     - uses: ./.github/actions/project-build
       id: project-build
       with:
-        project_path: unturned/OpenMod.Unturned.Module
+        project_path: standalone/OpenMod.Standalone
         nuget_push: false
     - name: Get Release
       if: github.event_name == 'release'
