@@ -5,7 +5,7 @@ using OpenMod.API.Prioritization;
 namespace OpenMod.Core.Commands
 {
     [Serializable]
-    public class RegisteredCommandData
+    public sealed class RegisteredCommandData
     {
         public string? Id { get; set; } = null!;
 

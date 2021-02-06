@@ -5,7 +5,7 @@ using OpenMod.API.Users;
 namespace OpenMod.Core.Users
 {
     [Serializable]
-    public class UsersData
+    public sealed class UsersData
     {
         public List<UserData>? Users { get; set; }
     }

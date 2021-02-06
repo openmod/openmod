@@ -4,12 +4,19 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API.Commands;
 using OpenMod.API.Eventing;
+using OpenMod.API.Localization;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Commands.Events;
+using OpenMod.Core.Cooldowns;
 using OpenMod.Core.Eventing;
+using OpenMod.Core.Ioc;
 using OpenMod.Core.Users;
+using OpenMod.Unturned.Configuration;
+using OpenMod.Unturned.RocketMod.Permissions;
 using OpenMod.Unturned.Users;
 using Rocket.API;
 using Rocket.Core;
@@ -22,6 +29,9 @@ namespace OpenMod.Unturned.RocketMod.Commands
     public class RocketModCommandEventListener : IEventListener<CommandExecutedEvent>
     {
         private const string s_RocketPrefix = "rocket:";
+        private readonly IOpenModUnturnedConfiguration m_Configuration;
+        private readonly ICommandCooldownStore m_CommandCooldownStore;
+        private readonly IOpenModStringLocalizer m_StringLocalizer;
         private static readonly MethodInfo s_CheckPermissionsMethod;
         private static readonly Regex s_PrefixRegex;
 
@@ -29,7 +39,17 @@ namespace OpenMod.Unturned.RocketMod.Commands
         {
             s_PrefixRegex = new Regex(Regex.Escape(s_RocketPrefix));
             s_CheckPermissionsMethod = typeof(UnturnedPermissions)
-                .GetMethod("CheckPermissions", BindingFlags.Static | BindingFlags.NonPublic);
+                .GetMethod("CheckPermissions", BindingFlags.Static | BindingFlags.NonPublic)!;
+        }
+
+        public RocketModCommandEventListener(
+            IOpenModUnturnedConfiguration configuration,
+            ICommandCooldownStore commandCooldownStore,
+            IOpenModStringLocalizer stringLocalizer)
+        {
+            m_Configuration = configuration;
+            m_CommandCooldownStore = commandCooldownStore;
+            m_StringLocalizer = stringLocalizer;
         }
 
         [EventListener(Priority = EventListenerPriority.Monitor)]
@@ -42,6 +62,11 @@ namespace OpenMod.Unturned.RocketMod.Commands
 
                 if (@event.CommandContext.Exception is CommandNotFoundException && R.Commands != null)
                 {
+                    if (!await CheckCooldownAsync(@event))
+                    {
+                        return;
+                    }
+
                     var commandAlias = @event.CommandContext.CommandAlias;
                     if (string.IsNullOrEmpty(commandAlias))
                     {
@@ -95,6 +120,63 @@ namespace OpenMod.Unturned.RocketMod.Commands
             }
 
             return Task().AsTask();
+        }
+
+        private const string RocketCooldownsFormat = "Rocket.{0}";
+        private async Task<bool> CheckCooldownAsync(CommandExecutedEvent @event)
+        {
+            const string rocketPrefix = "rocket:";
+
+            var commandContext = @event.CommandContext;
+            var commandAlias = commandContext.CommandAlias;
+            if (string.IsNullOrEmpty(commandAlias))
+            {
+                return true;
+            }
+
+            if (@event.Actor is not UnturnedUser user)
+            {
+                return true;
+            }
+
+            if (commandAlias.StartsWith(rocketPrefix))
+            {
+                commandAlias = commandAlias.Replace(rocketPrefix, string.Empty);
+            }
+
+            var steamPlayer = user.Player.SteamPlayer;
+            var rocketPlayer = UnturnedPlayer.FromSteamPlayer(steamPlayer);
+            var command = R.Commands.GetCommand(commandAlias.ToLower());
+            if (command == null || !R.Permissions.HasPermission(rocketPlayer, command))
+            {
+                return true;
+            }
+
+            var commandId = string.Format(RocketCooldownsFormat, command.Name);
+            var cooldownSpan = await m_CommandCooldownStore.GetCooldownSpanAsync(commandContext.Actor, commandId);
+
+            if (cooldownSpan.HasValue)
+            {
+                var lastExecuted = await m_CommandCooldownStore.GetLastExecutedAsync(@event.Actor, commandId);
+                if (lastExecuted.HasValue)
+                {
+                    var spanSinceLast = DateTime.Now - lastExecuted.Value;
+
+                    if (spanSinceLast < cooldownSpan)
+                    {
+                        @event.CommandContext.Exception = new UserFriendlyException(
+                            m_StringLocalizer["commands:errors:cooldown",
+                                new { TimeLeft = cooldownSpan - spanSinceLast }]);
+
+                        @event.ExceptionHandled = false;
+                        return false;
+                    }
+                }
+
+                await m_CommandCooldownStore.RecordExecutionAsync(commandContext.Actor, commandId, DateTime.Now);
+            }
+
+            return true;
         }
     }
 }

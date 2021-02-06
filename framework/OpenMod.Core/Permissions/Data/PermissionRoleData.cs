@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace OpenMod.Core.Permissions.Data
 {
     [Serializable]
-    public class PermissionRoleData
+    public sealed class PermissionRoleData
     {
         public string? Id { get; set; }
         public int Priority { get; set; }

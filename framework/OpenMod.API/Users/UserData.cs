@@ -7,7 +7,7 @@ namespace OpenMod.API.Users
     /// Serialized user data.
     /// </summary>
     [Serializable]
-    public class UserData
+    public sealed class UserData
     {
         /// <summary>
         /// Gets or sets the ID of the user.
