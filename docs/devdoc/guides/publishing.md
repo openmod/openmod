@@ -98,6 +98,10 @@ jobs:
       run: dotnet restore
     - name: Update version
       run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ github.event.inputs.version }}</Version>#\" YOURPLUGIN/YOURPLUGIN.csproj"  
+    - name: Update package version
+      run: "sed -i \"s#<PackageVersion>0.0.0</PackageVersion>#<PackageVersion>${{ github.event.inputs.version }}</PackageVersion>#\" YOURPLUGIN/YOURPLUGIN.csproj"  
+    - name: Update informational version
+      run: "sed -i \"s#<InformationalVersion>0.0.0</InformationalVersion>#<InformationalVersion>${{ github.event.inputs.version }}</InformationalVersion>#\" YOURPLUGIN/YOURPLUGIN.csproj"              
     - name: Build
       run: dotnet build YOURPLUGIN/YOURPLUGIN.csproj --configuration Release --no-restore
     - name: Push to NuGet
