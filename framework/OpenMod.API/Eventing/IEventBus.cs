@@ -38,7 +38,8 @@ namespace OpenMod.API.Eventing
         /// <param name="component">The component.</param>
         /// <param name="eventName">The event to subscribe to.</param>
         /// <param name="callback">The action to execute. See <see cref="EventCallback" /></param>
-        void Subscribe(IOpenModComponent component, string eventName, EventCallback callback);
+        /// <returns>A disposable that unsubscribes the callback when disposed.</returns>
+        IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback);
 
         /// <summary>
         /// <inheritdoc cref="Subscribe(IOpenModComponent,string,EventCallback)" />
@@ -46,7 +47,8 @@ namespace OpenMod.API.Eventing
         /// <param name="component">The component.</param>
         /// <param name="callback">The action to execute after all listeners were notified.</param>
         /// <typeparam name="TEvent">The event to subscribe to.</typeparam>
-        void Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback)
+        /// <returns>A disposable that unsubscribes the callback when disposed.</returns>
+        IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback)
             where TEvent : IEvent;
 
         /// <summary>
@@ -55,14 +57,16 @@ namespace OpenMod.API.Eventing
         /// <param name="component">The component.</param>
         /// <param name="callback">The action to execute after all listeners were notified.</param>
         /// <param name="eventType">The event to subscribe to.</param>
-        void Subscribe(IOpenModComponent component, Type eventType, EventCallback callback);
+        /// <returns>A disposable that unsubscribes the callback when disposed.</returns>
+        IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback);
 
         /// <summary>
         /// Finds and registers all <see cref="IEventListener"/>s.
         /// </summary>
         /// <param name="component">The component registering the event listeners.</param>
         /// <param name="assembly">The assembly to search for event listeners in.</param>
-        void Subscribe(IOpenModComponent component, Assembly assembly);
+        /// <returns>A disposable that unsubscribes the event listeners when disposed.</returns>
+        IDisposable Subscribe(IOpenModComponent component, Assembly assembly);
 
         /// <summary>
         /// Unsubscribes a component from all events.
