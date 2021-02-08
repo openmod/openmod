@@ -4,11 +4,11 @@ using OpenMod.Core.Eventing;
 
 namespace OpenMod.Core.Plugins.Events
 {
-    public class PluginLoadEvent : Event, ICancellableEvent
+    public class PluginLoadingEvent : Event, ICancellableEvent
     {
         public IOpenModPlugin Plugin { get; }
 
-        public PluginLoadEvent(IOpenModPlugin plugin)
+        public PluginLoadingEvent(IOpenModPlugin plugin)
         {
             Plugin = plugin;
         }
