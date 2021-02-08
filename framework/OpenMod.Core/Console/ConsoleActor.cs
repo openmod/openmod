@@ -20,7 +20,7 @@ namespace OpenMod.Core.Console
 
         public string Id { get; }
         public string Type { get; } = KnownActorTypes.Console;
-        public Dictionary<string, object> Data { get; } = new Dictionary<string, object>();
+        public Dictionary<string, object> Data { get; } = new();
         public string DisplayName { get; } = "Console";
 
         public Task PrintMessageAsync(string message)
@@ -32,6 +32,11 @@ namespace OpenMod.Core.Console
         {
             m_Logger.LogInformation(message);
             return Task.CompletedTask;
+        }
+
+        public string FullActorName
+        {
+            get { return DisplayName; }
         }
     }
 }

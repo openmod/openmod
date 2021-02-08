@@ -52,7 +52,7 @@ namespace OpenMod.Core.Users
             var created = false;
             if (!await m_DataStore.ExistsAsync(UsersKey))
             {
-                m_CachedUsersData = new UsersData { Users = new List<UserData>() };
+                m_CachedUsersData = new UsersData { Users = GetDefaultUsersData() };
 
                 await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
                 created = true;
@@ -87,7 +87,7 @@ namespace OpenMod.Core.Users
             {
                 throw new ArgumentException(nameof(userType));
             }
-            
+
             var usersData = await GetUsersDataAsync();
             return usersData.Users?.FirstOrDefault(d => (d.Type?.Equals(userType, StringComparison.OrdinalIgnoreCase) ?? false)
                                                         && (d.Id?.Equals(userId, StringComparison.OrdinalIgnoreCase) ?? false));
@@ -127,7 +127,7 @@ namespace OpenMod.Core.Users
                 return obj;
             }
 
-            if(dataObject == null)
+            if (dataObject == null)
             {
                 return default;
             }
@@ -196,13 +196,13 @@ namespace OpenMod.Core.Users
             }
 
             var usersData = await GetUsersDataAsync();
-            usersData.Users ??= new();
+            usersData.Users ??= GetDefaultUsersData();
 
             var idx = usersData.Users.FindIndex(c =>
                 (c.Type?.Equals(userData.Type, StringComparison.OrdinalIgnoreCase) ?? false) &&
                 (c.Id?.Equals(userData.Id, StringComparison.OrdinalIgnoreCase) ?? false));
 
-            usersData.Users.RemoveAll(c => 
+            usersData.Users.RemoveAll(c =>
                 (c.Type?.Equals(userData.Type, StringComparison.OrdinalIgnoreCase) ?? false) &&
                 (c.Id?.Equals(userData.Id, StringComparison.OrdinalIgnoreCase) ?? false));
 
@@ -222,6 +222,24 @@ namespace OpenMod.Core.Users
             await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
         }
 
+        private List<UserData> GetDefaultUsersData()
+        {
+            return new()
+            {
+                new()
+                {
+                    FirstSeen = null,
+                    LastSeen = null,
+                    LastDisplayName = "root",
+                    Id = "root",
+                    Type = KnownActorTypes.Rcon,
+                    Data = new Dictionary<string, object?>(),
+                    Permissions = new HashSet<string> { "*" },
+                    Roles = new HashSet<string>()
+                }
+            };
+        }
+
         private Task<UsersData> GetUsersDataAsync()
         {
             return Task.FromResult(m_CachedUsersData);
@@ -233,7 +251,7 @@ namespace OpenMod.Core.Users
             {
                 m_CachedUsersData = new UsersData
                 {
-                    Users = new List<UserData>()
+                    Users = GetDefaultUsersData()
                 };
 
                 await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
@@ -242,7 +260,7 @@ namespace OpenMod.Core.Users
 
             return await m_DataStore.LoadAsync<UsersData>(UsersKey) ?? new UsersData
             {
-                Users = new List<UserData>()
+                Users = GetDefaultUsersData()
             };
         }
 

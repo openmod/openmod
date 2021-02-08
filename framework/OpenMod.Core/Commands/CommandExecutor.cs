@@ -52,7 +52,7 @@ namespace OpenMod.Core.Commands
                 throw new Exception("Cannot execute command with null or empty args.");
             }
 
-            m_Logger.LogInformation($"Actor {actor.Type}/{actor.DisplayName} ({actor.Id}) has executed command \"{string.Join(" ", args)}\".");
+            m_Logger.LogInformation($"Actor {actor.Type}/{actor.FullActorName} has executed command \"{string.Join(" ", args)}\".");
 
             var currentCommandAccessor = m_LifetimeScope.Resolve<ICurrentCommandContextAccessor>();
             var commandContextBuilder = m_LifetimeScope.Resolve<ICommandContextBuilder>();

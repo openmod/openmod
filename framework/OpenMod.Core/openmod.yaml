@@ -1,17 +1,67 @@
-﻿hotreloading: true # Allows to update plugins or OpenMod without restarting
-console: # Setting these to true will likely disable your console ability if you're using a web-based console
+﻿# Allows to update plugins or OpenMod without restarting
+hotreloading: true
+
+# Enables advanced console input. May cause issues with some web consoles.
+console: 
   autocomplete: false
   history: false
+
+# NuGet related configurations. See packages/NuGet.Config for more configuration options such as feeds to use.
 nuget:
+  # The following OpenMod commands are restricted to some users even if they have permissions.
+  # By default "/openmod install" can only be used from console while the other commands can be used ingame.
   install:
     allowedActors:
       - Console
+      - Rcon
+     # Uncommenting the line below will allow players to execute "/openmod install" ingame.
+     # It is dangerous as your admins could use it to install any plugins including malicious ones.
+     # Only allow if you know what you are doing and and if trust your admins!
+     # - Player 
   remove:
     allowedActors:
       - Console
       - Player
+      - Rcon
   update:
     allowedActors:
       - Console
       - Player
-  tryAutoInstallMissingDependencies: false #Try to automatically install missing plugin dependencies
+      - Rcon
+  # Try to automatically install missing plugin dependencies
+  tryAutoInstallMissingDependencies: false
+
+# RCON related configurations
+rcon:
+  # Use 0.0.0.0 if you want to allow anyone to connect to RCON. This will make RCON listen on all interfaces.
+  # Use 127.0.0.1 if you only want to allow connections from the same machine to RCON.
+  # In other words, when using 127.0.0.1, all connection attempts over the internet or LAN will get rejected.
+  bind: 0.0.0.0
+
+  # RCON accounts. Permissions are defined openmod.users.yaml. By default the root account has all permissions.
+  #
+  # To login with RCON protocols that do not support usernames (e.g. Minecraft and srcds),
+  #    enter "username:password" (without quotes) as password.
+  # For example, if you use the Minecraft RCON protocol, use "root:ChangeThisToEnableRcon" as password.
+  accounts:
+  - id: root
+    password: ChangeThisToEnableRcon
+  - id: someoneelse
+    password: ChangeThisToEnableRcon
+
+  # Minecraft compatible RCON client
+  # Some clients:
+  #   mcrcon (Windows): https://sourceforge.net/projects/mcrcon/
+  #   hypercon (Android): https://play.google.com/store/apps/details?id=com.jakubtomana.hypercon.minecraft
+  #   etc.
+  minecraft:
+    encoding: UTF8
+    port: 25575
+    enabled: false
+
+  # Valve Source Dedicated Servers (srcds) compatible RCON
+  # https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
+  # Experimental support
+  srcds:
+    port: 27017
+    enabled: false

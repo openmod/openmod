@@ -7,8 +7,8 @@ using OpenMod.API.Eventing;
 using OpenMod.API.Jobs;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
+using OpenMod.Core.Events;
 using OpenMod.Core.Helpers;
-using OpenMod.Runtime.Events;
 using SmartFormat;
 
 namespace OpenMod.Runtime

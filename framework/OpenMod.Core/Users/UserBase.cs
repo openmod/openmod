@@ -22,6 +22,14 @@ namespace OpenMod.Core.Users
 
         public virtual string DisplayName { get; protected set; } = null!;
 
+        public virtual string FullActorName
+        {
+            get
+            {
+                return $"{DisplayName} ({Id})";
+            }
+        }
+
         public virtual IUserProvider? Provider { get; }
 
         public virtual IUserSession? Session { get; protected set; }

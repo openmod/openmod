@@ -19,7 +19,15 @@ namespace OpenMod.Core.Jobs
 
         public string Type { get; } = KnownActorTypes.Console;
 
-        public string DisplayName { get; } = "OpenMod Task Executor";
+        public string DisplayName { get; } = "OpenModTaskExecutor";
+
+        public string FullActorName
+        {
+            get
+            {
+                return DisplayName;
+            }
+        }
 
         public Task PrintMessageAsync(string message)
         {

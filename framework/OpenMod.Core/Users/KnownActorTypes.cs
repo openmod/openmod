@@ -5,5 +5,7 @@
         public const string Player = "player";
 
         public const string Console = "console";
+
+        public const string Rcon = "rcon";
     }
 }

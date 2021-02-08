@@ -180,13 +180,21 @@ namespace OpenMod.Core.Plugins
             commandContext.DisposeAsync().GetAwaiter().GetResult();
         }
 
-        public class PseudoActor: ICommandActor
+        public class PseudoActor : ICommandActor
         {
             public string Id { get; } = "PseudoActor";
 
             public string Type { get; } = KnownActorTypes.Console;
 
             public string DisplayName { get; } = "PseudoActor";
+
+            public string FullActorName
+            {
+                get
+                {
+                    return DisplayName;
+                }
+            }
 
             public Task PrintMessageAsync(string message)
             {
