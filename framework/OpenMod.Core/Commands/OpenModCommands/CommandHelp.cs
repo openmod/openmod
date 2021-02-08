@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Localization;
 using OpenMod.API.Permissions;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 // ReSharper disable PossibleMultipleEnumeration
 
@@ -21,7 +21,6 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [CommandSyntax("[command | page number]")]
     public class CommandHelp : Command
     {
-        private readonly IRuntime m_Runtime;
         private readonly ICommandStore m_CommandStore;
         private readonly IPermissionRegistry m_PermissionRegistry;
         private readonly ICommandPermissionBuilder m_CommandPermissionBuilder;
@@ -38,10 +37,8 @@ namespace OpenMod.Core.Commands.OpenModCommands
             ICommandContextBuilder commandContextBuilder,
             IOpenModStringLocalizer stringLocalizer) : base(serviceProvider)
         {
-            m_Runtime = runtime;
-
             // get global permission checker instead of scoped
-            m_PermissionChecker = m_Runtime.Host!.Services.GetRequiredService<IPermissionChecker>();
+            m_PermissionChecker = runtime.Host!.Services.GetRequiredService<IPermissionChecker>();
 
             m_CommandStore = commandStore;
             m_PermissionRegistry = permissionRegistry;
@@ -53,11 +50,10 @@ namespace OpenMod.Core.Commands.OpenModCommands
         protected override async Task OnExecuteAsync()
         {
             var commands = await m_CommandStore.GetCommandsAsync();
-            var totalCount = commands.Count;
 
-            const int itemsPerPage = 10;
+            const int c_ItemsPerPage = 10;
 
-            int currentPage = 1;
+            var currentPage = 1;
             if (Context.Parameters.Length == 0 || Context.Parameters.TryGet(0, out currentPage))
             {
                 if (currentPage < 1)
@@ -65,38 +61,38 @@ namespace OpenMod.Core.Commands.OpenModCommands
                     throw new CommandWrongUsageException(Context);
                 }
 
-                var pageCommands = commands
-                    .Skip(itemsPerPage * (currentPage - 1))
-                    .Take(itemsPerPage);
+                var parents = commands.Where(x => x.ParentId is null).ToList();
 
-                await PrintPageAsync(currentPage, (int)Math.Ceiling((double)totalCount / itemsPerPage), pageCommands);
+                var pageCommands = parents
+                    .Skip(c_ItemsPerPage * (currentPage - 1))
+                    .Take(c_ItemsPerPage);
+
+                await PrintPageAsync(currentPage, (int)Math.Ceiling((double)parents.Count / c_ItemsPerPage), pageCommands);
             }
             else if (Context.Parameters.Length > 0)
             {
-                var context = m_CommandContextBuilder.CreateContext(Context.Actor, Context.Parameters.ToArray(), Context.CommandPrefix, commands);
-                var permission = GetPermission(context.CommandRegistration!, commands);
-
+                await using var context = m_CommandContextBuilder.CreateContext(Context.Actor, Context.Parameters.ToArray(), string.Empty, commands);
                 if (context.CommandRegistration == null)
                 {
                     await PrintAsync(m_StringLocalizer["commands:errors:not_found",
-                        arguments: new { CommandName = context.GetCommandLine(includeArguments: false) }],
-                        color: Color.Red);
+                        new { CommandName = context.GetCommandLine(includeArguments: false) }], Color.Red);
                     return;
                 }
 
-                if (!string.IsNullOrEmpty(permission) && await m_PermissionChecker.CheckPermissionAsync(Context.Actor, permission!) != PermissionGrantResult.Grant)
+                var permission = GetPermission(context.CommandRegistration, commands);
+                if (!string.IsNullOrEmpty(permission)
+                    && await m_PermissionChecker.CheckPermissionAsync(Context.Actor, permission!) != PermissionGrantResult.Grant)
                 {
                     throw new NotEnoughPermissionException(m_StringLocalizer, permission!);
                 }
 
                 await PrintCommandHelpAsync(context, permission, commands);
-                await context.DisposeAsync();
             }
         }
 
         protected virtual string? GetPermission(ICommandRegistration commandRegistration, IReadOnlyCollection<ICommandRegistration> commands)
         {
-            var permission = m_CommandPermissionBuilder.GetPermission(commandRegistration, commands).Split(':')[1];
+            var permission = m_CommandPermissionBuilder.GetPermission(commandRegistration, commands)?.Split(':')?[1];
             if (permission == null)
             {
                 return null;
@@ -111,7 +107,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
             return $"{registeredPermission.Owner.OpenModComponentId}:{registeredPermission.Permission}";
         }
 
-        private async Task PrintCommandHelpAsync(ICommandContext context, string? permission, IEnumerable<ICommandRegistration> commands)
+        private async Task PrintCommandHelpAsync(ICommandContext context, string? permission, IReadOnlyCollection<ICommandRegistration> commands)
         {
             var usage = $"Usage: {context.CommandRegistration!.Name}";
             if (!string.IsNullOrEmpty(context.CommandRegistration.Syntax))
@@ -137,7 +133,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
         }
 
         private async Task PrintChildrenAsync(ICommandRegistration registration,
-            IEnumerable<ICommandRegistration> commands, string intent, bool isLast)
+            IReadOnlyCollection<ICommandRegistration> commands, string intent, bool isLast)
         {
             var children = commands
                 .Where(d => d.ParentId?.Equals(registration.Id, StringComparison.OrdinalIgnoreCase) == true)
@@ -149,7 +145,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
             if (isLast)
             {
                 sb.Append("┗ ");
-                intent += " ";
+                intent += "  ";
             }
             else
             {
@@ -188,14 +184,13 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
             foreach (var command in page)
             {
-                await PrintAsync(GetCommandUsage(command, Context.CommandPrefix));
+                await PrintAsync(GetCommandUsage(command));
             }
         }
 
-        public string GetCommandUsage(ICommandRegistration command, string prefix)
+        public string GetCommandUsage(ICommandRegistration command)
         {
-            return prefix
-                   + command.Name.ToLower()
+            return command.Name.ToLower()
                    + (string.IsNullOrEmpty(command.Syntax) ? string.Empty : " " + command.Syntax)
                    + (string.IsNullOrEmpty(command.Description) ? string.Empty : ": " + command.Description);
         }
