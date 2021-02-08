@@ -74,8 +74,9 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 await using var context = m_CommandContextBuilder.CreateContext(Context.Actor, Context.Parameters.ToArray(), string.Empty, commands);
                 if (context.CommandRegistration == null)
                 {
-                    throw new CommandNotFoundException(m_StringLocalizer["commands:errors:not_found",
-                        new { CommandName = context.GetCommandLine(includeArguments: false) }]);
+                    await PrintAsync(m_StringLocalizer["commands:errors:not_found",
+                        new { CommandName = context.GetCommandLine(includeArguments: false) }], Color.Red);
+                    return;
                 }
 
                 var permission = GetPermission(context.CommandRegistration, commands);
