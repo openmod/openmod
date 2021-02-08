@@ -17,7 +17,7 @@ namespace OpenMod.Core.Plugins
         [OpenModInternal]
         public sealed override async Task LoadAsync()
         {
-            var @event = new PluginLoadEvent(this);
+            var @event = new PluginLoadingEvent(this);
             await EventBus.EmitAsync(this, this, @event);
 
             if (@event.IsCancelled)
@@ -39,7 +39,7 @@ namespace OpenMod.Core.Plugins
         [OpenModInternal]
         public sealed override async Task UnloadAsync()
         {
-            await EventBus.EmitAsync(this, this, new PluginUnloadEvent(this));
+            await EventBus.EmitAsync(this, this, new PluginUnloadingEvent(this));
 
             await base.UnloadAsync();
             await OnUnloadAsync();
