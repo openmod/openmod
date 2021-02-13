@@ -18,3 +18,11 @@ rocketmodIntegration:
   # - Separate:          OpenMod and RocketMod will not have synced economy
   economySystem: RocketMod_Uconomy
 
+# RCON related configurations.
+rcon:
+  # RocketMod compatible RCON. Replaces RocketMod's own RCON.
+  # For a list of login accounts and for bind see openmod.yaml.
+  # If RocketMod is installed, the settings in Rocket.config.xml will override this.
+  rocketmod:
+    port: 27115
+    enabled: false

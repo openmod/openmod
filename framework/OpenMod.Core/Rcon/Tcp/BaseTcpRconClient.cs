@@ -197,7 +197,7 @@ namespace OpenMod.Core.Rcon.Tcp
 
         protected virtual Task OnConnectionClosedAsync(ConnectionCloseReason connectionCloseReason)
         {
-            if (m_IsDisposed)
+            if (m_IsDisposed || m_Runtime.IsDisposing || !m_Runtime.IsComponentAlive)
             {
                 return Task.CompletedTask;
             }
@@ -207,7 +207,7 @@ namespace OpenMod.Core.Rcon.Tcp
 
         protected abstract Task OnDataReceivedAsync(ArraySegment<byte> data);
 
-        protected virtual async Task OnExecuteCommand(string command)
+        protected virtual async Task OnExecuteCommandAsync(string command)
         {
             if (!IsAuthenticated)
             {
@@ -232,11 +232,21 @@ namespace OpenMod.Core.Rcon.Tcp
             }
         }
 
-        protected virtual async Task OnAuthenticatingAsync(string username, string password)
+        protected async Task<bool> DisconnectOnFailedLoginAttemptsAsync()
         {
             if (m_FailedAuthAttempts >= 3)
             {
                 await DisconnectAsync("Authentication failed.");
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual async Task OnAuthenticatingAsync(string username, string password)
+        {
+            if (await DisconnectOnFailedLoginAttemptsAsync())
+            {
                 return;
             }
 

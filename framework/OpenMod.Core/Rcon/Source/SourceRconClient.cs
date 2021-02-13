@@ -94,7 +94,7 @@ namespace OpenMod.Core.Rcon.Source
                     }
 
                     _latestCommandId = packet.RequestId;
-                    await OnExecuteCommand(packet.Body!);
+                    await OnExecuteCommandAsync(packet.Body!);
 
                     var message = "Command executed.";
                     if (m_CommandMessageBuffer.Count > 0)

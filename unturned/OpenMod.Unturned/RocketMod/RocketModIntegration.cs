@@ -12,6 +12,7 @@ using OpenMod.Unturned.RocketMod.Events;
 using OpenMod.Unturned.RocketMod.Patches;
 using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
+using Rocket.Core.RCON;
 using Rocket.Unturned;
 using SDG.Unturned;
 
@@ -169,9 +170,19 @@ namespace OpenMod.Unturned.RocketMod
                 PatchInitialize();
                 PatchLogging();
                 PatchPluginsLoaded();
+                PatchRcon();
             }
 
             m_Installed = true;
+        }
+
+        private void PatchRcon()
+        {
+            var awakeMethod = typeof(RCONServer).GetMethod("Awake", BindingFlags.Public | BindingFlags.Instance);
+            m_HarmonyInstance!.NopPatch(awakeMethod);
+
+            var destroyMethod = typeof(RCONServer).GetMethod("OnDestroy", BindingFlags.NonPublic | BindingFlags.Instance);
+            m_HarmonyInstance!.NopPatch(destroyMethod);
         }
 
         private void PatchPluginsLoaded()
@@ -206,7 +217,7 @@ namespace OpenMod.Unturned.RocketMod
 
         private void OnRocketModIntialized()
         {
-            AsyncHelper.RunSync(async () => await m_EventBus.EmitAsync(m_RocketModComponent, this, new RocketModReadyEvent()));
+            AsyncHelper.RunSync(async () => await m_EventBus.EmitAsync(m_RocketModComponent, this, new RocketModInitializedEvent()));
             m_Logger.LogInformation("RocketMod is ready.");
             s_IsReady = true;
         }

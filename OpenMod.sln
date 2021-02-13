@@ -71,7 +71,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Rust.Oxide.Tests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Common", "framework\OpenMod.Common\OpenMod.Common.csproj", "{ABD8C0E6-6DD7-413A-BDDD-7E55927B7F84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Unturned.Module.Bootstrapper", "unturned\OpenMod.Unturned.Module.Bootstrapper\OpenMod.Unturned.Module.Bootstrapper.csproj", "{0A7396D2-E877-4671-9647-6DBAE661470A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Unturned.Module.Bootstrapper", "unturned\OpenMod.Unturned.Module.Bootstrapper\OpenMod.Unturned.Module.Bootstrapper.csproj", "{0A7396D2-E877-4671-9647-6DBAE661470A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3EE05A39-E395-49DE-98CC-3D0CA689E172}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

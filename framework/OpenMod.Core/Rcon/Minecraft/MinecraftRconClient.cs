@@ -92,7 +92,7 @@ namespace OpenMod.Core.Rcon.Minecraft
                 case MinecraftPacketType.Command:
                     _latestCommandId = packet.RequestId;
                     var command = m_Encoding.GetString(packet.Payload!);
-                    await OnExecuteCommand(command);
+                    await OnExecuteCommandAsync(command);
 
                     var message = "Command executed.";
                     if (m_CommandMessageBuffer.Count > 0)
