@@ -12,7 +12,7 @@ jobs:
     args:
       commands:
       - openmod upgrade
-      - openmod restart
+      - restart
     enabled: true  
 ```
 
