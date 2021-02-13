@@ -1,8 +1,8 @@
 ﻿OpenMod for Unturned
 --------------------
-https://github.com/openmod/OpenMod
+https://github.com/openmod/openmod
 
-For latest downloads, visit https://github.com/openmod/OpenMod/releases
+For latest downloads, visit https://github.com/openmod/openmod/releases
 
 Installation
 ------------
