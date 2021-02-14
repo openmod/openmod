@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -6,14 +8,12 @@ using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.Common.Helpers;
 using OpenMod.Core.Ioc;
-using AssemblyExtensions = OpenMod.Common.Helpers.AssemblyExtensions;
 
 namespace OpenMod.Core.Commands
 {
     [OpenModInternal]
     public class OpenModComponentCommandSource : ICommandSource
     {
-
         private readonly ILogger m_Logger;
         private readonly IOpenModComponent m_OpenModComponent;
         private readonly List<ICommandRegistration> m_Commands;
@@ -51,45 +51,30 @@ namespace OpenMod.Core.Commands
                 m_Commands.Add(registatration);
             }
 
-            try
+            foreach (var type in assembly.GetLoadableTypes())
             {
-                foreach (var type in assembly.GetLoadableTypes())
-                {
-                    ScanTypeForCommands(type);
-                }
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                foreach (var type in ex.Types)
-                {
-                    if (type == null)
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        ScanTypeForCommands(type);
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-                }
+                ScanTypeForCommands(type);
             }
         }
 
         private void ScanTypeForCommands(IReflect type)
         {
-            foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Static))
+            try
             {
-                var commandAttribute = method.GetCustomAttribute<CommandAttribute>();
-                if (commandAttribute == null)
+                foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Static))
                 {
-                    continue;
-                }
+                    var commandAttribute = method.GetCustomAttribute<CommandAttribute>();
+                    if (commandAttribute == null)
+                    {
+                        continue;
+                    }
 
-                m_Commands.Add(new OpenModComponentBoundCommandRegistration(m_OpenModComponent, method));
+                    m_Commands.Add(new OpenModComponentBoundCommandRegistration(m_OpenModComponent, method));
+                }
+            }
+            catch(Exception ex)
+            {
+                m_Logger.LogDebug(ex, $"Exception in ScanTypeForCommands for type: {type}");
             }
         }
 
