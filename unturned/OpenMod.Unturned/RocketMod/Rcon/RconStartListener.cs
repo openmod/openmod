@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.Core.Events;
+using OpenMod.Core.Ioc;
 using OpenMod.Unturned.Configuration;
 using OpenMod.Unturned.RocketMod.Events;
 using Rocket.Core;
@@ -17,7 +18,7 @@ namespace OpenMod.Unturned.RocketMod.Rcon
         private readonly IRuntime m_Runtime;
         private readonly IConfiguration m_OpenModConfiguration;
         private readonly IConfiguration m_UnturnedConfiguration;
-
+        private static bool s_RocketInitialized;
         public RconStartListener(
             IEventBus eventBus,
             IRuntime runtime,
@@ -30,10 +31,15 @@ namespace OpenMod.Unturned.RocketMod.Rcon
             m_UnturnedConfiguration = unturnedConfiguration.Configuration;
         }
 
-        public Task HandleEventAsync(object sender, OpenModInitializedEvent @event)
+        public Task HandleEventAsync(object? sender, OpenModInitializedEvent @event)
         {
             if (RocketModIntegration.IsRocketModUnturnedLoaded(out _))
             {
+                if (s_RocketInitialized)
+                {
+                    StartRocketModRconWithRocketModSettings();
+                }
+
                 // Use RocketModInitializedEvent instead
                 return Task.CompletedTask;
             }
@@ -51,28 +57,35 @@ namespace OpenMod.Unturned.RocketMod.Rcon
             return Task.CompletedTask;
         }
 
-        public Task HandleEventAsync(object sender, RocketModInitializedEvent @event)
+        public Task HandleEventAsync(object? sender, RocketModInitializedEvent @event)
+        {
+            s_RocketInitialized = true;
+            StartRocketModRconWithRocketModSettings();
+            return Task.CompletedTask;
+        }
+
+        private void StartRocketModRconWithRocketModSettings()
         {
             var settings = R.Settings.Instance.RCON;
             if (!settings.Enabled)
             {
-                return Task.CompletedTask;
+                return;
             }
 
             var bind = !settings.EnableMaxGlobalConnections || settings.MaxGlobalConnections == 0
-                ? "0.0.0.0"
-                : "127.0.0.1";
+                ? "127.0.0.1"
+                : "0.0.0.0";
             var port = settings.Port;
 
             StartRocketModRcon(bind, port);
-            return Task.CompletedTask;
+            s_RocketInitialized = true;
         }
 
         private void StartRocketModRcon(string bind, int port)
         {
             var cancellationToken = GetCancellationToken();
             var endpoint = new IPEndPoint(IPAddress.Parse(bind), port);
-            var rocketRconListener = new RocketModRconHost(m_Runtime.Host!.Services);
+            var rocketRconListener = ActivatorUtilitiesEx.CreateInstance<RocketModRconHost>(m_Runtime.LifetimeScope);
             Task.Run(() => rocketRconListener.StartListeningAsync(endpoint, cancellationToken), cancellationToken);
         }
 

@@ -10,6 +10,6 @@ namespace OpenMod.Core.Rcon
 
         Task StartListeningAsync(IPEndPoint bind, CancellationToken cancellationToken = default);
 
-        Task StopListeningAsync(CancellationToken cancellationToken = default);
+        Task StopListeningAsync();
     }
 }

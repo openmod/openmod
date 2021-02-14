@@ -310,22 +310,18 @@ namespace OpenMod.Core.Rcon.Tcp
             return SendMessageAsync("Authenticated.");
         }
 
-        public virtual async ValueTask DisposeAsync(CancellationToken cancellationToken)
+        public virtual ValueTask DisposeAsync(CancellationToken cancellationToken)
         {
             if (m_IsDisposed)
             {
-                return;
+                return default;
             }
 
             TcpClient.Dispose();
             m_Stream = null;
 
-            if (m_ListenerTask != null)
-            {
-                await Task.WhenAny(m_ListenerTask, Task.Delay(-1, cancellationToken));
-            }
-
             m_IsDisposed = true;
+            return default;
         }
 
         public ValueTask DisposeAsync()

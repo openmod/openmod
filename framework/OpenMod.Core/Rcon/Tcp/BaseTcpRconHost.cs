@@ -15,12 +15,12 @@ using OpenMod.Core.Rcon.Events;
 
 namespace OpenMod.Core.Rcon.Tcp
 {
-    public abstract class BaseTcpRconHost<TClient> : IRconHost where TClient : class, IRconClient
+    public abstract class BaseTcpRconHost<TClient> : IRconHost, IAsyncDisposable where TClient : class, IRconClient
     {
         public IPEndPoint? Bind { get; private set; }
         public bool IsListening
         {
-            get { return m_Listener != null; }
+            get { return m_Listener != null && (!m_ListenerTask?.IsCompleted ?? false) && !m_IsStopped; }
         }
 
         private readonly IEventBus m_EventBus;
@@ -53,7 +53,7 @@ namespace OpenMod.Core.Rcon.Tcp
             m_IsStopped = false;
             m_Listener = new TcpListener(Bind);
 
-            cancellationToken.Register(() => { m_IsStopped = true; m_Listener.Stop(); }); //Stop is fire and forget.
+            cancellationToken.Register(() => { m_IsStopped = true; });
 
             var task = Task.Run(async () =>
             {
@@ -62,6 +62,7 @@ namespace OpenMod.Core.Rcon.Tcp
                 try
                 {
                     m_Listener.Start();
+                    m_Logger.LogInformation($"{GetType().Name} started listening on {Bind.Address}:{Bind.Port}.");
 
                     while (true)
                     {
@@ -148,6 +149,8 @@ namespace OpenMod.Core.Rcon.Tcp
                     m_Listener = null;
                     m_IsStopped = true;
                 }
+
+                m_Logger.LogInformation($"{GetType().Name} stopped.");
             }, cancellationToken);
 
             m_ListenerTask = task;
@@ -171,22 +174,27 @@ namespace OpenMod.Core.Rcon.Tcp
             return client;
         }
 
-        public virtual async Task StopListeningAsync(CancellationToken cancellationToken = default)
+        public virtual Task StopListeningAsync()
         {
-            if (m_IsStopped || m_Listener == null || (m_ListenerTask?.IsCompleted ?? true))
+            if (!IsListening)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             m_IsStopped = true;
-            m_Listener.Stop();
-
-            await Task.WhenAny(m_ListenerTask, Task.Delay(-1, cancellationToken));
+            m_Listener?.Stop();
+            m_Listener = null;
+            return Task.CompletedTask;
         }
 
         protected virtual Task<TClient> CreateRconClientAsync(TcpClient tcpClient)
         {
             return Task.FromResult(ActivatorUtilitiesEx.CreateInstance<TClient>(m_LifetimeScope, tcpClient, this));
+        }
+
+        public virtual async ValueTask DisposeAsync()
+        {
+            await StopListeningAsync();
         }
     }
 }

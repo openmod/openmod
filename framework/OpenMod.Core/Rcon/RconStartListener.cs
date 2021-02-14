@@ -7,6 +7,7 @@ using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.Core.Eventing;
 using OpenMod.Core.Events;
+using OpenMod.Core.Ioc;
 using OpenMod.Core.Rcon.Minecraft;
 using OpenMod.Core.Rcon.Source;
 
@@ -30,17 +31,16 @@ namespace OpenMod.Core.Rcon
         }
 
         [EventListener(Priority = EventListenerPriority.Lowest)] // Lowest so it starts up as early as possible
-        public Task HandleEventAsync(object sender, OpenModInitializedEvent @event)
+        public Task HandleEventAsync(object? sender, OpenModInitializedEvent @event)
         {
             var bind = m_OpenModConfiguration.GetSection("rcon:bind").Get<string>();
-
             var cancellationToken = GetCancellationToken();
             var sourceRconEnabled = m_OpenModConfiguration.GetSection("rcon:srcds:enabled").Get<bool>();
             if (sourceRconEnabled)
             {
                 var port = m_OpenModConfiguration.GetSection("rcon:srcds:port").Get<int>();
                 var endpoint = new IPEndPoint(IPAddress.Parse(bind), port);
-                var sourceRconListener = new SourceRconHost(m_Runtime.Host!.Services);
+                var sourceRconListener = ActivatorUtilitiesEx.CreateInstance<SourceRconHost>(m_Runtime.LifetimeScope);
 
                 Task.Run(() => sourceRconListener.StartListeningAsync(endpoint, cancellationToken), cancellationToken);
             }
@@ -50,7 +50,7 @@ namespace OpenMod.Core.Rcon
             {
                 var port = m_OpenModConfiguration.GetSection("rcon:minecraft:port").Get<int>();
                 var endpoint = new IPEndPoint(IPAddress.Parse(bind), port);
-                var minecraftRconListener = new MinecraftRconHost(m_Runtime.Host!.Services);
+                var minecraftRconListener = ActivatorUtilitiesEx.CreateInstance<MinecraftRconHost>(m_Runtime.LifetimeScope);
 
                 Task.Run(() => minecraftRconListener.StartListeningAsync(endpoint, cancellationToken), cancellationToken);
             }
