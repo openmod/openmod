@@ -355,14 +355,14 @@ namespace OpenMod.Runtime
             m_Logger = m_LoggerFactory.CreateLogger<Runtime>();
         }
 
-        public Task ShutdownAsync()
+        public async Task ShutdownAsync()
         {
             IsDisposing = true;
             m_Logger.LogInformation("OpenMod is shutting down...");
+            await LifetimeScope.DisposeAsync();
             Host?.Dispose();
             Status = RuntimeStatus.Unloaded;
             Log.CloseAndFlush();
-            return Task.CompletedTask;
         }
     }
 }
