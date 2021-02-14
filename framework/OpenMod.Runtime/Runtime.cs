@@ -7,14 +7,12 @@ using System.Resources;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Autofac.Util;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
-using OpenMod.API.Eventing;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.Common.Hotloading;
@@ -29,6 +27,7 @@ using Serilog;
 using Serilog.Extensions.Logging;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using AssemblyExtensions = OpenMod.Common.Helpers.AssemblyExtensions;
 
 namespace OpenMod.Runtime
 {
@@ -104,7 +103,8 @@ namespace OpenMod.Runtime
 
                 var hostInformationType = openModHostAssemblies
                     .Select(asm =>
-                        asm.GetLoadableTypes().FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
+                        AssemblyExtensions.GetLoadableTypes(asm)
+                            .FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
                     .LastOrDefault(d => d != null);
 
                 if (hostInformationType == null)

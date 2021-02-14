@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Autofac.Util;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
+using AssemblyExtensions = OpenMod.Common.Helpers.AssemblyExtensions;
 
 namespace OpenMod.Core.Ioc
 {
@@ -17,7 +17,7 @@ namespace OpenMod.Core.Ioc
             List<Type> types;
             try
             {
-                types = assembly.GetLoadableTypes()
+                types = AssemblyExtensions.GetLoadableTypes(assembly)
                     .Where(d => d.IsClass && !d.IsInterface && !d.IsAbstract)
                     .ToList();
             }

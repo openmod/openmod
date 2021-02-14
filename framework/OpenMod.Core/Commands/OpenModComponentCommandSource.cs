@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
-using Autofac.Util;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.Common.Helpers;
 using OpenMod.Core.Ioc;
+using AssemblyExtensions = OpenMod.Common.Helpers.AssemblyExtensions;
 
 namespace OpenMod.Core.Commands
 {
@@ -53,7 +53,7 @@ namespace OpenMod.Core.Commands
 
             try
             {
-                foreach (var type in assembly.GetLoadableTypes())
+                foreach (var type in AssemblyExtensions.GetLoadableTypes(assembly))
                 {
                     ScanTypeForCommands(type);
                 }
