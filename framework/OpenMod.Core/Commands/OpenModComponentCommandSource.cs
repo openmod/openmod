@@ -53,7 +53,7 @@ namespace OpenMod.Core.Commands
 
             try
             {
-                foreach (var type in AssemblyExtensions.GetLoadableTypes(assembly))
+                foreach (var type in assembly.GetLoadableTypes())
                 {
                     ScanTypeForCommands(type);
                 }
@@ -67,7 +67,14 @@ namespace OpenMod.Core.Commands
                         continue;
                     }
 
-                    ScanTypeForCommands(type);
+                    try
+                    {
+                        ScanTypeForCommands(type);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             }
         }
