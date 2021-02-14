@@ -45,7 +45,7 @@ namespace OpenMod.Unturned.RocketMod
         }
 
         [EventListener]
-        public Task HandleEventAsync(object sender, RocketModPluginsLoadedEvent @event)
+        public Task HandleEventAsync(object? sender, RocketModPluginsLoadedEvent @event)
         {
             var permissionSystem = m_UnturnedConfiguration.Configuration
                 .GetSection("rocketmodIntegration:permissionSystem")

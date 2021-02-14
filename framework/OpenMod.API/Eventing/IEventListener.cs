@@ -17,6 +17,6 @@ namespace OpenMod.API.Eventing
         /// </summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="event">The event object.</param>
-        Task HandleEventAsync(object sender, TEvent @event);
+        Task HandleEventAsync(object? sender, TEvent @event);
     }
 }

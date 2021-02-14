@@ -37,7 +37,7 @@ namespace OpenMod.Unturned.Plugins
                 select plugin.DisplayName);
         }
 
-        Task IEventListener<PluginLoadedEvent>.HandleEventAsync(object sender, PluginLoadedEvent @event)
+        Task IEventListener<PluginLoadedEvent>.HandleEventAsync(object? sender, PluginLoadedEvent @event)
         {
             var advertisePlugins = m_UnturnedConfiguration.Configuration.GetSection("advertisePlugins").Get<bool>();
             if (advertisePlugins)
@@ -48,7 +48,7 @@ namespace OpenMod.Unturned.Plugins
             return Task.CompletedTask;
         }
 
-        Task IEventListener<PluginUnloadedEvent>.HandleEventAsync(object sender, PluginUnloadedEvent @event)
+        Task IEventListener<PluginUnloadedEvent>.HandleEventAsync(object? sender, PluginUnloadedEvent @event)
         {
             PluginAdvertising.Get().RemovePlugin(@event.Plugin.DisplayName);
             return Task.CompletedTask;

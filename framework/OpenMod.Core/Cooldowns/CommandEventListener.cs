@@ -22,7 +22,7 @@ namespace OpenMod.Core.Cooldowns
         }
 
         [EventListener(Priority = EventListenerPriority.High)]
-        public async Task HandleEventAsync(object sender, CommandExecutingEvent @event)
+        public async Task HandleEventAsync(object? sender, CommandExecutingEvent @event)
         {
             var id = @event.CommandContext.CommandRegistration?.Id;
             if (id == null)
@@ -47,7 +47,7 @@ namespace OpenMod.Core.Cooldowns
             }
         }
 
-        public async Task HandleEventAsync(object sender, CommandExecutedEvent @event)
+        public async Task HandleEventAsync(object? sender, CommandExecutedEvent @event)
         {
             if (@event.CommandContext.CommandRegistration == null)
             {

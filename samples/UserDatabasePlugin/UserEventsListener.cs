@@ -18,12 +18,12 @@ namespace UserDatabasePlugin
         {
             m_DbContext = dbContext;
         }
-        public Task HandleEventAsync(object sender, IUserConnectedEvent @event)
+        public Task HandleEventAsync(object? sender, IUserConnectedEvent @event)
         {
             return HandleUserEvent(@event.User, "connect");
         }
 
-        public Task HandleEventAsync(object sender, IUserDisconnectedEvent @event)
+        public Task HandleEventAsync(object? sender, IUserDisconnectedEvent @event)
         {
             return HandleUserEvent(@event.User, "disconnect");
         }

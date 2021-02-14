@@ -53,7 +53,7 @@ namespace OpenMod.Unturned.RocketMod.Commands
         }
 
         [EventListener(Priority = EventListenerPriority.Monitor)]
-        public Task HandleEventAsync(object emitter, CommandExecutedEvent @event)
+        public Task HandleEventAsync(object? sender, CommandExecutedEvent @event)
         {
             async UniTask Task()
             {
