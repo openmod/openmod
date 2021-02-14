@@ -4,7 +4,7 @@ https://github.com/openmod/openmod
 For latest downloads, visit https://github.com/openmod/openmod/releases
 
 Using RocketMod? Install OpenMod using the OpenMod installer plugin for RocketMod instead:
-https://github.com/openmod/OpenMod.Installer.RocketMod/releases
+https://github.com/openmod/OpenMod.Installer.RocketMod/releases/latest
 
 Installation
 ------------
