@@ -61,21 +61,20 @@ namespace OpenMod.Unturned.Commands
 
             var releaseData = await client.GetStringAsync("https://api.github.com/repos/openmod/openmod/releases/latest");
             var release = JsonConvert.DeserializeObject<LatestRelease>(releaseData);
+            var isPre = Context.Parameters.Contains("--pre");
+            var anyUpdated = false;
 
             var moduleAsset = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"));
-            if (moduleAsset == null || m_HostInformation.HostVersion.CompareTo(release.TagName) >= 0)
+            if (moduleAsset != null && m_HostInformation.HostVersion.CompareTo(release.TagName) < 0)
             {
-                await PrintAsync("No update found...");
-                return;
+                await PrintAsync($"Downloading {moduleAsset.AssetName}...");
+
+                var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
+
+                await PrintAsync("Extracting update...");
+                await ExtractArchiveAsync(stream, openModDirPath!);
+                anyUpdated = true;
             }
-
-            await PrintAsync($"Downloading {moduleAsset.AssetName}...");
-
-            var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
-
-            await PrintAsync("Extracting update...");
-            await ExtractArchiveAsync(stream, openModDirPath!);
-            var isPre = Context.Parameters.Contains("--pre");
 
             foreach (var assembly in m_Runtime.HostAssemblies)
             {
@@ -94,9 +93,14 @@ namespace OpenMod.Unturned.Commands
 
                 await PrintAsync($"Updating package \"{ident.Identity.Id}\" to {ident.Identity.Version}");
                 await m_PackageManager.InstallAsync(ident.Identity, isPre);
+                anyUpdated = true;
             }
 
-            await PrintAsync("Packages updated.");
+            if (!anyUpdated)
+            {
+                await PrintAsync("No update found.");
+                return;
+            }
 
             if (Hotloader.Enabled)
             {
@@ -106,7 +110,8 @@ namespace OpenMod.Unturned.Commands
 
                 if (moduleNexusType == null)
                 {
-                    await PrintAsync("Failed to dynamically reload OpenMod. Please restart your server.", Color.Red);
+                    await PrintAsync("Failed to dynamically reload OpenMod. Please restart your server.",
+                        Color.Red);
                     return;
                 }
 
@@ -126,7 +131,9 @@ namespace OpenMod.Unturned.Commands
                 }
                 catch
                 {
-                    await PrintAsync("Reloading OpenMod has failed! Please restart your server and report this error.", Color.Red);
+                    await PrintAsync(
+                        "Reloading OpenMod has failed! Please restart your server and report this error.",
+                        Color.Red);
                     throw;
                 }
 
@@ -136,6 +143,7 @@ namespace OpenMod.Unturned.Commands
             {
                 await PrintAsync("Update has been installed. Restart to apply it.");
             }
+
         }
 
         private async Task ExtractArchiveAsync(Stream archiveStream, string directory)
