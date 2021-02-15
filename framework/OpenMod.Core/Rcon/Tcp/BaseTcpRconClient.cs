@@ -262,8 +262,9 @@ namespace OpenMod.Core.Rcon.Tcp
                 }
 
                 var accountPassword = account["password"];
-                if (accountPassword == "ChangeThisToEnableRcon")
+                if (accountPassword == "ChangeThisToEnableRcon") // lgtm [cs/hardcoded-credentials]
                 {
+                    // ignore accounts that have the default password
                     continue;
                 }
 

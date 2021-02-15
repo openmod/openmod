@@ -95,6 +95,7 @@ namespace OpenMod.Unturned.RocketMod.Rcon
             m_EventBus.Subscribe<OpenModShutdownEvent>(m_Runtime, (_, _, _) =>
             {
                 cts.Cancel();
+                cts.Dispose();
                 return Task.CompletedTask;
             });
 
