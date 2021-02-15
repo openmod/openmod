@@ -108,7 +108,7 @@ namespace OpenMod.Common.Helpers
 
             try
             {
-                return assembly.GetTypes()
+                return assembly.GetLoadableTypes()
                               .Where(c => includeAbstractAndInterfaces || !c.IsAbstract && !c.IsInterface);
             }
             catch (ReflectionTypeLoadException e)
