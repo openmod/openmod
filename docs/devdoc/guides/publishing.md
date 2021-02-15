@@ -90,10 +90,10 @@ jobs:
       name: Checkout Repository
       with:
         fetch-depth: 0
-    - name: Setup .NET Core
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.100
+        dotnet-version: 5.0.x
     - name: Install dependencies
       run: dotnet restore
     - name: Update version
