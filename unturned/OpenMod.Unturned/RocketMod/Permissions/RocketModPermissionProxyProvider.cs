@@ -6,6 +6,7 @@ using OpenMod.Core.Helpers;
 using Rocket.API;
 using Rocket.API.Serialisation;
 using Rocket.Core;
+using UnturnedPlayer = Rocket.Unturned.Player.UnturnedPlayer;
 
 namespace OpenMod.Unturned.RocketMod.Permissions
 {
@@ -34,6 +35,11 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             if (player == null)
             {
                 throw new ArgumentNullException(nameof(player));
+            }
+
+            if (player is UnturnedPlayer { IsAdmin: true })
+            {
+                return true;
             }
 
             if (requestedPermissions.Any(string.IsNullOrEmpty))
@@ -96,13 +102,18 @@ namespace OpenMod.Unturned.RocketMod.Permissions
                 foreach (var store in m_PermissionChecker.PermissionStores)
                 {
                     var denied = await store.GetDeniedPermissionsAsync(actor);
-                    result.AddRange(denied.Select(d => new Permission("!" + d)));
+                    result.AddRange(denied.Select(d => new Permission("!" + Normalize(d))));
 
                     var granted = await store.GetGrantedPermissionsAsync(actor);
-                    result.AddRange(granted.Select(d => new Permission(d)));
+                    result.AddRange(granted.Select(d => new Permission(Normalize(d))));
                 }
             });
             return result;
+        }
+
+        private string Normalize(string permission)
+        {
+            return permission.Replace("RocketMod:", string.Empty);
         }
 
         public List<Permission> GetPermissions(IRocketPlayer player, List<string> requestedPermissions)
