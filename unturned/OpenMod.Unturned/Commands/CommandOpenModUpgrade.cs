@@ -14,7 +14,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using NuGet.Packaging.Core;
 using OpenMod.NuGet;
 using Command = OpenMod.Core.Commands.Command;
 
@@ -54,7 +53,7 @@ namespace OpenMod.Unturned.Commands
         {
             var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
             var openModDirPath = Path.GetDirectoryName(Directory
-                .GetFiles(modulesDirectory, "OpenMod.Unturned.dll", SearchOption.AllDirectories)
+                .GetFiles(modulesDirectory, "OpenMod.Unturned.Module.dll", SearchOption.AllDirectories)
                 .FirstOrDefault() ?? throw new Exception("Failed to find OpenMod directory"));
 
             using var client = new HttpClient();
