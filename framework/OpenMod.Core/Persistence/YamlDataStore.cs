@@ -304,7 +304,7 @@ namespace OpenMod.Core.Persistence
             // Will add a change watcher that logs detected file changes
             m_KnownKeys.Add(key);
 
-            if (m_LogOnChange && !m_WatchedFiles.Contains(key))
+            if (m_LogOnChange && !m_WatchedFiles.Contains(key) && m_Runtime != null)
             {
                 m_WatchedFiles.Add(key);
 
