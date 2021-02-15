@@ -114,13 +114,18 @@ namespace OpenMod.Bootstrapper
                 {
                     var latestOpenModPackage = await packageManager.QueryPackageExactAsync(packageId, version: null, allowPrereleaseVersions);
                     var latestPackageIdentity = latestOpenModPackage?.Identity;
-
-                    if (latestPackageIdentity == null && packageIdentity == null)
+                    if (latestPackageIdentity == null)
                     {
-                        throw new Exception($"Failed to find package: {packageId}");
+                        if (packageIdentity == null)
+                        {
+                            throw new Exception($"Failed to find package: {packageId}");
+                        }
+
+                        logger.LogWarning($"Failed to query package: {packageId}");
+                        continue;
                     }
 
-                    if (packageIdentity == null || packageIdentity.Version < latestPackageIdentity!.Version)
+                    if (packageIdentity == null || latestPackageIdentity!.Version > packageIdentity.Version)
                     {
                         logger.LogInformation($"Downloading {latestPackageIdentity!.Id} v{latestPackageIdentity!.Version} via NuGet");
                         var installResult = await packageManager.InstallAsync(latestPackageIdentity!, allowPrereleaseVersions);

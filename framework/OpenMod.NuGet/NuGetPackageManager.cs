@@ -418,8 +418,16 @@ namespace OpenMod.NuGet
 
             if (availablePackages.Count == 0)
             {
-                // latest version already installed
-                return new NuGetQueryResult(identity, NuGetInstallCode.NoUpdatesFound);
+                if (await GetLatestPackageIdentityAsync(identity.Id) != null)
+                {
+                    // latest version already installed
+                    return new NuGetQueryResult(identity, NuGetInstallCode.NoUpdatesFound);
+                }
+
+                // package doesnt exist or weird NuGet bug:
+                // package shows up in version list but can not be installed yet
+                // will need to wait 15-30 minutes until it is indexed
+                return new NuGetQueryResult(identity, NuGetInstallCode.PackageOrVersionNotFound);
             }
 
             var resolverContext = new PackageResolverContext(
