@@ -13,6 +13,9 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using NuGet.Packaging.Core;
+using OpenMod.NuGet;
 using Command = OpenMod.Core.Commands.Command;
 
 namespace OpenMod.Unturned.Commands
@@ -23,13 +26,21 @@ namespace OpenMod.Unturned.Commands
     public class CommandOpenModUpgrade : Command
     {
         private readonly IRuntime m_Runtime;
+        private readonly NuGetPackageManager m_PackageManager;
         private readonly IHostInformation m_HostInformation;
+        private readonly ILogger<CommandOpenModUpgrade> m_Logger;
 
-        public CommandOpenModUpgrade(IServiceProvider serviceProvider, IRuntime runtime,
-            IHostInformation hostInformation) : base(serviceProvider)
+        public CommandOpenModUpgrade(
+            IServiceProvider serviceProvider,
+            IRuntime runtime,
+            NuGetPackageManager packageManager,
+            IHostInformation hostInformation,
+            ILogger<CommandOpenModUpgrade> logger) : base(serviceProvider)
         {
             m_Runtime = runtime;
+            m_PackageManager = packageManager;
             m_HostInformation = hostInformation;
+            m_Logger = logger;
         }
 
         private static readonly string[] s_IgnoredNameFiles =
@@ -37,6 +48,7 @@ namespace OpenMod.Unturned.Commands
             "OpenMod.Unturned.Module.Bootstrapper.dll",
             "Readme.txt"
         };
+
 
         protected override async Task OnExecuteAsync()
         {
@@ -64,6 +76,28 @@ namespace OpenMod.Unturned.Commands
 
             await PrintAsync("Extracting update...");
             await ExtractArchiveAsync(stream, openModDirPath!);
+            var isPre = Context.Parameters.Contains("--pre");
+
+            foreach (var assembly in m_Runtime.HostAssemblies)
+            {
+                var ident = await m_PackageManager.QueryPackageExactAsync(assembly.GetName().Name, null, isPre);
+                if (ident == null)
+                {
+                    m_Logger.LogWarning($"No package found for assembly: {assembly.FullName}");
+                    continue;
+                }
+
+                var installed = await m_PackageManager.GetLatestPackageIdentityAsync(ident.Identity.Id);
+                if (installed != null && installed.Version >= ident.Identity.Version)
+                {
+                    continue;
+                }
+
+                await PrintAsync($"Updating package \"{ident.Identity.Id}\" to {ident.Identity.Version}");
+                await m_PackageManager.InstallAsync(ident.Identity, isPre);
+            }
+
+            await PrintAsync("Packages updated.");
 
             if (Hotloader.Enabled)
             {
