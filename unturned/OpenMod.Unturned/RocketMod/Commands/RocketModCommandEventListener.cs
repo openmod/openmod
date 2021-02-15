@@ -25,10 +25,9 @@ using Rocket.Unturned.Player;
 
 namespace OpenMod.Unturned.RocketMod.Commands
 {
-    [EventListenerLifetime(ServiceLifetime.Transient)]
-    public class RocketModCommandEventListener : IEventListener<CommandExecutedEvent>
+    public class RocketModCommandEventListener
     {
-        private const string s_RocketPrefix = "rocket:";
+        private const string c_RocketPrefix = "rocket:";
         private readonly IOpenModUnturnedConfiguration m_Configuration;
         private readonly ICommandCooldownStore m_CommandCooldownStore;
         private readonly IOpenModStringLocalizer m_StringLocalizer;
@@ -37,7 +36,7 @@ namespace OpenMod.Unturned.RocketMod.Commands
 
         static RocketModCommandEventListener()
         {
-            s_PrefixRegex = new Regex(Regex.Escape(s_RocketPrefix));
+            s_PrefixRegex = new Regex(Regex.Escape(c_RocketPrefix));
             s_CheckPermissionsMethod = typeof(UnturnedPermissions)
                 .GetMethod("CheckPermissions", BindingFlags.Static | BindingFlags.NonPublic)!;
         }
@@ -73,7 +72,7 @@ namespace OpenMod.Unturned.RocketMod.Commands
                         return;
                     }
 
-                    var isRocketPrefixed = commandAlias.StartsWith(s_RocketPrefix);
+                    var isRocketPrefixed = commandAlias.StartsWith(c_RocketPrefix);
                     if (isRocketPrefixed)
                     {
                         commandAlias = s_PrefixRegex.Replace(commandAlias, string.Empty, 1);

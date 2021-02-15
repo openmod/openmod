@@ -2,12 +2,17 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Autofac;
 using HarmonyLib;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Eventing;
+using OpenMod.Core.Commands.Events;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 using OpenMod.Core.Patching;
+using OpenMod.Unturned.RocketMod.Commands;
 using OpenMod.Unturned.RocketMod.Events;
 using OpenMod.Unturned.RocketMod.Patches;
 using Rocket.Core.Logging;
@@ -158,6 +163,12 @@ namespace OpenMod.Unturned.RocketMod
 
             m_HarmonyInstance = new Harmony(c_HarmonyId);
             m_HarmonyInstance.PatchAllConditional(typeof(OpenModUnturnedHost).Assembly, "rocketmod");
+            m_EventBus.Subscribe<CommandExecutedEvent>(m_RocketModComponent, (services, sender, @event) =>
+            {
+                var scope = services.GetRequiredService<ILifetimeScope>();
+                var listener = ActivatorUtilitiesEx.CreateInstance<RocketModCommandEventListener>(scope);
+                return listener.HandleEventAsync(sender, @event);
+            });
 
             if (U.Settings != null)
             {
