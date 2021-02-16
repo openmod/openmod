@@ -15,16 +15,16 @@ using OpenMod.Core.Users;
 namespace OpenMod.Core.Cooldowns
 {
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class CommmandCooldownStore : ICommandCooldownStore
+    public class CommandCooldownStore : ICommandCooldownStore
     {
-        private readonly ILogger<CommmandCooldownStore> m_Logger;
+        private readonly ILogger<CommandCooldownStore> m_Logger;
         private readonly IPermissionRoleStore m_PermissionRoleStore;
         private readonly IPermissionRolesDataStore m_PermissionRolesDataStore;
         private readonly Dictionary<string, List<CooldownRecord>> m_Records;
         private readonly IPermissionChecker m_PermissionChecker;
 
-        public CommmandCooldownStore(
-            ILogger<CommmandCooldownStore> logger,
+        public CommandCooldownStore(
+            ILogger<CommandCooldownStore> logger,
             IPermissionRoleStore permissionRoleStore,
             IPermissionRolesDataStore permissionRolesDataStore,
             IPermissionChecker permissionChecker)
