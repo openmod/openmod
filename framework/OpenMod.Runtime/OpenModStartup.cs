@@ -46,7 +46,7 @@ namespace OpenMod.Runtime
             m_RegisteredAssemblies = new HashSet<AssemblyName>();
 
             var logger = openModStartupContext.LoggerFactory.CreateLogger<PluginAssemblyStore>();
-            m_PluginAssemblyStore = new PluginAssemblyStore(openModStartupContext.Configuration, logger, m_NuGetPackageManager);
+            m_PluginAssemblyStore = new PluginAssemblyStore(logger, m_NuGetPackageManager);
             m_PluginAssembliesSources = new List<IPluginAssembliesSource>();
         }
 

@@ -20,6 +20,7 @@ using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Persistence;
+using OpenMod.Core.Plugins;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 using Semver;
@@ -175,7 +176,6 @@ namespace OpenMod.Runtime
                     var config = deserializer.Deserialize<Dictionary<string, object>>(yaml);
 
                     var hotReloadingEnabled = true;
-
                     if (config.TryGetValue("hotreloading", out var unparsed))
                     {
                         switch (unparsed)
@@ -191,8 +191,29 @@ namespace OpenMod.Runtime
                                 break;
                         }
                     }
-
                     Hotloader.Enabled = hotReloadingEnabled;
+
+                    var tryInstallMissingDependencies = false;
+                    if (config.TryGetValue("nuget", out unparsed) && unparsed is Dictionary<object, object> nugetConfig)
+                    {
+                        if (nugetConfig.TryGetValue("tryAutoInstallMissingDependencies", out unparsed))
+                        {
+                            switch (unparsed)
+                            {
+                                case bool value:
+                                    tryInstallMissingDependencies = value;
+                                    break;
+                                case string strValue when bool.TryParse(strValue, out var parsed):
+                                    tryInstallMissingDependencies = parsed;
+                                    break;
+                                default:
+                                    m_Logger.LogWarning("Unknown config for 'tryAutoInstallMissingDependencies' in OpenMod configuration: " + unparsed);
+                                    break;
+                            }
+                        }
+                    }
+
+                    PluginAssemblyStore.TryInstallMissingDependencies = tryInstallMissingDependencies;
                 }
 
                 await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
