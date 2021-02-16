@@ -42,7 +42,8 @@ namespace OpenMod.Core.Configuration
             using var outStream = new MemoryStream();
             using var writer = new StreamWriter(outStream, reader.CurrentEncoding);
             writer.Write(yaml);
-            outStream.Seek(offset: 0, SeekOrigin.Begin);
+            writer.Flush();
+            outStream.Seek(0, SeekOrigin.Begin);
 
             var parser = Activator.CreateInstance(s_ParserType);
 
