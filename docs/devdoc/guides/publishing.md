@@ -110,7 +110,7 @@ jobs:
              --source https://api.nuget.org/v3/index.json
 ```
 
-After that you must edit the `<Version>x.x.x</Version>` in your .csproj and set it to `<Version>0.0.0</Version>`.
+After that you must edit the `<Version>x.x.x</Version>` in your .csproj and set it to `<Version>0.0.0</Version>`. Also add `<PackageVersion>0.0.0</PackageVersion>` and `<InformationalVersion>0.0.0</InformationalVersion>`.
 
 Finally, to finish setting up the workflow, you must add your NuGet secret:
 
