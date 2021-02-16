@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Plugins;
@@ -20,14 +19,16 @@ namespace OpenMod.Core.Plugins
     {
         private readonly ILogger<PluginAssemblyStore> m_Logger;
         private readonly NuGetPackageManager m_NuGetPackageManager;
-        private readonly IConfiguration? m_Configuration;
+
+        /// <summary>
+        /// Defines if openmod would try to install missing dependencies.
+        /// </summary>
+        public static bool TryInstallMissingDependencies { get; set; }
 
         public PluginAssemblyStore(
-            IConfiguration? configuration,
             ILogger<PluginAssemblyStore> logger,
             NuGetPackageManager nuGetPackageManager)
         {
-            m_Configuration = configuration;
             m_Logger = logger;
             m_NuGetPackageManager = nuGetPackageManager;
         }
@@ -75,11 +76,7 @@ namespace OpenMod.Core.Plugins
                     providerAssemblies.Remove(providerAssembly);
 
                     var missingAssemblies = CheckRequiredDependencies(ex.LoaderExceptions);
-                    var installMissingDependencies = m_Configuration != null &&
-                                                     m_Configuration.GetSection("nuget:tryAutoInstallMissingDependencies")
-                                                         .Get<bool>();//todo fix Configuration always null
-
-                    if (!installMissingDependencies)
+                    if (!TryInstallMissingDependencies)
                     {
                         m_Logger.LogWarning($"Couldn't load plugin from {providerAssembly}: Failed to resolve required dependencies: {string.Join(", ", missingAssemblies.Keys)}", Color.DarkRed);
                         continue;
