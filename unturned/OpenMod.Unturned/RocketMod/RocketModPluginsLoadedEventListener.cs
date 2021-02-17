@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using OpenMod.API.Eventing;
-using OpenMod.Core.Eventing;
-using OpenMod.Unturned.RocketMod.Events;
-using SDG.Unturned;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -11,6 +6,8 @@ using Autofac;
 using HarmonyLib;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using OpenMod.API.Eventing;
+using OpenMod.Core.Eventing;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Patching;
@@ -19,9 +16,10 @@ using OpenMod.Extensions.Economy.Abstractions;
 using OpenMod.Unturned.Configuration;
 using OpenMod.Unturned.RocketMod.Economy;
 using OpenMod.Unturned.RocketMod.Economy.Patches;
+using OpenMod.Unturned.RocketMod.Events;
 using OpenMod.Unturned.RocketMod.Permissions;
+using SDG.Unturned;
 
-#pragma warning disable IDE0079 // Remove unnecessary suppression
 namespace OpenMod.Unturned.RocketMod
 {
     public class RocketModPluginsLoadedEventListener : IEventListener<RocketModPluginsLoadedEvent>
@@ -141,6 +139,31 @@ namespace OpenMod.Unturned.RocketMod
             }
 
             var checkPermissionsList = ChatManager.onCheckPermissions.GetInvocationList();
+
+            var shimmyDelegate = Array.Find(checkPermissionsList,
+                d => d.GetMethodInfo()?.DeclaringType?.Assembly?.GetName()?.Name == "ShimmysAdminTools");
+            if (shimmyDelegate != null)
+            {
+                var type = shimmyDelegate.GetMethodInfo().DeclaringType;
+                var field = type.GetField("BaseCheckPermissions", c_BindingFlags);
+                if (field != null)
+                {
+                    var delegates = (CheckPermissions)field.GetValue(shimmyDelegate.Target);
+                    field.SetValue(shimmyDelegate.Target, new CheckPermissions(delegate
+                    { })); // set to empty
+
+                    delegates += (CheckPermissions)shimmyDelegate;
+                    checkPermissionsList = delegates.GetInvocationList();
+
+                    ChatManager.onCheckPermissions = delegates;
+                }
+            }
+
+            /* Who subscribed:
+             * AviRockets.Unturned.Addon
+             * ShimmysAdminTools
+             * Rocket.Unturned
+             */
             foreach (var @delegate in checkPermissionsList
                 .Where(IsRocketModDelegate))
             {
