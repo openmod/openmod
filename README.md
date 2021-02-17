@@ -33,7 +33,7 @@ The configs for RM4 are yet to be decided to be separate, or to be proxied.
 ## License
 See [LICENSE](LICENSE) file for more information.
 
-## Build Status
+## Build Status [![LGTM alerts](https://img.shields.io/lgtm/alerts/github/openmod/openmod?style=for-the-badge)](https://lgtm.com/projects/g/openmod/openmod/)
 ### Framework
 [![OpenMod.API](https://github.com/openmod/OpenMod/workflows/OpenMod.API/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.API) [![OpenMod.Bootstrapper](https://github.com/openmod/OpenMod/workflows/OpenMod.Bootstrapper/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Bootstrapper) [![OpenMod.NuGet](https://github.com/openmod/OpenMod/workflows/OpenMod.NuGet/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.NuGet) [![OpenMod.Core](https://github.com/openmod/OpenMod/workflows/OpenMod.Core/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Core) [![OpenMod.Runtime](https://github.com/openmod/OpenMod/workflows/OpenMod.Runtime/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Runtime) [![OpenMod.Analyzers](https://github.com/openmod/OpenMod/workflows/OpenMod.Analyzers/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Analyzers) [![OpenMod.Templates](https://github.com/openmod/OpenMod/workflows/OpenMod.Templates/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Templates) [![OpenMod.EntityFrameworkCore](https://github.com/openmod/OpenMod/workflows/OpenMod.EntityFrameworkCore/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.EntityFrameworkCore)
 
