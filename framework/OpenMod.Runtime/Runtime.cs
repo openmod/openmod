@@ -333,7 +333,6 @@ namespace OpenMod.Runtime
                     File.WriteAllText(loggingPath, fileContent);
                 }
 
-                var relativeWorkingDirectory = PathHelper.MakeRelativePath(Environment.CurrentDirectory, WorkingDirectory);
                 var configuration = new ConfigurationBuilder()
                     .SetBasePath(WorkingDirectory)
                     .AddYamlFileEx(s =>
@@ -342,7 +341,7 @@ namespace OpenMod.Runtime
                         s.Optional = false;
                         s.Variables = new Dictionary<string, string>
                         {
-                            {"workingDirectory", relativeWorkingDirectory.Replace(@"\", @"/")},
+                            {"workingDirectory", WorkingDirectory.Replace(@"\", @"/")},
                             {"date", DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}
                         };
                         s.ResolveFileProvider();
