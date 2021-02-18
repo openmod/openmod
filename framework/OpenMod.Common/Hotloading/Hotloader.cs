@@ -66,6 +66,16 @@ namespace OpenMod.Common.Hotloading
             var modCtx = ModuleDef.CreateModuleContext();
             var module = ModuleDefMD.Load(input, modCtx);
 
+            var isMono = Type.GetType("Mono.Runtime") != null;
+            var isStrongNamed = module.Assembly.PublicKey != null;
+
+            if (!isMono && isStrongNamed)
+            {
+                // Don't hotload strong-named assemblies unless mono
+                // Will cause FileLoadException's if not mono
+                return Assembly.Load(assemblyData);
+            }
+
             var realFullname = module.Assembly.FullName;
 
             if (s_Assemblies.ContainsKey(realFullname))
