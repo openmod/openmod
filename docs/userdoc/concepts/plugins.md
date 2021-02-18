@@ -2,7 +2,7 @@
 Plugins add new functionality to your server. OpenMod provides commands to download, install, update, and remove plugins at runtime.
 
 ## Finding plugins
-You can find a list of plugins at [the openmod-plugins repository](https://github.com/openmod/openmod-plugins) or on [nuget.org](https://www.nuget.org/packages?q=openmod-plugin).
+You can find a list of plugins at [the openmod-plugins page](https://openmod.github.io/openmod-plugins) or on [nuget.org](https://www.nuget.org/packages?q=openmod-plugin).
 
 ## Installing and updating plugins
 There are two ways to install plugins:
