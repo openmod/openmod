@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Persistence;
@@ -77,11 +78,26 @@ namespace OpenMod.Core.Persistence
             m_ChangeListeners = new List<RegisteredChangeListener>();
             m_Locks = new ConcurrentDictionary<string, object>();
 
-            CreateFileSystemWatcher();
+            EnsureFileSystemWatcherCreated(false);
         }
 
-        private void CreateFileSystemWatcher()
+        private void EnsureFileSystemWatcherCreated(bool createDirectory)
         {
+            if (m_FileSystemWatcher != null)
+            {
+                return;
+            }
+
+            if(!Directory.Exists(m_BasePath))
+            {
+                if (!createDirectory)
+                {
+                    return;
+                }
+
+                Directory.CreateDirectory(m_BasePath);
+            }
+
             m_FileSystemWatcher = new FileSystemWatcher(m_BasePath)
             {
                 IncludeSubdirectories = false,
@@ -301,6 +317,8 @@ namespace OpenMod.Core.Persistence
 
         private void RegisterKnownKey(string key)
         {
+            EnsureFileSystemWatcherCreated(true);
+
             // Will add a change watcher that logs detected file changes
             m_KnownKeys.Add(key);
 
