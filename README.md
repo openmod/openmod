@@ -4,7 +4,7 @@ OpenMod is a plugin framework for .NET.
 
 It supports authorization, plugin configurations, internalization, command handling and much more. OpenMod can be used for games, bot frameworks, web servers or anything else and has official implementations for Unturned, Rust (WIP) and a standalone console.
 
-For a list of available plugins, visit [openmod-plugins](https://github.com/openmod/openmod-plugins).
+For a list of available plugins, visit [openmod-plugins](https://openmod.github.io/openmod-plugins).
 
 ## Features
 OpenMod is based on modern C# code and best practices.
