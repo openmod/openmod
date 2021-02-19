@@ -38,7 +38,8 @@ jobs:
     args:
       commands:
       - openmod upgrade
-      - openmod restart
+      # Uncomment the line below to auto restart after upgrade
+      # - restart
     enabled: true
 
   # Restart everyday at 3 AM.
