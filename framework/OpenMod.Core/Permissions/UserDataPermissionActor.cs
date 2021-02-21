@@ -13,6 +13,7 @@ namespace OpenMod.Core.Permissions
             Type = userData.Type ?? throw new InvalidOperationException("userData.Type was null!"); ;
             Data = userData.Data;
             DisplayName = userData.LastDisplayName ?? Id;
+            FullActorName = $"{Type}/{Id} ({DisplayName})";
         }
 
         public string Id { get; }
@@ -22,6 +23,8 @@ namespace OpenMod.Core.Permissions
         public Dictionary<string, object?>? Data { get; }
 
         public string DisplayName { get; }
+
+        public string FullActorName { get; }
 
         public static implicit operator UserDataPermissionActor(UserData d) => new(d);
     }

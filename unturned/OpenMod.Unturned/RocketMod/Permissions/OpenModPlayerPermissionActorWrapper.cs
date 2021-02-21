@@ -14,10 +14,12 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             Id = player.Id;
             Type = KnownActorTypes.Player;
             DisplayName = player.DisplayName;
+            FullActorName = $"rocketmodPlayer/{Id} ({DisplayName})";
         }
 
         public string Id { get; }
         public string Type { get; }
         public string DisplayName { get; }
+        public string FullActorName { get; }
     }
 }

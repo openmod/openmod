@@ -17,6 +17,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
                 : new HashSet<string>();
 
             IsAutoAssigned = false; // todo check if default role
+            FullActorName = $"rocketmodGroup/{Id} ({DisplayName})";
         }
 
         public string Id { get; }
@@ -24,6 +25,8 @@ namespace OpenMod.Unturned.RocketMod.Permissions
         public string Type { get; }
 
         public string DisplayName { get; }
+
+        public string FullActorName { get; }
 
         public int Priority { get; set; }
 

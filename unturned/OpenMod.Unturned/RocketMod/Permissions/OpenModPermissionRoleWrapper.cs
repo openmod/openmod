@@ -19,11 +19,14 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             {
                 Parents.Add(@group.ParentGroup);
             }
+
+            FullActorName = $"rocketmodRole/{Id} ({DisplayName})";
         }
 
         public string Id { get; }
         public string Type { get; }
         public string DisplayName { get; }
+        public string FullActorName { get; }
         public int Priority { get; set; }
         public HashSet<string> Parents { get; }
         public bool IsAutoAssigned { get; set; }
