@@ -21,10 +21,5 @@ namespace OpenMod.API.Commands
         /// <param name="message">The message to print.</param>
         /// <param name="color">The color of the message.</param>
         Task PrintMessageAsync(string message, Color color);
-
-        /// <summary>
-        /// Gets the full actor name including display name and ID
-        /// </summary>
-        string FullActorName { get; }
     }
 }

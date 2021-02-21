@@ -17,6 +17,7 @@ namespace OpenMod.Core.Permissions
             Parents = data.Parents ?? new HashSet<string>();
             IsAutoAssigned = data.IsAutoAssigned;
             Permissions = data.Permissions ?? new HashSet<string>();
+            FullActorName = $"role/{Id} ({DisplayName})";
         }
 
         public static implicit operator PermissionRole(PermissionRoleData data)
@@ -40,6 +41,8 @@ namespace OpenMod.Core.Permissions
         public string Id { get; } 
         public int Priority { get; set; }
         public string DisplayName { get; }
+
+        public string FullActorName { get; }
         public HashSet<string> Parents { get; }
         public HashSet<string> Permissions { get; }
         public bool IsAutoAssigned { get; set; }

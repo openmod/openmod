@@ -19,5 +19,10 @@
         /// Gets the human readable name of the actor.
         /// </summary>
         string DisplayName { get; }
+
+        /// <summary>
+        /// Gets the full actor name including display name and ID
+        /// </summary>
+        string FullActorName { get; }
     }
 }
