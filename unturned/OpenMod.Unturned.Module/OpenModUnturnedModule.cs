@@ -1,8 +1,6 @@
-﻿extern alias JetBrainsAnnotations;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Bootstrapper;
 using OpenMod.NuGet;
 using OpenMod.Unturned.Module.Shared;
@@ -11,7 +9,6 @@ using SDG.Unturned;
 
 namespace OpenMod.Unturned.Module
 {
-    [UsedImplicitly]
     public class OpenModUnturnedModule : IModuleNexus
     {
         public object? OpenModRuntime { get; private set; }

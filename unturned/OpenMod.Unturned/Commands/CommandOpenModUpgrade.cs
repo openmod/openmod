@@ -54,7 +54,7 @@ namespace OpenMod.Unturned.Commands
             var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
             var openModDirPath = Path.GetDirectoryName(Directory
                 .GetFiles(modulesDirectory, "OpenMod.Unturned.Module.dll", SearchOption.AllDirectories)
-                .FirstOrDefault() ?? throw new Exception("Failed to find OpenMod directory"));
+                .FirstOrDefault() ?? throw new Exception("Failed to find OpenMod directory"))!;
 
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Add("User-Agent", "request");
@@ -67,12 +67,24 @@ namespace OpenMod.Unturned.Commands
             var moduleAsset = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"));
             if (moduleAsset != null && m_HostInformation.HostVersion.CompareTo(release.TagName) < 0)
             {
-                await PrintAsync($"Downloading {moduleAsset.AssetName}...");
+                BackupFiles(openModDirPath);
 
-                var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
+                try
+                {
+                    await PrintAsync($"Downloading {moduleAsset.AssetName}...");
 
-                await PrintAsync("Extracting update...");
-                await ExtractArchiveAsync(stream, openModDirPath!);
+                    var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
+
+                    await PrintAsync("Extracting update...");
+                    await ExtractArchiveAsync(stream, openModDirPath!);
+                }
+                catch (Exception)
+                {
+                    RestoreFiles(openModDirPath);
+                    throw;
+                }
+
+                DeleteBackup(openModDirPath);
                 anyUpdated = true;
             }
 
@@ -142,6 +154,70 @@ namespace OpenMod.Unturned.Commands
             else
             {
                 await PrintAsync("Update has been installed. Restart to apply it.");
+            }
+
+        }
+
+        private void DeleteBackup(string openModDirPath)
+        {
+            foreach (var file in Directory.GetFiles(openModDirPath, "*.bak"))
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogDebug(ex, "Exception occurred while deleting backup");
+                }
+            }
+        }
+
+        private void RestoreFiles(string openModDirPath)
+        {
+            foreach (var file in Directory.GetFiles(openModDirPath))
+            {
+                if (file.EndsWith(".bak"))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                    }
+                    catch (Exception ex)
+                    {
+                        m_Logger.LogDebug(ex, "Exception occurred while restoring backup");
+                    }
+                }
+            }
+
+            foreach (var file in Directory.GetFiles(openModDirPath))
+            {
+                if (file.EndsWith(".bak"))
+                {
+                    try
+                    {
+                        File.Move(file, file.Replace(".bak", string.Empty));
+                    }
+                    catch (Exception ex)
+                    {
+                        m_Logger.LogError(ex, "Exception occurred while restoring backup");
+                    }
+                }
+            }
+        }
+
+        private void BackupFiles(string openModDirPath)
+        {
+            foreach (var file in Directory.GetFiles(openModDirPath))
+            {
+                try
+                {
+                    File.Move(file, file + ".bak");
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogDebug(ex, "Exception occurred while creating backup");
+                }
             }
 
         }
