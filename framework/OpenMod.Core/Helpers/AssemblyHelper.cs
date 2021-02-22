@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
@@ -24,6 +25,11 @@ namespace OpenMod.Core.Helpers
 
             foreach (var resourceName in resourceNames)
             {
+                if (resourceName.EndsWith("..directory"))
+                {
+                    continue;
+                }
+
                 var assemblyName = Hotloader.GetRealAssemblyName(assembly);
 
                 if (!resourceName.Contains(assemblyName.Name + "."))
@@ -33,6 +39,37 @@ namespace OpenMod.Core.Helpers
 
                 var regex = new Regex(Regex.Escape(assemblyName.Name + "."));
                 var fileName = regex.Replace(resourceName, string.Empty, 1);
+
+                var parts = fileName.Split('.');
+                fileName = "";
+                var path = assemblyName.Name + ".";
+                foreach (var part in parts)
+                {
+                    path += part + ".";
+                    using var tmpStream = assembly.GetManifestResourceStream(path + ".directory");
+
+                    var isDirectory = tmpStream != null;
+                    if (isDirectory)
+                    {
+                        fileName += part + Path.DirectorySeparatorChar;
+                    }
+                    else
+                    {
+                        fileName += part + ".";
+                    }
+                }
+
+                var directory = Path.GetDirectoryName(fileName);
+
+                if(directory != null)
+                {
+                    directory = Path.Combine(baseDir, directory);
+                }
+
+                if(directory != null && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
 
                 var filePath = Path.Combine(baseDir, fileName);
                 using var stream = assembly.GetManifestResourceStream(resourceName);
