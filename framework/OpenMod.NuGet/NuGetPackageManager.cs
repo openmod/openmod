@@ -35,6 +35,22 @@ namespace OpenMod.NuGet
         private readonly HashSet<string> m_IgnoredDependendencies;
         private readonly PackagesDataStore? m_PackagesDataStore;
 
+        private static readonly string[] s_PackageBlacklist =
+        {
+            // Trademark violations
+            "VaultPlugin",
+            "F.AntiCosmetics",
+            "F.ItemRestrictions",
+            "F.RustResources",
+            "F.Announcer"
+        };
+
+        private static readonly string[] s_PublisherBlacklist =
+        {
+            // Trademark violations
+            "FPlugins"
+        };
+
         private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new();
         private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
@@ -117,6 +133,14 @@ namespace OpenMod.NuGet
                 throw new ArgumentNullException(nameof(packageIdentity));
             }
 
+            foreach (var id in s_PackageBlacklist)
+            {
+                if (packageIdentity.Id.Trim().Equals(id, StringComparison.OrdinalIgnoreCase))
+                {
+                    return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
+                }
+            }
+
             using var cacheContext = new SourceCacheContext();
             NuGetQueryResult queryResult;
             try
@@ -128,7 +152,7 @@ namespace OpenMod.NuGet
                 Logger.LogDebug(ex.ToString());
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
             }
-
+            
             if (queryResult.Code != NuGetInstallCode.Success)
             {
                 return new NuGetInstallResult(queryResult.Code, queryResult.InstalledPackage);
@@ -307,7 +331,11 @@ namespace OpenMod.NuGet
                 }
             }
 
-            return matches;
+            return matches.Where(a =>
+            {
+                return !s_PackageBlacklist.Any(l => string.Equals(a.Identity?.Id?.Trim(), l, StringComparison.OrdinalIgnoreCase))
+                    && !s_PublisherBlacklist.Any(l => a.Owners?.ToLowerInvariant().Contains(l.ToLowerInvariant()) ?? false);
+            });
         }
 
         public void IgnoreDependencies(params string[] packageIds)
