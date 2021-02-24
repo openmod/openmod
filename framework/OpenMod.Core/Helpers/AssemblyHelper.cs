@@ -59,6 +59,11 @@ namespace OpenMod.Core.Helpers
                     }
                 }
 
+                if (fileName.EndsWith("."))
+                {
+                    fileName = fileName.Substring(0, fileName.Length - 1);
+                }
+
                 var directory = Path.GetDirectoryName(fileName);
 
                 if(directory != null)
