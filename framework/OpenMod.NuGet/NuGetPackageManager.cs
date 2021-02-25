@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using NuGet.Common;
+﻿using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.Packaging;
@@ -16,6 +8,14 @@ using NuGet.Protocol.Core.Types;
 using NuGet.Resolver;
 using NuGet.Versioning;
 using OpenMod.Common.Hotloading;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OpenMod.NuGet
 {
@@ -808,14 +808,8 @@ namespace OpenMod.NuGet
             return s_VersionRegex.Replace(fullAssemblyName, string.Empty);
         }
 
-        public async Task<int> InstallMissingPackagesAsync(bool updateExisting = true)
+        public async Task InstallPackagesAsync(ICollection<PackageIdentity> packages, bool updateExisting = true)
         {
-            if (m_PackagesDataStore == null)
-            {
-                throw new Exception("InstallMissingPackagesAsync failed: packages.yaml is not enabled.");
-            }
-
-            var packages = await m_PackagesDataStore.GetPackagesAsync();
             foreach (var package in packages)
             {
                 if (await IsPackageInstalledAsync(package.Id))
@@ -835,6 +829,18 @@ namespace OpenMod.NuGet
                 Logger.LogInformation($"Installing package: {package.Id}@{package.Version?.OriginalVersion ?? "latest"}");
                 await InstallAsync(package, allowPrereleaseVersions: true);
             }
+        }
+
+        public async Task<int> InstallMissingPackagesAsync(bool updateExisting = true)
+        {
+            if (m_PackagesDataStore == null)
+            {
+                throw new Exception("InstallMissingPackagesAsync failed: packages.yaml is not enabled.");
+            }
+
+            var packages = await m_PackagesDataStore.GetPackagesAsync();
+
+            await InstallPackagesAsync(packages);
 
             return packages.Count;
         }
