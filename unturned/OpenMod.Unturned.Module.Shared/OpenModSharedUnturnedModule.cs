@@ -23,9 +23,11 @@ namespace OpenMod.Unturned.Module.Shared
         private readonly string[] m_CompatibleModules = { "AviRockets", "Rocket.Unturned" };
         private RemoteCertificateValidationCallback? m_OldCallBack;
         private Harmony? m_HarmonyInstance;
-
+        private Assembly? m_ModuleAssembly;
         public bool Initialize(Assembly moduleAssembly, bool isDynamicLoad)
         {
+            m_ModuleAssembly = moduleAssembly;
+
             var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
             var openModDirPath = Path.GetDirectoryName(Directory
                 .GetFiles(modulesDirectory, "OpenMod.Unturned.Module.Shared.dll", SearchOption.AllDirectories)
@@ -181,7 +183,8 @@ namespace OpenMod.Unturned.Module.Shared
             ServicePointManager.ServerCertificateValidationCallback = CertificateValidationWorkaroundCallback;
         }
 
-        private bool CertificateValidationWorkaroundCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        private bool CertificateValidationWorkaroundCallback(object sender, X509Certificate certificate,
+            X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             var isOk = true;
             // If there are errors in the certificate chain, look at each error to determine the cause.
@@ -206,6 +209,7 @@ namespace OpenMod.Unturned.Module.Shared
                     }
                 }
             }
+
             return isOk;
         }
 
@@ -217,6 +221,19 @@ namespace OpenMod.Unturned.Module.Shared
             if (string.Equals(baseDirectory, dllFullPath, StringComparison.OrdinalIgnoreCase))
             {
                 return;
+            }
+
+            if (dllName.Equals("OpenMod.API.dll") && !m_ModuleAssembly!.FullName.Contains(".Dev"))
+            {
+                try
+                {
+                    File.Delete(dllFullPath);
+                }
+                catch
+                {
+                    // ignored 
+                    return;
+                }
             }
 
             var data = File.ReadAllBytes(dllFullPath);
@@ -234,7 +251,6 @@ namespace OpenMod.Unturned.Module.Shared
 
         public void OnPostInitialize()
         {
-
         }
 
         public NuGetPackageManager GetNugetPackageManager(string openModDirectory)
