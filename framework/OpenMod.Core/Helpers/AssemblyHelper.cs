@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
@@ -12,6 +13,11 @@ namespace OpenMod.Core.Helpers
     [OpenModInternal]
     public static class AssemblyHelper
     {
+        private static readonly string[] s_ExcludedResources = new[]
+        {
+            "packages.yaml"
+        };
+
         public static void CopyAssemblyResources(Assembly assembly, string baseDir, bool overwrite = false)
         {
             baseDir ??= string.Empty;
@@ -39,6 +45,11 @@ namespace OpenMod.Core.Helpers
 
                 var regex = new Regex(Regex.Escape(assemblyName.Name + "."));
                 var fileName = regex.Replace(resourceName, string.Empty, 1);
+
+                if (s_ExcludedResources.Contains(fileName))
+                {
+                    continue;
+                }
 
                 var parts = fileName.Split('.');
                 fileName = "";
