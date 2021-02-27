@@ -105,10 +105,17 @@ namespace OpenMod.Unturned
 
         public Task InitAsync()
         {
-            if (RocketModIntegration.IsRocketModInstalled())
+            try
             {
-                var rocketModIntegration = ActivatorUtilitiesEx.CreateInstance<RocketModIntegration>(LifetimeScope);
-                rocketModIntegration.Install();
+                if (RocketModIntegration.IsRocketModInstalled())
+                {
+                    var rocketModIntegration = ActivatorUtilitiesEx.CreateInstance<RocketModIntegration>(LifetimeScope);
+                    rocketModIntegration.Install();
+                }
+            }
+            catch (Exception ex)
+            {
+                m_Logger.LogError("Failed to integrate with RocketMod", ex);
             }
 
             // ReSharper disable PossibleNullReferenceException
