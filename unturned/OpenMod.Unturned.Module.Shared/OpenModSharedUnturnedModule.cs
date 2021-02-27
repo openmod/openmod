@@ -43,6 +43,23 @@ namespace OpenMod.Unturned.Module.Shared
 
             InstallNewtonsoftJson(openModDirPath);
 
+            var rocketUnturnedFile = Directory
+                .GetFiles(modulesDirectory, "Rocket.Unturned.module", SearchOption.AllDirectories)
+                .FirstOrDefault();
+
+            var rocketModDirectory = rocketUnturnedFile != null
+                ? Path.GetDirectoryName(rocketUnturnedFile)!
+                : null;
+
+            if (rocketModDirectory != null)
+            {
+                foreach (var file in Directory.GetFiles(rocketModDirectory, "*.dll"))
+                {
+                    var assembly = Assembly.LoadFile(file);
+                    m_ResolvedAssemblies.Add(ReflectionExtensions.GetVersionIndependentName(assembly.FullName), assembly);
+                }
+            }
+
             if (!isDynamicLoad)
             {
                 SystemDrawingRedirect.Install();
@@ -148,14 +165,15 @@ namespace OpenMod.Unturned.Module.Shared
 
         private Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            var name = ReflectionExtensions.GetVersionIndependentName(args.Name, out _);
+            var name = ReflectionExtensions.GetVersionIndependentName(args.Name);
+
             if (m_ResolvedAssemblies.ContainsKey(name))
             {
                 return m_ResolvedAssemblies[name];
             }
 
             var assemblies = m_LoadedAssemblies.Values
-                .Where(d => ReflectionExtensions.GetVersionIndependentName(d.FullName, out _).Equals(name))
+                .Where(d => ReflectionExtensions.GetVersionIndependentName(d.FullName).Equals(name))
                 .OrderByDescending(d => d.GetName().Version);
 
             var match = assemblies.FirstOrDefault();

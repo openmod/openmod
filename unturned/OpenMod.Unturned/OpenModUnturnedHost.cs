@@ -115,7 +115,7 @@ namespace OpenMod.Unturned
             }
             catch (Exception ex)
             {
-                m_Logger.LogError("Failed to integrate with RocketMod", ex);
+                m_Logger.LogError(ex, "Failed to integrate with RocketMod");
             }
 
             // ReSharper disable PossibleNullReferenceException
