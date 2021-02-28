@@ -20,7 +20,7 @@ cooldowns:
 ```
 
 >[!NOTE]
-> If you're using `OpenMod.Cooldowns.Rocket`, the command id will be the name found in `Commands.config.xml` prefixed by `Rocket.`.
+> If you're configuring cooldowns for Rocket commands, the command id will be the name found in `Commands.config.xml` prefixed by `Rocket.`.
 > For the `/heal` command, the id would be `Rocket.heal`.
 
 The following example is a modified version of the default `openmod.roles.yaml` file to apply a cooldown of 30 seconds to the help command.
@@ -66,4 +66,4 @@ All of the following are valid cooldown time spans:
 - 30 seconds 500 milliseconds
 
 ## Permissions
-This plugin only contains one permission - `OpenMod.Cooldowns:immune`. This permission makes the inheritor immune to all cooldowns.
+This plugin only contains one permission - `OpenMod.Core:cooldowns.immune`. This permission makes the inheritor immune to all cooldowns.
