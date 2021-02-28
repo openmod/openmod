@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
@@ -11,6 +7,12 @@ using OpenMod.API.Prioritization;
 using OpenMod.Common.Helpers;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Users;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+[assembly: RegisterPermission("cooldowns.immune", Description = "Grants immunity to all command cooldowns.")]
 
 namespace OpenMod.Core.Cooldowns
 {
@@ -103,14 +105,14 @@ namespace OpenMod.Core.Cooldowns
             // todo: implement openmod.cooldowns.yaml
             return Task.CompletedTask;
         }
-
+        
         public async Task<DateTime?> GetLastExecutedAsync(ICommandActor actor, string command)
         {
             if (actor.Type == KnownActorTypes.Console)
             {
                 return null;
             }
-
+            
             if (await m_PermissionChecker.CheckPermissionAsync(actor, "OpenMod.Core:cooldowns.immune") == PermissionGrantResult.Grant)
             {
                 return null;
