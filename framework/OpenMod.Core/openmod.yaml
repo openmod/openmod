@@ -6,6 +6,10 @@ console:
   autocomplete: false
   history: false
 
+# Enables cooldowns lasting across OpenMod reloads/restarts
+cooldowns:
+  reloadPersistence: true
+
 # NuGet related configurations. See packages/NuGet.Config for more configuration options such as feeds to use.
 nuget:
   # The following OpenMod commands are restricted to some users even if they have permissions.
