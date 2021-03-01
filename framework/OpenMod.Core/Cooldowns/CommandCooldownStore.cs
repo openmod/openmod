@@ -1,39 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
+using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
 using OpenMod.Common.Helpers;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Users;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+[assembly: RegisterPermission("cooldowns.immune", Description = "Grants immunity to all command cooldowns.")]
 
 namespace OpenMod.Core.Cooldowns
 {
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class CommandCooldownStore : ICommandCooldownStore
     {
+        private const string DataStoreKey = "cooldowns";
+
+        private readonly IConfiguration m_Configuration;
+        private readonly IDataStore? m_DataStore;
         private readonly ILogger<CommandCooldownStore> m_Logger;
         private readonly IPermissionRoleStore m_PermissionRoleStore;
         private readonly IPermissionRolesDataStore m_PermissionRolesDataStore;
         private readonly Dictionary<string, List<CooldownRecord>> m_Records;
         private readonly IPermissionChecker m_PermissionChecker;
+        private bool m_LoadedPersistedRecords;
 
         public CommandCooldownStore(
+            IConfiguration configuration,
+            IRuntime runtime,
+            IDataStoreFactory dataStoreFactory,
             ILogger<CommandCooldownStore> logger,
             IPermissionRoleStore permissionRoleStore,
             IPermissionRolesDataStore permissionRolesDataStore,
             IPermissionChecker permissionChecker)
         {
+            m_Configuration = configuration;
+            m_DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters()
+            { Prefix = "openmod", WorkingDirectory = runtime.WorkingDirectory, LogOnChange = false });
             m_Logger = logger;
             m_PermissionRoleStore = permissionRoleStore;
             m_PermissionRolesDataStore = permissionRolesDataStore;
             m_PermissionChecker = permissionChecker;
             m_Records = new Dictionary<string, List<CooldownRecord>>();
+            m_LoadedPersistedRecords = false;
         }
 
         public async Task<TimeSpan?> GetCooldownSpanAsync(ICommandActor actor, string commandId)
@@ -92,16 +109,48 @@ namespace OpenMod.Core.Cooldowns
             return actor.Type + "." + actor.Id;
         }
 
-        private Task<List<CooldownRecord>?> GetPersistedRecords(string actorId, bool force = false)
+        private async Task LoadPersistedRecords(bool force = false)
         {
-            // todo: implement openmod.cooldowns.yaml
-            return Task.FromResult<List<CooldownRecord>?>(null);
+            if (m_LoadedPersistedRecords && !force) return;
+            m_LoadedPersistedRecords = true;
+
+            if (m_DataStore == null) return;
+
+            if (!m_Configuration.GetValue("cooldowns:reloadPersistence", true)) return;
+
+            if (!await m_DataStore.ExistsAsync("cooldowns")) return;
+
+            var persistedRecords = (await m_DataStore.LoadAsync<CooldownRecords>(DataStoreKey))?.Records;
+
+            if (persistedRecords == null || persistedRecords.Count == 0) return;
+
+            foreach (var pair in persistedRecords)
+            {
+                if (pair.Value == null || pair.Value.Count == 0) continue;
+
+                if (!m_Records.TryGetValue(pair.Key, out var records))
+                {
+                    records = new List<CooldownRecord>();
+
+                    m_Records.Add(pair.Key, records);
+                }
+
+                foreach (var record in pair.Value)
+                {
+                    records.Add(record);
+                }
+            }
         }
 
-        private Task SavePersistedRecord(string actorId, string command, DateTime time)
+        private async Task SavePersistedRecords()
         {
-            // todo: implement openmod.cooldowns.yaml
-            return Task.CompletedTask;
+            if (m_DataStore == null) return;
+
+            if (!m_Configuration.GetValue("cooldowns:reloadPersistence", true)) return;
+
+            var persistedRecords = new CooldownRecords(m_Records);
+
+            await m_DataStore.SaveAsync(DataStoreKey, persistedRecords);
         }
 
         public async Task<DateTime?> GetLastExecutedAsync(ICommandActor actor, string command)
@@ -116,6 +165,8 @@ namespace OpenMod.Core.Cooldowns
                 return null;
             }
 
+            await LoadPersistedRecords();
+
             var actorId = GetActorFullId(actor);
             if (m_Records.TryGetValue(actorId, out List<CooldownRecord> records))
             {
@@ -127,7 +178,7 @@ namespace OpenMod.Core.Cooldowns
                 }
             }
 
-            return (await GetPersistedRecords(actorId))?.FirstOrDefault(x => x.Command == command)?.Executed;
+            return null;
         }
 
         public async Task RecordExecutionAsync(ICommandActor actor, string command, DateTime time)
@@ -156,7 +207,7 @@ namespace OpenMod.Core.Cooldowns
                 });
             }
 
-            await SavePersistedRecord(actorId, command, time);
+            await SavePersistedRecords();
         }
     }
 }
