@@ -78,6 +78,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{08AFAF5C-D23F-4943-B3AB-6753E81E91AC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Unturned.PluginTemplate", "tools\OpenMod.Unturned.PluginTemplate\OpenMod.Unturned.PluginTemplate.csproj", "{22CE5F4E-C95C-4B98-AFD7-E1108FA35CBC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Unturned.PluginWizard", "tools\OpenMod.Unturned.PluginWizard\OpenMod.Unturned.PluginWizard.csproj", "{2E2BADD8-8578-4269-9ADC-221A91D638E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -184,6 +190,14 @@ Global
 		{0A7396D2-E877-4671-9647-6DBAE661470A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A7396D2-E877-4671-9647-6DBAE661470A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A7396D2-E877-4671-9647-6DBAE661470A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22CE5F4E-C95C-4B98-AFD7-E1108FA35CBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22CE5F4E-C95C-4B98-AFD7-E1108FA35CBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22CE5F4E-C95C-4B98-AFD7-E1108FA35CBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22CE5F4E-C95C-4B98-AFD7-E1108FA35CBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E2BADD8-8578-4269-9ADC-221A91D638E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E2BADD8-8578-4269-9ADC-221A91D638E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E2BADD8-8578-4269-9ADC-221A91D638E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E2BADD8-8578-4269-9ADC-221A91D638E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -217,6 +231,8 @@ Global
 		{4953870C-FA45-460C-B7AC-90AF8CBD9865} = {E7F9DE25-AA15-49F1-A3FF-0349CF1624CC}
 		{ABD8C0E6-6DD7-413A-BDDD-7E55927B7F84} = {42C946B3-E1EF-4278-A983-E99AA3F73527}
 		{0A7396D2-E877-4671-9647-6DBAE661470A} = {F6737FCE-E6A4-4970-A6AC-0D7061B820FB}
+		{22CE5F4E-C95C-4B98-AFD7-E1108FA35CBC} = {08AFAF5C-D23F-4943-B3AB-6753E81E91AC}
+		{2E2BADD8-8578-4269-9ADC-221A91D638E4} = {08AFAF5C-D23F-4943-B3AB-6753E81E91AC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5384DBB4-E799-40C6-BD98-4C90698BE085}
