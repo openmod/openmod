@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="OpenMod.Unturned.PluginWizard.UserInputControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:OpenMod.Unturned.PluginWizard"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:UserInputControl}"
+             d:DesignHeight="26" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Blue.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" SharedSizeGroup="Labels"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="{Binding Label}"/>
+        <TextBox x:Name="TextBox"
+                 Grid.Column="2"
+                 Opacity="0.6"
+                 Text="{Binding Text}"
+                 GotKeyboardFocus="OnGotKeyboardFocus"
+                 LostKeyboardFocus="OnLostKeyboardFocus"/>
+    </Grid>
+</UserControl>
