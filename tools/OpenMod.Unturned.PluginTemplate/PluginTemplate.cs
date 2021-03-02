@@ -15,7 +15,7 @@ namespace $safeprojectname$
     {
         private readonly IConfiguration m_Configuration;
         private readonly IStringLocalizer m_StringLocalizer;
-        private readonly ILogger<MyOpenModPlugin> m_Logger;
+        private readonly ILogger<$safeprojectname$Plugin> m_Logger;
 
         public $safeprojectname$Plugin(
             IConfiguration configuration,
