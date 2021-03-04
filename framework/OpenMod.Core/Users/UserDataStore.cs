@@ -89,8 +89,8 @@ namespace OpenMod.Core.Users
             }
 
             var usersData = await GetUsersDataAsync();
-            return usersData.Users?.FirstOrDefault(d => (d.Type?.Equals(userType, StringComparison.OrdinalIgnoreCase) ?? false)
-                                                        && (d.Id?.Equals(userId, StringComparison.OrdinalIgnoreCase) ?? false));
+            return usersData.Users?.FirstOrDefault(d => (d?.Type?.Equals(userType, StringComparison.OrdinalIgnoreCase) ?? false)
+                                                        && (d?.Id?.Equals(userId, StringComparison.OrdinalIgnoreCase) ?? false));
         }
 
         public async Task<T?> GetUserDataAsync<T>(string userId, string userType, string key)
