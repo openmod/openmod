@@ -67,6 +67,7 @@ namespace OpenMod.Core.Persistence
             m_Serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .WithTypeConverter(new YamlNullableEnumTypeConverter())
+                .DisableAliases()
                 .Build();
 
             m_Deserializer = new DeserializerBuilder()
