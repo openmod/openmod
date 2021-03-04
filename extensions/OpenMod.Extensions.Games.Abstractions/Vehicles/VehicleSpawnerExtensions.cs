@@ -1,10 +1,10 @@
-﻿using System.Numerics;
+﻿using OpenMod.Extensions.Games.Abstractions.Players;
+using System.Numerics;
 using System.Threading.Tasks;
-using OpenMod.Extensions.Games.Abstractions.Players;
 
 namespace OpenMod.Extensions.Games.Abstractions.Vehicles
 {
-    public static class VehicleExtensions
+    public static class VehicleSpawnerExtensions
     {
         /// See <see cref="IVehicleSpawner.SpawnVehicleAsync"/>.
         public static async Task SpawnVehicleAsync(this IVehicleSpawner vehicleSpawner, IPlayer player, string vehicleAssetId)
