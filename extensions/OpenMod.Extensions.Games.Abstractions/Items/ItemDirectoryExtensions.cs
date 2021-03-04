@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenMod.Core.Helpers;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,10 +28,33 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// <returns><b>The <see cref="IItemAsset"/></b> if found; otherwise, <b>null</b>.</returns>
         public static async Task<IItemAsset?> FindByNameAsync(this IItemDirectory directory, string itemName, bool exact = true)
         {
-            // todo: implement exact: false, find closest match
+            if (exact)
+                return (await directory.GetItemAssetsAsync()).FirstOrDefault(d =>
+                    d.ItemName.Equals(itemName, StringComparison.OrdinalIgnoreCase));
 
-            return (await directory.GetItemAssetsAsync())
-                .FirstOrDefault(d => d.ItemName.Equals(itemName, StringComparison.OrdinalIgnoreCase));
+            var matches = (await directory.GetItemAssetsAsync())
+                .Where(x => x.ItemName.IndexOf(itemName, StringComparison.OrdinalIgnoreCase) >= 0)
+                .ToArray();
+
+            var minDist = int.MaxValue;
+            IItemAsset? match = null;
+
+            foreach (var asset in matches)
+            {
+                var distance = StringHelper.LevenshteinDistance(itemName, asset.ItemName);
+
+                // There's no lower distance
+                if (distance == 0)
+                    return asset;
+
+                if (match == null || distance < minDist)
+                {
+                    match = asset;
+                    minDist = distance;
+                }
+            }
+
+            return match;
         }
     }
 }
