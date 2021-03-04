@@ -111,7 +111,7 @@ namespace OpenMod.API.Commands
         ///     <b>true</b> if the given index was valid and the parameter could be parsed to the given type; otherwise
         ///     <b>false</b>.
         /// </returns>
-        bool TryGet<T>(int index, out T value);
+        bool TryGet<T>(int index, out T? value);
 
         /// <summary>
         ///     Returns the joined arguments starting from the given position.
