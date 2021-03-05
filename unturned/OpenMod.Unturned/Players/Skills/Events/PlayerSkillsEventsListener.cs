@@ -1,23 +1,20 @@
 ﻿extern alias JetBrainsAnnotations;
 using HarmonyLib;
-using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
-using JetBrainsAnnotations::JetBrains.Annotations;
 
 // ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Players.Skills.Events
 {
+    [UsedImplicitly]
     internal class PlayerSkillsEventsListener : UnturnedEventsListener
     {
-        public PlayerSkillsEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public PlayerSkillsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

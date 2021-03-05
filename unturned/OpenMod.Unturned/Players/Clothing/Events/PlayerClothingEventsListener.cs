@@ -1,21 +1,18 @@
 ﻿extern alias JetBrainsAnnotations;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
-using OpenMod.API;
 using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Items;
 using SDG.Unturned;
+using System;
 
 namespace OpenMod.Unturned.Players.Clothing.Events
 {
     [UsedImplicitly]
     internal class PlayerClothingEventsListener : UnturnedPlayerEventsListener
     {
-        public PlayerClothingEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public PlayerClothingEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

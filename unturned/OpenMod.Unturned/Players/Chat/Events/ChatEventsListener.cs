@@ -1,10 +1,8 @@
 ﻿extern alias JetBrainsAnnotations;
 using JetBrainsAnnotations::JetBrains.Annotations;
-using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+using System;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Players.Chat.Events
@@ -12,9 +10,7 @@ namespace OpenMod.Unturned.Players.Chat.Events
     [UsedImplicitly]
     internal class ChatEventsListener : UnturnedEventsListener
     {
-        public ChatEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public ChatEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

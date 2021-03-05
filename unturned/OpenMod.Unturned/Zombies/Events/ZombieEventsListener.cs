@@ -1,13 +1,11 @@
 ﻿extern alias JetBrainsAnnotations;
 using HarmonyLib;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using System;
 using System.Linq;
-using JetBrainsAnnotations::JetBrains.Annotations;
 using UnityEngine;
 // ReSharper disable InconsistentNaming
 
@@ -16,9 +14,7 @@ namespace OpenMod.Unturned.Zombies.Events
     [OpenModInternal]
     internal class ZombieEventsListener : UnturnedEventsListener
     {
-        public ZombieEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public ZombieEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

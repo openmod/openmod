@@ -1,15 +1,13 @@
 ﻿extern alias JetBrainsAnnotations;
 using HarmonyLib;
-using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using System.Linq;
-using JetBrainsAnnotations::JetBrains.Annotations;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Players.Life.Events
@@ -17,9 +15,7 @@ namespace OpenMod.Unturned.Players.Life.Events
     [UsedImplicitly]
     internal class PlayerLifeEventsListener : UnturnedPlayerEventsListener
     {
-        public PlayerLifeEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public PlayerLifeEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

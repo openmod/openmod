@@ -1,19 +1,15 @@
 ﻿extern alias JetBrainsAnnotations;
 using JetBrainsAnnotations::JetBrains.Annotations;
-using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+using System;
 
 namespace OpenMod.Unturned.Players.Crafting.Events
 {
     [UsedImplicitly]
     internal class CraftingEventsListener : UnturnedEventsListener
     {
-        public CraftingEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public CraftingEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

@@ -1,20 +1,17 @@
 ﻿extern alias JetBrainsAnnotations;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
-using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
+using System;
 
 namespace OpenMod.Unturned.Players.Bans.Events
 {
+    [UsedImplicitly]
     internal class BansEventsListener : UnturnedEventsListener
     {
-        public BansEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public BansEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

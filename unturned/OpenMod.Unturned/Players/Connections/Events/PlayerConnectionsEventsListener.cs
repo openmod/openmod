@@ -1,20 +1,16 @@
 ﻿extern alias JetBrainsAnnotations;
 using Cysharp.Threading.Tasks;
 using JetBrainsAnnotations::JetBrains.Annotations;
-using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+using System;
 
 namespace OpenMod.Unturned.Players.Connections.Events
 {
     [UsedImplicitly]
     internal class PlayerConnectionsEventsListener : UnturnedEventsListener
     {
-        public PlayerConnectionsEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public PlayerConnectionsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

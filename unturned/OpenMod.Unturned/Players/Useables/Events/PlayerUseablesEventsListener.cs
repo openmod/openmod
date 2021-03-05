@@ -1,16 +1,15 @@
-﻿using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
+﻿extern alias JetBrainsAnnotations;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+using System;
 
 namespace OpenMod.Unturned.Players.Useables.Events
 {
+    [UsedImplicitly]
     internal class PlayerUseablesEventsListener : UnturnedEventsListener
     {
-        public PlayerUseablesEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public PlayerUseablesEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
