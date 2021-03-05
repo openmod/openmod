@@ -12,9 +12,11 @@ namespace OpenMod.Unturned.Items
 
         public byte PageIndex { get; }
 
-        public IInventory Inventory { get; set; }
+        public UnturnedPlayerInventory Inventory { get; set; }
 
-        public UnturnedPlayerInventoryPage(IInventory inventory, byte pageIndex, SDG.Unturned.Items page)
+        IInventory IInventoryPage.Inventory => Inventory;
+
+        public UnturnedPlayerInventoryPage(UnturnedPlayerInventory inventory, byte pageIndex, SDG.Unturned.Items page)
         {
             Inventory = inventory;
             Page = page;
@@ -79,7 +81,7 @@ namespace OpenMod.Unturned.Items
                 var items = new List<UnturnedInventoryItem>();
                 foreach (var itemJar in Page.items)
                 {
-                    items.Add(new UnturnedInventoryItem(itemJar, new UnturnedItem(itemJar.item)));
+                    items.Add(new UnturnedInventoryItem(Inventory, itemJar, new UnturnedItem(itemJar.item)));
                 }
 
                 return items;
