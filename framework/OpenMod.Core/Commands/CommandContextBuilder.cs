@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Autofac;
+﻿using Autofac;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
@@ -10,6 +7,9 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Localization;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Ioc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenMod.Core.Commands
 {
@@ -100,11 +100,19 @@ namespace OpenMod.Core.Commands
                 baseQuery = baseQuery.Where(d => d.SupportsActor(actor));
             }
 
-            // todo: could be done in a single iteration
-            // ReSharper disable PossibleMultipleEnumeration
-            return baseQuery.FirstOrDefault(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                   ?? baseQuery.FirstOrDefault(d => d.Aliases != null && d.Aliases.Any(e => e.Equals(name, StringComparison.OrdinalIgnoreCase)));
-            // ReSharper restore PossibleMultipleEnumeration
+            ICommandRegistration? aliasMatch = null;
+
+            foreach (var registration in baseQuery)
+            {
+                if (registration.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                    return registration;
+
+                if (registration.Aliases != null &&
+                    registration.Aliases.Any(e => e.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                    aliasMatch = registration;
+            }
+
+            return aliasMatch;
         }
     }
 }
