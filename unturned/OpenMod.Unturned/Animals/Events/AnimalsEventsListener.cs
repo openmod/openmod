@@ -1,22 +1,19 @@
 ﻿extern alias JetBrainsAnnotations;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
-using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+using System;
 using UnityEngine;
+// ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Animals.Events
 {
     [UsedImplicitly]
     internal class AnimalsEventsListener : UnturnedEventsListener
     {
-        public AnimalsEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public AnimalsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

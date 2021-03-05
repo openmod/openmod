@@ -1,20 +1,16 @@
 ﻿extern alias JetBrainsAnnotations;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
-using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+using System;
 
 namespace OpenMod.Unturned.Players.Inventory.Events
 {
     [UsedImplicitly]
     internal class PlayerInventoryEventsListener : UnturnedPlayerEventsListener
     {
-        public PlayerInventoryEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public PlayerInventoryEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

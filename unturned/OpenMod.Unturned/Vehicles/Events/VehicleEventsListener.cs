@@ -2,12 +2,11 @@
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Vehicles.Events
@@ -15,9 +14,7 @@ namespace OpenMod.Unturned.Vehicles.Events
     [OpenModInternal]
     internal class VehicleEventsListener : UnturnedEventsListener
     {
-        public VehicleEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public VehicleEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
+using System;
 
 namespace OpenMod.Unturned.Events
 {
@@ -12,25 +13,18 @@ namespace OpenMod.Unturned.Events
     {
         private readonly IOpenModHost m_OpenModHost;
         private readonly IEventBus m_EventBus;
-        protected readonly IUserManager m_UserManager;
+        protected readonly IUserManager UserManager;
 
-        protected UnturnedEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager)
+        protected UnturnedEventsListener(IServiceProvider serviceProvider)
         {
-            m_OpenModHost = openModHost;
-            m_EventBus = eventBus;
-            m_UserManager = userManager;
+            m_OpenModHost = serviceProvider.GetRequiredService<IOpenModHost>();
+            m_EventBus = serviceProvider.GetRequiredService<IEventBus>();
+            UserManager = serviceProvider.GetRequiredService<IUserManager>();
         }
 
         protected UnturnedPlayer? GetUnturnedPlayer(Player? player)
         {
-            if (player == null)
-            {
-                return null;
-            }
-
-            return new UnturnedPlayer(player);
+            return player == null ? null : new UnturnedPlayer(player);
         }
 
         protected UnturnedPlayer? GetUnturnedPlayer(SteamPlayer? player)

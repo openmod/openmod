@@ -1,13 +1,11 @@
 ﻿extern alias JetBrainsAnnotations;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
-using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Items;
 using SDG.Unturned;
 using Steamworks;
+using System;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Players.Equipment.Events
@@ -15,9 +13,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
     [UsedImplicitly]
     internal class PlayerEquipmentEventsListener : UnturnedPlayerEventsListener
     {
-        public PlayerEquipmentEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public PlayerEquipmentEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

@@ -1,16 +1,13 @@
 ﻿using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.Unturned.Events;
+using System;
 
 namespace OpenMod.Unturned.Server.Events
 {
     [OpenModInternal]
     internal class ServerEventsListener : UnturnedEventsListener
     {
-        public ServerEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public ServerEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 

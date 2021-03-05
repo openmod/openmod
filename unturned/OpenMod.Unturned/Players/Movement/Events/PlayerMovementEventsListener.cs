@@ -1,12 +1,10 @@
 ﻿extern alias JetBrainsAnnotations;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
-using OpenMod.API;
-using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
+using System;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Players.Movement.Events
@@ -14,9 +12,7 @@ namespace OpenMod.Unturned.Players.Movement.Events
     [UsedImplicitly]
     internal class PlayerMovementEventsListener : UnturnedPlayerEventsListener
     {
-        public PlayerMovementEventsListener(IOpenModHost openModHost,
-            IEventBus eventBus,
-            IUserManager userManager) : base(openModHost, eventBus, userManager)
+        public PlayerMovementEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
