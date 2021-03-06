@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
 using OpenMod.Rust.Transforms;
-using UVector3 = UnityEngine.Vector3;
 
 namespace OpenMod.Rust.Entities
 {
@@ -19,12 +18,11 @@ namespace OpenMod.Rust.Entities
             Transform = new RustNetworkableTransform(entity);
             EntityInstanceId = entity.GetInstanceID().ToString();
             State = new RustEntityState(entity);
-            // Rust todo: asset impl
         }
 
         public IWorldTransform Transform { get; }
 
-        public IEntityAsset Asset
+        public virtual IEntityAsset Asset
         {
             get
             {
@@ -70,7 +68,7 @@ namespace OpenMod.Rust.Entities
         {
             get
             {
-                return Asset.Name;
+                return Entity.ShortPrefabName;
             }
         }
     }
