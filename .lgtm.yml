@@ -1,5 +1,7 @@
 extraction:
   csharp:
     index:
+      solution: 
+      - "OpenMod.sln"
       dotnet:
         version: "5.0.100"
