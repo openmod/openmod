@@ -10,7 +10,6 @@ namespace OpenMod.Unturned
         public UnturnedHostInformation()
         {
             HostVersion = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
-
         }
 
         public SemVersion HostVersion { get; }
@@ -20,6 +19,8 @@ namespace OpenMod.Unturned
         public bool IsClient { get; } = Provider.isClient;
 
         public bool IsServer { get; } = Provider.isServer || Dedicator.isDedicated || Dedicator.isStandaloneDedicatedServer;
+
+        public string? ServerIP { get; } = Provider.bindAddress;
 
         public ushort? ServerPort { get; } = Provider.port;
 

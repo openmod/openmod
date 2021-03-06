@@ -20,6 +20,8 @@ namespace OpenMod.Rust
 
         public bool IsServer { get; } = true;
 
+        public string? ServerIP { get; } = ConVar.Server.ip;
+
         public ushort? ServerPort { get; } = (ushort) ConVar.Server.port;
 
         public string ServerInstance { get; } = ConVar.Server.identity;
