@@ -1,5 +1,5 @@
-﻿using System;
-using OpenMod.API.Permissions;
+﻿using OpenMod.API.Permissions;
+using System;
 
 namespace OpenMod.Core.Permissions
 {
@@ -10,11 +10,12 @@ namespace OpenMod.Core.Permissions
         
         public string? Description { get; set; }
 
-        public PermissionGrantResult? DefaultGrant { get; set; }
+        public PermissionGrantResult DefaultGrant { get; set; }
 
         public RegisterCommandPermissionAttribute(string permission)
         {
             Permission = permission;
+            DefaultGrant = PermissionGrantResult.Default;
         }
     }
 }
