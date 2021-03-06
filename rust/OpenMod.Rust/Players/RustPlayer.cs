@@ -40,17 +40,7 @@ namespace OpenMod.Rust.Players
 
         public int CompareTo(RustPlayer other)
         {
-            if (ReferenceEquals(this, other))
-            {
-                return 0;
-            }
-
-            if (ReferenceEquals(null, other))
-            {
-                return 1;
-            }
-
-            return string.Compare(EntityInstanceId, other.EntityInstanceId, StringComparison.Ordinal);
+            return ReferenceEquals(this, other) ? 0 : string.Compare(EntityInstanceId, other.EntityInstanceId, StringComparison.Ordinal);
         }
 
         protected override bool DoTeleport(Vector3 destination, Vector3 rotation)
