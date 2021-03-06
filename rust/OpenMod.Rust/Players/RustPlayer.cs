@@ -75,11 +75,13 @@ namespace OpenMod.Rust.Players
 
         public IInventory Inventory { get; }
 
-        public IPAddress Address
+        public IPAddress? Address
         {
             get
             {
-                return IPAddress.Parse(Player.Connection.ipaddress);
+                return Player.Connection?.ipaddress == null
+                    ? null
+                    : IPAddress.Parse(Player.Connection.ipaddress);
             }
         }
 
