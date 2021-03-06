@@ -61,7 +61,7 @@ namespace OpenMod.Core.Commands
             PermissionRegistrations = memberInfo.GetCustomAttributes<RegisterCommandPermissionAttribute>(true)
                 .Select(d => new PermissionRegistration
                 {
-                    DefaultGrant = d.DefaultGrant ?? PermissionGrantResult.Default,
+                    DefaultGrant = d.DefaultGrant,
                     Description = d.Description,
                     Owner = Component,
                     Permission = d.Permission
