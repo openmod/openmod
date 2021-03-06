@@ -38,6 +38,10 @@ namespace OpenMod.Core.Users
 
         public abstract Task PrintMessageAsync(string message, Color color);
 
+        public abstract Task PrintMessageAsync(string message, string? iconUrl);
+
+        public abstract Task PrintMessageAsync(string message, Color color, string? iconUrl);
+
         public async Task SavePersistentDataAsync<T>(string key, T? data)
         {
             if (string.IsNullOrEmpty(key))

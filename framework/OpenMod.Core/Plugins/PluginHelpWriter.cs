@@ -205,6 +205,16 @@ namespace OpenMod.Core.Plugins
             {
                 throw new NotSupportedException();
             }
+
+            public Task PrintMessageAsync(string message, string? iconUrl)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task PrintMessageAsync(string message, Color color, string? iconUrl)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

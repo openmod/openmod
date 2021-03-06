@@ -177,6 +177,16 @@ namespace OpenMod.Core.Rcon.Tcp
             return PrintMessageAsync(message);
         }
 
+        public virtual Task PrintMessageAsync(string message, string? iconUrl)
+        {
+            return PrintMessageAsync(message);
+        }
+
+        public virtual Task PrintMessageAsync(string message, Color color, string? iconUrl)
+        {
+            return PrintMessageAsync(message);
+        }
+
         public virtual async Task DisconnectAsync(string? reason = null, CancellationToken cancellationToken = default)
         {
             if (!string.IsNullOrEmpty(reason))

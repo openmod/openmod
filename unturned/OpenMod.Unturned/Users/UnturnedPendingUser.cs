@@ -4,6 +4,7 @@ using OpenMod.Core.Users;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Drawing;
 using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
@@ -46,7 +47,17 @@ namespace OpenMod.Unturned.Users
             return Task.CompletedTask;
         }
 
-        public override Task PrintMessageAsync(string message, System.Drawing.Color color)
+        public override Task PrintMessageAsync(string message, Color color)
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task PrintMessageAsync(string message, string? iconUrl)
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task PrintMessageAsync(string message, Color color, string? iconUrl)
         {
             return Task.CompletedTask;
         }

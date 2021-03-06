@@ -39,5 +39,15 @@ namespace OpenMod.Core.Jobs
         {
             return PrintMessageAsync(message);
         }
+
+        public Task PrintMessageAsync(string message, string? iconUrl)
+        {
+            return PrintMessageAsync(message);
+        }
+
+        public Task PrintMessageAsync(string message, Color color, string? iconUrl)
+        {
+            return PrintMessageAsync(message);
+        }
     }
 }

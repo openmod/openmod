@@ -1,4 +1,9 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Text;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
@@ -7,11 +12,6 @@ using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
 using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
 {
@@ -50,17 +50,28 @@ namespace OpenMod.Unturned.Users
 
         public override Task PrintMessageAsync(string message)
         {
-            return PrintMessageAsync(message, System.Drawing.Color.White);
+            return PrintMessageAsync(message, iconUrl: null);
         }
 
         public override Task PrintMessageAsync(string message, Color color)
         {
-            return PrintMessageAsync(message, color, isRich: true, iconUrl: SDG.Unturned.Provider.configData.Browser.Icon);
+            return PrintMessageAsync(message, color, iconUrl: null);
+        }
+
+        public override Task PrintMessageAsync(string message, string? iconUrl)
+        {
+            return PrintMessageAsync(message, Color.White, iconUrl);
+        }
+
+        public override Task PrintMessageAsync(string message, Color color, string? iconUrl)
+        {
+            iconUrl ??= SDG.Unturned.Provider.configData.Browser.Icon;
+            return PrintMessageAsync(message, color, isRich: true, iconUrl);
         }
 
         public Task PrintMessageAsync(string message, Color color, bool isRich, string iconUrl)
         {
-            if(string.IsNullOrEmpty(message))
+            if (string.IsNullOrEmpty(message))
             {
                 throw new ArgumentNullException(nameof(message));
             }
@@ -103,12 +114,12 @@ namespace OpenMod.Unturned.Users
             var words = line.Split(' ');
             var lines = new List<string>();
             var currentLine = new StringBuilder();
-            var maxLength = 90;
+            const int c_MaxLength = 90;
 
             foreach (var currentWord in words)
             {
-                if ((currentLine.Length > maxLength) ||
-                    ((currentLine.Length + currentWord.Length) > maxLength))
+                if ((currentLine.Length > c_MaxLength) ||
+                    ((currentLine.Length + currentWord.Length) > c_MaxLength))
                 {
                     lines.Add(currentLine.ToString());
                     currentLine.Clear();
@@ -135,8 +146,10 @@ namespace OpenMod.Unturned.Users
 
         public bool Equals(UnturnedUser other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
 
             return other.SteamId.Equals(SteamId);
         }

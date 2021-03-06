@@ -33,5 +33,17 @@ namespace OpenMod.Core.Users
             // do nothing;
             return Task.CompletedTask;
         }
+
+        public override Task PrintMessageAsync(string message, string? iconUrl)
+        {
+            // do nothing;
+            return Task.CompletedTask;
+        }
+
+        public override Task PrintMessageAsync(string message, Color color, string? iconUrl)
+        {
+            // do nothing;
+            return Task.CompletedTask;
+        }
     }
 }
