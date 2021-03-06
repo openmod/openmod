@@ -60,7 +60,7 @@ namespace OpenMod.Core.Rcon
 
         private CancellationToken GetCancellationToken()
         {
-            var cts = new CancellationTokenSource();
+            var cts = new CancellationTokenSource(); // lgtm [cs/local-not-disposed]
             m_EventBus.Subscribe<OpenModShutdownEvent>(m_Runtime, (_, _, _) =>
             {
                 cts.Cancel();
