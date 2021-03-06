@@ -7,7 +7,7 @@ namespace OpenMod.Extensions.Games.Abstractions
     /// Can be used to check if the current game supports specific features.
     /// See <see cref="IOpenModHost.HasCapability"/>.
     /// </summary>
-    public class KnownGameCapabilities
+    public static class KnownGameCapabilities
     {
         public static readonly string Inventory = "games-inventory";
         public static readonly string Health = "games-health";

@@ -1,7 +1,9 @@
-﻿using OpenMod.Core.Helpers;
+﻿using System.Net;
+using OpenMod.Core.Helpers;
 using OpenMod.Extensions.Games.Abstractions;
 using SDG.Unturned;
 using Semver;
+using Steamworks;
 
 namespace OpenMod.Unturned
 {
@@ -10,7 +12,6 @@ namespace OpenMod.Unturned
         public UnturnedHostInformation()
         {
             HostVersion = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
-
         }
 
         public SemVersion HostVersion { get; }
@@ -20,6 +21,8 @@ namespace OpenMod.Unturned
         public bool IsClient { get; } = Provider.isClient;
 
         public bool IsServer { get; } = Provider.isServer || Dedicator.isDedicated || Dedicator.isStandaloneDedicatedServer;
+
+        public IPAddress? ServerAddress { get; } = SteamGameServer.GetPublicIP().ToIPAddress();
 
         public ushort? ServerPort { get; } = Provider.port;
 

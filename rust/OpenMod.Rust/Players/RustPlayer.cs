@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Numerics;
 using OpenMod.Extensions.Games.Abstractions.Items;
 using OpenMod.Extensions.Games.Abstractions.Players;
@@ -66,5 +67,8 @@ namespace OpenMod.Rust.Players
         }
 
         public IInventory Inventory { get; }
+
+        // todo: get IP of RustPlayer
+        public IPAddress? Address => throw new NotImplementedException();
     }
 }
