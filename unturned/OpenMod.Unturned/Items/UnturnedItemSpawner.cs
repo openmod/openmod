@@ -92,6 +92,42 @@ namespace OpenMod.Unturned.Items
                     return true;
                 }
             }
+            
+            if (player.clothing.hat == 0 && itemAsset.type == EItemType.HAT)
+            {
+                player.clothing.askWearHat(item.id, item.quality, item.state, true);
+                return true;
+            }
+            if (player.clothing.shirt == 0 && itemAsset.type == EItemType.SHIRT)
+            {
+                player.clothing.askWearShirt(item.id, item.quality, item.state, true);
+                return true;
+            }
+            if (player.clothing.pants == 0 && itemAsset.type == EItemType.PANTS)
+            {
+                player.clothing.askWearPants(item.id, item.quality, item.state, true);
+                return true;
+            }
+            if (player.clothing.backpack == 0 && itemAsset.type == EItemType.BACKPACK)
+            {
+                player.clothing.askWearBackpack(item.id, item.quality, item.state, true);
+                return true;
+            }
+            if (player.clothing.vest == 0 && itemAsset.type == EItemType.VEST)
+            {
+                player.clothing.askWearVest(item.id, item.quality, item.state, true);
+                return true;
+            }
+            if (player.clothing.mask == 0 && itemAsset.type == EItemType.MASK)
+            {
+                player.clothing.askWearMask(item.id, item.quality, item.state, true);
+                return true;
+            }
+            if (player.clothing.glasses == 0 && itemAsset.type == EItemType.GLASSES)
+            {
+                player.clothing.askWearGlasses(item.id, item.quality, item.state, true);
+                return true;
+            }
 
             for (var page = PlayerInventory.SLOTS; page < PlayerInventory.PAGES - 2; page++)
             {
