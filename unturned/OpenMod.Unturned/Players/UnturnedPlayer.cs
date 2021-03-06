@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Net;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.API;
@@ -77,11 +78,11 @@ namespace OpenMod.Unturned.Players
 
         public double Health => Player.life.health;
 
-        public string IP
+        public IPAddress IP
         {
             get
             {
-                return SteamPlayer.transportConnection.GetAddressString(withPort: false);
+                return SteamPlayer.transportConnection.GetAddress();
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using OpenMod.Extensions.Games.Abstractions.Entities;
+﻿using System.Net;
+using OpenMod.Extensions.Games.Abstractions.Entities;
 
 namespace OpenMod.Extensions.Games.Abstractions.Players
 {
@@ -15,6 +16,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
         /// <summary>
         /// The IP of the player.
         /// </summary>
-        string IP { get; }
+        IPAddress IP { get; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using OpenMod.API;
+﻿using System.Net;
+using OpenMod.API;
 
 namespace OpenMod.Extensions.Games.Abstractions
 {
@@ -26,7 +27,7 @@ namespace OpenMod.Extensions.Games.Abstractions
         /// <summary>
         /// Gets the IP used to connect to the server. <b>Null</b> if the current host is not a server or is not listening yet.
         /// </summary>
-        string? ServerIP { get; }
+        IPAddress? ServerIP { get; }
 
         /// <summary>
         /// Gets the port used to connect to the server. <b>Null</b> if the current host is not a server or is not listening yet.
