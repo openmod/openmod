@@ -25,9 +25,9 @@ namespace OpenMod.Extensions.Games.Abstractions
         bool IsServer { get; }
 
         /// <summary>
-        /// Gets the IP used to connect to the server. <b>Null</b> if the current host is not a server or is not listening yet.
+        /// Gets the address used to connect to the server. <b>Null</b> if the current host is not a server or is not listening yet.
         /// </summary>
-        IPAddress? ServerIP { get; }
+        IPAddress? ServerAddress { get; }
 
         /// <summary>
         /// Gets the port used to connect to the server. <b>Null</b> if the current host is not a server or is not listening yet.

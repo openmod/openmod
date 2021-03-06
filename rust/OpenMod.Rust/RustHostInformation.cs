@@ -21,7 +21,7 @@ namespace OpenMod.Rust
 
         public bool IsServer { get; } = true;
 
-        public IPAddress? ServerIP { get; } = IPAddress.Parse(ConVar.Server.ip);
+        public IPAddress? ServerAddress { get; } = IPAddress.Parse(ConVar.Server.ip);
 
         public ushort? ServerPort { get; } = (ushort) ConVar.Server.port;
 

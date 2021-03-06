@@ -14,8 +14,8 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
         string Stance { get; }
 
         /// <summary>
-        /// The IP of the player.
+        /// The address of the player.
         /// </summary>
-        IPAddress? IP { get; }
+        IPAddress? Address { get; }
     }
 }

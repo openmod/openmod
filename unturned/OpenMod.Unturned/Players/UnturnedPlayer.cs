@@ -78,7 +78,7 @@ namespace OpenMod.Unturned.Players
 
         public double Health => Player.life.health;
 
-        public IPAddress? IP
+        public IPAddress? Address
         {
             get
             {

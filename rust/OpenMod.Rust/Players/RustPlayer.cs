@@ -69,6 +69,6 @@ namespace OpenMod.Rust.Players
         public IInventory Inventory { get; }
 
         // todo: get IP of RustPlayer
-        public IPAddress? IP => throw new NotImplementedException();
+        public IPAddress? Address => throw new NotImplementedException();
     }
 }
