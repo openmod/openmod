@@ -5,9 +5,8 @@ using OpenMod.Extensions.Games.Abstractions.Items;
 using OpenMod.UnityEngine.Extensions;
 using SDG.Unturned;
 using System;
-using System.Reflection;
+using System.Linq;
 using System.Threading.Tasks;
-using UnityEngine;
 using UVector3 = UnityEngine.Vector3;
 using Vector3 = System.Numerics.Vector3;
 
@@ -16,17 +15,6 @@ namespace OpenMod.Unturned.Items
     [ServiceImplementation(Priority = Priority.Lowest)]
     public class UnturnedItemSpawner : IItemSpawner
     {
-        private static readonly FieldInfo s_InstanceCountField;
-
-        static UnturnedItemSpawner()
-        {
-            s_InstanceCountField = typeof(ItemManager).GetField("instanceCount", BindingFlags.Static | BindingFlags.NonPublic)!;
-            if (s_InstanceCountField == null)
-            {
-                throw new Exception("Failed to find instanceCount field in ItemManager");
-            }
-        }
-
         public Task<IItemInstance?> GiveItemAsync(IInventory inventory, string itemId, IItemState? state = null)
         {
             async UniTask<IItemInstance?> GiveItemTask()
@@ -155,46 +143,23 @@ namespace OpenMod.Unturned.Items
             return SpawnItemTask().AsTask();
         }
 
-        // similar to ItemManager.dropItem but with some useful return values
         private UnturnedItemDrop? DropItem(Item item, Vector3 position)
         {
             var point = position.ToUnityVector();
+            ItemManager.dropItem(item, point, playEffect: true, isDropped: true, wideSpread: false);
 
             if (!Regions.tryGetCoordinate(point, out var x, out var y))
             {
                 return null;
             }
 
-            if (point.y > 0.0)
-            {
-                Physics.Raycast(point + UVector3.up, UVector3.down, out var hitInfo,
-                    Mathf.Min(point.y + 1f, Level.HEIGHT), RayMasks.BLOCK_ITEM);
-                if (hitInfo.collider != null)
-                {
-                    point.y = hitInfo.point.y;
-                }
-            }
+            var region = ItemManager.regions[x, y];
+            var itemData = region.items.FirstOrDefault(d => d.item == item);
 
-            bool shouldAllow = true;
-            ItemManager.onServerSpawningItemDrop?.Invoke(item, ref point, ref shouldAllow);
-            if (!shouldAllow)
+            if (itemData == null)
             {
                 return null;
             }
-
-            EffectManager.sendEffect(6, EffectManager.SMALL, point);
-            var nextInstanceId = (uint)s_InstanceCountField.GetValue(null) + 1;
-            s_InstanceCountField.SetValue(null, nextInstanceId);
-
-            var itemData = new ItemData(item, nextInstanceId, point, newDropped: true);
-
-            var region = ItemManager.regions[x, y];
-
-            region.items.Add(itemData);
-            ItemManager.instance.channel.send("tellItem",
-                ESteamCall.CLIENTS, x, y, ItemManager.ITEM_REGIONS,
-                ESteamPacket.UPDATE_RELIABLE_BUFFER, x, y, item.id,
-                item.amount, item.quality, item.state, point, itemData.instanceID);
 
             return new UnturnedItemDrop(region, itemData);
         }
