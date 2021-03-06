@@ -41,9 +41,9 @@ namespace OpenMod.Unturned.Users
         UnturnedPendingUser? FindPendingUser(CSteamID steamId);
 
         /// <summary>
-        /// Tries to find a pending Unturned player user based on ID or name depending on <see cref="searchMode"/>.
+        /// Tries to find a pending Unturned player user based on ID or name depending on <see cref="UserSearchMode"/>.
         /// </summary>
-        /// <param name="searchString">Name or ID of the user. The value depends on <see cref="searchMode"/>.</param>
+        /// <param name="searchString">Name or ID of the user. The value depends on <see cref="UserSearchMode"/>.</param>
         /// <param name="searchMode">The search mode. See <see cref="UserSearchMode"/>.</param>
         /// <returns><b>The Unturned user</b> if found; otherwise, <b>null</b>.</returns>
         UnturnedUser? FindUser(string searchString, UserSearchMode searchMode);

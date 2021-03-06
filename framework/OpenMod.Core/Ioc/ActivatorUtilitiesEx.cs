@@ -25,7 +25,7 @@ namespace OpenMod.Core.Ioc
         /// </summary>
         /// <param name="lifetimeScope">The lifetime scope used to resolve dependencies</param>
         /// <param name="instanceType">The type to activate</param>
-        /// <param name="parameters">Constructor arguments not provided by the <paramref name="provider"/>.</param>
+        /// <param name="parameters">Constructor arguments not provided by the <paramref name="lifetimeScope"/>.</param>
         /// <returns>An activated object of type instanceType</returns>
         public static object CreateInstance(ILifetimeScope lifetimeScope, Type instanceType, params object[] parameters)
         {
