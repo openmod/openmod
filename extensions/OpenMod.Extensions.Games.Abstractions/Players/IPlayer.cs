@@ -16,6 +16,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
         /// <summary>
         /// The IP of the player.
         /// </summary>
-        IPAddress IP { get; }
+        IPAddress? IP { get; }
     }
 }
