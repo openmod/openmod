@@ -1,16 +1,16 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using OpenMod.API.Ioc;
-using OpenMod.API.Prioritization;
-using OpenMod.API.Users;
-using OpenMod.Core.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using OpenMod.API;
+using OpenMod.API.Ioc;
+using OpenMod.API.Prioritization;
+using OpenMod.API.Users;
+using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Users
@@ -57,7 +57,7 @@ namespace OpenMod.Core.Users
 
         public virtual async Task<IUser?> FindUserAsync(string userType, string searchString, UserSearchMode searchMode)
         {
-            if(string.IsNullOrEmpty(userType))
+            if (string.IsNullOrEmpty(userType))
             {
                 throw new ArgumentException(nameof(userType));
             }
@@ -113,29 +113,39 @@ namespace OpenMod.Core.Users
             await provider.BroadcastAsync(userType, message);
         }
 
-        public virtual async Task BroadcastAsync(string message, Color? color)
+        public virtual Task BroadcastAsync(string message, Color? color)
+        {
+            return BroadcastWithIconAsync(message, color: color);
+        }
+
+        public virtual async Task BroadcastWithIconAsync(string message, string? iconUrl = null, Color? color = null)
         {
             if (string.IsNullOrEmpty(message))
             {
-                throw new ArgumentException(nameof(message));
+                throw new ArgumentException($"'{nameof(message)}' cannot be null or empty", nameof(message));
             }
 
             foreach (var provider in UserProviders)
             {
-                await provider.BroadcastAsync(message, color);
+                await provider.BroadcastWithIconAsync(message, iconUrl, color);
             }
         }
 
-        public virtual async Task BroadcastAsync(string userType, string message, Color? color)
+        public virtual Task BroadcastAsync(string userType, string message, Color? color)
+        {
+            return BroadcastAsync(userType, message, color: color);
+        }
+
+        public virtual async Task BroadcastWithIconAsync(string userType, string message, string? iconUrl = null, Color? color = null)
         {
             if (string.IsNullOrEmpty(userType))
             {
-                throw new ArgumentException(nameof(userType));
+                throw new ArgumentException($"'{nameof(userType)}' cannot be null or empty", nameof(userType));
             }
 
             if (string.IsNullOrEmpty(message))
             {
-                throw new ArgumentException(nameof(message));
+                throw new ArgumentException($"'{nameof(message)}' cannot be null or empty", nameof(message));
             }
 
             var provider = UserProviders.FirstOrDefault(d => d.SupportsUserType(userType));

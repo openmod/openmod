@@ -40,11 +40,28 @@ namespace OpenMod.API.Users
         Task BroadcastAsync(string message, Color? color = null);
 
         /// <summary>
+        /// Broadcasts a message to all users.
+        /// </summary>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="iconUrl">The icon URL to broadcast. May not be supported on all platforms.</param>
+        /// <param name="color">The message color. May not be supported on all platforms.</param>
+        Task BroadcastWithIconAsync(string message, string? iconUrl = null, Color? color = null);
+
+        /// <summary>
         /// Broadcasts a message to all users of the given type.
         /// </summary>
         /// <param name="userType">The user type to broadcast to.</param>
         /// <param name="message">The message to broadcast.</param>
         /// <param name="color">The message color. May not be supported on all platforms.</param>
         Task BroadcastAsync(string userType, string message, Color? color = null);
+
+        /// <summary>
+        /// Broadcasts a message to all users of the given type.
+        /// </summary>
+        /// <param name="userType">The user type to broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="iconUrl">The icon URL to broadcast. May not be supported on all platforms.</param>
+        /// <param name="color">The message color. May not be supported on all platforms.</param>
+        Task BroadcastWithIconAsync(string userType, string message, string? iconUrl = null, Color? color = null);
     }
 }

@@ -1,4 +1,9 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Prioritization;
@@ -9,10 +14,6 @@ using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Users.Events;
 using SDG.Unturned;
 using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
 {
@@ -310,28 +311,39 @@ namespace OpenMod.Unturned.Users
             return Task.FromResult<IReadOnlyCollection<IUser>>(m_Users);
         }
 
-        public Task BroadcastAsync(string userType, string message, System.Drawing.Color? color)
+        public Task BroadcastAsync(string userType, string message, Color? color)
+        {
+            return BroadcastWithIconAsync(userType, message, null, color);
+        }
+
+        public Task BroadcastWithIconAsync(string userType, string message, string? iconUrl = null, Color? color = null)
         {
             if (!KnownActorTypes.Player.Equals(userType, StringComparison.OrdinalIgnoreCase))
             {
                 return Task.CompletedTask;
             }
 
-            return BroadcastAsync(message, color);
+            return BroadcastWithIconAsync(message, iconUrl, color);
         }
 
-        public Task BroadcastAsync(string message, System.Drawing.Color? color)
+        public Task BroadcastAsync(string message, Color? color)
         {
-            return BroadcastAsync(message, color, isRich: true, iconUrl: Provider.configData.Browser.Icon);
+            return BroadcastWithIconAsync(message, null, color);
         }
 
-        public Task BroadcastAsync(string message, System.Drawing.Color? color, bool isRich, string iconUrl)
+        public Task BroadcastWithIconAsync(string message, string? iconUrl = null, Color? color = null)
+        {
+            return BroadcastAsync(message, color, isRich: true, iconUrl: iconUrl);
+        }
+
+        public Task BroadcastAsync(string message, Color? color, bool isRich, string? iconUrl)
         {
             async UniTask BroadcastTask()
             {
                 await UniTask.SwitchToMainThread();
 
-                color ??= System.Drawing.Color.White;
+                color ??= Color.White;
+                iconUrl ??= Provider.configData.Browser.Icon;
 
                 ChatManager.serverSendMessage(text: message, color: color.Value.ToUnityColor(), useRichTextFormatting: isRich, iconURL: iconUrl);
             }

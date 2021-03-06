@@ -31,9 +31,9 @@ namespace OpenMod.Core.Users
             var data = await m_UserDataStore.GetUserDataAsync(searchString, userType);
             if (data == null)
             {
-            	return null;
+                return null;
             }
-            
+
             return new OfflineUser(this, m_UserDataStore, data);
         }
 
@@ -48,7 +48,17 @@ namespace OpenMod.Core.Users
             return Task.CompletedTask;
         }
 
+        public Task BroadcastWithIconAsync(string message, string? iconUrl = null, Color? color = null)
+        {
+            return Task.CompletedTask;
+        }
+
         public Task BroadcastAsync(string message, Color? color)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task BroadcastWithIconAsync(string userType, string message, string? iconUrl = null, Color? color = null)
         {
             return Task.CompletedTask;
         }
