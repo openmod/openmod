@@ -1,4 +1,8 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using System.Globalization;
+using System.Net;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Items;
@@ -12,9 +16,6 @@ using OpenMod.Unturned.Items;
 using OpenMod.Unturned.Vehicles;
 using SDG.Unturned;
 using Steamworks;
-using System;
-using System.Globalization;
-using System.Threading.Tasks;
 using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players
@@ -42,15 +43,18 @@ namespace OpenMod.Unturned.Players
 
         public bool Equals(UnturnedPlayer other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
 
             return other.SteamId.Equals(SteamId);
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is UnturnedPlayer other) return Equals(other);
+            if (obj is UnturnedPlayer other)
+                return Equals(other);
 
             return false;
         }
@@ -73,6 +77,14 @@ namespace OpenMod.Unturned.Players
         public double MaxHealth => 255;
 
         public double Health => Player.life.health;
+
+        public IPAddress? Address
+        {
+            get
+            {
+                return SteamPlayer.getAddress();
+            }
+        }
 
         public Task SetHealthAsync(double health)
         {

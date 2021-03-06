@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
+using System.Text;
 using System.Text.RegularExpressions;
 using OpenMod.API;
 using OpenMod.Common.Hotloading;
@@ -53,11 +54,12 @@ namespace OpenMod.Core.Helpers
 
                 var parts = fileName.Split('.');
                 fileName = "";
-                var path = assemblyName.Name + ".";
+
+                var pathSb = new StringBuilder(assemblyName.Name + ".");
                 foreach (var part in parts)
                 {
-                    path += part + ".";
-                    using var tmpStream = assembly.GetManifestResourceStream(path + ".directory");
+                    pathSb.Append(part + ".");
+                    using var tmpStream = assembly.GetManifestResourceStream(pathSb + ".directory");
 
                     var isDirectory = tmpStream != null;
                     if (isDirectory)

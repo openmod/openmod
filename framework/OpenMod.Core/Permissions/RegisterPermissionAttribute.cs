@@ -10,11 +10,12 @@ namespace OpenMod.Core.Permissions
 
         public string? Description { get; set; }
 
-        public PermissionGrantResult? DefaultGrant { get; set; }
+        public PermissionGrantResult DefaultGrant { get; set; }
 
         public RegisterPermissionAttribute(string permission)
         {
             Permission = permission;
+            DefaultGrant = PermissionGrantResult.Default;
         }
     }
 }

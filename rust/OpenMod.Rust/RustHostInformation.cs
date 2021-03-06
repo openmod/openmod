@@ -1,4 +1,5 @@
-﻿using OpenMod.Core.Helpers;
+﻿using System.Net;
+using OpenMod.Core.Helpers;
 using OpenMod.Extensions.Games.Abstractions;
 using Rust;
 using Semver;
@@ -19,6 +20,8 @@ namespace OpenMod.Rust
         public bool IsClient { get; } = false;
 
         public bool IsServer { get; } = true;
+
+        public IPAddress? ServerAddress { get; } = IPAddress.Parse(ConVar.Server.ip);
 
         public ushort? ServerPort { get; } = (ushort) ConVar.Server.port;
 
