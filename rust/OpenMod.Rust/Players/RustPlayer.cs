@@ -95,7 +95,7 @@ namespace OpenMod.Rust.Players
         {
             get
             {
-                return Player.Health();
+                return Player.MaxHealth();
             }
         }
 
@@ -103,7 +103,7 @@ namespace OpenMod.Rust.Players
         {
             get
             {
-                return Player.MaxHealth();
+                return Player.Health();
             }
         }
 
