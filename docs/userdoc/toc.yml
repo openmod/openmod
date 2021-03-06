@@ -16,6 +16,8 @@
     href: concepts/translations.md
   - name: Permissions
     href: concepts/permissions.md
+  - name: Cooldowns
+    href: concepts/cooldowns.md
   - name: Logging
     href: concepts/logging.md  
   - name: Jobs
