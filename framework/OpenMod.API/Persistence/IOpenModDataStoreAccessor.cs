@@ -1,5 +1,4 @@
 ﻿using OpenMod.API.Ioc;
-using OpenMod.API.Plugins;
 
 namespace OpenMod.API.Persistence
 {
@@ -7,7 +6,7 @@ namespace OpenMod.API.Persistence
     /// The service used to access OpenMod's datastore.
     /// </summary>
     /// <remarks>
-    /// This service cannot be used to access plugin datastores. Use <see cref="IOpenModPlugin.DataStore"/> instead.
+    /// This service cannot be used to access plugin datastores. Use <see cref="IOpenModComponent.DataStore"/> instead.
     /// </remarks>
     [Service]
     public interface IOpenModDataStoreAccessor

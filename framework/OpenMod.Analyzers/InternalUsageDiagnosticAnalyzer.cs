@@ -26,7 +26,7 @@ namespace OpenMod.Analyzers
 
 #pragma warning disable RS2008
         private static readonly DiagnosticDescriptor s_Descriptor
-            = new DiagnosticDescriptor(
+            = new(
                 Id,
                 title: DefaultTitle,
                 messageFormat: MessageFormat,

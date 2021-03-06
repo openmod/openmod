@@ -43,12 +43,7 @@ namespace OpenMod.Unturned.Players
 
         public bool Equals(UnturnedPlayer other)
         {
-            if (ReferenceEquals(null, other))
-                return false;
-            if (ReferenceEquals(this, other))
-                return true;
-
-            return other.SteamId.Equals(SteamId);
+            return ReferenceEquals(this, other) || other.SteamId.Equals(SteamId);
         }
 
         public override bool Equals(object obj)

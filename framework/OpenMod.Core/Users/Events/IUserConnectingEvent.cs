@@ -18,7 +18,7 @@ namespace OpenMod.Core.Users.Events
         /// Rejects a players connection attempt.
         /// </summary>
         /// <param name="reason">The reason of the rejection.</param>
-        /// <exception cref="ArgumentNullException">Thrown when the <see cref="reason"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="reason"/> is null.</exception>
         Task RejectAsync(string reason);
     }
 }
