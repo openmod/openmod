@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 namespace OpenMod.Core.Commands.OpenModCommands
 {
     [Command("role")]
+    [CommandParent(typeof(CommandOpenMod))]
     [CommandAlias("r")]
     [CommandAlias("permissionrole")]
     [CommandAlias("pr")]
