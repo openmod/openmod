@@ -210,6 +210,11 @@ namespace OpenMod.Unturned.Commands
         {
             foreach (var file in Directory.GetFiles(openModDirPath))
             {
+                if (s_IgnoredNameFiles.Contains(Path.GetFileName(file)))
+                {
+                    continue;
+                }
+
                 try
                 {
                     File.Move(file, file + ".bak");
@@ -219,7 +224,6 @@ namespace OpenMod.Unturned.Commands
                     m_Logger.LogDebug(ex, "Exception occurred while creating backup");
                 }
             }
-
         }
 
         private async Task ExtractArchiveAsync(Stream archiveStream, string directory)
