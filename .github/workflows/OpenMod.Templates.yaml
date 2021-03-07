@@ -7,12 +7,10 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.Templates.yaml'
       - 'templates/**'
   pull_request:
     branches: [ main ]
     paths:
-      - '.github/workflows/OpenMod.Templates.yaml'
       - 'templates/**'
 
 jobs:
@@ -46,7 +44,10 @@ jobs:
     # Update project versions
     - name: Update OpenMod Templates version
       run: "sed -i \"s#0.0.0#${{ steps.get-version.outputs.version }}#\" templates/OpenMod.Templates.csproj"
-
+    - name: Update OpenMod Templates Universal version
+      run: "sed -i \"s#0.0.0#${{ steps.get-version.outputs.version }}#\" templates/templates/universal/PluginTemplate.csproj"
+    - name: Update OpenMod Templates Unturned version
+      run: "sed -i \"s#0.0.0#${{ steps.get-version.outputs.version }}#\" templates/templates/unturned/PluginTemplate.csproj"
     - name: Build
       run: dotnet build ./templates --configuration Release
 
