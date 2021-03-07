@@ -68,6 +68,7 @@ namespace OpenMod.Unturned
                     serviceCollection.Configure<PermissionCheckerOptions>(options =>
                     {
                         options.AddPermissionSource<RocketPermissionStore>();
+                        options.AddPermissionCheckProvider<RocketCooldownPermissionCheckProvider>();
                     });
 
                     serviceCollection.AddTransient<IPermissionRoleStore, RocketPermissionRoleStore>();

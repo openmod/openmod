@@ -10,7 +10,7 @@ using UnturnedPlayer = Rocket.Unturned.Player.UnturnedPlayer;
 
 namespace OpenMod.Unturned.RocketMod.Permissions
 {
-    public class RocketModPermissionProxyProvider : IRocketPermissionsProvider, IDisposable
+    public class RocketPermissionProxyProvider : IRocketPermissionsProvider, IDisposable
     {
         private readonly IRocketModComponent m_RocketModComponent;
         private readonly IPermissionChecker m_PermissionChecker;
@@ -18,7 +18,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
         private readonly IPermissionRegistry m_PermissionRegistry;
         private IRocketPermissionsProvider? m_OriginalPermissionProvider;
 
-        public RocketModPermissionProxyProvider(
+        public RocketPermissionProxyProvider(
             IRocketModComponent rocketModComponent,
             IPermissionChecker permissionChecker,
             IPermissionRoleStore permissionRoleStore,

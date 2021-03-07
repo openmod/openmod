@@ -52,7 +52,7 @@ namespace OpenMod.Unturned.RocketMod
             if (permissionSystem.Equals("OpenMod", StringComparison.OrdinalIgnoreCase))
             {
                 var scope = m_RocketModComponent.LifetimeScope;
-                var permissionProxyProvider = ActivatorUtilitiesEx.CreateInstance<RocketModPermissionProxyProvider>(scope);
+                var permissionProxyProvider = ActivatorUtilitiesEx.CreateInstance<RocketPermissionProxyProvider>(scope);
                 permissionProxyProvider.Install();
             }
 
