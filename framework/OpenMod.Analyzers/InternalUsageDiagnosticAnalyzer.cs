@@ -133,6 +133,7 @@ namespace OpenMod.Analyzers
             var i = ns.IndexOf("OpenMod", StringComparison.Ordinal);
 
             return
+                ns.Contains("Internal") &&
                 i != -1 &&
                 (i == 0 || ns[i - 1] == '.') &&
                 i + s_OmLen < ns.Length && ns[i + s_OmLen] == '.';
