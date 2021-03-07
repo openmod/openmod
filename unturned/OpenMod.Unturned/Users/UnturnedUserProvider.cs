@@ -226,6 +226,8 @@ namespace OpenMod.Unturned.Users
 
             isValid = isPendingValid;
             explanation = rejectExplanation;
+
+            Provider.onCheckValid?.Invoke(callback, ref isValid);
         }
 
         protected virtual void FinishSession(UnturnedPendingUser pending)
