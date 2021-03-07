@@ -13,18 +13,24 @@ namespace OpenMod.Core.Commands.OpenModCommands
     public class CommandOpenMod : Command
     {
         private readonly IRuntime m_Runtime;
-        private readonly IOpenModHost m_Host;
         private readonly IHostInformation m_HostInformation;
 
-        public CommandOpenMod(IRuntime runtime, IOpenModHost host, IHostInformation hostInformation, IServiceProvider serviceProvider) : base(serviceProvider)
+        public CommandOpenMod(
+            IRuntime runtime,
+            IHostInformation hostInformation,
+            IServiceProvider serviceProvider) : base(serviceProvider)
         {
             m_Runtime = runtime;
-            m_Host = host;
             m_HostInformation = hostInformation;
         }
 
         protected override async Task OnExecuteAsync()
         {
+            if(Context.Parameters.Length > 0)
+            {
+                throw new CommandWrongUsageException(Context);
+            }
+
             await Context.Actor.PrintMessageAsync($"OpenMod v{m_Runtime.Version} (c) Enes Sadık Özbek and contributors", Color.Green);
             await Context.Actor.PrintMessageAsync("OpenMod is free and open source, licensed under the EUPL-1.2.", Color.Green);
             await Context.Actor.PrintMessageAsync("Downloads and source code available at https://github.com/openmod/openmod.", Color.Green);

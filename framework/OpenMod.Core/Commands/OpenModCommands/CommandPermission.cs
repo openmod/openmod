@@ -6,6 +6,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
 {
     [Command("permission", Priority = Priority.Lowest)]
     [CommandAlias("p")]
+    [CommandParent(typeof(CommandOpenMod))]
     [CommandDescription("Manage permissions")]
     [CommandSyntax("<add/remove> <[p]layer | [r]ole> <name> <permission>")]
     public class CommandPermission : Command
