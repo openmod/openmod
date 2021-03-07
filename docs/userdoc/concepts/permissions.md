@@ -103,12 +103,12 @@ In that case, we can negate the permission by adding it prefixed with a "!":
 The ! prefix will forcefully remove any permission. 
 
 > [!NOTE]
-> You can also add and remove permissions with the `permission` command: `permission add role megavip !Kr4ken.NewEssentials:kit.vip`
+> You can also add and remove permissions with the `om p` command: `om p add role megavip !Kr4ken.NewEssentials:kit.vip`
 
 ## User permissions and assigning roles
-You can assign roles to users by using the `permissionrole add player <player> <role>` command, e.g. `permissionrole add player Trojaner megavip`. Similarly, you can remove users from a role by typing `permissionrole remove player <player> <role>`
+You can assign roles to users by using the `om r add player <player> <role>` command, e.g. `om r add player Trojaner megavip`. Similarly, you can remove users from a role by typing `om r remove player <player> <role>`
 
-Permissions can be directly attached to users: `permission add player Trojaner Kr4ken.NewEssentials:kits.vip`. User permissions always override any conflicting role permissions. You can use `permission remove Trojaner Kr4ken.NewEssentials:kits.vip` to remove the permission again.
+Permissions can be directly attached to users: `om p add player Trojaner Kr4ken.NewEssentials:kits.vip`. User permissions always override any conflicting role permissions. You can use `om p remove Trojaner Kr4ken.NewEssentials:kits.vip` to remove the permission again.
 
 ## Wildcards
 Assume a teleport plugin has the following permissions:
