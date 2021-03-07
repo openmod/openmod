@@ -45,10 +45,12 @@ namespace OpenMod.Unturned.RocketMod.Permissions
 
                 if (m_Cooldowns.ContainsKey(actor.Id))
                 {
-                    if (m_Cooldowns[actor.Id] < DateTime.UtcNow)
+                    if (m_Cooldowns[actor.Id] > DateTime.UtcNow)
                     {
                         var timeLeft = m_Cooldowns[actor.Id] - DateTime.UtcNow;
-                        AsyncHelper.RunSync(() => ((IPlayerUser) actor).PrintMessageAsync($"You must wait {timeLeft.Seconds}s.", Color.Red));
+
+                        // todo: there is no openmod.unturned.translations.yaml yet
+                        AsyncHelper.RunSync(() => ((IPlayerUser) actor).PrintMessageAsync($"You must wait {timeLeft.Seconds} seconds.", Color.Red));
                         return Task.FromResult(PermissionGrantResult.Deny);
                     }
 
