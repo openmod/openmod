@@ -9,7 +9,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
     [Command("openmod", Priority = Priority.Highest)]
     [CommandAlias("om")]
     [CommandDescription("Get information about OpenMod and manage it")]
-    [CommandSyntax("[<install/uninstall/update/reload>]")]
+    [CommandSyntax("[<plugins/install/uninstall/permission/reload/upgrade/purge>]")]
     public class CommandOpenMod : Command
     {
         private readonly IRuntime m_Runtime;
