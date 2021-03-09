@@ -135,8 +135,7 @@ namespace OpenMod.Unturned.Players
                     return false;
                 }
 
-                var rotationAngle = MeasurementTool.angleToByte(rotation.Y);
-                Player.channel.send("askTeleport", ESteamCall.ALL, ESteamPacket.UPDATE_RELIABLE_BUFFER, position, rotationAngle);
+                Player.teleportToLocationUnsafe(position.ToUnityVector(), rotation.Y);
                 return true;
             }
 
