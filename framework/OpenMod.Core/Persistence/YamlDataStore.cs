@@ -6,7 +6,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Persistence;
@@ -38,7 +37,6 @@ namespace OpenMod.Core.Persistence
 
         private YamlDataStore(DataStoreCreationParameters parameters) : this(parameters, null, null)
         {
-            
         }
 
         public YamlDataStore(DataStoreCreationParameters parameters,
@@ -89,7 +87,7 @@ namespace OpenMod.Core.Persistence
                 return;
             }
 
-            if(!Directory.Exists(m_BasePath))
+            if (!Directory.Exists(m_BasePath))
             {
                 if (!createDirectory)
                 {
@@ -150,8 +148,8 @@ namespace OpenMod.Core.Persistence
 
             var serializedYaml =
                 data == null
-                ? string.Empty
-                : m_Serializer.Serialize(data);
+                    ? string.Empty
+                    : m_Serializer.Serialize(data);
 
             var encodedData = Encoding.UTF8.GetBytes(serializedYaml);
             var filePath = GetFilePathForKey(key);
@@ -195,7 +193,7 @@ namespace OpenMod.Core.Persistence
 
             return Task.CompletedTask;
 
-            //bug: the follow lines work on .NET Core / Framework but not on mono 
+            //bug: the follow lines work on .NET Core / Framework but not on mono
             //using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
             //return fileStream.WriteAsync(encodedData, 0, encodedData.Length);
         }
@@ -208,7 +206,7 @@ namespace OpenMod.Core.Persistence
             return Task.FromResult(File.Exists(filePath));
         }
 
-        public virtual Task<T?> LoadAsync<T>(string key) where T : class
+        public virtual async Task<T?> LoadAsync<T>(string key) where T : class
         {
             CheckKeyValid(key);
 
@@ -225,9 +223,14 @@ namespace OpenMod.Core.Persistence
             //var encodedData = new byte[stream.Length];
             //await stream.ReadAsync(encodedData, 0, (int)stream.Length);
 
-            var encodedData = File.ReadAllBytes(filePath);
+            // Retry fixes stupid IOException ("File being used by another process")
+            // when reading from a FileSystemWatcher's event.
+            //
+            // Similar: https://stackoverflow.com/q/49551278
+            var encodedData = await Retry.DoAsync(() => File.ReadAllBytes((filePath)), TimeSpan.FromMilliseconds(1), 5);
+
             var serializedYaml = Encoding.UTF8.GetString(encodedData);
-            return Task.FromResult<T?>(m_Deserializer.Deserialize<T>(serializedYaml));
+            return m_Deserializer.Deserialize<T>(serializedYaml);
         }
 
         public IDisposable AddChangeWatcher(string key, IOpenModComponent component, Action onChange)
