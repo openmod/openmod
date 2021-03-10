@@ -13,7 +13,6 @@ using OpenMod.Core.Helpers;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-
 namespace OpenMod.Core.Persistence
 {
     [OpenModInternal]
@@ -34,10 +33,6 @@ namespace OpenMod.Core.Persistence
         private readonly Dictionary<string, int> m_WriteCounter;
         private readonly HashSet<string> m_KnownKeys;
         private FileSystemWatcher? m_FileSystemWatcher;
-
-        private YamlDataStore(DataStoreCreationParameters parameters) : this(parameters, null, null)
-        {
-        }
 
         public YamlDataStore(DataStoreCreationParameters parameters,
             ILogger<YamlDataStore>? logger,
@@ -180,6 +175,13 @@ namespace OpenMod.Core.Persistence
 
                 IncrementWriteCounter(key);
 
+                var wasRaising = false;
+                if (m_FileSystemWatcher != null)
+                {
+                    wasRaising = m_FileSystemWatcher.EnableRaisingEvents;
+                    m_FileSystemWatcher.EnableRaisingEvents = false;
+                }
+
                 try
                 {
                     File.WriteAllBytes(filePath, encodedData);
@@ -188,6 +190,13 @@ namespace OpenMod.Core.Persistence
                 {
                     DecrementWriteCounter(key);
                     throw;
+                }
+                finally
+                {
+                    if (m_FileSystemWatcher != null)
+                    {
+                        m_FileSystemWatcher.EnableRaisingEvents = wasRaising;
+                    }
                 }
             }
 
