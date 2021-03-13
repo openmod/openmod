@@ -13,7 +13,6 @@ using OpenMod.Core.Helpers;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-
 namespace OpenMod.Core.Persistence
 {
     [OpenModInternal]
@@ -33,11 +32,8 @@ namespace OpenMod.Core.Persistence
         private readonly bool m_LogOnChange;
         private readonly Dictionary<string, int> m_WriteCounter;
         private readonly HashSet<string> m_KnownKeys;
+        private readonly Dictionary<string, string> m_ContentHash;
         private FileSystemWatcher? m_FileSystemWatcher;
-
-        private YamlDataStore(DataStoreCreationParameters parameters) : this(parameters, null, null)
-        {
-        }
 
         public YamlDataStore(DataStoreCreationParameters parameters,
             ILogger<YamlDataStore>? logger,
@@ -49,6 +45,7 @@ namespace OpenMod.Core.Persistence
             m_WriteCounter = new Dictionary<string, int>();
             m_WatchedFiles = new List<string>();
             m_KnownKeys = new HashSet<string>();
+            m_ContentHash = new Dictionary<string, string>();
 
             if (!string.IsNullOrEmpty(parameters.Prefix))
             {
@@ -104,42 +101,56 @@ namespace OpenMod.Core.Persistence
                 EnableRaisingEvents = true
             };
 
-            m_FileSystemWatcher.Changed += (_, a) =>
+            m_FileSystemWatcher.Changed += (_, args) =>
             {
-                try
-                {
-                    if (a.ChangeType == WatcherChangeTypes.Renamed ||
-                        a.ChangeType == WatcherChangeTypes.Deleted)
-                    {
-                        return;
-                    }
-
-                    foreach (var key in m_KnownKeys)
-                    {
-                        var filePath = GetFilePathForKey(key);
-
-                        if (!a.FullPath.Equals(Path.GetFullPath(filePath), StringComparison.Ordinal))
-                        {
-                            continue;
-                        }
-
-                        lock (GetLock(key))
-                        {
-                            if (DecrementWriteCounter(key))
-                            {
-                                m_Logger?.LogDebug($"File changed: {a.FullPath} ({a.ChangeType:X})");
-                                OnFileChange(key);
-                            }
-                        }
-
-                        return;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    m_Logger?.LogError(ex, $"Error occured on file change for: {a.FullPath}");
-                }
+                AsyncHelper.Schedule(
+                    name: GetType().Name + "_" + nameof(ChangeEventHandler),
+                    task: () => ChangeEventHandler(args),
+                    ex => m_Logger?.LogError(ex, $"Error occured on file change for: {args.FullPath}"));
             };
+        }
+
+        private async Task ChangeEventHandler(FileSystemEventArgs a)
+        {
+            if (a.ChangeType == WatcherChangeTypes.Renamed ||
+                a.ChangeType == WatcherChangeTypes.Deleted)
+            {
+                return;
+            }
+
+            foreach (var key in m_KnownKeys)
+            {
+                var filePath = GetFilePathForKey(key);
+
+                if (!a.FullPath.Equals(Path.GetFullPath(filePath), StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                using var sha = new SHA256Managed();
+                var encodedData = await Retry.DoAsync(
+                    () => File.ReadAllBytes(filePath),
+                    retryInterval: TimeSpan.FromMilliseconds(1),
+                    maxAttempts: 5);
+                var fileHash = BitConverter.ToString(sha.ComputeHash(encodedData));
+
+                if (string.Equals(m_ContentHash[key], fileHash, StringComparison.Ordinal))
+                {
+                    // Nothing changed
+                    return;
+                }
+
+                lock (GetLock(key))
+                {
+                    if (DecrementWriteCounter(key))
+                    {
+                        m_Logger?.LogDebug($"File changed: {a.FullPath} ({a.ChangeType:X})");
+                        OnFileChange(key);
+                    }
+                }
+
+                return;
+            }
         }
 
         public virtual Task SaveAsync<T>(string key, T? data) where T : class
@@ -157,6 +168,9 @@ namespace OpenMod.Core.Persistence
 
             lock (GetLock(key))
             {
+                using var sha = new SHA256Managed();
+                var contentHash = BitConverter.ToString(sha.ComputeHash(encodedData));
+
                 var directory = Path.GetDirectoryName(filePath);
                 if (directory != null && !Directory.Exists(directory))
                 {
@@ -164,11 +178,8 @@ namespace OpenMod.Core.Persistence
                 }
                 else if (File.Exists(filePath))
                 {
-                    using var sha = new SHA256Managed();
                     using var fileStream = File.OpenRead(filePath);
-
                     var fileHash = BitConverter.ToString(sha.ComputeHash(fileStream));
-                    var contentHash = BitConverter.ToString(sha.ComputeHash(encodedData));
 
                     // Ensure that we are actually writing different data
                     // otherwise the file change watcher won't trigger and result in desycned write counter state
@@ -180,14 +191,30 @@ namespace OpenMod.Core.Persistence
 
                 IncrementWriteCounter(key);
 
+                var wasRaising = false;
+                if (m_FileSystemWatcher != null)
+                {
+                    wasRaising = m_FileSystemWatcher.EnableRaisingEvents;
+                    m_FileSystemWatcher.EnableRaisingEvents = false;
+                }
+
                 try
                 {
                     File.WriteAllBytes(filePath, encodedData);
+
+                    m_ContentHash[key] = contentHash;
                 }
                 catch
                 {
                     DecrementWriteCounter(key);
                     throw;
+                }
+                finally
+                {
+                    if (m_FileSystemWatcher != null)
+                    {
+                        m_FileSystemWatcher.EnableRaisingEvents = wasRaising;
+                    }
                 }
             }
 
@@ -228,6 +255,10 @@ namespace OpenMod.Core.Persistence
             //
             // Similar: https://stackoverflow.com/q/49551278
             var encodedData = await Retry.DoAsync(() => File.ReadAllBytes((filePath)), TimeSpan.FromMilliseconds(1), 5);
+
+            using var sha = new SHA256Managed();
+            var contentHash = BitConverter.ToString(sha.ComputeHash(encodedData));
+            m_ContentHash[key] = contentHash;
 
             var serializedYaml = Encoding.UTF8.GetString(encodedData);
             return m_Deserializer.Deserialize<T>(serializedYaml);
@@ -382,6 +413,7 @@ namespace OpenMod.Core.Persistence
             m_ChangeListeners?.Clear();
             m_FileSystemWatcher?.Dispose();
             m_Locks.Clear();
+            m_ContentHash.Clear();
         }
 
         private class RegisteredChangeListener
