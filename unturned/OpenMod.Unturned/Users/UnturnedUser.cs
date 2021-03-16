@@ -1,9 +1,7 @@
-﻿using Cysharp.Threading.Tasks;
-using OpenMod.API;
+﻿using OpenMod.API;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
 using OpenMod.Extensions.Games.Abstractions.Players;
-using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
 using Steamworks;
@@ -60,43 +58,9 @@ namespace OpenMod.Unturned.Users
 
         public Task PrintMessageAsync(string message, Color color, bool isRich, string iconUrl)
         {
-            if(string.IsNullOrEmpty(message))
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
-            async UniTask PrintMessageTask()
-            {
-                var lines = message.Replace(System.Environment.NewLine, "\n").Split('\n');
-                if (lines.Length == 0)
-                {
-                    return;
-                }
-
-                await UniTask.SwitchToMainThread();
-
-                foreach (var line in lines)
-                {
-                    var lineToDisplay = line.Trim();
-                    if (lineToDisplay.Length == 0)
-                    {
-                        continue;
-                    }
-
-                    foreach (var lline in WrapLine(line))
-                    {
-                        ChatManager.serverSendMessage(
-                            text: lline,
-                            color: color.ToUnityColor(),
-                            toPlayer: Player.SteamPlayer,
-                            iconURL: iconUrl,
-                            useRichTextFormatting: isRich);
-                    }
-                }
-            }
-
-            return PrintMessageTask().AsTask();
+            return Player.PrintMessageAsync(message, color, isRich, iconUrl);
         }
+            
 
         private IEnumerable<string> WrapLine(string line)
         {
