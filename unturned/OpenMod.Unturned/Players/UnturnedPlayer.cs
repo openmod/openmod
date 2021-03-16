@@ -1,8 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Net;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Items;
@@ -16,6 +12,13 @@ using OpenMod.Unturned.Items;
 using OpenMod.Unturned.Vehicles;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players
@@ -165,6 +168,91 @@ namespace OpenMod.Unturned.Players
             {
                 return Player.channel.owner.playerID.characterName;
             }
+        }
+
+        public Task PrintMessageAsync(string message)
+        {
+            return PrintMessageAsync(message, Color.White);
+        }
+
+        public Task PrintMessageAsync(string message, Color color)
+        {
+            return PrintMessageAsync(message, color, isRich: true, iconUrl: Provider.configData.Browser.Icon);
+        }
+
+        public Task PrintMessageAsync(string message, Color color, bool isRich, string iconUrl)
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            async UniTask PrintMessageTask()
+            {
+                var lines = message.Replace(System.Environment.NewLine, "\n").Split('\n');
+                if (lines.Length == 0)
+                {
+                    return;
+                }
+
+                await UniTask.SwitchToMainThread();
+
+                foreach (var line in lines)
+                {
+                    var lineToDisplay = line.Trim();
+                    if (lineToDisplay.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    foreach (var lline in WrapLine(line))
+                    {
+                        ChatManager.serverSendMessage(
+                            text: lline,
+                            color: color.ToUnityColor(),
+                            toPlayer: SteamPlayer,
+                            iconURL: iconUrl,
+                            useRichTextFormatting: isRich);
+                    }
+                }
+            }
+
+            return PrintMessageTask().AsTask();
+        }
+
+        private IEnumerable<string> WrapLine(string line)
+        {
+            var words = line.Split(' ');
+            var lines = new List<string>();
+            var currentLine = new StringBuilder();
+            var maxLength = 90;
+
+            foreach (var currentWord in words)
+            {
+                if (currentLine.Length > maxLength ||
+                    currentLine.Length + currentWord.Length > maxLength)
+                {
+                    lines.Add(currentLine.ToString());
+                    currentLine.Clear();
+                }
+
+                if (currentLine.Length > 0)
+                {
+                    currentLine.Append(" ");
+                    currentLine.Append(currentWord);
+                }
+                else
+                {
+                    currentLine.Append(currentWord);
+                }
+            }
+
+            if (currentLine.Length > 0)
+            {
+                lines.Add(currentLine.ToString());
+            }
+
+            return lines;
         }
     }
 }
