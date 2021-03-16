@@ -1,4 +1,5 @@
-﻿using OpenMod.Core.Helpers;
+﻿using MoreLinq;
+using OpenMod.Core.Helpers;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,29 +33,10 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
                 return (await directory.GetItemAssetsAsync()).FirstOrDefault(d =>
                     d.ItemName.Equals(itemName, StringComparison.OrdinalIgnoreCase));
 
-            var matches = (await directory.GetItemAssetsAsync())
+            return (await directory.GetItemAssetsAsync())
                 .Where(x => x.ItemName.IndexOf(itemName, StringComparison.OrdinalIgnoreCase) >= 0)
-                .ToArray();
-
-            var minDist = int.MaxValue;
-            IItemAsset? match = null;
-
-            foreach (var asset in matches)
-            {
-                var distance = StringHelper.LevenshteinDistance(itemName, asset.ItemName);
-
-                // There's no lower distance
-                if (distance == 0)
-                    return asset;
-
-                if (match == null || distance < minDist)
-                {
-                    match = asset;
-                    minDist = distance;
-                }
-            }
-
-            return match;
+                .MinBy(asset => StringHelper.LevenshteinDistance(itemName, asset.ItemName))
+                .FirstOrDefault();
         }
     }
 }
