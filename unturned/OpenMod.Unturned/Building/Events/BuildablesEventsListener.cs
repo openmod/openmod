@@ -380,34 +380,14 @@ namespace OpenMod.Unturned.Building.Events
                 OnStructureDestroyed?.Invoke(data, drop);
             }
 
-            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.askTransformBarricade),
-                new[]
-                {
-                    typeof(ServerInvocationContext), typeof(byte), typeof(byte), typeof(ushort),
-                    typeof(uint), typeof(Vector3), typeof(byte), typeof(byte), typeof(byte)
-                },
-                new[]
-                {
-                    ArgumentType.Ref, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal,
-                    ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal
-                })]
+            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.ReceiveTransformBarricadeRequest))]
             [HarmonyPrefix]
             private static void PreAskTransformBarricade(in ServerInvocationContext context)
             {
                 s_CurrentTransformingPlayerId = context.GetCallingPlayer().playerID.steamID;
             }
 
-            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.askTransformBarricade),
-                new[]
-                {
-                    typeof(ServerInvocationContext), typeof(byte), typeof(byte), typeof(ushort),
-                    typeof(uint), typeof(Vector3), typeof(byte), typeof(byte), typeof(byte)
-                },
-                new[]
-                {
-                    ArgumentType.Ref, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal,
-                    ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal, ArgumentType.Normal
-                })]
+            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.ReceiveTransformBarricadeRequest))]
             [HarmonyPostfix]
             private static void PostAskTransformBarricade()
             {
