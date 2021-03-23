@@ -29,11 +29,11 @@ namespace OpenMod.Unturned.Vehicles.Events
             VehicleManager.onSiphonVehicleRequested += OnSiphonVehicleRequested;
             VehicleManager.onVehicleCarjacked += OnVehicleCarjacked;
             VehicleManager.onVehicleLockpicked += OnVehicleLockpicked;
-            VehicleManager.OnToggleVehicleLockRequested += VehicleManagerOnOnToggleVehicleLockRequested;
-            VehicleManager.OnToggledVehicleLock += VehicleManagerOnOnToggledVehicleLock;
-            InteractableVehicle.OnPassengerAdded_Global += InteractableVehicleOnOnPassengerAdded_Global;
-            InteractableVehicle.OnPassengerRemoved_Global += InteractableVehicleOnOnPassengerRemoved_Global;
-            InteractableVehicle.OnPassengerChangedSeats_Global += InteractableVehicleOnOnPassengerChangedSeats_Global;
+            VehicleManager.OnToggleVehicleLockRequested += VehicleManager_OnToggleVehicleLockRequested;
+            VehicleManager.OnToggledVehicleLock += VehicleManager_OnToggledVehicleLock;
+            InteractableVehicle.OnPassengerAdded_Global += InteractableVehicle_OnPassengerAdded_Global;
+            InteractableVehicle.OnPassengerRemoved_Global += InteractableVehicle_OnPassengerRemoved_Global;
+            InteractableVehicle.OnPassengerChangedSeats_Global += InteractableVehicle_OnPassengerChangedSeats_Global;
             OnVehicleExploding += Events_OnVehicleExploding;
             OnVehicleSpawned += Events_OnVehicleSpawned;
             OnVehicleStealBattery += Events_OnVehicleStealingBattery;
@@ -51,18 +51,18 @@ namespace OpenMod.Unturned.Vehicles.Events
             VehicleManager.onSiphonVehicleRequested -= OnSiphonVehicleRequested;
             VehicleManager.onVehicleCarjacked -= OnVehicleCarjacked;
             VehicleManager.onVehicleLockpicked -= OnVehicleLockpicked;
-            VehicleManager.OnToggleVehicleLockRequested -= VehicleManagerOnOnToggleVehicleLockRequested;
-            VehicleManager.OnToggledVehicleLock -= VehicleManagerOnOnToggledVehicleLock;
-            InteractableVehicle.OnPassengerAdded_Global -= InteractableVehicleOnOnPassengerAdded_Global;
-            InteractableVehicle.OnPassengerRemoved_Global -= InteractableVehicleOnOnPassengerRemoved_Global;
-            InteractableVehicle.OnPassengerChangedSeats_Global -= InteractableVehicleOnOnPassengerChangedSeats_Global;
+            VehicleManager.OnToggleVehicleLockRequested -= VehicleManager_OnToggleVehicleLockRequested;
+            VehicleManager.OnToggledVehicleLock -= VehicleManager_OnToggledVehicleLock;
+            InteractableVehicle.OnPassengerAdded_Global -= InteractableVehicle_OnPassengerAdded_Global;
+            InteractableVehicle.OnPassengerRemoved_Global -= InteractableVehicle_OnPassengerRemoved_Global;
+            InteractableVehicle.OnPassengerChangedSeats_Global -= InteractableVehicle_OnPassengerChangedSeats_Global;
             OnVehicleExploding -= Events_OnVehicleExploding;
             OnVehicleSpawned -= Events_OnVehicleSpawned;
             OnVehicleStealBattery -= Events_OnVehicleStealingBattery;
             OnVehicleReplacingBattery -= Events_OnVehicleReplacingBattery;
         }
 
-        private void InteractableVehicleOnOnPassengerChangedSeats_Global(InteractableVehicle vehicle, int fromSeatIndex, int toSeatIndex)
+        private void InteractableVehicle_OnPassengerChangedSeats_Global(InteractableVehicle vehicle, int fromSeatIndex, int toSeatIndex)
         {
             var player = GetUnturnedPlayer(vehicle.passengers?[toSeatIndex].player);
 
@@ -72,7 +72,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             Emit(@event);
         }
 
-        private void InteractableVehicleOnOnPassengerRemoved_Global(InteractableVehicle vehicle, int seat, Player nativePlayer)
+        private void InteractableVehicle_OnPassengerRemoved_Global(InteractableVehicle vehicle, int seat, Player nativePlayer)
         {
             var player = GetUnturnedPlayer(nativePlayer);
 
@@ -81,7 +81,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             Emit(@event);
         }
 
-        private void InteractableVehicleOnOnPassengerAdded_Global(InteractableVehicle vehicle, int seat)
+        private void InteractableVehicle_OnPassengerAdded_Global(InteractableVehicle vehicle, int seat)
         {
             var player = GetUnturnedPlayer(vehicle.passengers?[seat].player);
 
@@ -90,7 +90,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             Emit(@event);
         }
 
-        private void VehicleManagerOnOnToggledVehicleLock(InteractableVehicle vehicle)
+        private void VehicleManager_OnToggledVehicleLock(InteractableVehicle vehicle)
         {
             var player = GetUnturnedPlayer(vehicle.passengers?[0].player);
             var group = vehicle.lockedGroup;
@@ -105,7 +105,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             Emit(@event);
         }
 
-        private void VehicleManagerOnOnToggleVehicleLockRequested(InteractableVehicle vehicle, ref bool shouldallow)
+        private void VehicleManager_OnToggleVehicleLockRequested(InteractableVehicle vehicle, ref bool shouldallow)
         {
             var player = GetUnturnedPlayer(vehicle.passengers?[0].player);
             var group = vehicle.lockedGroup;
@@ -348,7 +348,7 @@ namespace OpenMod.Unturned.Vehicles.Events
                 OnVehicleSpawned?.Invoke(__result);
             }
 
-            [HarmonyPatch(typeof(InteractableVehicle), "stealBattery")]
+            [HarmonyPatch(typeof(InteractableVehicle), nameof(InteractableVehicle.stealBattery))]
             [HarmonyPrefix]
             [UsedImplicitly]
             public static bool StealBattery(InteractableVehicle __instance, Player player)
@@ -360,7 +360,7 @@ namespace OpenMod.Unturned.Vehicles.Events
                 return !cancel;
             }
 
-            [HarmonyPatch(typeof(InteractableVehicle), "replaceBattery")]
+            [HarmonyPatch(typeof(InteractableVehicle), nameof(InteractableVehicle.replaceBattery))]
             [HarmonyPrefix]
             [UsedImplicitly]
             public static bool ReplaceBattery(InteractableVehicle __instance, Player player, byte quality)

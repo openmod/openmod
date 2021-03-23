@@ -17,15 +17,15 @@ namespace OpenMod.Unturned.Players.Skills.Events
 
         public override void Subscribe()
         {
-            PlayerSkills.OnExperienceChanged_Global += PlayerSkillsOnOnExperienceChanged_Global;
+            PlayerSkills.OnExperienceChanged_Global += PlayerSkills_OnExperienceChanged_Global;
         }
 
         public override void Unsubscribe()
         {
-            PlayerSkills.OnExperienceChanged_Global -= PlayerSkillsOnOnExperienceChanged_Global;
+            PlayerSkills.OnExperienceChanged_Global -= PlayerSkills_OnExperienceChanged_Global;
         }
 
-        private void PlayerSkillsOnOnExperienceChanged_Global(PlayerSkills skills, uint experience)
+        private void PlayerSkills_OnExperienceChanged_Global(PlayerSkills skills, uint experience)
         {
             var player = GetUnturnedPlayer(skills.player)!;
             var @event = new UnturnedPlayerExperienceUpdatedEvent(player, experience);
