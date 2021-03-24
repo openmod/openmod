@@ -8,7 +8,7 @@ You can manage cooldowns by editing the data portion of a role in the openmod.ro
 
 ## Configuration
 
-The default config file contains one setting, `reloadPersistent:enabled` which is set to `true`.
+The `openmod.yaml` config file contains one setting regarding cooldowns, `cooldowns:reloadPersistence` which is set to `true`.
 
 This will enable cooldowns to persist throughout server restarts and OpenMod reloads by writing command execution times to a file for the user.
 
