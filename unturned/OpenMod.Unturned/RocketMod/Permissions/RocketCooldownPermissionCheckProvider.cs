@@ -44,6 +44,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
                     var timeLeft = (finishDate - DateTime.UtcNow).TotalSeconds;
                     if (timeLeft > 0)
                     {
+                        // todo: there is no openmod.unturned.translations.yaml yet
                         AsyncHelper.RunSync(() => ((IPlayerUser)actor).PrintMessageAsync($"You must wait {timeLeft} seconds.", Color.Red));
                         return Task.FromResult(PermissionGrantResult.Deny);
                     }
