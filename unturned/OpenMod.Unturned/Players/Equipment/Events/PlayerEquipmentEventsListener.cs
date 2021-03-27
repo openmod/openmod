@@ -111,8 +111,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         {
             // ReSharper disable InconsistentNaming
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerEquipment), "tellEquip", typeof(byte), typeof(byte), typeof(byte),
-                typeof(ushort), typeof(byte), typeof(byte[]), typeof(NetId))]
+            [HarmonyPatch(typeof(PlayerEquipment), nameof(PlayerEquipment.ReceiveEquip))]
             [HarmonyPrefix]
             public static void PreTellEquip(PlayerEquipment __instance, out ushort __state)
             {
@@ -120,8 +119,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerEquipment), "tellEquip", typeof(byte), typeof(byte), typeof(byte),
-                typeof(ushort), typeof(byte), typeof(byte[]), typeof(NetId))]
+            [HarmonyPatch(typeof(PlayerEquipment), nameof(PlayerEquipment.ReceiveEquip))]
             [HarmonyPostfix]
             public static void PostTellEquip(PlayerEquipment __instance, ushort __state)
             {
