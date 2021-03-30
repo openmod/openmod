@@ -39,12 +39,12 @@ namespace OpenMod.Core.Ioc
 
             foreach (var type in types)
             {
-                T attribute;
+                T? attribute;
                 Type[] interfaces;
 
                 try
                 {
-                    attribute = type.GetCustomAttribute<T>(inherit: false);
+                    attribute = (T?)type.GetCustomAttributes(inherit: false).FirstOrDefault(x => x.GetType() == typeof(T));
                     if (attribute == null)
                     {
                         continue;
