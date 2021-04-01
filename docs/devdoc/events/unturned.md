@@ -172,3 +172,11 @@ These events are stored within the `OpenMod.Unturned.Players.Useables.Events` na
 | **Event**                        | **Fired when**                                 | **Cancellable** |
 |----------------------------------|------------------------------------------------|-----------------|
 | UnturnedPlayerPerformingAidEvent | Before a player performs aid on another player | Yes             |
+
+### UI
+These events are stored within the `OpenMod.Unturned.Players.UI.Events` namespace.
+
+| **Event**                        | **Fired when**                                    | **Cancellable** |
+|----------------------------------|---------------------------------------------------|-----------------|
+| UnturnedPlayerButtonClickedEvent | After a player has clicked a UI button            | No              |
+| UnturnedPlayerTextInputtedEvent  | After a player has inputted a text into a textbox | No              |

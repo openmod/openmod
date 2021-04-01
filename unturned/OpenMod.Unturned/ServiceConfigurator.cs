@@ -1,5 +1,4 @@
 ﻿extern alias JetBrainsAnnotations;
-using System;
 using Autofac;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
@@ -14,12 +13,14 @@ using OpenMod.Core.Users;
 using OpenMod.Extensions.Economy.Abstractions;
 using OpenMod.Unturned.Commands;
 using OpenMod.Unturned.Configuration;
+using OpenMod.Unturned.Locations;
 using OpenMod.Unturned.Permissions;
 using OpenMod.Unturned.Players;
 using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.RocketMod.Economy;
 using OpenMod.Unturned.RocketMod.Permissions;
 using OpenMod.Unturned.Users;
+using System;
 
 namespace OpenMod.Unturned
 {
@@ -53,6 +54,7 @@ namespace OpenMod.Unturned
             serviceCollection.Configure<CommandParameterResolverOptions>(options =>
             {
                 options.AddCommandParameterResolveProvider<UnturnedPlayerCommandParameterResolveProvider>();
+                options.AddCommandParameterResolveProvider<UnturnedLocationCommandParameterResolveProvider>();
             });
 
             if (RocketModIntegration.IsRocketModInstalled())

@@ -166,23 +166,24 @@ namespace OpenMod.Unturned.Module.Shared
         private Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var name = ReflectionExtensions.GetVersionIndependentName(args.Name);
-
             if (m_ResolvedAssemblies.ContainsKey(name))
             {
                 return m_ResolvedAssemblies[name];
             }
 
-            var assemblies = m_LoadedAssemblies.Values
-                .Where(d => ReflectionExtensions.GetVersionIndependentName(d.FullName).Equals(name))
-                .OrderByDescending(d => d.GetName().Version);
+            var matcher = new Func<Assembly, bool>(d => ReflectionExtensions.GetVersionIndependentName(d.FullName).Equals(name));
+            var match = m_LoadedAssemblies.Values
+                .OrderByDescending(d => d.GetName().Version)
+                .FirstOrDefault(matcher);
 
-            var match = assemblies.FirstOrDefault();
             if (match != null)
             {
                 m_ResolvedAssemblies.Add(name, match);
             }
 
-            return match;
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .OrderByDescending(d => d.GetName().Version)
+                .FirstOrDefault(matcher);
         }
 
         public void Shutdown()
