@@ -1,11 +1,11 @@
 ﻿extern alias JetBrainsAnnotations;
-using System;
-using System.Linq;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Linq;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
@@ -269,7 +269,7 @@ namespace OpenMod.Unturned.Building.Events
             var player = GetUnturnedPlayer(nativePlayer);
 
             var @event = new UnturnedBarricadeTransformedEvent(new UnturnedBarricadeBuildable(data, drop),
-                instigatorSteamId, player!);
+                instigatorSteamId, player);
 
             Emit(@event);
         }
@@ -280,7 +280,7 @@ namespace OpenMod.Unturned.Building.Events
             var player = GetUnturnedPlayer(nativePlayer);
 
             var @event = new UnturnedStructureTransformedEvent(new UnturnedStructureBuildable(data, drop),
-                instigatorSteamId, player!);
+                instigatorSteamId, player);
 
             Emit(@event);
         }
@@ -384,7 +384,7 @@ namespace OpenMod.Unturned.Building.Events
             [HarmonyPrefix]
             private static void PreAskTransformBarricade(in ServerInvocationContext context)
             {
-                s_CurrentTransformingPlayerId = context.GetCallingPlayer().playerID.steamID;
+                s_CurrentTransformingPlayerId = context.GetCallingPlayer()?.playerID.steamID ?? CSteamID.Nil;
             }
 
             [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.ReceiveTransformBarricadeRequest))]
@@ -399,7 +399,7 @@ namespace OpenMod.Unturned.Building.Events
             [HarmonyPrefix]
             private static void PreAskTransformStructure(in ServerInvocationContext context)
             {
-                s_CurrentTransformingPlayerId = context.GetCallingPlayer().playerID.steamID;
+                s_CurrentTransformingPlayerId = context.GetCallingPlayer()?.playerID.steamID ?? CSteamID.Nil;
             }
 
             [UsedImplicitly]
@@ -411,11 +411,9 @@ namespace OpenMod.Unturned.Building.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.tellTransformBarricade), typeof(byte),
-                typeof(byte), typeof(ushort), typeof(uint), typeof(Vector3),
-                typeof(byte), typeof(byte), typeof(byte))]
+            [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.ReceiveTransformBarricade))]
             [HarmonyPostfix]
-            private static void TellTransformBarricade(byte x, byte y, ushort plant, uint instanceID)
+            private static void ReceiveTransformBarricade(byte x, byte y, ushort plant, uint instanceID)
             {
                 ThreadUtil.assertIsGameThread();
 
@@ -434,11 +432,9 @@ namespace OpenMod.Unturned.Building.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.tellTransformStructure), typeof(byte),
-                typeof(byte), typeof(uint), typeof(Vector3),
-                typeof(byte), typeof(byte), typeof(byte))]
+            [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.ReceiveTransformStructure))]
             [HarmonyPostfix]
-            private static void TellTransformStructure(byte x, byte y, uint instanceID)
+            private static void ReceiveTransformStructure(byte x, byte y, uint instanceID)
             {
                 ThreadUtil.assertIsGameThread();
 
