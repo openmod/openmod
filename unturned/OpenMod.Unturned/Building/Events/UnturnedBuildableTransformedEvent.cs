@@ -7,10 +7,10 @@ namespace OpenMod.Unturned.Building.Events
     {
         public CSteamID InstigatorSteamId { get; }
 
-        public UnturnedPlayer Instigator { get; }
+        public UnturnedPlayer? Instigator { get; }
 
         public UnturnedBuildableTransformedEvent(UnturnedBuildable buildable, CSteamID instigatorSteamId,
-            UnturnedPlayer instigator) : base(buildable)
+            UnturnedPlayer? instigator) : base(buildable)
         {
             InstigatorSteamId = instigatorSteamId;
             Instigator = instigator;

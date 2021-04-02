@@ -1,4 +1,5 @@
 ﻿extern alias JetBrainsAnnotations;
+using System;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
@@ -6,7 +7,6 @@ using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
-using System;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Vehicles.Events
@@ -29,15 +29,15 @@ namespace OpenMod.Unturned.Vehicles.Events
             VehicleManager.onSiphonVehicleRequested += OnSiphonVehicleRequested;
             VehicleManager.onVehicleCarjacked += OnVehicleCarjacked;
             VehicleManager.onVehicleLockpicked += OnVehicleLockpicked;
+            VehicleManager.OnToggleVehicleLockRequested += VehicleManager_OnToggleVehicleLockRequested;
+            VehicleManager.OnToggledVehicleLock += VehicleManager_OnToggledVehicleLock;
+            InteractableVehicle.OnPassengerAdded_Global += InteractableVehicle_OnPassengerAdded_Global;
+            InteractableVehicle.OnPassengerRemoved_Global += InteractableVehicle_OnPassengerRemoved_Global;
+            InteractableVehicle.OnPassengerChangedSeats_Global += InteractableVehicle_OnPassengerChangedSeats_Global;
             OnVehicleExploding += Events_OnVehicleExploding;
             OnVehicleSpawned += Events_OnVehicleSpawned;
-            OnVehicleEntered += Events_OnVehicleEntered;
-            OnVehicleExited += Events_OnVehicleExited;
-            OnVehicleSwapped += Events_OnVehicleSwapped;
             OnVehicleStealBattery += Events_OnVehicleStealingBattery;
             OnVehicleReplacingBattery += Events_OnVehicleReplacingBattery;
-            OnVehicleLockUpdating += Events_OnVehicleLockUpdating;
-            OnVehicleLockUpdated += Events_OnVehicleLockUpdated;
         }
 
         public override void Unsubscribe()
@@ -51,15 +51,77 @@ namespace OpenMod.Unturned.Vehicles.Events
             VehicleManager.onSiphonVehicleRequested -= OnSiphonVehicleRequested;
             VehicleManager.onVehicleCarjacked -= OnVehicleCarjacked;
             VehicleManager.onVehicleLockpicked -= OnVehicleLockpicked;
+            VehicleManager.OnToggleVehicleLockRequested -= VehicleManager_OnToggleVehicleLockRequested;
+            VehicleManager.OnToggledVehicleLock -= VehicleManager_OnToggledVehicleLock;
+            InteractableVehicle.OnPassengerAdded_Global -= InteractableVehicle_OnPassengerAdded_Global;
+            InteractableVehicle.OnPassengerRemoved_Global -= InteractableVehicle_OnPassengerRemoved_Global;
+            InteractableVehicle.OnPassengerChangedSeats_Global -= InteractableVehicle_OnPassengerChangedSeats_Global;
             OnVehicleExploding -= Events_OnVehicleExploding;
             OnVehicleSpawned -= Events_OnVehicleSpawned;
-            OnVehicleEntered -= Events_OnVehicleEntered;
-            OnVehicleExited -= Events_OnVehicleExited;
-            OnVehicleSwapped -= Events_OnVehicleSwapped;
             OnVehicleStealBattery -= Events_OnVehicleStealingBattery;
             OnVehicleReplacingBattery -= Events_OnVehicleReplacingBattery;
-            OnVehicleLockUpdating -= Events_OnVehicleLockUpdating;
-            OnVehicleLockUpdated -= Events_OnVehicleLockUpdated;
+        }
+
+        private void InteractableVehicle_OnPassengerChangedSeats_Global(InteractableVehicle vehicle, int fromSeatIndex, int toSeatIndex)
+        {
+            var player = GetUnturnedPlayer(vehicle.passengers?[toSeatIndex].player);
+
+            var @event =
+                new UnturnedPlayerSwappedSeatEvent(player!, new UnturnedVehicle(vehicle), (byte)fromSeatIndex, (byte)toSeatIndex);
+
+            Emit(@event);
+        }
+
+        private void InteractableVehicle_OnPassengerRemoved_Global(InteractableVehicle vehicle, int seat, Player nativePlayer)
+        {
+            var player = GetUnturnedPlayer(nativePlayer);
+
+            var @event = new UnturnedPlayerExitedVehicleEvent(player!, new UnturnedVehicle(vehicle));
+
+            Emit(@event);
+        }
+
+        private void InteractableVehicle_OnPassengerAdded_Global(InteractableVehicle vehicle, int seat)
+        {
+            var player = GetUnturnedPlayer(vehicle.passengers?[seat].player);
+
+            var @event = new UnturnedPlayerEnteredVehicleEvent(player!, new UnturnedVehicle(vehicle));
+
+            Emit(@event);
+        }
+
+        private void VehicleManager_OnToggledVehicleLock(InteractableVehicle vehicle)
+        {
+            var player = GetUnturnedPlayer(vehicle.passengers?[0].player);
+            var group = vehicle.lockedGroup;
+            var isLocked = vehicle.isLocked;
+
+            var @event = new UnturnedVehicleLockUpdatedEvent(
+                instigator: player!,
+                vehicle: new UnturnedVehicle(vehicle),
+                group: group == CSteamID.Nil ? null : group,
+                isLocked: isLocked);
+
+            Emit(@event);
+        }
+
+        private void VehicleManager_OnToggleVehicleLockRequested(InteractableVehicle vehicle, ref bool shouldallow)
+        {
+            var player = GetUnturnedPlayer(vehicle.passengers?[0].player);
+            var group = vehicle.lockedGroup;
+            var isLocked = vehicle.isLocked;
+
+            var @event = new UnturnedVehicleLockUpdatingEvent(instigator: player!,
+                vehicle: new UnturnedVehicle(vehicle),
+                group: group == CSteamID.Nil ? null : group,
+                isLocking: isLocked)
+            {
+                IsCancelled = !shouldallow
+            };
+
+            Emit(@event);
+
+            shouldallow = !@event.IsCancelled;
         }
 
         private void OnEnterVehicleRequested(Player nativePlayer, InteractableVehicle vehicle, ref bool shouldAllow)
@@ -169,7 +231,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             pendingTotalHealing = @event.PendingTotalHealing;
             shouldAllow = !@event.IsCancelled;
         }
-        
+
         private void OnDamageVehicleRequested(CSteamID instigatorSteamId, InteractableVehicle vehicle, ref ushort pendingTotalDamage, ref bool canRepair, ref bool shouldAllow, EDamageOrigin damageOrigin) // lgtm [cs/too-many-ref-parameters] 
         {
             var @event = new UnturnedVehicleDamagingEvent(
@@ -221,34 +283,6 @@ namespace OpenMod.Unturned.Vehicles.Events
             Emit(@event);
         }
 
-        private void Events_OnVehicleEntered(InteractableVehicle vehicle, Player nativePlayer)
-        {
-            var player = GetUnturnedPlayer(nativePlayer);
-
-            var @event = new UnturnedPlayerEnteredVehicleEvent(player!, new UnturnedVehicle(vehicle));
-
-            Emit(@event);
-        }
-
-        private void Events_OnVehicleExited(InteractableVehicle vehicle, Player nativePlayer)
-        {
-            var player = GetUnturnedPlayer(nativePlayer);
-
-            var @event = new UnturnedPlayerExitedVehicleEvent(player!, new UnturnedVehicle(vehicle));
-
-            Emit(@event);
-        }
-
-        private void Events_OnVehicleSwapped(InteractableVehicle vehicle, Player nativePlayer, byte fromSeatIndex, byte toSeatIndex)
-        {
-            var player = GetUnturnedPlayer(nativePlayer);
-
-            var @event =
-                new UnturnedPlayerSwappedSeatEvent(player!, new UnturnedVehicle(vehicle), fromSeatIndex, toSeatIndex);
-
-            Emit(@event);
-        }
-
         private void Events_OnVehicleStealingBattery(InteractableVehicle vehicle, Player nativePlayer, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer);
@@ -277,62 +311,17 @@ namespace OpenMod.Unturned.Vehicles.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnVehicleLockUpdating(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, bool isLocked, ref bool cancel)
-        {
-            var player = GetUnturnedPlayer(nativePlayer);
-
-            var @event = new UnturnedVehicleLockUpdatingEvent(instigator: player!,
-                vehicle: new UnturnedVehicle(vehicle),
-                group: group == CSteamID.Nil ? null : group,
-                isLocking: isLocked)
-            {
-                IsCancelled = cancel
-            };
-
-            Emit(@event);
-
-            cancel = @event.IsCancelled;
-        }
-
-        private void Events_OnVehicleLockUpdated(InteractableVehicle vehicle, Player nativePlayer, CSteamID group, bool isLocked)
-        {
-            var player = GetUnturnedPlayer(nativePlayer);
-
-            var @event = new UnturnedVehicleLockUpdatedEvent(
-                instigator: player!,
-                vehicle: new UnturnedVehicle(vehicle),
-                group: group == CSteamID.Nil  ? null : group,
-                isLocked: isLocked);
-
-            Emit(@event);
-        }
-
         private delegate void VehicleExploding(InteractableVehicle vehicle, ref bool cancel);
         private static event VehicleExploding? OnVehicleExploding;
 
         private delegate void VehicleSpawned(InteractableVehicle vehicle);
         private static event VehicleSpawned? OnVehicleSpawned;
 
-        private delegate void VehicleEntered(InteractableVehicle vehicle, Player player);
-        private static event VehicleEntered? OnVehicleEntered;
-
-        private delegate void VehicleExited(InteractableVehicle vehicle, Player player);
-        private static event VehicleExited? OnVehicleExited;
-
-        private delegate void VehicleSwapped(InteractableVehicle vehicle, Player player, byte fromSeatIndex, byte toSeatIndex);
-        private static event VehicleSwapped? OnVehicleSwapped;
-
         private delegate void VehicleStealBattery(InteractableVehicle vehicle, Player player, ref bool cancel);
         private static event VehicleStealBattery? OnVehicleStealBattery;
 
         private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, byte amount, ref bool cancel);
         private static event VehicleReplacingBattery? OnVehicleReplacingBattery;
-
-        private delegate void VehicleLockUpdating(InteractableVehicle vehicle, Player player, CSteamID group, bool isLocked, ref bool cancel);
-        private static event VehicleLockUpdating? OnVehicleLockUpdating;
-
-        private delegate void VehicleLockUpdated(InteractableVehicle vehicle, Player player, CSteamID group, bool isLocked);
-        private static event VehicleLockUpdated? OnVehicleLockUpdated;
 
         [HarmonyPatch]
         [UsedImplicitly]
@@ -359,61 +348,7 @@ namespace OpenMod.Unturned.Vehicles.Events
                 OnVehicleSpawned?.Invoke(__result);
             }
 
-            [HarmonyPatch(typeof(InteractableVehicle), "addPlayer")]
-            [HarmonyPostfix]
-            [UsedImplicitly]
-            public static void AddPlayer(InteractableVehicle __instance, CSteamID steamID)
-            {
-                var player = PlayerTool.getPlayer(steamID);
-
-                if (player == null) return;
-
-                OnVehicleEntered?.Invoke(__instance, player);
-            }
-
-            [HarmonyPatch(typeof(InteractableVehicle), "removePlayer")]
-            [HarmonyPrefix]
-            [UsedImplicitly]
-            // ReSharper disable once RedundantAssignment
-            public static void PreRemovePlayer(InteractableVehicle __instance, byte seatIndex, ref Player? __state)
-            {
-                __state = null;
-
-                if (__instance.passengers is null || seatIndex >= __instance.passengers.Length)
-                    return;
-
-                var passenger = __instance.passengers[seatIndex];
-                __state = passenger.player?.player;
-            }
-
-            [HarmonyPatch(typeof(InteractableVehicle), "removePlayer")]
-            [HarmonyPostfix]
-            [UsedImplicitly]
-            public static void PostRemovePlayer(InteractableVehicle __instance, Player __state)
-            {
-                if (__state == null)
-                    return;
-
-                OnVehicleExited?.Invoke(__instance, __state);
-            }
-
-            [HarmonyPatch(typeof(InteractableVehicle), "swapPlayer")]
-            [HarmonyPostfix]
-            [UsedImplicitly]
-            public static void SwapPlayer(InteractableVehicle __instance, byte fromSeatIndex, byte toSeatIndex)
-            {
-                if (__instance.passengers is null || fromSeatIndex >= __instance.passengers.Length || toSeatIndex >= __instance.passengers.Length)
-                    return;
-
-                var passenger = __instance.passengers[toSeatIndex];
-                var player = passenger?.player?.player;
-                if (player == null)
-                    return;
-
-                OnVehicleSwapped?.Invoke(__instance, player, fromSeatIndex, toSeatIndex);
-            }
-
-            [HarmonyPatch(typeof(InteractableVehicle), "stealBattery")]
+            [HarmonyPatch(typeof(InteractableVehicle), nameof(InteractableVehicle.stealBattery))]
             [HarmonyPrefix]
             [UsedImplicitly]
             public static bool StealBattery(InteractableVehicle __instance, Player player)
@@ -425,7 +360,7 @@ namespace OpenMod.Unturned.Vehicles.Events
                 return !cancel;
             }
 
-            [HarmonyPatch(typeof(InteractableVehicle), "replaceBattery")]
+            [HarmonyPatch(typeof(InteractableVehicle), nameof(InteractableVehicle.replaceBattery))]
             [HarmonyPrefix]
             [UsedImplicitly]
             public static bool ReplaceBattery(InteractableVehicle __instance, Player player, byte quality)
@@ -437,60 +372,6 @@ namespace OpenMod.Unturned.Vehicles.Events
                 return !cancel;
             }
 
-            [HarmonyPatch(typeof(VehicleManager), "askVehicleLock")]
-            [HarmonyPrefix]
-            [UsedImplicitly]
-            public static bool PreVehicleLock(CSteamID steamID)
-            {
-                var cancel = false;
-
-                var player = PlayerTool.getPlayer(steamID);
-                if (player == null)
-                {
-                    return false;
-                }
-
-                var vehicle = player.movement.getVehicle();
-                if (vehicle == null ||vehicle.asset == null)
-                {
-                    return false;
-                }
-
-                if (!vehicle.checkDriver(steamID))
-                {
-                    return false;
-                }
-
-                var toLock = !vehicle.isLocked;
-                if (toLock && !vehicle.asset.canBeLocked)
-                {
-                    return false;
-                }
-
-                OnVehicleLockUpdating?.Invoke(vehicle, player, player.quests.groupID, toLock, ref cancel);
-
-                return !cancel;
-            }
-
-            [HarmonyPatch(typeof(VehicleManager), "tellVehicleLock")]
-            [HarmonyPostfix]
-            [UsedImplicitly]
-            public static void PostVehicleLock(uint instanceID, CSteamID owner, CSteamID group, bool locked)
-            {
-                var vehicle = VehicleManager.findVehicleByNetInstanceID(instanceID);
-                if (vehicle == null)
-                {
-                    return;
-                }
-
-                var nativePlayer = PlayerTool.getPlayer(owner);
-                if (nativePlayer == null)
-                {
-                    return;
-                }
-
-                OnVehicleLockUpdated?.Invoke(vehicle, nativePlayer, group, locked);
-            }
             // ReSharper restore InconsistentNaming
         }
     }

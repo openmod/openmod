@@ -192,12 +192,7 @@ namespace OpenMod.Unturned.Items
             var region = ItemManager.regions[x, y];
             var itemData = region.items.FirstOrDefault(d => d.item == item);
 
-            if (itemData == null)
-            {
-                return null;
-            }
-
-            return new UnturnedItemDrop(region, itemData);
+            return itemData == null ? null : new UnturnedItemDrop(x, y, itemData);
         }
 
         private void ValidateState(IItemState? state)
