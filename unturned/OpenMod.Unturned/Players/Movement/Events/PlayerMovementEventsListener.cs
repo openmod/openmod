@@ -31,13 +31,13 @@ namespace OpenMod.Unturned.Players.Movement.Events
         public override void SubscribePlayer(Player player)
         {
             player.stance.onStanceUpdated += () => OnStanceUpdated(player);
-            player.movement.onSafetyUpdated += (safe) => OnSafezoneUpdated(player, safe); 
+            player.movement.onSafetyUpdated += (safe) => OnSafetyUpdated(player, safe); 
         }
 
         public override void UnsubscribePlayer(Player player)
         {
             player.stance.onStanceUpdated -= () => OnStanceUpdated(player);
-            player.movement.onSafetyUpdated -= (safe) => OnSafezoneUpdated(player, safe);
+            player.movement.onSafetyUpdated -= (safe) => OnSafetyUpdated(player, safe);
         }
 
         private void PlayerAnimator_OnGestureChanged_Global(PlayerAnimator animator, EPlayerGesture gesture)
@@ -74,11 +74,11 @@ namespace OpenMod.Unturned.Players.Movement.Events
             Emit(@event);
         }
 
-        private void OnSafezoneUpdated(Player nativePlayer, bool safe)
+        private void OnSafetyUpdated(Player nativePlayer, bool safe)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
-            var @event = new UnturnedPlayerSafezoneUpdatedEvent(player, safe);
+            var @event = new UnturnedPlayerSafetyUpdatedEvent(player, safe);
 
             Emit(@event);
         }
