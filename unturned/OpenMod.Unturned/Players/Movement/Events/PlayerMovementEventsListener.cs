@@ -31,7 +31,7 @@ namespace OpenMod.Unturned.Players.Movement.Events
         public override void SubscribePlayer(Player player)
         {
             player.stance.onStanceUpdated += () => OnStanceUpdated(player);
-            player.movement.onSafetyUpdated += (safe) => OnSafetyUpdated(player, safe); 
+            player.movement.onSafetyUpdated += (safe) => OnSafetyUpdated(player, safe);
         }
 
         public override void UnsubscribePlayer(Player player)
