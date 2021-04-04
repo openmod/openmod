@@ -189,4 +189,4 @@ These events are stored within the `OpenMod.Unturned.Players.Voice.Events` names
 | **Event**                         | **Fired when**                                    | **Cancellable** |
 |-----------------------------------|---------------------------------------------------|-----------------|
 | UnturnedPlayerTalkingUpdatedEvent | After a player has started or stoped talking      | No              |
-| UnturnedPlayerRelayVoiceEvent     | Before a player has started talking               | Yes             |
+| UnturnedPlayerRelayingVoiceEvent  | Before a player has started talking               | Yes             |
