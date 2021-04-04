@@ -140,6 +140,7 @@ These events are stored within the `OpenMod.Unturned.Players.Movement.Events` na
 | UnturnedPlayerGestureUpdatedEvent | After a player's gesture updates | No              |
 | UnturnedPlayerStanceUpdatedEvent  | After a player's stance updates  | No              |
 | UnturnedPlayerTeleportingEvent    | Before a player teleports        | Yes             |
+| UnturnedPlayerSafetyUpdatedEvent  | After a player safezone updated  | No              |
 
 ### Skills
 These events are stored within the `OpenMod.Unturned.Players.Skills.Events` namespace.
