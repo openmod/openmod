@@ -25,7 +25,7 @@ namespace OpenMod.Unturned.Players.Voice.Events
         {
             var player = GetUnturnedPlayer(speaker.player)!;
 
-            var @event = new UnturnedPlayerVoiceEvent(player, wantsToUseWalkieTalkie, shouldBroadcastOverRadio)
+            var @event = new UnturnedPlayerRelayingVoiceEvent(player, wantsToUseWalkieTalkie, shouldBroadcastOverRadio)
             {
                 IsCancelled = !shouldAllow
             };
