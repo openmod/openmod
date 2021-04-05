@@ -340,6 +340,61 @@ namespace OpenMod.Unturned.Users
 
             return BroadcastTask().AsTask();
         }
+        
+        public async Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
+        {
+            var player = m_Users.FirstOrDefault(x => x.Id == user.Id);
+
+            if(player == null)
+            {
+                return false;
+            }
+
+            if (reason == null)
+            {
+                reason = "No reason provided";
+            }
+
+            if(endTime == null)
+            {
+                endTime = DateTime.Now;
+            }
+
+            async UniTask BanAsync()
+            {
+                await UniTask.SwitchToMainThread();
+                Provider.ban(player.SteamId, reason, (uint)(endTime.Value - DateTime.Now).TotalSeconds);
+            }
+
+            await BanAsync();
+
+            return true;
+        }
+
+        public async Task<bool> KickAsync(IUser user, string? reason = null)
+        {
+            var player = m_Users.First(x => x.Id == user.Id);
+
+            if (player == null)
+            {
+                return false;
+            }
+
+            if (reason == null)
+            {
+                reason = "No reason provided";
+            }
+
+            async UniTask KickAsync()
+            {
+                await UniTask.SwitchToMainThread();
+                Provider.kick(player.SteamId, reason);
+            }
+
+            await KickAsync();
+
+            return true;
+        }
 
         public ICollection<UnturnedUser> GetOnlineUsers()
         {
