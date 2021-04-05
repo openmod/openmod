@@ -146,37 +146,38 @@ namespace OpenMod.Core.Users
 
             await provider.BroadcastAsync(userType, message, color);
         }
-        
-        public async Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
+
+        public Task<bool> BanAsync(IUser instigator, IUser user, string? reason = null, DateTime? endTime = null)
         {
-            if (user == null)
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (user.Provider == null)
             {
-                return false;
-            }
-            else if(user.Provider == null)
-            {
-                return false;
+                return Task.FromResult(result: false);
             }
 
-            await user.Provider.BanAsync(user, reason, endTime);
-
-            return true;
+            return user.Provider.BanAsync(instigator, user, reason, endTime);
         }
 
-        public async Task<bool> KickAsync(IUser user, string? reason = null)
+        public Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
         {
-            if (user == null)
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (user.Provider == null)
             {
-                return false;
-            }
-            else if (user.Provider == null)
-            {
-                return false;
+                return Task.FromResult(result: false);
             }
 
-            await user.Provider.KickAsync(user, reason);
+            return user.Provider.BanAsync(user, reason, endTime);
+        }
 
-            return true;
+        public Task<bool> KickAsync(IUser user, string? reason = null)
+        {
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (user.Provider == null)
+            {
+                return Task.FromResult(result: false);
+            }
+
+            return user.Provider.KickAsync(user, reason);
         }
 
         public virtual ValueTask DisposeAsync()

@@ -56,12 +56,17 @@ namespace OpenMod.Core.Users
         
         public Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
         {
-            throw new NotSupportedException();
+            return Task.FromResult(result: false);
+        }
+
+        public Task<bool> BanAsync(IUser instigator, IUser user, string? reason = null, DateTime? endTime = null)
+        {
+            return Task.FromResult(result: false);
         }
 
         public Task<bool> KickAsync(IUser user, string? reason = null)
         {
-            throw new NotSupportedException();
+            return Task.FromResult(result: false);
         }
     }
 }
