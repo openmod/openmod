@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -51,6 +52,16 @@ namespace OpenMod.Core.Users
         public Task BroadcastAsync(string message, Color? color)
         {
             return Task.CompletedTask;
+        }
+        
+        public Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
+        {
+            throw new NotSupportedException();
+        }
+
+        public Task<bool> KickAsync(IUser user, string? reason = null)
+        {
+            throw new NotSupportedException();
         }
     }
 }
