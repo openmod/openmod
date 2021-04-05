@@ -1,4 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Prioritization;
