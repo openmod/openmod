@@ -146,6 +146,38 @@ namespace OpenMod.Core.Users
 
             await provider.BroadcastAsync(userType, message, color);
         }
+        
+        public async Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
+        {
+            if (user == null)
+            {
+                return false;
+            }
+            else if(user.Provider == null)
+            {
+                return false;
+            }
+
+            await user.Provider.BanAsync(user, reason, endTime);
+
+            return true;
+        }
+
+        public async Task<bool> KickAsync(IUser user, string? reason = null)
+        {
+            if (user == null)
+            {
+                return false;
+            }
+            else if (user.Provider == null)
+            {
+                return false;
+            }
+
+            await user.Provider.KickAsync(user, reason);
+
+            return true;
+        }
 
         public virtual ValueTask DisposeAsync()
         {
