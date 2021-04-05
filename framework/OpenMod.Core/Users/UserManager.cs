@@ -147,7 +147,7 @@ namespace OpenMod.Core.Users
             await provider.BroadcastAsync(userType, message, color);
         }
 
-        public Task<bool> BanAsync(IUser instigator, IUser user, string? reason = null, DateTime? endTime = null)
+        public Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? endTime = null)
         {
             // ReSharper disable once ConvertIfStatementToReturnStatement
             if (user.Provider == null)
@@ -155,7 +155,7 @@ namespace OpenMod.Core.Users
                 return Task.FromResult(result: false);
             }
 
-            return user.Provider.BanAsync(instigator, user, reason, endTime);
+            return user.Provider.BanAsync(user, instigator, reason, endTime);
         }
 
         public Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)

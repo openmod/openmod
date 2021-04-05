@@ -59,7 +59,7 @@ namespace OpenMod.Core.Users
             return Task.FromResult(result: false);
         }
 
-        public Task<bool> BanAsync(IUser instigator, IUser user, string? reason = null, DateTime? endTime = null)
+        public Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? endTime = null)
         {
             return Task.FromResult(result: false);
         }

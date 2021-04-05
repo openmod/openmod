@@ -359,16 +359,16 @@ namespace OpenMod.Unturned.Users
             async UniTask<bool> BanTask()
             {
                 await UniTask.SwitchToMainThread();
-                var ip = SteamGameServerNetworkingUtils.getIPv4AddressOrZero(player.SteamId);
+                var ip = player.Player.SteamPlayer.getIPv4AddressOrZero();
                 return Provider.requestBanPlayer(CSteamID.Nil, player.SteamId, ip, reason, banDuration);
             }
 
             return BanTask().AsTask();
         }
 
-        public Task<bool> BanAsync(IUser instigator, IUser user, string? reason = null, DateTime? endTime = null)
+        public Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? endTime = null)
         {
-            if (!ulong.TryParse(instigator.Id, out var instigatorId))
+            if (instigator == null || !ulong.TryParse(instigator.Id, out var instigatorId))
             {
                 return BanAsync(user, reason, endTime);
             }
@@ -388,7 +388,7 @@ namespace OpenMod.Unturned.Users
             async UniTask<bool> BanTask()
             {
                 await UniTask.SwitchToMainThread();
-                var ip = SteamGameServerNetworkingUtils.getIPv4AddressOrZero(player.SteamId);
+                var ip = player.Player.SteamPlayer.getIPv4AddressOrZero();
                 return Provider.requestBanPlayer(new CSteamID(instigatorId), player.SteamId, ip, reason, banDuration);
             }
 
