@@ -46,5 +46,20 @@ namespace OpenMod.API.Users
         /// <param name="message">The message to broadcast.</param>
         /// <param name="color">The message color. May not be supported on all platforms.</param>
         Task BroadcastAsync(string userType, string message, Color? color = null);
+        
+        /// <summary>
+        /// Ban a user.
+        /// </summary>
+        /// <param name="user">The user to ban.</param>
+        /// <param name="reason">The reason of the user ban.</param>
+        /// <param name="endTime">The time when the ban will expire.</param>
+        Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null);
+
+        /// <summary>
+        /// KIck a user.
+        /// </summary>
+        /// <param name="user">The user to kick.</param>
+        /// <param name="reason">The reason of the user kick.</param>
+        Task<bool> KickAsync(IUser user, string? reason = null);
     }
 }
