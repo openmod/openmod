@@ -15,13 +15,13 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         public uint IPToBan { get; }
 
-        public string Reason { get; set; }
+        public string? Reason { get; set; }
 
         public DateTime Duration { get; set; }
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedPlayerBanningEvent(UnturnedPlayer playerToBan, string instigatorId, string instigatorType, uint ipToBan, string reason, uint duration) : base(playerToBan)
+        public UnturnedPlayerBanningEvent(UnturnedPlayer playerToBan, string instigatorId, string instigatorType, uint ipToBan, string? reason, uint duration) : base(playerToBan)
         {
             InstigatorId = instigatorId;
             InstigatorType = instigatorType;

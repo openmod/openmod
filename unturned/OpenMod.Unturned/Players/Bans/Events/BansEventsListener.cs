@@ -52,7 +52,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
             Emit(@event);
 
-            reason = @event.Reason;
+            reason = @event.Reason ?? "";
             duration = (uint)@event.Duration.Second;
             shouldVanillaBan = !@event.IsCancelled;
         }
