@@ -1,30 +1,30 @@
 ﻿using OpenMod.API.Eventing;
 using OpenMod.Core.Eventing;
+using OpenMod.Extensions.Games.Abstractions.Players;
+using OpenMod.Unturned.Events;
 using Steamworks;
+using System;
 
 namespace OpenMod.Unturned.Players.Bans.Events
 {
-    public class UnturnedPlayerBanningEvent : Event, ICancellableEvent
+    public class UnturnedPlayerBanningEvent : UnturnedPlayerEvent, IPlayerBanningEvent
     {
-        public CSteamID Instigator { get; }
-
-        public CSteamID PlayerToBan { get; }
+        public string InstigatorId { get; }
 
         public uint IPToBan { get; }
 
         public string Reason { get; set; }
 
-        public uint Duration { get; set; }
+        public DateTime Duration { get; set; }
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedPlayerBanningEvent(CSteamID instigator, CSteamID playerToBan, uint ipToBan, string reason, uint duration)
+        public UnturnedPlayerBanningEvent(UnturnedPlayer playerToBan, string instigatorId, uint ipToBan, string reason, uint duration) : base(playerToBan)
         {
-            Instigator = instigator;
-            PlayerToBan = playerToBan;
+            InstigatorId = instigatorId;
             IPToBan = ipToBan;
             Reason = reason;
-            Duration = duration;
+            Duration = DateTime.Now.AddSeconds(duration);
         }
     }
 }

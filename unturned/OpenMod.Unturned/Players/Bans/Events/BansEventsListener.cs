@@ -36,8 +36,10 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         private void OnBanPlayerRequested(CSteamID instigator, CSteamID playerToBan, uint ipToBan, ref string reason, ref uint duration, ref bool shouldVanillaBan) // lgtm [cs/too-many-ref-parameters]
         {
+            var player = GetUnturnedPlayer(PlayerTool.getPlayer(playerToBan))!;
+
             var @event =
-                new UnturnedPlayerBanningEvent(instigator, playerToBan, ipToBan, reason, duration)
+                new UnturnedPlayerBanningEvent(player, instigator.ToString(), ipToBan, reason, duration)
                 {
                     IsCancelled = !shouldVanillaBan
                 };
@@ -46,7 +48,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
             Emit(@event);
 
             reason = @event.Reason;
-            duration = @event.Duration;
+            duration = (uint)@event.Duration.Second;
             shouldVanillaBan = !@event.IsCancelled;
         }
 
