@@ -7,7 +7,7 @@ using System;
 
 namespace OpenMod.Unturned.Players.Bans.Events
 {
-    public class UnturnedPlayerBanningEvent : UnturnedPlayerEvent, IPlayerBanningEvent
+    public class UnturnedPlayerBanningEvent : UnturnedPlayerEvent, IBanningPlayerEvent
     {
         public string InstigatorId { get; }
 
