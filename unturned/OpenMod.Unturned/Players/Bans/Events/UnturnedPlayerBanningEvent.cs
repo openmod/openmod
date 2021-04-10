@@ -4,6 +4,7 @@ using OpenMod.Extensions.Games.Abstractions.Players;
 using OpenMod.Unturned.Events;
 using Steamworks;
 using System;
+using System.Net;
 
 namespace OpenMod.Unturned.Players.Bans.Events
 {
@@ -13,7 +14,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         public string InstigatorType { get; }
 
-        public uint IPToBan { get; }
+        public IPAddress? AddressToBan { get; }
 
         public string? Reason { get; set; }
 
@@ -21,18 +22,24 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         public bool IsCancelled { get; set; }
 
+        [Obsolete("Use " + nameof(AddressToBan) + " instead")]
+        public uint IPToBan
+        {
+            get { return AddressToBan == null ? 0 : (uint) IPAddress.NetworkToHostOrder(AddressToBan.Address); }
+        }
+
         public UnturnedPlayerBanningEvent(
             UnturnedPlayer playerToBan,
             string instigatorId,
             string instigatorType,
-            uint ipToBan,
+            IPAddress? addressBan,
             string? reason,
             TimeSpan duration)
             : base(playerToBan)
         {
             InstigatorId = instigatorId;
             InstigatorType = instigatorType;
-            IPToBan = ipToBan;
+            AddressToBan = addressBan;
             Reason = reason;
             Duration = duration;
         }

@@ -5,6 +5,7 @@ using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Net;
 using OpenMod.Core.Users;
 
 namespace OpenMod.Unturned.Players.Bans.Events
@@ -38,12 +39,13 @@ namespace OpenMod.Unturned.Players.Bans.Events
         private void OnBanPlayerRequested(CSteamID instigator, CSteamID playerToBan, uint ipToBan, ref string reason, ref uint duration, ref bool shouldVanillaBan) // lgtm [cs/too-many-ref-parameters]
         {
             var player = GetUnturnedPlayer(PlayerTool.getPlayer(playerToBan))!;
+            var ipAddressToBan = IPAddress.Parse(ipToBan.ToString());
 
             var @event = new UnturnedPlayerBanningEvent(
                 player,
                 instigator.ToString(),
                 KnownActorTypes.Player,
-                ipToBan,
+                Equals(ipAddressToBan, IPAddress.Any) ? null : ipAddressToBan,
                 reason,
                 TimeSpan.FromSeconds(duration))
             {
