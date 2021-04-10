@@ -17,17 +17,24 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         public string? Reason { get; set; }
 
-        public DateTime Duration { get; set; }
+        public TimeSpan Duration { get; set; }
 
         public bool IsCancelled { get; set; }
 
-        public UnturnedPlayerBanningEvent(UnturnedPlayer playerToBan, string instigatorId, string instigatorType, uint ipToBan, string? reason, uint duration) : base(playerToBan)
+        public UnturnedPlayerBanningEvent(
+            UnturnedPlayer playerToBan,
+            string instigatorId,
+            string instigatorType,
+            uint ipToBan,
+            string? reason,
+            TimeSpan duration)
+            : base(playerToBan)
         {
             InstigatorId = instigatorId;
             InstigatorType = instigatorType;
             IPToBan = ipToBan;
             Reason = reason;
-            Duration = DateTime.Now.AddSeconds(duration);
+            Duration = duration;
         }
     }
 }

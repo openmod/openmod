@@ -45,7 +45,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
                 KnownActorTypes.Player,
                 ipToBan,
                 reason,
-                duration)
+                TimeSpan.FromSeconds(duration))
             {
                 IsCancelled = !shouldVanillaBan
             };
@@ -53,7 +53,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
             Emit(@event);
 
             reason = @event.Reason ?? "";
-            duration = (uint)@event.Duration.Second;
+            duration = (uint) @event.Duration.TotalSeconds;
             shouldVanillaBan = !@event.IsCancelled;
         }
 
