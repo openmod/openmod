@@ -6,6 +6,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Players
     public interface IBanningPlayerEvent : IPlayerEvent, ICancellableEvent
     {
         public string InstigatorId { get; }
+        public string InstigatorType { get; }
         public string Reason { get; set; }
         public DateTime Duration { get; set; }
     }

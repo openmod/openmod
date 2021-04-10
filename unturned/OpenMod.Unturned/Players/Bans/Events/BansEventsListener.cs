@@ -5,6 +5,7 @@ using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using OpenMod.Core.Users;
 
 namespace OpenMod.Unturned.Players.Bans.Events
 {
@@ -38,12 +39,16 @@ namespace OpenMod.Unturned.Players.Bans.Events
         {
             var player = GetUnturnedPlayer(PlayerTool.getPlayer(playerToBan))!;
 
-            var @event =
-                new UnturnedPlayerBanningEvent(player, instigator.ToString(), ipToBan, reason, duration)
-                {
-                    IsCancelled = !shouldVanillaBan
-                };
-
+            var @event = new UnturnedPlayerBanningEvent(
+                player,
+                instigator.ToString(),
+                KnownActorTypes.Player,
+                ipToBan,
+                reason,
+                duration)
+            {
+                IsCancelled = !shouldVanillaBan
+            };
 
             Emit(@event);
 
