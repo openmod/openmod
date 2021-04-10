@@ -1,9 +1,9 @@
-﻿using OpenMod.API.Eventing;
+using OpenMod.API.Eventing;
 using System;
 
 namespace OpenMod.Extensions.Games.Abstractions.Players
 {
-    public interface IPlayerBanningEvent : IPlayerEvent, ICancellableEvent
+    public interface IBanningPlayerEvent : IPlayerEvent, ICancellableEvent
     {
         public string InstigatorId { get; }
         public string Reason { get; set; }
