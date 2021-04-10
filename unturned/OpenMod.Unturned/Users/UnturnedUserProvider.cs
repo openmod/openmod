@@ -63,6 +63,44 @@ namespace OpenMod.Unturned.Users
             Provider.onEnemyConnected += OnPlayerConnected;
             Provider.onEnemyDisconnected += OnPlayerDisconnected;
             Provider.onRejectingPlayer += OnRejectingPlayer;
+            Provider.onBanPlayerRequested += OnBanRequested;
+        }
+
+        private void OnBanRequested(CSteamID instigator, CSteamID playerToBan, uint ipToBan, ref string reason, ref uint duration, ref bool shouldVanillaBan)
+        {
+            var user = GetUser(playerToBan)!;
+
+            string punisherId;
+            if (instigator == null)
+            {
+                punisherId = "0";
+            }
+            else
+            {
+                punisherId = instigator.ToString();
+            }
+
+            var banReason = reason;
+            var banTime = duration;
+            bool ban = shouldVanillaBan;
+
+            AsyncHelper.RunSync(async () =>
+            {
+                var @event = new UnturnedUserBanningEvent(user, punisherId, banReason, DateTime.Now.AddSeconds(banTime));
+
+                @event.IsCancelled = !ban;
+
+                await m_EventBus.EmitAsync(m_Runtime, this, @event);
+
+                if (@event.IsCancelled)
+                {
+                    ban = false;
+                }
+            });
+
+            reason = banReason;
+            duration = banTime;
+            shouldVanillaBan = ban;
         }
 
         protected virtual void OnPlayerConnected(SteamPlayer steamPlayer)
@@ -432,6 +470,7 @@ namespace OpenMod.Unturned.Users
             Provider.onEnemyConnected -= OnPlayerConnected;
             Provider.onEnemyDisconnected -= OnPlayerDisconnected;
             Provider.onRejectingPlayer -= OnRejectingPlayer;
+            Provider.onBanPlayerRequested -= OnBanRequested;
         }
     }
 }
