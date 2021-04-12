@@ -1,10 +1,10 @@
-﻿using System;
+﻿using dnlib.DotNet;
+using OpenMod.Common.Helpers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using dnlib.DotNet;
-using OpenMod.Common.Helpers;
 
 namespace OpenMod.Common.Hotloading
 {
@@ -29,23 +29,7 @@ namespace OpenMod.Common.Hotloading
 
         private static Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            Assembly? match = null;
-            var name = ReflectionExtensions.GetVersionIndependentName(args.Name);
-
-            foreach (var kv in s_Assemblies)
-            {
-                if (kv.Key.Equals(args.Name))
-                {
-                    return kv.Value;
-                }
-
-                if (ReflectionExtensions.GetVersionIndependentName(kv.Key).Equals(name))
-                {
-                    match = kv.Value;
-                }
-            }
-
-            return match;
+            return GetAssembly(args.Name);
         }
 
         /// <summary>
@@ -118,12 +102,22 @@ namespace OpenMod.Common.Hotloading
         /// <returns><b>The hotloaded assembly</b> if found; otherwise, <b>null</b>.</returns>
         public static Assembly? GetAssembly(string fullname)
         {
-            if (!s_Assemblies.ContainsKey(fullname))
+            if (s_Assemblies.TryGetValue(fullname, out var assembly))
             {
-                return null;
+                return assembly;
             }
 
-            return s_Assemblies[fullname];
+            var name = ReflectionExtensions.GetVersionIndependentName(fullname);
+
+            foreach (var kv in s_Assemblies)
+            {
+                if (ReflectionExtensions.GetVersionIndependentName(kv.Key).Equals(name))
+                {
+                    return kv.Value;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
