@@ -214,6 +214,15 @@ namespace OpenMod.Runtime
         {
             try
             {
+                await RegisterPluginAssembliesAsync(new NuGetPluginAssembliesSource(m_NuGetPackageManager));
+            }
+            catch (Exception ex)
+            {
+                m_Logger.LogError(ex, "Failed to load NuGet plugins");
+            }
+
+            try
+            {
                 var pluginsDirectory = Path.Combine(m_Runtime.WorkingDirectory, "plugins");
                 var logger = Context.LoggerFactory.CreateLogger<FileSystemPluginAssembliesSource>();
                 var fileSystemPluginAssembliesSource = new FileSystemPluginAssembliesSource(logger, pluginsDirectory);
@@ -222,15 +231,6 @@ namespace OpenMod.Runtime
             catch (Exception ex)
             {
                 m_Logger.LogError(ex, "Failed to load .dll plugins");
-            }
-
-            try
-            {
-                await RegisterPluginAssembliesAsync(new NuGetPluginAssembliesSource(m_NuGetPackageManager));
-            }
-            catch (Exception ex)
-            {
-                m_Logger.LogError(ex, "Failed to load NuGet plugins");
             }
         }
     }
