@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using OpenMod.API;
@@ -50,20 +51,22 @@ namespace OpenMod.Core.Plugins
             }
         }
 
-        private async Task InstallPackagesInEmbeddedFile(Assembly assembly)
+        private async Task<ICollection<Assembly>> InstallPackagesInEmbeddedFile(Assembly assembly, ICollection<Assembly> ignoredAssemblies)
         {
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
-            
+
+            var newPlugins = new List<Assembly>();
+
             try
             {
                 var packagesResourceName = assembly.GetManifestResourceNames()
                     .FirstOrDefault(x => x.EndsWith("packages.yaml"));
-                if (packagesResourceName == null) return;
+                if (packagesResourceName == null) return newPlugins;
 
                 using var stream = assembly.GetManifestResourceStream(packagesResourceName);
-                if (stream == null) return;
+                if (stream == null) return newPlugins;
 
                 using var reader = new StreamReader(stream);
                 var packagesContent = await reader.ReadToEndAsync();
@@ -76,16 +79,36 @@ namespace OpenMod.Core.Plugins
                             : new NuGetVersion(d.Version)))
                     .ToList();
 
-                if (packages == null || packages.Count == 0) return;
+                if (packages == null || packages.Count == 0) return newPlugins;
 
                 m_Logger.LogInformation($"Found and installing embedded NuGet packages for plugin assembly: {assembly.GetName().Name}");
 
+                var existingPackages = m_NuGetPackageManager.GetLoadedAssemblies();
+
                 await m_NuGetPackageManager.InstallPackagesAsync(packages);
+
+                var newAssemblies = m_NuGetPackageManager.GetLoadedAssemblies().Except(existingPackages);
+
+                foreach (var newAssembly in newAssemblies.Select(x => (Assembly)x.Assembly.Target))
+                {
+                    if (newAssembly == null) continue;
+
+                    if (newAssembly.GetCustomAttribute<PluginMetadataAttribute>() == null) continue;
+
+                    if (ignoredAssemblies.Contains(newAssembly)) continue;
+
+                    if (m_LoadedPluginAssemblies.Select(x => x.Target).Cast<Assembly>().Contains(newAssembly)) continue;
+
+                    newPlugins.Add(newAssembly);
+                }
             }
             catch (Exception ex)
             {
+                newPlugins.Clear();
                 m_Logger.LogError(ex, $"Failed to check/load embedded NuGet packages for assembly: {assembly}");
             }
+
+            return newPlugins;
         }
 
         public async Task<ICollection<Assembly>> LoadPluginAssembliesAsync(IPluginAssembliesSource source)
@@ -107,8 +130,11 @@ namespace OpenMod.Core.Plugins
                     continue;
                 }
 
-                await InstallPackagesInEmbeddedFile(providerAssembly);
+                providerAssemblies.AddRange(await InstallPackagesInEmbeddedFile(providerAssembly, providerAssemblies));
+            }
 
+            foreach (var providerAssembly in providerAssemblies.ToList())
+            {
                 ICollection<Type> types;
                 try
                 {
