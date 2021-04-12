@@ -784,6 +784,9 @@ namespace OpenMod.NuGet
                     .OrderByDescending(d => d.Version);
 
             var result = (Assembly?)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
+
+            result ??= Hotloader.GetAssembly(args.Name);
+
             if (result != null)
             {
                 m_ResolveCache.Add(name, result);
