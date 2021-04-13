@@ -55,7 +55,12 @@ namespace OpenMod.Unturned.Items
                 }
 
                 if (page != null)
+                {
                     Inventory.Inventory.removeItem(page.Value, (byte)index);
+
+                    if (page.Value < PlayerInventory.SLOTS)
+                        Inventory.Player.equipment.sendSlot(page.Value);
+                }
 
                 return true;
             }
