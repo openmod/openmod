@@ -11,7 +11,7 @@ namespace OpenMod.Unturned.Items
         {
             Inventory = inventory;
             ItemJar = itemJar;
-            Item = new UnturnedItem(itemJar.item, () => DestroyAsync());
+            Item = new UnturnedItem(itemJar.item, DestroyAsync);
         }
 
         public UnturnedPlayerInventory Inventory { get; }
