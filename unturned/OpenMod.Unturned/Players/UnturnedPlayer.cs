@@ -146,9 +146,19 @@ namespace OpenMod.Unturned.Players
 
         public string Stance => Player.stance.stance.ToString().ToLower(CultureInfo.InvariantCulture);
 
-        public IInventory Inventory { get; }
+        IInventory IHasInventory.Inventory => Inventory;
 
-        public IVehicle? CurrentVehicle
+        /// <summary>
+        /// Gets the inventory of the player.
+        /// </summary>
+        public UnturnedPlayerInventory Inventory { get; }
+
+        IVehicle? ICanEnterVehicle.CurrentVehicle => CurrentVehicle;
+
+        /// <summary>
+        /// Gets the current vehicle. Returns null if the player is not a passenger.
+        /// </summary>
+        public UnturnedVehicle? CurrentVehicle
         {
             get
             {
