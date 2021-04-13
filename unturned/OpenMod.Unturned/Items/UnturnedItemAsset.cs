@@ -18,5 +18,9 @@ namespace OpenMod.Unturned.Items
         public string ItemName => ItemAsset.itemName ?? ItemAssetId;
 
         public string ItemType => ItemAsset.type.ToString().ToLower(CultureInfo.InvariantCulture);
+
+        public double? MaxQuality => ItemAsset.qualityMax;
+
+        public double? MaxAmount => ItemAsset.amount;
     }
 }
