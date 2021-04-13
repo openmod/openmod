@@ -15,6 +15,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// <summary>
         /// Destroys the item.
         /// </summary>
-        Task DestroyAsync();
+        Task<bool> DestroyAsync();
     }
 }
