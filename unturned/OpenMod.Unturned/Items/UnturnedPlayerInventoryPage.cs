@@ -81,7 +81,7 @@ namespace OpenMod.Unturned.Items
                 var items = new List<UnturnedInventoryItem>();
                 foreach (var itemJar in Page.items)
                 {
-                    items.Add(new UnturnedInventoryItem(Inventory, itemJar, new UnturnedItem(itemJar.item)));
+                    items.Add(new UnturnedInventoryItem(Inventory, itemJar));
                 }
 
                 return items;
