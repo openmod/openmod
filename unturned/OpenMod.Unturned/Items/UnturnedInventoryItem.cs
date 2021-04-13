@@ -18,7 +18,9 @@ namespace OpenMod.Unturned.Items
 
         public ItemJar ItemJar { get; }
 
-        public IItem Item { get; }
+        IItem IItemInstance.Item => Item;
+
+        public UnturnedItem Item { get; }
 
         public Task DropAsync()
         {
