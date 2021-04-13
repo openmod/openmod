@@ -19,5 +19,15 @@
         /// The type of the item.
         /// </summary>
         string ItemType { get; }
+
+        /// <summary>
+        /// The maximum quality of the item. <c>null</c> if item doesn't support qualities.
+        /// </summary>
+        double? MaxQuality { get; }
+
+        /// <summary>
+        /// The maximum quality of the item. <c>null</c> if item doesn't support amounts.
+        /// </summary>
+        double? MaxAmount { get; }
     }
 }
