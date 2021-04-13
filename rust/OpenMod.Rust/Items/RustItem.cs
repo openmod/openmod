@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Items;
+using System.Threading.Tasks;
 
 namespace OpenMod.Rust.Items
 {
@@ -52,6 +52,18 @@ namespace OpenMod.Rust.Items
             }
 
             return SetItemAmountTask().AsTask();
+        }
+
+        public Task SetItemDurabilityAsync(double durability)
+        {
+            async UniTask SetItemDurabilityTask()
+            {
+                await UniTask.SwitchToMainThread();
+
+                Item.maxCondition = (int) durability;
+            }
+
+            return SetItemDurabilityTask().AsTask();
         }
 
         public IInventory? Inventory { get; }

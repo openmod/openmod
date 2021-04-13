@@ -36,5 +36,12 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// <param name="amount">The amount to set to.</param>
         /// <exception cref="ArgumentException">Thrown when the amount is invalid, e.g. non-positive or larger than the maximum amount allowed by the game.</exception>
         Task SetItemAmountAsync(double amount);
+
+        /// <summary>
+        /// Sets the durability of the item.
+        /// </summary>
+        /// <param name="durability">The amount to set to.</param>
+        /// <exception cref="ArgumentException">Thrown when the durability is invalid, e.g. non-positive or larger than the maximum durability allowed by the game.</exception>
+        Task SetItemDurabilityAsync(double durability);
     }
 }

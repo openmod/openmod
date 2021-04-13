@@ -36,5 +36,10 @@ namespace OpenMod.Rust.Items
         {
             get { return ItemDefinition.stackable; }
         }
+
+        public double? MaxDurability
+        {
+            get { return MaxQuality; }
+        }
     }
 }

@@ -22,5 +22,7 @@ namespace OpenMod.Unturned.Items
         public double? MaxQuality => ItemAsset.qualityMax;
 
         public double? MaxAmount => ItemAsset.amount;
+
+        public double? MaxDurability => MaxQuality;
     }
 }

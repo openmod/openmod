@@ -35,6 +35,8 @@ namespace OpenMod.Unturned.Items
             return Task.CompletedTask;
         }
 
+        public Task SetItemDurabilityAsync(double durability) => SetItemQualityAsync(durability);
+
         public Task<bool> DestroyAsync()
         {
             //todo: needs replication if equipped by a player
