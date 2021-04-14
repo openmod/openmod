@@ -76,11 +76,6 @@ namespace OpenMod.Unturned.Vehicles
             return SpawnVehicleTask().AsTask();
         }
 
-        public Task<IVehicle?> SpawnVehicleAsync(Vector3 position, string vehicleAssetId, IVehicleState? state = null)
-        {
-            return SpawnVehicleAsync(position, Quaternion.Identity, vehicleAssetId, state);
-        }
-
         public Task<IVehicle?> SpawnVehicleAsync(IPlayer player, string vehicleAssetId, IVehicleState? state = null)
         {
             var rotation = player.Transform.Rotation;
