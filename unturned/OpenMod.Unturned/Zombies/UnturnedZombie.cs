@@ -83,7 +83,7 @@ namespace OpenMod.Unturned.Zombies
             return SetPositionAsync(position, Transform.Rotation);
         }
 
-        public async Task<bool> SetPositionAsync(Vector3 position, Vector3 rotation)
+        public async Task<bool> SetPositionAsync(Vector3 position, Quaternion rotation)
         {
             // should be synced automatically
 

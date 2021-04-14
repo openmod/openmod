@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using UVector2 = UnityEngine.Vector2;
-using Vector2 = System.Numerics.Vector2;
 using UVector3 = UnityEngine.Vector3;
-using Vector3 = System.Numerics.Vector3;
 using UVector4 = UnityEngine.Vector4;
+using Vector2 = System.Numerics.Vector2;
+using Vector3 = System.Numerics.Vector3;
 using Vector4 = System.Numerics.Vector4;
 
 namespace OpenMod.UnityEngine.Extensions

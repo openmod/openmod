@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Net;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Vector3 = System.Numerics.Vector3;
@@ -118,17 +119,17 @@ namespace OpenMod.Unturned.Players
 
         public Task<bool> SetPositionAsync(Vector3 position)
         {
-            return SetPositionAsync(position, Player.transform.rotation.eulerAngles.ToSystemVector());
+            return SetPositionAsync(position, Player.transform.rotation.ToSystemQuaternion());
         }
 
-        public Task<bool> SetPositionAsync(Vector3 position, Vector3 rotation)
+        public Task<bool> SetPositionAsync(Vector3 position, Quaternion rotation)
         {
             async UniTask<bool> TeleportationTask()
             {
                 await UniTask.SwitchToMainThread();
 
                 if (Player.transform.position == position.ToUnityVector() &&
-                    Player.transform.rotation.eulerAngles == rotation.ToUnityVector())
+                    Player.transform.rotation == rotation.ToUnityQuaternion())
                 {
                     return true;
                 }
@@ -138,7 +139,7 @@ namespace OpenMod.Unturned.Players
                     return false;
                 }
 
-                return Player.teleportToLocation(position.ToUnityVector(), rotation.Y);
+                return Player.teleportToLocation(position.ToUnityVector(), rotation.ToEulerAngles().Y);
             }
 
             return TeleportationTask().AsTask();
@@ -146,9 +147,19 @@ namespace OpenMod.Unturned.Players
 
         public string Stance => Player.stance.stance.ToString().ToLower(CultureInfo.InvariantCulture);
 
-        public IInventory Inventory { get; }
+        IInventory IHasInventory.Inventory => Inventory;
 
-        public IVehicle? CurrentVehicle
+        /// <summary>
+        /// Gets the inventory of the player.
+        /// </summary>
+        public UnturnedPlayerInventory Inventory { get; }
+
+        IVehicle? ICanEnterVehicle.CurrentVehicle => CurrentVehicle;
+
+        /// <summary>
+        /// Gets the current vehicle. Returns null if the player is not a passenger.
+        /// </summary>
+        public UnturnedVehicle? CurrentVehicle
         {
             get
             {

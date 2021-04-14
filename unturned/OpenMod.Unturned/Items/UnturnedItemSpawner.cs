@@ -41,7 +41,7 @@ namespace OpenMod.Unturned.Items
                         return DropItem(item, playerInventory.Player.transform.position.ToSystemVector());
                     }
 
-                    return new UnturnedInventoryItem(playerInventory, itemJar!, new UnturnedItem(item));
+                    return new UnturnedInventoryItem(playerInventory, itemJar!);
                 }
 
                 throw new NotSupportedException($"Inventory type not supported: {inventory.GetType().FullName}");

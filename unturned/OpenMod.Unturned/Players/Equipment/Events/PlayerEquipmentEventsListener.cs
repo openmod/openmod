@@ -1,10 +1,10 @@
 ﻿extern alias JetBrainsAnnotations;
-using System;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Items;
 using SDG.Unturned;
+using System;
 
 namespace OpenMod.Unturned.Players.Equipment.Events
 {
@@ -42,11 +42,16 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         private void Events_OnItemEquipped(Player nativePlayer)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
+            
+            var page = nativePlayer.equipment.equippedPage;
 
-            var item = new Item(nativePlayer.equipment.itemID, 1, nativePlayer.equipment.quality,
-                nativePlayer.equipment.state);
+            var index = nativePlayer.inventory.getIndex(page,
+                nativePlayer.equipment.equipped_x, nativePlayer.equipment.equipped_y);
 
-            var @event = new UnturnedPlayerItemEquippedEvent(player, new UnturnedItem(item));
+            var inventoryItem =
+                new UnturnedInventoryItem(player.Inventory, nativePlayer.inventory.getItem(page, index));
+
+            var @event = new UnturnedPlayerItemEquippedEvent(player, inventoryItem.Item);
 
             Emit(@event);
         }
@@ -63,8 +68,10 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         private void OnEquipRequested(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
             var player = GetUnturnedPlayer(equipment.player)!;
+            
+            var inventoryItem = new UnturnedInventoryItem(player.Inventory, jar);
 
-            var @event = new UnturnedPlayerItemEquippingEvent(player, new UnturnedItem(jar.item))
+            var @event = new UnturnedPlayerItemEquippingEvent(player, inventoryItem.Item)
             {
                 IsCancelled = !shouldAllow
             };
@@ -89,7 +96,9 @@ namespace OpenMod.Unturned.Players.Equipment.Events
             if (jar?.item == null)
                 return;
 
-            var @event = new UnturnedPlayerItemUnequippingEvent(player, new UnturnedItem(jar.item))
+            var inventoryItem = new UnturnedInventoryItem(player.Inventory, jar);
+
+            var @event = new UnturnedPlayerItemUnequippingEvent(player, inventoryItem.Item)
             {
                 IsCancelled = !shouldAllow
             };

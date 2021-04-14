@@ -7,9 +7,9 @@ namespace OpenMod.Unturned.Players.Clothing.Events
     {
         public ClothingType Type { get; }
 
-        public UnturnedPlayerClothingEquippingEvent(UnturnedPlayer player, UnturnedItem item, ClothingType type) : base(player, item)
+        public UnturnedPlayerClothingEquippingEvent(UnturnedPlayer player, UnturnedClothingItem item) : base(player, item)
         {
-            Type = type;
+            Type = item.ClothingType;
         }
     }
 }

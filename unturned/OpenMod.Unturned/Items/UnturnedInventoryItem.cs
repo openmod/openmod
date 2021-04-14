@@ -1,4 +1,5 @@
-﻿using OpenMod.Extensions.Games.Abstractions.Items;
+﻿using Cysharp.Threading.Tasks;
+using OpenMod.Extensions.Games.Abstractions.Items;
 using SDG.Unturned;
 using System.Threading.Tasks;
 
@@ -6,18 +7,20 @@ namespace OpenMod.Unturned.Items
 {
     public class UnturnedInventoryItem : IInventoryItem
     {
-        public UnturnedInventoryItem(UnturnedPlayerInventory inventory, ItemJar itemJar, UnturnedItem item)
+        public UnturnedInventoryItem(UnturnedPlayerInventory inventory, ItemJar itemJar)
         {
             Inventory = inventory;
             ItemJar = itemJar;
-            Item = item;
+            Item = new UnturnedItem(itemJar.item, DestroyAsync);
         }
 
         public UnturnedPlayerInventory Inventory { get; }
 
         public ItemJar ItemJar { get; }
 
-        public IItem Item { get; }
+        IItem IItemInstance.Item => Item;
+
+        public UnturnedItem Item { get; }
 
         public Task DropAsync()
         {
@@ -28,29 +31,41 @@ namespace OpenMod.Unturned.Items
             return DestroyAsync();
         }
 
-        public Task DestroyAsync()
+        public Task<bool> DestroyAsync()
         {
-            byte? page = null;
-            var index = -1;
-
-            for (byte p = 0; p < PlayerInventory.PAGES - 2; p++)
+            async UniTask<bool> DestroyTask()
             {
-                var itemJars = Inventory.Inventory.items[p].items;
+                await UniTask.SwitchToMainThread();
 
-                if (itemJars == null) continue;
+                byte? page = null;
+                var index = -1;
 
-                index = itemJars.IndexOf(ItemJar);
+                for (byte p = 0; p < PlayerInventory.PAGES - 2; p++)
+                {
+                    var itemJars = Inventory.Inventory.items[p].items;
 
-                if (index < 0) continue;
+                    if (itemJars == null) continue;
 
-                page = p;
-                break;
+                    index = itemJars.IndexOf(ItemJar);
+
+                    if (index < 0) continue;
+
+                    page = p;
+                    break;
+                }
+
+                if (page != null)
+                {
+                    Inventory.Inventory.removeItem(page.Value, (byte)index);
+
+                    if (page.Value < PlayerInventory.SLOTS)
+                        Inventory.Player.equipment.sendSlot(page.Value);
+                }
+
+                return true;
             }
 
-            if (page != null)
-                Inventory.Inventory.removeItem(page.Value, (byte)index);
-
-            return Task.CompletedTask;
+            return DestroyTask().AsTask();
         }
     }
 }
