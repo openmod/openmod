@@ -36,6 +36,6 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
         /// <param name="position">The position to set to.</param>
         /// <param name="rotation">The rotation to set to.</param>
         /// <returns><b>True</b> if successful; otherwise, <b>false</b>.</returns>
-        Task<bool> SetPositionAsync(Vector3 position, Vector3 rotation);
+        Task<bool> SetPositionAsync(Vector3 position, Quaternion rotation);
     }
 }
