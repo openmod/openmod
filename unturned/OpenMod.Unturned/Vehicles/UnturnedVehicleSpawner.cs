@@ -1,40 +1,36 @@
 ﻿using Cysharp.Threading.Tasks;
-using HarmonyLib;
 using OpenMod.API.Ioc;
+using OpenMod.Extensions.Games.Abstractions.Players;
+using OpenMod.Extensions.Games.Abstractions.Transforms;
 using OpenMod.Extensions.Games.Abstractions.Vehicles;
 using OpenMod.UnityEngine.Extensions;
 using SDG.Unturned;
 using Steamworks;
 using System;
-using System.Numerics;
-using System.Reflection;
 using System.Threading.Tasks;
+using UnityEngine;
 using Priority = OpenMod.API.Prioritization.Priority;
-using Quaternion = UnityEngine.Quaternion;
+using Quaternion = System.Numerics.Quaternion;
+using UVector3 = UnityEngine.Vector3;
+using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Vehicles
 {
     [ServiceImplementation(Priority = Priority.Lowest)]
     public class UnturnedVehicleSpawner : IVehicleSpawner
     {
-        private static readonly MethodInfo m_AddVehicleMethod;
 
-        static UnturnedVehicleSpawner()
+        public Task<IVehicle?> SpawnVehicleAsync(Vector3 position, Quaternion rotation, string vehicleAssetId, IVehicleState? state = null)
         {
-            m_AddVehicleMethod = AccessTools.Method(typeof(VehicleManager), "addVehicle");
-        }
-
-        public Task<IVehicle?> SpawnVehicleAsync(Vector3 position, string vehicleId, IVehicleState? state = null)
-        {
-            async UniTask<IVehicle?> VehicleSpawnTask()
+            async UniTask<IVehicle?> SpawnVehicleTask()
             {
                 await UniTask.SwitchToMainThread();
-                if (!ushort.TryParse(vehicleId, out var parsedVehicleId))
+                if (!ushort.TryParse(vehicleAssetId, out var parsedVehicleId))
                 {
-                    throw new Exception($"Invalid vehicle id: {vehicleId}");
+                    throw new Exception($"Invalid vehicle id: {vehicleAssetId}");
                 }
 
-                if (Assets.find(EAssetType.VEHICLE, parsedVehicleId) is not VehicleAsset)
+                if (Assets.find(EAssetType.VEHICLE, parsedVehicleId) is not VehicleAsset vehicleAsset)
                 {
                     return null;
                 }
@@ -42,17 +38,14 @@ namespace OpenMod.Unturned.Vehicles
                 UnturnedVehicle? vehicle = null;
                 if (state is UnturnedVehicleState && state.StateData?.Length > 0)
                 {
-                    ReadState(state.StateData, out _ /* id doesn't require i guess? */, out var skinID, out var mythicID,
+                    ReadState(state.StateData, out _ /* id doesn't require i guess? */, out var skinId, out var mythicId,
                         out var roadPosition, out var fuel, out var health, out var batteryCharge,
                         out var owner, out var group, out var locked, out byte[][] turrets,
-                        out var instanceID, out var tireAliveMask, out var items);
+                        out _, out var tireAliveMask, out var items);
 
-                    // ushort id, ushort skinID, ushort mythicID, float roadPosition, Vector3 point, Quaternion angle, bool sirens,
-                    // bool blimp, bool headlights, bool taillights, ushort fuel, bool isExploded, ushort health, ushort batteryCharge,
-                    // CSteamID owner, CSteamID group, bool locked, CSteamID[] passengers, byte[][] turrets, uint instanceID, byte tireAliveMask
-                    var iVehicle = (InteractableVehicle)m_AddVehicleMethod.Invoke(VehicleManager.instance, new object?[] { vehicleId, skinID,
-                        mythicID, roadPosition, position.ToUnityVector(), Quaternion.identity, false, false, false, false, fuel, false, health,
-                        batteryCharge, owner, group, locked, null, turrets, instanceID, tireAliveMask });
+                    var iVehicle = VehicleManager.SpawnVehicleV3(vehicleAsset, skinId, mythicId, roadPosition,
+                        position.ToUnityVector(), rotation.ToUnityQuaternion(), false, false, false,
+                        false, fuel, health, batteryCharge, owner, group, locked, turrets, tireAliveMask);
 
                     if (iVehicle != null)
                     {
@@ -69,7 +62,8 @@ namespace OpenMod.Unturned.Vehicles
                 }
                 else
                 {
-                    var iVehicle = VehicleManager.spawnVehicleV2(parsedVehicleId, position.ToUnityVector(), Quaternion.identity);
+                    var iVehicle = VehicleManager.spawnVehicleV2(parsedVehicleId, position.ToUnityVector(),
+                        Quaternion.Identity.ToUnityQuaternion());
                     if (iVehicle != null)
                     {
                         vehicle = new UnturnedVehicle(iVehicle);
@@ -79,7 +73,30 @@ namespace OpenMod.Unturned.Vehicles
                 return vehicle;
             }
 
-            return VehicleSpawnTask().AsTask();
+            return SpawnVehicleTask().AsTask();
+        }
+
+        public Task<IVehicle?> SpawnVehicleAsync(Vector3 position, string vehicleAssetId, IVehicleState? state = null)
+        {
+            return SpawnVehicleAsync(position, Quaternion.Identity, vehicleAssetId, state);
+        }
+
+        public Task<IVehicle?> SpawnVehicleAsync(IPlayer player, string vehicleAssetId, IVehicleState? state = null)
+        {
+            var rotation = player.Transform.Rotation;
+            var position = player.Transform.Position;
+
+            var forward = (Vector3.UnitZ * 6).Rotate(rotation);
+
+            position += forward;
+            
+            Physics.Raycast((position + Vector3.UnitY * 16f).ToUnityVector(), UVector3.down, out var raycastHit, 32f, RayMasks.BLOCK_VEHICLE);
+            if (raycastHit.collider != null)
+            {
+                position.Y = raycastHit.point.y + 16f;
+            }
+
+            return SpawnVehicleAsync(position, rotation, vehicleAssetId, state);
         }
 
         private void ReadState(byte[] buffer, out ushort id, out ushort skinID, out ushort mythicID,
