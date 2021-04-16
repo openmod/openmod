@@ -39,10 +39,6 @@ namespace OpenMod.NuGet
         {
             // Trademark violations
             "VaultPlugin",
-            "F.AntiCosmetics",
-            "F.ItemRestrictions",
-            "F.RustResources",
-            "F.Announcer"
         };
 
         private static readonly string[] s_PublisherBlacklist =
