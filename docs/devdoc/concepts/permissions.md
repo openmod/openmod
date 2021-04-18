@@ -50,7 +50,7 @@ public class MyPlugin : OpenModUniversalPlugin
 {
     private readonly IPermissionRegistry m_PermissionRegistry;
 
-    public UserConnectEventListener(IPermissionChecker permissionRegistry)
+    public MyPlugin(IPermissionRegistry permissionRegistry)
     {
         m_PermissionRegistry = permissionRegistry;
     }
