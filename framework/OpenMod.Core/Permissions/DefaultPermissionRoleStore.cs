@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Ioc;
@@ -10,6 +6,10 @@ using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 using OpenMod.Core.Permissions.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenMod.Core.Permissions
 {
@@ -48,6 +48,8 @@ namespace OpenMod.Core.Permissions
                 // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var parentRoleId in role.Parents)
                 {
+                    if (string.IsNullOrEmpty(parentRoleId)) continue;
+
                     if (roleIds.Contains(parentRoleId))
                         continue;
 
@@ -71,6 +73,8 @@ namespace OpenMod.Core.Permissions
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var roleId in userData.Roles)
             {
+                if (string.IsNullOrEmpty(roleId)) continue;
+
                 if (roleIds.Contains(roleId))
                 {
                     continue;
@@ -89,6 +93,8 @@ namespace OpenMod.Core.Permissions
                 // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var parentRoleId in userRole.Parents)
                 {
+                    if (string.IsNullOrEmpty(parentRoleId)) continue;
+
                     if (roleIds.Contains(parentRoleId))
                         continue;
 
