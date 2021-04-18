@@ -1,9 +1,6 @@
-﻿extern alias JetBrainsAnnotations;
-using System;
+﻿using System;
 
-using HarmonyLib;
-
-using JetBrainsAnnotations::JetBrains.Annotations;
+using JetBrains.Annotations;
 
 using OpenMod.API;
 using OpenMod.Unturned.Events;
@@ -17,36 +14,24 @@ namespace OpenMod.Unturned.Workshop.Events
     internal class WorkshopEventsListener : UnturnedEventsListener
     {
 
-        private delegate void WorkshopLoaded();
-        private static event WorkshopLoaded? OnWorkshopLoaded;
-
         public WorkshopEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
         public override void Subscribe()
         {
-            OnWorkshopLoaded += WorkshopLoadedEventEmitter;
+            DedicatedUGC.installed += WorkshopLoadedEventEmitter;
         }
 
         public override void Unsubscribe()
         {
-            OnWorkshopLoaded -= WorkshopLoadedEventEmitter;
+            DedicatedUGC.installed -= WorkshopLoadedEventEmitter;
         }
 
         private void WorkshopLoadedEventEmitter()
         {
-            var @event = new UnturnedWorkshopLoadedEvent();
-
-            Emit(@event);
+            Emit(new UnturnedWorkshopLoadedEvent());
         }
 
-        [UsedImplicitly]
-        [HarmonyPatch(typeof(Provider), nameof(Provider.launch))]
-        [HarmonyPrefix]
-        public static void PreProviderLaunch()
-        {
-            OnWorkshopLoaded?.Invoke();
-        }
     }
 }
