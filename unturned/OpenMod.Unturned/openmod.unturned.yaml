@@ -1,6 +1,9 @@
 ﻿# If set to true, will show installed plugins when joining a server. Set to false to disable.
 advertisePlugins: true
 
+# Grants Unturned admins all permissions
+grantAdminsAllPerms: true
+
 # Configuration for RocketMod integration. Will have no effects if RocketMod is not installed.
 # RocketMod must be installed as a separate module for these to work. If using the legacy OpenMod RocketMod Bridge these will not work.
 rocketmodIntegration:
