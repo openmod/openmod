@@ -98,10 +98,10 @@ namespace OpenMod.Unturned.Players
 
         public Task DamageAsync(double amount)
         {
-            async UniTask SetHealthTask()
+            async UniTask DamageTask()
             {
                 await UniTask.SwitchToMainThread();
-                DamageTool.damagePlayer(new DamagePlayerParameters
+                DamageTool.damagePlayer(new DamagePlayerParameters(Player)
                 {
                     player = Player,
                     times = 1,
@@ -109,12 +109,12 @@ namespace OpenMod.Unturned.Players
                 }, out _);
             }
 
-            return SetHealthTask().AsTask();
+            return DamageTask().AsTask();
         }
 
         public Task KillAsync()
         {
-            return DamageAsync(float.MaxValue);
+            return DamageAsync(int.MaxValue / 2f);
         }
 
         public Task<bool> SetPositionAsync(Vector3 position)
