@@ -171,7 +171,7 @@ namespace OpenMod.Runtime
             foreach (var source in sortedSources)
             {
                 var lifetime = source.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Lifetime ??
-                               ServiceLifetime.Transient;
+                               ServiceLifetime.Singleton;
                 serviceCollection.Add(new ServiceDescriptor(source.GetType(), source.GetType(), lifetime));
             }
 
