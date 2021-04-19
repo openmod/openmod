@@ -1,10 +1,10 @@
-﻿using System;
-using System.Numerics;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
 using OpenMod.Rust.Transforms;
+using System;
+using System.Numerics;
+using System.Threading.Tasks;
 
 namespace OpenMod.Rust.Entities
 {
@@ -39,7 +39,7 @@ namespace OpenMod.Rust.Entities
             return SetPositionAsync(position, Transform.Rotation);
         }
 
-        public virtual Task<bool> SetPositionAsync(Vector3 position, Vector3 rotation)
+        public virtual Task<bool> SetPositionAsync(Vector3 position, Quaternion rotation)
         {
             async UniTask<bool> TeleportTask()
             {
@@ -59,7 +59,7 @@ namespace OpenMod.Rust.Entities
             return TeleportTask().AsTask();
         }
 
-        protected virtual bool DoTeleport(Vector3 destination, Vector3 rotation)
+        protected virtual bool DoTeleport(Vector3 destination, Quaternion rotation)
         {
             throw new NotImplementedException();
         }

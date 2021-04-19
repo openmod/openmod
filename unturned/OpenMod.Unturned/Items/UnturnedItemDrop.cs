@@ -34,7 +34,7 @@ namespace OpenMod.Unturned.Items
         public UnturnedItemDrop(ItemData itemData)
         {
             m_ItemData = itemData;
-            Item = new UnturnedItem(itemData.item);
+            Item = new UnturnedItem(itemData.item, DestroyAsync);
             Position = itemData.point.ToSystemVector();
 
             GetRegion(itemData, out var x, out var y);
@@ -47,7 +47,7 @@ namespace OpenMod.Unturned.Items
         public UnturnedItemDrop(byte regionX, byte regionY, ItemData itemData)
         {
             m_ItemData = itemData;
-            Item = new UnturnedItem(itemData.item);
+            Item = new UnturnedItem(itemData.item, DestroyAsync);
             Position = itemData.point.ToSystemVector();
 
             RegionX = regionX;

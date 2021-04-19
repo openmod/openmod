@@ -36,9 +36,9 @@ namespace OpenMod.Extensions.Games.Abstractions.Transforms
         Vector3 Velocity { get; }
 
         /// <summary>
-        /// Gets the euler angles rotation of the transform.
+        /// Gets the rotation of the transform.
         /// </summary>
-        Vector3 Rotation { get; }
+        Quaternion Rotation { get; }
 
         /// <summary>
         /// Sets the velocity of the transform.
@@ -60,7 +60,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Transforms
         /// </summary>
         /// <param name="rotation">The rotation to set to.</param>
         /// <returns><b>True</b> if successful; otherwise, <b>false</b>.</returns>
-        Task<bool> SetRotationAsync(Vector3 rotation);
+        Task<bool> SetRotationAsync(Quaternion rotation);
 
         /// <summary>
         /// Destorys the transform.

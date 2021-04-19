@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using OpenMod.API.Eventing;
 using OpenMod.Core.Helpers;
@@ -9,6 +6,10 @@ using OpenMod.Core.Users;
 using OpenMod.Extensions.Economy.Abstractions;
 using OpenMod.Unturned.RocketMod.Economy.Patches;
 using Rocket.Core.Plugins;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Threading.Tasks;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 namespace OpenMod.Unturned.RocketMod.Economy
@@ -148,8 +149,14 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
             ValidateActorType(ownerType);
 
-            var result = (decimal)m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId });
-            return Task.FromResult(result);
+            async UniTask<decimal> GetBalance()
+            {
+                await UniTask.SwitchToMainThread();
+
+                return (decimal)m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId });
+            }
+
+            return GetBalance().AsTask();
         }
 
         public Task<decimal> UpdateBalanceAsync(string ownerId, string ownerType, decimal changeAmount, string? reason)
@@ -161,8 +168,14 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
             ValidateActorType(ownerType);
 
-            var result = (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId, changeAmount });
-            return Task.FromResult(result);
+            async UniTask<decimal> UpdateBalance()
+            {
+                await UniTask.SwitchToMainThread();
+
+                return (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId, changeAmount });
+            }
+
+            return UpdateBalance().AsTask();
         }
 
         public Task SetBalanceAsync(string ownerId, string ownerType, decimal balance)
@@ -174,9 +187,16 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
             ValidateActorType(ownerType);
 
-            var currentBalance = (decimal)m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId });
-            var result = (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId, balance - currentBalance });
-            return Task.FromResult(result);
+            async UniTask<decimal> SetBalance()
+            {
+                await UniTask.SwitchToMainThread();
+
+                var currentBalance = (decimal)m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId });
+
+                return (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId, balance - currentBalance });
+            }
+
+            return SetBalance().AsTask();
         }
 
         private void ValidateActorType(string ownerType)

@@ -27,14 +27,21 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         /// Sets the quality of the item.
         /// </summary>
         /// <param name="quality">The quality to set to.</param>
-        /// <exception cref="ArgumentException">Thrown when the quality is invalid, e.g. non-positive or larger than the maxmimum quality allowed by the game.</exception>
+        /// <exception cref="ArgumentException">Thrown when the quality is invalid, e.g. non-positive or larger than the maximum quality allowed by the game.</exception>
         Task SetItemQualityAsync(double quality);
 
         /// <summary>
         /// Sets the amount of the item.
         /// </summary>
         /// <param name="amount">The amount to set to.</param>
-        /// <exception cref="ArgumentException">Thrown when the amount is invalid, e.g. non-positive or larger than the maxmimum amount allowed by the game.</exception>
+        /// <exception cref="ArgumentException">Thrown when the amount is invalid, e.g. non-positive or larger than the maximum amount allowed by the game.</exception>
         Task SetItemAmountAsync(double amount);
+
+        /// <summary>
+        /// Sets the durability of the item.
+        /// </summary>
+        /// <param name="durability">The amount to set to.</param>
+        /// <exception cref="ArgumentException">Thrown when the durability is invalid, e.g. non-positive or larger than the maximum durability allowed by the game.</exception>
+        Task SetItemDurabilityAsync(double durability);
     }
 }

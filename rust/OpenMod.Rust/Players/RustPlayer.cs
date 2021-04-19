@@ -1,14 +1,14 @@
-﻿using System;
-using System.Net;
-using System.Numerics;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Items;
 using OpenMod.Extensions.Games.Abstractions.Players;
 using OpenMod.Rust.Entities;
 using OpenMod.Rust.Items;
 using OpenMod.UnityEngine.Extensions;
+using System;
+using System.Net;
+using System.Numerics;
+using System.Threading.Tasks;
 using IHasInventory = OpenMod.Extensions.Games.Abstractions.Items.IHasInventory;
 
 namespace OpenMod.Rust.Players
@@ -43,7 +43,7 @@ namespace OpenMod.Rust.Players
             return ReferenceEquals(this, other) ? 0 : string.Compare(EntityInstanceId, other.EntityInstanceId, StringComparison.Ordinal);
         }
 
-        protected override bool DoTeleport(Vector3 destination, Vector3 rotation)
+        protected override bool DoTeleport(Vector3 destination, Quaternion rotation)
         {
             if (Player.IsSpectating())
             {

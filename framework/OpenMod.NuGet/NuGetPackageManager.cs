@@ -40,9 +40,7 @@ namespace OpenMod.NuGet
             // Trademark violations
             "VaultPlugin",
             "F.AntiCosmetics",
-            "F.ItemRestrictions",
-            "F.RustResources",
-            "F.Announcer"
+            "F.ItemRestrictions"
         };
 
         private static readonly string[] s_PublisherBlacklist =
@@ -784,6 +782,9 @@ namespace OpenMod.NuGet
                     .OrderByDescending(d => d.Version);
 
             var result = (Assembly?)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
+
+            result ??= Hotloader.GetAssembly(args.Name);
+
             if (result != null)
             {
                 m_ResolveCache.Add(name, result);

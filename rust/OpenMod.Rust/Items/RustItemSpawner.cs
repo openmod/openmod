@@ -1,13 +1,13 @@
-using System;
-using System.Numerics;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Extensions.Games.Abstractions.Items;
 using OpenMod.UnityEngine.Extensions;
-using UnityVector3 = UnityEngine.Vector3;
+using System;
+using System.Numerics;
+using System.Threading.Tasks;
 using UnityQuaternion = UnityEngine.Quaternion;
+using UnityVector3 = UnityEngine.Vector3;
 
 namespace OpenMod.Rust.Items
 {
@@ -24,7 +24,7 @@ namespace OpenMod.Rust.Items
 
                 if (inventory is RustPlayerInventory playerInventory)
                 {
-                    var item = CreateItem(itemId, state);
+                    var item = await CreateItem(itemId, state);
                     if (item == null)
                     {
                         return null;
@@ -48,7 +48,7 @@ namespace OpenMod.Rust.Items
             {
                 await UniTask.SwitchToMainThread();
 
-                var item = CreateItem(itemId, state);
+                var item = await CreateItem(itemId, state);
                 if (item == null)
                 {
                     return null;
@@ -81,12 +81,14 @@ namespace OpenMod.Rust.Items
             }
         }
 
-        private RustItem? CreateItem(string itemId, IItemState? state)
+        private async UniTask<RustItem?> CreateItem(string itemId, IItemState? state)
         {
             if (!int.TryParse(itemId, out var parsedItemId))
             {
                 throw new ArgumentException($"Invalid Item ID: {itemId}", nameof(itemId));
             }
+
+            await UniTask.SwitchToMainThread();
 
             var item = ItemManager.CreateByItemID(parsedItemId);
             if (item == null)
@@ -97,9 +99,9 @@ namespace OpenMod.Rust.Items
             var rustItem = new RustItem(item);
             if (state != null && !(state is NullItemState))
             {
-                rustItem.SetItemAmountAsync(state.ItemAmount);
-                rustItem.SetItemQualityAsync(state.ItemQuality);
-                rustItem.Item.maxCondition = (float) state.ItemDurability;
+                await rustItem.SetItemAmountAsync(state.ItemAmount);
+                await rustItem.SetItemQualityAsync(state.ItemQuality);
+                await rustItem.SetItemDurabilityAsync(state.ItemDurability);
             }
 
             return rustItem;
