@@ -1,4 +1,10 @@
-﻿using Autofac;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using Autofac;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,12 +22,6 @@ using OpenMod.Core.Plugins;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.Core.Prioritization;
 using OpenMod.NuGet;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -121,16 +121,17 @@ namespace OpenMod.Runtime
                     var packagesContent = await reader.ReadToEndAsync();
 
                     var deserialized = deserializer.Deserialize<SerializedPackagesFile>(packagesContent).Packages;
-                    
+
                     var packages = deserialized?.Select(d => new PackageIdentity(d.Id,
-                        d.Version.Equals("latest", StringComparison.OrdinalIgnoreCase)
-                            ? null
-                            : new NuGetVersion(d.Version)))
+                            d.Version.Equals("latest", StringComparison.OrdinalIgnoreCase)
+                                ? null
+                                : new NuGetVersion(d.Version)))
                         .ToList();
 
                     if (packages == null || packages.Count == 0) continue;
 
-                    m_Logger.LogInformation($"Found and installing embedded NuGet packages for plugin assembly: {assembly.GetName().Name}");
+                    m_Logger.LogInformation(
+                        $"Found and installing embedded NuGet packages for plugin assembly: {assembly.GetName().Name}");
 
                     await m_NuGetPackageManager.InstallPackagesAsync(packages);
                 }
@@ -172,7 +173,8 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError("Failed to configure configuration from: " + configurationConfiguratorType.FullName, ex);
+                    m_Logger.LogError(ex,
+                        $"Failed to configure configuration from: {configurationConfiguratorType.FullName}");
                 }
             }
         }
@@ -191,7 +193,6 @@ namespace OpenMod.Runtime
 
             foreach (var containerConfiguratorType in containerConfiguratorTypes)
             {
-
                 try
                 {
                     var instance = (IContainerConfigurator)Activator.CreateInstance(containerConfiguratorType);
@@ -199,7 +200,7 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError("Failed to configure container from: " + containerConfiguratorType.FullName, ex);
+                    m_Logger.LogError(ex, $"Failed to configure container from: {containerConfiguratorType.FullName}");
                 }
             }
         }
@@ -214,7 +215,7 @@ namespace OpenMod.Runtime
             foreach (var source in sortedSources)
             {
                 var lifetime = source.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Lifetime ??
-                               ServiceLifetime.Singleton;
+                               ServiceLifetime.Transient;
                 serviceCollection.Add(new ServiceDescriptor(source.GetType(), source.GetType(), lifetime));
             }
 
@@ -232,7 +233,7 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError("Failed to configure services from: " + serviceConfiguratorType.FullName, ex);
+                    m_Logger.LogError(ex, $"Failed to configure services from: {serviceConfiguratorType.FullName}");
                 }
             }
 
