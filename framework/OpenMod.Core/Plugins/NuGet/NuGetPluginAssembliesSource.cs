@@ -4,15 +4,19 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using OpenMod.API;
+using OpenMod.API.Ioc;
 using OpenMod.API.Plugins;
+using OpenMod.API.Prioritization;
 using OpenMod.NuGet;
 
 namespace OpenMod.Core.Plugins.NuGet
 {
     [OpenModInternal]
+    [ServiceImplementation(Priority = Priority.Normal, Lifetime = ServiceLifetime.Singleton)]
     public class NuGetPluginAssembliesSource : IPluginAssembliesSource, IDisposable
     {
         private readonly NuGetPackageManager m_NuGetPackageManager;
@@ -45,13 +49,15 @@ namespace OpenMod.Core.Plugins.NuGet
             return assemblies;
         }
 
-        public async Task<NuGetInstallResult> InstallPackageAsync(string packageName, string? version = null, bool isPreRelease = false)
+        public async Task<NuGetInstallResult> InstallPackageAsync(string packageName, string? version = null,
+            bool isPreRelease = false)
         {
             var exists = await m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
             return await InstallOrUpdateAsync(packageName, version, isPreRelease, exists);
         }
 
-        public Task<NuGetInstallResult> UpdatePackageAsync(string packageName, string? version = null, bool isPreRelease = false)
+        public Task<NuGetInstallResult> UpdatePackageAsync(string packageName, string? version = null,
+            bool isPreRelease = false)
         {
             return InstallOrUpdateAsync(packageName, version, isPreRelease, true);
         }
@@ -72,7 +78,8 @@ namespace OpenMod.Core.Plugins.NuGet
             return m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
         }
 
-        private async Task<NuGetInstallResult> InstallOrUpdateAsync(string packageName, string? version = null, bool isPreRelease = false, bool isUpdate = false)
+        private async Task<NuGetInstallResult> InstallOrUpdateAsync(string packageName, string? version = null,
+            bool isPreRelease = false, bool isUpdate = false)
         {
             if (string.IsNullOrEmpty(packageName))
             {
