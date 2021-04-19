@@ -129,7 +129,8 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError("Failed to configure configuration from: " + configurationConfiguratorType.FullName, ex);
+                    m_Logger.LogError(ex,
+                        $"Failed to configure configuration from: {configurationConfiguratorType.FullName}");
                 }
             }
         }
@@ -148,7 +149,6 @@ namespace OpenMod.Runtime
 
             foreach (var containerConfiguratorType in containerConfiguratorTypes)
             {
-
                 try
                 {
                     var instance = (IContainerConfigurator)Activator.CreateInstance(containerConfiguratorType);
@@ -156,7 +156,7 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError("Failed to configure container from: " + containerConfiguratorType.FullName, ex);
+                    m_Logger.LogError(ex, $"Failed to configure container from: {containerConfiguratorType.FullName}");
                 }
             }
         }
@@ -189,7 +189,7 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError("Failed to configure services from: " + serviceConfiguratorType.FullName, ex);
+                    m_Logger.LogError(ex, $"Failed to configure services from: {serviceConfiguratorType.FullName}");
                 }
             }
 
