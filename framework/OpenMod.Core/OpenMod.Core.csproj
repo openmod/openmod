@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+  	<PackageReference Include="Contrib.Bcl.Ranges" Version="1.0.0" />
   	<PackageReference Include="Cronos" Version="0.7.0" />
   	<PackageReference Include="DotNet.Glob" Version="3.1.2" />
   	<PackageReference Include="Fody" Version="6.3.0">
