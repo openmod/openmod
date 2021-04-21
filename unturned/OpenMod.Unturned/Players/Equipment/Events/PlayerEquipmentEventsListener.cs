@@ -42,17 +42,26 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         private void Events_OnItemEquipped(Player nativePlayer)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
-            
+
             var page = nativePlayer.equipment.equippedPage;
 
             var index = nativePlayer.inventory.getIndex(page,
                 nativePlayer.equipment.equipped_x, nativePlayer.equipment.equipped_y);
+            if (index == byte.MaxValue)
+            {
+                return;
+            }
+
+            var item = nativePlayer.inventory.getItem(page, index);
+            if (item == null)
+            {
+                return;
+            }
 
             var inventoryItem =
-                new UnturnedInventoryItem(player.Inventory, nativePlayer.inventory.getItem(page, index));
+                new UnturnedInventoryItem(player!.Inventory, item);
 
             var @event = new UnturnedPlayerItemEquippedEvent(player, inventoryItem.Item);
-
             Emit(@event);
         }
 
@@ -68,7 +77,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         private void OnEquipRequested(PlayerEquipment equipment, ItemJar jar, ItemAsset asset, ref bool shouldAllow)
         {
             var player = GetUnturnedPlayer(equipment.player)!;
-            
+
             var inventoryItem = new UnturnedInventoryItem(player.Inventory, jar);
 
             var @event = new UnturnedPlayerItemEquippingEvent(player, inventoryItem.Item)
@@ -109,9 +118,11 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         }
 
         private delegate void ItemEquipped(Player player);
+
         private static event ItemEquipped? OnItemEquipped;
 
         private delegate void ItemUnequipped(Player player);
+
         private static event ItemUnequipped? OnItemUnequipped;
 
         [UsedImplicitly]
