@@ -159,7 +159,7 @@ namespace OpenMod.Unturned.RocketMod
                 return;
             }
 
-            m_Logger.LogInformation("RocketMod is installed, enabling RocketMod integration.");
+            m_Logger.LogInformation("RocketMod is installed, enabling RocketMod integration");
 
             m_HarmonyInstance = new Harmony(c_HarmonyId);
             m_HarmonyInstance.PatchAllConditional(typeof(OpenModUnturnedHost).Assembly, "rocketmod");
@@ -223,20 +223,21 @@ namespace OpenMod.Unturned.RocketMod
 
         private void OnRocketLog(LogLevel level, string message, Exception? ex)
         {
+            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
             m_RocketModLogger.Log(level, ex, message);
         }
 
         private void OnRocketModIntialized()
         {
             AsyncHelper.RunSync(async () => await m_EventBus.EmitAsync(m_RocketModComponent, this, new RocketModInitializedEvent()));
-            m_Logger.LogInformation("RocketMod is ready.");
+            m_Logger.LogInformation("RocketMod is ready");
             s_IsReady = true;
         }
 
         private void OnRocketModPluginsLoaded()
         {
             AsyncHelper.RunSync(async () => await m_EventBus.EmitAsync(m_RocketModComponent, this, new RocketModPluginsLoadedEvent()));
-            m_Logger.LogInformation("RocketMod plugins have been loaded.");
+            m_Logger.LogInformation("RocketMod plugins have been loaded");
         }
 
         /// <summary>

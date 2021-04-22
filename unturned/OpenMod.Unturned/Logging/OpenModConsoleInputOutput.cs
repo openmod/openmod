@@ -48,7 +48,7 @@ namespace OpenMod.Unturned.Logging
             System.Console.InputEncoding = encoding;
 
             m_PreviousConsoleIn = System.Console.In;
-            
+
             var enableHistory = m_Configuration.GetSection("console:history").Get<bool>();
             var enableAutoComplete = m_Configuration.GetSection("console:autocomplete").Get<bool>();
 
@@ -107,7 +107,7 @@ namespace OpenMod.Unturned.Logging
                         if (!string.IsNullOrWhiteSpace(command))
                         {
                             // Enqueue command because inputCommitted is expected on main thread/
-                            m_CommandQueue.Enqueue(command); 
+                            m_CommandQueue.Enqueue(command);
                         }
                     }
                 }
@@ -122,16 +122,19 @@ namespace OpenMod.Unturned.Logging
 
         public void outputInformation(string information)
         {
+            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
             m_Logger.LogInformation(information);
         }
 
         public void outputWarning(string warning)
         {
+            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
             m_Logger.LogWarning(warning);
         }
 
         public void outputError(string error)
         {
+            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
             m_Logger.LogError(error);
         }
     }

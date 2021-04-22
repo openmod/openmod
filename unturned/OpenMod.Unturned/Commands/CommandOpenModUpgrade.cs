@@ -93,7 +93,7 @@ namespace OpenMod.Unturned.Commands
                 var ident = await m_PackageManager.QueryPackageExactAsync(assembly.GetName().Name, null, isPre);
                 if (ident == null)
                 {
-                    m_Logger.LogWarning($"No package found for assembly: {assembly.FullName}");
+                    m_Logger.LogWarning("No package found for assembly: {AssemblyName}", assembly.FullName);
                     continue;
                 }
 

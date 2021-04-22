@@ -31,8 +31,8 @@ namespace OpenMod.Core.Permissions
 
         public PermissionRolesDataStore(
             ILogger<PermissionRolesDataStore> logger,
-            IOpenModDataStoreAccessor dataStoreAccessor, 
-            IRuntime runtime) 
+            IOpenModDataStoreAccessor dataStoreAccessor,
+            IRuntime runtime)
         {
             m_DataStore = dataStoreAccessor.DataStore;
             m_Logger = logger;
@@ -151,7 +151,7 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task ReloadAsync()
         {
-            m_Logger.LogInformation("Permissions have been reloaded.");
+            m_Logger.LogInformation("Permissions have been reloaded");
             m_CachedPermissionRolesData = await m_DataStore.LoadAsync<PermissionRolesData>(RolesKey) ?? new PermissionRolesData();
         }
 

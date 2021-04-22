@@ -68,7 +68,7 @@ namespace OpenMod.Runtime
             var assemblyName = assembly.GetName();
             if (m_RegisteredAssemblies.Contains(assembly.GetName()))
             {
-                m_Logger.LogDebug("Skipping already registered assembly: " + assemblyName);
+                m_Logger.LogDebug("Skipping already registered assembly: {AssemblyName}", assemblyName);
                 return;
             }
 
@@ -93,10 +93,10 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, $"Failed to copy resources from assembly: {assembly}");
+                    m_Logger.LogError(ex, "Failed to copy resources from assembly: {Assembly}", assembly);
                 }
             }
-            
+
             foreach (var assembly in assemblies)
             {
                 // Auto register services with [Service] and [ServiceImplementation] attributes
@@ -106,7 +106,7 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, $"Failed to load services from assembly: {assembly}");
+                    m_Logger.LogError(ex, "Failed to load services from assembly: {Assembly}", assembly);
                 }
             }
 
@@ -129,8 +129,8 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex,
-                        $"Failed to configure configuration from: {configurationConfiguratorType.FullName}");
+                    m_Logger.LogError(ex, "Failed to configure configuration from: {ConfiguratorType}",
+                        configurationConfiguratorType.FullName);
                 }
             }
         }
@@ -156,7 +156,8 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, $"Failed to configure container from: {containerConfiguratorType.FullName}");
+                    m_Logger.LogError(ex, "Failed to configure container from: {ConfiguratorType}",
+                        containerConfiguratorType.FullName);
                 }
             }
         }
@@ -189,7 +190,8 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, $"Failed to configure services from: {serviceConfiguratorType.FullName}");
+                    m_Logger.LogError(ex, "Failed to configure services from: {ConfiguratorType}",
+                        serviceConfiguratorType.FullName);
                 }
             }
 

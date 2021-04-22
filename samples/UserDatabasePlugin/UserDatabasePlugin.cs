@@ -7,9 +7,9 @@ using OpenMod.Core.Plugins;
 using OpenMod.EntityFrameworkCore.Extensions;
 using UserDatabasePlugin.Database;
 
-[assembly: PluginMetadata("UserDatabasePlugin", 
-    Author = "OpenMod", 
-    DisplayName = "User Database Plugin", 
+[assembly: PluginMetadata("UserDatabasePlugin",
+    Author = "OpenMod",
+    DisplayName = "User Database Plugin",
     Website = "https://github.com/openmod/openmod/tree/main/samples/UserDatabasePlugin")]
 
 namespace UserDatabasePlugin
@@ -35,7 +35,7 @@ namespace UserDatabasePlugin
         {
             await m_DbContext.OpenModMigrateAsync();
 
-            m_Logger.LogInformation("UserDatabase has been loaded.");
+            m_Logger.LogInformation("UserDatabase has been loaded");
 
             // this is actually just a silly demo for permission registrations
             // the full permission which the user will see and manage will be "UserDatabasePlugin:anonymous" because RegisterPermission prefixes it with plugin ID

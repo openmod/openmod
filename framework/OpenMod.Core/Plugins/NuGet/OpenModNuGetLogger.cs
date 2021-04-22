@@ -35,6 +35,7 @@ namespace OpenMod.Core.Plugins.NuGet
 
             switch (level)
             {
+                // ReSharper disable TemplateIsNotCompileTimeConstantProblem
                 case LogLevel.Debug:
                     m_Logger.LogDebug(text);
                     break;
@@ -53,6 +54,7 @@ namespace OpenMod.Core.Plugins.NuGet
                 case LogLevel.Error:
                     m_Logger.LogError(text);
                     break;
+                // ReSharper restore TemplateIsNotCompileTimeConstantProblem
                 default:
                     throw new ArgumentOutOfRangeException(nameof(level), level, null);
             }

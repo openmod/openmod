@@ -103,7 +103,7 @@ namespace OpenMod.Unturned.RocketMod
                 else
                 {
                     var logger = m_LoggerFactory.CreateLogger<RocketModIntegration>();
-                    logger.LogWarning("Economy system was set to OpenMod_Uconomy but Uconomy is not loaded. Defaulting to Separate.");
+                    logger.LogWarning("Economy system was set to OpenMod_Uconomy but Uconomy is not loaded. Defaulting to Separate");
                 }
             }
 

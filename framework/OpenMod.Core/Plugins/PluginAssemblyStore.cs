@@ -8,7 +8,6 @@ using OpenMod.NuGet;
 using Semver;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -81,7 +80,9 @@ namespace OpenMod.Core.Plugins
 
                 if (packages == null || packages.Count == 0) return newPlugins;
 
-                m_Logger.LogInformation($"Found and installing embedded NuGet packages for plugin assembly: {assembly.GetName().Name}");
+                m_Logger.LogInformation(
+                    "Found and installing embedded NuGet packages for plugin assembly: {AssemblyName}",
+                    assembly.GetName().Name);
 
                 var existingPackages = m_NuGetPackageManager.GetLoadedAssemblies();
 
@@ -105,7 +106,8 @@ namespace OpenMod.Core.Plugins
             catch (Exception ex)
             {
                 newPlugins.Clear();
-                m_Logger.LogError(ex, $"Failed to check/load embedded NuGet packages for assembly: {assembly}");
+                m_Logger.LogError(ex, "Failed to check/load embedded NuGet packages for assembly: {Assembly}",
+                    assembly);
             }
 
             return newPlugins;
@@ -125,7 +127,9 @@ namespace OpenMod.Core.Plugins
                 var pluginMetadata = providerAssembly.GetCustomAttribute<PluginMetadataAttribute>();
                 if (pluginMetadata == null)
                 {
-                    m_Logger.LogWarning($"No plugin metadata attribute found in assembly: {providerAssembly}; skipping loading of this assembly as plugin");
+                    m_Logger.LogWarning(
+                        "No plugin metadata attribute found in assembly: {ProviderAssembly}; skipping loading of this assembly as plugin",
+                        providerAssembly);
                     providerAssemblies.Remove(providerAssembly);
                     continue;
                 }
@@ -148,7 +152,9 @@ namespace OpenMod.Core.Plugins
                     var missingAssemblies = CheckRequiredDependencies(ex.LoaderExceptions);
                     if (!TryInstallMissingDependencies)
                     {
-                        m_Logger.LogWarning($"Couldn't load plugin from {providerAssembly}: Failed to resolve required dependencies: {string.Join(", ", missingAssemblies.Keys)}", Color.DarkRed);
+                        m_Logger.LogWarning(
+                            "Couldn't load plugin from {ProviderAssembly}: Failed to resolve required dependencies: {MissingAssemblies}",
+                            providerAssembly, string.Join(", ", missingAssemblies.Keys));
                         continue;
                     }
 
@@ -161,7 +167,9 @@ namespace OpenMod.Core.Plugins
                     continue;
                 }
 
-                m_Logger.LogWarning($"No {nameof(IOpenModPlugin)} implementation found in assembly: {providerAssembly}; skipping loading of this assembly as plugin");
+                m_Logger.LogWarning(
+                    "No {PluginInterfaceName} implementation found in assembly: {ProviderAssembly}; skipping loading of this assembly as plugin",
+                    nameof(IOpenModPlugin), providerAssembly);
                 providerAssemblies.Remove(providerAssembly);
             }
 
@@ -226,14 +234,16 @@ namespace OpenMod.Core.Plugins
                         continue;
                     }
 
-                    m_Logger.LogWarning($"Failed to install \"{assembly.Key}\": {result.Code}", Color.DarkRed);
+                    m_Logger.LogWarning("Failed to install \"{AssemblyName}\": {ResultCode}",
+                        assembly.Key, result.Code);
                 }
                 else
                 {
-                    m_Logger.LogWarning($"Package not found: {assembly.Key}", Color.DarkRed);
+                    m_Logger.LogWarning("Package not found: {AssemblyName}", assembly.Key);
                 }
 
-                m_Logger.LogWarning($"Plugin \"{providerAssembly.GetName().Name}\" can't load without it!", Color.DarkRed);
+                m_Logger.LogWarning("Plugin \"{ProviderAssemblyName}\" can't load without it!",
+                    providerAssembly.GetName().Name);
                 return;
             }
         }

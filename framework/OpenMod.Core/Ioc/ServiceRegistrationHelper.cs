@@ -23,7 +23,7 @@ namespace OpenMod.Core.Ioc
             }
             catch (ReflectionTypeLoadException ex) //this ignores missing optional dependencies
             {
-                logger?.LogTrace(ex, $"Some optional dependencies are missing for \"{assembly}\"");
+                logger?.LogTrace(ex, "Some optional dependencies are missing for \"{Assembly}\"", assembly);
                 if (ex.LoaderExceptions != null && ex.LoaderExceptions.Length > 0)
                 {
                     foreach (var loaderException in ex.LoaderExceptions)
@@ -57,14 +57,17 @@ namespace OpenMod.Core.Ioc
                     if (interfaces.Length == 0)
                     {
                         logger?.LogWarning(
-                            $"Type {type.FullName} in assembly {assembly.FullName} has been marked as ServiceImplementation but does not inherit any services!\nDid you forget to add [Service] to your interfaces?");
+                            "Type {TypeName} in assembly {AssemblyName} has been marked as ServiceImplementation but does not inherit any services!\nDid you forget to add [Service] to your interfaces?",
+                            type.FullName, assembly.FullName);
                         continue;
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    logger?.LogWarning($"FindFromAssembly has failed for type: {type.FullName} while searching for {typeof(T).FullName}", ex);
+                    logger?.LogWarning(ex,
+                        "FindFromAssembly has failed for type: {TypeName} while searching for {SearchTypeName}",
+                        type.FullName, typeof(T).FullName);
                     continue;
                 }
 

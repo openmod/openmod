@@ -174,7 +174,8 @@ namespace OpenMod.Unturned
 
             Dedicator.commandWindow.addIOHandler(m_OpenModIoHandler);
 
-            m_Logger.LogInformation($"OpenMod for Unturned v{m_HostInformation.HostVersion} is initializing...");
+            m_Logger.LogInformation("OpenMod for Unturned v{HostVersion} is initializing...",
+                m_HostInformation.HostVersion);
 
             TlsWorkaround.Install();
 
@@ -194,7 +195,7 @@ namespace OpenMod.Unturned
                 s_UniTaskInited = true;
             }
 
-            m_Logger.LogInformation("OpenMod for Unturned is ready.");
+            m_Logger.LogInformation("OpenMod for Unturned is ready");
 
             return Task.CompletedTask;
             // ReSharper restore PossibleNullReferenceException

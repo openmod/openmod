@@ -107,7 +107,7 @@ namespace OpenMod.Core.Rcon.Source
                     break;
 
                 default:
-                    m_Logger.LogDebug($"Received unknown packet: {packet.Type}");
+                    m_Logger.LogDebug("Received unknown packet: {PacketType}", packet.Type);
                     break;
             }
         }

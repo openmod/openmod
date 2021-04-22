@@ -41,7 +41,7 @@ namespace OpenMod.Core.Jobs
                     continue;
                 }
 
-                m_Logger.LogInformation($"[{task.JobName}] Running system command: {command!}");
+                m_Logger.LogInformation("[{JobName}] Running system command: {Command}", task.JobName, command!);
                 var args = ArgumentsParser.ParseArguments(command!);
                 var startInfo = new ProcessStartInfo(args[0], command!.Replace(args[0] + " ", string.Empty))
                 {

@@ -89,7 +89,7 @@ namespace OpenMod.Unturned
                     else
                     {
                         var logger = openModStartupContext.LoggerFactory.CreateLogger<RocketModIntegration>();
-                        logger.LogWarning("Economy system was set to RocketMod_Uconomy but Uconomy is not installed. Defaulting to Separate.");
+                        logger.LogWarning("Economy system was set to RocketMod_Uconomy but Uconomy is not installed. Defaulting to Separate");
                     }
                 }
             }

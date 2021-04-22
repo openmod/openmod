@@ -131,7 +131,7 @@ namespace OpenMod.Runtime
 
                 SetupSerilog();
 
-                m_Logger.LogInformation($"OpenMod v{Version} is starting...");
+                m_Logger.LogInformation("OpenMod v{Version} is starting...", Version);
 
                 if (parameters.PackageManager is not NuGetPackageManager nugetPackageManager)
                 {
@@ -187,7 +187,9 @@ namespace OpenMod.Runtime
                                 hotReloadingEnabled = parsed;
                                 break;
                             default:
-                                m_Logger.LogWarning("Unknown config for 'hotreloading' in OpenMod configuration: " + unparsed);
+                                m_Logger.LogWarning(
+                                    "Unknown config for 'hotreloading' in OpenMod configuration: {UnparsedConfig}",
+                                    unparsed);
                                 break;
                         }
                     }
@@ -207,7 +209,9 @@ namespace OpenMod.Runtime
                                     tryInstallMissingDependencies = parsed;
                                     break;
                                 default:
-                                    m_Logger.LogWarning("Unknown config for 'tryAutoInstallMissingDependencies' in OpenMod configuration: " + unparsed);
+                                    m_Logger.LogWarning(
+                                        "Unknown config for 'tryAutoInstallMissingDependencies' in OpenMod configuration: {UnparsedConfig}",
+                                        unparsed);
                                     break;
                             }
                         }
@@ -268,7 +272,7 @@ namespace OpenMod.Runtime
                 catch (Exception ex)
                 {
                     Status = RuntimeStatus.Crashed;
-                    m_Logger.LogCritical(ex, "OpenMod has crashed.");
+                    m_Logger.LogCritical(ex, "OpenMod has crashed");
                     Log.CloseAndFlush();
                 }
 

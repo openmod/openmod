@@ -31,9 +31,9 @@ namespace OpenMod.Core.Ioc.Extensions
             return registrationBuilder;
         }
 
-        public static ContainerBuilder PopulateServices(this ContainerBuilder containerBuilder, 
-            ServiceCollection serviceCollection, 
-            Func<ServiceDescriptor, bool>? serviceFilter = null, 
+        public static ContainerBuilder PopulateServices(this ContainerBuilder containerBuilder,
+            ServiceCollection serviceCollection,
+            Func<ServiceDescriptor, bool>? serviceFilter = null,
             bool replaceServices = false,
             bool autowire = true)
         {
@@ -52,7 +52,8 @@ namespace OpenMod.Core.Ioc.Extensions
 
                 if (descriptor.ImplementationType != null)
                 {
-                    Log.Information($"Descriptor: impl {descriptor.ServiceType}, {descriptor.ImplementationType}");
+                    Log.Information("Descriptor: impl {ServiceType}, {ImplementationType}",
+                        descriptor.ServiceType, descriptor.ImplementationType);
 
                     // Test if the an open generic type is being registered
                     var serviceTypeInfo = descriptor.ServiceType.GetTypeInfo();
@@ -105,7 +106,8 @@ namespace OpenMod.Core.Ioc.Extensions
                 }
                 else
                 {
-                    Log.Information($"Descriptor: instance {descriptor.ServiceType}, {descriptor.ImplementationInstance.GetType()}");
+                    Log.Information("Descriptor: instance {ServiceType}, {ImplementationType}",
+                        descriptor.ServiceType, descriptor.ImplementationInstance.GetType());
                     var registrator = containerBuilder
                         .RegisterInstance(descriptor.ImplementationInstance)
                         .As(descriptor.ServiceType)
