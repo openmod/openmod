@@ -122,7 +122,7 @@ namespace OpenMod.Core.Commands
             m_Cache = await LoadCommandsFromDisk();
             m_ChangeWatcher = m_DataStore.AddChangeWatcher(CommandsKey, m_Runtime, () =>
             {
-                m_Logger.LogInformation("Commands have been reloaded.");
+                m_Logger.LogInformation("Commands have been reloaded");
                 m_Cache = AsyncHelper.RunSync(async () =>
                 {
                     var result = await LoadCommandsFromDisk();

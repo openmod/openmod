@@ -59,13 +59,14 @@ namespace OpenMod.Core.Eventing
 
             if (!component.IsComponentAlive)
             {
-                m_Logger.LogDebug($"{component.OpenModComponentId} tried to subscribe a callback but the component is not alive.");
+                m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
+                    component.OpenModComponentId);
                 return NullDisposable.Instance;
             }
 
             var attribute = GetEventListenerAttribute(callback.Method);
             var subscription = new EventSubscription(component, callback.Invoke, attribute, eventName, component.LifetimeScope.BeginLifetimeScopeEx());
-            
+
             m_EventSubscriptions.Add(subscription);
             return new DisposeAction(() =>
             {
@@ -87,7 +88,8 @@ namespace OpenMod.Core.Eventing
 
             if (!component.IsComponentAlive)
             {
-                m_Logger.LogDebug($"{component.OpenModComponentId} tried to subscribe a callback but the component is not alive.");
+                m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
+                    component.OpenModComponentId);
                 return NullDisposable.Instance;
             }
 
@@ -118,7 +120,8 @@ namespace OpenMod.Core.Eventing
 
             if (!component.IsComponentAlive)
             {
-                m_Logger.LogDebug($"{component.OpenModComponentId} tried to subscribe a callback but the component is not alive.");
+                m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
+                    component.OpenModComponentId);
                 return NullDisposable.Instance;
             }
 
@@ -149,11 +152,13 @@ namespace OpenMod.Core.Eventing
 
             if (!component.IsComponentAlive)
             {
-                m_Logger.LogDebug($"{component.OpenModComponentId} tried to subscribe \"{assembly.FullName}\" but the component is not alive.");
+                m_Logger.LogDebug("{ComponentId} tried to subscribe \"{AsemblyName}\" but the component is not alive",
+                    component.OpenModComponentId, assembly.FullName);
                 return NullDisposable.Instance;
             }
 
-            m_Logger.LogDebug($"Subscribing assembly \"{assembly.FullName}\" for {component.OpenModComponentId}.");
+            m_Logger.LogDebug("Subscribing assembly \"{AssemblyName}\" for {ComponentId}",
+                assembly.FullName, component.OpenModComponentId);
 
             List<(Type eventListenerType, MethodInfo method, EventListenerAttribute eventListenerAttribute, Type eventType)> eventListeners = new List<(Type, MethodInfo, EventListenerAttribute, Type)>();
             var scope = component.LifetimeScope.BeginLifetimeScopeEx((builder =>
@@ -268,7 +273,8 @@ namespace OpenMod.Core.Eventing
 
             if (!component.IsComponentAlive)
             {
-                m_Logger.LogDebug($"EmitAsync called by {component.OpenModComponentId} for {@event.GetType().Name} but the component is not alive.");
+                m_Logger.LogDebug("EmitAsync called by {ComponentId} for {EventType} but the component is not alive",
+                    component.OpenModComponentId, @event.GetType().Name);
                 return;
             }
 
@@ -287,7 +293,7 @@ namespace OpenMod.Core.Eventing
             {
                 string eventName = GetEventName(eventType);
 
-                m_Logger.LogTrace($"Emitting event: {eventName}");
+                m_Logger.LogTrace("Emitting event: {EventName}", eventName);
                 var eventSubscriptions
                     = m_EventSubscriptions
                         .Where(c => (c.EventType != null && c.EventType == eventType)
@@ -298,7 +304,7 @@ namespace OpenMod.Core.Eventing
 
                 if (eventSubscriptions.Count == 0)
                 {
-                    m_Logger.LogTrace($"No event subscriptions found for: {eventName}");
+                    m_Logger.LogTrace("No event subscriptions found for: {EventName}", eventName);
                     continue;
                 }
 
@@ -353,18 +359,19 @@ namespace OpenMod.Core.Eventing
                                 {
                                     cancellableEvent.IsCancelled = wasCancelled;
                                     m_Logger.LogWarning(
-                                        $"{((IOpenModComponent)@subscription.Owner.Target).OpenModComponentId} changed {@eventName} cancellation status with Monitor priority which is not permitted.");
+                                        "{ComponentId} changed {EventName} cancellation status with Monitor priority which is not permitted",
+                                        ((IOpenModComponent) @subscription.Owner.Target).OpenModComponentId, eventName);
                                 }
                             }
                         }
                         catch (Exception ex)
                         {
-                            m_Logger.LogError(ex, $"Exception occured during event {@eventName}");
+                            m_Logger.LogError(ex, "Exception occured during event {EventName}", eventName);
                         }
                     }
                 }
 
-                m_Logger.LogTrace($"{eventName}: Finished.");
+                m_Logger.LogTrace("{EventName}: Finished", eventName);
             }
 
             callback?.Invoke(@event);

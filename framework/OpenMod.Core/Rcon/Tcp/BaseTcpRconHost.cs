@@ -62,7 +62,8 @@ namespace OpenMod.Core.Rcon.Tcp
                 try
                 {
                     m_Listener.Start();
-                    m_Logger.LogInformation($"{GetType().Name} started listening on {Bind.Address}:{Bind.Port}.");
+                    m_Logger.LogInformation("{Type} started listening on {IPAddress}:{Port}",
+                        GetType().Name, Bind.Address, Bind.Port);
 
                     while (true)
                     {
@@ -150,7 +151,7 @@ namespace OpenMod.Core.Rcon.Tcp
                     m_IsStopped = true;
                 }
 
-                m_Logger.LogInformation($"{GetType().Name} stopped.");
+                m_Logger.LogInformation("{Type} stopped", GetType().Name);
             }, cancellationToken);
 
             m_ListenerTask = task;

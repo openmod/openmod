@@ -95,12 +95,13 @@ namespace OpenMod.EntityFrameworkCore
             if (string.IsNullOrEmpty(TablePrefix))
             {
                 return;
-            } 
+            }
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 var name = TablePrefix + entityType.GetTableName();
-                m_Logger.LogDebug($"Applying table name convention: {entityType.GetTableName()} -> {name}");
+                m_Logger.LogDebug("Applying table name convention: {TableName} -> {NewTableName}",
+                    entityType.GetTableName(), name);
                 entityType.SetTableName(name);
             }
         }

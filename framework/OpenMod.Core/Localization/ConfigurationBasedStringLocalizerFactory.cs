@@ -37,7 +37,7 @@ namespace OpenMod.Core.Localization
             var reloadToken = translations.GetReloadToken();
             reloadToken.RegisterChangeCallback(_ =>
             {
-                m_Logger.LogInformation($"Reloading translations: {Path.Combine(location, baseName + ".yaml")}");
+                m_Logger.LogInformation("Reloading translations: {Path}", Path.Combine(location, baseName + ".yaml"));
             }, null);
 
             return new ConfigurationBasedStringLocalizer(translations);

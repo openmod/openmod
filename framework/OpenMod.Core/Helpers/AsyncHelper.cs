@@ -84,7 +84,7 @@ namespace OpenMod.Core.Helpers
                     }
                     else
                     {
-                        Log.Error(e, $"Exception occured in task \"{name}\"");
+                        Log.Error(e, "Exception occured in task \"{TaskName}\"", name);
                     }
                 }
             });

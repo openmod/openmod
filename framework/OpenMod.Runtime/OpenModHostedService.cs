@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -54,7 +55,8 @@ namespace OpenMod.Runtime
             await m_PermissionChecker.InitAsync();
             Smart.Default.Parser.UseAlternativeEscapeChar();// '\\' is the default value
 
-            m_Logger.LogInformation($"Initializing for host: {m_HostInformation.HostName} v{m_HostInformation.HostVersion}");
+            m_Logger.LogInformation("Initializing for host: {HostName} v{HostVersion}",
+                m_HostInformation.HostName, m_HostInformation.HostVersion);
             await m_Host.InitAsync();
 
             foreach (var assembly in m_Runtime.HostAssemblies)
@@ -73,7 +75,7 @@ namespace OpenMod.Runtime
                 }
             }
 
-            m_Logger.LogInformation($"> {i} plugins loaded.");
+            m_Logger.LogInformation("> {Count} plugins loaded", i);
 
             AsyncHelper.Schedule("OpenMod initialize event", () => m_EventBus.EmitAsync(m_Host, this, new OpenModInitializedEvent(m_Host)));
             await m_JobScheduler.StartAsync();

@@ -58,15 +58,17 @@ namespace OpenMod.Core.Permissions
             foreach (var provider in m_PermissionCheckProviders.Where(c => c.SupportsActor(actor)))
             {
                 var result = await provider.CheckPermissionAsync(actor, permission);
-                m_Logger.LogDebug($"{actor.FullActorName} permission check result for \"{permission}\" ({provider.GetType().Name}): {result}");
-             
+                m_Logger.LogDebug("{0} permission check result for \"{ActorName}\" ({Permission}): {Result}",
+                    actor.FullActorName, permission, provider.GetType().Name, result);
+
                 if (result != PermissionGrantResult.Default)
                 {
                     return result;
                 }
             }
 
-            m_Logger.LogDebug($"{actor.FullActorName} permission check \"{permission}\" returning default");
+            m_Logger.LogDebug("{ActorName} permission check \"{Permission}\" returning default",
+                actor.FullActorName, permission);
             return registration.DefaultGrant;
         }
 

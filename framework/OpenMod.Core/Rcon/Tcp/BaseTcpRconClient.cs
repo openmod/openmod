@@ -151,7 +151,7 @@ namespace OpenMod.Core.Rcon.Tcp
                         }
                         catch (Exception ex)
                         {
-                            m_Logger.LogError(ex, $"{DisplayName} caused exception");
+                            m_Logger.LogError(ex, "{DisplayName} caused exception", DisplayName);
                             await SendMessageAsync(ex.Message, cancellationToken);
                         }
                     }

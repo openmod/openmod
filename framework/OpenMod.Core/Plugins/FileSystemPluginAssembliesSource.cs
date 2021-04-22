@@ -49,7 +49,7 @@ namespace OpenMod.Core.Plugins
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogWarning(ex, $"Failed to load plugin metadata from file: {file}");
+                    m_Logger.LogWarning(ex, "Failed to load plugin metadata from file: {File}", file);
                 }
             }
 

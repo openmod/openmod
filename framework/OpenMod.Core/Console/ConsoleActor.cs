@@ -30,6 +30,7 @@ namespace OpenMod.Core.Console
 
         public Task PrintMessageAsync(string message, Color color)
         {
+            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
             m_Logger.LogInformation(message);
             return Task.CompletedTask;
         }

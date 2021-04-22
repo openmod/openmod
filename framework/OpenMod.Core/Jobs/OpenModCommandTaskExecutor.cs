@@ -43,7 +43,7 @@ namespace OpenMod.Core.Jobs
                     continue;
                 }
 
-                m_Logger.LogInformation($"[{task.JobName}] Running OpenMod command: {command!}");
+                m_Logger.LogInformation("[{JobName}] Running OpenMod command: {Command}", task.JobName, command!);
 
                 var args = ArgumentsParser.ParseArguments(command!);
                 await m_CommandExecutor.ExecuteAsync(m_Actor, args, string.Empty);

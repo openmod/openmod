@@ -73,7 +73,7 @@ namespace OpenMod.Core.Commands
 
             if (m_CommandSources.Count == 0)
             {
-                m_Logger.LogDebug("InvalidateAsync: failed because no command sources were found; this is normal on booting.");
+                m_Logger.LogDebug("InvalidateAsync: failed because no command sources were found; this is normal on booting");
                 return;
             }
 
@@ -125,7 +125,7 @@ namespace OpenMod.Core.Commands
             }
 
             await m_CommandDataStore.SetRegisteredCommandsAsync(commandsData);
-            m_Logger.LogDebug($"Reloaded {commands.Count} commands.");
+            m_Logger.LogDebug("Reloaded {Count} commands", commands.Count);
         }
 
         public async Task<IReadOnlyCollection<ICommandRegistration>> GetCommandsAsync()

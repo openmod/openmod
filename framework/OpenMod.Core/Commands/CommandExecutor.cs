@@ -52,12 +52,13 @@ namespace OpenMod.Core.Commands
                 throw new Exception("Cannot execute command with null or empty args.");
             }
 
-            m_Logger.LogInformation($"Actor {actor.Type}/{actor.FullActorName} has executed command \"{string.Join(" ", args)}\".");
+            m_Logger.LogInformation("Actor {ActorType}/{ActorName} has executed command \"{Command}\"",
+                actor.Type, actor.FullActorName, string.Join(" ", args));
 
             var currentCommandAccessor = m_LifetimeScope.Resolve<ICurrentCommandContextAccessor>();
             var commandContextBuilder = m_LifetimeScope.Resolve<ICommandContextBuilder>();
             var stringLocalizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
-            
+
             var commandsRegistrations = await m_CommandStore.GetCommandsAsync();
             var commandContext = commandContextBuilder.CreateContext(actor, args, prefix, commandsRegistrations);
             var commandExecutingEvent = new CommandExecutingEvent(actor, commandContext);
@@ -89,7 +90,8 @@ namespace OpenMod.Core.Commands
                 sw.Start();
                 var command = commandContext.CommandRegistration!.Instantiate(commandContext.ServiceProvider);
                 await command.ExecuteAsync();
-                m_Logger.LogDebug($"Command \"{string.Join(" ", args)}\" executed in {sw.ElapsedMilliseconds}ms");
+                m_Logger.LogDebug("Command \"{Command}\" executed in {Ms}ms",
+                    string.Join(" ", args), sw.ElapsedMilliseconds);
 
                 currentCommandAccessor.Context = null;
             }
@@ -115,7 +117,9 @@ namespace OpenMod.Core.Commands
                     else
                     {
                         await actor.PrintMessageAsync("An internal error occured during the command execution.", Color.DarkRed);
-                        m_Logger.LogError(commandContext.Exception, $"Exception occured on command \"{string.Join(" ", args)}\" by actor {actor.Type}/{actor.DisplayName} ({actor.Id})");
+                        m_Logger.LogError(commandContext.Exception,
+                            "Exception occured on command \"{Command}\" by actor {ActorType}/{ActorName} ({ActorId})",
+                            string.Join(" ", args), actor.Type, actor.DisplayName, actor.Id);
                     }
                 }
 
