@@ -18,18 +18,18 @@ namespace OpenMod.Unturned.Effects
 {
     [OpenModInternal]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class UiEffectsKeysProvider : IUiEffectsKeysProvider
+    public class UnturnedUIEffectsKeysProvider : IUnturnedUIEffectsKeysProvider
     {
-        private readonly ILogger<UiEffectsKeysProvider> m_Logger;
+        private readonly ILogger<UnturnedUIEffectsKeysProvider> m_Logger;
 
         private short m_CurrentMaxKey = short.MinValue;
 
-        private readonly Dictionary<string, List<short>> m_Bindings = new();
+        private readonly Dictionary<string, List<UnturnedUIEffectKey>> m_Bindings = new();
 
-        private readonly List<short> m_ReleasedKeys = new();
+        private readonly List<UnturnedUIEffectKey> m_ReleasedKeys = new();
 
-        public UiEffectsKeysProvider(
-            ILogger<UiEffectsKeysProvider> logger,
+        public UnturnedUIEffectsKeysProvider(
+            ILogger<UnturnedUIEffectsKeysProvider> logger,
             IRuntime runtime,
             IEventBus eventBus)
         {
@@ -42,7 +42,7 @@ namespace OpenMod.Unturned.Effects
             string pluginId = ev.Plugin.OpenModComponentId;
             if (m_Bindings.ContainsKey(pluginId))
             {
-                List<short> bindings = m_Bindings[pluginId];
+                List<UnturnedUIEffectKey> bindings = m_Bindings[pluginId];
                 m_ReleasedKeys.AddRange(bindings);
                 m_Bindings.Remove(pluginId);
             }
@@ -50,22 +50,20 @@ namespace OpenMod.Unturned.Effects
             return Task.CompletedTask;
         }
 
-        public short BindKey(IOpenModPlugin plugin)
+        public UnturnedUIEffectKey BindKey(IOpenModPlugin plugin)
         {
             if (!plugin.IsComponentAlive)
             {
-                m_Logger.LogDebug(
-                    "{ComponentId} tried to bind a UI effect key but the plugin is not alive",
-                    plugin.OpenModComponentId);
-                return -1;
+                m_Logger.LogDebug("{ComponentId} tried to bind a UI effect key but the plugin is not alive", plugin.OpenModComponentId);
+                return UnturnedUIEffectKey.Invalid;
             }
 
-            short? result = GetNewKey();
+            UnturnedUIEffectKey? result = GetNewKey();
 
             if (result != null)
             { // if we got a key, bind it
 
-                List<short> bindings = GetBindingFor(plugin.OpenModComponentId);
+                List<UnturnedUIEffectKey> bindings = GetBindingFor(plugin.OpenModComponentId);
                 bindings.Add(result.Value);
 
                 return result.Value;
@@ -74,37 +72,37 @@ namespace OpenMod.Unturned.Effects
             // all keys are taken, log biggest offender
             LogBiggestOffender(plugin.OpenModComponentId);
 
-            return -1;
+            return UnturnedUIEffectKey.Invalid;
         }
 
-        public IEnumerable<short> BindKeys(IOpenModPlugin plugin, int amount)
+        public IEnumerable<UnturnedUIEffectKey> BindKeys(IOpenModPlugin plugin, int amount)
         {
             if (!plugin.IsComponentAlive)
             {
                 m_Logger.LogDebug(
                     "{ComponentId} tried to bind a UI effect keys but the plugin is not alive",
                     plugin.OpenModComponentId);
-                return Enumerable.Repeat((short) -1, amount);
+                return Enumerable.Repeat(UnturnedUIEffectKey.Invalid, amount);
             }
 
-            List<short> result = new(amount);
+            List<UnturnedUIEffectKey> result = new(amount);
             bool logOffender = false;
             for (int i = 0; i < amount; i++)
             {
 
-                short? key = GetNewKey();
+                UnturnedUIEffectKey? key = GetNewKey();
 
                 if (key == null)
                 {
                     logOffender = true;
                 }
 
-                result.Add(key ?? -1);
+                result.Add(key ?? UnturnedUIEffectKey.Invalid);
 
             }
 
-            List<short> bindings = GetBindingFor(plugin.OpenModComponentId);
-            bindings.AddRange(result.Where(x => x != -1));
+            List<UnturnedUIEffectKey> bindings = GetBindingFor(plugin.OpenModComponentId);
+            bindings.AddRange(result.Where(x => x != UnturnedUIEffectKey.Invalid));
 
             if (logOffender)
             {
@@ -114,9 +112,9 @@ namespace OpenMod.Unturned.Effects
             return result;
         }
 
-        public bool ReleaseKey(IOpenModPlugin plugin, short key)
+        public bool ReleaseKey(IOpenModPlugin plugin, UnturnedUIEffectKey key)
         {
-            List<short> bindings = GetBindingFor(plugin.OpenModComponentId);
+            List<UnturnedUIEffectKey> bindings = GetBindingFor(plugin.OpenModComponentId);
 
             bool result = bindings.Remove(key);
             if (result)
@@ -129,13 +127,12 @@ namespace OpenMod.Unturned.Effects
 
         public void ReleaseAllKeys(IOpenModPlugin plugin)
         {
-            List<short> bindings = GetBindingFor(plugin.OpenModComponentId);
-
+            List<UnturnedUIEffectKey> bindings = GetBindingFor(plugin.OpenModComponentId);
             m_ReleasedKeys.AddRange(bindings);
             m_Bindings.Remove(plugin.OpenModComponentId);
         }
 
-        private short? GetNewKey()
+        private UnturnedUIEffectKey? GetNewKey()
         {
             // grab keys by incrementing the value while we still have more available (first 65535 keys)
             if (m_CurrentMaxKey < short.MaxValue)
@@ -146,13 +143,13 @@ namespace OpenMod.Unturned.Effects
                     m_CurrentMaxKey++;
                 }
 
-                return m_CurrentMaxKey++; // increment key after getting the value
+                return new UnturnedUIEffectKey(m_CurrentMaxKey++); // increment key after getting the value
             }
 
             // all values have been used up already, grab one from released
             if (m_ReleasedKeys.Any())
             {
-                short result = m_ReleasedKeys[0];
+                UnturnedUIEffectKey result = m_ReleasedKeys[0];
                 m_ReleasedKeys.RemoveAt(0);
                 return result;
             }
@@ -161,21 +158,21 @@ namespace OpenMod.Unturned.Effects
             if (!m_Bindings.Any())
             {
                 m_CurrentMaxKey = short.MinValue;
-                return m_CurrentMaxKey++;
+                return new UnturnedUIEffectKey(m_CurrentMaxKey++);
             }
 
             // no key otherwise
             return null;
         }
 
-        private List<short> GetBindingFor(string pluginId)
+        private List<UnturnedUIEffectKey> GetBindingFor(string pluginId)
         {
             if (m_Bindings.ContainsKey(pluginId))
             {
                 return m_Bindings[pluginId];
             }
 
-            var list = new List<short>();
+            var list = new List<UnturnedUIEffectKey>();
             m_Bindings.Add(pluginId, list);
 
             return list;
@@ -183,7 +180,7 @@ namespace OpenMod.Unturned.Effects
 
         private void LogBiggestOffender(string pluginId)
         {
-            KeyValuePair<string, List<short>> maxValueBinding =
+            KeyValuePair<string, List<UnturnedUIEffectKey>> maxValueBinding =
                 m_Bindings.MaxBy(x => x.Value.Count).First();
             m_Logger.LogWarning(
                 "{CallingComponentId} tried to bind a UI effect key but there are none available. Plugin {MostKeysComponent} has {MostKeysCount} keys, consider disabling it",
