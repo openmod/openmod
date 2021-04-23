@@ -143,7 +143,6 @@ namespace OpenMod.Unturned.Effects {
 
             // no bindings and no released keys = reset and spawn key
             if (!m_Bindings.Any()) {
-                m_ReleasedKeys.Clear();
                 m_CurrentMaxKey = short.MinValue;
                 return m_CurrentMaxKey++;
             }
