@@ -63,7 +63,7 @@ namespace OpenMod.Unturned.Effects
             if (result != null)
             { // if we got a key, bind it
 
-                List<UnturnedUIEffectKey> bindings = GetBindingFor(plugin.OpenModComponentId);
+                List<UnturnedUIEffectKey> bindings = GetOrCreateBindingsFor(plugin.OpenModComponentId);
                 bindings.Add(result.Value);
 
                 return result.Value;
@@ -101,7 +101,7 @@ namespace OpenMod.Unturned.Effects
 
             }
 
-            List<UnturnedUIEffectKey> bindings = GetBindingFor(plugin.OpenModComponentId);
+            List<UnturnedUIEffectKey> bindings = GetOrCreateBindingsFor(plugin.OpenModComponentId);
             bindings.AddRange(result.Where(x => x != UnturnedUIEffectKey.Invalid));
 
             if (logOffender)
@@ -114,7 +114,11 @@ namespace OpenMod.Unturned.Effects
 
         public bool ReleaseKey(IOpenModPlugin plugin, UnturnedUIEffectKey key)
         {
-            List<UnturnedUIEffectKey> bindings = GetBindingFor(plugin.OpenModComponentId);
+            if (!m_Bindings.ContainsKey(plugin.OpenModComponentId))
+            {
+                return false;
+            }
+            List<UnturnedUIEffectKey> bindings = m_Bindings[plugin.OpenModComponentId];
 
             bool result = bindings.Remove(key);
             if (result)
@@ -127,9 +131,12 @@ namespace OpenMod.Unturned.Effects
 
         public void ReleaseAllKeys(IOpenModPlugin plugin)
         {
-            List<UnturnedUIEffectKey> bindings = GetBindingFor(plugin.OpenModComponentId);
-            m_ReleasedKeys.AddRange(bindings);
-            m_Bindings.Remove(plugin.OpenModComponentId);
+            if (m_Bindings.ContainsKey(plugin.OpenModComponentId))
+            {
+                List<UnturnedUIEffectKey> bindings = m_Bindings[plugin.OpenModComponentId];
+                m_ReleasedKeys.AddRange(bindings);
+                m_Bindings.Remove(plugin.OpenModComponentId);
+            }
         }
 
         private UnturnedUIEffectKey? GetNewKey()
@@ -165,7 +172,7 @@ namespace OpenMod.Unturned.Effects
             return null;
         }
 
-        private List<UnturnedUIEffectKey> GetBindingFor(string pluginId)
+        private List<UnturnedUIEffectKey> GetOrCreateBindingsFor(string pluginId)
         {
             if (m_Bindings.ContainsKey(pluginId))
             {
