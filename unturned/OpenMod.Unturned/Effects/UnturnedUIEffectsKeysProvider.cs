@@ -40,9 +40,8 @@ namespace OpenMod.Unturned.Effects
         private Task OnPluginUnloaded(PluginUnloadedEvent ev)
         {
             string pluginId = ev.Plugin.OpenModComponentId;
-            if (m_Bindings.ContainsKey(pluginId))
+            if (m_Bindings.TryGetValue(pluginId, out List<UnturnedUIEffectKey>? bindings))
             {
-                List<UnturnedUIEffectKey> bindings = m_Bindings[pluginId];
                 m_ReleasedKeys.AddRange(bindings);
                 m_Bindings.Remove(pluginId);
             }
@@ -114,16 +113,22 @@ namespace OpenMod.Unturned.Effects
 
         public bool ReleaseKey(IOpenModPlugin plugin, UnturnedUIEffectKey key)
         {
-            if (!m_Bindings.ContainsKey(plugin.OpenModComponentId))
+            if (!m_Bindings.TryGetValue(plugin.OpenModComponentId, out List<UnturnedUIEffectKey>? bindings))
             {
                 return false;
             }
-            List<UnturnedUIEffectKey> bindings = m_Bindings[plugin.OpenModComponentId];
 
+            // try to remove key from bindings list
             bool result = bindings.Remove(key);
             if (result)
             {
                 m_ReleasedKeys.Add(key);
+            }
+
+            // remove empty bindings entry
+            if (!bindings.Any())
+            {
+                m_Bindings.Remove(plugin.OpenModComponentId);
             }
 
             return result;
@@ -131,9 +136,8 @@ namespace OpenMod.Unturned.Effects
 
         public void ReleaseAllKeys(IOpenModPlugin plugin)
         {
-            if (m_Bindings.ContainsKey(plugin.OpenModComponentId))
+            if (m_Bindings.TryGetValue(plugin.OpenModComponentId, out List<UnturnedUIEffectKey>? bindings))
             {
-                List<UnturnedUIEffectKey> bindings = m_Bindings[plugin.OpenModComponentId];
                 m_ReleasedKeys.AddRange(bindings);
                 m_Bindings.Remove(plugin.OpenModComponentId);
             }
@@ -174,13 +178,12 @@ namespace OpenMod.Unturned.Effects
 
         private List<UnturnedUIEffectKey> GetOrCreateBindingsFor(string pluginId)
         {
-            if (m_Bindings.ContainsKey(pluginId))
-            {
-                return m_Bindings[pluginId];
+            if (m_Bindings.TryGetValue(pluginId, out List<UnturnedUIEffectKey> list)) {
+                return list;
             }
 
-            var list = new List<UnturnedUIEffectKey>();
-            m_Bindings.Add(pluginId, list);
+            list = new List<UnturnedUIEffectKey>();
+            m_Bindings[pluginId] = list;
 
             return list;
         }
