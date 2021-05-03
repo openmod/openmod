@@ -9,7 +9,7 @@ namespace OpenMod.Unturned.Building.Events
         public new UnturnedStructureBuildable Buildable => (UnturnedStructureBuildable)base.Buildable;
 
         public UnturnedStructureDamagingEvent(UnturnedStructureBuildable buildable, ushort damageAmount,
-            EDamageOrigin damageOrigin, UnturnedPlayer instigator, CSteamID instigatorId) : base(buildable,
+            EDamageOrigin damageOrigin, UnturnedPlayer? instigator, CSteamID instigatorId) : base(buildable,
             damageAmount, damageOrigin, instigator, instigatorId)
         {
         }
