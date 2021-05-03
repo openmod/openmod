@@ -78,9 +78,8 @@ namespace OpenMod.Unturned.Building.Events
 
             var @event = pendingTotalDamage >= buildable.State.Health
                 ? (UnturnedBuildableDamagingEvent)new UnturnedBarricadeDestroyingEvent(buildable, pendingTotalDamage,
-                    damageOrigin, player!, instigatorSteamId)
-                : new UnturnedBarricadeDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player!,
-                    instigatorSteamId);
+                    damageOrigin, player, instigatorSteamId)
+                : new UnturnedBarricadeDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player, instigatorSteamId);
 
             @event.IsCancelled = !shouldAllow;
 
@@ -107,9 +106,8 @@ namespace OpenMod.Unturned.Building.Events
 
             var @event = pendingTotalDamage >= buildable.State.Health
                 ? (UnturnedBuildableDamagingEvent)new UnturnedStructureDestroyingEvent(buildable,
-                    pendingTotalDamage, damageOrigin, player!, instigatorSteamId)
-                : new UnturnedStructureDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player!,
-                    instigatorSteamId);
+                    pendingTotalDamage, damageOrigin, player, instigatorSteamId)
+                : new UnturnedStructureDamagingEvent(buildable, pendingTotalDamage, damageOrigin, player, instigatorSteamId);
 
             @event.IsCancelled = !shouldAllow;
 
