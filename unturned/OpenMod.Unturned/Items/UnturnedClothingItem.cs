@@ -1,15 +1,16 @@
 ﻿using Cysharp.Threading.Tasks;
 using HarmonyLib;
-using OpenMod.Unturned.Players;
 using OpenMod.Unturned.Players.Clothing;
 using SDG.NetTransport;
 using SDG.Unturned;
 using System;
 using System.Threading.Tasks;
+using OpenMod.Extensions.Games.Abstractions.Items;
+using OpenMod.Unturned.Players;
 
 namespace OpenMod.Unturned.Items
 {
-    public class UnturnedClothingItem : UnturnedItem
+    public class UnturnedClothingItem : IItemInstance
     {
         private static readonly ClientInstanceMethod<ushort, byte, byte[]> s_SendWearShirt =
             AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<ushort, byte, byte[]>>("SendWearShirt");
@@ -46,16 +47,16 @@ namespace OpenMod.Unturned.Items
                 _ => throw new InvalidOperationException("Invalid clothing type")
             };
         }
-
-        private static Task<bool> DestroyClothingPieceAsync(UnturnedPlayer player, ClothingType clothingType)
+        // ReSharper disable once SuggestBaseTypeForParameter
+        private Task<bool> DestroyClothingPieceAsync(PlayerClothing playerClothing)
         {
             async UniTask<bool> DestroyClothingPieceTask()
             {
                 await UniTask.SwitchToMainThread();
 
-                var method = GetInstanceMethod(clothingType);
+                var method = GetInstanceMethod(ClothingType);
 
-                method.InvokeAndLoopback(player.Player.clothing.GetNetId(), ENetReliability.Reliable,
+                method.InvokeAndLoopback(playerClothing.GetNetId(), ENetReliability.Reliable,
                     Provider.EnumerateClients_Remote(), 0, 0, new byte[0]);
 
                 return true;
@@ -66,10 +67,20 @@ namespace OpenMod.Unturned.Items
 
         public ClothingType ClothingType { get; }
 
-        public UnturnedClothingItem(Item item, UnturnedPlayer player, ClothingType clothingType) :
-            base(item, () => DestroyClothingPieceAsync(player, clothingType))
+        public UnturnedClothingItem(Item item, UnturnedPlayer player, ClothingType clothingType)
         {
             ClothingType = clothingType;
+            Item = new UnturnedItem(item, () => DestroyClothingPieceAsync(player.Player.clothing));
         }
+
+        public UnturnedClothingItem(Item item, PlayerClothing playerClothing, ClothingType clothingType)
+        {
+            ClothingType = clothingType;
+            Item = new UnturnedItem(item, () => DestroyClothingPieceAsync(playerClothing));
+        }
+
+        IItem IItemInstance.Item => Item;
+
+        public UnturnedItem Item { get; }
     }
 }

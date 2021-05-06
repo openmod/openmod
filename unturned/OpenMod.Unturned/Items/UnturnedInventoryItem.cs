@@ -26,7 +26,7 @@ namespace OpenMod.Unturned.Items
         {
             ItemManager.dropItem(ItemJar.item,
                 Inventory.Player.transform.position + Inventory.Player.transform.forward * 0.5f,
-                true, true, false);
+                playEffect: true, isDropped: true, wideSpread: false);
 
             return DestroyAsync();
         }
@@ -54,13 +54,13 @@ namespace OpenMod.Unturned.Items
                     break;
                 }
 
-                if (page != null)
-                {
-                    Inventory.Inventory.removeItem(page.Value, (byte)index);
+                if (page == null)
+                    return true;
 
-                    if (page.Value < PlayerInventory.SLOTS)
-                        Inventory.Player.equipment.sendSlot(page.Value);
-                }
+                Inventory.Inventory.removeItem(page.Value, (byte)index);
+
+                if (page.Value < PlayerInventory.SLOTS)
+                    Inventory.Player.equipment.sendSlot(page.Value);
 
                 return true;
             }
