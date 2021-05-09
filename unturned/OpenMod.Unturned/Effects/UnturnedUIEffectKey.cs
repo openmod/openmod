@@ -8,7 +8,7 @@ namespace OpenMod.Unturned.Effects
     public readonly struct UnturnedUIEffectKey : IEquatable<UnturnedUIEffectKey>, IComparable<UnturnedUIEffectKey>
     {
         /// <summary>
-        /// Invalid effect key with value of -1. Sending -1 to client will not show effect
+        /// Invalid effect key with value of -1. Sending -1 to client will launch effect as one shot and not register the key.
         /// </summary>
         public static readonly UnturnedUIEffectKey Invalid = new(-1);
 
