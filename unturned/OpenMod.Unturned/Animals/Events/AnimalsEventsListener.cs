@@ -5,7 +5,11 @@ using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using System;
+using System.Reflection;
+using SDG.Framework.Devkit;
+using Steamworks;
 using UnityEngine;
+
 // ReSharper disable InconsistentNaming
 
 namespace OpenMod.Unturned.Animals.Events
@@ -13,6 +17,13 @@ namespace OpenMod.Unturned.Animals.Events
     [UsedImplicitly]
     internal class AnimalsEventsListener : UnturnedEventsListener
     {
+        private static readonly FieldInfo s_BumperVehicle;
+
+        static AnimalsEventsListener()
+        {
+            s_BumperVehicle = typeof(Bumper).GetField("vehicle", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        }
+
         public AnimalsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
@@ -21,22 +32,22 @@ namespace OpenMod.Unturned.Animals.Events
         {
             OnAnimalAdded += Events_OnAnimalAdded;
             OnAnimalRevived += Events_OnAnimalRevived;
-            OnAnimalDamaging += Events_OnAnimalDamaging;
             OnAnimalDead += Events_OnAnimalDead;
             OnAnimalFleeing += Events_OnAnimalFleeing;
             OnAnimalAttackingPoint += Events_OnAnimalAttackingPoint;
             OnAnimalAttackingPlayer += Events_OnAnimalAttackingPlayer;
+            DamageTool.damageAnimalRequested += DamageToolOndamageAnimalRequested;
         }
 
         public override void Unsubscribe()
         {
             OnAnimalAdded -= Events_OnAnimalAdded;
             OnAnimalRevived -= Events_OnAnimalRevived;
-            OnAnimalDamaging -= Events_OnAnimalDamaging;
             OnAnimalDead -= Events_OnAnimalDead;
             OnAnimalFleeing -= Events_OnAnimalFleeing;
             OnAnimalAttackingPoint -= Events_OnAnimalAttackingPoint;
             OnAnimalAttackingPlayer -= Events_OnAnimalAttackingPlayer;
+            DamageTool.damageAnimalRequested -= DamageToolOndamageAnimalRequested;
         }
 
         private void Events_OnAnimalAdded(Animal nativeAnimal)
@@ -57,27 +68,46 @@ namespace OpenMod.Unturned.Animals.Events
             Emit(@event);
         }
 
-        private void Events_OnAnimalDamaging(Animal nativeAnimal, ref ushort amount, ref Vector3 ragdoll, // lgtm [cs/too-many-ref-parameters]
-            ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot, ref bool cancel)
+        private void DamageToolOndamageAnimalRequested(ref DamageAnimalParameters parameters, ref bool shouldallow)
         {
-            var animal = new UnturnedAnimal(nativeAnimal);
+            var animal = new UnturnedAnimal(parameters.animal);
+            var amount = (ushort)Math.Min(ushort.MaxValue, Math.Floor(parameters.damage * parameters.times));
+            var ragdoll = (amount * parameters.direction).ToSystemVector();
+            var ragdollEffect = parameters.ragdollEffect;
+
+            var instigator = CSteamID.Nil;
+            switch (parameters.instigator)
+            {
+                case KillVolume or Barrier or InteractableTrap or InteractableSentry:
+                    instigator = Provider.server;
+                    break;
+                case Bumper bumper:
+                {
+                    var vehicle = (InteractableVehicle)s_BumperVehicle.GetValue(bumper);
+                    instigator = vehicle is not null and { isDriven: true }
+                        ? vehicle.passengers[0].player.playerID.steamID
+                        : Provider.server;
+
+                    break;
+                }
+                case Player player:
+                    instigator = player.channel.owner.playerID.steamID;
+                    break;
+            }
 
             var @event = amount >= animal.Health
-                ? new UnturnedAnimalDyingEvent(animal, amount, ragdoll.ToSystemVector(), ragdollEffect, trackKill,
-                    dropLoot)
-                : new UnturnedAnimalDamagingEvent(animal, amount, ragdoll.ToSystemVector(), ragdollEffect, trackKill,
-                    dropLoot);
+                ? new UnturnedAnimalDyingEvent(animal, amount, ragdoll, ragdollEffect, instigator)
+                : new UnturnedAnimalDamagingEvent(animal, amount, ragdoll, ragdollEffect, instigator);
 
-            @event.IsCancelled = cancel;
+            @event.IsCancelled = !shouldallow;
 
             Emit(@event);
 
-            amount = @event.DamageAmount;
-            ragdoll = @event.Ragdoll.ToUnityVector();
-            ragdollEffect = @event.RagdollEffect;
-            trackKill = @event.TrackKill;
-            dropLoot = @event.DropLoot;
-            cancel = @event.IsCancelled;
+            shouldallow = !@event.IsCancelled;
+            parameters.damage = @event.DamageAmount;
+            parameters.times = 1;
+            parameters.direction = @event.Ragdoll.ToUnityVector();
+            parameters.ragdollEffect = @event.RagdollEffect;
         }
 
         private void Events_OnAnimalDead(Animal nativeAnimal, Vector3 ragdoll, ERagdollEffect ragdollEffect)
@@ -89,7 +119,8 @@ namespace OpenMod.Unturned.Animals.Events
             Emit(@event);
         }
 
-        private void Events_OnAnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack, ref bool cancel) // lgtm [cs/too-many-ref-parameters]
+        private void Events_OnAnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack,
+            ref bool cancel) // lgtm [cs/too-many-ref-parameters]
         {
             var animal = new UnturnedAnimal(nativeAnimal);
 
@@ -105,7 +136,8 @@ namespace OpenMod.Unturned.Animals.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnAnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack, ref bool cancel) // lgtm [cs/too-many-ref-parameters]
+        private void Events_OnAnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack,
+            ref bool cancel) // lgtm [cs/too-many-ref-parameters]
         {
             var animal = new UnturnedAnimal(nativeAnimal);
 
@@ -121,7 +153,8 @@ namespace OpenMod.Unturned.Animals.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnAnimalAttackingPlayer(Animal nativeAnimal, ref Player nativePlayer, ref bool sendToPack, // lgtm [cs/too-many-ref-parameters]
+        private void Events_OnAnimalAttackingPlayer(Animal nativeAnimal, ref Player nativePlayer,
+            ref bool sendToPack, // lgtm [cs/too-many-ref-parameters]
             ref bool cancel)
         {
             var animal = new UnturnedAnimal(nativeAnimal);
@@ -141,24 +174,27 @@ namespace OpenMod.Unturned.Animals.Events
         }
 
         private delegate void AnimalSpawned(Animal nativeAnimal);
+
         private static event AnimalSpawned? OnAnimalAdded;
         private static event AnimalSpawned? OnAnimalRevived;
 
-        private delegate void AnimalDamaging(Animal nativeAnimal, ref ushort amount, ref Vector3 ragdoll,
-            ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot, ref bool cancel);
-        private static event AnimalDamaging? OnAnimalDamaging;
-
         private delegate void AnimalDead(Animal nativeAnimal, Vector3 ragdoll, ERagdollEffect ragdollEffect);
+
         private static event AnimalDead? OnAnimalDead;
 
-        private delegate void AnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack, ref bool cancel);
+        private delegate void AnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack,
+            ref bool cancel);
+
         private static event AnimalFleeing? OnAnimalFleeing;
 
-        private delegate void AnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack, ref bool cancel);
+        private delegate void AnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack,
+            ref bool cancel);
+
         private static event AnimalAttackingPoint? OnAnimalAttackingPoint;
 
         private delegate void AnimalAttackingPlayer(Animal nativeAnimal, ref Player player, ref bool sendToPack,
             ref bool cancel);
+
         private static event AnimalAttackingPlayer? OnAnimalAttackingPlayer;
 
         [UsedImplicitly]
@@ -182,22 +218,6 @@ namespace OpenMod.Unturned.Animals.Events
             public static void TellAlive(Animal __instance)
             {
                 OnAnimalRevived?.Invoke(__instance);
-            }
-
-            [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "askDamage")]
-            [HarmonyPrefix]
-            public static bool AskDamage(Animal __instance, ref ushort amount, ref Vector3 newRagdoll, // lgtm [cs/too-many-ref-parameters]
-                ref ERagdollEffect ragdollEffect, ref bool trackKill, ref bool dropLoot)
-            {
-                var cancel = false;
-
-                if (amount == 0 || __instance.isDead) return false;
-
-                OnAnimalDamaging?.Invoke(__instance, ref amount, ref newRagdoll, ref ragdollEffect, ref trackKill,
-                    ref dropLoot, ref cancel);
-
-                return !cancel;
             }
 
             [UsedImplicitly]
