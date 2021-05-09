@@ -1,10 +1,10 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.UnityEngine.Helpers;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using Quaternion = System.Numerics.Quaternion;
 using Vector3 = System.Numerics.Vector3;
@@ -53,9 +53,9 @@ namespace OpenMod.UnityEngine.Transforms
             }
         }
 
-        public Vector3 Position => (m_Rigidbody?.position ?? m_Transform.position).ToSystemVector();
+        public Vector3 Position => (m_Rigidbody != null ? m_Rigidbody.position : m_Transform.position).ToSystemVector();
 
-        public Vector3 Velocity => m_Rigidbody?.velocity.ToSystemVector() ?? Vector3.Zero;
+        public Vector3 Velocity => m_Rigidbody != null ? m_Rigidbody.velocity.ToSystemVector() : Vector3.Zero;
 
         public Task<bool> SetVelocityAsync(Vector3 velocity)
         {
@@ -83,7 +83,7 @@ namespace OpenMod.UnityEngine.Transforms
                 {
                     return false;
                 }
-                
+
                 await UniTask.SwitchToMainThread();
 
                 var unityPosition = targetPosition.ToUnityVector();
@@ -102,7 +102,8 @@ namespace OpenMod.UnityEngine.Transforms
             return PositionTask().AsTask();
         }
 
-        public Quaternion Rotation => (m_Rigidbody?.rotation ?? m_Transform.rotation).ToSystemQuaternion();
+        public Quaternion Rotation =>
+            (m_Rigidbody != null ? m_Rigidbody.rotation : m_Transform.rotation).ToSystemQuaternion();
 
         public virtual Task<bool> SetRotationAsync(Quaternion rotation)
         {
