@@ -27,7 +27,7 @@ namespace OpenMod.Core.Permissions
         private readonly IEventBus m_EventBus;
 
         public DefaultPermissionRoleStore(IPermissionRolesDataStore permissionRolesDataStore, IUserDataStore userDataStore,
-            IRuntime runtime,IEventBus eventBus)
+            IRuntime runtime, IEventBus eventBus)
         {
             m_PermissionRolesDataStore = permissionRolesDataStore;
             m_UserDataStore = userDataStore;
@@ -171,9 +171,6 @@ namespace OpenMod.Core.Permissions
             roleData.Data ??= new Dictionary<string, object?>();
 
             await m_PermissionRolesDataStore.SaveChangesAsync();
-
-            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionRoleUpdatedEvent((PermissionRole) roleData));
-
             return true;
         }
 
@@ -249,7 +246,7 @@ namespace OpenMod.Core.Permissions
                 return false;
             }
 
-            var data = new PermissionRoleData
+            m_PermissionRolesDataStore.Roles.Add(new PermissionRoleData
             {
                 Priority = role.Priority,
                 Id = role.Id,
@@ -257,14 +254,9 @@ namespace OpenMod.Core.Permissions
                 Parents = new HashSet<string>(role.Parents, StringComparer.InvariantCultureIgnoreCase),
                 Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase),
                 IsAutoAssigned = role.IsAutoAssigned
-            };
-
-            m_PermissionRolesDataStore.Roles.Add(data);
+            });
 
             await m_PermissionRolesDataStore.SaveChangesAsync();
-
-            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionRoleCreatedEvent((PermissionRole) data));
-
             return true;
         }
 
@@ -275,16 +267,12 @@ namespace OpenMod.Core.Permissions
                 throw new ArgumentNullException(nameof(roleId));
             }
 
-            var roleData = m_PermissionRolesDataStore.Roles.FirstOrDefault(d => d.Id?.Equals(roleId, StringComparison.OrdinalIgnoreCase) ?? false);
-            if (roleData == null)
+            if (m_PermissionRolesDataStore.Roles.RemoveAll(c => roleId.Equals(c.Id, StringComparison.OrdinalIgnoreCase)) == 0)
             {
                 return false;
             }
 
             await m_PermissionRolesDataStore.SaveChangesAsync();
-
-            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionRoleDeletedEvent((PermissionRole) roleData));
-
             return true;
         }
 
@@ -337,9 +325,6 @@ namespace OpenMod.Core.Permissions
             }
 
             await m_PermissionRolesDataStore.SaveChangesAsync();
-
-            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionRoleDataUpdatedEvent((PermissionRole) roleData, key, data, typeof(T)));
-
         }
 
         public Task<T?> GetPersistentDataAsync<T>(string roleId, string key)

@@ -10,7 +10,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+
+using OpenMod.API.Eventing;
 using OpenMod.Common.Helpers;
+using OpenMod.Core.Permissions.Events;
 
 namespace OpenMod.Core.Permissions
 {
@@ -24,6 +27,7 @@ namespace OpenMod.Core.Permissions
         private readonly IDataStore m_DataStore;
         private readonly ILogger<PermissionRolesDataStore> m_Logger;
         private readonly IRuntime m_Runtime;
+        private readonly IEventBus m_EventBus;
         private IDisposable? m_FileChangeWatcher;
         private PermissionRolesData? m_CachedPermissionRolesData;
 
@@ -32,11 +36,13 @@ namespace OpenMod.Core.Permissions
         public PermissionRolesDataStore(
             ILogger<PermissionRolesDataStore> logger,
             IOpenModDataStoreAccessor dataStoreAccessor,
-            IRuntime runtime)
+            IRuntime runtime,
+            IEventBus eventBus)
         {
             m_DataStore = dataStoreAccessor.DataStore;
             m_Logger = logger;
             m_Runtime = runtime;
+            m_EventBus = eventBus;
             AsyncHelper.RunSync(InitAsync);
         }
 
@@ -153,11 +159,13 @@ namespace OpenMod.Core.Permissions
         {
             m_Logger.LogInformation("Permissions have been reloaded");
             m_CachedPermissionRolesData = await m_DataStore.LoadAsync<PermissionRolesData>(RolesKey) ?? new PermissionRolesData();
+            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionRolesChangedEvent());
         }
 
-        public virtual Task SaveChangesAsync()
+        public virtual async Task SaveChangesAsync()
         {
-            return m_DataStore.SaveAsync(RolesKey, m_CachedPermissionRolesData);
+            await m_DataStore.SaveAsync(RolesKey, m_CachedPermissionRolesData);
+            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionRolesChangedEvent());
         }
 
         public virtual Task<bool> ExistsAsync()
