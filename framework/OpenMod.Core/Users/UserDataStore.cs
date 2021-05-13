@@ -110,7 +110,7 @@ namespace OpenMod.Core.Users
                 throw new ArgumentException(nameof(key));
             }
 
-            var data = await GetUserDataAsync(userId, userType) ?? new UserData();
+            var data = await GetUserDataAsync(userId, userType) ?? new UserData(userId, userType);
             if (data.Data == null)
             {
                 return default;
@@ -162,7 +162,7 @@ namespace OpenMod.Core.Users
                 throw new ArgumentException(nameof(key));
             }
 
-            var userData = await GetUserDataAsync(userId, userType) ?? new UserData();
+            var userData = await GetUserDataAsync(userId, userType) ?? new UserData(userId, userType);
             userData.Data ??= new();
 
             if (userData.Data.ContainsKey(key))
@@ -193,6 +193,18 @@ namespace OpenMod.Core.Users
             if (userData == null)
             {
                 throw new ArgumentNullException(nameof(userData));
+            }
+
+            if (string.IsNullOrWhiteSpace(userData.Id))
+            {
+                throw new ArgumentException(
+                    $"User data missing required property: {nameof(UserData.Id)}", nameof(userData));
+            }
+
+            if (string.IsNullOrWhiteSpace(userData.Type))
+            {
+                throw new ArgumentException(
+                    $"User data missing required property: {nameof(UserData.Type)}", nameof(userData));
             }
 
             var usersData = await GetUsersDataAsync();

@@ -14,7 +14,7 @@ namespace OpenMod.Rust.Building
             m_BuildingBlock = buildingBlock;
         }
 
-        public double Health => m_BuildingBlock?.Health() ?? throw new NotImplementedException("Health from raw state is not supported yet.");
+        public double Health => m_BuildingBlock != null ? m_BuildingBlock.Health() : throw new NotImplementedException("Health from raw state is not supported yet.");
 
         public RustBuildingBlockState(byte[] data)
         {

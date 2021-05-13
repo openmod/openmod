@@ -146,7 +146,7 @@ namespace OpenMod.Runtime
 
                 await nugetPackageManager.RemoveOutdatedPackagesAsync();
                 nugetPackageManager.InstallAssemblyResolver();
-                nugetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
+                nugetPackageManager.SetAssemblyLoader((NuGetPackageManager.AssemblyLoader) Hotloader.LoadAssembly);
 
                 var startupContext = new OpenModStartupContext
                 {

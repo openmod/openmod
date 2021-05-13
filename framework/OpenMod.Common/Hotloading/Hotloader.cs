@@ -10,7 +10,7 @@ namespace OpenMod.Common.Hotloading
 {
     /// <summary>
     /// Adds support for hotloading assemblies.
-    /// Use <see cref="LoadAssembly"/> instead of <see cref="Assembly.Load(byte[])"/>.
+    /// Use <see cref="LoadAssembly(byte[])"/> instead of <see cref="Assembly.Load(byte[])"/>.
     /// </summary>
     public static class Hotloader
     {
@@ -39,9 +39,20 @@ namespace OpenMod.Common.Hotloading
         /// <returns>The loaded assembly.</returns>
         public static Assembly LoadAssembly(byte[] assemblyData)
         {
+            return LoadAssembly(assemblyData, assemblySymbols: null);
+        }
+
+        /// <summary>
+        /// Hotloads an assembly. Redirects to <see cref="Assembly.Load(byte[], byte[])"/> if <see cref="Enabled"/> is set to false.
+        /// </summary>
+        /// <param name="assemblyData">The assembly to hotload.</param>
+        /// <param name="assemblySymbols">A byte array that contains the raw bytes representing the symbols for the assembly.</param>
+        /// <returns>The loaded assembly.</returns>
+        public static Assembly LoadAssembly(byte[] assemblyData, byte[]? assemblySymbols)
+        {
             if (!Enabled)
             {
-                return Assembly.Load(assemblyData);
+                return Assembly.Load(assemblyData, assemblySymbols);
             }
 
             using var input = new MemoryStream(assemblyData, writable: false);
@@ -57,7 +68,7 @@ namespace OpenMod.Common.Hotloading
             {
                 // Don't hotload strong-named assemblies unless mono
                 // Will cause FileLoadException's if not mono
-                return Assembly.Load(assemblyData);
+                return Assembly.Load(assemblyData, assemblySymbols);
             }
 
             var realFullname = module.Assembly.FullName;
@@ -70,7 +81,7 @@ namespace OpenMod.Common.Hotloading
             var guid = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 6);
             var name = $"{module.Assembly.Name}-{guid}";
 
-            module.Assembly.Name = name; 
+            module.Assembly.Name = name;
             module.Assembly.PublicKey = null;
             module.Assembly.HasPublicKey = false;
 
@@ -78,7 +89,7 @@ namespace OpenMod.Common.Hotloading
             output.Seek(offset: 0, SeekOrigin.Begin);
 
             var newAssemblyData = output.ToArray();
-            var assembly = Assembly.Load(newAssemblyData);
+            var assembly = Assembly.Load(newAssemblyData, assemblySymbols);
             s_Assemblies.Add(realFullname, assembly);
             return assembly;
         }

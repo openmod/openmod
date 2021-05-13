@@ -12,9 +12,16 @@ namespace OpenMod.Rust.Items
         public RustItemContainerInventory(ItemContainer itemContainer)
         {
             ItemContainer = itemContainer;
+
+            string? name = null;
+            if (ItemContainer.parent != null && itemContainer.parent.info != null)
+            {
+                name = ItemContainer.parent.info.displayName?.translated;
+            }
+            
             Pages = new IInventoryPage[]
             {
-                new RustInventoryPage(ItemContainer, this, ItemContainer.parent?.info?.displayName?.translated)
+                new RustInventoryPage(ItemContainer, this, name)
             };
         }
 
