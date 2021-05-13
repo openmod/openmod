@@ -11,6 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using OpenMod.API.Eventing;
+using OpenMod.Core.Permissions.Events;
+
 namespace OpenMod.Core.Permissions
 {
     [OpenModInternal]
@@ -20,11 +23,16 @@ namespace OpenMod.Core.Permissions
     {
         private readonly IPermissionRolesDataStore m_PermissionRolesDataStore;
         private readonly IUserDataStore m_UserDataStore;
+        private readonly IRuntime m_Runtime;
+        private readonly IEventBus m_EventBus;
 
-        public DefaultPermissionRoleStore(IPermissionRolesDataStore permissionRolesDataStore, IUserDataStore userDataStore)
+        public DefaultPermissionRoleStore(IPermissionRolesDataStore permissionRolesDataStore, IUserDataStore userDataStore,
+            IRuntime runtime,IEventBus eventBus)
         {
             m_PermissionRolesDataStore = permissionRolesDataStore;
             m_UserDataStore = userDataStore;
+            m_Runtime = runtime;
+            m_EventBus = eventBus;
         }
 
         public virtual async Task<IReadOnlyCollection<IPermissionRole>> GetRolesAsync(IPermissionActor actor, bool inherit = true)
@@ -112,7 +120,7 @@ namespace OpenMod.Core.Permissions
 
         public virtual Task<IReadOnlyCollection<IPermissionRole>> GetRolesAsync()
         {
-            //cast is neccessary, OfType<> or Cast<> does not work with cast operators
+            // cast is necessary, OfType<> or Cast<> does not work with cast operators
             return Task.FromResult<IReadOnlyCollection<IPermissionRole>>(m_PermissionRolesDataStore.Roles
                 .Where(d => d != null)
                 .Select(d => (IPermissionRole)(PermissionRole)d)
@@ -131,7 +139,7 @@ namespace OpenMod.Core.Permissions
                 return Task.FromResult<IPermissionRole?>(result: null);
             }
 
-            //cast is neccessary, OfType<> or Cast<> does not work with cast operators
+            // cast is necessary, OfType<> or Cast<> does not work with cast operators
             return Task.FromResult<IPermissionRole?>(m_PermissionRolesDataStore.Roles
                 .Select(d => (IPermissionRole)(PermissionRole)d)
                 .FirstOrDefault(d => d.Id.Equals(roleId, StringComparison.OrdinalIgnoreCase)));
@@ -163,6 +171,9 @@ namespace OpenMod.Core.Permissions
             roleData.Data ??= new Dictionary<string, object?>();
 
             await m_PermissionRolesDataStore.SaveChangesAsync();
+
+            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionRoleUpdatedEvent((PermissionRole) roleData));
+
             return true;
         }
 
@@ -191,7 +202,11 @@ namespace OpenMod.Core.Permissions
             }
 
             userData.Roles.Add(roleId);
+
             await m_UserDataStore.SetUserDataAsync(userData);
+
+            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionActorRoleAddedEvent(actor, roleId));
+
             return true;
         }
 
@@ -214,7 +229,11 @@ namespace OpenMod.Core.Permissions
             }
 
             userData.Roles.Remove(roleId);
+
             await m_UserDataStore.SetUserDataAsync(userData);
+
+            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionActorRoleRemovedEvent(actor, roleId));
+
             return true;
         }
 
@@ -230,7 +249,7 @@ namespace OpenMod.Core.Permissions
                 return false;
             }
 
-            m_PermissionRolesDataStore.Roles.Add(new PermissionRoleData
+            var data = new PermissionRoleData
             {
                 Priority = role.Priority,
                 Id = role.Id,
@@ -238,9 +257,14 @@ namespace OpenMod.Core.Permissions
                 Parents = new HashSet<string>(role.Parents, StringComparer.InvariantCultureIgnoreCase),
                 Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase),
                 IsAutoAssigned = role.IsAutoAssigned
-            });
+            };
+
+            m_PermissionRolesDataStore.Roles.Add(data);
 
             await m_PermissionRolesDataStore.SaveChangesAsync();
+
+            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionRoleCreatedEvent((PermissionRole) data));
+
             return true;
         }
 
@@ -251,12 +275,16 @@ namespace OpenMod.Core.Permissions
                 throw new ArgumentNullException(nameof(roleId));
             }
 
-            if (m_PermissionRolesDataStore.Roles.RemoveAll(c => roleId.Equals(c.Id, StringComparison.OrdinalIgnoreCase)) == 0)
+            var roleData = m_PermissionRolesDataStore.Roles.FirstOrDefault(d => d.Id?.Equals(roleId, StringComparison.OrdinalIgnoreCase) ?? false);
+            if (roleData == null)
             {
                 return false;
             }
 
             await m_PermissionRolesDataStore.SaveChangesAsync();
+
+            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionRoleDeletedEvent((PermissionRole) roleData));
+
             return true;
         }
 
@@ -309,6 +337,9 @@ namespace OpenMod.Core.Permissions
             }
 
             await m_PermissionRolesDataStore.SaveChangesAsync();
+
+            await m_EventBus.EmitAsync(m_Runtime, this, new PermissionRoleDataUpdatedEvent((PermissionRole) roleData, key, data, typeof(T)));
+
         }
 
         public Task<T?> GetPersistentDataAsync<T>(string roleId, string key)
@@ -328,7 +359,7 @@ namespace OpenMod.Core.Permissions
 
         protected IEnumerable<IPermissionRole> GetAutoAssignRoles()
         {
-            //cast is neccessary, OfType<> or Cast<> does not work with cast operators
+            // cast is necessary, OfType<> or Cast<> does not work with cast operators
             return m_PermissionRolesDataStore.Roles
                 .Select(d => (PermissionRole)d)
                 .Where(d => d.IsAutoAssigned);
