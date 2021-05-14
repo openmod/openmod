@@ -3,6 +3,9 @@ using OpenMod.Core.Eventing;
 
 namespace OpenMod.Core.Permissions.Events
 {
+    /// <summary>
+    /// Event that is triggered when a role is added to or removed from the actor
+    /// </summary>
     public abstract class PermissionActorRoleEvent : Event
     {
 
