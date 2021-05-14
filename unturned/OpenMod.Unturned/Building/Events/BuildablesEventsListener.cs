@@ -161,8 +161,8 @@ namespace OpenMod.Unturned.Building.Events
             shouldAllow = !@event.IsCancelled;
         }
 
-        private void OnDeployStructureRequested(Structure structure, ItemStructureAsset asset, ref Vector3 point,
-            ref float angleX, ref float angleY, ref float angleZ, ref ulong owner, ref ulong @group, ref bool shouldAllow)
+        private void OnDeployStructureRequested(Structure structure, ItemStructureAsset asset, // lgtm [cs/too-many-ref-parameters]
+            ref Vector3 point, ref float angleX, ref float angleY, ref float angleZ, ref ulong owner, ref ulong @group, ref bool shouldAllow)
         {
             var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2); // lgtm [cs/loss-of-precision]
 
@@ -233,7 +233,8 @@ namespace OpenMod.Unturned.Building.Events
             shouldAllow = !@event.IsCancelled;
         }
 
-        private void OnModifySignRequested(CSteamID steamId, InteractableSign sign, ref string text, ref bool shouldAllow)
+        private void OnModifySignRequested(CSteamID steamId, InteractableSign sign,  // lgtm [cs/too-many-ref-parameters]
+            ref string text, ref bool shouldAllow)
         {
             UnturnedBarricadeBuildable? buildable = GetUnturnedBarricadeBuildableByInteractable(sign);
             if (buildable == null)
