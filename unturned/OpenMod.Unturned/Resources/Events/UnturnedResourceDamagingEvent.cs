@@ -6,11 +6,10 @@ using SDG.Unturned;
 
 using Steamworks;
 
-namespace OpenMod.Unturned.Resources.Events {
-
+namespace OpenMod.Unturned.Resources.Events
+{
     public class UnturnedResourceDamagingEvent : Event, ICancellableEvent
     {
-
         public ResourceSpawnpoint ResourceSpawnpoint { get; }
 
         public ushort DamageAmount { get; set; }
@@ -33,5 +32,4 @@ namespace OpenMod.Unturned.Resources.Events {
             InstigatorId = instigatorId;
         }
     }
-
 }

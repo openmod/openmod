@@ -19,7 +19,6 @@ namespace OpenMod.Unturned.Resources.Events
     [UsedImplicitly]
     internal class ResourcesEventsListener : UnturnedEventsListener
     {
-
         public ResourcesEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
@@ -33,8 +32,8 @@ namespace OpenMod.Unturned.Resources.Events
             ResourceManager.onDamageResourceRequested -= OnDamageResourceRequested;
         }
 
-        private void OnDamageResourceRequested(CSteamID instigatorSteamId, Transform objectTransform, ref ushort pendingTotalDamage,
-            ref bool shouldAllow, EDamageOrigin damageOrigin)
+        private void OnDamageResourceRequested(CSteamID instigatorSteamId, Transform objectTransform, // lgtm [cs/too-many-ref-parameters]
+            ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
             if (!ResourceManager.tryGetRegion(objectTransform, out byte x, out byte y, out ushort index))
             {
