@@ -1,9 +1,10 @@
-﻿using OpenMod.Unturned.Players;
+﻿using OpenMod.Extensions.Games.Abstractions.Building;
+using OpenMod.Unturned.Players;
 using Steamworks;
 
 namespace OpenMod.Unturned.Building.Events
 {
-    public class UnturnedBuildableTransformedEvent : UnturnedBuildableEvent
+    public class UnturnedBuildableTransformedEvent : UnturnedBuildableEvent, IBuildableTransformedEvent
     {
         public CSteamID InstigatorSteamId { get; }
 

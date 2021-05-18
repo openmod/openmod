@@ -1,12 +1,10 @@
-using OpenMod.API.Eventing;
-
+using OpenMod.Extensions.Games.Abstractions.Building;
 using UnityEngine;
-
 using Event = OpenMod.Core.Eventing.Event;
 
 namespace OpenMod.Unturned.Building.Events
 {
-    public class UnturnedBuildableDeployingEvent : Event, ICancellableEvent
+    public class UnturnedBuildableDeployingEvent : Event, IBuildableDeployingEvent
     {
 
         public UnturnedBuildableAsset Asset { get; }
@@ -20,6 +18,8 @@ namespace OpenMod.Unturned.Building.Events
         public ulong Group { get; set; }
 
         public bool IsCancelled { get; set; }
+
+        IBuildableAsset IBuildableDeployingEvent.BuildableAsset => Asset;
 
         public UnturnedBuildableDeployingEvent(UnturnedBuildableAsset asset, Vector3 point, Quaternion rotation, ulong owner, ulong @group)
         {
