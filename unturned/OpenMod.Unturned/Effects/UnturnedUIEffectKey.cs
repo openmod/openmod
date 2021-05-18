@@ -20,7 +20,7 @@ namespace OpenMod.Unturned.Effects
         /// <summary>
         /// Checks if this effect key is valid
         /// </summary>
-        private bool IsValid => Value != Invalid.Value;
+        public bool IsValid => Value != Invalid.Value;
 
         public UnturnedUIEffectKey(short value) => Value = value;
 
