@@ -41,23 +41,23 @@ namespace OpenMod.Core.Permissions
             }
 
 
-            m_Logger.LogDebug("Granted permissions for " + actor.DisplayName + ": ");
+            m_Logger.LogDebug("Granted permissions for {ActorName}: ", actor.DisplayName);
             foreach (var knownPerm in grantedPermissions)
             {
-                m_Logger.LogDebug("* " + knownPerm);
+                m_Logger.LogDebug("* {KnownPerm}", knownPerm);
             }
 
-            m_Logger.LogDebug("Denied permissions for " + actor.DisplayName + ": ");
+            m_Logger.LogDebug("Denied permissions for {ActorName}: ", actor.DisplayName);
             foreach (var knownPerm in deniedPermissions)
             {
-                m_Logger.LogDebug("* " + knownPerm);
+                m_Logger.LogDebug("* {KnownPerm}", knownPerm);
             }
 
 
             var permissionTree = BuildPermissionTree(permission);
             foreach (var permissionNode in permissionTree)
             {
-                m_Logger.LogDebug("Checking node: " + permissionNode);
+                m_Logger.LogDebug("Checking node: {PermissionNode}", permissionNode);
 
                 if (deniedPermissions.Any(c => CheckPermissionEquals(permissionNode, c)))
                 {
@@ -107,10 +107,10 @@ namespace OpenMod.Core.Permissions
             };
 
             var separatorIndices = permission.AllIndexesOf(":");
-            
+
             // replace all ":" with "." for more simple code
             // we will restore : later again
-            permission = permission.Replace(":", "."); 
+            permission = permission.Replace(":", ".");
 
             var parentPath = new StringBuilder();
             foreach (var childPath in permission.Split('.'))

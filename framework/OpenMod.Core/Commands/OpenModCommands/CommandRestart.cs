@@ -57,7 +57,8 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 }
             }
 
-            m_Logger.LogInformation($"Executing command after shutdown: {Environment.NewLine}{binaryPath} {arguments}");
+            m_Logger.LogInformation("Executing command after shutdown: {NewLine}{BinaryPath} {Arguments}",
+                Environment.NewLine, binaryPath, arguments);
 
             var startInfo = new ProcessStartInfo(binaryPath, arguments)
             {

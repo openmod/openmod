@@ -75,8 +75,7 @@ namespace OpenMod.Unturned.Vehicles
                 throw new NotSupportedException($"Cannot add entity {passenger.GetType()} as passenger.");
             }
 
-            VehicleManager.instance.askEnterVehicle(player.SteamId, Vehicle.instanceID, Vehicle.asset.hash, (byte)Vehicle.asset.engine);
-            return player.CurrentVehicle?.VehicleInstanceId == VehicleInstanceId;
+            return VehicleManager.ServerForcePassengerIntoVehicle(player.Player, Vehicle);
         }
 
         public async Task<bool> RemovePassengerAsync(IEntity passenger)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -19,8 +18,8 @@ namespace OpenMod.Core.Commands
         private readonly List<ICommandRegistration> m_Commands;
 
         public OpenModComponentCommandSource(
-            ILogger logger, 
-            IOpenModComponent openModComponent, 
+            ILogger logger,
+            IOpenModComponent openModComponent,
             Assembly assembly)
         {
             m_Logger = logger;
@@ -42,7 +41,9 @@ namespace OpenMod.Core.Commands
                 var commandAttribute = type.GetCustomAttribute<CommandAttribute>();
                 if (commandAttribute == null)
                 {
-                    m_Logger.LogWarning($"Type {type} is missing the [Command(string name)] attribute. Command will not be registered.");
+                    m_Logger.LogWarning(
+                        "Type {Type} is missing the [Command(string name)] attribute. Command will not be registered",
+                        type);
                     continue;
                 }
 
@@ -74,7 +75,7 @@ namespace OpenMod.Core.Commands
             }
             catch(Exception ex)
             {
-                m_Logger.LogDebug(ex, $"Exception in ScanTypeForCommands for type: {type}");
+                m_Logger.LogDebug(ex, "Exception in ScanTypeForCommands for type: {Type}", type);
             }
         }
 

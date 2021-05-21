@@ -1,16 +1,20 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using NuGet.Packaging;
+using NuGet.Packaging.Core;
+using NuGet.Versioning;
+using OpenMod.API;
+using OpenMod.API.Plugins;
+using OpenMod.NuGet;
+using Semver;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using OpenMod.API;
-using OpenMod.API.Plugins;
-using OpenMod.NuGet;
-using Semver;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace OpenMod.Core.Plugins
 {
@@ -46,6 +50,69 @@ namespace OpenMod.Core.Plugins
             }
         }
 
+        private async Task<ICollection<Assembly>> InstallPackagesInEmbeddedFile(Assembly assembly, ICollection<Assembly> ignoredAssemblies)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            var newPlugins = new List<Assembly>();
+
+            try
+            {
+                var packagesResourceName = assembly.GetManifestResourceNames()
+                    .FirstOrDefault(x => x.EndsWith("packages.yaml"));
+                if (packagesResourceName == null) return newPlugins;
+
+                using var stream = assembly.GetManifestResourceStream(packagesResourceName);
+                if (stream == null) return newPlugins;
+
+                using var reader = new StreamReader(stream);
+                var packagesContent = await reader.ReadToEndAsync();
+
+                var deserialized = deserializer.Deserialize<SerializedPackagesFile>(packagesContent).Packages;
+
+                var packages = deserialized?.Select(d => new PackageIdentity(d.Id,
+                        d.Version.Equals("latest", StringComparison.OrdinalIgnoreCase)
+                            ? null
+                            : new NuGetVersion(d.Version)))
+                    .ToList();
+
+                if (packages == null || packages.Count == 0) return newPlugins;
+
+                m_Logger.LogInformation(
+                    "Found and installing embedded NuGet packages for plugin assembly: {AssemblyName}",
+                    assembly.GetName().Name);
+
+                var existingPackages = m_NuGetPackageManager.GetLoadedAssemblies();
+
+                await m_NuGetPackageManager.InstallPackagesAsync(packages);
+
+                var newAssemblies = m_NuGetPackageManager.GetLoadedAssemblies().Except(existingPackages);
+
+                foreach (var newAssembly in newAssemblies.Select(x => (Assembly)x.Assembly.Target))
+                {
+                    if (newAssembly == null) continue;
+
+                    if (newAssembly.GetCustomAttribute<PluginMetadataAttribute>() == null) continue;
+
+                    if (ignoredAssemblies.Contains(newAssembly)) continue;
+
+                    if (m_LoadedPluginAssemblies.Select(x => x.Target).Cast<Assembly>().Contains(newAssembly)) continue;
+
+                    newPlugins.Add(newAssembly);
+                }
+            }
+            catch (Exception ex)
+            {
+                newPlugins.Clear();
+                m_Logger.LogError(ex, "Failed to check/load embedded NuGet packages for assembly: {Assembly}",
+                    assembly);
+            }
+
+            return newPlugins;
+        }
+
         public async Task<ICollection<Assembly>> LoadPluginAssembliesAsync(IPluginAssembliesSource source)
         {
             if (source == null)
@@ -60,11 +127,18 @@ namespace OpenMod.Core.Plugins
                 var pluginMetadata = providerAssembly.GetCustomAttribute<PluginMetadataAttribute>();
                 if (pluginMetadata == null)
                 {
-                    m_Logger.LogWarning($"No plugin metadata attribute found in assembly: {providerAssembly}; skipping loading of this assembly as plugin");
+                    m_Logger.LogWarning(
+                        "No plugin metadata attribute found in assembly: {ProviderAssembly}; skipping loading of this assembly as plugin",
+                        providerAssembly);
                     providerAssemblies.Remove(providerAssembly);
                     continue;
                 }
 
+                providerAssemblies.AddRange(await InstallPackagesInEmbeddedFile(providerAssembly, providerAssemblies));
+            }
+
+            foreach (var providerAssembly in providerAssemblies.ToList())
+            {
                 ICollection<Type> types;
                 try
                 {
@@ -78,7 +152,9 @@ namespace OpenMod.Core.Plugins
                     var missingAssemblies = CheckRequiredDependencies(ex.LoaderExceptions);
                     if (!TryInstallMissingDependencies)
                     {
-                        m_Logger.LogWarning($"Couldn't load plugin from {providerAssembly}: Failed to resolve required dependencies: {string.Join(", ", missingAssemblies.Keys)}", Color.DarkRed);
+                        m_Logger.LogWarning(
+                            "Couldn't load plugin from {ProviderAssembly}: Failed to resolve required dependencies: {MissingAssemblies}",
+                            providerAssembly, string.Join(", ", missingAssemblies.Keys));
                         continue;
                     }
 
@@ -91,7 +167,9 @@ namespace OpenMod.Core.Plugins
                     continue;
                 }
 
-                m_Logger.LogWarning($"No {nameof(IOpenModPlugin)} implementation found in assembly: {providerAssembly}; skipping loading of this assembly as plugin");
+                m_Logger.LogWarning(
+                    "No {PluginInterfaceName} implementation found in assembly: {ProviderAssembly}; skipping loading of this assembly as plugin",
+                    nameof(IOpenModPlugin), providerAssembly);
                 providerAssemblies.Remove(providerAssembly);
             }
 
@@ -156,14 +234,16 @@ namespace OpenMod.Core.Plugins
                         continue;
                     }
 
-                    m_Logger.LogWarning($"Failed to install \"{assembly.Key}\": {result.Code}", Color.DarkRed);
+                    m_Logger.LogWarning("Failed to install \"{AssemblyName}\": {ResultCode}",
+                        assembly.Key, result.Code);
                 }
                 else
                 {
-                    m_Logger.LogWarning($"Package not found: {assembly.Key}", Color.DarkRed);
+                    m_Logger.LogWarning("Package not found: {AssemblyName}", assembly.Key);
                 }
 
-                m_Logger.LogWarning($"Plugin \"{providerAssembly.GetName().Name}\" can't load without it!", Color.DarkRed);
+                m_Logger.LogWarning("Plugin \"{ProviderAssemblyName}\" can't load without it!",
+                    providerAssembly.GetName().Name);
                 return;
             }
         }

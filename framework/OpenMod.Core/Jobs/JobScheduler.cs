@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Cronos;
@@ -215,19 +214,19 @@ namespace OpenMod.Core.Jobs
 
             if (string.IsNullOrEmpty(job.Name))
             {
-                m_Logger.LogError($"Job of type {job.Task} has no name set.");
+                m_Logger.LogError("Job of type {TaskType} has no name set", job.Task);
                 return;
             }
 
             if (string.IsNullOrEmpty(job.Task))
             {
-                m_Logger.LogError($"Job \"{job.Name}\" has no task set.");
+                m_Logger.LogError("Job \"{JobName}\" has no task set", job.Name);
                 return;
             }
 
             if (string.IsNullOrEmpty(job.Schedule))
             {
-                m_Logger.LogError($"Job \"{job.Name}\" has no schedule set.");
+                m_Logger.LogError("Job \"{JobName}\" has no schedule set", job.Name);
                 return;
             }
 
@@ -258,7 +257,8 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            m_Logger.LogInformation($"Scheduling job \"{job.Name}\" with schedule \"{job.Schedule}\"");
+            m_Logger.LogInformation("Scheduling job \"{JobName}\" with schedule \"{JobSchedule}\"",
+                job.Name, job.Schedule);
             ScheduleCronJob(job);
         }
 
@@ -278,7 +278,8 @@ namespace OpenMod.Core.Jobs
             }
             catch (Exception ex)
             {
-                m_Logger.LogError(ex, $"Invalid crontab syntax \"{job.Schedule}\" for job: {job.Name}");
+                m_Logger.LogError(ex, "Invalid crontab syntax \"{JobSchedule}\" for job: {JobName}",
+                    job.Schedule, job.Name);
                 return;
             }
 
@@ -320,11 +321,11 @@ namespace OpenMod.Core.Jobs
             var jobExecutor = m_JobExecutors.FirstOrDefault(d => d.SupportsType(job.Task!));
             if (jobExecutor == null)
             {
-                m_Logger.LogError($"[{job.Name}] Unknown job type: {job.Task}");
+                m_Logger.LogError("[{JobName}] Unknown job type: {TaskType}", job.Name, job.Task);
                 return;
             }
 
-            m_Logger.LogInformation($"Executing job \"{job.Name}\"...");
+            m_Logger.LogInformation("Executing job \"{JobName}\"...", job.Name);
 
             try
             {
@@ -332,7 +333,7 @@ namespace OpenMod.Core.Jobs
             }
             catch (Exception ex)
             {
-                m_Logger.LogError(ex, $"Job \"{job.Name}\" generated an exception.");
+                m_Logger.LogError(ex, "Job \"{JobName}\" generated an exception", job.Name);
             }
         }
 

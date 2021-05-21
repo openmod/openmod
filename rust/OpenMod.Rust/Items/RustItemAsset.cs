@@ -1,5 +1,5 @@
-using System.Globalization;
 using OpenMod.Extensions.Games.Abstractions.Items;
+using System.Globalization;
 
 namespace OpenMod.Rust.Items
 {
@@ -25,6 +25,21 @@ namespace OpenMod.Rust.Items
         public string ItemType
         {
             get { return ItemDefinition.category.ToString().ToLower(CultureInfo.InvariantCulture); }
+        }
+
+        public double? MaxQuality
+        {
+            get { return ItemDefinition.condition.enabled ? ItemDefinition.condition.max : null; }
+        }
+
+        public double? MaxAmount
+        {
+            get { return ItemDefinition.stackable; }
+        }
+
+        public double? MaxDurability
+        {
+            get { return MaxQuality; }
         }
     }
 }

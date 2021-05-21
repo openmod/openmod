@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Items;
+using System.Threading.Tasks;
 
 namespace OpenMod.Rust.Items
 {
@@ -31,13 +31,15 @@ namespace OpenMod.Rust.Items
             return DropTask().AsTask();
         }
 
-        public Task DestroyAsync()
+        public Task<bool> DestroyAsync()
         {
-            async UniTask DestroyTask()
+            async UniTask<bool> DestroyTask()
             {
                 await UniTask.SwitchToMainThread();
 
                 Item.Item.GetOwnerPlayer().inventory.Take(null, Item.Item.info.itemid, Item.Item.amount);
+
+                return true;
             }
 
             return DestroyTask().AsTask();

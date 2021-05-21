@@ -85,7 +85,8 @@ namespace OpenMod.Core.Plugins
                 if (pluginMetadata == null)
                 {
                     m_Logger.LogError(
-                        $"Failed to load plugin from assembly {assembly}: couldn't find any plugin metadata");
+                        "Failed to load plugin from assembly {Assembly}: couldn't find any plugin metadata",
+                        assembly);
                     return null;
                 }
 
@@ -93,14 +94,16 @@ namespace OpenMod.Core.Plugins
                 if (pluginTypes.Count == 0)
                 {
                     m_Logger.LogError(
-                        $"Failed to load plugin from assembly {assembly}: couldn't find any IOpenModPlugin implementation");
+                        "Failed to load plugin from assembly {Assembly}: couldn't find any IOpenModPlugin implementation",
+                        assembly);
                     return null;
                 }
 
                 if (pluginTypes.Count > 1)
                 {
                     m_Logger.LogError(
-                        $"Failed to load plugin from assembly {assembly}: assembly has multiple IOpenModPlugin instances");
+                        "Failed to load plugin from assembly {Assembly}: assembly has multiple IOpenModPlugin instances",
+                        assembly);
                     return null;
                 }
 
@@ -217,8 +220,8 @@ namespace OpenMod.Core.Plugins
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex,
-                        $"Failed to load plugin from type: {pluginType.FullName} in assembly: {assembly.FullName}");
+                    m_Logger.LogError(ex, "Failed to load plugin from type: {PluginName} in assembly: {AssemblyName}",
+                        pluginType.FullName, assembly.FullName);
                     return null;
                 }
 
@@ -231,7 +234,8 @@ namespace OpenMod.Core.Plugins
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, $"Failed to load plugin: {pluginInstance.DisplayName} v{pluginInstance.Version}");
+                    m_Logger.LogError(ex, "Failed to load plugin: {PluginName} v{PluginVersion}",
+                        pluginInstance.DisplayName, pluginInstance.Version);
 
                     try
                     {
@@ -250,7 +254,7 @@ namespace OpenMod.Core.Plugins
             }
             catch (Exception ex)
             {
-                m_Logger.LogError(ex, $"Failed to load plugin from assembly: {assembly.FullName}");
+                m_Logger.LogError(ex, "Failed to load plugin from assembly: {AssemblyName}", assembly.FullName);
                 return null;
             }
         }
@@ -266,10 +270,11 @@ namespace OpenMod.Core.Plugins
                 {
                     return;
                 }
-                
+
                 AsyncHelper.Schedule($"Configuration changed event for {pluginInstance.OpenModComponentId}", () =>
                 {
-                    pluginLogger.LogInformation($"Configuration updated for plugin: {pluginInstance.OpenModComponentId}");
+                    pluginLogger.LogInformation("Configuration updated for plugin: {ComponentId}",
+                        pluginInstance.OpenModComponentId);
                     return m_EventBus.EmitAsync(m_Runtime, this, new PluginConfigurationChangedEvent(pluginInstance, pluginConfiguration));
                 });
 
@@ -300,12 +305,12 @@ namespace OpenMod.Core.Plugins
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, $"An exception occured while unloading {instance.DisplayName}");
+                    m_Logger.LogError(ex, "An exception occured while unloading {DisplayName}", instance.DisplayName);
                 }
             }
 
             m_ActivatedPlugins.Clear();
-            m_Logger.LogInformation($"> {i} plugins unloaded.");
+            m_Logger.LogInformation("> {Count} plugins unloaded", i);
         }
     }
 }

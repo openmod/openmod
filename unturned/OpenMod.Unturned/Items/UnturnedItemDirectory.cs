@@ -25,9 +25,12 @@ namespace OpenMod.Unturned.Items
         {
             var drops = new List<IItemDrop>();
 
-            foreach (var region in ItemManager.regions)
+            for (byte x = 0; x < Regions.WORLD_SIZE; x++)
             {
-                drops.AddRange(region.items.Select(d => new UnturnedItemDrop(region, d)));
+                for (byte y = 0; y < Regions.WORLD_SIZE; y++)
+                {
+                    drops.AddRange(ItemManager.regions[x, y].items.Select(d => new UnturnedItemDrop(x, y, d)));
+                }
             }
 
             return Task.FromResult<IReadOnlyCollection<IItemDrop>>(drops);

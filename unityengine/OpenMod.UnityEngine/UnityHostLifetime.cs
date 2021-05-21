@@ -47,7 +47,7 @@ namespace OpenMod.UnityEngine
 
             if (!m_ShutdownBlock.WaitOne(m_HostOptions.ShutdownTimeout))
             {
-                m_Logger.LogInformation("Waiting for the host to be disposed. Ensure all 'IHost' instances are wrapped in 'using' blocks.");
+                m_Logger.LogInformation("Waiting for the host to be disposed. Ensure all 'IHost' instances are wrapped in 'using' blocks");
             }
 
             m_ShutdownBlock.WaitOne();

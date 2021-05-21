@@ -1,11 +1,11 @@
-﻿using OpenMod.API.Eventing;
+﻿using OpenMod.Extensions.Games.Abstractions.Building;
 using OpenMod.Unturned.Players;
 using Steamworks;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Building.Events
 {
-    public class UnturnedBuildableTransformingEvent : UnturnedBuildableEvent, ICancellableEvent
+    public class UnturnedBuildableTransformingEvent : UnturnedBuildableEvent, IBuildableTransformingEvent
     {
         public UnturnedPlayer Instigator { get; }
 

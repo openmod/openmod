@@ -1,16 +1,16 @@
-﻿using System;
+﻿using dnlib.DotNet;
+using OpenMod.Common.Helpers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using dnlib.DotNet;
-using OpenMod.Common.Helpers;
 
 namespace OpenMod.Common.Hotloading
 {
     /// <summary>
     /// Adds support for hotloading assemblies.
-    /// Use <see cref="LoadAssembly"/> instead of <see cref="Assembly.Load(byte[])"/>.
+    /// Use <see cref="LoadAssembly(byte[])"/> instead of <see cref="Assembly.Load(byte[])"/>.
     /// </summary>
     public static class Hotloader
     {
@@ -29,23 +29,7 @@ namespace OpenMod.Common.Hotloading
 
         private static Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            Assembly? match = null;
-            var name = ReflectionExtensions.GetVersionIndependentName(args.Name);
-
-            foreach (var kv in s_Assemblies)
-            {
-                if (kv.Key.Equals(args.Name))
-                {
-                    return kv.Value;
-                }
-
-                if (ReflectionExtensions.GetVersionIndependentName(kv.Key).Equals(name))
-                {
-                    match = kv.Value;
-                }
-            }
-
-            return match;
+            return GetAssembly(args.Name);
         }
 
         /// <summary>
@@ -55,9 +39,20 @@ namespace OpenMod.Common.Hotloading
         /// <returns>The loaded assembly.</returns>
         public static Assembly LoadAssembly(byte[] assemblyData)
         {
+            return LoadAssembly(assemblyData, assemblySymbols: null);
+        }
+
+        /// <summary>
+        /// Hotloads an assembly. Redirects to <see cref="Assembly.Load(byte[], byte[])"/> if <see cref="Enabled"/> is set to false.
+        /// </summary>
+        /// <param name="assemblyData">The assembly to hotload.</param>
+        /// <param name="assemblySymbols">A byte array that contains the raw bytes representing the symbols for the assembly.</param>
+        /// <returns>The loaded assembly.</returns>
+        public static Assembly LoadAssembly(byte[] assemblyData, byte[]? assemblySymbols)
+        {
             if (!Enabled)
             {
-                return Assembly.Load(assemblyData);
+                return Assembly.Load(assemblyData, assemblySymbols);
             }
 
             using var input = new MemoryStream(assemblyData, writable: false);
@@ -73,7 +68,7 @@ namespace OpenMod.Common.Hotloading
             {
                 // Don't hotload strong-named assemblies unless mono
                 // Will cause FileLoadException's if not mono
-                return Assembly.Load(assemblyData);
+                return Assembly.Load(assemblyData, assemblySymbols);
             }
 
             var realFullname = module.Assembly.FullName;
@@ -86,7 +81,7 @@ namespace OpenMod.Common.Hotloading
             var guid = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 6);
             var name = $"{module.Assembly.Name}-{guid}";
 
-            module.Assembly.Name = name; 
+            module.Assembly.Name = name;
             module.Assembly.PublicKey = null;
             module.Assembly.HasPublicKey = false;
 
@@ -94,7 +89,7 @@ namespace OpenMod.Common.Hotloading
             output.Seek(offset: 0, SeekOrigin.Begin);
 
             var newAssemblyData = output.ToArray();
-            var assembly = Assembly.Load(newAssemblyData);
+            var assembly = Assembly.Load(newAssemblyData, assemblySymbols);
             s_Assemblies.Add(realFullname, assembly);
             return assembly;
         }
@@ -118,12 +113,22 @@ namespace OpenMod.Common.Hotloading
         /// <returns><b>The hotloaded assembly</b> if found; otherwise, <b>null</b>.</returns>
         public static Assembly? GetAssembly(string fullname)
         {
-            if (!s_Assemblies.ContainsKey(fullname))
+            if (s_Assemblies.TryGetValue(fullname, out var assembly))
             {
-                return null;
+                return assembly;
             }
 
-            return s_Assemblies[fullname];
+            var name = ReflectionExtensions.GetVersionIndependentName(fullname);
+
+            foreach (var kv in s_Assemblies)
+            {
+                if (ReflectionExtensions.GetVersionIndependentName(kv.Key).Equals(name))
+                {
+                    return kv.Value;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

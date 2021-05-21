@@ -62,7 +62,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void Events_OnWearBackpack(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
@@ -71,12 +71,12 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 var c = nativePlayer.clothing;
 
                 var item = new Item(c.backpack, 1, c.backpackQuality, c.backpackState);
-                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedItem(item), ClothingType.Backpack);
+                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Backpack));
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedItem(item), ClothingType.Backpack);
+                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Backpack));
             }
 
             @event.IsCancelled = cancel;
@@ -88,7 +88,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void Events_OnWearGlasses(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
@@ -97,12 +97,12 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 PlayerClothing c = nativePlayer.clothing;
 
                 var item = new Item(c.glasses, 1, c.glassesQuality, c.glassesState);
-                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedItem(item), ClothingType.Glasses);
+                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Glasses));
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedItem(item), ClothingType.Glasses);
+                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Glasses));
             }
 
             @event.IsCancelled = cancel;
@@ -114,7 +114,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void Events_OnWearHat(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
@@ -123,12 +123,12 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 PlayerClothing c = nativePlayer.clothing;
 
                 var item = new Item(c.hat, 1, c.hatQuality, c.hatState);
-                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedItem(item), ClothingType.Hat);
+                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Hat));
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedItem(item), ClothingType.Hat);
+                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Hat));
             }
 
             @event.IsCancelled = cancel;
@@ -140,7 +140,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void Events_OnWearMask(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
@@ -149,12 +149,12 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 PlayerClothing c = nativePlayer.clothing;
 
                 var item = new Item(c.mask, 1, c.maskQuality, c.maskState);
-                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedItem(item), ClothingType.Mask);
+                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Mask));
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedItem(item), ClothingType.Mask);
+                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Mask));
             }
 
             @event.IsCancelled = cancel;
@@ -166,7 +166,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void Events_OnWearPants(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
@@ -174,12 +174,12 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             {
                 var c = nativePlayer.clothing;
                 var item = new Item(c.pants, 1, c.pantsQuality, c.pantsState);
-                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedItem(item), ClothingType.Pants);
+                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Pants));
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedItem(item), ClothingType.Pants);
+                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Pants));
             }
 
             @event.IsCancelled = cancel;
@@ -191,7 +191,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void Events_OnWearShirt(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
@@ -200,12 +200,12 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 PlayerClothing c = nativePlayer.clothing;
 
                 var item = new Item(c.shirt, 1, c.shirtQuality, c.shirtState);
-                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedItem(item), ClothingType.Shirt);
+                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Shirt));
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedItem(item), ClothingType.Shirt);
+                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Shirt));
             }
 
             @event.IsCancelled = cancel;
@@ -217,7 +217,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void Events_OnWearVest(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
@@ -226,12 +226,12 @@ namespace OpenMod.Unturned.Players.Clothing.Events
                 PlayerClothing c = nativePlayer.clothing;
 
                 var item = new Item(c.vest, 1, c.vestQuality, c.vestState);
-                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedItem(item), ClothingType.Vest);
+                @event = new UnturnedPlayerClothingUnequippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Vest));
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedItem(item), ClothingType.Vest);
+                @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Vest));
             }
 
             @event.IsCancelled = cancel;
@@ -243,18 +243,18 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnBackpackUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             IEvent @event;
 
             if (id == 0)
             {
-                @event = new UnturnedPlayerClothingUnequippedEvent(player!, ClothingType.Backpack);
+                @event = new UnturnedPlayerClothingUnequippedEvent(player, ClothingType.Backpack);
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippedEvent(player!, new UnturnedItem(item), ClothingType.Backpack);
+                @event = new UnturnedPlayerClothingEquippedEvent(player, new UnturnedClothingItem(item, player, ClothingType.Backpack));
             }
 
             Emit(@event);
@@ -262,18 +262,18 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnGlassesUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             IEvent @event;
 
             if (id == 0)
             {
-                @event = new UnturnedPlayerClothingUnequippedEvent(player!, ClothingType.Glasses);
+                @event = new UnturnedPlayerClothingUnequippedEvent(player, ClothingType.Glasses);
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippedEvent(player!, new UnturnedItem(item), ClothingType.Glasses);
+                @event = new UnturnedPlayerClothingEquippedEvent(player, new UnturnedClothingItem(item, player, ClothingType.Glasses));
             }
 
             Emit(@event);
@@ -281,18 +281,18 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnHatUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             IEvent @event;
 
             if (id == 0)
             {
-                @event = new UnturnedPlayerClothingUnequippedEvent(player!, ClothingType.Hat);
+                @event = new UnturnedPlayerClothingUnequippedEvent(player, ClothingType.Hat);
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippedEvent(player!, new UnturnedItem(item), ClothingType.Hat);
+                @event = new UnturnedPlayerClothingEquippedEvent(player, new UnturnedClothingItem(item, player, ClothingType.Hat));
             }
 
             Emit(@event);
@@ -300,18 +300,18 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnMaskUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             IEvent @event;
 
             if (id == 0)
             {
-                @event = new UnturnedPlayerClothingUnequippedEvent(player!, ClothingType.Mask);
+                @event = new UnturnedPlayerClothingUnequippedEvent(player, ClothingType.Mask);
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippedEvent(player!, new UnturnedItem(item), ClothingType.Mask);
+                @event = new UnturnedPlayerClothingEquippedEvent(player, new UnturnedClothingItem(item, player, ClothingType.Mask));
             }
 
             Emit(@event);
@@ -319,18 +319,18 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnPantsUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             IEvent @event;
 
             if (id == 0)
             {
-                @event = new UnturnedPlayerClothingUnequippedEvent(player!, ClothingType.Pants);
+                @event = new UnturnedPlayerClothingUnequippedEvent(player, ClothingType.Pants);
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippedEvent(player!, new UnturnedItem(item), ClothingType.Pants);
+                @event = new UnturnedPlayerClothingEquippedEvent(player, new UnturnedClothingItem(item, player, ClothingType.Pants));
             }
 
             Emit(@event);
@@ -338,18 +338,18 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnShirtUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             IEvent @event;
 
             if (id == 0)
             {
-                @event = new UnturnedPlayerClothingUnequippedEvent(player!, ClothingType.Shirt);
+                @event = new UnturnedPlayerClothingUnequippedEvent(player, ClothingType.Shirt);
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippedEvent(player!, new UnturnedItem(item), ClothingType.Shirt);
+                @event = new UnturnedPlayerClothingEquippedEvent(player, new UnturnedClothingItem(item, player, ClothingType.Shirt));
             }
 
             Emit(@event);
@@ -357,18 +357,18 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         private void OnVestUpdated(Player nativePlayer, ushort id, byte quality, byte[] state)
         {
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(nativePlayer)!;
 
             IEvent @event;
 
             if (id == 0)
             {
-                @event = new UnturnedPlayerClothingUnequippedEvent(player!, ClothingType.Vest);
+                @event = new UnturnedPlayerClothingUnequippedEvent(player, ClothingType.Vest);
             }
             else
             {
                 var item = new Item(id, 1, quality, state);
-                @event = new UnturnedPlayerClothingEquippedEvent(player!, new UnturnedItem(item), ClothingType.Vest);
+                @event = new UnturnedPlayerClothingEquippedEvent(player, new UnturnedClothingItem(item, player, ClothingType.Vest));
             }
 
             Emit(@event);

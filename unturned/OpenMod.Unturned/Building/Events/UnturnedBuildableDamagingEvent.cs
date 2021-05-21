@@ -11,13 +11,14 @@ namespace OpenMod.Unturned.Building.Events
 
         public EDamageOrigin DamageOrigin { get; }
 
-        public UnturnedPlayer Instigator { get; }
+        public UnturnedPlayer? Instigator { get; }
 
         public CSteamID InstigatorId { get; }
 
         public bool IsCancelled { get; set; }
 
-        protected UnturnedBuildableDamagingEvent(UnturnedBuildable buildable, ushort damageAmount, EDamageOrigin damageOrigin, UnturnedPlayer instigator, CSteamID instigatorId) : base(buildable)
+        protected UnturnedBuildableDamagingEvent(UnturnedBuildable buildable, ushort damageAmount, EDamageOrigin damageOrigin,
+            UnturnedPlayer? instigator, CSteamID instigatorId) : base(buildable)
         {
             DamageAmount = damageAmount;
             DamageOrigin = damageOrigin;

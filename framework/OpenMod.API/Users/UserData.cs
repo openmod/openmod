@@ -17,7 +17,7 @@ namespace OpenMod.API.Users
         /// <summary>
         /// Gets or sets the actor type of the user.
         /// </summary>
-        public string? Type { get; set; } 
+        public string? Type { get; set; }
 
         /// <summary>
         /// Gets or sets the last known display name of the user.
@@ -54,6 +54,12 @@ namespace OpenMod.API.Users
             Data = new Dictionary<string, object?>();
             Roles = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+        }
+
+        public UserData(string id, string type) : this()
+        {
+            Id = id;
+            Type = type;
         }
     }
 }

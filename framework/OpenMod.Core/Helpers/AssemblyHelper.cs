@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
@@ -19,7 +18,7 @@ namespace OpenMod.Core.Helpers
             "packages.yaml"
         };
 
-        public static void CopyAssemblyResources(Assembly assembly, string baseDir, bool overwrite = false)
+        public static void CopyAssemblyResources(Assembly assembly, string? baseDir, bool overwrite = false)
         {
             baseDir ??= string.Empty;
 
@@ -41,7 +40,9 @@ namespace OpenMod.Core.Helpers
 
                 if (!resourceName.Contains(assemblyName.Name + "."))
                 {
-                    Log.Warning($"{resourceName} does not contain assembly name in assembly: {assemblyName.Name}. <AssemblyName> and <RootNamespace> must be equal inside your plugins .csproj file.");
+                    Log.Warning(
+                        "{ResourceName} does not contain assembly name in assembly: {AssemblyName}. <AssemblyName> and <RootNamespace> must be equal inside your plugins .csproj file",
+                        resourceName, assemblyName.Name);
                 }
 
                 var regex = new Regex(Regex.Escape(assemblyName.Name + "."));
@@ -93,12 +94,12 @@ namespace OpenMod.Core.Helpers
                 using var stream = assembly.GetManifestResourceStream(resourceName);
                 using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException($"Couldn't find resource: {resourceName}"));
                 var fileContent = reader.ReadToEnd();
-                
+
                 if (File.Exists(filePath) && !overwrite)
                 {
                     continue;
                 }
-                
+
                 File.WriteAllText(filePath, fileContent);
             }
         }

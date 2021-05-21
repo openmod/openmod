@@ -106,7 +106,7 @@ namespace OpenMod.Core.Persistence
                 AsyncHelper.Schedule(
                     name: GetType().Name + "_" + nameof(ChangeEventHandler),
                     task: () => ChangeEventHandler(args),
-                    ex => m_Logger?.LogError(ex, $"Error occured on file change for: {args.FullPath}"));
+                    ex => m_Logger?.LogError(ex, "Error occured on file change for: {FilePath}", args.FullPath));
             };
         }
 
@@ -144,7 +144,7 @@ namespace OpenMod.Core.Persistence
                 {
                     if (DecrementWriteCounter(key))
                     {
-                        m_Logger?.LogDebug($"File changed: {a.FullPath} ({a.ChangeType:X})");
+                        m_Logger?.LogDebug("File changed: {FilePath} ({ChangeType:X})", a.FullPath, a.ChangeType);
                         OnFileChange(key);
                     }
                 }
@@ -363,7 +363,8 @@ namespace OpenMod.Core.Persistence
 
                 AddChangeWatcher(key, m_Runtime!, () =>
                 {
-                    m_Logger.LogInformation($"Reloaded {m_Prefix ?? string.Empty}{key}{m_Suffix ?? string.Empty}.yaml.");
+                    m_Logger.LogInformation("Reloaded {Prefix}{Key}{Suffix}.yaml",
+                        m_Prefix ?? string.Empty, key, m_Suffix ?? string.Empty);
                 });
             }
         }

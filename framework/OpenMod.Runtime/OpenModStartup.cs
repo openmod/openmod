@@ -3,8 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NuGet.Packaging;
-using NuGet.Packaging.Core;
-using NuGet.Versioning;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Plugins;
@@ -22,8 +20,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace OpenMod.Runtime
 {
@@ -72,7 +68,7 @@ namespace OpenMod.Runtime
             var assemblyName = assembly.GetName();
             if (m_RegisteredAssemblies.Contains(assembly.GetName()))
             {
-                m_Logger.LogDebug("Skipping already registered assembly: " + assemblyName);
+                m_Logger.LogDebug("Skipping already registered assembly: {AssemblyName}", assemblyName);
                 return;
             }
 
@@ -97,46 +93,7 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, $"Failed to copy resources from assembly: {assembly}");
-                }
-            }
-
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
-            foreach (var assembly in assemblies)
-            {
-                // Install packages specified in packages.yaml
-                try
-                {
-                    var packagesResourceName = assembly.GetManifestResourceNames()
-                        .FirstOrDefault(x => x.EndsWith("packages.yaml"));
-                    if (packagesResourceName == null) continue;
-
-                    using var stream = assembly.GetManifestResourceStream(packagesResourceName);
-                    if (stream == null) continue;
-
-                    using var reader = new StreamReader(stream);
-                    var packagesContent = await reader.ReadToEndAsync();
-
-                    var deserialized = deserializer.Deserialize<SerializedPackagesFile>(packagesContent).Packages;
-                    
-                    var packages = deserialized?.Select(d => new PackageIdentity(d.Id,
-                        d.Version.Equals("latest", StringComparison.OrdinalIgnoreCase)
-                            ? null
-                            : new NuGetVersion(d.Version)))
-                        .ToList();
-
-                    if (packages == null || packages.Count == 0) continue;
-
-                    m_Logger.LogInformation($"Found and installing embedded NuGet packages for plugin assembly: {assembly.GetName().Name}");
-
-                    await m_NuGetPackageManager.InstallPackagesAsync(packages);
-                }
-                catch (Exception ex)
-                {
-                    m_Logger.LogError(ex, $"Failed to check/load embedded NuGet packages for assembly: {assembly}");
+                    m_Logger.LogError(ex, "Failed to copy resources from assembly: {Assembly}", assembly);
                 }
             }
 
@@ -149,7 +106,7 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, $"Failed to load services from assembly: {assembly}");
+                    m_Logger.LogError(ex, "Failed to load services from assembly: {Assembly}", assembly);
                 }
             }
 
@@ -172,7 +129,8 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError("Failed to configure configuration from: " + configurationConfiguratorType.FullName, ex);
+                    m_Logger.LogError(ex, "Failed to configure configuration from: {ConfiguratorType}",
+                        configurationConfiguratorType.FullName);
                 }
             }
         }
@@ -191,7 +149,6 @@ namespace OpenMod.Runtime
 
             foreach (var containerConfiguratorType in containerConfiguratorTypes)
             {
-
                 try
                 {
                     var instance = (IContainerConfigurator)Activator.CreateInstance(containerConfiguratorType);
@@ -199,7 +156,8 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError("Failed to configure container from: " + containerConfiguratorType.FullName, ex);
+                    m_Logger.LogError(ex, "Failed to configure container from: {ConfiguratorType}",
+                        containerConfiguratorType.FullName);
                 }
             }
         }
@@ -232,7 +190,8 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError("Failed to configure services from: " + serviceConfiguratorType.FullName, ex);
+                    m_Logger.LogError(ex, "Failed to configure services from: {ConfiguratorType}",
+                        serviceConfiguratorType.FullName);
                 }
             }
 

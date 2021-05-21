@@ -1,10 +1,10 @@
 ﻿extern alias JetBrainsAnnotations;
+using System;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
-using System;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Players.Movement.Events
@@ -18,24 +18,35 @@ namespace OpenMod.Unturned.Players.Movement.Events
 
         public override void Subscribe()
         {
-            OnGestureUpdated += Events_OnGestureUpdated;
+            PlayerAnimator.OnGestureChanged_Global += PlayerAnimator_OnGestureChanged_Global;
             OnTeleporting += Events_OnTeleporting;
         }
 
         public override void Unsubscribe()
         {
-            OnGestureUpdated -= Events_OnGestureUpdated;
+            PlayerAnimator.OnGestureChanged_Global -= PlayerAnimator_OnGestureChanged_Global;
             OnTeleporting -= Events_OnTeleporting;
         }
 
         public override void SubscribePlayer(Player player)
         {
             player.stance.onStanceUpdated += () => OnStanceUpdated(player);
+            player.movement.onSafetyUpdated += (safe) => OnSafetyUpdated(player, safe); 
         }
 
         public override void UnsubscribePlayer(Player player)
         {
             player.stance.onStanceUpdated -= () => OnStanceUpdated(player);
+            player.movement.onSafetyUpdated -= (safe) => OnSafetyUpdated(player, safe);
+        }
+
+        private void PlayerAnimator_OnGestureChanged_Global(PlayerAnimator animator, EPlayerGesture gesture)
+        {
+            var player = GetUnturnedPlayer(animator.player)!;
+
+            var @event = new UnturnedPlayerGestureUpdatedEvent(player, gesture);
+
+            Emit(@event);
         }
 
         private void Events_OnTeleporting(Player nativePlayer, ref Vector3 position, ref float yaw, ref bool cancel) // lgtm [cs/too-many-ref-parameters]
@@ -63,39 +74,22 @@ namespace OpenMod.Unturned.Players.Movement.Events
             Emit(@event);
         }
 
-        private void Events_OnGestureUpdated(Player nativePlayer, EPlayerGesture gesture)
+        private void OnSafetyUpdated(Player nativePlayer, bool safe)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
-            var @event = new UnturnedPlayerGestureUpdatedEvent(player, gesture);
+            var @event = new UnturnedPlayerSafetyUpdatedEvent(player, safe);
 
             Emit(@event);
         }
 
-        private delegate void GestureUpdated(Player player, EPlayerGesture gesture);
-        private static event GestureUpdated? OnGestureUpdated;
-
-        private delegate void Teleporting(Player player,
-            ref Vector3 position, ref float yaw, ref bool cancel);
+        private delegate void Teleporting(Player player, ref Vector3 position, ref float yaw, ref bool cancel);
         private static event Teleporting? OnTeleporting;
 
         [UsedImplicitly]
         [HarmonyPatch]
         internal static class Patches
         {
-            [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerAnimator), "sendGesture")]
-            [HarmonyPostfix]
-            public static void SendGesture(PlayerAnimator __instance, EPlayerGesture gesture)
-            {
-                if (gesture == EPlayerGesture.REST_START && __instance.player.stance.stance != EPlayerStance.CROUCH)
-                {
-                    return;
-                }
-
-                OnGestureUpdated?.Invoke(__instance.player, gesture);
-            }
-
             [UsedImplicitly]
             [HarmonyPatch(typeof(Player), "teleportToLocationUnsafe")]
             [HarmonyPrefix]

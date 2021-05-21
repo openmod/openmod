@@ -1,54 +1,67 @@
-﻿using System;
-using System.Numerics;
-using System.Reflection;
+﻿using Cysharp.Threading.Tasks;
+using HarmonyLib;
 using OpenMod.Extensions.Games.Abstractions.Items;
-using SDG.Unturned;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
 using OpenMod.UnityEngine.Extensions;
+using SDG.NetTransport;
+using SDG.Unturned;
+using System;
+using System.Numerics;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Items
 {
     public class UnturnedItemDrop : IItemDrop
     {
-        private static readonly FieldInfo s_DespawnXField;
-        private static readonly FieldInfo s_DespawnYField;
-        private readonly ItemData m_ItemData;
+        private static readonly ClientStaticMethod<byte, byte, uint> s_SendTakeItem;
 
         static UnturnedItemDrop()
         {
-            s_DespawnXField = typeof(ItemManager).GetField("despawnItems_X", BindingFlags.Static | BindingFlags.NonPublic);
-            s_DespawnYField = typeof(ItemManager).GetField("despawnItems_Y", BindingFlags.Static | BindingFlags.NonPublic);
+            s_SendTakeItem = AccessTools.StaticFieldRefAccess<ItemManager, ClientStaticMethod<byte, byte, uint>>("SendTakeItem");
         }
 
-        public UnturnedItemDrop(ItemData itemData) : this(GetRegion(itemData), itemData)
-        {
-
-        }
-
-        private static ItemRegion GetRegion(ItemData itemData)
-        {
-            if (!Regions.tryGetCoordinate(itemData.point, out var x, out var y))
-            {
-                throw new Exception($"Failed to get region for point {itemData.point}");
-            }
-
-            return ItemManager.regions[x, y];
-        }
-
-        public UnturnedItemDrop(ItemRegion region, ItemData itemData)
-        {
-            m_ItemData = itemData;
-            Item = new UnturnedItem(itemData.item);
-            Position = itemData.point.ToSystemVector();
-            Region = region;
-        }
+        private readonly ItemData m_ItemData;
 
         public IItem Item { get; }
 
         public Vector3 Position { get; }
 
+        public byte RegionX { get; }
+
+        public byte RegionY { get; }
+
         public ItemRegion Region { get; }
+
+        public UnturnedItemDrop(ItemData itemData)
+        {
+            m_ItemData = itemData;
+            Item = new UnturnedItem(itemData.item, DestroyAsync);
+            Position = itemData.point.ToSystemVector();
+
+            GetRegion(itemData, out var x, out var y);
+            RegionX = x;
+            RegionY = y;
+
+            Region = ItemManager.regions[RegionX, RegionY];
+        }
+
+        public UnturnedItemDrop(byte regionX, byte regionY, ItemData itemData)
+        {
+            m_ItemData = itemData;
+            Item = new UnturnedItem(itemData.item, DestroyAsync);
+            Position = itemData.point.ToSystemVector();
+
+            RegionX = regionX;
+            RegionY = regionY;
+            Region = ItemManager.regions[RegionX, RegionY];
+        }
+
+        private static void GetRegion(ItemData itemData, out byte x, out byte y)
+        {
+            if (!Regions.tryGetCoordinate(itemData.point, out x, out y))
+            {
+                throw new Exception($"Failed to get region for point {itemData.point}");
+            }
+        }
 
         public Task<bool> DestroyAsync()
         {
@@ -63,9 +76,10 @@ namespace OpenMod.Unturned.Items
                     return false;
                 }
 
-                var despawnX = (byte) s_DespawnXField.GetValue(null);
-                var despawnY = (byte) s_DespawnYField.GetValue(null);
-                ItemManager.instance.channel.send("tellTakeItem", ESteamCall.CLIENTS, despawnX, despawnY, ItemManager.ITEM_REGIONS, ESteamPacket.UPDATE_RELIABLE_BUFFER, despawnX, despawnY, m_ItemData.instanceID);
+                s_SendTakeItem.Invoke(ENetReliability.Reliable,
+                    Regions.EnumerateClients(RegionX, RegionY, ItemManager.ITEM_REGIONS),
+                    RegionX, RegionY, m_ItemData.instanceID);
+
                 return true;
             }
 

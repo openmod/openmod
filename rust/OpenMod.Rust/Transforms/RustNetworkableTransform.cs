@@ -1,10 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
 using OpenMod.UnityEngine.Transforms;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Threading.Tasks;
 using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Rust.Transforms
@@ -80,12 +81,12 @@ namespace OpenMod.Rust.Transforms
             return m_UnityTransform.SetPositionAsync(targetPosition);
         }
 
-        public Vector3 Rotation
+        public Quaternion Rotation
         {
             get { return m_UnityTransform.Rotation; }
         }
 
-        public Task<bool> SetRotationAsync(Vector3 rotation)
+        public Task<bool> SetRotationAsync(Quaternion rotation)
         {
             return m_UnityTransform.SetRotationAsync(rotation);
         }

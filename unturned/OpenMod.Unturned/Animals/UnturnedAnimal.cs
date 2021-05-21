@@ -3,6 +3,7 @@ using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.Extensions.Games.Abstractions.Transforms;
 using OpenMod.UnityEngine.Transforms;
 using SDG.Unturned;
+using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Vector3 = System.Numerics.Vector3;
@@ -80,7 +81,7 @@ namespace OpenMod.Unturned.Animals
             return SetPositionAsync(position, Transform.Rotation);
         }
 
-        public async Task<bool> SetPositionAsync(Vector3 position, Vector3 rotation)
+        public async Task<bool> SetPositionAsync(Vector3 position, Quaternion rotation)
         {
             // should be synced automatically
 

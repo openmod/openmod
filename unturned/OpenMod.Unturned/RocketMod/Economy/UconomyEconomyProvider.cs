@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using OpenMod.API.Eventing;
 using OpenMod.Core.Helpers;
@@ -9,13 +6,17 @@ using OpenMod.Core.Users;
 using OpenMod.Extensions.Economy.Abstractions;
 using OpenMod.Unturned.RocketMod.Economy.Patches;
 using Rocket.Core.Plugins;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Threading.Tasks;
 
-#pragma warning disable IDE0079 // Remove unnecessary suppression
 namespace OpenMod.Unturned.RocketMod.Economy
 {
     public class UconomyEconomyProvider : IEconomyProvider, IDisposable
     {
-        private const BindingFlags c_BindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
+        private const BindingFlags c_BindingFlags =
+            BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
 
         private readonly IRocketModComponent m_RocketModComponent;
         private readonly IEventBus m_EventBus;
@@ -102,7 +103,8 @@ namespace OpenMod.Unturned.RocketMod.Economy
             var pluginConfigurationAssetField = pluginType.GetField("configuration", c_BindingFlags);
             var pluginConfigurationAssetInstance = pluginConfigurationAssetField.GetValue(m_UconomyInstance);
 
-            var uconomyConfigurationInstanceProperty = pluginConfigurationAssetField.FieldType.GetProperty("Instance", c_BindingFlags);
+            var uconomyConfigurationInstanceProperty =
+                pluginConfigurationAssetField.FieldType.GetProperty("Instance", c_BindingFlags);
             m_UconomyConfigurationInstance = uconomyConfigurationInstanceProperty.GetGetMethod()
                 .Invoke(pluginConfigurationAssetInstance, new object[0]);
 
@@ -127,6 +129,11 @@ namespace OpenMod.Unturned.RocketMod.Economy
         {
             get
             {
+                if (!EnsureUconomyReady())
+                {
+                    throw new Exception("Uconomy is not loaded.");
+                }
+
                 return (string)m_MoneyNameField!.GetValue(m_UconomyConfigurationInstance);
             }
         }
@@ -135,6 +142,11 @@ namespace OpenMod.Unturned.RocketMod.Economy
         {
             get
             {
+                if (!EnsureUconomyReady())
+                {
+                    throw new Exception("Uconomy is not loaded.");
+                }
+
                 return (string)m_MoneySymbolField!.GetValue(m_UconomyConfigurationInstance);
             }
         }
@@ -148,8 +160,14 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
             ValidateActorType(ownerType);
 
-            var result = (decimal)m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId });
-            return Task.FromResult(result);
+            async UniTask<decimal> GetBalance()
+            {
+                await UniTask.SwitchToMainThread();
+
+                return (decimal)m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId });
+            }
+
+            return GetBalance().AsTask();
         }
 
         public Task<decimal> UpdateBalanceAsync(string ownerId, string ownerType, decimal changeAmount, string? reason)
@@ -161,8 +179,15 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
             ValidateActorType(ownerType);
 
-            var result = (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId, changeAmount });
-            return Task.FromResult(result);
+            async UniTask<decimal> UpdateBalance()
+            {
+                await UniTask.SwitchToMainThread();
+
+                return (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance,
+                    new object[] { ownerId, changeAmount });
+            }
+
+            return UpdateBalance().AsTask();
         }
 
         public Task SetBalanceAsync(string ownerId, string ownerType, decimal balance)
@@ -174,9 +199,17 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
             ValidateActorType(ownerType);
 
-            var currentBalance = (decimal)m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId });
-            var result = (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId, balance - currentBalance });
-            return Task.FromResult(result);
+            async UniTask<decimal> SetBalance()
+            {
+                await UniTask.SwitchToMainThread();
+
+                var currentBalance = (decimal)m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] { ownerId });
+
+                return (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance,
+                    new object[] { ownerId, balance - currentBalance });
+            }
+
+            return SetBalance().AsTask();
         }
 
         private void ValidateActorType(string ownerType)

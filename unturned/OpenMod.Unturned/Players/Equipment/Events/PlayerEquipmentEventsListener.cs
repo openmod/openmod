@@ -4,9 +4,7 @@ using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Items;
 using SDG.Unturned;
-using Steamworks;
 using System;
-using UnityEngine;
 
 namespace OpenMod.Unturned.Players.Equipment.Events
 {
@@ -45,14 +43,25 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
-            var item = new Item(
-                nativePlayer.equipment.itemID, 
-                1, 
-                nativePlayer.equipment.quality,
-                nativePlayer.equipment.state);
+            var page = nativePlayer.equipment.equippedPage;
 
-            var @event = new UnturnedPlayerItemEquippedEvent(player, new UnturnedItem(item));
+            var index = nativePlayer.inventory.getIndex(page,
+                nativePlayer.equipment.equipped_x, nativePlayer.equipment.equipped_y);
+            if (index == byte.MaxValue)
+            {
+                return;
+            }
 
+            var item = nativePlayer.inventory.getItem(page, index);
+            if (item == null)
+            {
+                return;
+            }
+
+            var inventoryItem =
+                new UnturnedInventoryItem(player!.Inventory, item);
+
+            var @event = new UnturnedPlayerItemEquippedEvent(player, inventoryItem.Item);
             Emit(@event);
         }
 
@@ -69,7 +78,9 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         {
             var player = GetUnturnedPlayer(equipment.player)!;
 
-            var @event = new UnturnedPlayerItemEquippingEvent(player, new UnturnedItem(jar.item))
+            var inventoryItem = new UnturnedInventoryItem(player.Inventory, jar);
+
+            var @event = new UnturnedPlayerItemEquippingEvent(player, inventoryItem.Item)
             {
                 IsCancelled = !shouldAllow
             };
@@ -91,9 +102,12 @@ namespace OpenMod.Unturned.Players.Equipment.Events
 
             var jar = inv.getItem(page, index);
 
-            if (jar?.item == null) return;
+            if (jar?.item == null)
+                return;
 
-            var @event = new UnturnedPlayerItemUnequippingEvent(player, new UnturnedItem(jar.item))
+            var inventoryItem = new UnturnedInventoryItem(player.Inventory, jar);
+
+            var @event = new UnturnedPlayerItemUnequippingEvent(player, inventoryItem.Item)
             {
                 IsCancelled = !shouldAllow
             };
@@ -104,18 +118,20 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         }
 
         private delegate void ItemEquipped(Player player);
+
         private static event ItemEquipped? OnItemEquipped;
 
         private delegate void ItemUnequipped(Player player);
+
         private static event ItemUnequipped? OnItemUnequipped;
 
         [UsedImplicitly]
         [HarmonyPatch]
-        internal static class Patches
+        private static class Patches
         {
             // ReSharper disable InconsistentNaming
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerEquipment), "tellEquip")]
+            [HarmonyPatch(typeof(PlayerEquipment), nameof(PlayerEquipment.ReceiveEquip))]
             [HarmonyPrefix]
             public static void PreTellEquip(PlayerEquipment __instance, out ushort __state)
             {
@@ -123,30 +139,21 @@ namespace OpenMod.Unturned.Players.Equipment.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerEquipment), "tellEquip")]
+            [HarmonyPatch(typeof(PlayerEquipment), nameof(PlayerEquipment.ReceiveEquip))]
             [HarmonyPostfix]
-            public static void PostTellEquip(PlayerEquipment __instance, ushort __state, Transform[] ___thirdSlots,
-                CSteamID steamID, ushort id)
+            public static void PostTellEquip(PlayerEquipment __instance, ushort __state)
             {
-                if (!__instance.channel.checkServer(steamID)) return;
-
-                if (___thirdSlots == null) return;
-
-                if (__state == 0 && id == 0) return;
+                if (__state == 0 && __instance.itemID == 0)
+                    return;
 
                 if (__state != 0)
                 {
                     OnItemUnequipped?.Invoke(__instance.player);
                 }
 
-                if (id != 0 && __instance.asset != null)
+                if (__instance.useable != null)
                 {
-                    var type = Assets.useableTypes.getType(__instance.asset.useable);
-
-                    if (type != null && typeof(Useable).IsAssignableFrom(type))
-                    {
-                        OnItemEquipped?.Invoke(__instance.player);
-                    }
+                    OnItemEquipped?.Invoke(__instance.player);
                 }
             }
             // ReSharper restore InconsistentNaming

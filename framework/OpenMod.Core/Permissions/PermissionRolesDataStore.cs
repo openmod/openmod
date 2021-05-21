@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+
+using OpenMod.API.Eventing;
 using OpenMod.Common.Helpers;
 
 namespace OpenMod.Core.Permissions
@@ -31,8 +33,9 @@ namespace OpenMod.Core.Permissions
 
         public PermissionRolesDataStore(
             ILogger<PermissionRolesDataStore> logger,
-            IOpenModDataStoreAccessor dataStoreAccessor, 
-            IRuntime runtime) 
+            IOpenModDataStoreAccessor dataStoreAccessor,
+            IRuntime runtime,
+            IEventBus eventBus)
         {
             m_DataStore = dataStoreAccessor.DataStore;
             m_Logger = logger;
@@ -151,13 +154,13 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task ReloadAsync()
         {
-            m_Logger.LogInformation("Permissions have been reloaded.");
+            m_Logger.LogInformation("Permissions have been reloaded");
             m_CachedPermissionRolesData = await m_DataStore.LoadAsync<PermissionRolesData>(RolesKey) ?? new PermissionRolesData();
         }
 
-        public virtual Task SaveChangesAsync()
+        public virtual async Task SaveChangesAsync()
         {
-            return m_DataStore.SaveAsync(RolesKey, m_CachedPermissionRolesData);
+            await m_DataStore.SaveAsync(RolesKey, m_CachedPermissionRolesData);
         }
 
         public virtual Task<bool> ExistsAsync()

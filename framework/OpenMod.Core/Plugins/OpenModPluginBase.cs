@@ -75,7 +75,7 @@ namespace OpenMod.Core.Plugins
         public virtual Task LoadAsync()
         {
             Logger = m_LoggerFactory.CreateLogger(GetType());
-            Logger.LogInformation($"[loading] {DisplayName} v{Version}");
+            Logger.LogInformation("[loading] {DisplayName} v{Version}", DisplayName, Version);
 
             m_CommandSource = new OpenModComponentCommandSource(Logger, this, GetType().Assembly);
             m_CommandStoreOptions.Value.AddCommandSource(m_CommandSource);

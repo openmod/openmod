@@ -16,11 +16,14 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenMod.Common.Helpers;
 
 namespace OpenMod.NuGet
 {
     public class NuGetPackageManager : IDisposable
     {
+        public delegate Assembly AssemblyLoader(byte[] assemblyData, byte[]? assemblySymbols);
+
         public ILogger Logger { get; set; }
 
         public string PackagesDirectory { get; }
@@ -40,9 +43,7 @@ namespace OpenMod.NuGet
             // Trademark violations
             "VaultPlugin",
             "F.AntiCosmetics",
-            "F.ItemRestrictions",
-            "F.RustResources",
-            "F.Announcer"
+            "F.ItemRestrictions"
         };
 
         private static readonly string[] s_PublisherBlacklist =
@@ -54,7 +55,7 @@ namespace OpenMod.NuGet
         private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new();
         private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
-        private Func<byte[], Assembly> m_AssemblyLoader;
+        private AssemblyLoader m_AssemblyLoader;
 
         public NuGetPackageManager(string packagesDirectory) : this(packagesDirectory, usePackagesFiles: true)
         {
@@ -152,7 +153,7 @@ namespace OpenMod.NuGet
                 Logger.LogDebug(ex.ToString());
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
             }
-            
+
             if (queryResult.Code != NuGetInstallCode.Success)
             {
                 return new NuGetInstallResult(queryResult.Code, queryResult.InstalledPackage);
@@ -419,9 +420,15 @@ namespace OpenMod.NuGet
             return list;
         }
 
-        public void SetAssemblyLoader(Func<byte[], Assembly> assemblyLoader)
+        public void SetAssemblyLoader(AssemblyLoader assemblyLoader)
         {
             m_AssemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
+        }
+
+        [Obsolete("Use SetAssemblyLoader(AssemblyLoader) instead")]
+        public void SetAssemblyLoader(Func<byte[], Assembly> assemblyLoader)
+        {
+            SetAssemblyLoader((assemblyData, _) => assemblyLoader(assemblyData));
         }
 
         public virtual async Task<NuGetQueryResult> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext)
@@ -609,29 +616,24 @@ namespace OpenMod.NuGet
 
                         var entry = packageReader.GetEntry(item);
                         using var stream = entry.Open();
-                        var ms = new MemoryStream();
-                        await stream.CopyToAsync(ms);
+                        var assemblyData = stream.ReadAllBytes();
+                        var assemblySymbolsPath = Path.ChangeExtension(item, "pdb");
+                        var assemblySymbols = File.Exists(assemblySymbolsPath)
+                            ? await FileHelper.ReadAllBytesAsync(assemblySymbolsPath)
+                            : null;
 
-                        try
+                        var asm = m_AssemblyLoader(assemblyData, assemblySymbols);
+
+                        var name = GetVersionIndependentName(asm.FullName, out var extractedVersion);
+                        var parsedVersion = new Version(extractedVersion);
+
+                        assemblies.Add(new NuGetAssembly
                         {
-                            var asm = m_AssemblyLoader(ms.ToArray());
-
-                            var name = GetVersionIndependentName(asm.FullName, out var extractedVersion);
-                            var parsedVersion = new Version(extractedVersion);
-
-                            assemblies.Add(new NuGetAssembly
-                            {
-                                Assembly = new WeakReference(asm),
-                                AssemblyName = name,
-                                Version = parsedVersion,
-                                Package = identity
-                            });
-                        }
-                        finally
-                        {
-                            ms.Close();
-                            stream.Close();
-                        }
+                            Assembly = new WeakReference(asm),
+                            AssemblyName = name,
+                            Version = parsedVersion,
+                            Package = identity
+                        });
                     }
                     catch (Exception ex)
                     {
@@ -736,7 +738,7 @@ namespace OpenMod.NuGet
 
             foreach (var sourceRepository in repos)
             {
-                Logger.LogDebug("GetResourceAsync for " + sourceRepository.PackageSource.SourceUri);
+                Logger.LogDebug("GetResourceAsync (DependencyInfoResource) for " + sourceRepository.PackageSource.SourceUri);
                 var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
 
                 Logger.LogDebug("ResolvePackage");
@@ -749,10 +751,21 @@ namespace OpenMod.NuGet
 
                 Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
 
+                Logger.LogDebug("GetResourceAsync (FindPackageById) for " + sourceRepository.PackageSource.SourceUri);
+                var packageResource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
+
                 availablePackages.Add(dependencyInfo);
                 foreach (var dependency in dependencyInfo.Dependencies)
                 {
-                    await QueryPackageDependenciesAsync(new PackageIdentity(dependency.Id, dependency.VersionRange.MaxVersion ?? dependency.VersionRange.MinVersion), cacheContext, repos, availablePackages);
+                    var versions = await packageResource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None);
+
+                    if (versions == null)
+                    {
+                        Logger.LogDebug("Versions could not be found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
+                        continue;
+                    }
+
+                    await QueryPackageDependenciesAsync(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)), cacheContext, repos, availablePackages);
                 }
 
                 break;
@@ -784,6 +797,9 @@ namespace OpenMod.NuGet
                     .OrderByDescending(d => d.Version);
 
             var result = (Assembly?)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
+
+            result ??= Hotloader.GetAssembly(args.Name);
+
             if (result != null)
             {
                 m_ResolveCache.Add(name, result);
