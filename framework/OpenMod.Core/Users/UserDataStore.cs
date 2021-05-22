@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
@@ -12,6 +8,10 @@ using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenMod.Core.Users
 {
@@ -89,8 +89,9 @@ namespace OpenMod.Core.Users
             }
 
             var usersData = await GetUsersDataAsync();
-            return usersData.Users?.FirstOrDefault(d => (d?.Type?.Equals(userType, StringComparison.OrdinalIgnoreCase) ?? false)
-                                                        && (d?.Id?.Equals(userId, StringComparison.OrdinalIgnoreCase) ?? false));
+            return usersData?.FirstOrDefault(d =>
+                (d?.Type?.Equals(userType, StringComparison.OrdinalIgnoreCase) ?? false)
+                && (d?.Id?.Equals(userId, StringComparison.OrdinalIgnoreCase) ?? false));
         }
 
         public async Task<T?> GetUserDataAsync<T>(string userId, string userType, string key)
@@ -182,10 +183,10 @@ namespace OpenMod.Core.Users
             }
 
             var usersData = await GetUsersDataAsync();
-            return usersData.Users?
+            return usersData?
                        .Where(d => d.Type?.Equals(type, StringComparison.OrdinalIgnoreCase) ?? false)
                        .ToList()
-                ?? new List<UserData>();
+                   ?? new List<UserData>();
         }
 
         public async Task SetUserDataAsync(UserData userData)
@@ -207,28 +208,27 @@ namespace OpenMod.Core.Users
                     $"User data missing required property: {nameof(UserData.Type)}", nameof(userData));
             }
 
-            var usersData = await GetUsersDataAsync();
-            usersData.Users ??= GetDefaultUsersData();
+            var usersData = await GetUsersDataAsync() ?? GetDefaultUsersData();
 
-            var idx = usersData.Users.FindIndex(c =>
+            var idx = usersData.FindIndex(c =>
                 (c.Type?.Equals(userData.Type, StringComparison.OrdinalIgnoreCase) ?? false) &&
                 (c.Id?.Equals(userData.Id, StringComparison.OrdinalIgnoreCase) ?? false));
 
-            usersData.Users.RemoveAll(c =>
+            usersData.RemoveAll(c =>
                 (c.Type?.Equals(userData.Type, StringComparison.OrdinalIgnoreCase) ?? false) &&
                 (c.Id?.Equals(userData.Id, StringComparison.OrdinalIgnoreCase) ?? false));
 
             // preserve location in data
             if (idx >= 0)
             {
-                usersData.Users.Insert(idx, userData);
+                usersData.Insert(idx, userData);
             }
             else
             {
-                usersData.Users.Add(userData);
+                usersData.Add(userData);
             }
 
-            m_CachedUsersData = usersData;
+            m_CachedUsersData.Users = usersData;
             m_IsUpdating = true;
 
             await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
@@ -252,9 +252,9 @@ namespace OpenMod.Core.Users
             };
         }
 
-        private Task<UsersData> GetUsersDataAsync()
+        private Task<List<UserData>?> GetUsersDataAsync()
         {
-            return Task.FromResult(m_CachedUsersData);
+            return Task.FromResult(m_CachedUsersData.Users?.ToList());
         }
 
         private async Task<UsersData> LoadUsersDataFromDiskAsync()
