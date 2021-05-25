@@ -181,16 +181,24 @@ namespace OpenMod.Unturned
 
             if (!s_UniTaskInited)
             {
-                var unitySynchronizationContetextField =
-                    typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext",
+                var unitySynchronizationContextField =
+                    typeof(PlayerLoopHelper).GetField("unitySynchronizationContext",
                         BindingFlags.Static | BindingFlags.NonPublic);
-                unitySynchronizationContetextField.SetValue(null, SynchronizationContext.Current);
+
+                // For older version of UniTask
+                unitySynchronizationContextField ??=
+                    typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext",
+                        BindingFlags.Static | BindingFlags.NonPublic)
+                    ?? throw new Exception("Could not find PlayerLoopHelper.unitySynchronizationContext field");
+
+                unitySynchronizationContextField.SetValue(null, SynchronizationContext.Current);
 
                 var mainThreadIdField =
-                    typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
+                    typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic)
+                    ?? throw new Exception("Could not find PlayerLoopHelper.mainThreadId field");
                 mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
 
-                var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+                var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
                 PlayerLoopHelper.Initialize(ref playerLoop);
                 s_UniTaskInited = true;
             }
