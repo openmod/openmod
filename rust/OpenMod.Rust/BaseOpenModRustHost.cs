@@ -61,7 +61,7 @@ namespace OpenMod.Rust
                     typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
                 mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
 
-                var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+                var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
              
                 PlayerLoopHelper.Initialize(ref playerLoop);
                 s_UniTaskInited = true;
