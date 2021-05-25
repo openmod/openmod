@@ -190,7 +190,7 @@ namespace OpenMod.Unturned
                     typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
                 mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
 
-                var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
+                var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
                 PlayerLoopHelper.Initialize(ref playerLoop);
                 s_UniTaskInited = true;
             }
