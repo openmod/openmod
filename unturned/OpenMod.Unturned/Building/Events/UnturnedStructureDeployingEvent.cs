@@ -4,6 +4,10 @@ using UnityEngine;
 
 namespace OpenMod.Unturned.Building.Events
 {
+    /// <summary>
+    /// Event that is emitted when a structure is being placed.
+    /// Special note: the game completely disregards any rotation in in X and Z axis
+    /// </summary>
     public class UnturnedStructureDeployingEvent : UnturnedBuildableDeployingEvent
     {
         public ItemStructureAsset StructureAsset { get; }
