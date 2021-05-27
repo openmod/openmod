@@ -138,7 +138,7 @@ namespace OpenMod.Unturned.Building.Events
         private void OnDeployBarricadeRequested(Barricade barricade, ItemBarricadeAsset asset, Transform hit, ref Vector3 point,
             ref float angleX, ref float angleY, ref float angleZ, ref ulong owner, ref ulong @group, ref bool shouldAllow)
         {
-            var rot = Quaternion.Euler(angleX, angleY, angleZ); // lgtm [cs/loss-of-precision]
+            var rot = Quaternion.Euler(angleX, angleY, angleZ);
 
             var @event = new UnturnedBarricadeDeployingEvent(asset, hit, point, rot, owner, group)
             {
@@ -164,7 +164,7 @@ namespace OpenMod.Unturned.Building.Events
         private void OnDeployStructureRequested(Structure structure, ItemStructureAsset asset, // lgtm [cs/too-many-ref-parameters]
             ref Vector3 point, ref float angleX, ref float angleY, ref float angleZ, ref ulong owner, ref ulong @group, ref bool shouldAllow)
         {
-            var rot = Quaternion.Euler(angleX, angleY, angleZ); // lgtm [cs/loss-of-precision]
+            var rot = Quaternion.Euler(angleX, angleY, angleZ);
 
             var @event = new UnturnedStructureDeployingEvent(asset, point, rot, owner, group)
             {
