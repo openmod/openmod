@@ -138,7 +138,7 @@ namespace OpenMod.Unturned.Building.Events
         private void OnDeployBarricadeRequested(Barricade barricade, ItemBarricadeAsset asset, Transform hit, ref Vector3 point,
             ref float angleX, ref float angleY, ref float angleZ, ref ulong owner, ref ulong @group, ref bool shouldAllow)
         {
-            var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2); // lgtm [cs/loss-of-precision]
+            var rot = Quaternion.Euler(angleX, angleY, angleZ);
 
             var @event = new UnturnedBarricadeDeployingEvent(asset, hit, point, rot, owner, group)
             {
@@ -151,9 +151,9 @@ namespace OpenMod.Unturned.Building.Events
 
             var eulerAngles = @event.Rotation.eulerAngles;
 
-            angleX = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.x / 2f) * 2); // lgtm [cs/loss-of-precision]
-            angleY = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.y / 2f) * 2); // lgtm [cs/loss-of-precision]
-            angleZ = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2); // lgtm [cs/loss-of-precision]
+            angleX = eulerAngles.x;
+            angleY = eulerAngles.y;
+            angleZ = eulerAngles.z;
 
             owner = @event.Owner;
             group = @event.Group;
@@ -164,7 +164,7 @@ namespace OpenMod.Unturned.Building.Events
         private void OnDeployStructureRequested(Structure structure, ItemStructureAsset asset, // lgtm [cs/too-many-ref-parameters]
             ref Vector3 point, ref float angleX, ref float angleY, ref float angleZ, ref ulong owner, ref ulong @group, ref bool shouldAllow)
         {
-            var rot = Quaternion.Euler(angleX * 2, angleY * 2, angleZ * 2); // lgtm [cs/loss-of-precision]
+            var rot = Quaternion.Euler(angleX, angleY, angleZ);
 
             var @event = new UnturnedStructureDeployingEvent(asset, point, rot, owner, group)
             {
@@ -177,9 +177,9 @@ namespace OpenMod.Unturned.Building.Events
 
             var eulerAngles = @event.Rotation.eulerAngles;
 
-            angleX = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.x / 2f) * 2); // lgtm [cs/loss-of-precision]
-            angleY = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.y / 2f) * 2); // lgtm [cs/loss-of-precision]
-            angleZ = MeasurementTool.angleToByte(Mathf.RoundToInt(eulerAngles.z / 2f) * 2); // lgtm [cs/loss-of-precision]
+            angleX = eulerAngles.x;
+            angleY = eulerAngles.y;
+            angleZ = eulerAngles.z;
 
             owner = @event.Owner;
             group = @event.Group;
