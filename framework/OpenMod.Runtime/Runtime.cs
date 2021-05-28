@@ -283,12 +283,12 @@ namespace OpenMod.Runtime
                     var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
                     var watcher = watcherField?.GetValue(null);
 
-                    if (watcher?.GetType().GetField("watches", BindingFlags.Static | BindingFlags.NonPublic).GetValue(watcher) is Hashtable hashtable)
+                    if (watcher?.GetType().GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)?.GetValue(watcher) is Hashtable watches)
                     {
                         FieldInfo? incSubdirsField = null;
 
                         // DictionaryEntry<FileSystemWatcher, DefaultWatcherData>
-                        foreach (var data in hashtable)
+                        foreach (var data in watches)
                         {
                             if (data is DictionaryEntry entry)
                             {

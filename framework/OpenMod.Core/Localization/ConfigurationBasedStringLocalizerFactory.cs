@@ -34,11 +34,16 @@ namespace OpenMod.Core.Localization
                 .AddYamlFile(baseName + ".yaml", true, reloadOnChange: true)
                 .Build();
 
-            var reloadToken = translations.GetReloadToken();
-            reloadToken.RegisterChangeCallback(_ =>
+            void ReloadToken()
             {
-                m_Logger.LogInformation("Reloading translations: {Path}", Path.Combine(location, baseName + ".yaml"));
-            }, null);
+                translations.GetReloadToken().RegisterChangeCallback(_ =>
+                {
+                    m_Logger.LogInformation("Reloading translations: {Path}", Path.Combine(location, baseName + ".yaml"));
+                    ReloadToken();
+                }, null);
+            }
+
+            ReloadToken();
 
             return new ConfigurationBasedStringLocalizer(translations);
         }
