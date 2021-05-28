@@ -198,7 +198,7 @@ namespace OpenMod.Unturned
                     ?? throw new Exception("Could not find PlayerLoopHelper.mainThreadId field");
                 mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
 
-                var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
+                var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
                 PlayerLoopHelper.Initialize(ref playerLoop);
                 s_UniTaskInited = true;
             }
