@@ -278,31 +278,7 @@ namespace OpenMod.Runtime
                     Log.CloseAndFlush();
                 }
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Type.GetType("Mono.Runtime") != null)
-                {
-                    var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
-                    var watcher = watcherField?.GetValue(null);
-
-                    if (watcher?.GetType().GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)?.GetValue(watcher) is Hashtable watches)
-                    {
-                        FieldInfo? incSubdirsField = null;
-
-                        // DictionaryEntry<FileSystemWatcher, DefaultWatcherData>
-                        foreach (var data in watches)
-                        {
-                            if (data is DictionaryEntry entry)
-                            {
-                                if (entry.Key is FileSystemWatcher fileSystemWatcher)
-                                {
-                                    fileSystemWatcher.IncludeSubdirectories = false;
-                                }
-
-                                incSubdirsField ??= entry.Value.GetType().GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
-                                incSubdirsField?.SetValue(entry.Value, false);
-                            }
-                        }
-                    }
-                }
+                PerformFileSystemWatcherPatch();
 
                 return Host;
             }
@@ -317,6 +293,35 @@ namespace OpenMod.Runtime
         {
             await ShutdownAsync();
             await InitAsync(m_OpenModHostAssemblies!, m_RuntimeInitParameters!, m_HostBuilderFunc);
+        }
+
+        private void PerformFileSystemWatcherPatch()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Type.GetType("Mono.Runtime") != null)
+            {
+                var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
+                var watcher = watcherField?.GetValue(null);
+
+                if (watcher?.GetType().GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)?.GetValue(watcher) is Hashtable watches)
+                {
+                    FieldInfo? incSubdirsField = null;
+
+                    // DictionaryEntry<FileSystemWatcher, DefaultWatcherData>
+                    foreach (var data in watches)
+                    {
+                        if (data is DictionaryEntry entry)
+                        {
+                            if (entry.Key is FileSystemWatcher fileSystemWatcher)
+                            {
+                                fileSystemWatcher.IncludeSubdirectories = false;
+                            }
+
+                            incSubdirsField ??= entry.Value.GetType().GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
+                            incSubdirsField?.SetValue(entry.Value, false);
+                        }
+                    }
+                }
+            }
         }
 
         private void ConfigureConfiguration(IConfigurationBuilder builder, OpenModStartup startup)
