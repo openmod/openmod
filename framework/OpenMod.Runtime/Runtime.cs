@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -146,7 +148,7 @@ namespace OpenMod.Runtime
 
                 await nugetPackageManager.RemoveOutdatedPackagesAsync();
                 nugetPackageManager.InstallAssemblyResolver();
-                nugetPackageManager.SetAssemblyLoader((NuGetPackageManager.AssemblyLoader) Hotloader.LoadAssembly);
+                nugetPackageManager.SetAssemblyLoader((NuGetPackageManager.AssemblyLoader)Hotloader.LoadAssembly);
 
                 var startupContext = new OpenModStartupContext
                 {
@@ -274,6 +276,32 @@ namespace OpenMod.Runtime
                     Status = RuntimeStatus.Crashed;
                     m_Logger.LogCritical(ex, "OpenMod has crashed");
                     Log.CloseAndFlush();
+                }
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Type.GetType("Mono.Runtime") != null)
+                {
+                    var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
+                    var watcher = watcherField?.GetValue(null);
+
+                    if (watcher?.GetType().GetField("watches", BindingFlags.Static | BindingFlags.NonPublic).GetValue(watcher) is Hashtable hashtable)
+                    {
+                        FieldInfo? incSubdirsField = null;
+
+                        // DictionaryEntry<FileSystemWatcher, DefaultWatcherData>
+                        foreach (var data in hashtable)
+                        {
+                            if (data is DictionaryEntry entry)
+                            {
+                                if (entry.Key is FileSystemWatcher fileSystemWatcher)
+                                {
+                                    fileSystemWatcher.IncludeSubdirectories = false;
+                                }
+
+                                incSubdirsField ??= entry.Value.GetType().GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
+                                incSubdirsField?.SetValue(entry.Value, false);
+                            }
+                        }
+                    }
                 }
 
                 return Host;
