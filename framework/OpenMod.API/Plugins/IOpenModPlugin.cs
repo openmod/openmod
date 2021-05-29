@@ -24,6 +24,11 @@ namespace OpenMod.API.Plugins
         string? Website { get; }
 
         /// <summary>
+        /// Gets the plugin description
+        /// </summary>
+        string? Description { get; }
+
+        /// <summary>
         /// Gets the plugin version.
         /// </summary>
         SemVersion Version { get; }
