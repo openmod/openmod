@@ -52,6 +52,10 @@ namespace OpenMod.Core.Plugins
             {
                 markdownBuilder.Append("Website: ").AppendLine(m_Plugin.Website);
             }
+            if (!string.IsNullOrEmpty(m_Plugin.Description))
+            {
+                markdownBuilder.Append("Description: ").AppendLine(m_Plugin.Description);
+            }
 
             var commands = (await m_CommandStore.GetCommandsAsync())
                 .Where(d => d.Component == m_Plugin)

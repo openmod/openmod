@@ -30,6 +30,7 @@ namespace OpenMod.Core.Plugins
         public virtual string DisplayName { get; }
         public virtual string? Author { get; }
         public virtual string? Website { get; }
+        public virtual string? Description { get; }
         public virtual SemVersion Version { get; }
         public virtual IDataStore DataStore { get; }
         public virtual ILifetimeScope LifetimeScope { get; }
@@ -63,6 +64,7 @@ namespace OpenMod.Core.Plugins
 
             Author = metadata.Author;
             Website = metadata.Website;
+            Description = metadata.Description;
             WorkingDirectory = PluginHelper.GetWorkingDirectory(Runtime, metadata.Id);
         }
 

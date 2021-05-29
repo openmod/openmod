@@ -58,5 +58,10 @@ namespace OpenMod.API.Plugins
         /// Gets or sets the website of the plugin.
         /// </summary>
         public string? Website { get; set; }
+
+        /// <summary>
+        /// Gets or sets the description of the plugin.
+        /// </summary>
+        public string? Description { get; set; }
     }
 }
