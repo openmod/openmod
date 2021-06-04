@@ -6,6 +6,7 @@ using OpenMod.Core.Users;
 using OpenMod.Extensions.Economy.Abstractions;
 using OpenMod.Unturned.RocketMod.Economy.Patches;
 using Rocket.Core.Plugins;
+using SmartFormat;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -182,6 +183,19 @@ namespace OpenMod.Unturned.RocketMod.Economy
             async UniTask<decimal> UpdateBalance()
             {
                 await UniTask.SwitchToMainThread();
+
+                if (changeAmount < 0)
+                {
+                    var balance = (decimal) m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] {ownerId});
+
+                    if (balance + changeAmount < 0)
+                    {
+                        // todo: allow modification of message through translations
+                        throw new NotEnoughBalanceException(Smart.Format(
+                            "You don't have enough balance. Current balance: {Balance}{EconomyProvider.CurrencySymbol}",
+                            new {Balance = balance, EconomyProvider = this}), balance);
+                    }
+                }
 
                 return (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance,
                     new object[] { ownerId, changeAmount });
