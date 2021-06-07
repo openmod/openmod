@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 
@@ -11,10 +12,12 @@ namespace OpenMod.Core.Users
     [Priority(Priority = Priority.Lowest)]
     public class OfflineUserProvider : IUserProvider
     {
+        private readonly IStringLocalizer m_StringLocalizer;
         private readonly IUserDataStore m_UserDataStore;
 
-        public OfflineUserProvider(IUserDataStore userDataStore)
+        public OfflineUserProvider(IStringLocalizer stringLocalizer, IUserDataStore userDataStore)
         {
+            m_StringLocalizer = stringLocalizer;
             m_UserDataStore = userDataStore;
         }
         public bool SupportsUserType(string userType)
@@ -54,26 +57,28 @@ namespace OpenMod.Core.Users
             return Task.CompletedTask;
         }
         
-        public async Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
+        public Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
         {
+            return BanAsync(user, instigator: null, reason, endTime);
+        }
+
+        public async Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? expireDate = null)
+        {
+            if (expireDate.HasValue && expireDate.Value < DateTime.Now)
+                return false;
+
             var data = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
             if (data == null)
             {
                 return false;
             }
 
-            endTime ??= DateTime.MaxValue;
-
-            data.UnBan = endTime;
+            expireDate ??= DateTime.MaxValue;
+            reason ??= m_StringLocalizer["ban_default"];
+            data.BanInfo = new BanData(reason, instigator, expireDate);
 
             await m_UserDataStore.SetUserDataAsync(data);
-
             return true;
-        }
-
-        public async Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? endTime = null)
-        {
-            return await BanAsync(user, reason, endTime);
         }
 
         public Task<bool> KickAsync(IUser user, string? reason = null)

@@ -52,7 +52,6 @@ namespace OpenMod.Core.Users
                 Type = actorType,
                 LastSeen = DateTime.Now,
                 FirstSeen = DateTime.Now,
-                UnBan = DateTime.MinValue,
                 Permissions = new HashSet<string>(),
                 Roles = autoAssignRoles,
                 LastDisplayName = displayName

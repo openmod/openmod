@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
@@ -19,9 +18,8 @@ namespace OpenMod.Core.Users
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class UserDataStore : IUserDataStore, IAsyncDisposable
     {
-        private readonly ILogger<UserDataStore> m_Logger;
         private readonly IRuntime m_Runtime;
-        public const string UsersKey = "users";
+        public const string c_UsersKey = "users";
         private readonly IDataStore m_DataStore;
         private UsersData m_CachedUsersData;
         private IDisposable m_FileChangeWatcher;
@@ -29,11 +27,9 @@ namespace OpenMod.Core.Users
 
 
         public UserDataStore(
-            ILogger<UserDataStore> logger,
             IOpenModDataStoreAccessor dataStoreAccessor,
             IRuntime runtime)
         {
-            m_Logger = logger;
             m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
 
@@ -50,15 +46,15 @@ namespace OpenMod.Core.Users
         private async Task<UsersData> EnsureUserDataCreatedAsync()
         {
             var created = false;
-            if (!await m_DataStore.ExistsAsync(UsersKey))
+            if (!await m_DataStore.ExistsAsync(c_UsersKey))
             {
                 m_CachedUsersData = new UsersData { Users = GetDefaultUsersData() };
 
-                await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+                await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
                 created = true;
             }
 
-            m_FileChangeWatcher = m_DataStore.AddChangeWatcher(UsersKey, m_Runtime, () =>
+            m_FileChangeWatcher = m_DataStore.AddChangeWatcher(c_UsersKey, m_Runtime, () =>
             {
                 if (!m_IsUpdating)
                 {
@@ -91,7 +87,7 @@ namespace OpenMod.Core.Users
             var usersData = await GetUsersDataAsync();
             return usersData?.FirstOrDefault(d =>
                 (d?.Type?.Equals(userType, StringComparison.OrdinalIgnoreCase) ?? false)
-                && (d?.Id?.Equals(userId, StringComparison.OrdinalIgnoreCase) ?? false));
+                && (d.Id?.Equals(userId, StringComparison.OrdinalIgnoreCase) ?? false));
         }
 
         public async Task<T?> GetUserDataAsync<T>(string userId, string userType, string key)
@@ -231,18 +227,18 @@ namespace OpenMod.Core.Users
             m_CachedUsersData.Users = usersData;
             m_IsUpdating = true;
 
-            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+            await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
         }
 
         private List<UserData> GetDefaultUsersData()
         {
             return new()
             {
-                new()
+                new UserData
                 {
                     FirstSeen = null,
                     LastSeen = null,
-                    UnBan = null,
+                    BanInfo = null,
                     LastDisplayName = "root",
                     Id = "root",
                     Type = KnownActorTypes.Rcon,
@@ -260,18 +256,18 @@ namespace OpenMod.Core.Users
 
         private async Task<UsersData> LoadUsersDataFromDiskAsync()
         {
-            if (!await m_DataStore.ExistsAsync(UsersKey))
+            if (!await m_DataStore.ExistsAsync(c_UsersKey))
             {
                 m_CachedUsersData = new UsersData
                 {
                     Users = GetDefaultUsersData()
                 };
 
-                await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+                await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
                 return m_CachedUsersData;
             }
 
-            return await m_DataStore.LoadAsync<UsersData>(UsersKey) ?? new UsersData
+            return await m_DataStore.LoadAsync<UsersData>(c_UsersKey) ?? new UsersData
             {
                 Users = GetDefaultUsersData()
             };
@@ -286,7 +282,7 @@ namespace OpenMod.Core.Users
                 throw new Exception("Tried to save null users data");
             }
 
-            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+            await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
         }
     }
 }
