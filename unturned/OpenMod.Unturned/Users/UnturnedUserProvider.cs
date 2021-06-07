@@ -211,7 +211,7 @@ namespace OpenMod.Unturned.Users
 
                 userConnectingEvent.IsCancelled = !isPendingValid;
 
-                if (userData!.UnBan >= DateTime.Now)
+                if (userData.UnBan != null && userData.UnBan >= DateTime.Now)
                     await userConnectingEvent.RejectAsync(Smart.Format("You are banned from this server until the {Day} of {Month} at {Hour}:{Minute}", new
                     {
                         Day = userData.UnBan.Value.Day,
