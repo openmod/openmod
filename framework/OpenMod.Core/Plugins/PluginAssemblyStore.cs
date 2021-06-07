@@ -151,7 +151,8 @@ namespace OpenMod.Core.Plugins
 
                     foreach (var loaderException in ex.LoaderExceptions)
                     {
-                        m_Logger.LogDebug(loaderException, "Exception occurred when getting types in plugin assembly");
+                        m_Logger.LogDebug(loaderException,
+                            $"Exception occurred when getting types in plugin assembly: {providerAssembly.GetName().Name}");
                     }
 
                     var missingAssemblies = CheckRequiredDependencies(ex.LoaderExceptions);
