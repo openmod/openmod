@@ -8,9 +8,11 @@ using OpenMod.Core.Users;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Users.Events;
 using SDG.Unturned;
+using SmartFormat;
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using SteamGameServerNetworkingUtils = SDG.Unturned.SteamGameServerNetworkingUtils;
@@ -197,6 +199,7 @@ namespace OpenMod.Unturned.Users
                     userData ??= new();
                     userData.LastSeen = DateTime.Now;
                     userData.LastDisplayName = pendingUser.DisplayName;
+                    userData.UnBan ??= DateTime.MinValue;
                     await m_UserDataStore.SetUserDataAsync(userData);
                 }
 
@@ -207,6 +210,15 @@ namespace OpenMod.Unturned.Users
                     : new UnturnedUserConnectingEvent(pendingUser);
 
                 userConnectingEvent.IsCancelled = !isPendingValid;
+
+                if (userData!.UnBan >= DateTime.Now)
+                    await userConnectingEvent.RejectAsync(Smart.Format("You are banned from this server until the {Day} of {Month} at {Hour}:{Minute}", new
+                    {
+                        Day = userData.UnBan.Value.Day,
+                        Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(userData.UnBan.Value.Month),
+                        Hour = userData.UnBan.Value.Hour,
+                        Minute = userData.UnBan.Value.Minute
+                    }));
 
                 if (rejectExplanation != null)
                     await userConnectingEvent.RejectAsync(rejectExplanation);

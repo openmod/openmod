@@ -242,6 +242,7 @@ namespace OpenMod.Core.Users
                 {
                     FirstSeen = null,
                     LastSeen = null,
+                    UnBan = null,
                     LastDisplayName = "root",
                     Id = "root",
                     Type = KnownActorTypes.Rcon,

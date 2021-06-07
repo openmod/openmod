@@ -54,14 +54,26 @@ namespace OpenMod.Core.Users
             return Task.CompletedTask;
         }
         
-        public Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
+        public async Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
         {
-            return Task.FromResult(result: false);
+            var data = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
+            if (data == null)
+            {
+                return false;
+            }
+
+            endTime ??= DateTime.MaxValue;
+
+            data.UnBan = endTime;
+
+            await m_UserDataStore.SetUserDataAsync(data);
+
+            return true;
         }
 
-        public Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? endTime = null)
+        public async Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? endTime = null)
         {
-            return Task.FromResult(result: false);
+            return await BanAsync(user, reason, endTime);
         }
 
         public Task<bool> KickAsync(IUser user, string? reason = null)

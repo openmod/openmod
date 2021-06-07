@@ -35,6 +35,11 @@ namespace OpenMod.API.Users
         public DateTime? LastSeen { get; set; }
 
         /// <summary>
+        /// Gets or sets the unban date, this is used for banning offline players
+        /// </summary>
+        public DateTime? UnBan { get; set; }
+
+        /// <summary>
         /// Gets or sets the permissions of the user.
         /// </summary>
         public HashSet<string>? Permissions { get; set; }
