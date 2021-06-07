@@ -4,7 +4,7 @@ using OpenMod.API.Permissions;
 namespace OpenMod.API.Users
 {
     [Serializable]
-    public class BanData : IBanData
+    public class BanData
     {
         public DateTime? ExpireDate { get; set; }
 
