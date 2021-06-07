@@ -20,6 +20,10 @@ namespace OpenMod.Core.Helpers
 
         public static void CopyAssemblyResources(Assembly assembly, string? baseDir, bool overwrite = false)
         {
+#if DEBUG
+            return;
+#endif
+
             baseDir ??= string.Empty;
 
             var resourceNames = assembly.GetManifestResourceNames();
@@ -80,19 +84,21 @@ namespace OpenMod.Core.Helpers
 
                 var directory = Path.GetDirectoryName(fileName);
 
-                if(directory != null)
+                if (directory != null)
                 {
                     directory = Path.Combine(baseDir, directory);
                 }
 
-                if(directory != null && !Directory.Exists(directory))
+                if (directory != null && !Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
 
                 var filePath = Path.Combine(baseDir, fileName);
                 using var stream = assembly.GetManifestResourceStream(resourceName);
-                using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException($"Couldn't find resource: {resourceName}"));
+                using var reader = new StreamReader(stream ??
+                                                    throw new MissingManifestResourceException(
+                                                        $"Couldn't find resource: {resourceName}"));
                 var fileContent = reader.ReadToEnd();
 
                 if (File.Exists(filePath) && !overwrite)

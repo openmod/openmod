@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>openmod openmod-plugin universal</PackageTags>
     <RootNamespace>PLUGIN-NAMESPACE-XML</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
