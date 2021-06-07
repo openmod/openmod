@@ -35,6 +35,11 @@ namespace OpenMod.API.Users
         public DateTime? LastSeen { get; set; }
 
         /// <summary>
+        /// Gets the data related to user ban.
+        /// </summary>
+        public BanData? BanInfo { get; set; }
+
+        /// <summary>
         /// Gets or sets the permissions of the user.
         /// </summary>
         public HashSet<string>? Permissions { get; set; }
