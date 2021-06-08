@@ -10,7 +10,7 @@ namespace OpenMod.Unturned.Players.Quests.Events
     [UsedImplicitly]
     internal class PlayerQuestsEventsListener : UnturnedPlayerEventsListener
     {
-        protected PlayerQuestsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
+        public PlayerQuestsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
