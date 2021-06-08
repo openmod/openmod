@@ -19,6 +19,7 @@ namespace OpenMod.Unturned.Players.Quests.Events
             OldGroupID = oldGroupID;
             OldGroupRank = oldGroupRank;
             NewGroupID = newGroupID;
+            NewGroupRank = newGroupRank;
         }
     }
 }
