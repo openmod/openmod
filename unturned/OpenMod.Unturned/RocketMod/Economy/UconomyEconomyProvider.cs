@@ -1,12 +1,12 @@
 ﻿using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using OpenMod.API.Eventing;
+using OpenMod.API.Localization;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
 using OpenMod.Extensions.Economy.Abstractions;
 using OpenMod.Unturned.RocketMod.Economy.Patches;
 using Rocket.Core.Plugins;
-using SmartFormat;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -21,6 +21,8 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
         private readonly IRocketModComponent m_RocketModComponent;
         private readonly IEventBus m_EventBus;
+        private readonly IOpenModHostStringLocalizer m_StringLocalizer;
+
         private bool m_UconomyReady;
         private Harmony? m_HarmonyInstance;
         private Type? m_DatabaseType;
@@ -35,10 +37,12 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
         public UconomyEconomyProvider(
             IRocketModComponent rocketModComponent,
-            IEventBus eventBus)
+            IEventBus eventBus,
+            IOpenModHostStringLocalizer stringLocalizer)
         {
             m_RocketModComponent = rocketModComponent;
             m_EventBus = eventBus;
+            m_StringLocalizer = stringLocalizer;
         }
 
         private void PatchUconomy()
@@ -190,10 +194,9 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
                     if (balance + changeAmount < 0)
                     {
-                        // todo: allow modification of message through translations
-                        throw new NotEnoughBalanceException(Smart.Format(
-                            "You don't have enough balance. Current balance: {Balance}{EconomyProvider.CurrencySymbol}",
-                            new {Balance = balance, EconomyProvider = this}), balance);
+                        throw new NotEnoughBalanceException(
+                            m_StringLocalizer["rocket:uconomy:not_enough_balance",
+                                new {Balance = balance, EconomyProvider = this}], balance);
                     }
                 }
 
