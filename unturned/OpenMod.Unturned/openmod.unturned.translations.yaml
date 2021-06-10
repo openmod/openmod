@@ -1,0 +1,5 @@
+﻿rocket:
+  uconomy:
+    not_enough_balance: "You don't have enough balance. Current balance: {Balance}{EconomyProvider.CurrencySymbol}"
+  permissions:
+    command_cooldown: "You must wait {TimeLeft:0.##} seconds."
