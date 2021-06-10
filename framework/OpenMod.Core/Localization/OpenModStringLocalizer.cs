@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using OpenMod.API;
@@ -13,40 +11,11 @@ namespace OpenMod.Core.Localization
     [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class OpenModStringLocalizer : IOpenModStringLocalizer
+    public class OpenModStringLocalizer : ProxyStringLocalizer, IOpenModStringLocalizer
     {
-        private readonly IStringLocalizer m_StringLocalizer;
-
-        public OpenModStringLocalizer(IStringLocalizerFactory stringLocalizerFactory, IRuntime runtime)
+        public OpenModStringLocalizer(IStringLocalizerFactory stringLocalizerFactory, IRuntime runtime) : base(
+            stringLocalizerFactory.Create("openmod.translations", runtime.WorkingDirectory))
         {
-            m_StringLocalizer = stringLocalizerFactory.Create("openmod.translations", runtime.WorkingDirectory);
-        }
-        public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
-        {
-            return m_StringLocalizer.GetAllStrings(includeParentCultures);
-        }
-
-#pragma warning disable 618 // disable obsolete warning
-        public IStringLocalizer WithCulture(CultureInfo culture)
-        {
-            return m_StringLocalizer.WithCulture(culture); // lgtm [cs/call-to-obsolete-method]
-        }
-#pragma warning restore 618
-
-        public LocalizedString this[string name]
-        {
-            get
-            {
-                return m_StringLocalizer[name];
-            }
-        }
-
-        public LocalizedString this[string name, params object[] arguments]
-        {
-            get
-            {
-                return m_StringLocalizer[name, arguments];
-            }
         }
     }
 }
