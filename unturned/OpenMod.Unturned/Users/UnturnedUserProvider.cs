@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SteamGameServerNetworkingUtils = SDG.Unturned.SteamGameServerNetworkingUtils;
+using Microsoft.Extensions.Localization;
 
 namespace OpenMod.Unturned.Users
 {
@@ -24,6 +24,7 @@ namespace OpenMod.Unturned.Users
         private readonly HashSet<UnturnedPendingUser> m_PendingUsers;
 
         private readonly IEventBus m_EventBus;
+        private readonly IStringLocalizer m_StringLocalizer;
         private readonly IRuntime m_Runtime;
         private readonly IUserDataSeeder m_DataSeeder;
 
@@ -31,12 +32,14 @@ namespace OpenMod.Unturned.Users
 
         public UnturnedUserProvider(
             IEventBus eventBus,
+            IStringLocalizer stringLocalizer,
             IUserDataSeeder dataSeeder,
             IUserDataStore userDataStore,
             IRuntime runtime)
         {
             m_EventBus = eventBus;
             m_DataSeeder = dataSeeder;
+            m_StringLocalizer = stringLocalizer;
             m_UserDataStore = userDataStore;
             m_Runtime = runtime;
             m_Users = new HashSet<UnturnedUser>();
@@ -194,7 +197,7 @@ namespace OpenMod.Unturned.Users
                 }
                 else
                 {
-                    userData ??= new();
+                    userData ??= new UserData();
                     userData.LastSeen = DateTime.Now;
                     userData.LastDisplayName = pendingUser.DisplayName;
                     await m_UserDataStore.SetUserDataAsync(userData);
@@ -207,7 +210,6 @@ namespace OpenMod.Unturned.Users
                     : new UnturnedUserConnectingEvent(pendingUser);
 
                 userConnectingEvent.IsCancelled = !isPendingValid;
-
                 if (rejectExplanation != null)
                     await userConnectingEvent.RejectAsync(rejectExplanation);
 
@@ -228,7 +230,9 @@ namespace OpenMod.Unturned.Users
             isValid = isPendingValid;
             explanation = rejectExplanation;
 
+#pragma warning disable 618
             Provider.onCheckValid?.Invoke(callback, ref isValid);
+#pragma warning restore 618
         }
 
         protected virtual void FinishSession(UnturnedPendingUser pending)
@@ -342,57 +346,30 @@ namespace OpenMod.Unturned.Users
             return BroadcastTask().AsTask();
         }
 
-        public Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
+        public Task<bool> BanAsync(IUser user, string? reason = null, DateTime? expireDate = null)
         {
-            if (user is not UnturnedUser player)
-            {
-                return Task.FromResult(result: false);
-            }
-
-            reason ??= "No reason provided";
-            endTime ??= DateTime.MaxValue;
-
-            var banDuration = (uint)(endTime.Value - DateTime.Now).TotalSeconds;
-            if (banDuration <= 0)
-                return Task.FromResult(result: false);
-
-            async UniTask<bool> BanTask()
-            {
-                await UniTask.SwitchToMainThread();
-                var ip = player.Player.SteamPlayer.getIPv4AddressOrZero();
-                return Provider.requestBanPlayer(CSteamID.Nil, player.SteamId, ip, reason, banDuration);
-            }
-
-            return BanTask().AsTask();
+            return BanAsync(user, instigator: null, reason, expireDate);
         }
 
-        public Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? endTime = null)
+        public async Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? expireDate = null)
         {
-            if (instigator == null || !ulong.TryParse(instigator.Id, out var instigatorId))
+            expireDate ??= DateTime.MaxValue;
+
+            var duration = (expireDate.Value - DateTime.Now).TotalSeconds;
+            if (duration <= 0)
+                return false;
+
+            reason ??= m_StringLocalizer["ban_default"];
+            var data = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
+            if (data != null)
             {
-                return BanAsync(user, reason, endTime);
+                data.BanInfo = new BanData(reason, instigator, expireDate);
+                await m_UserDataStore.SetUserDataAsync(data);
             }
 
-            if (user is not UnturnedUser player)
-            {
-                return Task.FromResult(result: false);
-            }
-
-            reason ??= "No reason provided";
-            endTime ??= DateTime.MaxValue;
-
-            var banDuration = (uint) (endTime.Value - DateTime.Now).TotalSeconds;
-            if (banDuration <= 0)
-                return Task.FromResult(result: false);
-
-            async UniTask<bool> BanTask()
-            {
-                await UniTask.SwitchToMainThread();
-                var ip = player.Player.SteamPlayer.getIPv4AddressOrZero();
-                return Provider.requestBanPlayer(new CSteamID(instigatorId), player.SteamId, ip, reason, banDuration);
-            }
-
-            return BanTask().AsTask();
+            await UniTask.SwitchToMainThread();
+            Provider.ban(new CSteamID(ulong.Parse(user.Id)), reason, duration > uint.MaxValue ? SteamBlacklist.PERMANENT : (uint)duration);
+            return true;
         }
 
         public Task<bool> KickAsync(IUser user, string? reason = null)

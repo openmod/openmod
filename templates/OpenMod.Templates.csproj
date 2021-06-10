@@ -2,7 +2,7 @@
     <PropertyGroup>
         <PackageType>Template</PackageType>
         <PackageId>OpenMod.Templates</PackageId>
-        <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageAuthors>OpenMod</PackageAuthors>
         <PackageOwners>OpenMod</PackageOwners>
         <Title>OpenMod Plugin Templates</Title>

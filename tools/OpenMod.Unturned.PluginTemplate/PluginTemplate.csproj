@@ -4,7 +4,7 @@
     <TargetFramework>net461</TargetFramework>
 $if$ ($packageid$ != "")    <PackageId>$packageid$</PackageId>$endif$
 $if$ ($description$ != "")    <PackageDescription>$description$</PackageDescription>$endif$
-    <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>openmod openmod-plugin unturned</PackageTags>
 $if$ ($author$ != "")    <PackageAuthor>$author$</PackageAuthor>
     <Authors>$author$</Authors>

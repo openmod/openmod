@@ -1,6 +1,7 @@
 ﻿commands:
   openmod:
     restricted: "This command is restricted."
+    ban_default: "Ban reason not provided."
   errors:
     out_of_range_error: "Too few arguments: missing parameter at index {Index} of type {Type.Name}"
     parse_error: "Parse error: could not parse {Value} to {Type.Name}"
