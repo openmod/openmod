@@ -1,18 +1,15 @@
-﻿extern alias JetBrainsAnnotations;
-using OpenMod.Unturned.Events;
+﻿using OpenMod.Unturned.Events;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Players.Quests.Events
 {
     public class UnturnedPlayerFlagChangedEvent : UnturnedPlayerEvent
     {
-        public PlayerQuests Quests { get; }
         public PlayerQuestFlag Flag { get;  }
 
-        public UnturnedPlayerFlagChangedEvent(UnturnedPlayer player, PlayerQuests quests, PlayerQuestFlag flag) :
+        public UnturnedPlayerFlagChangedEvent(UnturnedPlayer player, PlayerQuestFlag flag) :
             base(player)
         {
-            Quests = quests;
             Flag = flag;
         }
     }

@@ -1,5 +1,4 @@
-﻿extern alias JetBrainsAnnotations;
-using OpenMod.Unturned.Events;
+﻿using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
 
@@ -7,18 +6,18 @@ namespace OpenMod.Unturned.Players.Quests.Events
 {
     public class UnturnedPlayerGroupChangedEvent : UnturnedPlayerEvent
     {
-        public CSteamID OldGroupID { get; }
+        public CSteamID OldGroupId { get; }
         public EPlayerGroupRank OldGroupRank { get;  }
 
-        public CSteamID NewGroupID { get; }
+        public CSteamID NewGroupId { get; }
         public EPlayerGroupRank NewGroupRank { get; }
 
-        public UnturnedPlayerGroupChangedEvent(UnturnedPlayer player, CSteamID oldGroupID,
-            EPlayerGroupRank oldGroupRank, CSteamID newGroupID, EPlayerGroupRank newGroupRank) : base(player)
+        public UnturnedPlayerGroupChangedEvent(UnturnedPlayer player, CSteamID oldGroupId,
+            EPlayerGroupRank oldGroupRank, CSteamID newGroupId, EPlayerGroupRank newGroupRank) : base(player)
         {
-            OldGroupID = oldGroupID;
+            OldGroupId = oldGroupId;
             OldGroupRank = oldGroupRank;
-            NewGroupID = newGroupID;
+            NewGroupId = newGroupId;
             NewGroupRank = newGroupRank;
         }
     }

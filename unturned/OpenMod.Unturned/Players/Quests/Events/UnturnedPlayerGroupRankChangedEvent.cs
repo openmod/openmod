@@ -1,5 +1,4 @@
-﻿extern alias JetBrainsAnnotations;
-using OpenMod.Unturned.Events;
+﻿using OpenMod.Unturned.Events;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Players.Quests.Events

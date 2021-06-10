@@ -41,18 +41,18 @@ namespace OpenMod.Unturned.Players.Quests.Events
             var player = GetUnturnedPlayer(quests.player)!;
 
             var @event =
-                new UnturnedPlayerFlagChangedEvent(player, quests, flag);
+                new UnturnedPlayerFlagChangedEvent(player, flag);
 
             Emit(@event);
         }
 
-        private void OnGroupChanged(PlayerQuests sender, CSteamID oldGroupID, EPlayerGroupRank oldGroupRank,
-            CSteamID newGroupID, EPlayerGroupRank newGroupRank)
+        private void OnGroupChanged(PlayerQuests sender, CSteamID oldGroupId, EPlayerGroupRank oldGroupRank,
+            CSteamID newGroupId, EPlayerGroupRank newGroupRank)
         {
             var player = GetUnturnedPlayer(sender.player)!;
 
             var @event =
-                new UnturnedPlayerGroupChangedEvent(player, oldGroupID, oldGroupRank, newGroupID, newGroupRank);
+                new UnturnedPlayerGroupChangedEvent(player, oldGroupId, oldGroupRank, newGroupId, newGroupRank);
 
             Emit(@event);
         }
