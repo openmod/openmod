@@ -1,22 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using OpenMod.API.Localization;
 using OpenMod.API.Permissions;
 using OpenMod.Core.Helpers;
 using OpenMod.Extensions.Games.Abstractions.Players;
 using Rocket.API;
 using Rocket.Core;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.RocketMod.Permissions
 {
     public class RocketCooldownPermissionCheckProvider : IPermissionCheckProvider
     {
+        private readonly IOpenModHostStringLocalizer m_StringLocalizer;
         private readonly Dictionary<string, Dictionary<string, DateTime>> m_Cooldowns;
 
-        public RocketCooldownPermissionCheckProvider()
+        public RocketCooldownPermissionCheckProvider(IOpenModHostStringLocalizer stringLocalizer)
         {
+            m_StringLocalizer = stringLocalizer;
             m_Cooldowns = new Dictionary<string, Dictionary<string, DateTime>>();
         }
 
@@ -44,8 +47,10 @@ namespace OpenMod.Unturned.RocketMod.Permissions
                     var timeLeft = (finishDate - DateTime.UtcNow).TotalSeconds;
                     if (timeLeft > 0)
                     {
-                        // todo: there is no openmod.unturned.translations.yaml yet
-                        AsyncHelper.RunSync(() => ((IPlayerUser)actor).PrintMessageAsync($"You must wait {timeLeft:0.##} seconds.", Color.Red));
+                        AsyncHelper.RunSync(() =>
+                            ((IPlayerUser) actor).PrintMessageAsync(
+                                m_StringLocalizer["rocket:permissions:command_cooldown", new {TimeLeft = timeLeft}],
+                                Color.Red));
                         return Task.FromResult(PermissionGrantResult.Deny);
                     }
 

@@ -1,6 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using OpenMod.API.Eventing;
+using OpenMod.API.Localization;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
 using OpenMod.Extensions.Economy.Abstractions;
@@ -20,6 +21,8 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
         private readonly IRocketModComponent m_RocketModComponent;
         private readonly IEventBus m_EventBus;
+        private readonly IOpenModHostStringLocalizer m_StringLocalizer;
+
         private bool m_UconomyReady;
         private Harmony? m_HarmonyInstance;
         private Type? m_DatabaseType;
@@ -34,10 +37,12 @@ namespace OpenMod.Unturned.RocketMod.Economy
 
         public UconomyEconomyProvider(
             IRocketModComponent rocketModComponent,
-            IEventBus eventBus)
+            IEventBus eventBus,
+            IOpenModHostStringLocalizer stringLocalizer)
         {
             m_RocketModComponent = rocketModComponent;
             m_EventBus = eventBus;
+            m_StringLocalizer = stringLocalizer;
         }
 
         private void PatchUconomy()
@@ -182,6 +187,18 @@ namespace OpenMod.Unturned.RocketMod.Economy
             async UniTask<decimal> UpdateBalance()
             {
                 await UniTask.SwitchToMainThread();
+
+                if (changeAmount < 0)
+                {
+                    var balance = (decimal) m_GetBalanceMethod!.Invoke(m_DatabaseInstance, new object[] {ownerId});
+
+                    if (balance + changeAmount < 0)
+                    {
+                        throw new NotEnoughBalanceException(
+                            m_StringLocalizer["rocket:uconomy:not_enough_balance",
+                                new {Balance = balance, EconomyProvider = this}], balance);
+                    }
+                }
 
                 return (decimal)m_IncreaseBalanceMethod!.Invoke(m_DatabaseInstance,
                     new object[] { ownerId, changeAmount });
