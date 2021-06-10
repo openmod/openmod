@@ -54,7 +54,7 @@ namespace OpenMod.EntityFrameworkCore.Extensions
             Action<DbContextOptionsBuilder>? optionsBuilderAction,
             ServiceLifetime? serviceLifetime)
         {
-            serviceLifetime ??= ServiceLifetime.Scoped;
+            serviceLifetime ??= ServiceLifetime.Transient;
 
             containerBuilder
                 .Register(context =>
