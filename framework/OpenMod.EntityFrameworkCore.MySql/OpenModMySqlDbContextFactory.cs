@@ -1,13 +1,12 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MySql.Data.EntityFrameworkCore.Extensions;
+using System;
+using System.Linq;
+using System.Reflection;
 
-namespace OpenMod.EntityFrameworkCore
+namespace OpenMod.EntityFrameworkCore.MySql
 {
     /// <summary>
     /// Boilerplate code for design time context factories. Must be implemented to support EF Core commands.
@@ -15,13 +14,14 @@ namespace OpenMod.EntityFrameworkCore
     /// <typeparam name="TDbContext">The DbContext the factory is for.</typeparam>
     /// <example>
     /// <code>
-    /// public class MyDbContextFactory : OpenModDbContextFactory&lt;MyDbContext&gt;
+    /// public class MyDbContextFactory : OpenModMySqlDbContextFactory&lt;MyDbContext&gt;
     /// {
     ///    // that's all needed
     /// }
     /// </code>
     /// </example>
-    public class OpenModDbContextFactory<TDbContext> : IDesignTimeDbContextFactory<TDbContext> where TDbContext : OpenModDbContext<TDbContext>
+    public abstract class OpenModMySqlDbContextFactory<TDbContext> : IDesignTimeDbContextFactory<TDbContext>
+        where TDbContext : OpenModMySqlDbContext<TDbContext>
     {
         public TDbContext CreateDbContext(string[] args)
         {
@@ -58,12 +58,13 @@ namespace OpenMod.EntityFrameworkCore
 
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddLogging();
-            serviceCollection.AddEntityFrameworkMySQL();
             serviceCollection.AddSingleton(config);
             serviceCollection.AddSingleton<IConfiguration>(config);
             serviceCollection.AddTransient<IConnectionStringAccessor, ConfigurationBasedConnectionStringAccessor>();
-            addDbContextMethod.Invoke(obj: null, new object?[] { serviceCollection, null, ServiceLifetime.Scoped, ServiceLifetime.Scoped });
-           
+            serviceCollection.AddEntityFrameworkMySql();
+
+            addDbContextMethod.Invoke(obj: null, new object?[] { serviceCollection, null, ServiceLifetime.Transient, ServiceLifetime.Transient });
+
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             return serviceProvider.GetRequiredService<TDbContext>();
