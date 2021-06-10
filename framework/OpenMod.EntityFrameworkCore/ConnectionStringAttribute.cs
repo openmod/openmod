@@ -3,7 +3,7 @@
 namespace OpenMod.EntityFrameworkCore
 {
     /// <summary>
-    /// Sets the connection string to use for a <see cref="OpenModDbContext{TSelf}"/>. 
+    /// Sets the connection string to use for a <see cref="OpenModDbContextBase{TSelf}"/>. 
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class ConnectionStringAttribute : Attribute
@@ -14,7 +14,7 @@ namespace OpenMod.EntityFrameworkCore
         public string Name { get; }
 
         /// <summary>
-        /// Sets the connection string to use for a<see cref="OpenModDbContext{TSelf}"/>.
+        /// Sets the connection string to use for a<see cref="OpenModDbContextBase{TSelf}"/>.
         /// </summary>
         /// <param name="name">The connection string name.</param>
         public ConnectionStringAttribute(string name)
