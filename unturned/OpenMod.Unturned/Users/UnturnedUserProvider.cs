@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Eventing;
@@ -9,11 +13,6 @@ using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Users.Events;
 using SDG.Unturned;
 using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using SteamGameServerNetworkingUtils = SDG.Unturned.SteamGameServerNetworkingUtils;
 
 namespace OpenMod.Unturned.Users
 {
@@ -60,14 +59,15 @@ namespace OpenMod.Unturned.Users
             }
 
             Provider.onCheckValidWithExplanation += OnPendingPlayerConnecting;
-            Provider.onEnemyConnected += OnPlayerConnected;
+            Provider.onServerConnected += OnPlayerConnected;
             Provider.onEnemyDisconnected += OnPlayerDisconnected;
             Provider.onRejectingPlayer += OnRejectingPlayer;
         }
 
-        protected virtual void OnPlayerConnected(SteamPlayer steamPlayer)
+        protected virtual void OnPlayerConnected(CSteamID steamID)
         {
-            if (m_Users.Any(d => d.Player.SteamPlayer.Equals(steamPlayer)))
+            var steamPlayer = PlayerTool.getSteamPlayer(steamID);
+            if (steamPlayer == null || m_Users.Any(d => d.Player.SteamPlayer.Equals(steamPlayer)))
             {
                 return;
             }
@@ -81,15 +81,9 @@ namespace OpenMod.Unturned.Users
             var user = new UnturnedUser(this, m_UserDataStore, steamPlayer.player, pending);
             m_Users.Add(user);
 
-            var connectedEvent = new UnturnedUserConnectedEvent(user);
+            var @event = new UnturnedUserConnectedEvent(user);
 
-            async UniTaskVoid EmitDelayedEvent(UnturnedUserConnectedEvent @event)
-            {
-                await UniTask.DelayFrame(1);
-                await m_EventBus.EmitAsync(m_Runtime, this, @event);
-            }
-
-            EmitDelayedEvent(connectedEvent).Forget();
+            AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_Runtime, this, @event));
         }
 
         protected virtual void OnPlayerDisconnected(SteamPlayer steamPlayer)
@@ -379,7 +373,7 @@ namespace OpenMod.Unturned.Users
             reason ??= "No reason provided";
             endTime ??= DateTime.MaxValue;
 
-            var banDuration = (uint) (endTime.Value - DateTime.Now).TotalSeconds;
+            var banDuration = (uint)(endTime.Value - DateTime.Now).TotalSeconds;
             if (banDuration <= 0)
                 return Task.FromResult(result: false);
 
@@ -427,7 +421,7 @@ namespace OpenMod.Unturned.Users
             m_PendingUsers.Clear();
 
             Provider.onCheckValidWithExplanation -= OnPendingPlayerConnecting;
-            Provider.onEnemyConnected -= OnPlayerConnected;
+            Provider.onServerConnected -= OnPlayerConnected;
             Provider.onEnemyDisconnected -= OnPlayerDisconnected;
             Provider.onRejectingPlayer -= OnRejectingPlayer;
         }
