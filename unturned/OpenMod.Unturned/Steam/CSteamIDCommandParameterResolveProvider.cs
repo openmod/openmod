@@ -16,7 +16,7 @@ namespace OpenMod.Unturned.Steam
 
             if (string.IsNullOrEmpty(input))
             {
-                return Task.FromResult((object?)null);
+                return Task.FromResult((object?)CSteamID.Nil);
             }
 
             if (!Supports(type))
