@@ -6,6 +6,9 @@ using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Net;
+using Microsoft.Extensions.DependencyInjection;
+using Nito.AsyncEx;
+using OpenMod.API.Users;
 using OpenMod.Core.Users;
 
 namespace OpenMod.Unturned.Players.Bans.Events
@@ -13,8 +16,11 @@ namespace OpenMod.Unturned.Players.Bans.Events
     [UsedImplicitly]
     internal class BansEventsListener : UnturnedEventsListener
     {
+        private readonly IUserDataStore m_UserDataStore;
+
         public BansEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            m_UserDataStore = serviceProvider.GetRequiredService<IUserDataStore>();
         }
 
         public override void Subscribe()
@@ -59,10 +65,41 @@ namespace OpenMod.Unturned.Players.Bans.Events
             shouldVanillaBan = !@event.IsCancelled;
         }
 
-        private void OnCheckBanStatus(SteamPlayerID playerId, uint remoteIP, ref bool isBanned, ref string banReason, ref uint banRemainingDuration) // lgtm [cs/too-many-ref-parameters]
+        private void OnCheckBanStatus(SteamPlayerID playerId, uint remoteIp, ref bool isBanned, ref string banReason, ref uint banRemainingDuration) // lgtm [cs/too-many-ref-parameters]
         {
+            if (!isBanned)
+            {
+                var banned = isBanned;
+                var duration = banRemainingDuration;
+                var reason = banReason;
+
+                AsyncContext.Run(async () =>
+                {
+                    var userData = await m_UserDataStore.GetUserDataAsync(playerId.steamID.ToString(), KnownActorTypes.Player);
+                    if (userData?.BanInfo?.ExpireDate == null)
+                    {
+                        return;
+                    }
+
+                    var dur = (userData.BanInfo.ExpireDate.Value - DateTime.Now).TotalSeconds;
+                    if (dur < 0)
+                    {
+                        return;
+                    }
+
+                    banned = true;
+                    duration = dur > uint.MaxValue ? SteamBlacklist.PERMANENT : (uint)dur;
+                    reason = userData.BanInfo.Reason;
+                });
+
+                isBanned = banned;
+                banRemainingDuration = duration;
+                banReason = reason;
+            }
+
+
             var @event =
-                new UnturnedPlayerCheckingBanEvent(playerId, remoteIP, isBanned, banReason, banRemainingDuration);
+                new UnturnedPlayerCheckingBanEvent(playerId, remoteIp, isBanned, banReason, banRemainingDuration);
 
             Emit(@event);
 

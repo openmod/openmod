@@ -7,9 +7,11 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
   <ItemGroup>
+    <None Remove="openmod.unturned.translations.yaml" />
     <None Remove="openmod.unturned.yaml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="openmod.unturned.translations.yaml" />
     <EmbeddedResource Include="openmod.unturned.yaml" />
   </ItemGroup>
 
