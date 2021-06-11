@@ -19,6 +19,7 @@ using OpenMod.Unturned.Players;
 using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.RocketMod.Economy;
 using OpenMod.Unturned.RocketMod.Permissions;
+using OpenMod.Unturned.Steam;
 using OpenMod.Unturned.Users;
 using System;
 
@@ -55,6 +56,7 @@ namespace OpenMod.Unturned
             {
                 options.AddCommandParameterResolveProvider<UnturnedPlayerCommandParameterResolveProvider>();
                 options.AddCommandParameterResolveProvider<UnturnedLocationCommandParameterResolveProvider>();
+                options.AddCommandParameterResolveProvider<CSteamIDCommandParameterResolveProvider>();
             });
 
             if (RocketModIntegration.IsRocketModInstalled())
