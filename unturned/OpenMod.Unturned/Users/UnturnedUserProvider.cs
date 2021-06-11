@@ -60,7 +60,7 @@ namespace OpenMod.Unturned.Users
 
             Provider.onCheckValidWithExplanation += OnPendingPlayerConnecting;
             Provider.onServerConnected += OnPlayerConnected;
-            Provider.onEnemyDisconnected += OnPlayerDisconnected;
+            Provider.onServerDisconnected += OnPlayerDisconnected;
             Provider.onRejectingPlayer += OnRejectingPlayer;
         }
 
@@ -86,9 +86,9 @@ namespace OpenMod.Unturned.Users
             AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_Runtime, this, @event));
         }
 
-        protected virtual void OnPlayerDisconnected(SteamPlayer steamPlayer)
+        protected virtual void OnPlayerDisconnected(CSteamID steamID)
         {
-            var user = GetUser(steamPlayer.playerID.steamID);
+            var user = GetUser(steamID);
 
             if (user == null)
             {
@@ -422,7 +422,7 @@ namespace OpenMod.Unturned.Users
 
             Provider.onCheckValidWithExplanation -= OnPendingPlayerConnecting;
             Provider.onServerConnected -= OnPlayerConnected;
-            Provider.onEnemyDisconnected -= OnPlayerDisconnected;
+            Provider.onServerDisconnected -= OnPlayerDisconnected;
             Provider.onRejectingPlayer -= OnRejectingPlayer;
         }
     }
