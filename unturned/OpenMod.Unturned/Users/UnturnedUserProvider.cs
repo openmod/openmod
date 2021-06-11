@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Eventing;
+using OpenMod.API.Localization;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
@@ -13,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Localization;
 
 namespace OpenMod.Unturned.Users
 {
@@ -24,7 +24,7 @@ namespace OpenMod.Unturned.Users
         private readonly HashSet<UnturnedPendingUser> m_PendingUsers;
 
         private readonly IEventBus m_EventBus;
-        private readonly IStringLocalizer m_StringLocalizer;
+        private readonly IOpenModStringLocalizer m_StringLocalizer;
         private readonly IRuntime m_Runtime;
         private readonly IUserDataSeeder m_DataSeeder;
 
@@ -32,7 +32,7 @@ namespace OpenMod.Unturned.Users
 
         public UnturnedUserProvider(
             IEventBus eventBus,
-            IStringLocalizer stringLocalizer,
+            IOpenModStringLocalizer stringLocalizer,
             IUserDataSeeder dataSeeder,
             IUserDataStore userDataStore,
             IRuntime runtime)
