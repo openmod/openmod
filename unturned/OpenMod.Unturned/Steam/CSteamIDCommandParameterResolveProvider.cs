@@ -16,7 +16,7 @@ namespace OpenMod.Unturned.Steam
 
             if (string.IsNullOrEmpty(input))
             {
-                return Task.FromResult((object?)null);
+                return Task.FromResult((object?)CSteamID.Nil);
             }
 
             if (!Supports(type))
@@ -24,14 +24,7 @@ namespace OpenMod.Unturned.Steam
                 throw new ArgumentException("The given type is not supported", nameof(type));
             }
 
-            if (ulong.TryParse(input, out ulong steamId))
-            {
-                return Task.FromResult((object?)new CSteamID(steamId));
-            }
-            else
-            {
-                return Task.FromResult((object?)CSteamID.Nil);
-            }
+            return Task.FromResult((object?)new CSteamID(ulong.Parse(input)));
         }
 
         public bool Supports(Type type)
