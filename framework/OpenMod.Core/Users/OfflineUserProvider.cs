@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Localization;
+using OpenMod.API.Localization;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 
@@ -12,10 +13,10 @@ namespace OpenMod.Core.Users
     [Priority(Priority = Priority.Lowest)]
     public class OfflineUserProvider : IUserProvider
     {
-        private readonly IStringLocalizer m_StringLocalizer;
+        private readonly IOpenModStringLocalizer m_StringLocalizer;
         private readonly IUserDataStore m_UserDataStore;
 
-        public OfflineUserProvider(IStringLocalizer stringLocalizer, IUserDataStore userDataStore)
+        public OfflineUserProvider(IOpenModStringLocalizer stringLocalizer, IUserDataStore userDataStore)
         {
             m_StringLocalizer = stringLocalizer;
             m_UserDataStore = userDataStore;
