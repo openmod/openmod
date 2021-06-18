@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Ioc;
+using OpenMod.Extensions.Games.Abstractions;
 
 namespace OpenMod.Rust
 {
@@ -7,6 +8,8 @@ namespace OpenMod.Rust
     {
         public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
         {
+            serviceCollection.AddSingleton<IGameHostInformation, RustHostInformation>();
+
             // serviceCollection.Configure<CommandStoreOptions>(options =>
             // {
             //     options.AddCommandSource<RustCommandSource>();
