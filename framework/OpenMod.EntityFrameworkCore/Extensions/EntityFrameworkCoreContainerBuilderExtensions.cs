@@ -1,9 +1,10 @@
-﻿using System;
-using Autofac;
+﻿using Autofac;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.Core.Ioc.Extensions;
+using OpenMod.EntityFrameworkCore.Configurator;
+using System;
 
 namespace OpenMod.EntityFrameworkCore.Extensions
 {
@@ -52,20 +53,32 @@ namespace OpenMod.EntityFrameworkCore.Extensions
         private static ContainerBuilder AddDbContextInternal(this ContainerBuilder containerBuilder,
             Type dbContextType,
             Action<DbContextOptionsBuilder>? optionsBuilderAction,
-            ServiceLifetime? serviceLifetime)
+            ServiceLifetime? serviceLifetime,
+            IDbContextConfigurator? configurator = null)
         {
             serviceLifetime ??= ServiceLifetime.Transient;
 
             containerBuilder
                 .Register(context =>
                 {
-                    var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
-                    optionsBuilder.UseLoggerFactory(context.Resolve<ILoggerFactory>());
-                    
                     var applicationServiceProvider = context.Resolve<IServiceProvider>();
-                    optionsBuilder.UseApplicationServiceProvider(applicationServiceProvider);
-                    optionsBuilderAction?.Invoke(optionsBuilder);
-                    return ActivatorUtilities.CreateInstance(applicationServiceProvider, dbContextType, optionsBuilder.Options);
+
+                    void Builder(DbContextOptionsBuilder builder)
+                    {
+                        builder.UseLoggerFactory(context.Resolve<ILoggerFactory>());
+                        builder.UseApplicationServiceProvider(applicationServiceProvider);
+                        optionsBuilderAction?.Invoke(builder);
+                    }
+
+                    var actionConfigurator = new DbContextOptionsBuilderActionContextConfigurator(Builder);
+
+                    IDbContextConfigurator compilationConfigurator = configurator == null
+                        ? actionConfigurator
+                        : new DbContextConfiguratorCompilation(actionConfigurator, configurator);
+
+
+                    return ActivatorUtilities.CreateInstance(
+                        applicationServiceProvider, dbContextType, compilationConfigurator);
                 })
                 .PropertiesAutowired()
                 .As(dbContextType)
