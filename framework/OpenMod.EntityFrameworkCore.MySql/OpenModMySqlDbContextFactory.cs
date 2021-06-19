@@ -21,7 +21,7 @@ namespace OpenMod.EntityFrameworkCore.MySql
     /// </code>
     /// </example>
     public abstract class OpenModMySqlDbContextFactory<TDbContext> : IDesignTimeDbContextFactory<TDbContext>
-        where TDbContext : OpenModMySqlDbContext<TDbContext>
+        where TDbContext : OpenModDbContext<TDbContext>
     {
         public TDbContext CreateDbContext(string[] args)
         {
