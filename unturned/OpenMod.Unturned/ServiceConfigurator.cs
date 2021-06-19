@@ -11,6 +11,7 @@ using OpenMod.Core.Commands;
 using OpenMod.Core.Permissions;
 using OpenMod.Core.Users;
 using OpenMod.Extensions.Economy.Abstractions;
+using OpenMod.Extensions.Games.Abstractions;
 using OpenMod.Unturned.Commands;
 using OpenMod.Unturned.Configuration;
 using OpenMod.Unturned.Locations;
@@ -33,6 +34,7 @@ namespace OpenMod.Unturned
             var unturnedConfiguration = new OpenModUnturnedConfiguration(openModStartupContext.Runtime.WorkingDirectory);
 
             serviceCollection.AddSingleton<IOpenModUnturnedConfiguration>(unturnedConfiguration);
+            serviceCollection.AddSingleton<IGameHostInformation, UnturnedHostInformation>();
 
             serviceCollection.Configure<PermissionCheckerOptions>(options =>
             {
