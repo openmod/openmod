@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OpenMod.API.Plugins;
+using OpenMod.EntityFrameworkCore.Configurator;
 using System;
 using System.Reflection;
 
@@ -7,17 +8,34 @@ namespace OpenMod.EntityFrameworkCore
 {
     public abstract class OpenModDbContext<TSelf> : DbContext where TSelf : OpenModDbContext<TSelf>
     {
-        private readonly IServiceProvider m_ServiceProvider;
+        internal readonly IServiceProvider ServiceProvider;
+        private readonly IDbContextConfigurator? m_DbContextConfigurator;
 
         protected OpenModDbContext(IServiceProvider serviceProvider)
         {
-            m_ServiceProvider = serviceProvider;
+            ServiceProvider = serviceProvider;
         }
 
-        protected OpenModDbContext(DbContextOptions<TSelf> options, IServiceProvider serviceProvider) :
-            base(options)
+        protected OpenModDbContext(IDbContextConfigurator configurator, IServiceProvider serviceProvider)
         {
-            m_ServiceProvider = serviceProvider;
+            m_DbContextConfigurator = configurator;
+            ServiceProvider = serviceProvider;
+        }
+        
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+
+            m_DbContextConfigurator?.Configure(this, optionsBuilder);
+        }
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            m_DbContextConfigurator?.Configure(this, modelBuilder);
+        }
+
         /// <summary>
         /// Gets the name of the migrations table for supporting providers.
         /// </summary>
