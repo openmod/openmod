@@ -9,22 +9,22 @@ namespace OpenMod.EntityFrameworkCore.Extensions
 {
     public static class EntityFrameworkCoreContainerBuilderExtensions
     {
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder) where T : OpenModDbContextBase<T>
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder) where T : OpenModDbContext<T>
         {
             return AddDbContextInternal(containerBuilder, typeof(T), null, null);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContextBase<T>
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext<T>
         {
             return AddDbContextInternal(containerBuilder, typeof(T), null, serviceLifetime);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder>? optionsBuilder) where T : OpenModDbContextBase<T>
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder>? optionsBuilder) where T : OpenModDbContext<T>
         {
             return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, null);
         }
 
-        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder>? optionsBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContextBase<T>
+        public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder>? optionsBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext<T>
         {
             return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, serviceLifetime);
         }
@@ -61,7 +61,7 @@ namespace OpenMod.EntityFrameworkCore.Extensions
                 {
                     var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(typeof(DbContextOptionsBuilder<>).MakeGenericType(dbContextType));
                     optionsBuilder.UseLoggerFactory(context.Resolve<ILoggerFactory>());
-
+                    
                     var applicationServiceProvider = context.Resolve<IServiceProvider>();
                     optionsBuilder.UseApplicationServiceProvider(applicationServiceProvider);
                     optionsBuilderAction?.Invoke(optionsBuilder);
