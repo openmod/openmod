@@ -21,7 +21,7 @@ namespace OpenMod.EntityFrameworkCore.MySql
             }
 
             using var stream = GetType().Assembly
-                .GetManifestResourceStream("SilK.OpenMod.EntityFrameworkCore.libs.MySqlConnector.dll");
+                .GetManifestResourceStream("OpenMod.EntityFrameworkCore.MySql.libs.MySqlConnector.dll");
 
             if (stream == null)
             {
