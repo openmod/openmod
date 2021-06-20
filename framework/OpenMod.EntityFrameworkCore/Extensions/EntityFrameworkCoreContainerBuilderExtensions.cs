@@ -27,7 +27,7 @@ namespace OpenMod.EntityFrameworkCore.Extensions
 
         public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder>? optionsBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext<T>
         {
-            return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, serviceLifetime);
+            return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, serviceLifetime, null);
         }
 
         public static ContainerBuilder AddDbContext(this ContainerBuilder containerBuilder, Type dbContextType)
