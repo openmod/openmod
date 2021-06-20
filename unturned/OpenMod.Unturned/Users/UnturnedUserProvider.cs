@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Eventing;
@@ -10,10 +14,6 @@ using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Users.Events;
 using SDG.Unturned;
 using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
 {
@@ -63,67 +63,71 @@ namespace OpenMod.Unturned.Users
             }
 
             Provider.onCheckValidWithExplanation += OnPendingPlayerConnecting;
-            Provider.onEnemyConnected += OnPlayerConnected;
-            Provider.onEnemyDisconnected += OnPlayerDisconnected;
+            Provider.onServerConnected += OnPlayerConnected;
+            Provider.onServerDisconnected += OnPlayerDisconnected;
             Provider.onRejectingPlayer += OnRejectingPlayer;
         }
 
-        protected virtual void OnPlayerConnected(SteamPlayer steamPlayer)
+        protected virtual void OnPlayerConnected(CSteamID steamID)
         {
-            if (m_Users.Any(d => d.Player.SteamPlayer.Equals(steamPlayer)))
+            AsyncHelper.Schedule("OnPlayerConnected Event Thread", () =>
             {
-                return;
-            }
-
-            var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == steamPlayer.playerID.steamID);
-            if (pending != null)
-            {
-                FinishSession(pending);
-            }
-
-            var user = new UnturnedUser(this, m_UserDataStore, steamPlayer.player, pending);
-            m_Users.Add(user);
-
-            var connectedEvent = new UnturnedUserConnectedEvent(user);
-
-            async UniTaskVoid EmitDelayedEvent(UnturnedUserConnectedEvent @event)
-            {
-                await UniTask.DelayFrame(1);
-                await m_EventBus.EmitAsync(m_Runtime, this, @event);
-            }
-
-            EmitDelayedEvent(connectedEvent).Forget();
-        }
-
-        protected virtual void OnPlayerDisconnected(SteamPlayer steamPlayer)
-        {
-            var user = GetUser(steamPlayer.playerID.steamID);
-
-            if (user == null)
-            {
-                return;
-            }
-
-            if (user.Session is UnturnedUserSession session)
-            {
-                session.OnSessionEnd();
-            }
-
-            AsyncHelper.RunSync(async () =>
-            {
-                var disconnectedEvent = new UnturnedUserDisconnectedEvent(user);
-                await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
-
-                m_Users.Remove(user);
-
-                var userData = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
-                if (userData == null)
+                var steamPlayer = PlayerTool.getSteamPlayer(steamID);
+                if (steamPlayer == null || m_Users.Any(d => d.Player.SteamPlayer.Equals(steamPlayer)))
                 {
-                    return;
+                    return Task.CompletedTask;
                 }
 
-                userData.LastSeen = DateTime.Now;
-                await m_UserDataStore.SetUserDataAsync(userData);
+                var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == steamPlayer.playerID.steamID);
+                if (pending != null)
+                {
+                    FinishSession(pending);
+                }
+
+                var user = new UnturnedUser(this, m_UserDataStore, steamPlayer.player, pending);
+                m_Users.Add(user);
+
+                var @event = new UnturnedUserConnectedEvent(user);
+
+                AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_Runtime, this, @event));
+                return Task.CompletedTask;
+            });
+        }
+
+        protected virtual void OnPlayerDisconnected(CSteamID steamID)
+        {
+            AsyncHelper.Schedule("OnPlayerDisconnected Event Thread", () =>
+            {
+                var user = GetUser(steamID);
+
+                if (user == null)
+                {
+                    return Task.CompletedTask;
+                }
+
+                if (user.Session is UnturnedUserSession session)
+                {
+                    session.OnSessionEnd();
+                }
+
+                AsyncHelper.RunSync(async () =>
+                {
+                    var disconnectedEvent = new UnturnedUserDisconnectedEvent(user);
+                    await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
+
+                    m_Users.Remove(user);
+
+                    var userData = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
+                    if (userData == null)
+                    {
+                        return;
+                    }
+
+                    userData.LastSeen = DateTime.Now;
+                    await m_UserDataStore.SetUserDataAsync(userData);
+                });
+
+                return Task.CompletedTask;
             });
         }
 
@@ -144,95 +148,101 @@ namespace OpenMod.Unturned.Users
 
         protected virtual void OnRejectingPlayer(CSteamID steamId, ESteamRejection rejection, string explanation)
         {
-            var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == steamId);
-            if (pending == null)
+            AsyncHelper.Schedule("OnRejectingPlayer Event Thread", () =>
             {
-                return;
-            }
-
-            AsyncHelper.RunSync(async () =>
-            {
-                var disconnectedEvent = new UnturnedPendingUserDisconnectedEvent(pending);
-                await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
-
-                FinishSession(pending);
-
-                var userData = await m_UserDataStore.GetUserDataAsync(pending.Id, pending.Type);
-                if (userData == null)
+                var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == steamId);
+                if (pending == null)
                 {
-                    return;
+                    return Task.CompletedTask;
                 }
 
-                userData.LastSeen = DateTime.Now;
-                await m_UserDataStore.SetUserDataAsync(userData);
+                AsyncHelper.RunSync(async () =>
+                {
+                    var disconnectedEvent = new UnturnedPendingUserDisconnectedEvent(pending);
+                    await m_EventBus.EmitAsync(m_Runtime, this, disconnectedEvent);
+
+                    FinishSession(pending);
+
+                    var userData = await m_UserDataStore.GetUserDataAsync(pending.Id, pending.Type);
+                    if (userData == null)
+                    {
+                        return;
+                    }
+
+                    userData.LastSeen = DateTime.Now;
+                    await m_UserDataStore.SetUserDataAsync(userData);
+                });
+
+                return Task.CompletedTask;
             });
         }
 
         protected virtual void OnPendingPlayerConnecting(ValidateAuthTicketResponse_t callback, ref bool isValid, ref string? explanation)
         {
-            if (m_PendingUsers.Any(d => d.SteamId == callback.m_SteamID))
-            {
-                return;
-            }
-
             //todo check if it is working, if not this should be patched
             var isPendingValid = isValid;
             var rejectExplanation = explanation;
 
-            AsyncHelper.RunSync(async () =>
+            AsyncHelper.Schedule("OnPendingPlayerConnecting Event Thread", () =>
             {
-                var steamPending = Provider.pending.FirstOrDefault(d => d.playerID.steamID == callback.m_SteamID);
-                if (steamPending == null)
+                if (m_PendingUsers.Any(d => d.SteamId == callback.m_SteamID))
                 {
-                    return;
+                    return Task.CompletedTask;
                 }
 
-                var pendingUser = new UnturnedPendingUser(this, m_UserDataStore, steamPending);
-                var userData = await m_UserDataStore.GetUserDataAsync(pendingUser.Id, pendingUser.Type);
-                var isFirstConnect = userData == null;
-
-                if (isFirstConnect)
+                AsyncHelper.RunSync(async () =>
                 {
-                    await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
-                }
-                else
-                {
-                    userData ??= new UserData();
-                    userData.LastSeen = DateTime.Now;
-                    userData.LastDisplayName = pendingUser.DisplayName;
-                    await m_UserDataStore.SetUserDataAsync(userData);
-                }
+                    var steamPending = Provider.pending.FirstOrDefault(d => d.playerID.steamID == callback.m_SteamID);
+                    if (steamPending == null)
+                    {
+                        return;
+                    }
 
-                m_PendingUsers.Add(pendingUser);
+                    var pendingUser = new UnturnedPendingUser(this, m_UserDataStore, steamPending);
+                    var userData = await m_UserDataStore.GetUserDataAsync(pendingUser.Id, pendingUser.Type);
+                    var isFirstConnect = userData == null;
 
-                var userConnectingEvent = isFirstConnect
-                    ? new UnturnedUserFirstConnectingEvent(pendingUser)
-                    : new UnturnedUserConnectingEvent(pendingUser);
+                    if (isFirstConnect)
+                    {
+                        await m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName);
+                    }
+                    else
+                    {
+                        userData ??= new();
+                        userData.LastSeen = DateTime.Now;
+                        userData.LastDisplayName = pendingUser.DisplayName;
+                        await m_UserDataStore.SetUserDataAsync(userData);
+                    }
 
-                userConnectingEvent.IsCancelled = !isPendingValid;
-                if (rejectExplanation != null)
-                    await userConnectingEvent.RejectAsync(rejectExplanation);
+                    m_PendingUsers.Add(pendingUser);
 
-                await m_EventBus.EmitAsync(m_Runtime, this, userConnectingEvent);
+                    var userConnectingEvent = isFirstConnect
+                        ? new UnturnedUserFirstConnectingEvent(pendingUser)
+                        : new UnturnedUserConnectingEvent(pendingUser);
 
-                if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))
-                {
-                    isPendingValid = false;
-                    rejectExplanation = userConnectingEvent.RejectionReason;
-                }
+                    userConnectingEvent.IsCancelled = !isPendingValid;
+                    if (rejectExplanation != null)
+                        await userConnectingEvent.RejectAsync(rejectExplanation);
 
-                if (userConnectingEvent.IsCancelled)
-                {
-                    isPendingValid = false;
-                }
+                    await m_EventBus.EmitAsync(m_Runtime, this, userConnectingEvent);
+
+                    if (!string.IsNullOrEmpty(userConnectingEvent.RejectionReason))
+                    {
+                        isPendingValid = false;
+                        rejectExplanation = userConnectingEvent.RejectionReason;
+                    }
+
+                    if (userConnectingEvent.IsCancelled)
+                    {
+                        isPendingValid = false;
+                    }
+                });
+
+                return Task.CompletedTask;
             });
-
             isValid = isPendingValid;
             explanation = rejectExplanation;
 
-#pragma warning disable 618
-            Provider.onCheckValid?.Invoke(callback, ref isValid);
-#pragma warning restore 618
         }
 
         protected virtual void FinishSession(UnturnedPendingUser pending)
@@ -406,8 +416,8 @@ namespace OpenMod.Unturned.Users
             m_PendingUsers.Clear();
 
             Provider.onCheckValidWithExplanation -= OnPendingPlayerConnecting;
-            Provider.onEnemyConnected -= OnPlayerConnected;
-            Provider.onEnemyDisconnected -= OnPlayerDisconnected;
+            Provider.onServerConnected -= OnPlayerConnected;
+            Provider.onServerDisconnected -= OnPlayerDisconnected;
             Provider.onRejectingPlayer -= OnRejectingPlayer;
         }
     }
