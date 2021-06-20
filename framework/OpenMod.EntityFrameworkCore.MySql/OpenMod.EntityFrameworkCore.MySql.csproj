@@ -1,32 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0</TargetFrameworks>
-		<PackageDescription>MySql EntityFrameworkCore integration for OpenMod</PackageDescription>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <PackageDescription>MySql EntityFrameworkCore integration for OpenMod</PackageDescription>
+  </PropertyGroup>
 
-	<Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
-	<PropertyGroup>
-		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	</PropertyGroup>
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
 
-	<ItemGroup>
-	  <None Remove="libs\MySqlConnector.dll" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Remove="libs\MySqlConnector.dll" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <EmbeddedResource Include="libs\MySqlConnector.dll" />
-	</ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="libs\MySqlConnector.dll" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.2.5" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.2.5" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\OpenMod.EntityFrameworkCore\OpenMod.EntityFrameworkCore.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenMod.EntityFrameworkCore\OpenMod.EntityFrameworkCore.csproj" />
+  </ItemGroup>
 
 </Project>
