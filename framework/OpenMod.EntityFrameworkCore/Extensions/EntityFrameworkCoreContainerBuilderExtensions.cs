@@ -12,17 +12,17 @@ namespace OpenMod.EntityFrameworkCore.Extensions
     {
         public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder) where T : OpenModDbContext<T>
         {
-            return AddDbContextInternal(containerBuilder, typeof(T), null, null);
+            return AddDbContextInternal(containerBuilder, typeof(T), null, null, null);
         }
 
         public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext<T>
         {
-            return AddDbContextInternal(containerBuilder, typeof(T), null, serviceLifetime);
+            return AddDbContextInternal(containerBuilder, typeof(T), null, serviceLifetime, null);
         }
 
         public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder>? optionsBuilder) where T : OpenModDbContext<T>
         {
-            return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, null);
+            return AddDbContextInternal(containerBuilder, typeof(T), optionsBuilder, null, null);
         }
 
         public static ContainerBuilder AddDbContext<T>(this ContainerBuilder containerBuilder, Action<DbContextOptionsBuilder>? optionsBuilder, ServiceLifetime serviceLifetime) where T : OpenModDbContext<T>
@@ -32,29 +32,34 @@ namespace OpenMod.EntityFrameworkCore.Extensions
 
         public static ContainerBuilder AddDbContext(this ContainerBuilder containerBuilder, Type dbContextType)
         {
-            return AddDbContextInternal(containerBuilder, dbContextType, null, null);
+            return AddDbContextInternal(containerBuilder, dbContextType, null, null, null);
         }
 
         public static ContainerBuilder AddDbContext(this ContainerBuilder containerBuilder, Type dbContextType, ServiceLifetime serviceLifetime)
         {
-            return AddDbContextInternal(containerBuilder, dbContextType, null, serviceLifetime);
+            return AddDbContextInternal(containerBuilder, dbContextType, null, serviceLifetime, null);
         }
 
         public static ContainerBuilder AddDbContext(this ContainerBuilder containerBuilder, Type dbContextType, Action<DbContextOptionsBuilder>? optionsBuilder)
         {
-            return AddDbContextInternal(containerBuilder, dbContextType, optionsBuilder, null);
+            return AddDbContextInternal(containerBuilder, dbContextType, optionsBuilder, null, null);
         }
 
         public static ContainerBuilder AddDbContext(this ContainerBuilder containerBuilder, Type dbContextType, Action<DbContextOptionsBuilder>? optionsBuilder, ServiceLifetime serviceLifetime)
         {
-            return AddDbContextInternal(containerBuilder, dbContextType, optionsBuilder, serviceLifetime);
+            return AddDbContextInternal(containerBuilder, dbContextType, optionsBuilder, serviceLifetime, null);
+        }
+
+        public static ContainerBuilder AddDbContext(this ContainerBuilder containerBuilder, Type dbContextType, Action<DbContextOptionsBuilder>? optionsBuilder, ServiceLifetime serviceLifetime, IDbContextConfigurator configurator)
+        {
+            return AddDbContextInternal(containerBuilder, dbContextType, optionsBuilder, serviceLifetime, configurator);
         }
 
         internal static ContainerBuilder AddDbContextInternal(this ContainerBuilder containerBuilder,
             Type dbContextType,
             Action<DbContextOptionsBuilder>? optionsBuilderAction,
             ServiceLifetime? serviceLifetime,
-            IDbContextConfigurator? configurator = null)
+            IDbContextConfigurator? configurator)
         {
             serviceLifetime ??= ServiceLifetime.Transient;
 
