@@ -1,9 +1,9 @@
 ﻿extern alias JetBrainsAnnotations;
-using Cysharp.Threading.Tasks;
+using System;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
-using System;
+using Steamworks;
 
 namespace OpenMod.Unturned.Players.Connections.Events
 {
@@ -16,34 +16,27 @@ namespace OpenMod.Unturned.Players.Connections.Events
 
         public override void Subscribe()
         {
-            Provider.onEnemyConnected += OnPlayerConnected;
-            Provider.onEnemyDisconnected += OnPlayerDisconnected;
+            Provider.onServerConnected += OnPlayerConnected;
+            Provider.onServerDisconnected += OnPlayerDisconnected;
         }
 
         public override void Unsubscribe()
         {
-            Provider.onEnemyConnected -= OnPlayerConnected;
-            Provider.onEnemyDisconnected -= OnPlayerDisconnected;
+            Provider.onServerConnected -= OnPlayerConnected;
+            Provider.onServerDisconnected -= OnPlayerDisconnected;
         }
 
-        private void OnPlayerConnected(SteamPlayer steamPlayer)
+        private void OnPlayerConnected(CSteamID steamID)
         {
-            async UniTaskVoid EmitPlayerConnected(SteamPlayer nativePlayer)
-            {
-                var player = GetUnturnedPlayer(nativePlayer)!;
+            var player = GetUnturnedPlayer(steamID)!;
 
-                await UniTask.DelayFrame(1);
-
-                var @event = new UnturnedPlayerConnectedEvent(player);
-                Emit(@event);
-            }
-
-            EmitPlayerConnected(steamPlayer).Forget();
+            var @event = new UnturnedPlayerConnectedEvent(player);
+            Emit(@event);
         }
 
-        private void OnPlayerDisconnected(SteamPlayer steamPlayer)
+        private void OnPlayerDisconnected(CSteamID steamID)
         {
-            var player = GetUnturnedPlayer(steamPlayer)!;
+            var player = GetUnturnedPlayer(steamID)!;
 
             var @event = new UnturnedPlayerDisconnectedEvent(player);
             Emit(@event);
