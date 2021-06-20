@@ -9,7 +9,7 @@ namespace OpenMod.EntityFrameworkCore.MySql.Extensions
 {
     public static class MySqlContainerBuilderExtensions
     {
-        public static ContainerBuilder AddMySqlDbContext<T>(this ContainerBuilder containerBuilder, string connectionString) where T : OpenModDbContext<T>
+        public static ContainerBuilder AddMySqlDbContext<T>(this ContainerBuilder containerBuilder) where T : OpenModDbContext<T>
         {
             return AddMySqlDbContextInternal(containerBuilder, typeof(T), null, null);
         }
