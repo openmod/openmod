@@ -67,10 +67,11 @@ namespace OpenMod.EntityFrameworkCore.Extensions
                 .Register(context =>
                 {
                     var applicationServiceProvider = context.Resolve<IServiceProvider>();
+                    var loggerFactory = context.Resolve<ILoggerFactory>();
 
                     void Builder(DbContextOptionsBuilder builder)
                     {
-                        builder.UseLoggerFactory(context.Resolve<ILoggerFactory>());
+                        builder.UseLoggerFactory(loggerFactory);
                         builder.UseApplicationServiceProvider(applicationServiceProvider);
                         optionsBuilderAction?.Invoke(builder);
                     }
@@ -80,7 +81,6 @@ namespace OpenMod.EntityFrameworkCore.Extensions
                     IDbContextConfigurator compilationConfigurator = configurator == null
                         ? actionConfigurator
                         : new DbContextConfiguratorCompilation(actionConfigurator, configurator);
-
 
                     return ActivatorUtilities.CreateInstance(
                         applicationServiceProvider, dbContextType, compilationConfigurator);
