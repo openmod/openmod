@@ -374,7 +374,10 @@ namespace OpenMod.Core.Eventing
                 m_Logger.LogTrace("{EventName}: Finished", eventName);
             }
 
-            callback?.Invoke(@event);
+            if(callback != null)
+            {
+                await callback.Invoke(@event);
+            }
         }
 
         internal static string GetEventName(Type eventType)
