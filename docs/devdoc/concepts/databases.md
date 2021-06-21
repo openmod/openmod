@@ -341,12 +341,3 @@ public class LastConnectCommand : Command
     }
 }
 ```
-
-## Migrating from MySql.Data.EntityFrameworkCore to Pomelo.EntityFrameworkCore.MySql
-
-Unfortunately, migrations do not automatically work across EF Core providers. In order to migrate from OpenMod.EntityFrameworkCore's old default provider, you must:
-- Delete all your existing migrations by deleting everything within your `Migrations` folder.
-- Recreate your initial migration.
-
-It is possible to change your migrations to function across providers, especially from MySql.Data.EntityFrameworkCore to Pomelo.EntityFrameworkCore.MySql as they are very similar, but this requires manually editing migration files.
-If you do not know how to do this, just follow the steps above.
