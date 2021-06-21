@@ -1,0 +1,36 @@
+name: OpenMod.EntityFrameworkCore.MySql
+
+on:
+  create:
+    tags:
+      - "*"
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/OpenMod.EntityFrameworkCore.MySql.yaml'
+      - 'framework/OpenMod.EntityFrameworkCore.MySql/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/OpenMod.EntityFrameworkCore.MySql.yaml'
+      - 'framework/OpenMod.EntityFrameworkCore.MySql/**'
+
+jobs:
+  build:
+    name: "OpenMod.EntityFrameworkCore.MySql Build"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-dotnet@v1
+      name: Setup .NET
+      with:
+        dotnet-version: 5.0.100
+    - uses: ./.github/actions/project-build
+      id: project-build
+      with:
+        project_path: framework/OpenMod.EntityFrameworkCore.MySql
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        nuget_key: ${{ secrets.NUGET_DEPLOY_KEY }}
+        nuget_push: true
