@@ -10,7 +10,7 @@ For more information on Entity Framework Core, [read Microsoft's documentation](
 
 The DbContext houses all of your database sets which in turn hold all your information.
 
-In this example, we will create a database which will allow us to record everytime a user connects and we will be using the MySql provider.
+In this example, we will create a database that will allow us to record every time a user connects and we will be using the MySql provider.
 
 To create your first DbContext, you must create a class which inherits OpenModDbContext and add constructors for both constructors of the base class:
 
@@ -27,8 +27,8 @@ public class UserConnectionDbContext : OpenModDbContext<UserConnectionDbContext>
 }
 ```
 
-After creating this class, you must register it as a database context within your plugin. To do this, add a plugin container configurator and register the database context in it's configure method.
-This class can be placed anywhere, but is usually in the root namespace.
+After creating this class, you must register it as a database context within your plugin. To do this, add a plugin container configurator and register the database context in its configure method.
+This class can be placed anywhere but is usually in the root namespace.
 
 ```cs
 public class PluginContainerConfigurator : IPluginContainerConfigurator
@@ -99,9 +99,9 @@ This class needs a primary key to identify each model and this primary key (Conn
 	```
   The purpose of Fluent API, although more complicated, allows greater control over how models are configured.
 
-## Add your model to your db context
+## Add your model to your DB context
 
-Now that you have your db context (`UserConnectionDbContext`) and your model (`UserConnection`), linking the two is very easy. All that is needed is to define a new property in your db context as follows:
+Now that you have your DB context (`UserConnectionDbContext`) and your model (`UserConnection`), linking the two is very easy. All that is needed is to define a new property in your DB context as follows:
 
 ```cs
 public DbSet<UserConnection> UserConnections => Set<UserConnection>();
@@ -161,7 +161,7 @@ public class UserConnectionDbContext : OpenModDbContext<UserConnectionDbContext>
 
 For more detail on migrations, refer to [Microsoft's EF Core Documentation on migrations](https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/).
 
-Migrations allow EF Core to manage creating and modifying the database automatically. An initial migration must be created to allow EF Core to create the database for us.
+Migrations allow EF Core to manage the creation and modifications of the database automatically. An initial migration must be created to allow EF Core to create the database for us.
 
 Creating migrations is very simple:
 
@@ -191,9 +191,9 @@ To add migrations in the future, you only need to run the `Add-Migration` (or `d
 
 For more detail on saving, refer to [Microsoft's EF Core Documentation on saving data](https://docs.microsoft.com/en-us/ef/core/saving/).
 
-Everytime a user connects, we want to record this to a database. We can subscribe to `IUserConnectionEvent` for this. For more information on events, see the [Events documentation](events.md).
+Every time a user connects, we want to record this to a database. We can subscribe to `IUserConnectionEvent` for this. For more information on events, see the [Events documentation](events.md).
 
-As we registered our db context in our plugin container configurator, we can simply resolve our db context from our constructor.
+As we registered our DB context in our plugin container configurator, we can simply resolve our DB context from our constructor.
 
 The base code for our event listener is as follows:
 
@@ -269,7 +269,7 @@ public class UserConnectedEventListener : IEventListener<IUserConnectedEvent>
 
 For more detail on querying data, refer to [Microsoft's EF Core Documentation on querying](https://docs.microsoft.com/en-us/ef/core/querying/).
 
-For this sample, we'll create a /lastconnect command which responds with the last time a user connected. For more information on commands, see the [Commands documentation](commands.md).
+For this sample, we'll create a /lastconnect command that responds with the last time a user connected. For more information on commands, see the [Commands documentation](commands.md).
 
 The base code for our command is as follows:
 ```cs
