@@ -1,33 +1,45 @@
-﻿using System;
-using System.Reflection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
 using OpenMod.API.Plugins;
+using OpenMod.EntityFrameworkCore.Configurator;
+using System;
+using System.Reflection;
 
 namespace OpenMod.EntityFrameworkCore
 {
-    /// <summary>
-    /// Base <see cref="DbContext"/> for OpenMod plugins.
-    /// </summary>
-    /// <typeparam name="TSelf">A type parameter pointing to the class implementing itself.</typeparam>
-    /// <example>
-    /// <code>
-    /// public class MyDbContext : OpenModDbContext&lt;MyDbContext&gt;
-    /// {
-    ///     // impl
-    /// }
-    /// </code>
-    /// </example>
     public abstract class OpenModDbContext<TSelf> : DbContext where TSelf : OpenModDbContext<TSelf>
     {
-        private readonly IServiceProvider m_ServiceProvider;
-        private readonly ILogger<TSelf> m_Logger;
+        internal readonly IServiceProvider ServiceProvider;
+        private readonly IDbContextConfigurator? m_DbContextConfigurator;
+
+        protected OpenModDbContext(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        protected OpenModDbContext(IDbContextConfigurator configurator, IServiceProvider serviceProvider)
+        {
+            m_DbContextConfigurator = configurator;
+            ServiceProvider = serviceProvider;
+        }
+        
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+
+            m_DbContextConfigurator?.Configure(this, optionsBuilder);
+        }
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            m_DbContextConfigurator?.Configure(this, modelBuilder);
+        }
 
         /// <summary>
-        /// Gets the name of the migrations table.
+        /// Gets the name of the migrations table for supporting providers.
         /// </summary>
-        public virtual string MigrationsTableName
+        protected internal virtual string MigrationsTableName
         {
             get
             {
@@ -37,73 +49,26 @@ namespace OpenMod.EntityFrameworkCore
         }
 
         /// <summary>
-        /// Gets the prefix for the tables.
+        /// Gets the prefix for the tables for supporting providers.
         /// </summary>
-        public virtual string TablePrefix
+        protected internal virtual string? TablePrefix
         {
             get
             {
-                var componentId = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>().Id;
+                var componentId = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>()?.Id ??
+                                  throw new InvalidOperationException("Could not find plugin metadata");
+
                 return componentId.Replace(".", "_") + "_";
             }
         }
 
-        protected OpenModDbContext(IServiceProvider serviceProvider)
-        {
-            m_ServiceProvider = serviceProvider;
-            m_Logger = serviceProvider.GetRequiredService<ILogger<TSelf>>();
-        }
-
-        protected OpenModDbContext(DbContextOptions<TSelf> options, IServiceProvider serviceProvider) :
-            base(options)
-        {
-            m_ServiceProvider = serviceProvider;
-            m_Logger = serviceProvider.GetRequiredService<ILogger<TSelf>>();
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
-
-            if (optionsBuilder.IsConfigured)
-            {
-                return;
-            }
-
-            var connectionStringName = GetConnectionStringName();
-            var connectionStringAccessor = m_ServiceProvider.GetRequiredService<IConnectionStringAccessor>();
-            var connectionString = connectionStringAccessor.GetConnectionString(connectionStringName);
-
-            optionsBuilder.UseMySQL(connectionString,
-                options => { options.MigrationsHistoryTable(MigrationsTableName); });
-        }
-
-        protected virtual string GetConnectionStringName()
+        /// <summary>
+        /// Gets the name of the connection string used by supporting providers.
+        /// </summary>
+        protected internal virtual string GetConnectionStringName()
         {
             return typeof(TSelf).GetCustomAttribute<ConnectionStringAttribute>()?.Name ??
-                ConnectionStrings.Default;
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            ApplyTableNameConvention(modelBuilder);
-        }
-
-        protected virtual void ApplyTableNameConvention(ModelBuilder modelBuilder)
-        {
-            if (string.IsNullOrEmpty(TablePrefix))
-            {
-                return;
-            }
-
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-            {
-                var name = TablePrefix + entityType.GetTableName();
-                m_Logger.LogDebug("Applying table name convention: {TableName} -> {NewTableName}",
-                    entityType.GetTableName(), name);
-                entityType.SetTableName(name);
-            }
+                   ConnectionStrings.Default;
         }
     }
 }
