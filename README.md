@@ -25,10 +25,7 @@ If you would like to install OpenMod, installation guides for the following plat
 If you want to make plugins for OpenMod, you can get started by reading the [Making your first plugin](https://openmod.github.io/openmod-docs/devdoc/guides/getting-started.html) page.
 
 ## Supported Games
-Currently Unturned is the only supported game. More games might follow in the future.
-
-A RocketMod 4 bridge has been made, which allows to run legacy RM4 plugins.
-The configs for RM4 are yet to be decided to be separate, or to be proxied.
+Currently Unturned is the only supported game. More games might follow in the future. OpenMod can work side-by-side with RocketMod. 
 
 ## License
 See [LICENSE](LICENSE) file for more information.
