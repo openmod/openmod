@@ -69,15 +69,15 @@ namespace OpenMod.Unturned.Users
             Provider.onRejectingPlayer += OnRejectingPlayer;
         }
 
-        private void OnPlayerConnected(CSteamID steamId)
+        protected virtual void OnPlayerConnected(CSteamID steamID)
         {
-            var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == steamId);
+            var pending = m_PendingUsers.FirstOrDefault(d => d.SteamId == steamID);
             if (pending != null)
             {
                 FinishSession(pending);
             }
 
-            var steamPlayer = Provider.clients.FirstOrDefault(pl => pl.playerID.steamID == steamId);
+            var steamPlayer = PlayerTool.getSteamPlayer(steamID);
             if (steamPlayer == null)
             {
                 return;
@@ -93,9 +93,10 @@ namespace OpenMod.Unturned.Users
             });
         }
 
-        protected virtual void OnPlayerDisconnected(CSteamID steamId)
+        protected virtual void OnPlayerDisconnected(CSteamID steamID)
         {
-            var user = GetUser(steamId);
+            var user = GetUser(steamID);
+
             if (user == null)
             {
                 return;
@@ -174,7 +175,6 @@ namespace OpenMod.Unturned.Users
             var user = GetUser(callback.m_SteamID);
             if (user != null || m_PendingUsers.Any(d => d.SteamId == callback.m_SteamID))
             {
-                //User already in server?!
                 return;
             }
 
@@ -227,11 +227,6 @@ namespace OpenMod.Unturned.Users
             });
             isValid = isPendingValid;
             explanation = rejectExplanation;
-
-            //Needed #413
-#pragma warning disable 618
-            Provider.onCheckValid?.Invoke(callback, ref isValid);
-#pragma warning restore 618
         }
 
         protected virtual void FinishSession(UnturnedPendingUser pending)

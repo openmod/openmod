@@ -5,6 +5,7 @@ using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
+using Steamworks;
 using System;
 
 namespace OpenMod.Unturned.Events
@@ -30,6 +31,11 @@ namespace OpenMod.Unturned.Events
         protected UnturnedPlayer? GetUnturnedPlayer(SteamPlayer? player)
         {
             return GetUnturnedPlayer(player?.player);
+        }
+
+        protected UnturnedPlayer? GetUnturnedPlayer(CSteamID steamID)
+        {
+            return GetUnturnedPlayer(PlayerTool.getPlayer(steamID));
         }
 
         protected void Emit(IEvent @event)
