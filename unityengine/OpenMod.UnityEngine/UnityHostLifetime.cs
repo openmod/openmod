@@ -1,12 +1,15 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Cysharp.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.Core.Helpers;
 using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.LowLevel;
 
 namespace OpenMod.UnityEngine
 {
@@ -30,6 +33,29 @@ namespace OpenMod.UnityEngine
 
         public Task WaitForStartAsync(CancellationToken cancellationToken)
         {
+            if (!PlayerLoopHelper.IsInjectedUniTaskPlayerLoop())
+            {
+                var unitySynchronizationContextField =
+                    typeof(PlayerLoopHelper).GetField("unitySynchronizationContext",
+                        BindingFlags.Static | BindingFlags.NonPublic);
+
+                // For older version of UniTask
+                unitySynchronizationContextField ??=
+                    typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext",
+                        BindingFlags.Static | BindingFlags.NonPublic)
+                    ?? throw new Exception("Could not find PlayerLoopHelper.unitySynchronizationContext field");
+
+                unitySynchronizationContextField.SetValue(null, SynchronizationContext.Current);
+
+                var mainThreadIdField =
+                    typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic)
+                    ?? throw new Exception("Could not find PlayerLoopHelper.mainThreadId field");
+                mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
+
+                var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+                PlayerLoopHelper.Initialize(ref playerLoop);
+            }
+
             Application.quitting += OnApplicationQuitting;
             Console.CancelKeyPress += Console_CancelKeyPress;
             return Task.CompletedTask;
