@@ -57,11 +57,21 @@ namespace OpenMod.UnityEngine
                 PlayerLoopHelper.Initialize(ref playerLoop);
             }
 
+            // Handle UniTask exception
+            UniTaskScheduler.UnobservedTaskException += UniTaskExceptionHandler;
+            // Do not switch thread
+            UniTaskScheduler.DispatchUnityMainThread = false;
+
             TlsWorkaround.Install();
 
             Application.quitting += OnApplicationQuitting;
             Console.CancelKeyPress += OnCancelKeyPress;
             return Task.CompletedTask;
+        }
+
+        private void UniTaskExceptionHandler(Exception exception)
+        {
+            m_Logger.LogError(exception, "Caught UnobservedTaskException");
         }
 
         private void OnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
@@ -97,6 +107,9 @@ namespace OpenMod.UnityEngine
             m_ShutdownBlock.Set();
 
             TlsWorkaround.Uninstall();
+
+            UniTaskScheduler.UnobservedTaskException -= UniTaskExceptionHandler;
+            UniTaskScheduler.DispatchUnityMainThread = true;
 
             Application.quitting -= OnApplicationQuitting;
             Console.CancelKeyPress -= OnCancelKeyPress;
