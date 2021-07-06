@@ -19,7 +19,6 @@ using OpenMod.Core.Ioc;
 using OpenMod.Extensions.Games.Abstractions;
 using OpenMod.NuGet;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
 using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.Users;
@@ -175,8 +174,6 @@ namespace OpenMod.Unturned
             m_Logger.LogInformation("OpenMod for Unturned v{HostVersion} is initializing...",
                 m_HostInformation.HostVersion);
 
-            TlsWorkaround.Install();
-
             m_Logger.LogInformation("OpenMod for Unturned is ready");
 
             return Task.CompletedTask;
@@ -257,6 +254,7 @@ namespace OpenMod.Unturned
 
         public void Dispose()
         {
+            System.Console.WriteLine("dispose");
             if (m_IsDisposing)
             {
                 return;
@@ -277,7 +275,6 @@ namespace OpenMod.Unturned
 
             IsComponentAlive = false;
             m_IsDisposing = true;
-            TlsWorkaround.Uninstalll();
 
             m_Harmony?.UnpatchAll(OpenModComponentId);
             UnbindUnturnedEvents();

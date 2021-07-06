@@ -1,13 +1,14 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.Core.Helpers;
-using System;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
+using OpenMod.UnityEngine.Helpers;
 using UnityEngine;
 using UnityEngine.LowLevel;
 
@@ -56,12 +57,14 @@ namespace OpenMod.UnityEngine
                 PlayerLoopHelper.Initialize(ref playerLoop);
             }
 
+            TlsWorkaround.Install();
+
             Application.quitting += OnApplicationQuitting;
-            Console.CancelKeyPress += Console_CancelKeyPress;
+            Console.CancelKeyPress += OnCancelKeyPress;
             return Task.CompletedTask;
         }
 
-        private void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        private void OnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
             e.Cancel = true;
             AsyncHelper.RunSync(m_OpenModHost.ShutdownAsync);
@@ -92,8 +95,11 @@ namespace OpenMod.UnityEngine
         public void Dispose()
         {
             m_ShutdownBlock.Set();
+
+            TlsWorkaround.Uninstall();
+
             Application.quitting -= OnApplicationQuitting;
-            Console.CancelKeyPress -= Console_CancelKeyPress;
+            Console.CancelKeyPress -= OnCancelKeyPress;
         }
     }
 }
