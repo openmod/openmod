@@ -254,7 +254,6 @@ namespace OpenMod.Unturned
 
         public void Dispose()
         {
-            System.Console.WriteLine("dispose");
             if (m_IsDisposing)
             {
                 return;
