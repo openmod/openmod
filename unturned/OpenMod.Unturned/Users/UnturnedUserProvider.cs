@@ -154,7 +154,7 @@ namespace OpenMod.Unturned.Users
 
         private void UpdateLastSeen(string id, string type)
         {
-            async UniTask UpdateDisconnectInfo()
+            UniTask.RunOnThreadPool(async () =>
             {
                 var userData = await m_UserDataStore.GetUserDataAsync(id, type);
                 if (userData == null)
@@ -164,9 +164,7 @@ namespace OpenMod.Unturned.Users
 
                 userData.LastSeen = DateTime.Now;
                 await m_UserDataStore.SetUserDataAsync(userData);
-            }
-
-            UpdateDisconnectInfo().Forget();
+            }).Forget();
         }
 
         protected virtual void OnPendingPlayerConnecting(ValidateAuthTicketResponse_t callback, ref bool isValid,
@@ -200,12 +198,12 @@ namespace OpenMod.Unturned.Users
 
                     userData.LastSeen = DateTime.Now;
                     userData.LastDisplayName = pendingUser.DisplayName;
-                    UniTask.Run(() => m_UserDataStore.SetUserDataAsync(userData)).Forget();
+                    UniTask.RunOnThreadPool(() => m_UserDataStore.SetUserDataAsync(userData)).Forget();
                 }
                 else
                 {
                     userEvent = new UnturnedUserFirstConnectingEvent(pendingUser);
-                    UniTask.Run(() => m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName)).Forget();
+                    UniTask.RunOnThreadPool(() => m_DataSeeder.SeedUserDataAsync(pendingUser.Id, pendingUser.Type, pendingUser.DisplayName)).Forget();
                 }
 
                 userEvent.IsCancelled = !isPendingValid;
