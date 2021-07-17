@@ -6,7 +6,6 @@ using System;
 namespace OpenMod.Unturned.Commands
 {
     [DontAutoRegister]
-    [OpenModInternal]
     public abstract class UnturnedCommand : UnityEngineCommand
     {
         protected UnturnedCommand(IServiceProvider serviceProvider) : base(serviceProvider)
