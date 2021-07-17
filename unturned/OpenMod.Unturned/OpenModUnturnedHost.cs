@@ -1,4 +1,10 @@
-﻿using Autofac;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Autofac;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,23 +15,14 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Console;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 using OpenMod.Extensions.Games.Abstractions;
+using OpenMod.NuGet;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
+using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.Users;
 using SDG.Unturned;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using OpenMod.Core.Ioc;
-using OpenMod.NuGet;
-using OpenMod.Unturned.RocketMod;
-using UnityEngine.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
 
 namespace OpenMod.Unturned
@@ -177,32 +174,6 @@ namespace OpenMod.Unturned
             m_Logger.LogInformation("OpenMod for Unturned v{HostVersion} is initializing...",
                 m_HostInformation.HostVersion);
 
-            TlsWorkaround.Install();
-
-            if (!s_UniTaskInited)
-            {
-                var unitySynchronizationContextField =
-                    typeof(PlayerLoopHelper).GetField("unitySynchronizationContext",
-                        BindingFlags.Static | BindingFlags.NonPublic);
-
-                // For older version of UniTask
-                unitySynchronizationContextField ??=
-                    typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext",
-                        BindingFlags.Static | BindingFlags.NonPublic)
-                    ?? throw new Exception("Could not find PlayerLoopHelper.unitySynchronizationContext field");
-
-                unitySynchronizationContextField.SetValue(null, SynchronizationContext.Current);
-
-                var mainThreadIdField =
-                    typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic)
-                    ?? throw new Exception("Could not find PlayerLoopHelper.mainThreadId field");
-                mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
-
-                var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
-                PlayerLoopHelper.Initialize(ref playerLoop);
-                s_UniTaskInited = true;
-            }
-
             m_Logger.LogInformation("OpenMod for Unturned is ready");
 
             return Task.CompletedTask;
@@ -222,7 +193,7 @@ namespace OpenMod.Unturned
                     .FirstOrDefault(d => d.GetName().Name.Equals("OpenMod.Unturned.Module.Bootstrapper"));
 
                 var bootstrapperClass = bootstrapperAssembly!.GetType("OpenMod.Unturned.Module.Bootstrapper.BootstrapperModule");
-                var instanceProperty = bootstrapperClass.GetProperty("Instance", BindingFlags.Public |  BindingFlags.Static);
+                var instanceProperty = bootstrapperClass.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
                 var initializeMethod = bootstrapperClass.GetMethod("initialize", BindingFlags.Instance | BindingFlags.Public);
                 var moduleInstance = instanceProperty!.GetValue(null);
 
@@ -303,7 +274,6 @@ namespace OpenMod.Unturned
 
             IsComponentAlive = false;
             m_IsDisposing = true;
-            TlsWorkaround.Uninstalll();
 
             m_Harmony?.UnpatchAll(OpenModComponentId);
             UnbindUnturnedEvents();
