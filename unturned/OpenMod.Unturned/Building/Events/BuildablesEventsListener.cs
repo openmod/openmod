@@ -38,8 +38,8 @@ namespace OpenMod.Unturned.Building.Events
             BarricadeManager.onSalvageBarricadeRequested += OnSalvageBarricadeRequested;
             StructureManager.onSalvageStructureRequested += OnSalvageStructureRequested;
 
-            OnBarricadeDestroyed += Events_OnBarricadeDestroyed;
-            OnStructureDestroyed += Events_OnStructureDestroyed;
+            OnBarricadeDestroying += Events_OnBarricadeDestroyed;
+            OnStructureDestroying += Events_OnStructureDestroyed;
 
             BarricadeManager.onTransformRequested += OnTransformBarricadeRequested;
             StructureManager.onTransformRequested += OnTransformStructureRequested;
@@ -68,8 +68,8 @@ namespace OpenMod.Unturned.Building.Events
             BarricadeManager.onSalvageBarricadeRequested -= OnSalvageBarricadeRequested;
             StructureManager.onSalvageStructureRequested -= OnSalvageStructureRequested;
 
-            OnBarricadeDestroyed -= Events_OnBarricadeDestroyed;
-            OnStructureDestroyed -= Events_OnStructureDestroyed;
+            OnBarricadeDestroying -= Events_OnBarricadeDestroyed;
+            OnStructureDestroying -= Events_OnStructureDestroyed;
 
             BarricadeManager.onTransformRequested -= OnTransformBarricadeRequested;
             StructureManager.onTransformRequested -= OnTransformStructureRequested;
@@ -443,10 +443,10 @@ namespace OpenMod.Unturned.Building.Events
         }
 
         private delegate void BarricadeDestroyed(BarricadeData data, BarricadeDrop drop);
-        private static event BarricadeDestroyed? OnBarricadeDestroyed;
+        private static event BarricadeDestroyed? OnBarricadeDestroying;
 
         private delegate void StructureDestroyed(StructureDrop drop);
-        private static event StructureDestroyed? OnStructureDestroyed;
+        private static event StructureDestroyed? OnStructureDestroying;
 
         private delegate void BarricadeTransformed(BarricadeData data, BarricadeDrop drop);
         private static event BarricadeTransformed? OnBarricadeTransformed;
@@ -462,22 +462,32 @@ namespace OpenMod.Unturned.Building.Events
         {
             [UsedImplicitly]
             [HarmonyPatch(typeof(BarricadeManager), nameof(BarricadeManager.destroyBarricade))]
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             private static void BarricadeDestroyed(BarricadeRegion region, ushort index)
             {
+                if (index >= region.drops.Count)
+                {
+                    return;
+                }
+
                 var data = region.barricades[index];
                 var drop = region.drops[index];
 
-                OnBarricadeDestroyed?.Invoke(data, drop);
+                OnBarricadeDestroying?.Invoke(data, drop);
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.destroyStructure),
-                typeof(StructureDrop), typeof(byte), typeof(byte), typeof(Vector3))]
-            [HarmonyPostfix]
-            private static void StructureDestroyed(StructureDrop structure)
+            [HarmonyPatch(typeof(StructureManager), nameof(StructureManager.ReceiveDestroyStructure))]
+            [HarmonyPrefix]
+            private static void StructureDestroyed(NetId netId)
             {
-                OnStructureDestroyed?.Invoke(structure);
+                var structure = NetIdRegistry.Get<StructureDrop>(netId);
+                if (structure == null)
+                {
+                    return;
+                }
+
+                OnStructureDestroying?.Invoke(structure);
             }
 
             [UsedImplicitly]
