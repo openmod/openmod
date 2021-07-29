@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -27,6 +28,7 @@ using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 using Semver;
 using Serilog;
+using Serilog.Events;
 using Serilog.Extensions.Logging;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -68,6 +70,7 @@ namespace OpenMod.Runtime
 
         public bool IsDisposing { get; private set; }
 
+        private DateTime? m_DateLogger;
         private SerilogLoggerFactory? m_LoggerFactory;
         private ILogger<Runtime>? m_Logger;
         private IHostApplicationLifetime? m_AppLifeTime;
@@ -138,10 +141,7 @@ namespace OpenMod.Runtime
                 if (parameters.PackageManager is not NuGetPackageManager nugetPackageManager)
                 {
                     var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
-                    nugetPackageManager = new NuGetPackageManager(packagesDirectory)
-                    {
-                        Logger = new OpenModNuGetLogger(m_LoggerFactory!.CreateLogger("NuGet"))
-                    };
+                    nugetPackageManager = new NuGetPackageManager(packagesDirectory);
                 }
 
                 nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory!.CreateLogger("NuGet"));
@@ -354,21 +354,35 @@ namespace OpenMod.Runtime
         private void SetupSerilog(bool loadFromFile)
         {
 #if DEBUG
-            Serilog.Debugging.SelfLog.Enable(Console.Error);
+            Serilog.Debugging.SelfLog.Enable(s =>
+            {
+                Console.WriteLine(s);
+                Debugger.Break();
+            });
 #endif
 
-            LoggerConfiguration loggerConfiguration;
+            LoggerConfiguration? loggerConfiguration = null;
 
-            LoggerConfiguration CreateDefault()
+            LoggerConfiguration CreateDefaultLoggerConfiguration()
             {
+                const string c_DefaultConsoleLogTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
+                const string c_DefaultFileLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
+
+                m_DateLogger ??= DateTime.Now;
+                var logFilePath = $"{WorkingDirectory}/logs/openmod-{m_DateLogger:yyyy-MM-dd-HH-mm-ss}.log"
+                    .Replace(@"\", "/");
+
                 return new LoggerConfiguration()
-                   .WriteTo.Async(c => c.Console());
+                   .WriteTo.Async(c => c.Console(LogEventLevel.Information, c_DefaultConsoleLogTemplate))
+                   .WriteTo.Async(c => c.File(logFilePath, LogEventLevel.Information, outputTemplate: c_DefaultFileLogTemplate));
             }
 
             if (loadFromFile)
             {
                 try
                 {
+                    Log.CloseAndFlush();
+
                     var loggingPath = Path.Combine(WorkingDirectory, "logging.yaml");
                     if (!File.Exists(loggingPath))
                     {
@@ -385,6 +399,8 @@ namespace OpenMod.Runtime
                         File.WriteAllText(loggingPath, fileContent);
                     }
 
+                    m_DateLogger ??= DateTime.Now;
+
                     var configuration = new ConfigurationBuilder()
                         .SetBasePath(WorkingDirectory)
                         .AddYamlFileEx(s =>
@@ -393,8 +409,8 @@ namespace OpenMod.Runtime
                             s.Optional = false;
                             s.Variables = new Dictionary<string, string>
                             {
-                            {"workingDirectory", WorkingDirectory.Replace(@"\", @"/")},
-                            {"date", DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}
+                                {"workingDirectory", WorkingDirectory.Replace(@"\", "/")},
+                                {"date", m_DateLogger.Value.ToString("yyyy-MM-dd-HH-mm-ss")}
                             };
                             s.ResolveFileProvider();
                         })
@@ -416,14 +432,10 @@ namespace OpenMod.Runtime
                     Console.WriteLine(ex);
 
                     Console.ForegroundColor = previousColor;
-
-                    loggerConfiguration = CreateDefault();
                 }
             }
-            else
-            {
-                loggerConfiguration = CreateDefault();
-            }
+
+            loggerConfiguration ??= CreateDefaultLoggerConfiguration();
 
             var serilogLogger = Log.Logger = loggerConfiguration.CreateLogger();
             m_LoggerFactory = new SerilogLoggerFactory(serilogLogger);
@@ -437,6 +449,8 @@ namespace OpenMod.Runtime
             await LifetimeScope.DisposeAsync();
             Host?.Dispose();
             Status = RuntimeStatus.Unloaded;
+
+            m_DateLogger = null;
             Log.CloseAndFlush();
         }
     }
