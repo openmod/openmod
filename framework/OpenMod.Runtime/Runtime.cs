@@ -131,7 +131,7 @@ namespace OpenMod.Runtime
                 WorkingDirectory = parameters.WorkingDirectory;
                 CommandlineArgs = parameters.CommandlineArgs;
 
-                SetupSerilog();
+                SetupSerilog(false);
 
                 m_Logger.LogInformation("OpenMod v{Version} is starting...", Version);
 
@@ -224,6 +224,8 @@ namespace OpenMod.Runtime
 
                 await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
                 await startup.LoadPluginAssembliesAsync();
+
+                SetupSerilog(true);
 
                 hostBuilder
                     .UseContentRoot(parameters.WorkingDirectory)
@@ -349,62 +351,78 @@ namespace OpenMod.Runtime
             startup.SetupContainer(containerBuilder);
         }
 
-        private void SetupSerilog()
+        private void SetupSerilog(bool loadFromFile)
         {
+#if DEBUG
+            Serilog.Debugging.SelfLog.Enable(Console.Error);
+#endif
+
             LoggerConfiguration loggerConfiguration;
-            try
+
+            LoggerConfiguration CreateDefault()
             {
-                var loggingPath = Path.Combine(WorkingDirectory, "logging.yaml");
-                if (!File.Exists(loggingPath))
+                return new LoggerConfiguration()
+                   .WriteTo.Async(c => c.Console());
+            }
+
+            if (loadFromFile)
+            {
+                try
                 {
-                    // First run, logging.yaml doesn't exist yet.
-                    // We can't wait for auto-copy from the assembly as it would be too late.
-                    using var stream =
-                        typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yaml");
-                    using var reader =
-                        new StreamReader(
-                            stream ?? throw new MissingManifestResourceException(
-                                "Couldn't find resource: OpenMod.Core.logging.yaml"));
-
-                    var fileContent = reader.ReadToEnd();
-                    File.WriteAllText(loggingPath, fileContent);
-                }
-
-                var configuration = new ConfigurationBuilder()
-                    .SetBasePath(WorkingDirectory)
-                    .AddYamlFileEx(s =>
+                    var loggingPath = Path.Combine(WorkingDirectory, "logging.yaml");
+                    if (!File.Exists(loggingPath))
                     {
-                        s.Path = "logging.yaml";
-                        s.Optional = false;
-                        s.Variables = new Dictionary<string, string>
+                        // First run, logging.yaml doesn't exist yet.
+                        // We can't wait for auto-copy from the assembly as it would be too late.
+                        using var stream =
+                            typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yaml");
+                        using var reader =
+                            new StreamReader(
+                                stream ?? throw new MissingManifestResourceException(
+                                    "Couldn't find resource: OpenMod.Core.logging.yaml"));
+
+                        var fileContent = reader.ReadToEnd();
+                        File.WriteAllText(loggingPath, fileContent);
+                    }
+
+                    var configuration = new ConfigurationBuilder()
+                        .SetBasePath(WorkingDirectory)
+                        .AddYamlFileEx(s =>
                         {
+                            s.Path = "logging.yaml";
+                            s.Optional = false;
+                            s.Variables = new Dictionary<string, string>
+                            {
                             {"workingDirectory", WorkingDirectory.Replace(@"\", @"/")},
                             {"date", DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}
-                        };
-                        s.ResolveFileProvider();
-                    })
-                    .AddEnvironmentVariables()
-                    .Build();
+                            };
+                            s.ResolveFileProvider();
+                        })
+                        .AddEnvironmentVariables()
+                        .Build();
 
-                loggerConfiguration = new LoggerConfiguration()
-                    .ReadFrom.Configuration(configuration);
+                    loggerConfiguration = new LoggerConfiguration()
+                        .ReadFrom.Configuration(configuration);
+                }
+                catch (Exception ex)
+                {
+                    var previousColor = Console.ForegroundColor;
 
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine("Failed to setup Serilog; logging will not work correctly.");
+                    Console.WriteLine("Setting up console only logging as workaround.");
+                    Console.WriteLine("Please fix your logging.yaml file or delete it to restore the default one.");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(ex);
+
+                    Console.ForegroundColor = previousColor;
+
+                    loggerConfiguration = CreateDefault();
+                }
             }
-            catch (Exception ex)
+            else
             {
-                var previousColor = Console.ForegroundColor;
-
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("Failed to setup Serilog; logging will not work correctly.");
-                Console.WriteLine("Setting up console only logging as workaround.");
-                Console.WriteLine("Please fix your logging.yaml file or delete it to restore the default one.");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(ex);
-
-                Console.ForegroundColor = previousColor;
-
-                loggerConfiguration = new LoggerConfiguration()
-                    .WriteTo.Async(c => c.Console());
+                loggerConfiguration = CreateDefault();
             }
 
             var serilogLogger = Log.Logger = loggerConfiguration.CreateLogger();

@@ -793,7 +793,8 @@ namespace OpenMod.NuGet
 
             var matchingAssemblies =
                 m_LoadedPackageAssemblies.Values.SelectMany(d => d)
-                    .Where(d => d.Assembly.IsAlive && d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
+                    .Where(d => d.Assembly.IsAlive && (d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase)
+                        || Hotloader.GetRealAssemblyName((Assembly)d.Assembly.Target).Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
                     .OrderByDescending(d => d.Version);
 
             var result = (Assembly?)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
