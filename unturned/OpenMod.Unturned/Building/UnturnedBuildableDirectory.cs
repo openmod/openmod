@@ -40,19 +40,13 @@ namespace OpenMod.Unturned.Building
                 var structureRegions = StructureManager.regions.Cast<StructureRegion>()
                     .ToList();
 
-                var barricadeDatas = barricadeRegions.SelectMany(brd => brd.barricades).ToList();
                 var barricadeDrops = barricadeRegions.SelectMany(brd => brd.drops).ToList();
-
                 var structureDrops = structureRegions.SelectMany(str => str.drops).ToList();
 
-                return barricadeDatas
-                    .Select((k, i) =>
-                    {
-                        var drop = barricadeDrops[i];
-                        return drop == null ? null : new UnturnedBarricadeBuildable(k, drop);
-                    })
+                return barricadeDrops
+                    .Select(d => new UnturnedBarricadeBuildable(d))
                     .Cast<UnturnedBuildable>()
-                    .Concat(structureDrops.Select(d => d == null ? null : new UnturnedStructureBuildable(d)))
+                    .Concat(structureDrops.Select(d => new UnturnedStructureBuildable(d)))
                     .Select(d => d!)
                     .ToList();
             }
