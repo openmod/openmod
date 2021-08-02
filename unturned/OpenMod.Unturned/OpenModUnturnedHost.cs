@@ -1,4 +1,11 @@
-﻿using Autofac;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using Autofac;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,22 +16,15 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Console;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 using OpenMod.Extensions.Games.Abstractions;
+using OpenMod.NuGet;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
+using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.Users;
 using SDG.Unturned;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using OpenMod.Core.Ioc;
-using OpenMod.NuGet;
-using OpenMod.Unturned.RocketMod;
 using UnityEngine.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
 
@@ -121,8 +121,15 @@ namespace OpenMod.Unturned
             // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
 
-            m_Harmony = new Harmony(OpenModComponentId);
-            m_Harmony.PatchAll(GetType().Assembly);
+            try
+            {
+                m_Harmony = new Harmony(OpenModComponentId);
+                m_Harmony.PatchAll(GetType().Assembly);
+            }
+            catch (Exception ex)
+            {
+                m_Logger.LogError(ex, "Failed to patch with Harmony. Report this error on the OpenMod discord: https://discord.com/invite/jRrCJVm");
+            }
 
             m_UnturnedCommandHandler.Value.Subscribe();
             BindUnturnedEvents();
@@ -222,7 +229,7 @@ namespace OpenMod.Unturned
                     .FirstOrDefault(d => d.GetName().Name.Equals("OpenMod.Unturned.Module.Bootstrapper"));
 
                 var bootstrapperClass = bootstrapperAssembly!.GetType("OpenMod.Unturned.Module.Bootstrapper.BootstrapperModule");
-                var instanceProperty = bootstrapperClass.GetProperty("Instance", BindingFlags.Public |  BindingFlags.Static);
+                var instanceProperty = bootstrapperClass.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
                 var initializeMethod = bootstrapperClass.GetMethod("initialize", BindingFlags.Instance | BindingFlags.Public);
                 var moduleInstance = instanceProperty!.GetValue(null);
 
@@ -305,7 +312,15 @@ namespace OpenMod.Unturned
             m_IsDisposing = true;
             TlsWorkaround.Uninstalll();
 
-            m_Harmony?.UnpatchAll(OpenModComponentId);
+            try
+            {
+                m_Harmony?.UnpatchAll(OpenModComponentId);
+            }
+            catch
+            {
+                // ignore it
+            }
+
             UnbindUnturnedEvents();
         }
     }
