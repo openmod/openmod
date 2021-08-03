@@ -26,7 +26,7 @@ namespace OpenMod.Unturned.Building.Events
             BarricadeManager.onDeployBarricadeRequested += OnDeployBarricadeRequested;
             StructureManager.onDeployStructureRequested += OnDeployStructureRequested;
 
-            BarricadeManager.onHarvestPlantRequested += OnHarvestPlantRequested;
+            InteractableFarm.OnHarvestRequested_Global += OnHarvestPlantRequested;
 
             BarricadeManager.onOpenStorageRequested += OnOpenStorageRequested;
 
@@ -35,8 +35,8 @@ namespace OpenMod.Unturned.Building.Events
             BarricadeManager.onBarricadeSpawned += Events_OnBarricadeDeployed;
             StructureManager.onStructureSpawned += Events_OnStructureDeployed;
 
-            BarricadeManager.onSalvageBarricadeRequested += OnSalvageBarricadeRequested;
-            StructureManager.onSalvageStructureRequested += OnSalvageStructureRequested;
+            BarricadeDrop.OnSalvageRequested_Global += OnSalvageBarricadeRequested;
+            StructureDrop.OnSalvageRequested_Global += OnSalvageStructureRequested;
 
             OnBarricadeDestroying += Events_OnBarricadeDestroyed;
             OnStructureDestroying += Events_OnStructureDestroyed;
@@ -56,7 +56,7 @@ namespace OpenMod.Unturned.Building.Events
             BarricadeManager.onDeployBarricadeRequested -= OnDeployBarricadeRequested;
             StructureManager.onDeployStructureRequested -= OnDeployStructureRequested;
 
-            BarricadeManager.onHarvestPlantRequested -= OnHarvestPlantRequested;
+            InteractableFarm.OnHarvestRequested_Global -= OnHarvestPlantRequested;
 
             BarricadeManager.onOpenStorageRequested -= OnOpenStorageRequested;
 
@@ -65,8 +65,8 @@ namespace OpenMod.Unturned.Building.Events
             BarricadeManager.onBarricadeSpawned -= Events_OnBarricadeDeployed;
             StructureManager.onStructureSpawned -= Events_OnStructureDeployed;
 
-            BarricadeManager.onSalvageBarricadeRequested -= OnSalvageBarricadeRequested;
-            StructureManager.onSalvageStructureRequested -= OnSalvageStructureRequested;
+            BarricadeDrop.OnSalvageRequested_Global -= OnSalvageBarricadeRequested;
+            StructureDrop.OnSalvageRequested_Global -= OnSalvageStructureRequested;
 
             OnBarricadeDestroying -= Events_OnBarricadeDestroyed;
             OnStructureDestroying -= Events_OnStructureDestroyed;
@@ -184,17 +184,15 @@ namespace OpenMod.Unturned.Building.Events
             shouldAllow = !@event.IsCancelled;
         }
 
-        private void OnHarvestPlantRequested(CSteamID steamId, byte x, byte y, ushort plant, ushort index, ref bool shouldAllow)
+        private void OnHarvestPlantRequested(InteractableFarm harvestable, SteamPlayer instigatorPlayer, ref bool shouldAllow)
         {
-            if (!BarricadeManager.tryGetRegion(x, y, plant, out var region))
+            var drop = BarricadeManager.FindBarricadeByRootTransform(harvestable.transform);
+            if (drop == null)
             {
                 return;
             }
 
-            var drop = region.drops[index];
-
-            var nativePlayer = PlayerTool.getPlayer(steamId);
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(instigatorPlayer);
 
             var @event = new UnturnedPlantHarvestingEvent(new UnturnedBarricadeBuildable(drop), player)
             {
@@ -269,17 +267,9 @@ namespace OpenMod.Unturned.Building.Events
             Emit(@event);
         }
 
-        private void OnSalvageBarricadeRequested(CSteamID steamId, byte x, byte y, ushort plant, ushort index, ref bool shouldAllow)
+        private void OnSalvageBarricadeRequested(BarricadeDrop drop, SteamPlayer instigator, ref bool shouldAllow)
         {
-            if (!BarricadeManager.tryGetRegion(x, y, plant, out var region))
-            {
-                return;
-            }
-
-            var drop = region.drops[index];
-
-            var nativePlayer = PlayerTool.getPlayer(steamId);
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(instigator);
 
             var @event = new UnturnedBarricadeSalvagingEvent(new UnturnedBarricadeBuildable(drop), player!)
             {
@@ -291,17 +281,9 @@ namespace OpenMod.Unturned.Building.Events
             shouldAllow = !@event.IsCancelled;
         }
 
-        private void OnSalvageStructureRequested(CSteamID steamId, byte x, byte y, ushort index, ref bool shouldAllow)
+        private void OnSalvageStructureRequested(StructureDrop drop, SteamPlayer instigator, ref bool shouldAllow)
         {
-            if (!StructureManager.tryGetRegion(x, y, out var region))
-            {
-                return;
-            }
-
-            var drop = region.drops[index];
-
-            var nativePlayer = PlayerTool.getPlayer(steamId);
-            var player = GetUnturnedPlayer(nativePlayer);
+            var player = GetUnturnedPlayer(instigator);
 
             var @event = new UnturnedStructureSalvagingEvent(new UnturnedStructureBuildable(drop), player!)
             {
