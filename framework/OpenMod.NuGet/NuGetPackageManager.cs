@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenMod.Common.Helpers;
+using OpenMod.NuGet.Helpers;
 
 namespace OpenMod.NuGet
 {
@@ -614,12 +615,10 @@ namespace OpenMod.NuGet
                             continue;
                         }
 
-                        var entry = packageReader.GetEntry(item);
-                        using var stream = entry.Open();
-                        var assemblyData = stream.ReadAllBytes();
+                        var assemblyData = packageReader.ReadAllBytes(item);
                         var assemblySymbolsPath = Path.ChangeExtension(item, "pdb");
-                        var assemblySymbols = File.Exists(assemblySymbolsPath)
-                            ? await FileHelper.ReadAllBytesAsync(assemblySymbolsPath)
+                        var assemblySymbols = file.Items.Contains(assemblySymbolsPath)
+                            ? packageReader.ReadAllBytes(assemblySymbolsPath)
                             : null;
 
                         var asm = m_AssemblyLoader(assemblyData, assemblySymbols);
