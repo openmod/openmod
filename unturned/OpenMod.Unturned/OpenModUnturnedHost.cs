@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -23,6 +23,7 @@ using OpenMod.Unturned.Logging;
 using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.Users;
 using SDG.Unturned;
+using UnityEngine.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
 
 namespace OpenMod.Unturned
@@ -118,8 +119,15 @@ namespace OpenMod.Unturned
             // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
 
-            m_Harmony = new Harmony(OpenModComponentId);
-            m_Harmony.PatchAll(GetType().Assembly);
+            try
+            {
+                m_Harmony = new Harmony(OpenModComponentId);
+                m_Harmony.PatchAll(GetType().Assembly);
+            }
+            catch (Exception ex)
+            {
+                m_Logger.LogError(ex, "Failed to patch with Harmony. Report this error on the OpenMod discord: https://discord.com/invite/jRrCJVm");
+            }
 
             m_UnturnedCommandHandler.Value.Subscribe();
             BindUnturnedEvents();
@@ -275,7 +283,15 @@ namespace OpenMod.Unturned
             IsComponentAlive = false;
             m_IsDisposing = true;
 
-            m_Harmony?.UnpatchAll(OpenModComponentId);
+            try
+            {
+                m_Harmony?.UnpatchAll(OpenModComponentId);
+            }
+            catch
+            {
+                // ignore it
+            }
+
             UnbindUnturnedEvents();
         }
     }
