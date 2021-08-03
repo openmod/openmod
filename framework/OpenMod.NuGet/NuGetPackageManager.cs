@@ -493,7 +493,7 @@ namespace OpenMod.NuGet
 
             using var packageReader = new PackageArchiveReader(nupkgFile);
 
-            var libItems = packageReader.GetLibItems().ToList();
+            var libItems = (await packageReader.GetLibItemsAsync(CancellationToken.None)).ToList();
             var nearest = m_FrameworkReducer.GetNearest(m_CurrentFramework, libItems.Select(x => x.TargetFramework));
             var assemblies = new List<byte[]>();
 
@@ -600,7 +600,7 @@ namespace OpenMod.NuGet
                 await LoadAssembliesFromNuGetPackageAsync(nupkg);
             }
 
-            var libItems = packageReader.GetLibItems().ToList();
+            var libItems = (await packageReader.GetLibItemsAsync(CancellationToken.None)).ToList();
             var nearest = m_FrameworkReducer.GetNearest(m_CurrentFramework, libItems.Select(x => x.TargetFramework));
 
             foreach (var file in libItems.Where(x => x.TargetFramework.Equals(nearest)))
@@ -793,7 +793,8 @@ namespace OpenMod.NuGet
 
             var matchingAssemblies =
                 m_LoadedPackageAssemblies.Values.SelectMany(d => d)
-                    .Where(d => d.Assembly.IsAlive && d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
+                    .Where(d => d.Assembly.IsAlive && (d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase)
+                        || Hotloader.GetRealAssemblyName((Assembly)d.Assembly.Target).Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
                     .OrderByDescending(d => d.Version);
 
             var result = (Assembly?)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
@@ -856,7 +857,7 @@ namespace OpenMod.NuGet
 
             var packages = await m_PackagesDataStore.GetPackagesAsync();
 
-            await InstallPackagesAsync(packages);
+            await InstallPackagesAsync(packages, updateExisting);
 
             return packages.Count;
         }
@@ -904,7 +905,6 @@ namespace OpenMod.NuGet
             {
                 kv.Value?.Clear();
             }
-
             m_LoadedPackageAssemblies.Clear();
         }
 
