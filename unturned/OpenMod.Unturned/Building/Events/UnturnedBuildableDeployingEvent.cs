@@ -6,7 +6,6 @@ namespace OpenMod.Unturned.Building.Events
 {
     public class UnturnedBuildableDeployingEvent : Event, IBuildableDeployingEvent
     {
-
         public UnturnedBuildableAsset Asset { get; }
 
         public Vector3 Point { get; set; }
@@ -21,13 +20,13 @@ namespace OpenMod.Unturned.Building.Events
 
         IBuildableAsset IBuildableDeployingEvent.BuildableAsset => Asset;
 
-        public UnturnedBuildableDeployingEvent(UnturnedBuildableAsset asset, Vector3 point, Quaternion rotation, ulong owner, ulong @group)
+        public UnturnedBuildableDeployingEvent(UnturnedBuildableAsset asset, Vector3 point, Quaternion rotation, ulong owner, ulong group)
         {
             Asset = asset;
             Point = point;
             Rotation = rotation;
             Owner = owner;
-            Group = @group;
+            Group = group;
         }
     }
 }

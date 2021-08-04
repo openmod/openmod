@@ -6,7 +6,8 @@ namespace OpenMod.Unturned.Building.Events
     {
         public new UnturnedBarricadeBuildable Buildable => (UnturnedBarricadeBuildable)base.Buildable;
 
-        public UnturnedBarricadeTransformedEvent(UnturnedBuildable buildable, UnturnedPlayer? instigator) : base(buildable, instigator)
+        public UnturnedBarricadeTransformedEvent(UnturnedBuildable buildable, UnturnedPlayer? instigator)
+            : base(buildable, instigator)
         {
         }
     }

@@ -6,7 +6,8 @@ namespace OpenMod.Unturned.Building.Events
     {
         public new UnturnedStructureBuildable Buildable => (UnturnedStructureBuildable)base.Buildable;
 
-        public UnturnedStructureTransformedEvent(UnturnedBuildable buildable, UnturnedPlayer? instigator) : base(buildable, instigator)
+        public UnturnedStructureTransformedEvent(UnturnedBuildable buildable, UnturnedPlayer? instigator)
+            : base(buildable, instigator)
         {
         }
     }

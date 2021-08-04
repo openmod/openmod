@@ -7,7 +7,7 @@ namespace OpenMod.Unturned.Building.Events
     {
         public new UnturnedStructureBuildable Buildable => (UnturnedStructureBuildable)base.Buildable;
 
-        public UnturnedStructureTransformingEvent(UnturnedStructureBuildable buildable, UnturnedPlayer instigator,
+        public UnturnedStructureTransformingEvent(UnturnedStructureBuildable buildable, UnturnedPlayer? instigator,
             Vector3 point, Quaternion rotation) : base(buildable, instigator, point, rotation)
         {
         }
