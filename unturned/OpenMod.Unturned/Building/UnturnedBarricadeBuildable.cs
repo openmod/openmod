@@ -21,12 +21,12 @@ namespace OpenMod.Unturned.Building
 
         public Interactable Interactable { get; }
 
-        [Obsolete]
+        [Obsolete("Use another constructor with only BarricadeDrop")]
         public UnturnedBarricadeBuildable(BarricadeData data, BarricadeDrop drop) : this(drop)
         {
             if (drop.GetServersideData() != data)
             {
-                throw new Exception($"The ServerSideData is not equals to BarricadeData");
+                throw new Exception($"{nameof(data)} is incorrect barricade data for {nameof(drop)}");
             }
         }
 
@@ -46,6 +46,11 @@ namespace OpenMod.Unturned.Building
             async UniTask DestroyTask()
             {
                 await UniTask.SwitchToMainThread();
+
+                if (BarricadeDrop.GetNetId().IsNull())
+                {
+                    return;
+                }
 
                 if (BarricadeManager.tryGetRegion(BarricadeDrop.model, out var x, out var y, out var plant, out _))
                 {

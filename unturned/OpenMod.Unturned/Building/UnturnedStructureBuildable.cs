@@ -19,12 +19,12 @@ namespace OpenMod.Unturned.Building
 
         public StructureDrop StructureDrop { get; }
 
-        [Obsolete]
+        [Obsolete("Use another constructor with only StructureDrop")]
         public UnturnedStructureBuildable(StructureData data, StructureDrop drop) : this(drop)
         {
             if (data != drop.GetServersideData())
             {
-                throw new Exception("StructureData is not equal to the drop data");
+                throw new Exception($"{nameof(data)} is incorrect structure data for {nameof(drop)}");
             }
         }
 
@@ -44,7 +44,12 @@ namespace OpenMod.Unturned.Building
             {
                 await UniTask.SwitchToMainThread();
 
-                if (Regions.tryGetCoordinate(StructureDrop.GetServersideData().point, out var x, out var y))
+                if (StructureDrop.GetNetId().IsNull()) // already destroyed
+                {
+                    return;
+                }
+
+                if (!Regions.tryGetCoordinate(StructureDrop.GetServersideData().point, out var x, out var y))
                 {
                     return;
                 }
