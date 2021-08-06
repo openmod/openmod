@@ -22,7 +22,7 @@
         /// </summary>
         High,
         /// <summary>
-        /// The highst priority. 
+        /// The highest priority. 
         /// </summary>
         Highest,
         /// <summary>
