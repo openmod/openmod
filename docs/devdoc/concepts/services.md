@@ -137,4 +137,4 @@ Services can have to scopes: plugin scope and global scope.
 | IStringLocalizer                                | Localizes messages from plugin translation files       |
 | IUserDataSeeder                                 | Seeds user data on first connect                       |
 | IUserDataStore                                  | Stores and manages user data                           |
-| IUserManager                                    | Nanages users                                          |
+| IUserManager                                    | Manages users                                          |

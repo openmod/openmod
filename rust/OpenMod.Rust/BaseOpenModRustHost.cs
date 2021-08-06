@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Cysharp.Threading.Tasks;
@@ -8,7 +6,6 @@ using OpenMod.API;
 using OpenMod.API.Persistence;
 using OpenMod.Extensions.Games.Abstractions;
 using Rust;
-using UnityEngine.LowLevel;
 
 namespace OpenMod.Rust
 {
@@ -26,7 +23,6 @@ namespace OpenMod.Rust
         public IDataStore DataStore { get; }
 
         private bool m_IsDisposing;
-        private static bool s_UniTaskInited;
 
         protected BaseOpenModRustHost(
             ILifetimeScope lifetimeScope,
@@ -50,23 +46,6 @@ namespace OpenMod.Rust
         {
             IsComponentAlive = true;
 
-            if (!s_UniTaskInited)
-            {
-                var unitySynchronizationContetextField =
-                    typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext",
-                        BindingFlags.Static | BindingFlags.NonPublic);
-                unitySynchronizationContetextField.SetValue(null, SynchronizationContext.Current);
-
-                var mainThreadIdField =
-                    typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
-                mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
-
-                var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
-             
-                PlayerLoopHelper.Initialize(ref playerLoop);
-                s_UniTaskInited = true;
-            }
-
             return OnInitAsync();
         }
 
@@ -89,7 +68,7 @@ namespace OpenMod.Rust
             {
                 return true;
             }
-            
+
             if (capability == KnownGameCapabilities.Health)
             {
                 return true;

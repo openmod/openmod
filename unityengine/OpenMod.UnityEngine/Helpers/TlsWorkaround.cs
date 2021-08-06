@@ -3,9 +3,9 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
-namespace OpenMod.Unturned.Helpers
+namespace OpenMod.UnityEngine.Helpers
 {
-    //http://answers.unity.com/answers/1089592/view.html
+    // http://answers.unity.com/answers/1089592/view.html
     internal static class TlsWorkaround
     {
         public static void Install()
@@ -13,7 +13,7 @@ namespace OpenMod.Unturned.Helpers
             ServicePointManager.ServerCertificateValidationCallback = CertificateValidationWorkaroundCallback;
         }
 
-        public static void Uninstalll()
+        public static void Uninstall()
         {
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
