@@ -1,27 +1,42 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.UnityEngine.Transforms;
 using SDG.Unturned;
-using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Building
 {
     public class UnturnedBarricadeBuildable : UnturnedBuildable, IDamageSource
     {
-        public BarricadeData BarricadeData { get; }
+        public BarricadeData BarricadeData
+        {
+            get
+            {
+                return BarricadeDrop.GetServersideData();
+            }
+        }
 
         public BarricadeDrop BarricadeDrop { get; }
 
         public Interactable Interactable { get; }
 
-        public UnturnedBarricadeBuildable(BarricadeData data, BarricadeDrop drop) : base(
+        [Obsolete("Use another constructor with only BarricadeDrop")]
+        public UnturnedBarricadeBuildable(BarricadeData data, BarricadeDrop drop) : this(drop)
+        {
+            if (drop.GetServersideData() != data)
+            {
+                throw new Exception($"{nameof(data)} is incorrect barricade data for {nameof(drop)}");
+            }
+        }
+
+        public UnturnedBarricadeBuildable(BarricadeDrop drop) : base(
             new UnturnedBuildableAsset(drop.asset),
             new UnityTransform(drop.model),
-            new UnturnedBuildableState(data.barricade),
-            new UnturnedBuildableOwnership(data),
+            new UnturnedBuildableState(drop.GetServersideData().barricade),
+            new UnturnedBuildableOwnership(drop.GetServersideData()),
             drop.instanceID.ToString())
         {
-            BarricadeData = data;
             BarricadeDrop = drop;
             Interactable = drop.interactable;
         }
@@ -32,9 +47,14 @@ namespace OpenMod.Unturned.Building
             {
                 await UniTask.SwitchToMainThread();
 
-                if (BarricadeManager.tryGetInfo(BarricadeDrop.model, out var x, out var y, out var plant, out var index, out var region))
+                if (BarricadeDrop.GetNetId().IsNull())
                 {
-                    BarricadeManager.destroyBarricade(region, x, y, plant, index);
+                    return;
+                }
+
+                if (BarricadeManager.tryGetRegion(BarricadeDrop.model, out var x, out var y, out var plant, out _))
+                {
+                    BarricadeManager.destroyBarricade(BarricadeDrop, x, y, plant);
                 }
             }
 
