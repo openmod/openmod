@@ -1,11 +1,11 @@
 ﻿extern alias JetBrainsAnnotations;
+using System;
+using System.Linq;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
-using System;
-using System.Linq;
 using UnityEngine;
 // ReSharper disable InconsistentNaming
 
@@ -140,6 +140,14 @@ namespace OpenMod.Unturned.Zombies.Events
         [HarmonyPatch]
         internal static class ZombiePatches
         {
+#if !DEBUG
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex)
+            {
+                return null;
+            }
+#endif
+
             [UsedImplicitly]
             [HarmonyPatch(typeof(Zombie), "alert", typeof(Player))]
             [HarmonyPrefix]

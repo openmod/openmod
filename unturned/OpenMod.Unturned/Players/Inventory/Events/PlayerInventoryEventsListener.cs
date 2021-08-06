@@ -146,6 +146,14 @@ namespace OpenMod.Unturned.Players.Inventory.Events
         [HarmonyPatch]
         internal static class Patches
         {
+#if !DEBUG
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex)
+            {
+                return null;
+            }
+#endif
+
             [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerInventory), "openStorage")]
             [HarmonyPostfix]

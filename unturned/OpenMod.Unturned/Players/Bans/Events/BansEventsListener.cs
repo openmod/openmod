@@ -144,6 +144,14 @@ namespace OpenMod.Unturned.Players.Bans.Events
         [UsedImplicitly]
         internal static class Patches
         {
+#if !DEBUG
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex)
+            {
+                return null;
+            }
+#endif
+
             [UsedImplicitly]
             [HarmonyPatch(typeof(SteamBlacklist), "ban", typeof(CSteamID), typeof(uint), typeof(CSteamID), typeof(string), typeof(uint))]
             [HarmonyPostfix]

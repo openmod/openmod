@@ -327,6 +327,14 @@ namespace OpenMod.Unturned.Vehicles.Events
         [UsedImplicitly]
         internal static class VehiclePatches
         {
+#if !DEBUG
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex)
+            {
+                return null;
+            }
+#endif
+
             // ReSharper disable InconsistentNaming
             [HarmonyPatch(typeof(InteractableVehicle), "explode")]
             [HarmonyPrefix]
