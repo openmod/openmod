@@ -9,6 +9,8 @@ using System.Reflection;
 using SDG.Framework.Devkit;
 using Steamworks;
 using UnityEngine;
+using OpenMod.Unturned.Patching;
+using static OpenMod.Unturned.Zombies.Events.ZombieEventsListener;
 
 // ReSharper disable InconsistentNaming
 
@@ -201,6 +203,15 @@ namespace OpenMod.Unturned.Animals.Events
         [HarmonyPatch]
         internal static class Patches
         {
+#if !DEBUG
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex, MethodBase original)
+            {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
+                return null;
+            }
+#endif
+
             [UsedImplicitly]
             [HarmonyPatch(typeof(AnimalManager), "addAnimal")]
             [HarmonyPostfix]
@@ -213,7 +224,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "tellAlive")]
+            [HarmonyPatch(typeof(Animal), nameof(Animal.tellAlive))]
             [HarmonyPostfix]
             public static void TellAlive(Animal __instance)
             {
@@ -221,7 +232,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "tellDead")]
+            [HarmonyPatch(typeof(Animal), nameof(Animal.tellDead))]
             [HarmonyPostfix]
             public static void TellDead(Animal __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
             {
@@ -229,7 +240,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "alertDirection")]
+            [HarmonyPatch(typeof(Animal), nameof(Animal.alertDirection))]
             [HarmonyPrefix]
             public static bool AlertDirection(Animal __instance, ref Vector3 newDirection, ref bool sendToPack)
             {
@@ -242,7 +253,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "alertGoToPoint")]
+            [HarmonyPatch(typeof(Animal), nameof(Animal.alertGoToPoint))]
             [HarmonyPrefix]
             public static bool AlertGoToPoint(Animal __instance, ref Vector3 point, ref bool sendToPack)
             {
@@ -255,7 +266,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "alertPlayer")]
+            [HarmonyPatch(typeof(Animal), nameof(Animal.alertPlayer))]
             [HarmonyPrefix]
             public static bool AlertPlayer(Animal __instance, ref Player newPlayer, ref bool sendToPack)
             {

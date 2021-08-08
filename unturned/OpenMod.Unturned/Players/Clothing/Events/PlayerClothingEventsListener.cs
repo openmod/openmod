@@ -1,11 +1,13 @@
 ﻿extern alias JetBrainsAnnotations;
+using System;
+using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API.Eventing;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Items;
+using OpenMod.Unturned.Patching;
 using SDG.Unturned;
-using System;
 
 namespace OpenMod.Unturned.Players.Clothing.Events
 {
@@ -390,14 +392,15 @@ namespace OpenMod.Unturned.Players.Clothing.Events
         {
 #if !DEBUG
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex)
+            public static Exception? Cleanup(Exception ex, MethodBase original)
             {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;
             }
 #endif
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), "askWearBackpack")]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearBackpack))]
             [HarmonyPrefix]
             public static bool AskWearBackpack(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
@@ -409,7 +412,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), "askWearGlasses")]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearGlasses))]
             [HarmonyPrefix]
             public static bool AskWearGlasses(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
@@ -421,7 +424,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), "askWearHat")]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearHat))]
             [HarmonyPrefix]
             public static bool AskWearHat(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
@@ -433,7 +436,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), "askWearMask")]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearMask))]
             [HarmonyPrefix]
             public static bool AskWearMask(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
@@ -445,7 +448,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), "askWearPants")]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearPants))]
             [HarmonyPrefix]
             public static bool AskWearPants(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
@@ -457,7 +460,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), "askWearShirt")]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearShirt))]
             [HarmonyPrefix]
             public static bool AskWearShirt(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {
@@ -469,7 +472,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), "askWearVest")]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearVest))]
             [HarmonyPrefix]
             public static bool AskWearVest(PlayerClothing __instance, ushort id, byte quality, byte[] state)
             {

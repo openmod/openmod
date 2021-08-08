@@ -1,15 +1,17 @@
 ﻿extern alias JetBrainsAnnotations;
-using HarmonyLib;
-using JetBrainsAnnotations::JetBrains.Annotations;
-using OpenMod.Unturned.Events;
-using SDG.Unturned;
-using Steamworks;
 using System;
 using System.Net;
+using System.Reflection;
+using HarmonyLib;
+using JetBrainsAnnotations::JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Nito.AsyncEx;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
+using OpenMod.Unturned.Events;
+using OpenMod.Unturned.Patching;
+using SDG.Unturned;
+using Steamworks;
 
 namespace OpenMod.Unturned.Players.Bans.Events
 {
@@ -61,7 +63,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
             Emit(@event);
 
             reason = @event.Reason ?? "";
-            duration = (uint) @event.Duration.TotalSeconds;
+            duration = (uint)@event.Duration.TotalSeconds;
             shouldVanillaBan = !@event.IsCancelled;
         }
 
@@ -146,14 +148,15 @@ namespace OpenMod.Unturned.Players.Bans.Events
         {
 #if !DEBUG
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex)
+            public static Exception? Cleanup(Exception ex, MethodBase original)
             {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;
             }
 #endif
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(SteamBlacklist), "ban", typeof(CSteamID), typeof(uint), typeof(CSteamID), typeof(string), typeof(uint))]
+            [HarmonyPatch(typeof(SteamBlacklist), nameof(SteamBlacklist.ban), typeof(CSteamID), typeof(uint), typeof(CSteamID), typeof(string), typeof(uint))]
             [HarmonyPostfix]
             public static void Ban(CSteamID playerID, uint ip, CSteamID judgeID, string reason, uint duration)
             {
@@ -161,7 +164,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(SteamBlacklist), "unban")]
+            [HarmonyPatch(typeof(SteamBlacklist), nameof(SteamBlacklist.unban))]
             [HarmonyPostfix]
             public static void Unban(CSteamID playerID, bool __result)
             {

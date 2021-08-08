@@ -1,10 +1,12 @@
 ﻿extern alias JetBrainsAnnotations;
+using System;
+using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Items;
+using OpenMod.Unturned.Patching;
 using SDG.Unturned;
-using System;
 
 namespace OpenMod.Unturned.Players.Equipment.Events
 {
@@ -131,8 +133,9 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         {
 #if !DEBUG
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex)
+            public static Exception? Cleanup(Exception ex, MethodBase original)
             {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;
             }
 #endif

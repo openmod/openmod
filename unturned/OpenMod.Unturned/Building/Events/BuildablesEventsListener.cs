@@ -2,11 +2,14 @@
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Unturned.Events;
+using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
+using static OpenMod.Unturned.Zombies.Events.ZombieEventsListener;
 
 // ReSharper disable InconsistentNaming
 
@@ -472,8 +475,9 @@ namespace OpenMod.Unturned.Building.Events
         {
 #if !DEBUG
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex)
+            public static Exception? Cleanup(Exception ex, MethodBase original)
             {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;
             }
 #endif

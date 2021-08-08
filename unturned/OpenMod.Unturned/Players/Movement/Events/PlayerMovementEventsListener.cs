@@ -1,9 +1,11 @@
 ﻿extern alias JetBrainsAnnotations;
 using System;
+using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
+using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using UnityEngine;
 
@@ -92,14 +94,15 @@ namespace OpenMod.Unturned.Players.Movement.Events
         {
 #if !DEBUG
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex)
+            public static Exception? Cleanup(Exception ex, MethodBase original)
             {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;
             }
 #endif
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Player), "teleportToLocationUnsafe")]
+            [HarmonyPatch(typeof(Player), nameof(Player.teleportToLocationUnsafe))]
             [HarmonyPrefix]
             public static bool TeleportToLocationUnsafe(Player __instance, ref Vector3 position, ref float yaw)
             {
