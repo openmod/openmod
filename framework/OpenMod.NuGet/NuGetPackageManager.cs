@@ -47,11 +47,7 @@ namespace OpenMod.NuGet
             "F.ItemRestrictions"
         };
 
-        private static readonly string[] s_PublisherBlacklist =
-        {
-            // Trademark violations
-            "FPlugins"
-        };
+        private static readonly string[] s_PublisherBlacklist = new string[] {};
 
         private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new();
         private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
