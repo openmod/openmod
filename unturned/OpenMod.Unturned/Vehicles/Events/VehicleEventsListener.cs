@@ -345,9 +345,6 @@ namespace OpenMod.Unturned.Vehicles.Events
             [UsedImplicitly]
             public static void SpawnVehicleInternal(InteractableVehicle __result)
             {
-                if (__result == null)
-                    return;
-
                 OnVehicleSpawned?.Invoke(__result);
             }
 
