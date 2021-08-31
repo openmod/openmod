@@ -7,12 +7,12 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Configuration" Version="5.9.0" />
-    <PackageReference Include="NuGet.Frameworks" Version="5.9.0" />
-    <PackageReference Include="NuGet.Packaging" Version="5.9.0" />
-    <PackageReference Include="NuGet.Protocol" Version="5.9.0" />
-    <PackageReference Include="NuGet.Resolver" Version="5.9.0" />
-    <PackageReference Include="YamlDotNet" Version="9.1.4" />
+    <PackageReference Include="NuGet.Configuration" Version="5.11.0" />
+    <PackageReference Include="NuGet.Frameworks" Version="5.11.0" />
+    <PackageReference Include="NuGet.Packaging" Version="5.11.0" />
+    <PackageReference Include="NuGet.Protocol" Version="5.11.0" />
+    <PackageReference Include="NuGet.Resolver" Version="5.11.0" />
+    <PackageReference Include="YamlDotNet" Version="11.2.1" />
   </ItemGroup>
 
   <ItemGroup>

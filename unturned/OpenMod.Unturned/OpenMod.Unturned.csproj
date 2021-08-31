@@ -40,8 +40,4 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" />
-  </ItemGroup>
-
 </Project>
