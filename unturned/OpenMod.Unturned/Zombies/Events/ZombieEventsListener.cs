@@ -88,7 +88,6 @@ namespace OpenMod.Unturned.Zombies.Events
             Emit(@event);
 
             parameters.damage = @event.DamageAmount;
-            parameters.times = 1;
             parameters.direction = @event.Ragdoll;
             parameters.ragdollEffect = @event.RagdollEffect;
             parameters.instigator = @event.Instigator?.Player;
