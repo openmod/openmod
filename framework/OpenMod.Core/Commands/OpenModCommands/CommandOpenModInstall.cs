@@ -59,6 +59,11 @@ namespace OpenMod.Core.Commands.OpenModCommands
             var anySuccessful = false;
             foreach (var arg in args)
             {
+                if (string.IsNullOrWhiteSpace(arg))
+                {
+                    throw new CommandWrongUsageException(Context);
+                }
+
                 var packageInfo = arg.Split('@');
                 var packageName = packageInfo[0];
                 var packageVersion = packageInfo.Length > 1 ? packageInfo[1] : null;
