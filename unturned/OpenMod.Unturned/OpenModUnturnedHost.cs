@@ -23,7 +23,6 @@ using OpenMod.Unturned.Logging;
 using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.Users;
 using SDG.Unturned;
-using UnityEngine.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
 
 namespace OpenMod.Unturned
@@ -31,7 +30,6 @@ namespace OpenMod.Unturned
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
-        private static bool s_UniTaskInited;
         private readonly IRuntime m_Runtime;
         private readonly IHostInformation m_HostInformation;
         private readonly IServiceProvider m_ServiceProvider;
@@ -47,7 +45,7 @@ namespace OpenMod.Unturned
         private Harmony? m_Harmony;
         private bool m_IsDisposing;
 
-        public string OpenModComponentId { get; } = "OpenMod.Unturned";
+        public string OpenModComponentId => "OpenMod.Unturned";
 
         public string WorkingDirectory { get; }
 
@@ -251,7 +249,7 @@ namespace OpenMod.Unturned
 
         public Task ShutdownAsync()
         {
-            async UniTask ShutdownTask()
+            static async UniTask ShutdownTask()
             {
                 await UniTask.SwitchToMainThread();
                 Provider.shutdown();

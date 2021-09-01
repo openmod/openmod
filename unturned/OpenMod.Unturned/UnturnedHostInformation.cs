@@ -16,7 +16,7 @@ namespace OpenMod.Unturned
 
         public SemVersion HostVersion { get; }
 
-        public string HostName { get; } = "OpenMod for Unturned";
+        public string HostName => "OpenMod for Unturned";
 
         public bool IsClient { get; } = Provider.isClient;
 
