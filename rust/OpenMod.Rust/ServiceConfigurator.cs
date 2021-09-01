@@ -10,10 +10,10 @@ namespace OpenMod.Rust
     {
         public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
         {
-            var instance = serviceCollection.FirstOrDefault(x => typeof(IHostInformation).IsAssignableFrom(x.ServiceType))?.ImplementationInstance;
-            if (instance is IGameHostInformation)
+            var instance = openModStartupContext.Runtime.HostInformation;
+            if (instance is IGameHostInformation gameHostInformation)
             {
-                serviceCollection.AddSingleton(typeof(IGameHostInformation), instance);
+                serviceCollection.AddSingleton(typeof(IGameHostInformation), gameHostInformation);
             }
             else
             {
