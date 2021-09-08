@@ -47,7 +47,7 @@ namespace OpenMod.Unturned
         private Harmony? m_Harmony;
         private bool m_IsDisposing;
 
-        public string OpenModComponentId { get; } = "OpenMod.Unturned";
+        public string OpenModComponentId => "OpenMod.Unturned";
 
         public string WorkingDirectory { get; }
 
@@ -254,7 +254,7 @@ namespace OpenMod.Unturned
 
         public Task ShutdownAsync()
         {
-            async UniTask ShutdownTask()
+            static async UniTask ShutdownTask()
             {
                 await UniTask.SwitchToMainThread();
                 Provider.shutdown();

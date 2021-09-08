@@ -44,6 +44,17 @@ namespace OpenMod.API.Eventing
         IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback);
 
         /// <summary>
+        /// Subscribes a component to an event.
+        /// </summary>
+        /// <param name="component">The component.</param>
+        /// <param name="eventName">The event to subscribe to.</param>
+        /// <param name="callback">The action to execute. See <see cref="EventCallback" /></param>
+        /// <param name="options">The extended options for this event subscription.</param>
+        /// <returns>A disposable that unsubscribes the callback when disposed.</returns>
+        IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback,
+            IEventListenerOptions options);
+
+        /// <summary>
         /// <inheritdoc cref="Subscribe(IOpenModComponent,string,EventCallback)" />
         /// </summary>
         /// <param name="component">The component.</param>
@@ -58,9 +69,31 @@ namespace OpenMod.API.Eventing
         /// </summary>
         /// <param name="component">The component.</param>
         /// <param name="callback">The action to execute after all listeners were notified.</param>
+        /// <param name="options">The extended options for this event subscription.</param>
+        /// <typeparam name="TEvent">The event to subscribe to.</typeparam>
+        /// <returns>A disposable that unsubscribes the callback when disposed.</returns>
+        IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback,
+            IEventListenerOptions options) where TEvent : IEvent;
+
+        /// <summary>
+        /// <inheritdoc cref="Subscribe(IOpenModComponent,string,EventCallback)" />
+        /// </summary>
+        /// <param name="component">The component.</param>
         /// <param name="eventType">The event to subscribe to.</param>
+        /// <param name="callback">The action to execute after all listeners were notified.</param>
         /// <returns>A disposable that unsubscribes the callback when disposed.</returns>
         IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback);
+
+        /// <summary>
+        /// <inheritdoc cref="Subscribe(IOpenModComponent,string,EventCallback)" />
+        /// </summary>
+        /// <param name="component">The component.</param>
+        /// <param name="eventType">The event to subscribe to.</param>
+        /// <param name="callback">The action to execute after all listeners were notified.</param>
+        /// <param name="options">The extended options for this event subscription.</param>
+        /// <returns>A disposable that unsubscribes the callback when disposed.</returns>
+        IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback,
+            IEventListenerOptions options);
 
         /// <summary>
         /// Finds and registers all <see cref="IEventListener"/>s.

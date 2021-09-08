@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.21.18">
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.21.25-preview.1">
 	  <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
   </ItemGroup>
@@ -38,6 +38,10 @@
     <Reference Include="Rocket.Unturned">
       <HintPath>libs\Rocket.Unturned.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" />
   </ItemGroup>
 
 </Project>
