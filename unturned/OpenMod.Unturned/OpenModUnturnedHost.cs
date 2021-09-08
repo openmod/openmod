@@ -47,7 +47,7 @@ namespace OpenMod.Unturned
         private Harmony? m_Harmony;
         private bool m_IsDisposing;
 
-        public string OpenModComponentId => "OpenMod.Unturned";
+        public string OpenModComponentId { get; } = "OpenMod.Unturned";
 
         public string WorkingDirectory { get; }
 
@@ -105,6 +105,9 @@ namespace OpenMod.Unturned
 
         public Task InitAsync()
         {
+            m_Logger.LogInformation("OpenMod for Unturned v{HostVersion} is initializing...",
+                m_HostInformation.HostVersion);
+
             try
             {
                 if (RocketModIntegration.IsRocketModInstalled())
@@ -182,9 +185,6 @@ namespace OpenMod.Unturned
 
             Dedicator.commandWindow.addIOHandler(m_OpenModIoHandler);
 
-            m_Logger.LogInformation("OpenMod for Unturned v{HostVersion} is initializing...",
-                m_HostInformation.HostVersion);
-
             m_Logger.LogInformation("OpenMod for Unturned is ready");
 
             return Task.CompletedTask;
@@ -257,7 +257,7 @@ namespace OpenMod.Unturned
             static async UniTask ShutdownTask()
             {
                 await UniTask.SwitchToMainThread();
-                Provider.shutdown();
+                Provider.shutdown(1);
             }
 
             return ShutdownTask().AsTask();

@@ -1,5 +1,4 @@
-﻿#if !DEBUG
-using System;
+﻿using System;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
@@ -30,4 +29,3 @@ namespace OpenMod.Unturned.Patching
         }
     }
 }
-#endif

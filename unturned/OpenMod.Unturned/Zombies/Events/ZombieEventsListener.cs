@@ -2,7 +2,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
@@ -146,14 +145,12 @@ namespace OpenMod.Unturned.Zombies.Events
         [HarmonyPatch]
         internal static class ZombiePatches
         {
-#if !DEBUG
             [HarmonyCleanup]
             public static Exception? Cleanup(Exception ex, MethodBase original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(ZombiePatches), ex, original);
                 return null;
             }
-#endif
 
             [UsedImplicitly]
             [HarmonyPatch(typeof(Zombie), nameof(Zombie.alert), typeof(Player))]

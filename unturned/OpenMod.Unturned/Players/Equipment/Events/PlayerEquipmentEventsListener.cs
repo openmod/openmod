@@ -131,14 +131,12 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         [HarmonyPatch]
         private static class Patches
         {
-#if !DEBUG
             [HarmonyCleanup]
             public static Exception? Cleanup(Exception ex, MethodBase original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;
             }
-#endif
 
             // ReSharper disable InconsistentNaming
             [UsedImplicitly]

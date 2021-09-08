@@ -1,16 +1,15 @@
 ﻿extern alias JetBrainsAnnotations;
+using System;
+using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
-using SDG.Unturned;
-using System;
-using System.Reflection;
+using OpenMod.Unturned.Patching;
 using SDG.Framework.Devkit;
+using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
-using OpenMod.Unturned.Patching;
-using static OpenMod.Unturned.Zombies.Events.ZombieEventsListener;
 
 // ReSharper disable InconsistentNaming
 
@@ -19,11 +18,11 @@ namespace OpenMod.Unturned.Animals.Events
     [UsedImplicitly]
     internal class AnimalsEventsListener : UnturnedEventsListener
     {
-        private static readonly FieldInfo s_BumperVehicle;
+        private static readonly FieldInfo? s_BumperVehicleField;
 
         static AnimalsEventsListener()
         {
-            s_BumperVehicle = typeof(Bumper).GetField("vehicle", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            s_BumperVehicleField = typeof(Bumper).GetField("vehicle", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
         public AnimalsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
@@ -84,14 +83,20 @@ namespace OpenMod.Unturned.Animals.Events
                     instigator = Provider.server;
                     break;
                 case Bumper bumper:
-                {
-                    var vehicle = (InteractableVehicle)s_BumperVehicle.GetValue(bumper);
-                    instigator = vehicle is not null and { isDriven: true }
+                    if (s_BumperVehicleField is null)
+                    {
+                        break;
+                    }
+
+                    var vehicle = (InteractableVehicle)s_BumperVehicleField.GetValue(bumper);
+#pragma warning disable RCS1146 // Use conditional access.
+                    instigator = vehicle != null && vehicle.isDriven
+#pragma warning restore RCS1146 // Use conditional access.
                         ? vehicle.passengers[0].player.playerID.steamID
                         : Provider.server;
 
                     break;
-                }
+
                 case Player player:
                     instigator = player.channel.owner.playerID.steamID;
                     break;
@@ -203,14 +208,12 @@ namespace OpenMod.Unturned.Animals.Events
         [HarmonyPatch]
         internal static class Patches
         {
-#if !DEBUG
             [HarmonyCleanup]
             public static Exception? Cleanup(Exception ex, MethodBase original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;
             }
-#endif
 
             [UsedImplicitly]
             [HarmonyPatch(typeof(AnimalManager), "addAnimal")]
