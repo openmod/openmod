@@ -20,6 +20,7 @@ using OpenMod.Extensions.Games.Abstractions;
 using OpenMod.NuGet;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Logging;
+using OpenMod.Unturned.Patching;
 using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.Users;
 using SDG.Unturned;
@@ -38,6 +39,7 @@ namespace OpenMod.Unturned
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
         private readonly NuGetPackageManager m_NuGetPackageManager;
         private readonly Lazy<UnturnedCommandHandler> m_UnturnedCommandHandler;
+        private readonly ILoggerFactory m_LoggerFactory;
         private readonly HashSet<string> m_Capabilities;
         private OpenModConsoleInputOutput? m_OpenModIoHandler;
         private List<ICommandInputOutput>? m_IoHandlers;
@@ -45,7 +47,7 @@ namespace OpenMod.Unturned
         private Harmony? m_Harmony;
         private bool m_IsDisposing;
 
-        public string OpenModComponentId => "OpenMod.Unturned";
+        public string OpenModComponentId { get; } = "OpenMod.Unturned";
 
         public string WorkingDirectory { get; }
 
@@ -65,7 +67,8 @@ namespace OpenMod.Unturned
             ILogger<OpenModUnturnedHost> logger,
             NuGetPackageManager nuGetPackageManager,
             Lazy<ICommandExecutor> commandExecutor,
-            Lazy<UnturnedCommandHandler> unturnedCommandHandler)
+            Lazy<UnturnedCommandHandler> unturnedCommandHandler,
+            ILoggerFactory loggerFactory)
         {
             m_Runtime = runtime;
             m_HostInformation = hostInformation;
@@ -75,6 +78,7 @@ namespace OpenMod.Unturned
             m_Logger = logger;
             m_NuGetPackageManager = nuGetPackageManager;
             m_UnturnedCommandHandler = unturnedCommandHandler;
+            m_LoggerFactory = loggerFactory;
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
 
@@ -101,6 +105,9 @@ namespace OpenMod.Unturned
 
         public Task InitAsync()
         {
+            m_Logger.LogInformation("OpenMod for Unturned v{HostVersion} is initializing...",
+                m_HostInformation.HostVersion);
+
             try
             {
                 if (RocketModIntegration.IsRocketModInstalled())
@@ -119,6 +126,7 @@ namespace OpenMod.Unturned
 
             try
             {
+                HarmonyExceptionHandler.LoggerFactoryGetterEvent += () => m_LoggerFactory;
                 m_Harmony = new Harmony(OpenModComponentId);
                 m_Harmony.PatchAll(GetType().Assembly);
             }
@@ -176,9 +184,6 @@ namespace OpenMod.Unturned
                 : ActivatorUtilities.CreateInstance<OpenModConsoleInputOutput>(m_ServiceProvider);
 
             Dedicator.commandWindow.addIOHandler(m_OpenModIoHandler);
-
-            m_Logger.LogInformation("OpenMod for Unturned v{HostVersion} is initializing...",
-                m_HostInformation.HostVersion);
 
             m_Logger.LogInformation("OpenMod for Unturned is ready");
 
@@ -252,7 +257,7 @@ namespace OpenMod.Unturned
             static async UniTask ShutdownTask()
             {
                 await UniTask.SwitchToMainThread();
-                Provider.shutdown();
+                Provider.shutdown(1);
             }
 
             return ShutdownTask().AsTask();
@@ -283,6 +288,7 @@ namespace OpenMod.Unturned
 
             try
             {
+                HarmonyExceptionHandler.LoggerFactoryGetterEvent -= () => m_LoggerFactory;
                 m_Harmony?.UnpatchAll(OpenModComponentId);
             }
             catch

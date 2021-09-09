@@ -1,10 +1,12 @@
 ﻿extern alias JetBrainsAnnotations;
 using System;
+using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
+using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
@@ -297,7 +299,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnVehicleReplacingBattery(InteractableVehicle vehicle, Player nativePlayer, byte amount, ref bool cancel)
+        private void Events_OnVehicleReplacingBattery(InteractableVehicle vehicle, Player nativePlayer, ref byte amount, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer);
 
@@ -311,6 +313,7 @@ namespace OpenMod.Unturned.Vehicles.Events
             cancel = @event.IsCancelled;
         }
 
+#pragma warning disable RCS1213 // Remove unused member declaration.
         private delegate void VehicleExploding(InteractableVehicle vehicle, ref bool cancel);
         private static event VehicleExploding? OnVehicleExploding;
 
@@ -320,18 +323,26 @@ namespace OpenMod.Unturned.Vehicles.Events
         private delegate void VehicleStealBattery(InteractableVehicle vehicle, Player player, ref bool cancel);
         private static event VehicleStealBattery? OnVehicleStealBattery;
 
-        private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, byte amount, ref bool cancel);
+        private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, ref byte amount, ref bool cancel);
         private static event VehicleReplacingBattery? OnVehicleReplacingBattery;
+#pragma warning restore RCS1213 // Remove unused member declaration.
 
         [HarmonyPatch]
         [UsedImplicitly]
         internal static class VehiclePatches
         {
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex, MethodBase original)
+            {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(VehiclePatches), ex, original);
+                return null;
+            }
+
             // ReSharper disable InconsistentNaming
             [HarmonyPatch(typeof(InteractableVehicle), "explode")]
             [HarmonyPrefix]
             [UsedImplicitly]
-            public static bool Explode(InteractableVehicle __instance)
+            public static bool VehicleExploding(InteractableVehicle __instance)
             {
                 var cancel = false;
 
@@ -340,13 +351,15 @@ namespace OpenMod.Unturned.Vehicles.Events
                 return !cancel;
             }
 
-            [HarmonyPatch(typeof(VehicleManager), "spawnVehicleInternal")]
+            [HarmonyPatch(typeof(VehicleManager), nameof(VehicleManager.SpawnVehicleV3))]
             [HarmonyPostfix]
             [UsedImplicitly]
-            public static void SpawnVehicleInternal(InteractableVehicle __result)
+            public static void VehicleSpawned(InteractableVehicle __result)
             {
                 if (__result == null)
+                {
                     return;
+                }
 
                 OnVehicleSpawned?.Invoke(__result);
             }
@@ -366,11 +379,11 @@ namespace OpenMod.Unturned.Vehicles.Events
             [HarmonyPatch(typeof(InteractableVehicle), nameof(InteractableVehicle.replaceBattery))]
             [HarmonyPrefix]
             [UsedImplicitly]
-            public static bool ReplaceBattery(InteractableVehicle __instance, Player player, byte quality)
+            public static bool ReplaceBattery(InteractableVehicle __instance, Player player, ref byte quality)
             {
                 var cancel = false;
 
-                OnVehicleReplacingBattery?.Invoke(__instance, player, quality, ref cancel);
+                OnVehicleReplacingBattery?.Invoke(__instance, player, ref quality, ref cancel);
 
                 return !cancel;
             }
