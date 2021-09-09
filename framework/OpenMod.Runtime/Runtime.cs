@@ -226,6 +226,7 @@ namespace OpenMod.Runtime
                 await startup.LoadPluginAssembliesAsync();
 
                 SetupSerilog(true);
+                nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory!.CreateLogger("NuGet"));
 
                 hostBuilder
                     .UseContentRoot(parameters.WorkingDirectory)
