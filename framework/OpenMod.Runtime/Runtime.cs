@@ -281,7 +281,14 @@ namespace OpenMod.Runtime
                     Log.CloseAndFlush();
                 }
 
-                PerformFileSystemWatcherPatch();
+                try
+                {
+                    PerformFileSystemWatcherPatch();
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError(ex, "Failed to patch FileSystemWatcher");
+                }
 
                 return Host;
             }
@@ -300,29 +307,60 @@ namespace OpenMod.Runtime
 
         private void PerformFileSystemWatcherPatch()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Type.GetType("Mono.Runtime") != null)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Type.GetType("Mono.Runtime") is null)
             {
-                var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
-                var watcher = watcherField?.GetValue(null);
+                return;
+            }
 
-                if (watcher?.GetType().GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)?.GetValue(watcher) is Hashtable watches)
+            var internalSupportsFSWMethod = typeof(FileSystemWatcher).GetMethod("InternalSupportsFSW",
+                BindingFlags.Static | BindingFlags.NonPublic);
+
+            if (internalSupportsFSWMethod is not null)
+            {
+                var i = (int)internalSupportsFSWMethod.Invoke(null, null);
+
+                m_Logger.LogDebug("InternalSupportsFSW extern returns: {Num}", i);
+            }
+
+            var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
+            var watcher = watcherField?.GetValue(null);
+
+            if (watcher?.GetType()
+                .GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)
+                ?.GetValue(watcher) is not Hashtable watches)
+            {
+                return;
+            }
+
+            FieldInfo? incSubdirsField = null;
+            FieldInfo? filesLockField = null;
+            FieldInfo? filesField = null;
+
+            // DictionaryEntry<FileSystemWatcher, DefaultWatcherData>
+            foreach (DictionaryEntry entry in watches)
+            {
+                var watcherDataType = entry.Value.GetType();
+
+                incSubdirsField ??= watcherDataType.GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
+                incSubdirsField?.SetValue(entry.Value, false);
+
+                filesLockField ??= watcherDataType.GetField("FilesLock", BindingFlags.Public | BindingFlags.Instance);
+                var @lock = filesLockField?.GetValue(entry.Value);
+
+                filesField ??= watcherDataType.GetField("Files", BindingFlags.Public | BindingFlags.Instance);
+                var files = filesField?.GetValue(entry.Value);
+
+                if (files is Hashtable hashtable && @lock is not null)
                 {
-                    FieldInfo? incSubdirsField = null;
-
-                    // DictionaryEntry<FileSystemWatcher, DefaultWatcherData>
-                    foreach (var data in watches)
+                    lock (@lock)
                     {
-                        if (data is DictionaryEntry entry)
-                        {
-                            if (entry.Key is FileSystemWatcher fileSystemWatcher)
-                            {
-                                fileSystemWatcher.IncludeSubdirectories = false;
-                            }
-
-                            incSubdirsField ??= entry.Value.GetType().GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
-                            incSubdirsField?.SetValue(entry.Value, false);
-                        }
+                        hashtable.Clear();
                     }
+                }
+
+                if (entry.Key is FileSystemWatcher fileSystemWatcher)
+                {
+                    fileSystemWatcher.IncludeSubdirectories = false;
                 }
             }
         }

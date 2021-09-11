@@ -97,8 +97,8 @@ namespace OpenMod.Core.Persistence
             m_FileSystemWatcher = new FileSystemWatcher(m_BasePath)
             {
                 IncludeSubdirectories = false,
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.Size,
-                EnableRaisingEvents = true
+                NotifyFilter = NotifyFilters.LastWrite,
+                Filter = "*.yaml"
             };
 
             m_FileSystemWatcher.Changed += (_, args) =>
@@ -285,6 +285,11 @@ namespace OpenMod.Core.Persistence
             if (directory == null)
             {
                 throw new Exception($"Unable to retrieve directory info for file: {filePath}");
+            }
+
+            if (m_FileSystemWatcher is not null)
+            {
+                m_FileSystemWatcher.EnableRaisingEvents = true;
             }
 
             var @lock = GetLock(key);
