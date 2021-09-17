@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UserDatabasePlugin.Database;
 
 namespace UserDatabasePlugin.Migrations
@@ -13,18 +14,18 @@ namespace UserDatabasePlugin.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.5")
+                .HasAnnotation("ProductVersion", "3.1.16")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("UserDatabasePlugin.Database.User", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(36)")
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
                         .HasMaxLength(36);
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("varchar(20)")
+                        .HasColumnType("varchar(20) CHARACTER SET utf8mb4")
                         .HasMaxLength(20);
 
                     b.HasKey("Id");
@@ -39,18 +40,20 @@ namespace UserDatabasePlugin.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Type")
-                        .HasColumnType("varchar(32)")
+                        .IsRequired()
+                        .HasColumnType("varchar(32) CHARACTER SET utf8mb4")
                         .HasMaxLength(32);
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(36)");
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.Property<string>("UserName")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
 
