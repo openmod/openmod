@@ -50,10 +50,14 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
             var args = Context.Parameters.ToList();
             var isPre = false;
-            if (args.Contains("-Pre"))
+            for (var i = 0; i < args.Count; i++)
             {
+                if (!args[i].Equals("-pre", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                args.RemoveAt(i);
                 isPre = true;
-                args.Remove("-Pre");
+                break;
             }
 
             var anySuccessful = false;
