@@ -42,6 +42,18 @@ namespace OpenMod.Core.Eventing
 
         public virtual IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback)
         {
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            var attribute = GetEventListenerAttribute(callback.Method);
+
+            return Subscribe(component, eventName, callback, attribute);
+        }
+
+        public virtual IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback, IEventListenerOptions options)
+        {
             if (component == null)
             {
                 throw new ArgumentNullException(nameof(component));
@@ -57,15 +69,19 @@ namespace OpenMod.Core.Eventing
                 throw new ArgumentException(eventName);
             }
 
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             if (!component.IsComponentAlive)
             {
                 m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
                     component.OpenModComponentId);
                 return NullDisposable.Instance;
             }
-
-            var attribute = GetEventListenerAttribute(callback.Method);
-            var subscription = new EventSubscription(component, callback.Invoke, attribute, eventName, component.LifetimeScope.BeginLifetimeScopeEx());
+            
+            var subscription = new EventSubscription(component, callback.Invoke, options, eventName, component.LifetimeScope.BeginLifetimeScopeEx());
 
             m_EventSubscriptions.Add(subscription);
             return new DisposeAction(() =>
@@ -76,37 +92,17 @@ namespace OpenMod.Core.Eventing
 
         public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback) where TEvent : IEvent
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
-
             if (callback == null)
             {
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            if (!component.IsComponentAlive)
-            {
-                m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
-                    component.OpenModComponentId);
-                return NullDisposable.Instance;
-            }
-
             var attribute = GetEventListenerAttribute(callback.Method);
 
-            var subscription = new EventSubscription(component,
-                (serviceProvider, sender, @event) => callback.Invoke(serviceProvider, sender, (TEvent) @event),
-                attribute, typeof(TEvent), component.LifetimeScope.BeginLifetimeScopeEx());
-
-            m_EventSubscriptions.Add(subscription);
-            return new DisposeAction(() =>
-            {
-                m_EventSubscriptions.Remove(subscription);
-            });
+            return Subscribe(component, callback, attribute);
         }
 
-        public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback)
+        public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback, IEventListenerOptions options) where TEvent : IEvent
         {
             if (component == null)
             {
@@ -118,6 +114,11 @@ namespace OpenMod.Core.Eventing
                 throw new ArgumentNullException(nameof(callback));
             }
 
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             if (!component.IsComponentAlive)
             {
                 m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
@@ -125,9 +126,54 @@ namespace OpenMod.Core.Eventing
                 return NullDisposable.Instance;
             }
 
+            var subscription = new EventSubscription(component,
+                (serviceProvider, sender, @event) => callback.Invoke(serviceProvider, sender, (TEvent)@event),
+                options, typeof(TEvent), component.LifetimeScope.BeginLifetimeScopeEx());
+
+            m_EventSubscriptions.Add(subscription);
+            return new DisposeAction(() =>
+            {
+                m_EventSubscriptions.Remove(subscription);
+            });
+        }
+
+        public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback)
+        {
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             var attribute = GetEventListenerAttribute(callback.Method);
 
-            var subscription = new EventSubscription(component, callback.Invoke, attribute, eventType,
+            return Subscribe(component, eventType, callback, attribute);
+        }
+
+        public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback, IEventListenerOptions options)
+        {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (!component.IsComponentAlive)
+            {
+                m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
+                    component.OpenModComponentId);
+                return NullDisposable.Instance;
+            }
+
+            var subscription = new EventSubscription(component, callback.Invoke, options, eventType,
                 component.LifetimeScope.BeginLifetimeScopeEx());
 
             m_EventSubscriptions.Add(subscription);
@@ -311,8 +357,8 @@ namespace OpenMod.Core.Eventing
                 var comparer = new PriorityComparer(PriortyComparisonMode.LowestFirst);
                 eventSubscriptions.Sort((a, b) =>
                     comparer.Compare(
-                        (Priority)a.EventListenerAttribute.Priority,
-                        (Priority)b.EventListenerAttribute.Priority)
+                        (Priority)a.EventListenerOptions.Priority,
+                        (Priority)b.EventListenerOptions.Priority)
                 );
 
                 foreach (var group in eventSubscriptions.GroupBy(e => e.Scope))
@@ -334,7 +380,7 @@ namespace OpenMod.Core.Eventing
 
                         if (cancellableEvent != null
                             && cancellableEvent.IsCancelled
-                            && !subscription.EventListenerAttribute.IgnoreCancelled)
+                            && !subscription.EventListenerOptions.IgnoreCancelled)
                         {
                             continue;
                         }
@@ -352,7 +398,7 @@ namespace OpenMod.Core.Eventing
                             await subscription.Callback.Invoke(serviceProvider, sender, @event);
 
                             // Ensure monitor event listeners can't cancel or uncancel events
-                            if (cancellableEvent != null && subscription.EventListenerAttribute.Priority ==
+                            if (cancellableEvent != null && subscription.EventListenerOptions.Priority ==
                                 EventListenerPriority.Monitor)
                             {
                                 if (cancellableEvent.IsCancelled != wasCancelled)

@@ -23,6 +23,7 @@ using OpenMod.Unturned.RocketMod.Permissions;
 using OpenMod.Unturned.Steam;
 using OpenMod.Unturned.Users;
 using System;
+using System.Linq;
 
 namespace OpenMod.Unturned
 {
@@ -34,7 +35,16 @@ namespace OpenMod.Unturned
             var unturnedConfiguration = new OpenModUnturnedConfiguration(openModStartupContext.Runtime.WorkingDirectory);
 
             serviceCollection.AddSingleton<IOpenModUnturnedConfiguration>(unturnedConfiguration);
-            serviceCollection.AddSingleton<IGameHostInformation, UnturnedHostInformation>();
+
+            var instance = openModStartupContext.Runtime.HostInformation;
+            if (instance is IGameHostInformation gameHostInformation)
+            {
+                serviceCollection.AddSingleton(typeof(IGameHostInformation), gameHostInformation);
+            }
+            else
+            {
+                serviceCollection.AddSingleton<IGameHostInformation, UnturnedHostInformation>();
+            }
 
             serviceCollection.Configure<PermissionCheckerOptions>(options =>
             {

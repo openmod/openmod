@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenMod.Common.Helpers;
+using OpenMod.NuGet.Helpers;
 
 namespace OpenMod.NuGet
 {
@@ -46,11 +47,7 @@ namespace OpenMod.NuGet
             "F.ItemRestrictions"
         };
 
-        private static readonly string[] s_PublisherBlacklist =
-        {
-            // Trademark violations
-            "FPlugins"
-        };
+        private static readonly string[] s_PublisherBlacklist = new string[] {};
 
         private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new();
         private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
@@ -614,12 +611,10 @@ namespace OpenMod.NuGet
                             continue;
                         }
 
-                        var entry = packageReader.GetEntry(item);
-                        using var stream = entry.Open();
-                        var assemblyData = stream.ReadAllBytes();
+                        var assemblyData = packageReader.ReadAllBytes(item);
                         var assemblySymbolsPath = Path.ChangeExtension(item, "pdb");
-                        var assemblySymbols = File.Exists(assemblySymbolsPath)
-                            ? await FileHelper.ReadAllBytesAsync(assemblySymbolsPath)
+                        var assemblySymbols = file.Items.Contains(assemblySymbolsPath)
+                            ? packageReader.ReadAllBytes(assemblySymbolsPath)
                             : null;
 
                         var asm = m_AssemblyLoader(assemblyData, assemblySymbols);

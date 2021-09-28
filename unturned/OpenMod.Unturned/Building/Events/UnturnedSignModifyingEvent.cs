@@ -1,6 +1,6 @@
+using System;
 using OpenMod.API.Eventing;
 using OpenMod.Unturned.Players;
-
 using Steamworks;
 
 namespace OpenMod.Unturned.Building.Events
@@ -9,19 +9,19 @@ namespace OpenMod.Unturned.Building.Events
     {
         public bool IsCancelled { get; set; }
 
-        public CSteamID InstigatorSteamId { get; }
+        [Obsolete("Use Instigator.SteamId")]
+        public CSteamID InstigatorSteamId { get { return Instigator?.SteamId ?? CSteamID.Nil; } }
 
         public UnturnedPlayer? Instigator { get; }
 
         public string Text { get; set; }
 
-        public new UnturnedBarricadeBuildable Buildable => (UnturnedBarricadeBuildable) base.Buildable;
+        public new UnturnedBarricadeBuildable Buildable => (UnturnedBarricadeBuildable)base.Buildable;
 
-        public UnturnedSignModifyingEvent(UnturnedBuildable buildable, UnturnedPlayer instigator, CSteamID instigatorSteamId, string text)
+        public UnturnedSignModifyingEvent(UnturnedBuildable buildable, UnturnedPlayer? instigator, string text)
             : base(buildable)
         {
             Instigator = instigator;
-            InstigatorSteamId = instigatorSteamId;
             Text = text;
         }
     }

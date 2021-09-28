@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
+using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.Extensions.Games.Abstractions;
 
@@ -8,7 +10,15 @@ namespace OpenMod.Rust
     {
         public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IGameHostInformation, RustHostInformation>();
+            var instance = openModStartupContext.Runtime.HostInformation;
+            if (instance is IGameHostInformation gameHostInformation)
+            {
+                serviceCollection.AddSingleton(typeof(IGameHostInformation), gameHostInformation);
+            }
+            else
+            {
+                serviceCollection.AddSingleton<IGameHostInformation, RustHostInformation>();
+            }
 
             // serviceCollection.Configure<CommandStoreOptions>(options =>
             // {
