@@ -1,14 +1,13 @@
-using System.Collections.Generic;
-using System.Linq;
-
+using Autofac;
+using Autofac.Core.Lifetime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
 using MoreLinq;
-
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenMod.Unturned.Effects
 {
@@ -106,6 +105,7 @@ namespace OpenMod.Unturned.Effects
             if (!bindings.Any())
             {
                 m_Bindings.Remove(component.OpenModComponentId);
+                component.LifetimeScope.CurrentScopeEnding -= ComponentScopeEnding;
             }
 
             return result;
@@ -117,6 +117,7 @@ namespace OpenMod.Unturned.Effects
             {
                 m_ReleasedKeys.AddRange(bindings);
                 m_Bindings.Remove(component.OpenModComponentId);
+                component.LifetimeScope.CurrentScopeEnding -= ComponentScopeEnding;
             }
         }
 
@@ -162,11 +163,18 @@ namespace OpenMod.Unturned.Effects
             }
 
             list = new List<UnturnedUIEffectKey>();
-            m_Bindings[componentId] = list;
+            m_Bindings.Add(componentId, list);
 
-            component.LifetimeScope.CurrentScopeEnding += (_, _) => { OnComponentUnload(componentId); };
+            component.LifetimeScope.CurrentScopeEnding += ComponentScopeEnding;
 
             return list;
+        }
+
+        private void ComponentScopeEnding(object sender, LifetimeScopeEndingEventArgs e)
+        {
+            var component = e.LifetimeScope.Resolve<IOpenModComponent>();
+
+            OnComponentUnload(component.OpenModComponentId);
         }
 
         private void OnComponentUnload(string componentId)
