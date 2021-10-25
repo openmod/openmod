@@ -53,9 +53,7 @@ namespace OpenMod.Unturned.Players
         public override bool Equals(object obj)
         {
             if (obj is UnturnedPlayer other)
-            {
                 return Equals(other);
-            }
 
             return false;
         }
@@ -78,7 +76,6 @@ namespace OpenMod.Unturned.Players
         public double MaxHealth => 255;
 
         public double Health => Player.life.health;
-        public double Hunger => Player.life.food;
 
         public IPAddress? Address
         {
@@ -184,21 +181,15 @@ namespace OpenMod.Unturned.Players
             }
         }
 
-        public bool IsHungery
+        public double MaxHunger => byte.MaxValue;
+
+        public double Hunger
         {
             get
             {
-                var hunger = Player.life.food;
-                if(hunger <= 0)
-                {
-                    return true;
-                }
-
-                return false;
+                return Player.life.food;
             }
         }
-
-        public double MaxHunger => byte.MaxValue;
 
         public Task PrintMessageAsync(string message)
         {
@@ -294,29 +285,6 @@ namespace OpenMod.Unturned.Players
             }
 
             return SetHungerTask().AsTask();
-        }
-
-        public Task HungeryAsync()
-        {
-            async UniTask HungeryTask()
-            {
-                await UniTask.SwitchToMainThread();
-                Player.life.askEat(0);
-            }
-
-            return HungeryTask().AsTask();
-        }
-
-        public Task HungeryAsync(double hunger)
-        {
-            async UniTask HungeryTask()
-            {
-                await UniTask.SwitchToMainThread();
-                byte newHunger = (byte)(Hunger - hunger);
-                Player.life.askEat(newHunger);
-            }
-
-            return HungeryTask().AsTask();
         }
     }
 }
