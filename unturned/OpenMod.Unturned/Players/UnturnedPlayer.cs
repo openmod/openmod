@@ -24,7 +24,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players
 {
-    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource
+    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource, IHasHunger
     {
         public Player Player { get; }
 
@@ -53,7 +53,9 @@ namespace OpenMod.Unturned.Players
         public override bool Equals(object obj)
         {
             if (obj is UnturnedPlayer other)
+            {
                 return Equals(other);
+            }
 
             return false;
         }
@@ -76,6 +78,7 @@ namespace OpenMod.Unturned.Players
         public double MaxHealth => 255;
 
         public double Health => Player.life.health;
+        public double Hunger => Player.life.food;
 
         public IPAddress? Address
         {
@@ -181,6 +184,22 @@ namespace OpenMod.Unturned.Players
             }
         }
 
+        public bool IsHungery
+        {
+            get
+            {
+                var hunger = Player.life.food;
+                if(hunger <= 0)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public double MaxHunger => byte.MaxValue;
+
         public Task PrintMessageAsync(string message)
         {
             return PrintMessageAsync(message, Color.White);
@@ -264,6 +283,40 @@ namespace OpenMod.Unturned.Players
             }
 
             return lines;
+        }
+
+        public Task SetHungerAsync(double hunger)
+        {
+            async UniTask SetHungerTask()
+            {
+                await UniTask.SwitchToMainThread();
+                Player.life.askEat((byte)hunger);
+            }
+
+            return SetHungerTask().AsTask();
+        }
+
+        public Task HungeryAsync()
+        {
+            async UniTask HungeryTask()
+            {
+                await UniTask.SwitchToMainThread();
+                Player.life.askEat(0);
+            }
+
+            return HungeryTask().AsTask();
+        }
+
+        public Task HungeryAsync(double hunger)
+        {
+            async UniTask HungeryTask()
+            {
+                await UniTask.SwitchToMainThread();
+                byte newHunger = (byte)(Hunger - hunger);
+                Player.life.askEat(newHunger);
+            }
+
+            return HungeryTask().AsTask();
         }
     }
 }
