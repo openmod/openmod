@@ -24,7 +24,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players
 {
-    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource
+    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource, IHasHunger
     {
         public Player Player { get; }
 
@@ -181,6 +181,16 @@ namespace OpenMod.Unturned.Players
             }
         }
 
+        public double MaxHunger => byte.MaxValue;
+
+        public double Hunger
+        {
+            get
+            {
+                return Player.life.food;
+            }
+        }
+
         public Task PrintMessageAsync(string message)
         {
             return PrintMessageAsync(message, Color.White);
@@ -264,6 +274,17 @@ namespace OpenMod.Unturned.Players
             }
 
             return lines;
+        }
+
+        public Task SetHungerAsync(double hunger)
+        {
+            async UniTask SetHungerTask()
+            {
+                await UniTask.SwitchToMainThread();
+                Player.life.askEat((byte)hunger);
+            }
+
+            return SetHungerTask().AsTask();
         }
     }
 }
