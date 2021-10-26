@@ -21,12 +21,14 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         {
             OnItemEquipped += Events_OnItemEquipped;
             OnItemUnequipped += Events_OnItemUnequipped;
+            PlayerEquipment.OnPunch_Global += Events_OnPunchGlobal;
         }
 
         public override void Unsubscribe()
         {
             OnItemEquipped -= Events_OnItemEquipped;
             OnItemUnequipped -= Events_OnItemUnequipped;
+            PlayerEquipment.OnPunch_Global -= Events_OnPunchGlobal;
         }
 
         public override void SubscribePlayer(Player player)
@@ -72,6 +74,15 @@ namespace OpenMod.Unturned.Players.Equipment.Events
             var player = GetUnturnedPlayer(nativePlayer)!;
 
             var @event = new UnturnedPlayerItemUnequippedEvent(player);
+
+            Emit(@event);
+        }
+
+        private void Events_OnPunchGlobal(PlayerEquipment equipment, EPlayerPunch punch)
+        {
+            var player = GetUnturnedPlayer(equipment.player)!;
+
+            var @event = new UnturnedPlayerPunchEvent(player, punch);
 
             Emit(@event);
         }
