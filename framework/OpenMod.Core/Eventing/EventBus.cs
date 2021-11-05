@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
@@ -15,6 +10,11 @@ using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Ioc.Extensions;
 using OpenMod.Core.Prioritization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace OpenMod.Core.Eventing
 {
@@ -38,6 +38,21 @@ namespace OpenMod.Core.Eventing
         {
             m_Logger = logger;
             m_EventSubscriptions = new List<EventSubscription>();
+        }
+
+        private IDisposable SubscribeInternal(EventSubscription subscription)
+        {
+            subscription.Scope.Disposer.AddInstanceForDisposal(new DisposeAction(() =>
+            {
+                m_EventSubscriptions.RemoveAll(x => x.Scope == subscription.Scope);
+            }));
+
+            m_EventSubscriptions.Add(subscription);
+
+            return new DisposeAction(() =>
+            {
+                m_EventSubscriptions.Remove(subscription);
+            });
         }
 
         public virtual IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback)
@@ -83,11 +98,7 @@ namespace OpenMod.Core.Eventing
             
             var subscription = new EventSubscription(component, callback.Invoke, options, eventName, component.LifetimeScope.BeginLifetimeScopeEx());
 
-            m_EventSubscriptions.Add(subscription);
-            return new DisposeAction(() =>
-            {
-                m_EventSubscriptions.Remove(subscription);
-            });
+            return SubscribeInternal(subscription);
         }
 
         public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback) where TEvent : IEvent
@@ -129,12 +140,8 @@ namespace OpenMod.Core.Eventing
             var subscription = new EventSubscription(component,
                 (serviceProvider, sender, @event) => callback.Invoke(serviceProvider, sender, (TEvent)@event),
                 options, typeof(TEvent), component.LifetimeScope.BeginLifetimeScopeEx());
-
-            m_EventSubscriptions.Add(subscription);
-            return new DisposeAction(() =>
-            {
-                m_EventSubscriptions.Remove(subscription);
-            });
+            
+            return SubscribeInternal(subscription);
         }
 
         public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback)
@@ -176,12 +183,7 @@ namespace OpenMod.Core.Eventing
             var subscription = new EventSubscription(component, callback.Invoke, options, eventType,
                 component.LifetimeScope.BeginLifetimeScopeEx());
 
-            m_EventSubscriptions.Add(subscription);
-
-            return new DisposeAction(() =>
-            {
-                m_EventSubscriptions.Remove(subscription);
-            });
+            return SubscribeInternal(subscription);
         }
 
         public virtual IDisposable Subscribe(IOpenModComponent component, Assembly assembly)
@@ -244,24 +246,24 @@ namespace OpenMod.Core.Eventing
                 }
             }));
 
-            var addedListeners = new List<EventSubscription>();
+            scope.Disposer.AddInstanceForDisposal(new DisposeAction(() =>
+            {
+                m_EventSubscriptions.RemoveAll(x => x.Scope == scope);
+            }));
+
+            var eventDisposables = new List<IDisposable>();
+
             foreach (var eventListener in eventListeners)
             {
                 var subscription = new EventSubscription(component, eventListener.eventListenerType,
                     eventListener.method, eventListener.eventListenerAttribute, eventListener.eventType, scope);
-                addedListeners.Add(subscription);
+
+                var disposable = SubscribeInternal(subscription);
+
+                eventDisposables.Add(disposable);
             }
-
-            m_EventSubscriptions.AddRange(addedListeners);
-            return new DisposeAction(() =>
-            {
-                foreach (var eventListener in addedListeners)
-                {
-                    m_EventSubscriptions.Remove(eventListener);
-                }
-
-                addedListeners.Clear();
-            });
+            
+            return new DisposeAction(eventDisposables.DisposeAll);
         }
 
         public virtual void Unsubscribe(IOpenModComponent component)
