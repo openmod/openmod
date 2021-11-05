@@ -365,57 +365,66 @@ namespace OpenMod.Core.Eventing
 
                 foreach (var group in eventSubscriptions.GroupBy(e => e.Scope))
                 {
-                    //   Creates a new scope for the event. This is needed for scoped services so they share the same service instance
-                    // on each events. AutofacWebRequest makes it emulate a request for proper scopes. This tag is hardcoded by AutoFac.
-                    // Without this tag, services with the "Scope" lifetime will cause "DependencyResolutionException:
-                    // No scope with a Tag matching 'AutofacWebRequest' (...)".
-                    //
-                    //   If you are here because of the following error:  "System.ObjectDisposedException: Instances cannot
-                    // be resolved and nested lifetimes cannot be created from this LifetimeScope as it (or one of its parent scopes)
-                    // has already been disposed." It means you injected a service to an IEventHandler
-                    // that used the service *after* the event has finished (e.g. in a Task or by storing it somewhere).
-
-                    await using var newScope = group.Key.BeginLifetimeScopeEx("AutofacWebRequest");
-                    foreach (var subscription in group)
+                    try
                     {
-                        var cancellableEvent = @event as ICancellableEvent;
+                        //   Creates a new scope for the event. This is needed for scoped services so they share the same service instance
+                        // on each events. AutofacWebRequest makes it emulate a request for proper scopes. This tag is hardcoded by AutoFac.
+                        // Without this tag, services with the "Scope" lifetime will cause "DependencyResolutionException:
+                        // No scope with a Tag matching 'AutofacWebRequest' (...)".
+                        //
+                        //   If you are here because of the following error:  "System.ObjectDisposedException: Instances cannot
+                        // be resolved and nested lifetimes cannot be created from this LifetimeScope as it (or one of its parent scopes)
+                        // has already been disposed." It means you injected a service to an IEventHandler
+                        // that used the service *after* the event has finished (e.g. in a Task or by storing it somewhere).
 
-                        if (cancellableEvent != null
-                            && cancellableEvent.IsCancelled
-                            && !subscription.EventListenerOptions.IgnoreCancelled)
+                        await using var newScope = group.Key.BeginLifetimeScopeEx("AutofacWebRequest");
+                        foreach (var subscription in group)
                         {
-                            continue;
-                        }
+                            var cancellableEvent = @event as ICancellableEvent;
 
-                        var wasCancelled = false;
-                        if (cancellableEvent != null)
-                        {
-                            wasCancelled = cancellableEvent.IsCancelled;
-                        }
-
-                        var serviceProvider = newScope.Resolve<IServiceProvider>();
-
-                        try
-                        {
-                            await subscription.Callback.Invoke(serviceProvider, sender, @event);
-
-                            // Ensure monitor event listeners can't cancel or uncancel events
-                            if (cancellableEvent != null && subscription.EventListenerOptions.Priority ==
-                                EventListenerPriority.Monitor)
+                            if (cancellableEvent != null
+                                && cancellableEvent.IsCancelled
+                                && !subscription.EventListenerOptions.IgnoreCancelled)
                             {
-                                if (cancellableEvent.IsCancelled != wasCancelled)
+                                continue;
+                            }
+
+                            var wasCancelled = false;
+                            if (cancellableEvent != null)
+                            {
+                                wasCancelled = cancellableEvent.IsCancelled;
+                            }
+
+                            var serviceProvider = newScope.Resolve<IServiceProvider>();
+
+                            try
+                            {
+                                await subscription.Callback.Invoke(serviceProvider, sender, @event);
+
+                                // Ensure monitor event listeners can't cancel or uncancel events
+                                if (cancellableEvent != null && subscription.EventListenerOptions.Priority ==
+                                    EventListenerPriority.Monitor)
                                 {
-                                    cancellableEvent.IsCancelled = wasCancelled;
-                                    m_Logger.LogWarning(
-                                        "{ComponentId} changed {EventName} cancellation status with Monitor priority which is not permitted",
-                                        ((IOpenModComponent) @subscription.Owner.Target).OpenModComponentId, eventName);
+                                    if (cancellableEvent.IsCancelled != wasCancelled)
+                                    {
+                                        cancellableEvent.IsCancelled = wasCancelled;
+                                        m_Logger.LogWarning(
+                                            "{ComponentId} changed {EventName} cancellation status with Monitor priority which is not permitted",
+                                            ((IOpenModComponent) @subscription.Owner.Target).OpenModComponentId,
+                                            eventName);
+                                    }
                                 }
                             }
+                            catch (Exception ex)
+                            {
+                                m_Logger.LogError(ex, "Exception occured during event {EventName}", eventName);
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            m_Logger.LogError(ex, "Exception occured during event {EventName}", eventName);
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        m_Logger.LogError(ex, "Exception occurred when attempting to emit event {EventName}",
+                            eventName);
                     }
                 }
 
