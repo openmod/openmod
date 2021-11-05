@@ -246,11 +246,6 @@ namespace OpenMod.Core.Eventing
                 }
             }));
 
-            scope.Disposer.AddInstanceForDisposal(new DisposeAction(() =>
-            {
-                m_EventSubscriptions.RemoveAll(x => x.Scope == scope);
-            }));
-
             var eventDisposables = new List<IDisposable>();
 
             foreach (var eventListener in eventListeners)
