@@ -114,9 +114,16 @@ namespace OpenMod.Core.Plugins
 
         public async ValueTask DisposeAsync()
         {
-            if (!await OnDispose())
+            try
             {
-                await UnloadAsync();
+                if (!await OnDispose())
+                {
+                    await UnloadAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Exception occurred when disposing plugin '{ComponentId}'", OpenModComponentId);
             }
 
             await EventBus.EmitAsync(this, this, new PluginDisposedEvent(this));
