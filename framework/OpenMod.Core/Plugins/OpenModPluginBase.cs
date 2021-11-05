@@ -39,8 +39,8 @@ namespace OpenMod.Core.Plugins
         public IEventBus EventBus { get; }
         protected ILogger Logger { get; set; } = null!;
         protected Harmony Harmony { get; private set; } = null!;
+
         private readonly IOptions<CommandStoreOptions> m_CommandStoreOptions;
-        private readonly ILoggerFactory m_LoggerFactory;
         private OpenModComponentCommandSource m_CommandSource = null!;
 
         protected OpenModPluginBase(IServiceProvider serviceProvider)
@@ -51,8 +51,10 @@ namespace OpenMod.Core.Plugins
             DataStore = serviceProvider.GetRequiredService<IDataStore>();
             Runtime = serviceProvider.GetRequiredService<IRuntime>();
             EventBus = serviceProvider.GetRequiredService<IEventBus>();
-            m_LoggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
             m_CommandStoreOptions = serviceProvider.GetRequiredService<IOptions<CommandStoreOptions>>();
+
+            var loggerType = typeof(ILogger<>).MakeGenericType(GetType());
+            Logger = (ILogger)serviceProvider.GetRequiredService(loggerType);
 
             var metadata = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>();
             OpenModComponentId = metadata.Id;
@@ -76,7 +78,6 @@ namespace OpenMod.Core.Plugins
         [OpenModInternal]
         public virtual Task LoadAsync()
         {
-            Logger = m_LoggerFactory.CreateLogger(GetType());
             Logger.LogInformation("[loading] {DisplayName} v{Version}", DisplayName, Version);
 
             m_CommandSource = new OpenModComponentCommandSource(Logger, this, GetType().Assembly);
