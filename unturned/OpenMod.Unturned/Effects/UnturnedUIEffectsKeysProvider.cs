@@ -1,4 +1,3 @@
-using Autofac;
 using Autofac.Core.Lifetime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -25,11 +24,6 @@ namespace OpenMod.Unturned.Effects
         private readonly Dictionary<IOpenModComponent, List<UnturnedUIEffectKey>> m_Bindings = new();
 
         private readonly List<UnturnedUIEffectKey> m_ReleasedKeys = new();
-
-        /// <summary>
-        /// Dictionary that is used to retrieve component by it's lifetime scope in the <see cref="ComponentScopeEnding"/> callback
-        /// </summary>
-        private readonly Dictionary<ILifetimeScope, IOpenModComponent> m_ScopeComponents = new();
 
         public UnturnedUIEffectsKeysProvider(ILogger<UnturnedUIEffectsKeysProvider> logger)
         {
@@ -179,16 +173,17 @@ namespace OpenMod.Unturned.Effects
             var newList = new List<UnturnedUIEffectKey>();
             m_Bindings[component] = newList;
 
-            // prepare and register cleanup callback
-            m_ScopeComponents[component.LifetimeScope] = component;
+            // register cleanup callback
             component.LifetimeScope.CurrentScopeEnding += ComponentScopeEnding;
 
             return newList;
         }
 
-        private void ComponentScopeEnding(object sender, LifetimeScopeEndingEventArgs e) {
-            // find component by it's lifetime scope
-            if (!m_ScopeComponents.TryGetValue(e.LifetimeScope, out IOpenModComponent component))
+        private void ComponentScopeEnding(object sender, LifetimeScopeEndingEventArgs e)
+        {
+            // find bound component by it's lifetime scope
+            IOpenModComponent? component = m_Bindings.Keys.FirstOrDefault(x => x.LifetimeScope == e.LifetimeScope);
+            if (component == null)
             {
                 return;
             }
@@ -198,6 +193,7 @@ namespace OpenMod.Unturned.Effects
             { // release all keys
                 m_ReleasedKeys.AddRange(bindings);
             }
+
             // cleanup all component related stuff
             CleanupComponent(component);
         }
@@ -208,8 +204,6 @@ namespace OpenMod.Unturned.Effects
             m_Bindings.Remove(component);
             // unregister cleanup callback
             component.LifetimeScope.CurrentScopeEnding -= ComponentScopeEnding;
-            // remove unnecessary data
-            m_ScopeComponents.Remove(component.LifetimeScope);
         }
 
         private void LogBiggestOffender(string callerComponentId)
