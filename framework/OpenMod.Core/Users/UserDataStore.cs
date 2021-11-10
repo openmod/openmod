@@ -5,12 +5,14 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
-using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace OpenMod.Core.Users
 {
@@ -25,6 +27,8 @@ namespace OpenMod.Core.Users
         private IDisposable m_FileChangeWatcher;
         private bool m_IsUpdating;
 
+        private readonly ISerializer _serializer;
+        private readonly IDeserializer _deserializer;
 
         public UserDataStore(
             IOpenModDataStoreAccessor dataStoreAccessor,
@@ -32,6 +36,18 @@ namespace OpenMod.Core.Users
         {
             m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
+
+            _serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithTypeConverter(new YamlNullableEnumTypeConverter())
+                .DisableAliases()
+                .Build();
+
+            _deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
+                .WithTypeConverter(new YamlNullableEnumTypeConverter())
+                .Build();
 
             // suppress errors because the compiler can't analyze that the values are set from the statements below
             m_CachedUsersData = null!;
@@ -124,22 +140,14 @@ namespace OpenMod.Core.Users
                 return obj;
             }
 
-            if (dataObject == null)
+            if (dataObject == default)
             {
                 return default;
             }
+            
+            var serialized = _serializer.Serialize(dataObject);
 
-            if (dataObject.GetType().HasConversionOperator(typeof(T)))
-            {
-                return (T)dataObject;
-            }
-
-            if (dataObject is Dictionary<object, object> dict)
-            {
-                return dict.ToObject<T>();
-            }
-
-            throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
+            return _deserializer.Deserialize<T>(serialized);
         }
 
         public async Task SetUserDataAsync<T>(string userId, string userType, string key, T? value)
