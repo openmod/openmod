@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Text;
@@ -62,6 +63,11 @@ namespace OpenMod.Unturned.Players
         {
             return unchecked((int)(SteamId.m_SteamID * 174 ^ 5 + 185737));
         }
+
+        public string CharacterName => Player.channel.owner.playerID.characterName;
+        public string PlayerName => Player.channel.owner.playerID.playerName;
+        public bool IsAdmin => Player.channel.owner.isAdmin;
+        public bool IsOnline => Provider.clients.Any(c => c.playerID.steamID == Player.channel.owner.playerID.steamID);
 
         public IEntityAsset Asset { get; }
 
