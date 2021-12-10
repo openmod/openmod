@@ -20,7 +20,7 @@ namespace OpenMod.Unturned
 
         public bool IsClient { get; } = Provider.isClient;
 
-        public bool IsServer { get; } = Provider.isServer || Dedicator.isDedicated || Dedicator.isStandaloneDedicatedServer;
+        public bool IsServer { get; } = Provider.isServer || Dedicator.isStandaloneDedicatedServer;
 
         public IPAddress? ServerAddress { get => SteamGameServer.GetPublicIP().ToIPAddress(); }
 

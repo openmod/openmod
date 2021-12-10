@@ -62,13 +62,13 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             player.clothing.onVestUpdated -= (a, b, c) => OnVestUpdated(player, a, b, c);
         }
 
-        private void Events_OnWearBackpack(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
+        private void Events_OnWearBackpack(Player nativePlayer, ItemClothingAsset asset, byte quality, byte[] state, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
-            if (id == 0)
+            if (asset is not ItemBackpackAsset backpackAsset)
             {
                 var c = nativePlayer.clothing;
 
@@ -77,7 +77,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
             else
             {
-                var item = new Item(id, 1, quality, state);
+                var item = new Item(backpackAsset.id, 1, quality, state);
                 @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Backpack));
             }
 
@@ -88,13 +88,13 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearGlasses(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
+        private void Events_OnWearGlasses(Player nativePlayer, ItemClothingAsset asset, byte quality, byte[] state, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
-            if (id == 0)
+            if (asset is not ItemGlassesAsset glassesAsset)
             {
                 PlayerClothing c = nativePlayer.clothing;
 
@@ -103,7 +103,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
             else
             {
-                var item = new Item(id, 1, quality, state);
+                var item = new Item(glassesAsset.id, 1, quality, state);
                 @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Glasses));
             }
 
@@ -114,13 +114,13 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearHat(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
+        private void Events_OnWearHat(Player nativePlayer, ItemClothingAsset asset, byte quality, byte[] state, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
-            if (id == 0)
+            if (asset is not ItemHatAsset hatAsset)
             {
                 PlayerClothing c = nativePlayer.clothing;
 
@@ -129,7 +129,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
             else
             {
-                var item = new Item(id, 1, quality, state);
+                var item = new Item(hatAsset.id, 1, quality, state);
                 @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Hat));
             }
 
@@ -140,13 +140,13 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearMask(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
+        private void Events_OnWearMask(Player nativePlayer, ItemClothingAsset asset, byte quality, byte[] state, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
-            if (id == 0)
+            if (asset is not ItemMaskAsset maskAsset)
             {
                 PlayerClothing c = nativePlayer.clothing;
 
@@ -155,7 +155,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
             else
             {
-                var item = new Item(id, 1, quality, state);
+                var item = new Item(maskAsset.id, 1, quality, state);
                 @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Mask));
             }
 
@@ -166,13 +166,13 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearPants(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
+        private void Events_OnWearPants(Player nativePlayer, ItemClothingAsset asset, byte quality, byte[] state, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
-            if (id == 0)
+            if (asset is not ItemPantsAsset pantsAsset)
             {
                 var c = nativePlayer.clothing;
                 var item = new Item(c.pants, 1, c.pantsQuality, c.pantsState);
@@ -180,7 +180,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
             else
             {
-                var item = new Item(id, 1, quality, state);
+                var item = new Item(pantsAsset.id, 1, quality, state);
                 @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Pants));
             }
 
@@ -191,13 +191,13 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearShirt(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
+        private void Events_OnWearShirt(Player nativePlayer, ItemClothingAsset asset, byte quality, byte[] state, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
-            if (id == 0)
+            if (asset is not ItemShirtAsset shirtAsset)
             {
                 PlayerClothing c = nativePlayer.clothing;
 
@@ -206,7 +206,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
             else
             {
-                var item = new Item(id, 1, quality, state);
+                var item = new Item(shirtAsset.id, 1, quality, state);
                 @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Shirt));
             }
 
@@ -217,13 +217,13 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnWearVest(Player nativePlayer, ushort id, byte quality, byte[] state, ref bool cancel)
+        private void Events_OnWearVest(Player nativePlayer, ItemClothingAsset asset, byte quality, byte[] state, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
             ICancellableEvent @event;
 
-            if (id == 0)
+            if (asset is not ItemVestAsset vestAsset)
             {
                 PlayerClothing c = nativePlayer.clothing;
 
@@ -232,7 +232,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
             else
             {
-                var item = new Item(id, 1, quality, state);
+                var item = new Item(vestAsset.id, 1, quality, state);
                 @event = new UnturnedPlayerClothingEquippingEvent(player!, new UnturnedClothingItem(item, player, ClothingType.Vest));
             }
 
@@ -376,7 +376,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             Emit(@event);
         }
 
-        private delegate void WearClothing(Player player, ushort id, byte quality, byte[] state, ref bool cancel);
+        private delegate void WearClothing(Player player, ItemClothingAsset asset, byte quality, byte[] state, ref bool cancel);
 
         private static event WearClothing? OnWearBackpack;
         private static event WearClothing? OnWearGlasses;
@@ -398,85 +398,92 @@ namespace OpenMod.Unturned.Players.Clothing.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearBackpack))]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearBackpack),
+                typeof(ItemBackpackAsset), typeof(byte), typeof(byte[]), typeof(bool))]
             [HarmonyPrefix]
-            public static bool AskWearBackpack(PlayerClothing __instance, ushort id, byte quality, byte[] state)
+            public static bool AskWearBackpack(PlayerClothing __instance, ItemBackpackAsset asset, byte quality, byte[] state)
             {
                 var cancel = false;
 
-                OnWearBackpack?.Invoke(__instance.player, id, quality, state, ref cancel);
+                OnWearBackpack?.Invoke(__instance.player, asset, quality, state, ref cancel);
 
                 return !cancel;
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearGlasses))]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearGlasses),
+                typeof(ItemGlassesAsset), typeof(byte), typeof(byte[]), typeof(bool))]
             [HarmonyPrefix]
-            public static bool AskWearGlasses(PlayerClothing __instance, ushort id, byte quality, byte[] state)
+            public static bool AskWearGlasses(PlayerClothing __instance, ItemGlassesAsset asset, byte quality, byte[] state)
             {
                 var cancel = false;
 
-                OnWearGlasses?.Invoke(__instance.player, id, quality, state, ref cancel);
+                OnWearGlasses?.Invoke(__instance.player, asset, quality, state, ref cancel);
 
                 return !cancel;
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearHat))]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearHat),
+                typeof(ItemHatAsset), typeof(byte), typeof(byte[]), typeof(bool))]
             [HarmonyPrefix]
-            public static bool AskWearHat(PlayerClothing __instance, ushort id, byte quality, byte[] state)
+            public static bool AskWearHat(PlayerClothing __instance, ItemHatAsset asset, byte quality, byte[] state)
             {
                 var cancel = false;
 
-                OnWearHat?.Invoke(__instance.player, id, quality, state, ref cancel);
+                OnWearHat?.Invoke(__instance.player, asset, quality, state, ref cancel);
 
                 return !cancel;
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearMask))]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearMask),
+                typeof(ItemMaskAsset), typeof(byte), typeof(byte[]), typeof(bool))]
             [HarmonyPrefix]
-            public static bool AskWearMask(PlayerClothing __instance, ushort id, byte quality, byte[] state)
+            public static bool AskWearMask(PlayerClothing __instance, ItemMaskAsset asset, byte quality, byte[] state)
             {
                 var cancel = false;
 
-                OnWearMask?.Invoke(__instance.player, id, quality, state, ref cancel);
+                OnWearMask?.Invoke(__instance.player, asset, quality, state, ref cancel);
 
                 return !cancel;
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearPants))]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearPants),
+                typeof(ItemPantsAsset), typeof(byte), typeof(byte[]), typeof(bool))]
             [HarmonyPrefix]
-            public static bool AskWearPants(PlayerClothing __instance, ushort id, byte quality, byte[] state)
+            public static bool AskWearPants(PlayerClothing __instance, ItemPantsAsset asset, byte quality, byte[] state)
             {
                 var cancel = false;
 
-                OnWearPants?.Invoke(__instance.player, id, quality, state, ref cancel);
+                OnWearPants?.Invoke(__instance.player, asset, quality, state, ref cancel);
 
                 return !cancel;
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearShirt))]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearShirt),
+                typeof(ItemShirtAsset), typeof(byte), typeof(byte[]), typeof(bool))]
             [HarmonyPrefix]
-            public static bool AskWearShirt(PlayerClothing __instance, ushort id, byte quality, byte[] state)
+            public static bool AskWearShirt(PlayerClothing __instance, ItemShirtAsset asset, byte quality, byte[] state)
             {
                 var cancel = false;
 
-                OnWearShirt?.Invoke(__instance.player, id, quality, state, ref cancel);
+                OnWearShirt?.Invoke(__instance.player, asset, quality, state, ref cancel);
 
                 return !cancel;
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearVest))]
+            [HarmonyPatch(typeof(PlayerClothing), nameof(PlayerClothing.askWearVest),
+                typeof(ItemVestAsset), typeof(byte), typeof(byte[]), typeof(bool))]
             [HarmonyPrefix]
-            public static bool AskWearVest(PlayerClothing __instance, ushort id, byte quality, byte[] state)
+            public static bool AskWearVest(PlayerClothing __instance, ItemVestAsset asset, byte quality, byte[] state)
             {
                 var cancel = false;
 
-                OnWearVest?.Invoke(__instance.player, id, quality, state, ref cancel);
+                OnWearVest?.Invoke(__instance.player, asset, quality, state, ref cancel);
 
                 return !cancel;
             }

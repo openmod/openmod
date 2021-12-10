@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.21.25-preview.1">
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.21.33-preview.1">
 	  <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
   </ItemGroup>
