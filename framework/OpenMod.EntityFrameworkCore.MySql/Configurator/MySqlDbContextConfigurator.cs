@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.EntityFrameworkCore.Configurator;
+using Pomelo.EntityFrameworkCore.MySql.Storage;
 
 namespace OpenMod.EntityFrameworkCore.MySql.Configurator
 {
@@ -14,8 +15,14 @@ namespace OpenMod.EntityFrameworkCore.MySql.Configurator
             var connectionStringAccessor = dbContext.ServiceProvider.GetRequiredService<IConnectionStringAccessor>();
             var connectionString = connectionStringAccessor.GetConnectionString(connectionStringName);
 
+            var autoDetectedVersion = ServerVersion.AutoDetect(connectionString);
+
             optionsBuilder.UseMySql(connectionString!,
-                options => { options.MigrationsHistoryTable(dbContext.MigrationsTableName); });
+                options =>
+                {
+                    options.MigrationsHistoryTable(dbContext.MigrationsTableName);
+                    options.ServerVersion(autoDetectedVersion);
+                });
         }
 
         public void Configure<TDbContext>(OpenModDbContext<TDbContext> dbContext, ModelBuilder modelBuilder)
