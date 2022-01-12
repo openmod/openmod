@@ -730,8 +730,42 @@ namespace OpenMod.NuGet
 
             Logger.LogDebug("GetPackageDependencies: " + package);
             var repos = repositories.ToList();
+            var dependencyInfo = await FindDependencyInfoAsync(package, cacheContext, repos);
+
+            if (dependencyInfo == null)
+            {
+                return;
+            }
+
+            availablePackages.Add(dependencyInfo);
 
             foreach (var sourceRepository in repos)
+            {
+                Logger.LogDebug("GetResourceAsync (FindPackageById) for " + dependencyInfo.Source.PackageSource.SourceUri);
+                var packageResource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
+
+                foreach (var dependency in dependencyInfo.Dependencies)
+                {
+                    var versions = (await packageResource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None))
+                        ?.ToArray();
+
+                    if (versions?.Length == 0)
+                    {
+                        Logger.LogDebug("Versions could not be found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
+                        continue;
+                    }
+
+                    await QueryPackageDependenciesAsync(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)), cacheContext, repos, availablePackages);
+                }
+            }
+        }
+
+        private async Task<SourcePackageDependencyInfo?> FindDependencyInfoAsync(
+            PackageIdentity package,
+            SourceCacheContext cacheContext,
+            IEnumerable<SourceRepository> repositories)
+        {
+            foreach (var sourceRepository in repositories)
             {
                 Logger.LogDebug("GetResourceAsync (DependencyInfoResource) for " + sourceRepository.PackageSource.SourceUri);
                 var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
@@ -746,25 +780,10 @@ namespace OpenMod.NuGet
 
                 Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
 
-                Logger.LogDebug("GetResourceAsync (FindPackageById) for " + sourceRepository.PackageSource.SourceUri);
-                var packageResource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
-
-                availablePackages.Add(dependencyInfo);
-                foreach (var dependency in dependencyInfo.Dependencies)
-                {
-                    var versions = await packageResource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None);
-
-                    if (versions == null)
-                    {
-                        Logger.LogDebug("Versions could not be found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
-                        continue;
-                    }
-
-                    await QueryPackageDependenciesAsync(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)), cacheContext, repos, availablePackages);
-                }
-
-                break;
+                return dependencyInfo;
             }
+
+            return null;
         }
 
         public virtual void InstallAssemblyResolver()
