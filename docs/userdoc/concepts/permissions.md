@@ -105,6 +105,10 @@ The ! prefix will forcefully remove any permission.
 > [!NOTE]
 > You can also add and remove permissions with the `om p` command: `om p add role megavip !Kr4ken.NewEssentials:kit.vip`
 
+> [!Note]
+> If you are managing RocketMod permissions from OpenMod, you must add `RocketMod:` to the beginning of the permission.
+> For example, if the RocketMod permission is `help`, the equivalent in OpenMod is `RocketMod:help`.
+
 ## User permissions and assigning roles
 You can assign roles to users by using the `om r add player <player> <role>` command, e.g. `om r add player Trojaner megavip`. Similarly, you can remove users from a role by typing `om r remove player <player> <role>`
 
