@@ -24,7 +24,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players
 {
-    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource, IHasHunger
+    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource, IHasHunger, IHasThirst
     {
         public Player Player { get; }
 
@@ -73,7 +73,7 @@ namespace OpenMod.Unturned.Players
 
         public bool IsAlive => !Player.life.isDead;
 
-        public double MaxHealth => 255;
+        public double MaxHealth => byte.MaxValue;
 
         public double Health => Player.life.health;
 
@@ -191,6 +191,16 @@ namespace OpenMod.Unturned.Players
             }
         }
 
+        public double MaxThirst => byte.MaxValue;
+
+        public double Thirst
+        {
+            get
+            {
+                return Player.life.water;
+            }
+        }
+
         public Task PrintMessageAsync(string message)
         {
             return PrintMessageAsync(message, Color.White);
@@ -285,6 +295,18 @@ namespace OpenMod.Unturned.Players
             }
 
             return SetHungerTask().AsTask();
+        }
+
+        public Task SetThirstAsync(double thirst)
+        {
+            async UniTask SetThirstTask()
+            {
+                await UniTask.SwitchToMainThread();
+                Player.life.askDrink(100);
+                Player.life.askDehydrate((byte)thirst);
+            }
+
+            return SetThirstTask().AsTask();
         }
     }
 }
