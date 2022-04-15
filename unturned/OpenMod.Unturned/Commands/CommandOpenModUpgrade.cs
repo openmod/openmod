@@ -60,7 +60,7 @@ namespace OpenMod.Unturned.Commands
             client.DefaultRequestHeaders.Add("User-Agent", "request");
 
             var releaseData = await client.GetStringAsync("https://api.github.com/repos/openmod/openmod/releases/latest");
-            var release = JsonConvert.DeserializeObject<LatestRelease>(releaseData);
+            var release = JsonConvert.DeserializeObject<LatestRelease>(releaseData) ?? throw new Exception("Failed to deserialize GitHub data");
             var isPre = Context.Parameters.Contains("--pre");
             var anyUpdated = false;
 
