@@ -53,7 +53,7 @@ namespace OpenMod.Runtime
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await m_PermissionChecker.InitAsync();
-            Smart.Default.Parser.UseAlternativeEscapeChar();// '\\' is the default value
+            Smart.Default.Settings.StringFormatCompatibility = true; // '\\' is the default value
 
             m_Logger.LogInformation("Initializing for host: {HostName} v{HostVersion}",
                 m_HostInformation.HostName, m_HostInformation.HostVersion);
