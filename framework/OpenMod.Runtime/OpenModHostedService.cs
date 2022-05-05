@@ -54,7 +54,7 @@ namespace OpenMod.Runtime
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await m_PermissionChecker.InitAsync();
-
+            
             // https://github.com/axuno/SmartFormat/wiki/Async-and-Thread-Safety
             SmartSettings.IsThreadSafeMode = true;
             Smart.Default = SmartFormatterHelper.ObtainSmartFormatter();

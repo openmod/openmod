@@ -7,12 +7,16 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Configuration" Version="5.9.0" />
-    <PackageReference Include="NuGet.Frameworks" Version="5.9.0" />
-    <PackageReference Include="NuGet.Packaging" Version="5.9.0" />
-    <PackageReference Include="NuGet.Protocol" Version="5.9.0" />
-    <PackageReference Include="NuGet.Resolver" Version="5.9.0" />
-    <PackageReference Include="YamlDotNet" Version="9.1.4" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NuGet.Configuration" Version="6.1.0" />
+    <PackageReference Include="NuGet.Frameworks" Version="6.1.0" />
+    <PackageReference Include="NuGet.Packaging" Version="6.1.0" />
+    <PackageReference Include="NuGet.Protocol" Version="6.1.0" />
+    <PackageReference Include="NuGet.Resolver" Version="6.1.0" />
+    <PackageReference Include="YamlDotNet" Version="11.2.1" />
   </ItemGroup>
 
   <ItemGroup>
