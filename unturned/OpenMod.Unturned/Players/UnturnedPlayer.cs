@@ -11,6 +11,7 @@ using OpenMod.UnityEngine.Transforms;
 using OpenMod.Unturned.Items;
 using OpenMod.Unturned.Vehicles;
 using SDG.Unturned;
+using SmartFormat.ZString;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -243,17 +244,16 @@ namespace OpenMod.Unturned.Players
 
         private IEnumerable<string> WrapLine(string line)
         {
-            var words = line.Split(' ');
-            var lines = new List<string>();
-            var currentLine = new StringBuilder();
-            var maxLength = 90;
+            const int maxLength = 90;
 
-            foreach (var currentWord in words)
+            using var currentLine = new ZStringBuilder(false);
+
+            foreach (var currentWord in line.Split(' '))
             {
                 if (currentLine.Length > maxLength ||
                     currentLine.Length + currentWord.Length > maxLength)
                 {
-                    lines.Add(currentLine.ToString());
+                    yield return currentLine.ToString();
                     currentLine.Clear();
                 }
 
@@ -270,10 +270,8 @@ namespace OpenMod.Unturned.Players
 
             if (currentLine.Length > 0)
             {
-                lines.Add(currentLine.ToString());
+                yield return currentLine.ToString();
             }
-
-            return lines;
         }
 
         public Task SetHungerAsync(double hunger)

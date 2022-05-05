@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,6 +10,8 @@ using OpenMod.API.Plugins;
 using OpenMod.Core.Events;
 using OpenMod.Core.Helpers;
 using SmartFormat;
+using SmartFormat.Core.Settings;
+using SmartFormat.Extensions;
 
 namespace OpenMod.Runtime
 {
@@ -53,7 +54,10 @@ namespace OpenMod.Runtime
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await m_PermissionChecker.InitAsync();
-            Smart.Default.Settings.StringFormatCompatibility = true; // '\\' is the default value
+            
+            // https://github.com/axuno/SmartFormat/wiki/Async-and-Thread-Safety
+            SmartSettings.IsThreadSafeMode = true;
+            Smart.Default = SmartFormatterHelper.ObtainSmartFormatter();
 
             m_Logger.LogInformation("Initializing for host: {HostName} v{HostVersion}",
                 m_HostInformation.HostName, m_HostInformation.HostVersion);

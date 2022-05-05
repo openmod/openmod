@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using OpenMod.API.Commands;
+using SmartFormat.ZString;
 
 namespace OpenMod.Core.Commands
 {
@@ -7,7 +8,7 @@ namespace OpenMod.Core.Commands
     {
         public static string GetCommandLine(this ICommandContext context, bool includeArguments = true)
         {
-            var sb = new StringBuilder();
+            using var sb = new ZStringBuilder(false);
             sb.Append(context.CommandPrefix);
             sb.Append(context.CommandAlias);
 
