@@ -138,7 +138,8 @@ namespace OpenMod.Runtime
 
         internal void SetupContainer(ContainerBuilder containerBuilder)
         {
-            foreach (var servicesRegistration in m_ServiceRegistrations)
+            foreach (var servicesRegistration in m_ServiceRegistrations
+                .OrderBy(d => d.Priority, new PriorityComparer(PriortyComparisonMode.LowestFirst)))
             {
                 containerBuilder.RegisterType(servicesRegistration.ServiceImplementationType)
                     .AsSelf()
