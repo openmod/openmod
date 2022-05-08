@@ -155,7 +155,7 @@ namespace OpenMod.Common.Helpers
             return "<anonymous>#" + mb.Name;
         }
 
-        public static async Task InvokeWithTaskSupportAsync(this MethodBase method, object? instance, object?[] @params)
+        public static Task InvokeWithTaskSupportAsync(this MethodBase method, object? instance, object?[] @params)
         {
             if (method == null)
             {
@@ -171,12 +171,11 @@ namespace OpenMod.Common.Helpers
 
             if (isAsync)
             {
-                var task = (Task)method.Invoke(instance, @params);
-                await task;
-                return;
+                return (Task)method.Invoke(instance, @params);
             }
 
-            method.Invoke(instance, @params.ToArray());
+            method.Invoke(instance, @params);
+            return Task.CompletedTask;
         }
 
         public static T ToObject<T>(this Dictionary<object, object> dict)

@@ -1,10 +1,12 @@
-﻿using OpenMod.API;
+﻿using System;
+using Cysharp.Threading.Tasks;
+using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
 using SDG.Unturned;
-using System;
+using Serilog;
 
 namespace OpenMod.Unturned.Users
 {
@@ -47,7 +49,7 @@ namespace OpenMod.Unturned.Users
 
         protected virtual void OnCheckCommandPermissions(SteamPlayer steamPlayer, string text, ref bool shouldExecuteCommand, ref bool shouldList)
         {
-            if (!text.StartsWith("/"))
+            if (!text.StartsWith("/", StringComparison.Ordinal))
             {
                 return;
             }
@@ -55,7 +57,7 @@ namespace OpenMod.Unturned.Users
             shouldList = false;
             shouldExecuteCommand = false;
 
-            var args = ArgumentsParser.ParseArguments(text.Substring(1));
+            var args = ArgumentsParser.ParseArguments(text[1..]);
             if (args.Length == 0)
             {
                 return;

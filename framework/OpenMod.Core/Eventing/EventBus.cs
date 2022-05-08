@@ -1,4 +1,9 @@
-﻿using Autofac;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
@@ -10,11 +15,6 @@ using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Ioc.Extensions;
 using OpenMod.Core.Prioritization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace OpenMod.Core.Eventing
 {
@@ -33,6 +33,8 @@ namespace OpenMod.Core.Eventing
             typeof(EventBase),
             typeof(Event)
         };
+
+        private static readonly PriorityComparer s_PriorityComparer = new(PriortyComparisonMode.LowestFirst);
 
         public EventBus(ILogger<EventBus> logger)
         {
@@ -95,7 +97,7 @@ namespace OpenMod.Core.Eventing
                     component.OpenModComponentId);
                 return NullDisposable.Instance;
             }
-            
+
             var subscription = new EventSubscription(component, callback.Invoke, options, eventName, component.LifetimeScope.BeginLifetimeScopeEx());
 
             return SubscribeInternal(subscription);
@@ -140,7 +142,7 @@ namespace OpenMod.Core.Eventing
             var subscription = new EventSubscription(component,
                 (serviceProvider, sender, @event) => callback.Invoke(serviceProvider, sender, (TEvent)@event),
                 options, typeof(TEvent), component.LifetimeScope.BeginLifetimeScopeEx());
-            
+
             return SubscribeInternal(subscription);
         }
 
@@ -209,7 +211,7 @@ namespace OpenMod.Core.Eventing
                 assembly.FullName, component.OpenModComponentId);
 
             List<(Type eventListenerType, MethodInfo method, EventListenerAttribute eventListenerAttribute, Type eventType)> eventListeners = new List<(Type, MethodInfo, EventListenerAttribute, Type)>();
-            var scope = component.LifetimeScope.BeginLifetimeScopeEx((builder =>
+            var scope = component.LifetimeScope.BeginLifetimeScopeEx(builder =>
             {
                 foreach (var type in assembly.FindTypes<IEventListener>())
                 {
@@ -244,20 +246,20 @@ namespace OpenMod.Core.Eventing
                         .WithLifetime(lifetime)
                         .OwnedByLifetimeScope();
                 }
-            }));
+            });
 
-            var eventDisposables = new List<IDisposable>();
+            var eventDisposables = new List<IDisposable>(eventListeners.Count);
 
-            foreach (var eventListener in eventListeners)
+            foreach (var (eventListenerType, method, eventListenerAttribute, eventType) in eventListeners)
             {
-                var subscription = new EventSubscription(component, eventListener.eventListenerType,
-                    eventListener.method, eventListener.eventListenerAttribute, eventListener.eventType, scope);
+                var subscription = new EventSubscription(component, eventListenerType,
+                    method, eventListenerAttribute, eventType, scope);
 
                 var disposable = SubscribeInternal(subscription);
 
                 eventDisposables.Add(disposable);
             }
-            
+
             return new DisposeAction(eventDisposables.DisposeAll);
         }
 
@@ -332,9 +334,11 @@ namespace OpenMod.Core.Eventing
 
             eventTypes.AddRange(@event.GetType().GetInterfaces().Where(d => typeof(IEvent).IsAssignableFrom(d)));
 
+            var cancellableEvent = @event as ICancellableEvent;
+
             foreach (var eventType in eventTypes.Except(s_OmittedTypes))
             {
-                string eventName = GetEventName(eventType);
+                var eventName = GetEventName(eventType);
 
                 m_Logger.LogTrace("Emitting event: {EventName}", eventName);
                 var eventSubscriptions
@@ -344,16 +348,14 @@ namespace OpenMod.Core.Eventing
                                         && c.Owner.IsAlive && ((IOpenModComponent)c.Owner.Target).IsComponentAlive))
                         .ToList();
 
-
                 if (eventSubscriptions.Count == 0)
                 {
                     m_Logger.LogTrace("No event subscriptions found for: {EventName}", eventName);
                     continue;
                 }
 
-                var comparer = new PriorityComparer(PriortyComparisonMode.LowestFirst);
                 eventSubscriptions.Sort((a, b) =>
-                    comparer.Compare(
+                    s_PriorityComparer.Compare(
                         (Priority)a.EventListenerOptions.Priority,
                         (Priority)b.EventListenerOptions.Priority)
                 );
@@ -372,11 +374,9 @@ namespace OpenMod.Core.Eventing
                         // has already been disposed." It means you injected a service to an IEventHandler
                         // that used the service *after* the event has finished (e.g. in a Task or by storing it somewhere).
 
-                        await using var newScope = group.Key.BeginLifetimeScopeEx("AutofacWebRequest");
+                        await using var newScope = group.Key.BeginLifetimeScope("AutofacWebRequest");
                         foreach (var subscription in group)
                         {
-                            var cancellableEvent = @event as ICancellableEvent;
-
                             if (cancellableEvent != null
                                 && cancellableEvent.IsCancelled
                                 && !subscription.EventListenerOptions.IgnoreCancelled)
@@ -405,7 +405,7 @@ namespace OpenMod.Core.Eventing
                                         cancellableEvent.IsCancelled = wasCancelled;
                                         m_Logger.LogWarning(
                                             "{ComponentId} changed {EventName} cancellation status with Monitor priority which is not permitted",
-                                            ((IOpenModComponent) @subscription.Owner.Target).OpenModComponentId,
+                                            ((IOpenModComponent)@subscription.Owner.Target).OpenModComponentId,
                                             eventName);
                                     }
                                 }
@@ -426,7 +426,7 @@ namespace OpenMod.Core.Eventing
                 m_Logger.LogTrace("{EventName}: Finished", eventName);
             }
 
-            if(callback != null)
+            if (callback != null)
             {
                 await callback.Invoke(@event);
             }
@@ -440,7 +440,7 @@ namespace OpenMod.Core.Eventing
             var eventName = eventType.Name;
 
             return eventName.EndsWith(suffix, StringComparison.Ordinal)
-                ? eventName.Substring(0, eventName.Length - suffix.Length)
+                ? eventName[..^suffix.Length]
                 : eventName;
         }
 
@@ -460,6 +460,7 @@ namespace OpenMod.Core.Eventing
             await m_EventSubscriptions
                 .Select(d => d.Scope)
                 .Distinct()
+                .ToList()
                 .DisposeAllAsync();
 
             m_EventSubscriptions.Clear();
