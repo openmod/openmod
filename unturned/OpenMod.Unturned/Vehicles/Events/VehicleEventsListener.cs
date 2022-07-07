@@ -1,6 +1,4 @@
 ﻿extern alias JetBrainsAnnotations;
-using System;
-using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
@@ -9,6 +7,8 @@ using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Reflection;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Vehicles.Events
@@ -299,11 +299,11 @@ namespace OpenMod.Unturned.Vehicles.Events
             cancel = @event.IsCancelled;
         }
 
-        private void Events_OnVehicleReplacingBattery(InteractableVehicle vehicle, Player nativePlayer, ref byte amount, ref bool cancel)
+        private void Events_OnVehicleReplacingBattery(InteractableVehicle vehicle, Player nativePlayer, ref byte amount, Guid batteryItemGuid, ref bool cancel)
         {
             var player = GetUnturnedPlayer(nativePlayer);
 
-            var @event = new UnturnedVehicleReplacingBatteryEvent(player!, new UnturnedVehicle(vehicle), amount)
+            var @event = new UnturnedVehicleReplacingBatteryEvent(player!, new UnturnedVehicle(vehicle), amount, batteryItemGuid)
             {
                 IsCancelled = cancel
             };
@@ -323,7 +323,7 @@ namespace OpenMod.Unturned.Vehicles.Events
         private delegate void VehicleStealBattery(InteractableVehicle vehicle, Player player, ref bool cancel);
         private static event VehicleStealBattery? OnVehicleStealBattery;
 
-        private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, ref byte amount, ref bool cancel);
+        private delegate void VehicleReplacingBattery(InteractableVehicle vehicle, Player player, ref byte amount, Guid batteryItemGuid, ref bool cancel);
         private static event VehicleReplacingBattery? OnVehicleReplacingBattery;
 #pragma warning restore RCS1213 // Remove unused member declaration.
 
@@ -376,14 +376,15 @@ namespace OpenMod.Unturned.Vehicles.Events
                 return !cancel;
             }
 
-            [HarmonyPatch(typeof(InteractableVehicle), nameof(InteractableVehicle.replaceBattery))]
+            [HarmonyPatch(typeof(InteractableVehicle), nameof(InteractableVehicle.replaceBattery),
+                typeof(Player), typeof(byte), typeof(Guid))]
             [HarmonyPrefix]
             [UsedImplicitly]
-            public static bool ReplaceBattery(InteractableVehicle __instance, Player player, ref byte quality)
+            public static bool ReplaceBattery(InteractableVehicle __instance, Player player, ref byte quality, Guid newBatteryItemGuid)
             {
                 var cancel = false;
 
-                OnVehicleReplacingBattery?.Invoke(__instance, player, ref quality, ref cancel);
+                OnVehicleReplacingBattery?.Invoke(__instance, player, ref quality, newBatteryItemGuid, ref cancel);
 
                 return !cancel;
             }
