@@ -1,5 +1,6 @@
 ﻿using OpenMod.API.Eventing;
 using OpenMod.Unturned.Players;
+using System;
 
 namespace OpenMod.Unturned.Vehicles.Events
 {
@@ -18,12 +19,19 @@ namespace OpenMod.Unturned.Vehicles.Events
         /// </summary>
         public byte BatteryQuality { get; }
 
+        /// <summary>
+        /// Gets the Guid of the new battery item.
+        /// </summary>
+        public Guid BatteryItemGuid { get; }
+
         public bool IsCancelled { get; set; }
 
-        public UnturnedVehicleReplacingBatteryEvent(UnturnedPlayer instigator, UnturnedVehicle vehicle, byte batteryQuality) : base(vehicle)
+        public UnturnedVehicleReplacingBatteryEvent(UnturnedPlayer instigator, UnturnedVehicle vehicle,
+            byte batteryQuality, Guid batteryItemGuid) : base(vehicle)
         {
             Instigator = instigator;
             BatteryQuality = batteryQuality;
+            BatteryItemGuid = batteryItemGuid;
         }
     }
 }
