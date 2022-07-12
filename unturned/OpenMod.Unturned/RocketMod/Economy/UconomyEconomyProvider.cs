@@ -139,7 +139,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
                     throw new Exception("Uconomy is not loaded.");
                 }
 
-                return (string)m_MoneyNameField!.GetValue(m_UconomyConfigurationInstance);
+                return (string?)m_MoneyNameField?.GetValue(m_UconomyConfigurationInstance) ?? "Credits";
             }
         }
 
@@ -152,7 +152,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
                     throw new Exception("Uconomy is not loaded.");
                 }
 
-                return (string)m_MoneySymbolField!.GetValue(m_UconomyConfigurationInstance);
+                return (string?)m_MoneySymbolField?.GetValue(m_UconomyConfigurationInstance) ?? "$";
             }
         }
 
