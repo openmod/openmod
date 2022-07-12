@@ -11,15 +11,12 @@ using OpenMod.UnityEngine.Transforms;
 using OpenMod.Unturned.Items;
 using OpenMod.Unturned.Vehicles;
 using SDG.Unturned;
-using SmartFormat.ZString;
 using Steamworks;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Net;
 using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
 using Vector3 = System.Numerics.Vector3;
 
@@ -227,51 +224,16 @@ namespace OpenMod.Unturned.Players
                         continue;
                     }
 
-                    foreach (var lline in WrapLine(line))
-                    {
-                        ChatManager.serverSendMessage(
-                            text: lline,
-                            color: color.ToUnityColor(),
-                            toPlayer: SteamPlayer,
-                            iconURL: iconUrl,
-                            useRichTextFormatting: isRich);
-                    }
+                    ChatManager.serverSendMessage(
+                        text: line,
+                        color: color.ToUnityColor(),
+                        toPlayer: SteamPlayer,
+                        iconURL: iconUrl,
+                        useRichTextFormatting: isRich);
                 }
             }
 
             return PrintMessageTask().AsTask();
-        }
-
-        private IEnumerable<string> WrapLine(string line)
-        {
-            const int maxLength = 90;
-
-            using var currentLine = new ZStringBuilder(false);
-
-            foreach (var currentWord in line.Split(' '))
-            {
-                if (currentLine.Length > maxLength ||
-                    currentLine.Length + currentWord.Length > maxLength)
-                {
-                    yield return currentLine.ToString();
-                    currentLine.Clear();
-                }
-
-                if (currentLine.Length > 0)
-                {
-                    currentLine.Append(" ");
-                    currentLine.Append(currentWord);
-                }
-                else
-                {
-                    currentLine.Append(currentWord);
-                }
-            }
-
-            if (currentLine.Length > 0)
-            {
-                yield return currentLine.ToString();
-            }
         }
 
         public Task SetHungerAsync(double hunger)
