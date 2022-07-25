@@ -1,12 +1,13 @@
 ﻿extern alias JetBrainsAnnotations;
+using System;
+using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
-using SDG.Unturned;
-using System;
-using System.Reflection;
+using OpenMod.Unturned.Patching;
 using SDG.Framework.Devkit;
+using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
 
@@ -17,11 +18,11 @@ namespace OpenMod.Unturned.Animals.Events
     [UsedImplicitly]
     internal class AnimalsEventsListener : UnturnedEventsListener
     {
-        private static readonly FieldInfo s_BumperVehicle;
+        private static readonly FieldInfo? s_BumperVehicleField;
 
         static AnimalsEventsListener()
         {
-            s_BumperVehicle = typeof(Bumper).GetField("vehicle", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            s_BumperVehicleField = typeof(Bumper).GetField("vehicle", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
         public AnimalsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
@@ -82,14 +83,20 @@ namespace OpenMod.Unturned.Animals.Events
                     instigator = Provider.server;
                     break;
                 case Bumper bumper:
-                {
-                    var vehicle = (InteractableVehicle)s_BumperVehicle.GetValue(bumper);
-                    instigator = vehicle is not null and { isDriven: true }
+                    if (s_BumperVehicleField is null)
+                    {
+                        break;
+                    }
+
+                    var vehicle = (InteractableVehicle)s_BumperVehicleField.GetValue(bumper);
+#pragma warning disable RCS1146 // Use conditional access.
+                    instigator = vehicle != null && vehicle.isDriven
+#pragma warning restore RCS1146 // Use conditional access.
                         ? vehicle.passengers[0].player.playerID.steamID
                         : Provider.server;
 
                     break;
-                }
+
                 case Player player:
                     instigator = player.channel.owner.playerID.steamID;
                     break;
@@ -201,6 +208,13 @@ namespace OpenMod.Unturned.Animals.Events
         [HarmonyPatch]
         internal static class Patches
         {
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex, MethodBase original)
+            {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
+                return null;
+            }
+
             [UsedImplicitly]
             [HarmonyPatch(typeof(AnimalManager), "addAnimal")]
             [HarmonyPostfix]
@@ -213,7 +227,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "tellAlive")]
+            [HarmonyPatch(typeof(Animal), nameof(Animal.tellAlive))]
             [HarmonyPostfix]
             public static void TellAlive(Animal __instance)
             {
@@ -221,7 +235,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "tellDead")]
+            [HarmonyPatch(typeof(Animal), nameof(Animal.tellDead))]
             [HarmonyPostfix]
             public static void TellDead(Animal __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
             {
@@ -229,7 +243,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "alertDirection")]
+            [HarmonyPatch(typeof(Animal), nameof(Animal.alertDirection))]
             [HarmonyPrefix]
             public static bool AlertDirection(Animal __instance, ref Vector3 newDirection, ref bool sendToPack)
             {
@@ -242,7 +256,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "alertGoToPoint")]
+            [HarmonyPatch(typeof(Animal), nameof(Animal.alertGoToPoint))]
             [HarmonyPrefix]
             public static bool AlertGoToPoint(Animal __instance, ref Vector3 point, ref bool sendToPack)
             {
@@ -255,7 +269,7 @@ namespace OpenMod.Unturned.Animals.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Animal), "alertPlayer")]
+            [HarmonyPatch(typeof(Animal), nameof(Animal.alertPlayer))]
             [HarmonyPrefix]
             public static bool AlertPlayer(Animal __instance, ref Player newPlayer, ref bool sendToPack)
             {

@@ -1,17 +1,18 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
-using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace OpenMod.Core.Users
 {
@@ -19,23 +20,34 @@ namespace OpenMod.Core.Users
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class UserDataStore : IUserDataStore, IAsyncDisposable
     {
-        private readonly ILogger<UserDataStore> m_Logger;
         private readonly IRuntime m_Runtime;
-        public const string UsersKey = "users";
+        public const string c_UsersKey = "users";
         private readonly IDataStore m_DataStore;
         private UsersData m_CachedUsersData;
         private IDisposable m_FileChangeWatcher;
         private bool m_IsUpdating;
 
+        private readonly ISerializer _serializer;
+        private readonly IDeserializer _deserializer;
 
         public UserDataStore(
-            ILogger<UserDataStore> logger,
             IOpenModDataStoreAccessor dataStoreAccessor,
             IRuntime runtime)
         {
-            m_Logger = logger;
             m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
+
+            _serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithTypeConverter(new YamlNullableEnumTypeConverter())
+                .DisableAliases()
+                .Build();
+
+            _deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
+                .WithTypeConverter(new YamlNullableEnumTypeConverter())
+                .Build();
 
             // suppress errors because the compiler can't analyze that the values are set from the statements below
             m_CachedUsersData = null!;
@@ -50,15 +62,15 @@ namespace OpenMod.Core.Users
         private async Task<UsersData> EnsureUserDataCreatedAsync()
         {
             var created = false;
-            if (!await m_DataStore.ExistsAsync(UsersKey))
+            if (!await m_DataStore.ExistsAsync(c_UsersKey))
             {
                 m_CachedUsersData = new UsersData { Users = GetDefaultUsersData() };
 
-                await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+                await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
                 created = true;
             }
 
-            m_FileChangeWatcher = m_DataStore.AddChangeWatcher(UsersKey, m_Runtime, () =>
+            m_FileChangeWatcher = m_DataStore.AddChangeWatcher(c_UsersKey, m_Runtime, () =>
             {
                 if (!m_IsUpdating)
                 {
@@ -91,7 +103,7 @@ namespace OpenMod.Core.Users
             var usersData = await GetUsersDataAsync();
             return usersData?.FirstOrDefault(d =>
                 (d?.Type?.Equals(userType, StringComparison.OrdinalIgnoreCase) ?? false)
-                && (d?.Id?.Equals(userId, StringComparison.OrdinalIgnoreCase) ?? false));
+                && (d.Id?.Equals(userId, StringComparison.OrdinalIgnoreCase) ?? false));
         }
 
         public async Task<T?> GetUserDataAsync<T>(string userId, string userType, string key)
@@ -128,22 +140,14 @@ namespace OpenMod.Core.Users
                 return obj;
             }
 
-            if (dataObject == null)
+            if (dataObject == default)
             {
                 return default;
             }
+            
+            var serialized = _serializer.Serialize(dataObject);
 
-            if (dataObject.GetType().HasConversionOperator(typeof(T)))
-            {
-                return (T)dataObject;
-            }
-
-            if (dataObject is Dictionary<object, object> dict)
-            {
-                return dict.ToObject<T>();
-            }
-
-            throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
+            return _deserializer.Deserialize<T>(serialized);
         }
 
         public async Task SetUserDataAsync<T>(string userId, string userType, string key, T? value)
@@ -231,17 +235,18 @@ namespace OpenMod.Core.Users
             m_CachedUsersData.Users = usersData;
             m_IsUpdating = true;
 
-            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+            await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
         }
 
         private List<UserData> GetDefaultUsersData()
         {
             return new()
             {
-                new()
+                new UserData
                 {
                     FirstSeen = null,
                     LastSeen = null,
+                    BanInfo = null,
                     LastDisplayName = "root",
                     Id = "root",
                     Type = KnownActorTypes.Rcon,
@@ -259,18 +264,18 @@ namespace OpenMod.Core.Users
 
         private async Task<UsersData> LoadUsersDataFromDiskAsync()
         {
-            if (!await m_DataStore.ExistsAsync(UsersKey))
+            if (!await m_DataStore.ExistsAsync(c_UsersKey))
             {
                 m_CachedUsersData = new UsersData
                 {
                     Users = GetDefaultUsersData()
                 };
 
-                await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+                await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
                 return m_CachedUsersData;
             }
 
-            return await m_DataStore.LoadAsync<UsersData>(UsersKey) ?? new UsersData
+            return await m_DataStore.LoadAsync<UsersData>(c_UsersKey) ?? new UsersData
             {
                 Users = GetDefaultUsersData()
             };
@@ -285,7 +290,7 @@ namespace OpenMod.Core.Users
                 throw new Exception("Tried to save null users data");
             }
 
-            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
+            await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
         }
     }
 }

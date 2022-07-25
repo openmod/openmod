@@ -18,25 +18,13 @@ namespace OpenMod.Unturned.Players.Animator.Events
         private void OnLeanChanged(PlayerAnimator obj)
         {
             var player = GetUnturnedPlayer(obj.player)!;
-
-            LeanType leanType;
-
-            switch (obj.lean)
+            var leanType = obj.lean switch
             {
-                case 1:
-                    leanType = LeanType.Left;
-                    break;
-                case 0:
-                    leanType = LeanType.Center;
-                    break;
-                case -1:
-                    leanType = LeanType.Right;
-                    break;
-                default:
-                    leanType = LeanType.Center;
-                    break;
-            }
-
+                1 => LeanType.Left,
+                0 => LeanType.Center,
+                -1 => LeanType.Right,
+                _ => LeanType.Center,
+            };
             var @event = new UnturnedPlayerLeanUpdatedEvent(player, leanType);
 
             Emit(@event);

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace OpenMod.Core.Helpers
@@ -12,18 +13,17 @@ namespace OpenMod.Core.Helpers
         /// <returns>The args[] array (argv)</returns>
         public static string[] ParseArguments(string line)
         {
-            var argsBuilder = new StringBuilder(line);
             var args = new List<string>();
 
-            var currentArg = new StringBuilder();
+            var currentArg = new StringBuilder(32);
 
             var inQuote = false;
             var inApostrophes = false;
             var isEscaped = false;
 
-            for (var i = 0; i < argsBuilder.Length; i++)
+            for (var i = 0; i < line.Length; i++)
             {
-                var currentChar = argsBuilder[i];
+                var currentChar = line[i];
                 if (isEscaped)
                 {
                     currentArg.Append(currentChar);
@@ -39,7 +39,7 @@ namespace OpenMod.Core.Helpers
                         break;
 
                     case '\'':
-                        if (!inQuote && (currentArg.Length == 0 || argsBuilder.Length == nextIndex || IsSpace(argsBuilder[nextIndex])))
+                        if (!inQuote && (currentArg.Length == 0 || line.Length == nextIndex || IsSpace(line[nextIndex])))
                         {
                             inApostrophes = !inApostrophes;
                         }
@@ -50,7 +50,7 @@ namespace OpenMod.Core.Helpers
                         break;
 
                     case '"':
-                        if (!inApostrophes && (currentArg.Length == 0 || argsBuilder.Length == nextIndex || IsSpace(argsBuilder[nextIndex])))
+                        if (!inApostrophes && (currentArg.Length == 0 || line.Length == nextIndex || IsSpace(line[nextIndex])))
                         {
                             inQuote = !inQuote;
                         }
@@ -106,6 +106,7 @@ namespace OpenMod.Core.Helpers
             return currentArg;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsSpace(char character)
         {
             return char.IsWhiteSpace(character) || character == char.MinValue;

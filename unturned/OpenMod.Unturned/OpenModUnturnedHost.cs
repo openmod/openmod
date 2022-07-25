@@ -1,4 +1,10 @@
-﻿using Autofac;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Autofac;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,23 +15,15 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Console;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 using OpenMod.Extensions.Games.Abstractions;
+using OpenMod.NuGet;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Helpers;
 using OpenMod.Unturned.Logging;
+using OpenMod.Unturned.Patching;
+using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.Users;
 using SDG.Unturned;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using OpenMod.Core.Ioc;
-using OpenMod.NuGet;
-using OpenMod.Unturned.RocketMod;
-using UnityEngine.LowLevel;
 using Priority = OpenMod.API.Prioritization.Priority;
 
 namespace OpenMod.Unturned
@@ -33,7 +31,6 @@ namespace OpenMod.Unturned
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class OpenModUnturnedHost : IOpenModHost, IDisposable
     {
-        private static bool s_UniTaskInited;
         private readonly IRuntime m_Runtime;
         private readonly IHostInformation m_HostInformation;
         private readonly IServiceProvider m_ServiceProvider;
@@ -42,6 +39,7 @@ namespace OpenMod.Unturned
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
         private readonly NuGetPackageManager m_NuGetPackageManager;
         private readonly Lazy<UnturnedCommandHandler> m_UnturnedCommandHandler;
+        private readonly ILoggerFactory m_LoggerFactory;
         private readonly HashSet<string> m_Capabilities;
         private OpenModConsoleInputOutput? m_OpenModIoHandler;
         private List<ICommandInputOutput>? m_IoHandlers;
@@ -69,7 +67,8 @@ namespace OpenMod.Unturned
             ILogger<OpenModUnturnedHost> logger,
             NuGetPackageManager nuGetPackageManager,
             Lazy<ICommandExecutor> commandExecutor,
-            Lazy<UnturnedCommandHandler> unturnedCommandHandler)
+            Lazy<UnturnedCommandHandler> unturnedCommandHandler,
+            ILoggerFactory loggerFactory)
         {
             m_Runtime = runtime;
             m_HostInformation = hostInformation;
@@ -79,6 +78,7 @@ namespace OpenMod.Unturned
             m_Logger = logger;
             m_NuGetPackageManager = nuGetPackageManager;
             m_UnturnedCommandHandler = unturnedCommandHandler;
+            m_LoggerFactory = loggerFactory;
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
 
@@ -105,6 +105,9 @@ namespace OpenMod.Unturned
 
         public Task InitAsync()
         {
+            m_Logger.LogInformation("OpenMod for Unturned v{HostVersion} is initializing...",
+                m_HostInformation.HostVersion);
+
             try
             {
                 if (RocketModIntegration.IsRocketModInstalled())
@@ -121,8 +124,16 @@ namespace OpenMod.Unturned
             // ReSharper disable PossibleNullReferenceException
             IsComponentAlive = true;
 
-            m_Harmony = new Harmony(OpenModComponentId);
-            m_Harmony.PatchAll(GetType().Assembly);
+            try
+            {
+                HarmonyExceptionHandler.LoggerFactoryGetterEvent += () => m_LoggerFactory;
+                m_Harmony = new Harmony(OpenModComponentId);
+                m_Harmony.PatchAll(GetType().Assembly);
+            }
+            catch (Exception ex)
+            {
+                m_Logger.LogError(ex, "Failed to patch with Harmony. Report this error on the OpenMod discord: https://discord.com/invite/jRrCJVm");
+            }
 
             m_UnturnedCommandHandler.Value.Subscribe();
             BindUnturnedEvents();
@@ -174,27 +185,6 @@ namespace OpenMod.Unturned
 
             Dedicator.commandWindow.addIOHandler(m_OpenModIoHandler);
 
-            m_Logger.LogInformation("OpenMod for Unturned v{HostVersion} is initializing...",
-                m_HostInformation.HostVersion);
-
-            TlsWorkaround.Install();
-
-            if (!s_UniTaskInited)
-            {
-                var unitySynchronizationContetextField =
-                    typeof(PlayerLoopHelper).GetField("unitySynchronizationContetext",
-                        BindingFlags.Static | BindingFlags.NonPublic);
-                unitySynchronizationContetextField.SetValue(null, SynchronizationContext.Current);
-
-                var mainThreadIdField =
-                    typeof(PlayerLoopHelper).GetField("mainThreadId", BindingFlags.Static | BindingFlags.NonPublic);
-                mainThreadIdField.SetValue(null, Thread.CurrentThread.ManagedThreadId);
-
-                var playerLoop = PlayerLoop.GetDefaultPlayerLoop();
-                PlayerLoopHelper.Initialize(ref playerLoop);
-                s_UniTaskInited = true;
-            }
-
             m_Logger.LogInformation("OpenMod for Unturned is ready");
 
             return Task.CompletedTask;
@@ -214,7 +204,7 @@ namespace OpenMod.Unturned
                     .FirstOrDefault(d => d.GetName().Name.Equals("OpenMod.Unturned.Module.Bootstrapper"));
 
                 var bootstrapperClass = bootstrapperAssembly!.GetType("OpenMod.Unturned.Module.Bootstrapper.BootstrapperModule");
-                var instanceProperty = bootstrapperClass.GetProperty("Instance", BindingFlags.Public |  BindingFlags.Static);
+                var instanceProperty = bootstrapperClass.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
                 var initializeMethod = bootstrapperClass.GetMethod("initialize", BindingFlags.Instance | BindingFlags.Public);
                 var moduleInstance = instanceProperty!.GetValue(null);
 
@@ -264,10 +254,10 @@ namespace OpenMod.Unturned
 
         public Task ShutdownAsync()
         {
-            async UniTask ShutdownTask()
+            static async UniTask ShutdownTask()
             {
                 await UniTask.SwitchToMainThread();
-                Provider.shutdown();
+                Provider.shutdown(1);
             }
 
             return ShutdownTask().AsTask();
@@ -295,9 +285,17 @@ namespace OpenMod.Unturned
 
             IsComponentAlive = false;
             m_IsDisposing = true;
-            TlsWorkaround.Uninstalll();
 
-            m_Harmony?.UnpatchAll(OpenModComponentId);
+            try
+            {
+                HarmonyExceptionHandler.LoggerFactoryGetterEvent -= () => m_LoggerFactory;
+                m_Harmony?.UnpatchAll(OpenModComponentId);
+            }
+            catch
+            {
+                // ignore it
+            }
+
             UnbindUnturnedEvents();
         }
     }

@@ -25,7 +25,7 @@ namespace OpenMod.Unturned.Players
             }
 
             var steamPlayer = Provider.clients
-                .FirstOrDefault(x => input == x.playerID.steamID.ToString() || input.Equals(x.playerID.playerName, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(x => input == x.playerID.steamID.ToString() || input.Equals(x.playerID.playerName, StringComparison.OrdinalIgnoreCase) || input.Equals(x.playerID.characterName, StringComparison.OrdinalIgnoreCase));
 
             var player = steamPlayer == null ? null : new UnturnedPlayer(steamPlayer.player);
 

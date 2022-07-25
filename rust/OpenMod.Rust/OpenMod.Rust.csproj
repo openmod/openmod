@@ -12,7 +12,7 @@
     <PackageReference Include="OpenMod.Rust.Redist" Version="2260.199.1">
 	  <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenMod.UniTask" Version="2019.2.1" />
+    <PackageReference Include="OpenMod.UniTask" Version="2019.2.2.5" />
     <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2019.4.10">
 	  <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
@@ -26,6 +26,10 @@
 
   <ItemGroup>
     <Folder Include="Networkables\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
   </ItemGroup>
 
 </Project>

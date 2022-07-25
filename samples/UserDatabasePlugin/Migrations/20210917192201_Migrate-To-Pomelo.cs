@@ -1,10 +1,10 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using MySql.Data.EntityFrameworkCore.Metadata;
 
 namespace UserDatabasePlugin.Migrations
 {
-    public partial class Initial : Migration
+    public partial class MigrateToPomelo : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,7 +13,7 @@ namespace UserDatabasePlugin.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 36, nullable: false),
-                    Type = table.Column<string>(maxLength: 20, nullable: true)
+                    Type = table.Column<string>(maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -25,10 +25,11 @@ namespace UserDatabasePlugin.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Date = table.Column<DateTime>(nullable: false),
-                    Type = table.Column<string>(maxLength: 32, nullable: true),
-                    UserId = table.Column<string>(nullable: true)
+                    UserName = table.Column<string>(nullable: false),
+                    Type = table.Column<string>(maxLength: 32, nullable: false),
+                    UserId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -38,7 +39,7 @@ namespace UserDatabasePlugin.Migrations
                         column: x => x.UserId,
                         principalTable: "UserDatabasePlugin_Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

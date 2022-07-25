@@ -34,13 +34,42 @@ namespace OpenMod.Core.Eventing
             typeof(Event)
         };
 
+        private static readonly PriorityComparer s_PriorityComparer = new(PriortyComparisonMode.LowestFirst);
+
         public EventBus(ILogger<EventBus> logger)
         {
             m_Logger = logger;
             m_EventSubscriptions = new List<EventSubscription>();
         }
 
+        private IDisposable SubscribeInternal(EventSubscription subscription)
+        {
+            subscription.Scope.Disposer.AddInstanceForDisposal(new DisposeAction(() =>
+            {
+                m_EventSubscriptions.RemoveAll(x => x.Scope == subscription.Scope);
+            }));
+
+            m_EventSubscriptions.Add(subscription);
+
+            return new DisposeAction(() =>
+            {
+                m_EventSubscriptions.Remove(subscription);
+            });
+        }
+
         public virtual IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback)
+        {
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            var attribute = GetEventListenerAttribute(callback.Method);
+
+            return Subscribe(component, eventName, callback, attribute);
+        }
+
+        public virtual IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback, IEventListenerOptions options)
         {
             if (component == null)
             {
@@ -57,6 +86,11 @@ namespace OpenMod.Core.Eventing
                 throw new ArgumentException(eventName);
             }
 
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             if (!component.IsComponentAlive)
             {
                 m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
@@ -64,49 +98,24 @@ namespace OpenMod.Core.Eventing
                 return NullDisposable.Instance;
             }
 
-            var attribute = GetEventListenerAttribute(callback.Method);
-            var subscription = new EventSubscription(component, callback.Invoke, attribute, eventName, component.LifetimeScope.BeginLifetimeScopeEx());
+            var subscription = new EventSubscription(component, callback.Invoke, options, eventName, component.LifetimeScope.BeginLifetimeScopeEx());
 
-            m_EventSubscriptions.Add(subscription);
-            return new DisposeAction(() =>
-            {
-                m_EventSubscriptions.Remove(subscription);
-            });
+            return SubscribeInternal(subscription);
         }
 
         public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback) where TEvent : IEvent
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
-
             if (callback == null)
             {
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            if (!component.IsComponentAlive)
-            {
-                m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
-                    component.OpenModComponentId);
-                return NullDisposable.Instance;
-            }
-
             var attribute = GetEventListenerAttribute(callback.Method);
 
-            var subscription = new EventSubscription(component,
-                (serviceProvider, sender, @event) => callback.Invoke(serviceProvider, sender, (TEvent) @event),
-                attribute, typeof(TEvent), component.LifetimeScope.BeginLifetimeScopeEx());
-
-            m_EventSubscriptions.Add(subscription);
-            return new DisposeAction(() =>
-            {
-                m_EventSubscriptions.Remove(subscription);
-            });
+            return Subscribe(component, callback, attribute);
         }
 
-        public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback)
+        public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback, IEventListenerOptions options) where TEvent : IEvent
         {
             if (component == null)
             {
@@ -118,6 +127,11 @@ namespace OpenMod.Core.Eventing
                 throw new ArgumentNullException(nameof(callback));
             }
 
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             if (!component.IsComponentAlive)
             {
                 m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
@@ -125,17 +139,53 @@ namespace OpenMod.Core.Eventing
                 return NullDisposable.Instance;
             }
 
+            var subscription = new EventSubscription(component,
+                (serviceProvider, sender, @event) => callback.Invoke(serviceProvider, sender, (TEvent)@event),
+                options, typeof(TEvent), component.LifetimeScope.BeginLifetimeScopeEx());
+
+            return SubscribeInternal(subscription);
+        }
+
+        public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback)
+        {
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             var attribute = GetEventListenerAttribute(callback.Method);
 
-            var subscription = new EventSubscription(component, callback.Invoke, attribute, eventType,
+            return Subscribe(component, eventType, callback, attribute);
+        }
+
+        public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback, IEventListenerOptions options)
+        {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (!component.IsComponentAlive)
+            {
+                m_Logger.LogDebug("{ComponentId} tried to subscribe a callback but the component is not alive",
+                    component.OpenModComponentId);
+                return NullDisposable.Instance;
+            }
+
+            var subscription = new EventSubscription(component, callback.Invoke, options, eventType,
                 component.LifetimeScope.BeginLifetimeScopeEx());
 
-            m_EventSubscriptions.Add(subscription);
-
-            return new DisposeAction(() =>
-            {
-                m_EventSubscriptions.Remove(subscription);
-            });
+            return SubscribeInternal(subscription);
         }
 
         public virtual IDisposable Subscribe(IOpenModComponent component, Assembly assembly)
@@ -161,7 +211,7 @@ namespace OpenMod.Core.Eventing
                 assembly.FullName, component.OpenModComponentId);
 
             List<(Type eventListenerType, MethodInfo method, EventListenerAttribute eventListenerAttribute, Type eventType)> eventListeners = new List<(Type, MethodInfo, EventListenerAttribute, Type)>();
-            var scope = component.LifetimeScope.BeginLifetimeScopeEx((builder =>
+            var scope = component.LifetimeScope.BeginLifetimeScopeEx(builder =>
             {
                 foreach (var type in assembly.FindTypes<IEventListener>())
                 {
@@ -196,26 +246,21 @@ namespace OpenMod.Core.Eventing
                         .WithLifetime(lifetime)
                         .OwnedByLifetimeScope();
                 }
-            }));
+            });
 
-            var addedListeners = new List<EventSubscription>();
-            foreach (var eventListener in eventListeners)
+            var eventDisposables = new List<IDisposable>(eventListeners.Count);
+
+            foreach (var (eventListenerType, method, eventListenerAttribute, eventType) in eventListeners)
             {
-                var subscription = new EventSubscription(component, eventListener.eventListenerType,
-                    eventListener.method, eventListener.eventListenerAttribute, eventListener.eventType, scope);
-                addedListeners.Add(subscription);
+                var subscription = new EventSubscription(component, eventListenerType,
+                    method, eventListenerAttribute, eventType, scope);
+
+                var disposable = SubscribeInternal(subscription);
+
+                eventDisposables.Add(disposable);
             }
 
-            m_EventSubscriptions.AddRange(addedListeners);
-            return new DisposeAction(() =>
-            {
-                foreach (var eventListener in addedListeners)
-                {
-                    m_EventSubscriptions.Remove(eventListener);
-                }
-
-                addedListeners.Clear();
-            });
+            return new DisposeAction(eventDisposables.DisposeAll);
         }
 
         public virtual void Unsubscribe(IOpenModComponent component)
@@ -289,9 +334,11 @@ namespace OpenMod.Core.Eventing
 
             eventTypes.AddRange(@event.GetType().GetInterfaces().Where(d => typeof(IEvent).IsAssignableFrom(d)));
 
+            var cancellableEvent = @event as ICancellableEvent;
+
             foreach (var eventType in eventTypes.Except(s_OmittedTypes))
             {
-                string eventName = GetEventName(eventType);
+                var eventName = GetEventName(eventType);
 
                 m_Logger.LogTrace("Emitting event: {EventName}", eventName);
                 var eventSubscriptions
@@ -301,80 +348,88 @@ namespace OpenMod.Core.Eventing
                                         && c.Owner.IsAlive && ((IOpenModComponent)c.Owner.Target).IsComponentAlive))
                         .ToList();
 
-
                 if (eventSubscriptions.Count == 0)
                 {
                     m_Logger.LogTrace("No event subscriptions found for: {EventName}", eventName);
                     continue;
                 }
 
-                var comparer = new PriorityComparer(PriortyComparisonMode.LowestFirst);
                 eventSubscriptions.Sort((a, b) =>
-                    comparer.Compare(
-                        (Priority)a.EventListenerAttribute.Priority,
-                        (Priority)b.EventListenerAttribute.Priority)
+                    s_PriorityComparer.Compare(
+                        (Priority)a.EventListenerOptions.Priority,
+                        (Priority)b.EventListenerOptions.Priority)
                 );
 
                 foreach (var group in eventSubscriptions.GroupBy(e => e.Scope))
                 {
-                    //   Creates a new scope for the event. This is needed for scoped services so they share the same service instance
-                    // on each events. AutofacWebRequest makes it emulate a request for proper scopes. This tag is hardcoded by AutoFac.
-                    // Without this tag, services with the "Scope" lifetime will cause "DependencyResolutionException:
-                    // No scope with a Tag matching 'AutofacWebRequest' (...)".
-                    //
-                    //   If you are here because of the following error:  "System.ObjectDisposedException: Instances cannot
-                    // be resolved and nested lifetimes cannot be created from this LifetimeScope as it (or one of its parent scopes)
-                    // has already been disposed." It means you injected a service to an IEventHandler
-                    // that used the service *after* the event has finished (e.g. in a Task or by storing it somewhere).
-
-                    await using var newScope = group.Key.BeginLifetimeScopeEx("AutofacWebRequest");
-                    foreach (var subscription in group)
+                    try
                     {
-                        var cancellableEvent = @event as ICancellableEvent;
+                        //   Creates a new scope for the event. This is needed for scoped services so they share the same service instance
+                        // on each events. AutofacWebRequest makes it emulate a request for proper scopes. This tag is hardcoded by AutoFac.
+                        // Without this tag, services with the "Scope" lifetime will cause "DependencyResolutionException:
+                        // No scope with a Tag matching 'AutofacWebRequest' (...)".
+                        //
+                        //   If you are here because of the following error:  "System.ObjectDisposedException: Instances cannot
+                        // be resolved and nested lifetimes cannot be created from this LifetimeScope as it (or one of its parent scopes)
+                        // has already been disposed." It means you injected a service to an IEventHandler
+                        // that used the service *after* the event has finished (e.g. in a Task or by storing it somewhere).
 
-                        if (cancellableEvent != null
-                            && cancellableEvent.IsCancelled
-                            && !subscription.EventListenerAttribute.IgnoreCancelled)
+                        await using var newScope = group.Key.BeginLifetimeScope("AutofacWebRequest");
+                        foreach (var subscription in group)
                         {
-                            continue;
-                        }
-
-                        var wasCancelled = false;
-                        if (cancellableEvent != null)
-                        {
-                            wasCancelled = cancellableEvent.IsCancelled;
-                        }
-
-                        var serviceProvider = newScope.Resolve<IServiceProvider>();
-
-                        try
-                        {
-                            await subscription.Callback.Invoke(serviceProvider, sender, @event);
-
-                            // Ensure monitor event listeners can't cancel or uncancel events
-                            if (cancellableEvent != null && subscription.EventListenerAttribute.Priority ==
-                                EventListenerPriority.Monitor)
+                            if (cancellableEvent != null
+                                && cancellableEvent.IsCancelled
+                                && !subscription.EventListenerOptions.IgnoreCancelled)
                             {
-                                if (cancellableEvent.IsCancelled != wasCancelled)
+                                continue;
+                            }
+
+                            var wasCancelled = false;
+                            if (cancellableEvent != null)
+                            {
+                                wasCancelled = cancellableEvent.IsCancelled;
+                            }
+
+                            var serviceProvider = newScope.Resolve<IServiceProvider>();
+
+                            try
+                            {
+                                await subscription.Callback.Invoke(serviceProvider, sender, @event);
+
+                                // Ensure monitor event listeners can't cancel or uncancel events
+                                if (cancellableEvent != null && subscription.EventListenerOptions.Priority ==
+                                    EventListenerPriority.Monitor)
                                 {
-                                    cancellableEvent.IsCancelled = wasCancelled;
-                                    m_Logger.LogWarning(
-                                        "{ComponentId} changed {EventName} cancellation status with Monitor priority which is not permitted",
-                                        ((IOpenModComponent) @subscription.Owner.Target).OpenModComponentId, eventName);
+                                    if (cancellableEvent.IsCancelled != wasCancelled)
+                                    {
+                                        cancellableEvent.IsCancelled = wasCancelled;
+                                        m_Logger.LogWarning(
+                                            "{ComponentId} changed {EventName} cancellation status with Monitor priority which is not permitted",
+                                            ((IOpenModComponent)@subscription.Owner.Target).OpenModComponentId,
+                                            eventName);
+                                    }
                                 }
                             }
+                            catch (Exception ex)
+                            {
+                                m_Logger.LogError(ex, "Exception occured during event {EventName}", eventName);
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            m_Logger.LogError(ex, "Exception occured during event {EventName}", eventName);
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        m_Logger.LogError(ex, "Exception occurred when attempting to emit event {EventName}",
+                            eventName);
                     }
                 }
 
                 m_Logger.LogTrace("{EventName}: Finished", eventName);
             }
 
-            callback?.Invoke(@event);
+            if (callback != null)
+            {
+                await callback.Invoke(@event);
+            }
         }
 
         internal static string GetEventName(Type eventType)
@@ -385,7 +440,7 @@ namespace OpenMod.Core.Eventing
             var eventName = eventType.Name;
 
             return eventName.EndsWith(suffix, StringComparison.Ordinal)
-                ? eventName.Substring(0, eventName.Length - suffix.Length)
+                ? eventName[..^suffix.Length]
                 : eventName;
         }
 
@@ -405,6 +460,7 @@ namespace OpenMod.Core.Eventing
             await m_EventSubscriptions
                 .Select(d => d.Scope)
                 .Distinct()
+                .ToList()
                 .DisposeAllAsync();
 
             m_EventSubscriptions.Clear();

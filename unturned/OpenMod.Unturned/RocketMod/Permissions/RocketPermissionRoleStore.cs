@@ -101,7 +101,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             {
                 if (!IsPlayerActor(actor.Type))
                 {
-                    throw new NotSupportedException($"Cannot add non-player actor {actor.Type} to a RocketMod group.");
+                    return Task.FromException<bool>(new NotSupportedException($"Cannot add non-player actor {actor.Type} to a RocketMod group."));
                 }
 
                 var result = R.Permissions.AddPlayerToGroup(roleId, ToRocketPlayer(actor));
@@ -127,7 +127,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             {
                 if (!IsPlayerActor(actor.Type))
                 {
-                    throw new NotSupportedException($"Cannot remove non-player actor {actor.Type} from a RocketMod group.");
+                    return Task.FromException<bool>(new NotSupportedException($"Cannot remove non-player actor {actor.Type} from a RocketMod group."));
                 }
 
                 var result = R.Permissions.RemovePlayerFromGroup(roleId, ToRocketPlayer(actor));

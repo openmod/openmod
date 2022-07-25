@@ -1,4 +1,5 @@
-﻿using OpenMod.Extensions.Games.Abstractions.Items;
+﻿using System;
+using OpenMod.Extensions.Games.Abstractions.Items;
 using SDG.Unturned;
 using System.Collections;
 using System.Collections.Generic;
@@ -47,6 +48,26 @@ namespace OpenMod.Unturned.Items
 
                 return list;
             }
+        }
+
+        public void Clear()
+        {
+            for (byte page = 0; page < PlayerInventory.PAGES - 2; page++)
+            {
+                for (int index = Inventory.getItemCount(page) - 1; index >= 0; index--)
+                {
+                    Inventory.removeItem(page, (byte)index);
+                }
+            }
+            Player.clothing.updateClothes(0, 0, Array.Empty<byte>(), 0, 0, Array.Empty<byte>(), 0, 0, Array.Empty<byte>(), 0, 0, Array.Empty<byte>(), 0, 0, Array.Empty<byte>(), 0, 0, Array.Empty<byte>(), 0, 0, Array.Empty<byte>());
+            Player.equipment.sendSlot(0);
+            Player.equipment.sendSlot(1);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return (obj as UnturnedPlayerInventory)?.Player == Player;
         }
 
         public bool IsFull

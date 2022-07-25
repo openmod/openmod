@@ -16,11 +16,11 @@ namespace OpenMod.Unturned
 
         public SemVersion HostVersion { get; }
 
-        public string HostName { get; } = "OpenMod for Unturned";
+        public string HostName => "OpenMod for Unturned";
 
         public bool IsClient { get; } = Provider.isClient;
 
-        public bool IsServer { get; } = Provider.isServer || Dedicator.isDedicated || Dedicator.isStandaloneDedicatedServer;
+        public bool IsServer { get; } = Provider.isServer || Dedicator.isStandaloneDedicatedServer;
 
         public IPAddress? ServerAddress { get => SteamGameServer.GetPublicIP().ToIPAddress(); }
 

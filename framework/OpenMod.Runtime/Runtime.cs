@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -25,6 +28,7 @@ using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
 using Semver;
 using Serilog;
+using Serilog.Events;
 using Serilog.Extensions.Logging;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -66,6 +70,7 @@ namespace OpenMod.Runtime
 
         public bool IsDisposing { get; private set; }
 
+        private DateTime? m_DateLogger;
         private SerilogLoggerFactory? m_LoggerFactory;
         private ILogger<Runtime>? m_Logger;
         private IHostApplicationLifetime? m_AppLifeTime;
@@ -129,24 +134,21 @@ namespace OpenMod.Runtime
                 WorkingDirectory = parameters.WorkingDirectory;
                 CommandlineArgs = parameters.CommandlineArgs;
 
-                SetupSerilog();
+                SetupSerilog(false);
 
                 m_Logger.LogInformation("OpenMod v{Version} is starting...", Version);
 
                 if (parameters.PackageManager is not NuGetPackageManager nugetPackageManager)
                 {
                     var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
-                    nugetPackageManager = new NuGetPackageManager(packagesDirectory)
-                    {
-                        Logger = new OpenModNuGetLogger(m_LoggerFactory!.CreateLogger("NuGet"))
-                    };
+                    nugetPackageManager = new NuGetPackageManager(packagesDirectory);
                 }
 
                 nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory!.CreateLogger("NuGet"));
 
                 await nugetPackageManager.RemoveOutdatedPackagesAsync();
                 nugetPackageManager.InstallAssemblyResolver();
-                nugetPackageManager.SetAssemblyLoader((NuGetPackageManager.AssemblyLoader) Hotloader.LoadAssembly);
+                nugetPackageManager.SetAssemblyLoader((NuGetPackageManager.AssemblyLoader)Hotloader.LoadAssembly);
 
                 var startupContext = new OpenModStartupContext
                 {
@@ -223,6 +225,9 @@ namespace OpenMod.Runtime
                 await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
                 await startup.LoadPluginAssembliesAsync();
 
+                SetupSerilog(true);
+                nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory!.CreateLogger("NuGet"));
+
                 hostBuilder
                     .UseContentRoot(parameters.WorkingDirectory)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
@@ -276,6 +281,8 @@ namespace OpenMod.Runtime
                     Log.CloseAndFlush();
                 }
 
+                PerformFileSystemWatcherPatch();
+
                 return Host;
             }
             catch (Exception ex)
@@ -289,6 +296,35 @@ namespace OpenMod.Runtime
         {
             await ShutdownAsync();
             await InitAsync(m_OpenModHostAssemblies!, m_RuntimeInitParameters!, m_HostBuilderFunc);
+        }
+
+        private void PerformFileSystemWatcherPatch()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Type.GetType("Mono.Runtime") != null)
+            {
+                var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
+                var watcher = watcherField?.GetValue(null);
+
+                if (watcher?.GetType().GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)?.GetValue(watcher) is Hashtable watches)
+                {
+                    FieldInfo? incSubdirsField = null;
+
+                    // DictionaryEntry<FileSystemWatcher, DefaultWatcherData>
+                    foreach (var data in watches)
+                    {
+                        if (data is DictionaryEntry entry)
+                        {
+                            if (entry.Key is FileSystemWatcher fileSystemWatcher)
+                            {
+                                fileSystemWatcher.IncludeSubdirectories = false;
+                            }
+
+                            incSubdirsField ??= entry.Value.GetType().GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
+                            incSubdirsField?.SetValue(entry.Value, false);
+                        }
+                    }
+                }
+            }
         }
 
         private void ConfigureConfiguration(IConfigurationBuilder builder, OpenModStartup startup)
@@ -316,63 +352,91 @@ namespace OpenMod.Runtime
             startup.SetupContainer(containerBuilder);
         }
 
-        private void SetupSerilog()
+        private void SetupSerilog(bool loadFromFile)
         {
-            LoggerConfiguration loggerConfiguration;
-            try
+#if DEBUG
+            Serilog.Debugging.SelfLog.Enable(s =>
             {
-                var loggingPath = Path.Combine(WorkingDirectory, "logging.yaml");
-                if (!File.Exists(loggingPath))
+                Console.WriteLine(s);
+                Debugger.Break();
+            });
+#endif
+
+            LoggerConfiguration? loggerConfiguration = null;
+
+            LoggerConfiguration CreateDefaultLoggerConfiguration()
+            {
+                const string c_DefaultConsoleLogTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
+                const string c_DefaultFileLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
+
+                m_DateLogger ??= DateTime.Now;
+                var logFilePath = $"{WorkingDirectory}/logs/openmod-{m_DateLogger:yyyy-MM-dd-HH-mm-ss}.log"
+                    .Replace(@"\", "/");
+
+                return new LoggerConfiguration()
+                   .WriteTo.Async(c => c.Console(LogEventLevel.Information, c_DefaultConsoleLogTemplate))
+                   .WriteTo.Async(c => c.File(logFilePath, LogEventLevel.Information, outputTemplate: c_DefaultFileLogTemplate));
+            }
+
+            if (loadFromFile)
+            {
+                try
                 {
-                    // First run, logging.yaml doesn't exist yet.
-                    // We can't wait for auto-copy from the assembly as it would be too late.
-                    using var stream =
-                        typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yaml");
-                    using var reader =
-                        new StreamReader(
-                            stream ?? throw new MissingManifestResourceException(
-                                "Couldn't find resource: OpenMod.Core.logging.yaml"));
+                    Log.CloseAndFlush();
 
-                    var fileContent = reader.ReadToEnd();
-                    File.WriteAllText(loggingPath, fileContent);
-                }
-
-                var configuration = new ConfigurationBuilder()
-                    .SetBasePath(WorkingDirectory)
-                    .AddYamlFileEx(s =>
+                    var loggingPath = Path.Combine(WorkingDirectory, "logging.yaml");
+                    if (!File.Exists(loggingPath))
                     {
-                        s.Path = "logging.yaml";
-                        s.Optional = false;
-                        s.Variables = new Dictionary<string, string>
+                        // First run, logging.yaml doesn't exist yet.
+                        // We can't wait for auto-copy from the assembly as it would be too late.
+                        using var stream =
+                            typeof(AsyncHelper).Assembly.GetManifestResourceStream("OpenMod.Core.logging.yaml");
+                        using var reader =
+                            new StreamReader(
+                                stream ?? throw new MissingManifestResourceException(
+                                    "Couldn't find resource: OpenMod.Core.logging.yaml"));
+
+                        var fileContent = reader.ReadToEnd();
+                        File.WriteAllText(loggingPath, fileContent);
+                    }
+
+                    m_DateLogger ??= DateTime.Now;
+
+                    var configuration = new ConfigurationBuilder()
+                        .SetBasePath(WorkingDirectory)
+                        .AddYamlFileEx(s =>
                         {
-                            {"workingDirectory", WorkingDirectory.Replace(@"\", @"/")},
-                            {"date", DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}
-                        };
-                        s.ResolveFileProvider();
-                    })
-                    .AddEnvironmentVariables()
-                    .Build();
+                            s.Path = "logging.yaml";
+                            s.Optional = false;
+                            s.Variables = new Dictionary<string, string>
+                            {
+                                {"workingDirectory", WorkingDirectory.Replace(@"\", "/")},
+                                {"date", m_DateLogger.Value.ToString("yyyy-MM-dd-HH-mm-ss")}
+                            };
+                            s.ResolveFileProvider();
+                        })
+                        .AddEnvironmentVariables()
+                        .Build();
 
-                loggerConfiguration = new LoggerConfiguration()
-                    .ReadFrom.Configuration(configuration);
+                    loggerConfiguration = new LoggerConfiguration()
+                        .ReadFrom.Configuration(configuration);
+                }
+                catch (Exception ex)
+                {
+                    var previousColor = Console.ForegroundColor;
 
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine("Failed to setup Serilog; logging will not work correctly.");
+                    Console.WriteLine("Setting up console only logging as workaround.");
+                    Console.WriteLine("Please fix your logging.yaml file or delete it to restore the default one.");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(ex);
+
+                    Console.ForegroundColor = previousColor;
+                }
             }
-            catch (Exception ex)
-            {
-                var previousColor = Console.ForegroundColor;
 
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("Failed to setup Serilog; logging will not work correctly.");
-                Console.WriteLine("Setting up console only logging as workaround.");
-                Console.WriteLine("Please fix your logging.yaml file or delete it to restore the default one.");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(ex);
-
-                Console.ForegroundColor = previousColor;
-
-                loggerConfiguration = new LoggerConfiguration()
-                    .WriteTo.Async(c => c.Console());
-            }
+            loggerConfiguration ??= CreateDefaultLoggerConfiguration();
 
             var serilogLogger = Log.Logger = loggerConfiguration.CreateLogger();
             m_LoggerFactory = new SerilogLoggerFactory(serilogLogger);
@@ -381,11 +445,22 @@ namespace OpenMod.Runtime
 
         public async Task ShutdownAsync()
         {
+            if (IsDisposing)
+            {
+                return;
+            }
+
             IsDisposing = true;
             m_Logger.LogInformation("OpenMod is shutting down...");
-            await LifetimeScope.DisposeAsync();
-            Host?.Dispose();
+
+            if (Host is not null)
+            {
+                await Host.DisposeSyncOrAsync();
+            }
+
             Status = RuntimeStatus.Unloaded;
+
+            m_DateLogger = null;
             Log.CloseAndFlush();
         }
     }

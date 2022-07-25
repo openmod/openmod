@@ -6,7 +6,6 @@ namespace OpenMod.Unturned.Building.Events
     {
         public UnturnedBuildableDeployedEvent(UnturnedBuildable buildable) : base(buildable)
         {
-
         }
     }
 }

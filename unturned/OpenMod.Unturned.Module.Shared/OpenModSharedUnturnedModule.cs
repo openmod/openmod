@@ -20,7 +20,7 @@ namespace OpenMod.Unturned.Module.Shared
         private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new();
         private readonly Dictionary<string, Assembly> m_ResolvedAssemblies = new();
         private readonly string[] m_IncompatibleModules = { "Redox.Unturned" };
-        private readonly string[] m_CompatibleModules = { "AviRockets", "Rocket.Unturned" };
+        private readonly string[] m_CompatibleModules = { "AviRockets", "uScript.Unturned", "Rocket.Unturned" };
         private RemoteCertificateValidationCallback? m_OldCallBack;
         private Harmony? m_HarmonyInstance;
         private Assembly? m_ModuleAssembly;

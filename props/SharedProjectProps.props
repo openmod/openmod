@@ -3,7 +3,7 @@
     <PackageId>$(AssemblyName)</PackageId>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageTags>OpenMod UnityEngine UnrealEngine Plugin Framework</PackageTags>
-    <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://openmod.github.io/openmod-docs</PackageProjectUrl>
     <PackageOwners>OpenMod;Enes Sadık Özbek&lt;esozbek.me&gt;</PackageOwners>
     <PackageVersion>0.0.0</PackageVersion>
@@ -40,7 +40,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'== 'net461'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>	
   </ItemGroup>
    

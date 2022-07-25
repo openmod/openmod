@@ -1,7 +1,4 @@
-﻿using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using HarmonyLib;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +12,9 @@ using OpenMod.Core.Commands;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Plugins.Events;
 using Semver;
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace OpenMod.Core.Plugins
 {
@@ -27,9 +27,11 @@ namespace OpenMod.Core.Plugins
         public virtual string OpenModComponentId { get; }
         public virtual string WorkingDirectory { get; }
         public virtual bool IsComponentAlive { get; protected set; }
+        public virtual PluginStatus Status { get; private set; }
         public virtual string DisplayName { get; }
         public virtual string? Author { get; }
         public virtual string? Website { get; }
+        public virtual string? Description { get; }
         public virtual SemVersion Version { get; }
         public virtual IDataStore DataStore { get; }
         public virtual ILifetimeScope LifetimeScope { get; }
@@ -38,8 +40,8 @@ namespace OpenMod.Core.Plugins
         public IEventBus EventBus { get; }
         protected ILogger Logger { get; set; } = null!;
         protected Harmony Harmony { get; private set; } = null!;
+
         private readonly IOptions<CommandStoreOptions> m_CommandStoreOptions;
-        private readonly ILoggerFactory m_LoggerFactory;
         private OpenModComponentCommandSource m_CommandSource = null!;
 
         protected OpenModPluginBase(IServiceProvider serviceProvider)
@@ -50,8 +52,12 @@ namespace OpenMod.Core.Plugins
             DataStore = serviceProvider.GetRequiredService<IDataStore>();
             Runtime = serviceProvider.GetRequiredService<IRuntime>();
             EventBus = serviceProvider.GetRequiredService<IEventBus>();
-            m_LoggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
             m_CommandStoreOptions = serviceProvider.GetRequiredService<IOptions<CommandStoreOptions>>();
+
+            var loggerType = typeof(ILogger<>).MakeGenericType(GetType());
+            Logger = (ILogger)serviceProvider.GetRequiredService(loggerType);
+
+            Status = PluginStatus.Initialized;
 
             var metadata = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>();
             OpenModComponentId = metadata.Id;
@@ -63,6 +69,7 @@ namespace OpenMod.Core.Plugins
 
             Author = metadata.Author;
             Website = metadata.Website;
+            Description = metadata.Description;
             WorkingDirectory = PluginHelper.GetWorkingDirectory(Runtime, metadata.Id);
         }
 
@@ -74,18 +81,36 @@ namespace OpenMod.Core.Plugins
         [OpenModInternal]
         public virtual Task LoadAsync()
         {
-            Logger = m_LoggerFactory.CreateLogger(GetType());
-            Logger.LogInformation("[loading] {DisplayName} v{Version}", DisplayName, Version);
+            // Only load plugin after initialization
+            if (Status != PluginStatus.Initialized)
+            {
+                return Task.CompletedTask;
+            }
 
-            m_CommandSource = new OpenModComponentCommandSource(Logger, this, GetType().Assembly);
-            m_CommandStoreOptions.Value.AddCommandSource(m_CommandSource);
+            Status = PluginStatus.Loading;
 
-            Harmony = new Harmony(OpenModComponentId);
-            Harmony.PatchAll(GetType().Assembly);
+            try
+            {
+                Logger.LogInformation("[loading] {DisplayName} v{Version}", DisplayName, Version);
 
-            IsComponentAlive = true;
+                m_CommandSource = new OpenModComponentCommandSource(Logger, this, GetType().Assembly);
+                m_CommandStoreOptions.Value.AddCommandSource(m_CommandSource);
 
-            EventBus.Subscribe(this, GetType().Assembly);
+                Harmony = new Harmony(OpenModComponentId);
+                Harmony.PatchAll(GetType().Assembly);
+
+                IsComponentAlive = true;
+
+                EventBus.Subscribe(this, GetType().Assembly);
+
+                Status = PluginStatus.Loaded;
+            }
+            catch
+            {
+                Status = PluginStatus.ExceptionWhenLoading;
+
+                throw;
+            }
 
             return Task.CompletedTask;
         }
@@ -94,26 +119,46 @@ namespace OpenMod.Core.Plugins
         [OpenModInternal]
         public virtual async Task UnloadAsync()
         {
-            Harmony.UnpatchAll(OpenModComponentId);
-            m_CommandStoreOptions.Value.RemoveCommandSource(m_CommandSource);
-            EventBus.Unsubscribe(this);
-            IsComponentAlive = false;
-
-            if(Logger is IAsyncDisposable asyncDisposable)
+            // Only unload after plugin loaded or attempted to load
+            if (Status != PluginStatus.Loaded && Status != PluginStatus.ExceptionWhenLoading)
             {
-                await asyncDisposable.DisposeAsync();
+                return;
             }
-            else if(Logger is IDisposable disposable)
+
+            Status = PluginStatus.Unloading;
+
+            try
             {
-                disposable.Dispose();
+                Harmony.UnpatchAll(OpenModComponentId);
+
+                m_CommandStoreOptions.Value.RemoveCommandSource(m_CommandSource);
+
+                EventBus.Unsubscribe(this);
+
+                IsComponentAlive = false;
+
+                Status = PluginStatus.Unloaded;
+            }
+            catch
+            {
+                Status = PluginStatus.ExceptionWhenUnloading;
+
+                throw;
             }
         }
 
         public async ValueTask DisposeAsync()
         {
-            if (!await OnDispose())
+            try
             {
-                await UnloadAsync();
+                if (!await OnDispose())
+                {
+                    await UnloadAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Exception occurred when disposing plugin '{ComponentId}'", OpenModComponentId);
             }
 
             await EventBus.EmitAsync(this, this, new PluginDisposedEvent(this));

@@ -1,5 +1,5 @@
 ﻿using OpenMod.API.Plugins;
-using OpenMod.EntityFrameworkCore.Extensions;
+using OpenMod.EntityFrameworkCore.MySql.Extensions;
 using UserDatabasePlugin.Database;
 
 namespace UserDatabasePlugin
@@ -8,8 +8,7 @@ namespace UserDatabasePlugin
     {
         public void ConfigureContainer(IPluginServiceConfigurationContext context)
         {
-            context.ContainerBuilder.AddEntityFrameworkCoreMySql();
-            context.ContainerBuilder.AddDbContext<UserDatabaseDbContext>();
+            context.ContainerBuilder.AddMySqlDbContext<UserDatabaseDbContext>();
         }
     }
 }
