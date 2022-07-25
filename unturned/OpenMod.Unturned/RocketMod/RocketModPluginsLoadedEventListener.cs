@@ -141,7 +141,7 @@ namespace OpenMod.Unturned.RocketMod
             var checkPermissionsList = ChatManager.onCheckPermissions.GetInvocationList();
 
             var shimmyDelegate = Array.Find(checkPermissionsList,
-                d => d.GetMethodInfo()?.DeclaringType?.Assembly?.GetName()?.Name == "ShimmysAdminTools");
+                d => d.GetMethodInfo()?.DeclaringType?.Assembly?.GetName().Name == "ShimmysAdminTools");
             if (shimmyDelegate != null)
             {
                 var type = shimmyDelegate.GetMethodInfo().DeclaringType;

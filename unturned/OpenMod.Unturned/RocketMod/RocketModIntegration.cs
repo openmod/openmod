@@ -163,6 +163,13 @@ namespace OpenMod.Unturned.RocketMod
 
             m_HarmonyInstance = new Harmony(c_HarmonyId);
             m_HarmonyInstance.PatchAllConditional(typeof(OpenModUnturnedHost).Assembly, "rocketmod");
+            m_EventBus.Subscribe<CommandExecutingEvent>(m_RocketModComponent, (services, sender, @event) =>
+            {
+                var scope = services.GetRequiredService<ILifetimeScope>();
+                var listener = ActivatorUtilitiesEx.CreateInstance<RocketModExecuteCommandEventTrigger>(scope);
+                return listener.HandleEventAsync(sender, @event);
+            });
+
             m_EventBus.Subscribe<CommandExecutedEvent>(m_RocketModComponent, (services, sender, @event) =>
             {
                 var scope = services.GetRequiredService<ILifetimeScope>();
@@ -190,10 +197,10 @@ namespace OpenMod.Unturned.RocketMod
         private void PatchRcon()
         {
             var awakeMethod = typeof(RCONServer).GetMethod("Awake", BindingFlags.Public | BindingFlags.Instance);
-            m_HarmonyInstance!.NopPatch(awakeMethod);
+            m_HarmonyInstance!.NopPatch(awakeMethod!);
 
             var destroyMethod = typeof(RCONServer).GetMethod("OnDestroy", BindingFlags.NonPublic | BindingFlags.Instance);
-            m_HarmonyInstance!.NopPatch(destroyMethod);
+            m_HarmonyInstance!.NopPatch(destroyMethod!);
         }
 
         private void PatchPluginsLoaded()

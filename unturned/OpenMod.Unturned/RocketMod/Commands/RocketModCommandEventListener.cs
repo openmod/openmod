@@ -4,8 +4,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Commands;
 using OpenMod.API.Eventing;
 using OpenMod.API.Localization;
@@ -13,10 +11,7 @@ using OpenMod.Core.Commands;
 using OpenMod.Core.Commands.Events;
 using OpenMod.Core.Cooldowns;
 using OpenMod.Core.Eventing;
-using OpenMod.Core.Ioc;
 using OpenMod.Core.Users;
-using OpenMod.Unturned.Configuration;
-using OpenMod.Unturned.RocketMod.Permissions;
 using OpenMod.Unturned.Users;
 using Rocket.API;
 using Rocket.Core;
@@ -28,7 +23,6 @@ namespace OpenMod.Unturned.RocketMod.Commands
     public class RocketModCommandEventListener
     {
         private const string c_RocketPrefix = "rocket:";
-        private readonly IOpenModUnturnedConfiguration m_Configuration;
         private readonly ICommandCooldownStore m_CommandCooldownStore;
         private readonly IOpenModStringLocalizer m_StringLocalizer;
         private static readonly MethodInfo s_CheckPermissionsMethod;
@@ -42,17 +36,15 @@ namespace OpenMod.Unturned.RocketMod.Commands
         }
 
         public RocketModCommandEventListener(
-            IOpenModUnturnedConfiguration configuration,
             ICommandCooldownStore commandCooldownStore,
             IOpenModStringLocalizer stringLocalizer)
         {
-            m_Configuration = configuration;
             m_CommandCooldownStore = commandCooldownStore;
             m_StringLocalizer = stringLocalizer;
         }
 
         [EventListener(Priority = EventListenerPriority.Monitor)]
-        public Task HandleEventAsync(object? sender, CommandExecutedEvent @event)
+        public Task HandleEventAsync(object? _, CommandExecutedEvent @event)
         {
             async UniTask Task()
             {
@@ -121,7 +113,7 @@ namespace OpenMod.Unturned.RocketMod.Commands
             return Task().AsTask();
         }
 
-        private const string RocketCooldownsFormat = "Rocket.{0}";
+        private const string c_RocketCooldownsFormat = "Rocket.{0}";
         private async Task<bool> CheckCooldownAsync(CommandExecutedEvent @event)
         {
             const string rocketPrefix = "rocket:";
@@ -151,7 +143,7 @@ namespace OpenMod.Unturned.RocketMod.Commands
                 return true;
             }
 
-            var commandId = string.Format(RocketCooldownsFormat, command.Name);
+            var commandId = string.Format(c_RocketCooldownsFormat, command.Name);
             var cooldownSpan = await m_CommandCooldownStore.GetCooldownSpanAsync(commandContext.Actor, commandId);
 
             if (cooldownSpan.HasValue)
