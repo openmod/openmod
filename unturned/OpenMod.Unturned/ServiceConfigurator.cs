@@ -86,6 +86,7 @@ namespace OpenMod.Unturned
                 {
                     serviceCollection.Configure<PermissionCheckerOptions>(options =>
                     {
+                        options.RemovePermissionSource<DefaultPermissionStore>();
                         options.AddPermissionSource<RocketPermissionStore>();
                         options.AddPermissionCheckProvider<RocketCooldownPermissionCheckProvider>();
                     });
