@@ -445,10 +445,19 @@ namespace OpenMod.Runtime
 
         public async Task ShutdownAsync()
         {
+            if (IsDisposing)
+            {
+                return;
+            }
+
             IsDisposing = true;
             m_Logger.LogInformation("OpenMod is shutting down...");
-            await LifetimeScope.DisposeAsync();
-            Host?.Dispose();
+
+            if (Host is not null)
+            {
+                await Host.DisposeSyncOrAsync();
+            }
+
             Status = RuntimeStatus.Unloaded;
 
             m_DateLogger = null;

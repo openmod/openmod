@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OpenMod.NuGet;
 using Command = OpenMod.Core.Commands.Command;
+using Semver;
 
 namespace OpenMod.Unturned.Commands
 {
@@ -60,12 +61,13 @@ namespace OpenMod.Unturned.Commands
             client.DefaultRequestHeaders.Add("User-Agent", "request");
 
             var releaseData = await client.GetStringAsync("https://api.github.com/repos/openmod/openmod/releases/latest");
-            var release = JsonConvert.DeserializeObject<LatestRelease>(releaseData);
+            var release = JsonConvert.DeserializeObject<LatestRelease>(releaseData) ?? throw new Exception("Failed to deserialize GitHub data");
+            var releaseVersion = SemVersion.Parse(release.TagName, SemVersionStyles.Any);
             var isPre = Context.Parameters.Contains("--pre");
             var anyUpdated = false;
 
             var moduleAsset = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"));
-            if (moduleAsset != null && m_HostInformation.HostVersion.CompareTo(release.TagName) < 0)
+            if (moduleAsset != null && m_HostInformation.HostVersion.CompareTo(releaseVersion) < 0)
             {
                 BackupFiles(openModDirPath);
 

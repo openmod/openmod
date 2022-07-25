@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using OpenMod.API;
-using SmartFormat;
+using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Localization
 {
@@ -49,12 +49,9 @@ namespace OpenMod.Core.Localization
             get
             {
                 var configValue = m_Configuration.GetSection(name);
-                if (!configValue.Exists() || string.IsNullOrEmpty(configValue.Value))
-                {
-                    return new LocalizedString(name, name, true);
-                }
-
-                return new LocalizedString(name, configValue.Value);
+                return !configValue.Exists() || string.IsNullOrEmpty(configValue.Value)
+                    ? new LocalizedString(name, name, true)
+                    : new LocalizedString(name, configValue.Value);
             }
         }
 
@@ -68,7 +65,8 @@ namespace OpenMod.Core.Localization
                     return new LocalizedString(name, name, true);
                 }
 
-                return new LocalizedString(name, Smart.Format(configValue.Value, arguments));
+                var formatter = SmartFormatterHelper.ObtainSmartFormatter();
+                return new LocalizedString(name, formatter.Format(configValue.Value, arguments));
             }
         }
     }

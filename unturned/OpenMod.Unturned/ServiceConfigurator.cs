@@ -14,6 +14,7 @@ using OpenMod.Extensions.Economy.Abstractions;
 using OpenMod.Extensions.Games.Abstractions;
 using OpenMod.Unturned.Commands;
 using OpenMod.Unturned.Configuration;
+using OpenMod.Unturned.Items;
 using OpenMod.Unturned.Locations;
 using OpenMod.Unturned.Permissions;
 using OpenMod.Unturned.Players;
@@ -22,8 +23,8 @@ using OpenMod.Unturned.RocketMod.Economy;
 using OpenMod.Unturned.RocketMod.Permissions;
 using OpenMod.Unturned.Steam;
 using OpenMod.Unturned.Users;
+using OpenMod.Unturned.Vehicles;
 using System;
-using System.Linq;
 
 namespace OpenMod.Unturned
 {
@@ -69,6 +70,8 @@ namespace OpenMod.Unturned
                 options.AddCommandParameterResolveProvider<UnturnedPlayerCommandParameterResolveProvider>();
                 options.AddCommandParameterResolveProvider<UnturnedLocationCommandParameterResolveProvider>();
                 options.AddCommandParameterResolveProvider<CSteamIDCommandParameterResolveProvider>();
+                options.AddCommandParameterResolveProvider<UnturnedItemAssetCommandParameterResolveProvider>();
+                options.AddCommandParameterResolveProvider<UnturnedVehicleAssetCommandParameterResolveProvider>();
             });
 
             if (RocketModIntegration.IsRocketModInstalled())
@@ -83,6 +86,7 @@ namespace OpenMod.Unturned
                 {
                     serviceCollection.Configure<PermissionCheckerOptions>(options =>
                     {
+                        options.RemovePermissionSource<DefaultPermissionStore>();
                         options.AddPermissionSource<RocketPermissionStore>();
                         options.AddPermissionCheckProvider<RocketCooldownPermissionCheckProvider>();
                     });

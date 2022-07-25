@@ -13,12 +13,10 @@ using OpenMod.Unturned.Vehicles;
 using SDG.Unturned;
 using Steamworks;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Net;
 using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
 using Vector3 = System.Numerics.Vector3;
 
@@ -236,54 +234,16 @@ namespace OpenMod.Unturned.Players
                         continue;
                     }
 
-                    foreach (var lline in WrapLine(line))
-                    {
-                        ChatManager.serverSendMessage(
-                            text: lline,
-                            color: color.ToUnityColor(),
-                            toPlayer: SteamPlayer,
-                            iconURL: iconUrl,
-                            useRichTextFormatting: isRich);
-                    }
+                    ChatManager.serverSendMessage(
+                        text: line,
+                        color: color.ToUnityColor(),
+                        toPlayer: SteamPlayer,
+                        iconURL: iconUrl,
+                        useRichTextFormatting: isRich);
                 }
             }
 
             return PrintMessageTask().AsTask();
-        }
-
-        private IEnumerable<string> WrapLine(string line)
-        {
-            var words = line.Split(' ');
-            var lines = new List<string>();
-            var currentLine = new StringBuilder();
-            var maxLength = 90;
-
-            foreach (var currentWord in words)
-            {
-                if (currentLine.Length > maxLength ||
-                    currentLine.Length + currentWord.Length > maxLength)
-                {
-                    lines.Add(currentLine.ToString());
-                    currentLine.Clear();
-                }
-
-                if (currentLine.Length > 0)
-                {
-                    currentLine.Append(" ");
-                    currentLine.Append(currentWord);
-                }
-                else
-                {
-                    currentLine.Append(currentWord);
-                }
-            }
-
-            if (currentLine.Length > 0)
-            {
-                lines.Add(currentLine.ToString());
-            }
-
-            return lines;
         }
 
         public Task SetHungerAsync(double hunger)
