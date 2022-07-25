@@ -843,29 +843,35 @@ namespace OpenMod.NuGet
         {
             foreach (var package in packages)
             {
-                if (await IsPackageInstalledAsync(package.Id))
+                if (!await IsPackageInstalledAsync(package.Id))
                 {
-                    if (updateExisting)
-                    {
-                        var installedPackage = await GetLatestPackageIdentityAsync(package.Id);
-
-                        // Re-install the package if:
-                        // The target package is latest (has no version)
-                        // or
-                        // The currently installed package's version is not equal to the target's package version
-                        if (!package.HasVersion || installedPackage?.Version == null || package.Version > installedPackage.Version)
-                        {
-                            Logger.LogInformation($"Updating package: {package.Id}@{package.Version?.OriginalVersion ?? "latest"}");
-                            await InstallAsync(package, allowPrereleaseVersions: true);
-                        }
-                    }
-
+                    await LogAndInstallPackage(package, false);
                     continue;
                 }
 
-                Logger.LogInformation($"Installing package: {package.Id}@{package.Version?.OriginalVersion ?? "latest"}");
-                await InstallAsync(package, allowPrereleaseVersions: true);
+                if (!updateExisting)
+                {
+                    continue;
+                }
+
+                if (!package.HasVersion)
+                {
+                    await LogAndInstallPackage(package, true);
+                    continue;
+                }
+
+                var installedPackage = await GetLatestPackageIdentityAsync(package.Id);
+                if (installedPackage?.Version == null || package.Version > installedPackage.Version)
+                {
+                    await LogAndInstallPackage(package, false);
+                }
             }
+        }
+
+        private async Task LogAndInstallPackage(PackageIdentity package, bool isUpdate)
+        {
+            Logger.LogInformation($"{(isUpdate ? "Updating" : "Installing")} package: {package.Id}@{package.Version?.OriginalVersion ?? "latest"}");
+            await InstallAsync(package, allowPrereleaseVersions: true);
         }
 
         public async Task<int> InstallMissingPackagesAsync(bool updateExisting = true)
