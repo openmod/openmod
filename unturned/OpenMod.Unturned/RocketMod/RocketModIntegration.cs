@@ -163,11 +163,12 @@ namespace OpenMod.Unturned.RocketMod
 
             m_HarmonyInstance = new Harmony(c_HarmonyId);
             m_HarmonyInstance.PatchAllConditional(typeof(OpenModUnturnedHost).Assembly, "rocketmod");
-            m_EventBus.Subscribe<CommandExecutingEvent>(m_RocketModComponent, (services, sender, @event) =>
+
+            var rocketmodOnExecuteCommandTrigger = new RocketModExecuteCommandEventTrigger();
+            m_EventBus.Subscribe<CommandExecutingEvent>(m_RocketModComponent, (_, sender, @event) =>
             {
-                var scope = services.GetRequiredService<ILifetimeScope>();
-                var listener = ActivatorUtilitiesEx.CreateInstance<RocketModExecuteCommandEventTrigger>(scope);
-                return listener.HandleEventAsync(sender, @event);
+                // ReSharper disable once ConvertToLambdaExpression
+                return rocketmodOnExecuteCommandTrigger.HandleEventAsync(sender, @event);
             });
 
             m_EventBus.Subscribe<CommandExecutedEvent>(m_RocketModComponent, (services, sender, @event) =>

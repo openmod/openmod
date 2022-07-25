@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using OpenMod.API.Eventing;
+using OpenMod.Core.Commands;
 using OpenMod.Core.Commands.Events;
 using OpenMod.Core.Eventing;
 using OpenMod.Core.Users;
@@ -29,6 +30,12 @@ namespace OpenMod.Unturned.RocketMod.Commands
         {
             async UniTask Task()
             {
+                //Just need to be handle if command exists
+                if (@event.CommandContext.Exception is CommandNotFoundException)
+                {
+                    return;
+                }
+
                 var command = new RocketModCommandFromOpenMod(@event.CommandContext);
 
                 await UniTask.SwitchToMainThread();
