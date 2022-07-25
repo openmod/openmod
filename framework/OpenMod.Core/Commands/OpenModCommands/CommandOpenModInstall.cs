@@ -49,12 +49,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
             }
 
             var args = Context.Parameters.ToList();
-            var isPre = false;
-            if (args.Contains("-Pre"))
-            {
-                isPre = true;
-                args.Remove("-Pre");
-            }
+            var isPre = args.Remove("-Pre");
 
             var anySuccessful = false;
             foreach (var arg in args)
