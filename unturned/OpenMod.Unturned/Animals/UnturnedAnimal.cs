@@ -12,11 +12,11 @@ namespace OpenMod.Unturned.Animals
 {
     public class UnturnedAnimal : IEntity, IHasHealth, IDamageSource
     {
-        private static readonly FieldInfo m_HealthField;
+        private static readonly FieldInfo? s_HealthField;
 
         static UnturnedAnimal()
         {
-            m_HealthField = typeof(Animal).GetField("health", BindingFlags.Instance | BindingFlags.NonPublic);
+            s_HealthField = typeof(Animal).GetField("health", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
         public UnturnedAnimal(Animal animal)
@@ -41,17 +41,23 @@ namespace OpenMod.Unturned.Animals
 
         public double MaxHealth => Animal.asset.health;
 
-        public double Health => (ushort)m_HealthField.GetValue(Animal);
+        public double Health => (double)(s_HealthField?.GetValue(Animal) ?? 0);
 
+        
         public Task SetHealthAsync(double health)
         {
             async UniTask SetHeathTask()
             {
                 await UniTask.SwitchToMainThread();
-                m_HealthField.SetValue(Animal, (ushort)health);
+                s_HealthField?.SetValue(Animal, (ushort)health);
             }
 
             return SetHeathTask().AsTask();
+        }
+
+        public Task SetFullHealthAsync()
+        {
+            return SetHealthAsync(MaxHealth);
         }
 
         public Task DamageAsync(double amount)
@@ -90,12 +96,7 @@ namespace OpenMod.Unturned.Animals
                 return false;
             }
 
-            if (Transform.Rotation != rotation && !await Transform.SetRotationAsync(rotation))
-            {
-                return false;
-            }
-
-            return true;
+            return Transform.Rotation == rotation || await Transform.SetRotationAsync(rotation);
         }
 
         public string DamageSourceName

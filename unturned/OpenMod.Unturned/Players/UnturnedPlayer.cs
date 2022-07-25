@@ -15,6 +15,7 @@ using Steamworks;
 using System;
 using System.Drawing;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -22,13 +23,16 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players
 {
-    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource, IHasHunger
+    //todo add infect and oxygen
+    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource, IHasHunger, IHasThirst
     {
         public Player Player { get; }
 
         public SteamPlayer SteamPlayer { get; }
 
         public CSteamID SteamId { get; }
+
+        public PlayerLife PlayerLife { get; }
 
         [OpenModInternal]
         protected internal UnturnedPlayer(Player player)
@@ -41,6 +45,8 @@ namespace OpenMod.Unturned.Players
             SteamPlayer = Player.channel.owner;
             SteamId = SteamPlayer.playerID.steamID;
             EntityInstanceId = SteamId.ToString();
+
+            PlayerLife = Player.life;
         }
 
         public bool Equals(UnturnedPlayer other)
@@ -69,11 +75,11 @@ namespace OpenMod.Unturned.Players
 
         public string EntityInstanceId { get; }
 
-        public bool IsAlive => !Player.life.isDead;
+        public bool IsAlive => !PlayerLife.isDead;
 
-        public double MaxHealth => 255;
+        public double MaxHealth => 100;//Unturned Max health
 
-        public double Health => Player.life.health;
+        public double Health => PlayerLife.health;
 
         public IPAddress? Address
         {
@@ -83,12 +89,40 @@ namespace OpenMod.Unturned.Players
             }
         }
 
-        public Task SetHealthAsync(double health)
+        public Task SetFullHealthAsync()
+        {
+            async UniTask SetFullHealthTask()
+            {
+                await UniTask.SwitchToMainThread();
+
+                PlayerLife.askHeal((byte)MaxHealth, PlayerLife.isBleeding, PlayerLife.isBroken);
+
+                //todo add infect and oxygen
+                PlayerLife.askEat((byte)MaxHunger);
+                PlayerLife.askDrink((byte)MaxThirst);
+            }
+
+            return SetFullHealthTask().AsTask();
+        }
+
+        public Task SetHealthAsync(double health)//This is a Set and NOT a incremental
         {
             async UniTask SetHealthTask()
             {
+                if (health < 0 || health > MaxHealth)
+                {
+                    throw new ArgumentException($"Invalid health amount({health}). It must be lower than {MaxHealth} and above 0.");
+                }
+
                 await UniTask.SwitchToMainThread();
-                Player.life.askHeal((byte)health, Player.life.isBleeding, Player.life.isBroken);
+
+                var amount = (float)health - PlayerLife.food;
+                if (amount == 0)
+                {
+                    return;
+                }
+
+                PlayerLife.serverModifyHealth(amount);
             }
 
             return SetHealthTask().AsTask();
@@ -117,7 +151,7 @@ namespace OpenMod.Unturned.Players
 
         public Task<bool> SetPositionAsync(Vector3 position)
         {
-            return SetPositionAsync(position, Player.transform.rotation.ToSystemQuaternion());
+            return SetPositionAsync(position, Transform.Rotation);
         }
 
         public Task<bool> SetPositionAsync(Vector3 position, Quaternion rotation)
@@ -126,8 +160,7 @@ namespace OpenMod.Unturned.Players
             {
                 await UniTask.SwitchToMainThread();
 
-                if (Player.transform.position == position.ToUnityVector() &&
-                    Player.transform.rotation == rotation.ToUnityQuaternion())
+                if (Transform.Position == position && Transform.Rotation == rotation)
                 {
                     return true;
                 }
@@ -162,12 +195,7 @@ namespace OpenMod.Unturned.Players
             get
             {
                 var vehicle = Player.movement.getVehicle();
-                if (vehicle == null)
-                {
-                    return null;
-                }
-
-                return new UnturnedVehicle(vehicle);
+                return vehicle == null ? null : new UnturnedVehicle(vehicle);
             }
         }
 
@@ -175,17 +203,27 @@ namespace OpenMod.Unturned.Players
         {
             get
             {
-                return Player.channel.owner.playerID.characterName;
+                return SteamPlayer.playerID.characterName;
             }
         }
 
-        public double MaxHunger => byte.MaxValue;
+        public double MaxHunger => 100;//Unturned Max hunger
 
         public double Hunger
         {
             get
             {
-                return Player.life.food;
+                return PlayerLife.food;
+            }
+        }
+
+        public double MaxThirst => 100;//Unturned Max Thirst
+
+        public double Thirst
+        {
+            get
+            {
+                return PlayerLife.water;
             }
         }
 
@@ -208,8 +246,8 @@ namespace OpenMod.Unturned.Players
 
             async UniTask PrintMessageTask()
             {
-                var lines = message.Replace(System.Environment.NewLine, "\n").Split('\n');
-                if (lines.Length == 0)
+                var lines = message.Replace(System.Environment.NewLine, "\n").Split('\n').Where(line => line.Trim().Length > 0).ToArray();
+                if (!lines.Any())
                 {
                     return;
                 }
@@ -218,12 +256,6 @@ namespace OpenMod.Unturned.Players
 
                 foreach (var line in lines)
                 {
-                    var lineToDisplay = line.Trim();
-                    if (lineToDisplay.Length == 0)
-                    {
-                        continue;
-                    }
-
                     ChatManager.serverSendMessage(
                         text: line,
                         color: color.ToUnityColor(),
@@ -236,15 +268,50 @@ namespace OpenMod.Unturned.Players
             return PrintMessageTask().AsTask();
         }
 
-        public Task SetHungerAsync(double hunger)
+        public Task SetHungerAsync(double hunger)//This is a Set and NOT a incremental
         {
             async UniTask SetHungerTask()
             {
+                if (hunger < 0 || hunger > MaxHunger)
+                {
+                    throw new ArgumentException($"Invalid hunger amount({hunger}). It must be lower than {MaxHunger} and above 0.");
+                }
+
                 await UniTask.SwitchToMainThread();
-                Player.life.askEat((byte)hunger);
+
+                var amount = (float)hunger - PlayerLife.food;
+                if (amount == 0)
+                {
+                    return;
+                }
+
+                PlayerLife.serverModifyFood(amount);
             }
 
             return SetHungerTask().AsTask();
+        }
+
+        public Task SetThirstAsync(double thirst)//This is a Set and NOT a incremental
+        {
+            async UniTask SetThirstTask()
+            {
+                if (thirst < 0 || thirst > MaxThirst)
+                {
+                    throw new ArgumentException($"Invalid thirst amount({thirst}). It must be lower than {MaxThirst} and above 0.");
+                }
+
+                await UniTask.SwitchToMainThread();
+
+                var amount = (float)thirst - PlayerLife.water;
+                if (amount == 0)
+                {
+                    return;
+                }
+
+                PlayerLife.serverModifyWater(amount);
+            }
+
+            return SetThirstTask().AsTask();
         }
     }
 }
