@@ -23,7 +23,6 @@ namespace OpenMod.Core.Plugins
     /// </summary>
     public abstract class OpenModPluginBase : IOpenModPlugin, IAsyncDisposable
     {
-        private readonly IServiceProvider m_ServiceProvider;
         public virtual string OpenModComponentId { get; }
         public virtual string WorkingDirectory { get; }
         public virtual bool IsComponentAlive { get; protected set; }
@@ -38,7 +37,7 @@ namespace OpenMod.Core.Plugins
         public virtual IConfiguration Configuration { get; protected set; }
         public IRuntime Runtime { get; }
         public IEventBus EventBus { get; }
-        protected ILogger Logger { get; set; } = null!;
+        protected ILogger Logger { get; set; }
         protected Harmony Harmony { get; private set; } = null!;
 
         private readonly IOptions<CommandStoreOptions> m_CommandStoreOptions;
@@ -46,8 +45,8 @@ namespace OpenMod.Core.Plugins
 
         protected OpenModPluginBase(IServiceProvider serviceProvider)
         {
-            m_ServiceProvider = serviceProvider;
             LifetimeScope = serviceProvider.GetRequiredService<ILifetimeScope>();
+            // ReSharper disable once VirtualMemberCallInConstructor
             Configuration = serviceProvider.GetRequiredService<IConfiguration>();
             DataStore = serviceProvider.GetRequiredService<IDataStore>();
             Runtime = serviceProvider.GetRequiredService<IRuntime>();
@@ -61,6 +60,7 @@ namespace OpenMod.Core.Plugins
 
             var metadata = GetType().Assembly.GetCustomAttribute<PluginMetadataAttribute>();
             OpenModComponentId = metadata.Id;
+            // ReSharper disable once VirtualMemberCallInConstructor
             Version = GetPluginVersion();
 
             DisplayName = !string.IsNullOrEmpty(metadata.DisplayName)
@@ -117,12 +117,12 @@ namespace OpenMod.Core.Plugins
 
 
         [OpenModInternal]
-        public virtual async Task UnloadAsync()
+        public virtual Task UnloadAsync()
         {
             // Only unload after plugin loaded or attempted to load
             if (Status != PluginStatus.Loaded && Status != PluginStatus.ExceptionWhenLoading)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             Status = PluginStatus.Unloading;
@@ -138,6 +138,7 @@ namespace OpenMod.Core.Plugins
                 IsComponentAlive = false;
 
                 Status = PluginStatus.Unloaded;
+                return Task.CompletedTask;
             }
             catch
             {
