@@ -1,15 +1,13 @@
-﻿using OpenMod.API;
+﻿using System;
+using System.Drawing;
+using System.Threading.Tasks;
+using OpenMod.API;
 using OpenMod.API.Users;
 using OpenMod.Core.Users;
 using OpenMod.Extensions.Games.Abstractions.Players;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
 using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Users
 {
@@ -60,49 +58,10 @@ namespace OpenMod.Unturned.Users
         {
             return Player.PrintMessageAsync(message, color, isRich, iconUrl);
         }
-            
-
-        private IEnumerable<string> WrapLine(string line)
-        {
-            var words = line.Split(' ');
-            var lines = new List<string>();
-            var currentLine = new StringBuilder();
-            var maxLength = 90;
-
-            foreach (var currentWord in words)
-            {
-                if ((currentLine.Length > maxLength) ||
-                    ((currentLine.Length + currentWord.Length) > maxLength))
-                {
-                    lines.Add(currentLine.ToString());
-                    currentLine.Clear();
-                }
-
-                if (currentLine.Length > 0)
-                {
-                    currentLine.Append(" ");
-                    currentLine.Append(currentWord);
-                }
-                else
-                {
-                    currentLine.Append(currentWord);
-                }
-            }
-
-            if (currentLine.Length > 0)
-            {
-                lines.Add(currentLine.ToString());
-            }
-
-            return lines;
-        }
 
         public bool Equals(UnturnedUser other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-
-            return other.SteamId.Equals(SteamId);
+            return !ReferenceEquals(null, other) && (ReferenceEquals(this, other) || other.SteamId.Equals(SteamId));
         }
 
         public bool Equals(UnturnedPendingUser other)

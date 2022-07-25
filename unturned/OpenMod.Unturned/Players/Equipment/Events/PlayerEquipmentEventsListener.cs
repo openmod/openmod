@@ -1,10 +1,12 @@
 ﻿extern alias JetBrainsAnnotations;
+using System;
+using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Items;
+using OpenMod.Unturned.Patching;
 using SDG.Unturned;
-using System;
 
 namespace OpenMod.Unturned.Players.Equipment.Events
 {
@@ -19,12 +21,14 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         {
             OnItemEquipped += Events_OnItemEquipped;
             OnItemUnequipped += Events_OnItemUnequipped;
+            PlayerEquipment.OnPunch_Global += Events_OnPunchGlobal;
         }
 
         public override void Unsubscribe()
         {
             OnItemEquipped -= Events_OnItemEquipped;
             OnItemUnequipped -= Events_OnItemUnequipped;
+            PlayerEquipment.OnPunch_Global -= Events_OnPunchGlobal;
         }
 
         public override void SubscribePlayer(Player player)
@@ -70,6 +74,15 @@ namespace OpenMod.Unturned.Players.Equipment.Events
             var player = GetUnturnedPlayer(nativePlayer)!;
 
             var @event = new UnturnedPlayerItemUnequippedEvent(player);
+
+            Emit(@event);
+        }
+
+        private void Events_OnPunchGlobal(PlayerEquipment equipment, EPlayerPunch punch)
+        {
+            var player = GetUnturnedPlayer(equipment.player)!;
+
+            var @event = new UnturnedPlayerPunchEvent(player, punch);
 
             Emit(@event);
         }
@@ -129,6 +142,13 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         [HarmonyPatch]
         private static class Patches
         {
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex, MethodBase original)
+            {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
+                return null;
+            }
+
             // ReSharper disable InconsistentNaming
             [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerEquipment), nameof(PlayerEquipment.ReceiveEquip))]

@@ -1,10 +1,10 @@
 ﻿using JetBrains.Annotations;
-using OpenMod.EntityFrameworkCore;
+using OpenMod.EntityFrameworkCore.MySql;
 
 namespace UserDatabasePlugin.Database
 {
     [UsedImplicitly]
-    public class UserDatabaseDbContextFactory : OpenModDbContextFactory<UserDatabaseDbContext>
+    public class UserDatabaseDbContextFactory : OpenModMySqlDbContextFactory<UserDatabaseDbContext>
     {
         
     }

@@ -1,4 +1,5 @@
-﻿using OpenMod.API.Eventing;
+﻿using System;
+using OpenMod.API.Eventing;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
 using Steamworks;
@@ -13,17 +14,17 @@ namespace OpenMod.Unturned.Building.Events
 
         public UnturnedPlayer? Instigator { get; }
 
-        public CSteamID InstigatorId { get; }
+        [Obsolete("Use Instigator.SteamId")]
+        public CSteamID InstigatorId { get { return Instigator?.SteamId ?? CSteamID.Nil; } }
 
         public bool IsCancelled { get; set; }
 
         protected UnturnedBuildableDamagingEvent(UnturnedBuildable buildable, ushort damageAmount, EDamageOrigin damageOrigin,
-            UnturnedPlayer? instigator, CSteamID instigatorId) : base(buildable)
+            UnturnedPlayer? instigator) : base(buildable)
         {
             DamageAmount = damageAmount;
             DamageOrigin = damageOrigin;
             Instigator = instigator;
-            InstigatorId = instigatorId;
         }
     }
 }

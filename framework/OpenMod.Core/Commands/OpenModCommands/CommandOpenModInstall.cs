@@ -63,32 +63,36 @@ namespace OpenMod.Core.Commands.OpenModCommands
             var anySuccessful = false;
             foreach (var arg in args)
             {
+                if (string.IsNullOrWhiteSpace(arg))
+                {
+                    throw new CommandWrongUsageException(Context);
+                }
+
                 var packageInfo = arg.Split('@');
                 var packageName = packageInfo[0];
                 var packageVersion = packageInfo.Length > 1 ? packageInfo[1] : null;
 
-                if (packageVersion != null && packageVersion.Equals("latest", StringComparison.OrdinalIgnoreCase))
+                if (packageVersion?.Equals("latest", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     packageVersion = null;
                 }
 
-                await Context.Actor.PrintMessageAsync($"Installing {arg}...", Color.White);
+                await PrintAsync($"Installing {arg}...", Color.White);
                 var result = await m_NuGetPlugins.InstallPackageAsync(packageName, packageVersion, isPre);
 
                 switch (result.Code)
                 {
                     case NuGetInstallCode.Success:
-                        await Context.Actor.PrintMessageAsync(
+                        await PrintAsync(
                             $"Successfully installed {result.Identity!.Id} v{result.Identity!.Version}.", Color.DarkGreen);
                         anySuccessful = true;
                         break;
                     case NuGetInstallCode.NoUpdatesFound:
-                        await Context.Actor.PrintMessageAsync(
+                        await PrintAsync(
                             $"No updates found for {result.Identity!.Id}.", Color.DarkGreen);
-                        anySuccessful = true;
                         break;
                     default:
-                        await Context.Actor.PrintMessageAsync($"Failed to install \"{packageName}\": " + result.Code, Color.DarkRed);
+                        await PrintAsync($"Failed to install \"{packageName}\": " + result.Code, Color.DarkRed);
                         break;
                 }
             }
@@ -97,11 +101,11 @@ namespace OpenMod.Core.Commands.OpenModCommands
             {
                 if (Hotloader.Enabled)
                 {
-                    await Context.Actor.PrintMessageAsync("To complete installation, please reload OpenMod with /openmod reload.", Color.White);
+                    await PrintAsync("To complete installation, please reload OpenMod with /openmod reload.", Color.White);
                 }
                 else
                 {
-                    await Context.Actor.PrintMessageAsync("To complete installation, please restart your server or enable hotloading and reload.", Color.White);
+                    await PrintAsync("To complete installation, please restart your server or enable hotloading and reload.", Color.White);
                 }
             }
         }

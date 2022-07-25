@@ -1,11 +1,13 @@
 ﻿extern alias JetBrainsAnnotations;
+using System;
+using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.Unturned.Events;
+using OpenMod.Unturned.Patching;
 using SDG.Unturned;
-using System;
-using System.Linq;
 using UnityEngine;
 // ReSharper disable InconsistentNaming
 
@@ -88,6 +90,7 @@ namespace OpenMod.Unturned.Zombies.Events
             Emit(@event);
 
             parameters.damage = @event.DamageAmount;
+            parameters.times = 1;
             parameters.direction = @event.Ragdoll;
             parameters.ragdollEffect = @event.RagdollEffect;
             parameters.instigator = @event.Instigator?.Player;
@@ -123,6 +126,7 @@ namespace OpenMod.Unturned.Zombies.Events
             Emit(@event);
         }
 
+#pragma warning disable RCS1213 // Remove unused member declaration.
         private delegate void ZombieAlertingPlayer(Zombie nativeZombie, ref Player? player, ref bool cancel);
         private static event ZombieAlertingPlayer? OnZombieAlertingPlayer;
 
@@ -135,13 +139,21 @@ namespace OpenMod.Unturned.Zombies.Events
 
         private delegate void ZombieDead(Zombie nativeZombie, Vector3 ragdoll, ERagdollEffect ragdollEffect);
         private static event ZombieDead? OnZombieDead;
+#pragma warning restore RCS1213 // Remove unused member declaration.
 
         [UsedImplicitly]
         [HarmonyPatch]
         internal static class ZombiePatches
         {
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex, MethodBase original)
+            {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(ZombiePatches), ex, original);
+                return null;
+            }
+
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Zombie), "alert", typeof(Player))]
+            [HarmonyPatch(typeof(Zombie), nameof(Zombie.alert), typeof(Player))]
             [HarmonyPrefix]
             public static bool AlertPlayer(Zombie __instance, ref Player? newPlayer)
             {
@@ -156,7 +168,7 @@ namespace OpenMod.Unturned.Zombies.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Zombie), "alert", typeof(Vector3), typeof(bool))]
+            [HarmonyPatch(typeof(Zombie), nameof(Zombie.alert), typeof(Vector3), typeof(bool))]
             [HarmonyPrefix]
             public static bool AlertPosition(Zombie __instance, ref Vector3 newPosition, ref bool isStartling)
             {
@@ -171,25 +183,25 @@ namespace OpenMod.Unturned.Zombies.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Zombie), "tellDead")]
+            [HarmonyPatch(typeof(Zombie), nameof(Zombie.tellDead))]
             [HarmonyPostfix]
-            public static void TellDead(Zombie __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
+            public static void ZombieDead(Zombie __instance, Vector3 newRagdoll, ERagdollEffect ragdollEffect)
             {
                 OnZombieDead?.Invoke(__instance, newRagdoll, ragdollEffect);
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(Zombie), "tellAlive")]
+            [HarmonyPatch(typeof(Zombie), nameof(Zombie.tellAlive))]
             [HarmonyPostfix]
-            public static void TellAlive(Zombie __instance)
+            public static void ZombieAlived(Zombie __instance)
             {
                 OnZombieRevived?.Invoke(__instance);
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(ZombieManager), "addZombie")]
+            [HarmonyPatch(typeof(ZombieManager), nameof(ZombieManager.addZombie))]
             [HarmonyPostfix]
-            public static void AddZombie(byte bound)
+            public static void ZombieAdded(byte bound)
             {
                 var zombie = ZombieManager.regions[bound].zombies.LastOrDefault();
 

@@ -251,11 +251,11 @@ namespace OpenMod.Unturned.Items
                 return null;
             }
 
-            var item = new Item(itemAsset.id, EItemOrigin.WORLD);
+            var item = new Item(itemAsset.id, EItemOrigin.ADMIN);
             if (state is null or NullItemState)
                 return item;
 
-            item.state = state.StateData ?? itemAsset.getState(EItemOrigin.WORLD); /* item.state must not be null */
+            item.state = state.StateData ?? itemAsset.getState(EItemOrigin.ADMIN); /* item.state must not be null */
             item.amount = (byte)state.ItemAmount;
             item.quality = (byte)state.ItemQuality;
             item.durability = (byte)state.ItemDurability;

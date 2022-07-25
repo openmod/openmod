@@ -6,7 +6,7 @@ using OpenMod.API.Ioc;
 namespace OpenMod.Unturned.Effects
 {
     /// <summary>
-    /// The service for generating UI effect keys for components that prevents possible conflicts.
+    /// Service that generates UI effect keys for components and prevents possible key conflicts.
     /// </summary>
     [Service]
     public interface IUnturnedUIEffectsKeysProvider

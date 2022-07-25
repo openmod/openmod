@@ -13,18 +13,16 @@ using OpenMod.Unturned.Vehicles;
 using SDG.Unturned;
 using Steamworks;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Net;
 using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
 using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players
 {
-    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource
+    public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource, IHasHunger
     {
         public Player Player { get; }
 
@@ -181,6 +179,16 @@ namespace OpenMod.Unturned.Players
             }
         }
 
+        public double MaxHunger => byte.MaxValue;
+
+        public double Hunger
+        {
+            get
+            {
+                return Player.life.food;
+            }
+        }
+
         public Task PrintMessageAsync(string message)
         {
             return PrintMessageAsync(message, Color.White);
@@ -216,54 +224,27 @@ namespace OpenMod.Unturned.Players
                         continue;
                     }
 
-                    foreach (var lline in WrapLine(line))
-                    {
-                        ChatManager.serverSendMessage(
-                            text: lline,
-                            color: color.ToUnityColor(),
-                            toPlayer: SteamPlayer,
-                            iconURL: iconUrl,
-                            useRichTextFormatting: isRich);
-                    }
+                    ChatManager.serverSendMessage(
+                        text: line,
+                        color: color.ToUnityColor(),
+                        toPlayer: SteamPlayer,
+                        iconURL: iconUrl,
+                        useRichTextFormatting: isRich);
                 }
             }
 
             return PrintMessageTask().AsTask();
         }
 
-        private IEnumerable<string> WrapLine(string line)
+        public Task SetHungerAsync(double hunger)
         {
-            var words = line.Split(' ');
-            var lines = new List<string>();
-            var currentLine = new StringBuilder();
-            var maxLength = 90;
-
-            foreach (var currentWord in words)
+            async UniTask SetHungerTask()
             {
-                if (currentLine.Length > maxLength ||
-                    currentLine.Length + currentWord.Length > maxLength)
-                {
-                    lines.Add(currentLine.ToString());
-                    currentLine.Clear();
-                }
-
-                if (currentLine.Length > 0)
-                {
-                    currentLine.Append(" ");
-                    currentLine.Append(currentWord);
-                }
-                else
-                {
-                    currentLine.Append(currentWord);
-                }
+                await UniTask.SwitchToMainThread();
+                Player.life.askEat((byte)hunger);
             }
 
-            if (currentLine.Length > 0)
-            {
-                lines.Add(currentLine.ToString());
-            }
-
-            return lines;
+            return SetHungerTask().AsTask();
         }
     }
 }

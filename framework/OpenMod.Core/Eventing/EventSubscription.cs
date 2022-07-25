@@ -1,11 +1,11 @@
-﻿using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.Common.Helpers;
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace OpenMod.Core.Eventing
 {
@@ -15,13 +15,13 @@ namespace OpenMod.Core.Eventing
         public EventSubscription(
             IOpenModComponent ownerComponent,
             EventCallback callback,
-            EventListenerAttribute attribute,
+            IEventListenerOptions options,
             string eventName,
             ILifetimeScope scope)
         {
             Owner = new WeakReference(ownerComponent);
             Callback = callback;
-            EventListenerAttribute = attribute;
+            EventListenerOptions = options;
             EventName = eventName;
             Scope = scope;
         }
@@ -30,7 +30,7 @@ namespace OpenMod.Core.Eventing
             IOpenModComponent ownerComponent,
             Type eventListener,
             MethodBase method,
-            EventListenerAttribute attribute,
+            IEventListenerOptions options,
             Type eventType,
             ILifetimeScope scope)
         {
@@ -41,7 +41,7 @@ namespace OpenMod.Core.Eventing
                 var listener = serviceProvider.GetRequiredService(eventListener);
                 return method.InvokeWithTaskSupportAsync(listener, new[] { sender, @event });
             };
-            EventListenerAttribute = attribute;
+            EventListenerOptions = options;
             EventName = eventType.Name;
             EventType = eventType;
             Scope = scope;
@@ -50,13 +50,13 @@ namespace OpenMod.Core.Eventing
         public EventSubscription(
             IOpenModComponent ownerComponent,
             EventCallback callback,
-            EventListenerAttribute attribute,
+            IEventListenerOptions options,
             Type eventType,
             ILifetimeScope scope)
         {
             Owner = new WeakReference(ownerComponent);
             Callback = callback;
-            EventListenerAttribute = attribute;
+            EventListenerOptions = options;
             EventName = eventType.Name;
             EventType = eventType;
             Scope = scope;
@@ -72,7 +72,7 @@ namespace OpenMod.Core.Eventing
 
         public EventCallback Callback { get; }
 
-        public EventListenerAttribute EventListenerAttribute { get; }
+        public IEventListenerOptions EventListenerOptions { get; }
 
         public Type? EventListener { get; }
 
