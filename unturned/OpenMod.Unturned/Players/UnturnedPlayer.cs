@@ -23,6 +23,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players
 {
+    //todo add infect and oxygen
     public class UnturnedPlayer : IEquatable<UnturnedPlayer>, IPlayer, IHasHealth, IHasInventory, ICanEnterVehicle, IDamageSource, IHasHunger, IHasThirst
     {
         public Player Player { get; }
@@ -86,6 +87,22 @@ namespace OpenMod.Unturned.Players
             {
                 return SteamPlayer.getAddress();
             }
+        }
+
+        public Task SetFullHealthAsync()
+        {
+            async UniTask SetFullHealthTask()
+            {
+                await UniTask.SwitchToMainThread();
+
+                PlayerLife.askHeal((byte)MaxHealth, PlayerLife.isBleeding, PlayerLife.isBroken);
+
+                //todo add infect and oxygen
+                PlayerLife.askEat((byte)MaxHunger);
+                PlayerLife.askDrink((byte)MaxThirst);
+            }
+
+            return SetFullHealthTask().AsTask();
         }
 
         public Task SetHealthAsync(double health)//This is a Set and NOT a incremental

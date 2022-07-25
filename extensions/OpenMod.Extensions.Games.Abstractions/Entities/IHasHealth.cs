@@ -31,6 +31,11 @@ namespace OpenMod.Extensions.Games.Abstractions.Entities
         Task SetHealthAsync(double health);
 
         /// <summary>
+        /// This should set the life/health stats to max (this should include food, water, etc if supported)
+        /// </summary>
+        Task SetFullHealthAsync();
+
+        /// <summary>
         /// Damages the entity. Depending on game support, it will trigger damage effects.
         /// </summary>
         /// <param name="amount">The amount to damage.</param>

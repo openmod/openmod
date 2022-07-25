@@ -13,13 +13,15 @@ using IHasInventory = OpenMod.Extensions.Games.Abstractions.Items.IHasInventory;
 
 namespace OpenMod.Rust.Players
 {
-    public class RustPlayer : RustEntity, IPlayer, IComparable<RustPlayer>, IHasInventory, IHasHealth
+    public class RustPlayer : RustEntity, IPlayer, IComparable<RustPlayer>, IHasInventory, IHasHealth, IHasThirst, IHasHunger
     {
         public BasePlayer Player { get; }
 
         public RustPlayer(BasePlayer player) : base(player)
         {
             Player = player;
+            PlayerMetabolism = player.metabolism;
+
             EntityInstanceId = player.UserIDString;
             Inventory = new RustPlayerInventory(Player.inventory);
             Asset = new RustPlayerAsset(player);
@@ -99,6 +101,11 @@ namespace OpenMod.Rust.Players
             }
         }
 
+        public Task SetFullHealthAsync()
+        {
+            return SetHealthAsync(MaxHealth);
+        }
+
         public Task SetHealthAsync(double health)
         {
             async UniTask SetHealthTask()
@@ -130,6 +137,62 @@ namespace OpenMod.Rust.Players
             }
 
             return KillTask().AsTask();
+        }
+
+        public PlayerMetabolism PlayerMetabolism { get; }
+
+        public double MaxThirst
+        {
+            get
+            {
+                return PlayerMetabolism.hydration.max;
+            }
+        }
+
+        public double Thirst
+        {
+            get
+            {
+                return PlayerMetabolism.hydration.value;
+            }
+        }
+
+        public Task SetThirstAsync(double thirst)
+        {
+            async UniTask SetThirstTask()
+            {
+                await UniTask.SwitchToMainThread();
+                PlayerMetabolism.hydration.SetValue((float)thirst);
+            }
+
+            return SetThirstTask().AsTask();
+        }
+
+        public double MaxHunger
+        {
+            get
+            {
+                return PlayerMetabolism.calories.max;
+            }
+        }
+
+        public double Hunger
+        {
+            get
+            {
+                return PlayerMetabolism.calories.value;
+            }
+        }
+
+        public Task SetHungerAsync(double hunger)
+        {
+            async UniTask SetHungerTask()
+            {
+                await UniTask.SwitchToMainThread();
+                PlayerMetabolism.calories.SetValue((float)hunger);
+            }
+
+            return SetHungerTask().AsTask();
         }
     }
 }

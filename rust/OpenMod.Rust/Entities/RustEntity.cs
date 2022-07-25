@@ -44,11 +44,7 @@ namespace OpenMod.Rust.Entities
             async UniTask<bool> TeleportTask()
             {
                 await UniTask.SwitchToMainThread();
-
-                var entity = Entity;
-
-                var combatEntity = entity as BaseCombatEntity;
-                if (combatEntity != null && !combatEntity.IsAlive())
+                if (Entity is BaseCombatEntity combatEntity && !combatEntity.IsAlive())
                 {
                     return false;
                 }
