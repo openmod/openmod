@@ -44,8 +44,7 @@ namespace OpenMod.Unturned.RocketMod.Commands
                     return;
                 }
 
-                var delegates = RocketModExecuteEvent?.GetValue(R.Commands) as MulticastDelegate;
-                if (delegates == null)
+                if (RocketModExecuteEvent?.GetValue(R.Commands) is not MulticastDelegate delegates)
                 {
                     return;
                 }
