@@ -12,12 +12,9 @@ namespace OpenMod.Unturned.Zombies
     public class UnturnedZombie : IEntity, IHasHealth, IDamageSource
     {
         private static readonly FieldInfo? s_HealthField;
-        private static readonly FieldInfo? s_MaxHealthField;
-
         static UnturnedZombie()
         {
             s_HealthField = typeof(Zombie).GetField("health", BindingFlags.Instance | BindingFlags.NonPublic);
-            s_MaxHealthField = typeof(Zombie).GetField("maxHealth", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
         public UnturnedZombie(Zombie zombie)
@@ -41,9 +38,9 @@ namespace OpenMod.Unturned.Zombies
 
         public bool IsAlive => !Zombie.isDead;
 
-        public double MaxHealth => (double)(s_MaxHealthField?.GetValue(Zombie) ?? 0);
+        public double MaxHealth => Zombie.GetMaxHealth();
 
-        public double Health => (double)(s_HealthField?.GetValue(Zombie) ?? 0);
+        public double Health => Zombie.GetHealth();
 
         public Task SetFullHealthAsync()
         {
