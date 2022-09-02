@@ -41,9 +41,9 @@ namespace OpenMod.Unturned.Animals
 
         public double MaxHealth => Animal.asset.health;
 
-        public double Health => (double)(s_HealthField?.GetValue(Animal) ?? 0);
+        public double Health => Animal.GetHealth();
 
-        
+
         public Task SetHealthAsync(double health)
         {
             async UniTask SetHeathTask()
