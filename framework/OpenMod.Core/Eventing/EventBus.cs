@@ -25,7 +25,8 @@ namespace OpenMod.Core.Eventing
         private bool m_IsDisposing;
 
         private readonly ILogger<EventBus> m_Logger;
-        private readonly List<EventSubscription> m_EventSubscriptions;
+        private readonly List<EventSubscription> m_EventSubscriptions = new();
+        private readonly object m_Lock = new();
 
         private static readonly Type[] s_OmittedTypes = {
             typeof(IEvent),
@@ -39,21 +40,29 @@ namespace OpenMod.Core.Eventing
         public EventBus(ILogger<EventBus> logger)
         {
             m_Logger = logger;
-            m_EventSubscriptions = new List<EventSubscription>();
         }
 
         private IDisposable SubscribeInternal(EventSubscription subscription)
         {
             subscription.Scope.Disposer.AddInstanceForDisposal(new DisposeAction(() =>
             {
-                m_EventSubscriptions.RemoveAll(x => x.Scope == subscription.Scope);
+                lock (m_Lock)
+                {
+                    m_EventSubscriptions.RemoveAll(x => x.Scope == subscription.Scope);
+                }
             }));
 
-            m_EventSubscriptions.Add(subscription);
+            lock (m_Lock)
+            {
+                m_EventSubscriptions.Add(subscription);
+            }
 
             return new DisposeAction(() =>
             {
-                m_EventSubscriptions.Remove(subscription);
+                lock (m_Lock)
+                {
+                    m_EventSubscriptions.Remove(subscription);
+                }
             });
         }
 
@@ -215,10 +224,13 @@ namespace OpenMod.Core.Eventing
             {
                 foreach (var type in assembly.FindTypes<IEventListener>())
                 {
-                    if (m_EventSubscriptions.Any(c => c.EventListener == type))
+                    lock (m_Lock)
                     {
-                        // Prevent duplicate registration
-                        return;
+                        if (m_EventSubscriptions.Any(c => c.EventListener == type))
+                        {
+                            // Prevent duplicate registration
+                            return;
+                        }
                     }
 
                     // ReSharper disable once LoopCanBeConvertedToQuery
@@ -270,7 +282,10 @@ namespace OpenMod.Core.Eventing
                 throw new ArgumentNullException(nameof(component));
             }
 
-            m_EventSubscriptions.RemoveAll(c => !c.Owner.IsAlive || c.Owner.Target == component);
+            lock (m_Lock)
+            {
+                m_EventSubscriptions.RemoveAll(c => !c.Owner.IsAlive || c.Owner.Target == component);
+            }
         }
 
         public virtual void Unsubscribe(IOpenModComponent component, string eventName)
@@ -280,7 +295,10 @@ namespace OpenMod.Core.Eventing
                 throw new ArgumentNullException(nameof(component));
             }
 
-            m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && c.EventName.Equals(eventName, StringComparison.OrdinalIgnoreCase));
+            lock (m_Lock)
+            {
+                m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && c.EventName.Equals(eventName, StringComparison.OrdinalIgnoreCase));
+            }
         }
 
         public virtual void Unsubscribe<TEvent>(IOpenModComponent component) where TEvent : IEvent
@@ -290,7 +308,10 @@ namespace OpenMod.Core.Eventing
                 throw new ArgumentNullException(nameof(component));
             }
 
-            m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == typeof(TEvent) || c.EventName.Equals(typeof(TEvent).Name, StringComparison.OrdinalIgnoreCase)));
+            lock (m_Lock)
+            {
+                m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == typeof(TEvent) || c.EventName.Equals(typeof(TEvent).Name, StringComparison.OrdinalIgnoreCase)));
+            }
         }
 
         public virtual void Unsubscribe(IOpenModComponent component, Type eventType)
@@ -300,7 +321,10 @@ namespace OpenMod.Core.Eventing
                 throw new ArgumentNullException(nameof(component));
             }
 
-            m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == eventType || c.EventName.Equals(eventType.Name, StringComparison.OrdinalIgnoreCase)));
+            lock (m_Lock)
+            {
+                m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == eventType || c.EventName.Equals(eventType.Name, StringComparison.OrdinalIgnoreCase)));
+            }
         }
 
         public virtual async Task EmitAsync(IOpenModComponent component, object? sender, IEvent @event,
@@ -341,12 +365,16 @@ namespace OpenMod.Core.Eventing
                 var eventName = GetEventName(eventType);
 
                 m_Logger.LogTrace("Emitting event: {EventName}", eventName);
-                var eventSubscriptions
-                    = m_EventSubscriptions
-                        .Where(c => (c.EventType != null && c.EventType == eventType)
+                List<EventSubscription> eventSubscriptions;
+
+                lock (m_Lock)
+                {
+                    eventSubscriptions = m_EventSubscriptions
+                        .Where(c => c is not null && ((c.EventType != null && c.EventType == eventType)
                                     || (eventName.Equals(c.EventName, StringComparison.OrdinalIgnoreCase)
-                                        && c.Owner.IsAlive && ((IOpenModComponent)c.Owner.Target).IsComponentAlive))
+                                        && c.Owner.IsAlive && ((IOpenModComponent)c.Owner.Target).IsComponentAlive)))
                         .ToList();
+                }
 
                 if (eventSubscriptions.Count == 0)
                 {
