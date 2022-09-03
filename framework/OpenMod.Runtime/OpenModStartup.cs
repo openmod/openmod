@@ -10,6 +10,7 @@ using OpenMod.API.Prioritization;
 using OpenMod.Common.Helpers;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
+using OpenMod.Core.Ioc.Extensions;
 using OpenMod.Core.Plugins;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.Core.Prioritization;
@@ -66,7 +67,7 @@ namespace OpenMod.Runtime
         public void RegisterServicesFromAssembly(Assembly assembly)
         {
             var assemblyName = assembly.GetName();
-            if (m_RegisteredAssemblies.Contains(assembly.GetName()))
+            if (m_RegisteredAssemblies.Contains(assemblyName))
             {
                 m_Logger.LogDebug("Skipping already registered assembly: {AssemblyName}", assemblyName);
                 return;
@@ -137,9 +138,13 @@ namespace OpenMod.Runtime
 
         internal void SetupContainer(ContainerBuilder containerBuilder)
         {
-            foreach (var servicesRegistration in m_ServiceRegistrations)
+            foreach (var servicesRegistration in m_ServiceRegistrations
+                .OrderBy(d => d.Priority, new PriorityComparer(PriortyComparisonMode.LowestFirst)))
             {
                 containerBuilder.RegisterType(servicesRegistration.ServiceImplementationType)
+                    .AsSelf()
+                    .As(servicesRegistration.ServiceTypes)
+                    .WithLifetime(servicesRegistration.Lifetime)
                     .PropertiesAutowired();
             }
 
@@ -192,22 +197,6 @@ namespace OpenMod.Runtime
                 {
                     m_Logger.LogError(ex, "Failed to configure services from: {ConfiguratorType}",
                         serviceConfiguratorType.FullName);
-                }
-            }
-
-            var servicesRegistrations = m_ServiceRegistrations.OrderBy(d => d.Priority,
-                new PriorityComparer(PriortyComparisonMode.LowestFirst));
-
-            foreach (var servicesRegistration in servicesRegistrations)
-            {
-                var implementationType = servicesRegistration.ServiceImplementationType;
-                serviceCollection.Add(new ServiceDescriptor(implementationType, implementationType,
-                    servicesRegistration.Lifetime));
-
-                foreach (var service in servicesRegistration.ServiceTypes)
-                {
-                    serviceCollection.Add(new ServiceDescriptor(service,
-                        provider => provider.GetService(implementationType), servicesRegistration.Lifetime));
                 }
             }
         }

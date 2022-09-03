@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using OpenMod.API.Permissions;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
+using SmartFormat.ZString;
 
 namespace OpenMod.Core.Permissions
 {
@@ -112,7 +113,7 @@ namespace OpenMod.Core.Permissions
             // we will restore : later again
             permission = permission.Replace(":", ".");
 
-            var parentPath = new StringBuilder();
+            using var parentPath = new ZStringBuilder(false);
             foreach (var childPath in permission.Split('.'))
             {
                 permissions.Add($"{parentPath}{childPath}.*");

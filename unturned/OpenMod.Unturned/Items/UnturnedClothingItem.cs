@@ -1,39 +1,39 @@
 ﻿using Cysharp.Threading.Tasks;
 using HarmonyLib;
+using OpenMod.Extensions.Games.Abstractions.Items;
+using OpenMod.Unturned.Players;
 using OpenMod.Unturned.Players.Clothing;
 using SDG.NetTransport;
 using SDG.Unturned;
 using System;
 using System.Threading.Tasks;
-using OpenMod.Extensions.Games.Abstractions.Items;
-using OpenMod.Unturned.Players;
 
 namespace OpenMod.Unturned.Items
 {
     public class UnturnedClothingItem : IItemInstance
     {
-        private static readonly ClientInstanceMethod<ushort, byte, byte[]> s_SendWearShirt =
-            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<ushort, byte, byte[]>>("SendWearShirt");
+        private static readonly ClientInstanceMethod<Guid, byte, byte[], bool> s_SendWearShirt =
+            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<Guid, byte, byte[], bool>>("SendWearShirt");
 
-        private static readonly ClientInstanceMethod<ushort, byte, byte[]> s_SendWearPants =
-            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<ushort, byte, byte[]>>("SendWearPants");
+        private static readonly ClientInstanceMethod<Guid, byte, byte[], bool> s_SendWearPants =
+            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<Guid, byte, byte[], bool>>("SendWearPants");
 
-        private static readonly ClientInstanceMethod<ushort, byte, byte[]> s_SendWearHat =
-            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<ushort, byte, byte[]>>("SendWearHat");
+        private static readonly ClientInstanceMethod<Guid, byte, byte[], bool> s_SendWearHat =
+            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<Guid, byte, byte[], bool>>("SendWearHat");
 
-        private static readonly ClientInstanceMethod<ushort, byte, byte[]> s_SendWearBackpack =
-            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<ushort, byte, byte[]>>("SendWearBackpack");
+        private static readonly ClientInstanceMethod<Guid, byte, byte[], bool> s_SendWearBackpack =
+            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<Guid, byte, byte[], bool>>("SendWearBackpack");
 
-        private static readonly ClientInstanceMethod<ushort, byte, byte[]> s_SendWearVest =
-            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<ushort, byte, byte[]>>("SendWearVest");
+        private static readonly ClientInstanceMethod<Guid, byte, byte[], bool> s_SendWearVest =
+            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<Guid, byte, byte[], bool>>("SendWearVest");
 
-        private static readonly ClientInstanceMethod<ushort, byte, byte[]> s_SendWearMask =
-            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<ushort, byte, byte[]>>("SendWearMask");
+        private static readonly ClientInstanceMethod<Guid, byte, byte[], bool> s_SendWearMask =
+            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<Guid, byte, byte[], bool>>("SendWearMask");
 
-        private static readonly ClientInstanceMethod<ushort, byte, byte[]> s_SendWearGlasses =
-            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<ushort, byte, byte[]>>("SendWearGlasses");
+        private static readonly ClientInstanceMethod<Guid, byte, byte[], bool> s_SendWearGlasses =
+            AccessTools.StaticFieldRefAccess<PlayerClothing, ClientInstanceMethod<Guid, byte, byte[], bool>>("SendWearGlasses");
 
-        private static ClientInstanceMethod<ushort, byte, byte[]> GetInstanceMethod(ClothingType clothingType)
+        private static ClientInstanceMethod<Guid, byte, byte[], bool> GetInstanceMethod(ClothingType clothingType)
         {
             return clothingType switch
             {
@@ -47,6 +47,7 @@ namespace OpenMod.Unturned.Items
                 _ => throw new InvalidOperationException("Invalid clothing type")
             };
         }
+
         // ReSharper disable once SuggestBaseTypeForParameter
         private Task<bool> DestroyClothingPieceAsync(PlayerClothing playerClothing)
         {
@@ -57,7 +58,7 @@ namespace OpenMod.Unturned.Items
                 var method = GetInstanceMethod(ClothingType);
 
                 method.InvokeAndLoopback(playerClothing.GetNetId(), ENetReliability.Reliable,
-                    Provider.EnumerateClients_Remote(), 0, 0, new byte[0]);
+                    Provider.EnumerateClients_Remote(), Guid.Empty, 0, Array.Empty<byte>(), true);
 
                 return true;
             }

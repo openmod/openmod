@@ -1,17 +1,17 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Autofac;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using Autofac;
-using OpenMod.API;
-using OpenMod.Core.Ioc;
 
 namespace OpenMod.Core.Users
 {
@@ -104,13 +104,10 @@ namespace OpenMod.Core.Users
                 throw new ArgumentException(nameof(message));
             }
 
-            var provider = UserProviders.FirstOrDefault(d => d.SupportsUserType(userType));
-            if (provider == null)
+            foreach (var provider in UserProviders.Where(d => d.SupportsUserType(userType)))
             {
-                return;
+                await provider.BroadcastAsync(userType, message);
             }
-
-            await provider.BroadcastAsync(userType, message);
         }
 
         public virtual async Task BroadcastAsync(string message, Color? color)
@@ -138,13 +135,10 @@ namespace OpenMod.Core.Users
                 throw new ArgumentException(nameof(message));
             }
 
-            var provider = UserProviders.FirstOrDefault(d => d.SupportsUserType(userType));
-            if (provider == null)
+            foreach (var provider in UserProviders.Where(d => d.SupportsUserType(userType)))
             {
-                return;
+                await provider.BroadcastAsync(userType, message, color);
             }
-
-            await provider.BroadcastAsync(userType, message, color);
         }
 
         public Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? endTime = null)

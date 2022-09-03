@@ -16,7 +16,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenMod.Common.Helpers;
 using OpenMod.NuGet.Helpers;
 
 namespace OpenMod.NuGet
@@ -124,7 +123,7 @@ namespace OpenMod.NuGet
             InstallAssemblyResolver();
         }
 
-        public virtual async Task<NuGetInstallResult> InstallAsync(PackageIdentity packageIdentity, bool allowPrereleaseVersions = false)
+        public virtual async Task<NuGetInstallResult> InstallAsync(PackageIdentity packageIdentity, bool allowPreReleaseVersions = false)
         {
             if (packageIdentity == null)
             {
@@ -143,7 +142,7 @@ namespace OpenMod.NuGet
             NuGetQueryResult queryResult;
             try
             {
-                queryResult = await QueryDependenciesAsync(packageIdentity, cacheContext);
+                queryResult = await QueryDependenciesAsync(packageIdentity, cacheContext, allowPreReleaseVersions);
             }
             catch (NuGetResolverInputException ex)
             {
@@ -174,7 +173,7 @@ namespace OpenMod.NuGet
                     var installed = await GetLatestPackageIdentityAsync(dependencyPackage.Id);
                     if (installed != null)
                     {
-                        if (!dependencyPackage.HasVersion || installed.Version >= dependencyPackage.Version)
+                        if (dependencyPackage.HasVersion && installed.Version >= dependencyPackage.Version)
                         {
                             continue;
                         }
@@ -428,7 +427,7 @@ namespace OpenMod.NuGet
             SetAssemblyLoader((assemblyData, _) => assemblyLoader(assemblyData));
         }
 
-        public virtual async Task<NuGetQueryResult> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext)
+        public virtual async Task<NuGetQueryResult> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext, bool allowPreReleaseVersions)
         {
             if (identity == null)
             {
@@ -443,10 +442,15 @@ namespace OpenMod.NuGet
             var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
             var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, m_Providers);
 
-            var sourceRepositories = sourceRepositoryProvider.GetRepositories();
-
+            var sourceRepositories = sourceRepositoryProvider.GetRepositories().ToArray();
             var availablePackages = new HashSet<SourcePackageDependencyInfo>(PackageIdentityComparer.Default);
-            await QueryPackageDependenciesAsync(identity, cacheContext, sourceRepositories, availablePackages);
+
+            if (!identity.HasVersion)
+            {
+                identity = await QueryPackageLatestVersionAsync(identity, cacheContext, sourceRepositories, allowPreReleaseVersions);
+            }
+
+            await QueryPackageDependenciesAsync(identity, cacheContext, sourceRepositories, availablePackages, allowPreReleaseVersions);
 
             if (availablePackages.Count == 0)
             {
@@ -697,11 +701,54 @@ namespace OpenMod.NuGet
             return Path.Combine(dir, dirName + ".nupkg");
         }
 
+        protected virtual async Task<PackageIdentity> QueryPackageLatestVersionAsync(
+            PackageIdentity package,
+            SourceCacheContext cacheContext,
+            IEnumerable<SourceRepository> repositories,
+            bool allowPreReleaseVersions)
+        {
+            if (package == null)
+            {
+                throw new ArgumentNullException(nameof(package));
+            }
+
+            if (cacheContext == null)
+            {
+                throw new ArgumentNullException(nameof(cacheContext));
+            }
+
+            if (repositories == null)
+            {
+                throw new ArgumentNullException(nameof(repositories));
+            }
+
+            Logger.LogDebug("GetPackageLatestVersion: " + package);
+            var repos = repositories.ToArray();
+
+            foreach (var sourceRepository in repos)
+            {
+                Logger.LogDebug("GetResourceAsync (MetadataResource) for " + sourceRepository.PackageSource.SourceUri);
+                var metadataResource = await sourceRepository.GetResourceAsync<MetadataResource>();
+
+                Logger.LogDebug("GetLatestVersion");
+                var latestVersion = await metadataResource.GetLatestVersion(package.Id, allowPreReleaseVersions, false, cacheContext, Logger, CancellationToken.None);
+                if (latestVersion == null || package.HasVersion && package.Version < latestVersion)
+                {
+                    continue;
+                }
+
+                package = new PackageIdentity(package.Id, latestVersion);
+            }
+
+            return package;
+        }
+
         protected virtual async Task QueryPackageDependenciesAsync(
             PackageIdentity package,
             SourceCacheContext cacheContext,
             IEnumerable<SourceRepository> repositories,
-            ISet<SourcePackageDependencyInfo> availablePackages)
+            ISet<SourcePackageDependencyInfo> availablePackages,
+            bool allowPreReleaseVersions)
         {
             if (package == null)
             {
@@ -730,8 +777,42 @@ namespace OpenMod.NuGet
 
             Logger.LogDebug("GetPackageDependencies: " + package);
             var repos = repositories.ToList();
+            var dependencyInfo = await FindDependencyInfoAsync(package, cacheContext, repos);
+
+            if (dependencyInfo == null)
+            {
+                return;
+            }
+
+            availablePackages.Add(dependencyInfo);
 
             foreach (var sourceRepository in repos)
+            {
+                Logger.LogDebug("GetResourceAsync (FindPackageById) for " + dependencyInfo.Source.PackageSource.SourceUri);
+                var packageResource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
+
+                foreach (var dependency in dependencyInfo.Dependencies)
+                {
+                    var versions = (await packageResource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None))
+                        ?.ToArray();
+
+                    if (versions?.Length == 0)
+                    {
+                        Logger.LogDebug("Versions could not be found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
+                        continue;
+                    }
+
+                    await QueryPackageDependenciesAsync(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)), cacheContext, repos, availablePackages, allowPreReleaseVersions);
+                }
+            }
+        }
+
+        private async Task<SourcePackageDependencyInfo?> FindDependencyInfoAsync(
+            PackageIdentity package,
+            SourceCacheContext cacheContext,
+            IEnumerable<SourceRepository> repositories)
+        {
+            foreach (var sourceRepository in repositories)
             {
                 Logger.LogDebug("GetResourceAsync (DependencyInfoResource) for " + sourceRepository.PackageSource.SourceUri);
                 var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
@@ -746,25 +827,10 @@ namespace OpenMod.NuGet
 
                 Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
 
-                Logger.LogDebug("GetResourceAsync (FindPackageById) for " + sourceRepository.PackageSource.SourceUri);
-                var packageResource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
-
-                availablePackages.Add(dependencyInfo);
-                foreach (var dependency in dependencyInfo.Dependencies)
-                {
-                    var versions = await packageResource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None);
-
-                    if (versions == null)
-                    {
-                        Logger.LogDebug("Versions could not be found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
-                        continue;
-                    }
-
-                    await QueryPackageDependenciesAsync(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)), cacheContext, repos, availablePackages);
-                }
-
-                break;
+                return dependencyInfo;
             }
+
+            return null;
         }
 
         public virtual void InstallAssemblyResolver()
@@ -824,23 +890,35 @@ namespace OpenMod.NuGet
         {
             foreach (var package in packages)
             {
-                if (await IsPackageInstalledAsync(package.Id))
+                if (!await IsPackageInstalledAsync(package.Id))
                 {
-                    if (updateExisting)
-                    {
-                        var installedPackage = await GetLatestPackageIdentityAsync(package.Id);
-                        if (package.HasVersion && installedPackage?.Version != package.Version)
-                        {
-                            await InstallAsync(package, allowPrereleaseVersions: true);
-                        }
-                    }
-
+                    await LogAndInstallPackage(package, false);
                     continue;
                 }
 
-                Logger.LogInformation($"Installing package: {package.Id}@{package.Version?.OriginalVersion ?? "latest"}");
-                await InstallAsync(package, allowPrereleaseVersions: true);
+                if (!updateExisting)
+                {
+                    continue;
+                }
+
+                if (!package.HasVersion)
+                {
+                    await LogAndInstallPackage(package, true);
+                    continue;
+                }
+
+                var installedPackage = await GetLatestPackageIdentityAsync(package.Id);
+                if (installedPackage?.Version == null || package.Version > installedPackage.Version)
+                {
+                    await LogAndInstallPackage(package, false);
+                }
             }
+        }
+
+        private async Task LogAndInstallPackage(PackageIdentity package, bool isUpdate)
+        {
+            Logger.LogInformation($"{(isUpdate ? "Updating" : "Installing")} package: {package.Id}@{package.Version?.OriginalVersion ?? "latest"}");
+            await InstallAsync(package, allowPreReleaseVersions: true);
         }
 
         public async Task<int> InstallMissingPackagesAsync(bool updateExisting = true)

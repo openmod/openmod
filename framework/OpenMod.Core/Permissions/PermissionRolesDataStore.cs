@@ -1,18 +1,19 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenMod.API;
+using OpenMod.API.Eventing;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Permissions.Data;
+using OpenMod.Core.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-
-using OpenMod.API.Eventing;
-using OpenMod.Common.Helpers;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace OpenMod.Core.Permissions
 {
@@ -29,6 +30,9 @@ namespace OpenMod.Core.Permissions
         private IDisposable? m_FileChangeWatcher;
         private PermissionRolesData? m_CachedPermissionRolesData;
 
+        private readonly ISerializer _serializer;
+        private readonly IDeserializer _deserializer;
+
         public List<PermissionRoleData> Roles { get => m_CachedPermissionRolesData!.Roles ?? new List<PermissionRoleData>(); }
 
         public PermissionRolesDataStore(
@@ -40,6 +44,19 @@ namespace OpenMod.Core.Permissions
             m_DataStore = dataStoreAccessor.DataStore;
             m_Logger = logger;
             m_Runtime = runtime;
+
+            _serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithTypeConverter(new YamlNullableEnumTypeConverter())
+                .DisableAliases()
+                .Build();
+
+            _deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
+                .WithTypeConverter(new YamlNullableEnumTypeConverter())
+                .Build();
+
             AsyncHelper.RunSync(InitAsync);
         }
 
@@ -133,23 +150,14 @@ namespace OpenMod.Core.Permissions
                 return Task.FromResult<T?>(obj);
             }
 
-            if(dataObject == null)
+            if (dataObject == default)
             {
                 return Task.FromResult<T?>(default);
             }
 
-            if (dataObject.GetType().HasConversionOperator(typeof(T)))
-            {
-                // ReSharper disable once PossibleInvalidCastException
-                return Task.FromResult<T?>((T)dataObject);
-            }
+            var serialized = _serializer.Serialize(dataObject);
 
-            if (dataObject is Dictionary<object, object> dict)
-            {
-                return Task.FromResult(dict.ToObject<T?>());
-            }
-
-            throw new Exception($"Failed to parse {dataObject.GetType()} as {typeof(T)}");
+            return Task.FromResult<T?>(_deserializer.Deserialize<T>(serialized));
         }
 
         public virtual async Task ReloadAsync()

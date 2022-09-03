@@ -11,13 +11,10 @@ namespace OpenMod.Unturned.Zombies
 {
     public class UnturnedZombie : IEntity, IHasHealth, IDamageSource
     {
-        private static readonly FieldInfo m_HealthField;
-        private static readonly FieldInfo m_MaxHealthField;
-
+        private static readonly FieldInfo? s_HealthField;
         static UnturnedZombie()
         {
-            m_HealthField = typeof(Zombie).GetField("health", BindingFlags.Instance | BindingFlags.NonPublic);
-            m_MaxHealthField = typeof(Zombie).GetField("maxHealth", BindingFlags.Instance | BindingFlags.NonPublic);
+            s_HealthField = typeof(Zombie).GetField("health", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
         public UnturnedZombie(Zombie zombie)
@@ -41,20 +38,26 @@ namespace OpenMod.Unturned.Zombies
 
         public bool IsAlive => !Zombie.isDead;
 
-        public double MaxHealth => (ushort)m_MaxHealthField.GetValue(Zombie);
+        public double MaxHealth => Zombie.GetMaxHealth();
 
-        public double Health => (ushort)m_HealthField.GetValue(Zombie);
+        public double Health => Zombie.GetHealth();
+
+        public Task SetFullHealthAsync()
+        {
+            return SetHealthAsync(MaxHealth);
+        }
 
         public Task SetHealthAsync(double health)
         {
             async UniTask SetHeathTask()
             {
                 await UniTask.SwitchToMainThread();
-                m_HealthField.SetValue(Zombie, (ushort)health);
+                s_HealthField?.SetValue(Zombie, (ushort)health);
             }
 
             return SetHeathTask().AsTask();
         }
+
 
         public Task DamageAsync(double amount)
         {
@@ -92,12 +95,7 @@ namespace OpenMod.Unturned.Zombies
                 return false;
             }
 
-            if (Transform.Rotation != rotation && !await Transform.SetRotationAsync(rotation))
-            {
-                return false;
-            }
-
-            return true;
+            return Transform.Rotation == rotation || await Transform.SetRotationAsync(rotation);
         }
 
         public string DamageSourceName

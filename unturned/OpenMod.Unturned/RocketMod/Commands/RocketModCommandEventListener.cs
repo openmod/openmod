@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API.Commands;
 using OpenMod.API.Eventing;
 using OpenMod.API.Localization;
@@ -13,10 +10,7 @@ using OpenMod.Core.Commands;
 using OpenMod.Core.Commands.Events;
 using OpenMod.Core.Cooldowns;
 using OpenMod.Core.Eventing;
-using OpenMod.Core.Ioc;
 using OpenMod.Core.Users;
-using OpenMod.Unturned.Configuration;
-using OpenMod.Unturned.RocketMod.Permissions;
 using OpenMod.Unturned.Users;
 using Rocket.API;
 using Rocket.Core;
@@ -28,7 +22,6 @@ namespace OpenMod.Unturned.RocketMod.Commands
     public class RocketModCommandEventListener
     {
         private const string c_RocketPrefix = "rocket:";
-        private readonly IOpenModUnturnedConfiguration m_Configuration;
         private readonly ICommandCooldownStore m_CommandCooldownStore;
         private readonly IOpenModStringLocalizer m_StringLocalizer;
         private static readonly MethodInfo s_CheckPermissionsMethod;
@@ -42,86 +35,86 @@ namespace OpenMod.Unturned.RocketMod.Commands
         }
 
         public RocketModCommandEventListener(
-            IOpenModUnturnedConfiguration configuration,
             ICommandCooldownStore commandCooldownStore,
             IOpenModStringLocalizer stringLocalizer)
         {
-            m_Configuration = configuration;
             m_CommandCooldownStore = commandCooldownStore;
             m_StringLocalizer = stringLocalizer;
         }
 
         [EventListener(Priority = EventListenerPriority.Monitor)]
-        public Task HandleEventAsync(object? sender, CommandExecutedEvent @event)
+        public Task HandleEventAsync(object? _, CommandExecutedEvent @event)
         {
             async UniTask Task()
             {
+                if (@event.CommandContext.Exception is not CommandNotFoundException)
+                {
+                    return;
+                }
+
                 // RocketMod commands must run on main thread
                 await UniTask.SwitchToMainThread();
 
-                if (@event.CommandContext.Exception is CommandNotFoundException && R.Commands != null)
+                if (R.Commands == null)
                 {
-                    if (!await CheckCooldownAsync(@event))
-                    {
-                        return;
-                    }
-
-                    var commandAlias = @event.CommandContext.CommandAlias;
-                    if (string.IsNullOrEmpty(commandAlias))
-                    {
-                        return;
-                    }
-
-                    var isRocketPrefixed = commandAlias.StartsWith(c_RocketPrefix);
-                    if (isRocketPrefixed)
-                    {
-                        commandAlias = s_PrefixRegex.Replace(commandAlias, string.Empty, 1);
-                    }
-
-                    IRocketPlayer rocketPlayer;
-                    if (@event.Actor is UnturnedUser user)
-                    {
-                        var steamPlayer = user.Player.SteamPlayer;
-                        if (!(bool)s_CheckPermissionsMethod.Invoke(null, new object[] { steamPlayer, $"/{commandAlias}" }))
-                        {
-                            // command doesnt exist or no permission
-                            @event.ExceptionHandled = true;
-                            return;
-                        }
-
-                        rocketPlayer = UnturnedPlayer.FromSteamPlayer(steamPlayer);
-                    }
-                    else if (@event.Actor.Type.Equals(KnownActorTypes.Console, StringComparison.OrdinalIgnoreCase))
-                    {
-                        rocketPlayer = new ConsolePlayer();
-
-                        var command = R.Commands.GetCommand(commandAlias.ToLower(CultureInfo.InvariantCulture));
-                        if (command == null)
-                        {
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        // unsupported user; do not handle
-                        return;
-                    }
-
-                    var commandLine = @event.CommandContext.GetCommandLine();
-                    if (isRocketPrefixed)
-                    {
-                        commandLine = s_PrefixRegex.Replace(commandLine, string.Empty, count: 1);
-                    }
-
-                    R.Commands.Execute(rocketPlayer, commandLine);
-                    @event.ExceptionHandled = true;
+                    return;
                 }
+
+
+                if (!await CheckCooldownAsync(@event))
+                {
+                    return;
+                }
+
+                var commandAlias = @event.CommandContext.CommandAlias;
+                if (string.IsNullOrEmpty(commandAlias))
+                {
+                    return;
+                }
+
+                var isRocketPrefixed = commandAlias.StartsWith(c_RocketPrefix);
+                if (isRocketPrefixed)
+                {
+                    commandAlias = s_PrefixRegex.Replace(commandAlias, string.Empty, 1);
+                }
+
+                IRocketPlayer rocketPlayer;
+                if (@event.Actor is UnturnedUser user)
+                {
+                    var steamPlayer = user.Player.SteamPlayer;
+                    if (!(bool)s_CheckPermissionsMethod.Invoke(null, new object[] { steamPlayer, $"/{commandAlias}" }))
+                    {
+                        // command doesnt exist or no permission
+                        @event.ExceptionHandled = true;
+                        return;
+                    }
+
+                    rocketPlayer = UnturnedPlayer.FromSteamPlayer(steamPlayer);
+                }
+                else if (@event.Actor.Type.Equals(KnownActorTypes.Console, StringComparison.OrdinalIgnoreCase))
+                {
+                    rocketPlayer = new ConsolePlayer();
+                }
+                else
+                {
+                    // unsupported user; do not handle
+                    return;
+                }
+
+                var commandLine = @event.CommandContext.GetCommandLine();
+                if (isRocketPrefixed)
+                {
+                    commandLine = s_PrefixRegex.Replace(commandLine, string.Empty, count: 1);
+                }
+
+                R.Commands.Execute(rocketPlayer, commandLine);
+                @event.ExceptionHandled = true;
             }
 
             return Task().AsTask();
         }
 
-        private const string RocketCooldownsFormat = "Rocket.{0}";
+        private const string c_RocketCooldownsFormat = "Rocket.{0}";
         private async Task<bool> CheckCooldownAsync(CommandExecutedEvent @event)
         {
             const string rocketPrefix = "rocket:";
@@ -151,7 +144,7 @@ namespace OpenMod.Unturned.RocketMod.Commands
                 return true;
             }
 
-            var commandId = string.Format(RocketCooldownsFormat, command.Name);
+            var commandId = string.Format(c_RocketCooldownsFormat, command.Name);
             var cooldownSpan = await m_CommandCooldownStore.GetCooldownSpanAsync(commandContext.Actor, commandId);
 
             if (cooldownSpan.HasValue)

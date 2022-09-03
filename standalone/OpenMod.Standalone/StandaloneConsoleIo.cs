@@ -17,6 +17,11 @@ namespace OpenMod.Standalone
             s_IsRunning = true;
             do
             {
+                if (!Console.KeyAvailable)
+                {
+                    continue;
+                }
+
                 var line = ReadLine.Read().Trim();
                 if (!string.IsNullOrEmpty(line))
                 {

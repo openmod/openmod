@@ -7,8 +7,12 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
   <ItemGroup>
-    <ProjectReference Include="..\..\framework\OpenMod.API\OpenMod.API.csproj"/>
-    <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj"/>
+    <ProjectReference Include="..\..\framework\OpenMod.API\OpenMod.API.csproj" />
+    <ProjectReference Include="..\..\framework\OpenMod.Core\OpenMod.Core.csproj" />
     <ProjectReference Include="..\..\framework\OpenMod.Runtime\OpenMod.Runtime.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
   </ItemGroup>
 </Project>

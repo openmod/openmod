@@ -32,7 +32,6 @@ namespace OpenMod.Core.Ioc
                     }
                 }
 
-
                 types = ex.Types.Where(tp => tp != null && tp.IsClass && !tp.IsInterface && !tp.IsAbstract)
                     .ToList();
             }
@@ -44,7 +43,7 @@ namespace OpenMod.Core.Ioc
 
                 try
                 {
-                    attribute = (T?)type.GetCustomAttributes(inherit: false).FirstOrDefault(x => x.GetType() == typeof(T));
+                    attribute = Array.Find(type.GetCustomAttributes(inherit: false), x => x.GetType() == typeof(T)) as T;
                     if (attribute == null)
                     {
                         continue;
@@ -61,7 +60,6 @@ namespace OpenMod.Core.Ioc
                             type.FullName, assembly.FullName);
                         continue;
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -79,7 +77,6 @@ namespace OpenMod.Core.Ioc
                     Lifetime = attribute.Lifetime
                 };
             }
-
         }
     }
 }

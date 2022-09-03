@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Plugins;
-using OpenMod.EntityFrameworkCore.Extensions;
 using UserDatabasePlugin.Database;
 
 [assembly: PluginMetadata("UserDatabasePlugin",
@@ -33,7 +33,7 @@ namespace UserDatabasePlugin
 
         protected override async Task OnLoadAsync()
         {
-            await m_DbContext.OpenModMigrateAsync();
+            await m_DbContext.Database.MigrateAsync();
 
             m_Logger.LogInformation("UserDatabase has been loaded");
 
