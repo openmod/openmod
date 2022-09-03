@@ -24,8 +24,9 @@ namespace OpenMod.Unturned.Items
 
         public Task DropAsync()
         {
+            var transform = Inventory.Player.transform;
             ItemManager.dropItem(ItemJar.item,
-                Inventory.Player.transform.position + Inventory.Player.transform.forward * 0.5f,
+                transform.position + transform.forward * 0.5f,
                 playEffect: true, isDropped: true, wideSpread: false);
 
             return DestroyAsync();
