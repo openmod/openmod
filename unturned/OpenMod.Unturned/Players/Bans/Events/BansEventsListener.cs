@@ -55,6 +55,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
                 instigator.ToString(),
                 KnownActorTypes.Player,
                 Equals(ipAddressToBan, IPAddress.Any) ? null : ipAddressToBan,
+                hwidsToBan,
                 reason,
                 TimeSpan.FromSeconds(duration))
             {
