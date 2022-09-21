@@ -1,5 +1,6 @@
 ﻿extern alias JetBrainsAnnotations;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 using HarmonyLib;
@@ -27,7 +28,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         public override void Subscribe()
         {
-            Provider.onBanPlayerRequested += OnBanPlayerRequested;
+            Provider.onBanPlayerRequestedV2 += OnBanPlayerRequested;
             Provider.onCheckBanStatusWithHWID += OnCheckBanStatus;
             Provider.onUnbanPlayerRequested += OnUnbanPlayerRequested;
             OnBanned += Events_OnBanned;
@@ -36,7 +37,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
 
         public override void Unsubscribe()
         {
-            Provider.onBanPlayerRequested -= OnBanPlayerRequested;
+            Provider.onBanPlayerRequestedV2 -= OnBanPlayerRequested;
             Provider.onCheckBanStatusWithHWID -= OnCheckBanStatus;
             Provider.onUnbanPlayerRequested -= OnUnbanPlayerRequested;
 
@@ -44,7 +45,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
             OnUnbanned -= Events_OnUnbanned;
         }
 
-        private void OnBanPlayerRequested(CSteamID instigator, CSteamID playerToBan, uint ipToBan, ref string reason, ref uint duration, ref bool shouldVanillaBan) // lgtm [cs/too-many-ref-parameters]
+        private void OnBanPlayerRequested(CSteamID instigator, CSteamID playerToBan, uint ipToBan, IEnumerable<byte[]> hwidsToBan, ref string reason, ref uint duration, ref bool shouldVanillaBan) // lgtm [cs/too-many-ref-parameters]
         {
             var player = GetUnturnedPlayer(PlayerTool.getPlayer(playerToBan))!;
             var ipAddressToBan = IPAddress.Parse(ipToBan.ToString());
@@ -54,6 +55,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
                 instigator.ToString(),
                 KnownActorTypes.Player,
                 Equals(ipAddressToBan, IPAddress.Any) ? null : ipAddressToBan,
+                hwidsToBan,
                 reason,
                 TimeSpan.FromSeconds(duration))
             {

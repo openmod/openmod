@@ -70,6 +70,12 @@ namespace OpenMod.Unturned.Items
             return (obj as UnturnedPlayerInventory)?.Player == Player;
         }
 
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return Player.GetHashCode();
+        }
+
         public bool IsFull
         {
             get
