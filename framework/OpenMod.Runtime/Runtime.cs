@@ -50,7 +50,7 @@ namespace OpenMod.Runtime
 
         public string OpenModComponentId { get; } = "OpenMod.Core";
 
-        public bool IsComponentAlive => Status != RuntimeStatus.Unloaded && Status != RuntimeStatus.Crashed;
+        public bool IsComponentAlive => Status is not RuntimeStatus.Unloaded and not RuntimeStatus.Crashed;
 
         public ILifetimeScope LifetimeScope { get; private set; } = null!;
 
@@ -310,16 +310,6 @@ namespace OpenMod.Runtime
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Type.GetType("Mono.Runtime") is null)
             {
                 return;
-            }
-
-            var internalSupportsFSWMethod = typeof(FileSystemWatcher).GetMethod("InternalSupportsFSW",
-                BindingFlags.Static | BindingFlags.NonPublic);
-
-            if (internalSupportsFSWMethod is not null)
-            {
-                var i = (int)internalSupportsFSWMethod.Invoke(null, null);
-
-                m_Logger.LogDebug("InternalSupportsFSW extern returns: {Num}", i);
             }
 
             var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
