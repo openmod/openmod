@@ -40,7 +40,7 @@ namespace OpenMod.Unturned.Commands
 
         public bool SupportsActor(ICommandActor actor)
         {
-            return actor.Type == KnownActorTypes.Player || actor.Type == KnownActorTypes.Console;
+            return actor.Type is KnownActorTypes.Player or KnownActorTypes.Console or KnownActorTypes.Rcon;
         }
 
         public ICommand Instantiate(IServiceProvider serviceProvider)

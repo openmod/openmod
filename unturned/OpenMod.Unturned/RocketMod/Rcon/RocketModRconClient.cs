@@ -15,6 +15,7 @@ namespace OpenMod.Unturned.RocketMod.Rcon
     public class RocketModRconClient : BaseTcpRconClient
     {
         private readonly ILogger<RocketModRconClient> m_Logger;
+        private NewLineType? m_NewLineType;
 
         public RocketModRconClient(
             ILogger<RocketModRconClient> logger,
@@ -27,6 +28,7 @@ namespace OpenMod.Unturned.RocketMod.Rcon
 
         protected Task SendPacketAsync(RocketModRconPacket packet, CancellationToken cancellationToken = default)
         {
+            //todo
             return SendDataAsync(packet.Serialize(), cancellationToken);
         }
 
@@ -34,7 +36,8 @@ namespace OpenMod.Unturned.RocketMod.Rcon
         {
             return SendPacketAsync(new RocketModRconPacket
             {
-                Body = message
+                Body = message,
+                NewLineType = m_NewLineType ?? NewLineType.Windows
             }, cancellationToken);
         }
 
@@ -45,6 +48,24 @@ namespace OpenMod.Unturned.RocketMod.Rcon
             try
             {
                 var packet = await RocketModRconPacket.ReadFromStreamAsync(stream);
+                if (m_NewLineType == null && packet.Body != null)
+                {
+                    if (packet.Body.EndsWith("\r\n"))
+                    {
+                        m_NewLineType = NewLineType.Windows;
+                        packet.Body = packet.Body[..^2];//lenght - 2
+                    }
+                    else if (packet.Body.EndsWith("\n"))
+                    {
+                        m_NewLineType = NewLineType.Linux;
+                        packet.Body = packet.Body[..^1];//lenght - 1
+                    }
+                    else
+                    {
+                        m_NewLineType = NewLineType.Mac;
+                        packet.Body = packet.Body[..^1];//lenght - 1
+                    }
+                }
                 await ProcessPacketAsync(packet);
             }
             catch (Exception ex)

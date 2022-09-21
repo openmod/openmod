@@ -25,10 +25,11 @@ namespace OpenMod.Unturned.Commands
         {
             var cmd = m_CommandRegistration.Cmd;
 
-            CSteamID id = Context.Actor.Type switch
+            var id = Context.Actor.Type switch
             {
                 KnownActorTypes.Player => ((UnturnedUser)Context.Actor).SteamId,
                 KnownActorTypes.Console => CSteamID.Nil,
+                KnownActorTypes.Rcon => CSteamID.Nil,
                 _ => throw new NotSupportedException($"Cannot execute unturned commands from actor: {Context.Actor.GetType()}.")
             };
 

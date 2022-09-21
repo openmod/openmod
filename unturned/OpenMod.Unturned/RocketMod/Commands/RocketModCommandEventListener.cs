@@ -11,6 +11,7 @@ using OpenMod.Core.Commands.Events;
 using OpenMod.Core.Cooldowns;
 using OpenMod.Core.Eventing;
 using OpenMod.Core.Users;
+using OpenMod.Unturned.RocketMod.Permissions;
 using OpenMod.Unturned.Users;
 using Rocket.API;
 using Rocket.Core;
@@ -95,6 +96,15 @@ namespace OpenMod.Unturned.RocketMod.Commands
                 {
                     rocketPlayer = new ConsolePlayer();
                 }
+                else if (@event.Actor.Type.Equals(KnownActorTypes.Rcon, StringComparison.OrdinalIgnoreCase))
+                {
+                    rocketPlayer = new RconPlayer(@event.Actor);
+
+                    if (!CheckRconPermission(rocketPlayer, commandAlias))
+                    {
+                        return;
+                    }
+                }
                 else
                 {
                     // unsupported user; do not handle
@@ -169,6 +179,17 @@ namespace OpenMod.Unturned.RocketMod.Commands
             }
 
             return true;
+        }
+
+        private bool CheckRconPermission(IRocketPlayer player, string commandAlias)
+        {
+            if (R.Permissions.GetType() != typeof(RocketPermissionProxyProvider))
+            {
+                return true;
+            }
+
+            var command = R.Commands.GetCommand(commandAlias);
+            return command != null && R.Permissions.HasPermission(player, command);
         }
     }
 }
