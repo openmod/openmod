@@ -417,7 +417,6 @@ namespace OpenMod.Runtime
             Serilog.Debugging.SelfLog.Enable(s =>
             {
                 Console.WriteLine(s);
-                Debugger.Break();
             });
 #endif
 
