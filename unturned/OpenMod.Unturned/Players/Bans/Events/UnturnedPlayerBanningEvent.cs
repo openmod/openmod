@@ -1,9 +1,7 @@
-﻿using OpenMod.API.Eventing;
-using OpenMod.Core.Eventing;
-using OpenMod.Extensions.Games.Abstractions.Players;
+﻿using OpenMod.Extensions.Games.Abstractions.Players;
 using OpenMod.Unturned.Events;
-using Steamworks;
 using System;
+using System.Collections.Generic;
 using System.Net;
 
 namespace OpenMod.Unturned.Players.Bans.Events
@@ -15,6 +13,8 @@ namespace OpenMod.Unturned.Players.Bans.Events
         public string InstigatorType { get; }
 
         public IPAddress? AddressToBan { get; }
+
+        public IEnumerable<byte[]>? HwidsToBan { get; }
 
         public string? Reason { get; set; }
 
@@ -33,6 +33,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
             string instigatorId,
             string instigatorType,
             IPAddress? addressBan,
+            IEnumerable<byte[]> hwidsToBan,
             string? reason,
             TimeSpan duration)
             : base(playerToBan)
@@ -40,6 +41,25 @@ namespace OpenMod.Unturned.Players.Bans.Events
             InstigatorId = instigatorId;
             InstigatorType = instigatorType;
             AddressToBan = addressBan;
+            HwidsToBan = hwidsToBan;
+            Reason = reason;
+            Duration = duration;
+        }
+
+        [Obsolete("Use the construtor with hwids instead")]
+        public UnturnedPlayerBanningEvent(
+            UnturnedPlayer playerToBan,
+            string instigatorId,
+            string instigatorType,
+            IPAddress? addressBan,
+            string? reason,
+            TimeSpan duration)
+            : base(playerToBan)
+        {
+            InstigatorId = instigatorId;
+            InstigatorType = instigatorType;
+            AddressToBan = addressBan;
+            HwidsToBan = null;
             Reason = reason;
             Duration = duration;
         }

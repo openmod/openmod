@@ -58,6 +58,10 @@ namespace OpenMod.Unturned.RocketMod.Commands
                 {
                     rocketPlayer = new ConsolePlayer();
                 }
+                else if (@event.Actor.Type.Equals(KnownActorTypes.Rcon, StringComparison.OrdinalIgnoreCase))
+                {
+                    rocketPlayer = new RconPlayer(@event.Actor);
+                }
                 else
                 {
                     return;
