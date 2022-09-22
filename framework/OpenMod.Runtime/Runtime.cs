@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -50,7 +49,7 @@ namespace OpenMod.Runtime
 
         public string OpenModComponentId { get; } = "OpenMod.Core";
 
-        public bool IsComponentAlive => Status != RuntimeStatus.Unloaded && Status != RuntimeStatus.Crashed;
+        public bool IsComponentAlive => Status is not RuntimeStatus.Unloaded and not RuntimeStatus.Crashed;
 
         public ILifetimeScope LifetimeScope { get; private set; } = null!;
 
@@ -281,7 +280,14 @@ namespace OpenMod.Runtime
                     Log.CloseAndFlush();
                 }
 
-                PerformFileSystemWatcherPatch();
+                try
+                {
+                    PerformFileSystemWatcherPatch();
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError(ex, "Failed to patch FileSystemWatcher");
+                }
 
                 return Host;
             }
@@ -300,27 +306,80 @@ namespace OpenMod.Runtime
 
         private void PerformFileSystemWatcherPatch()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Type.GetType("Mono.Runtime") != null)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Type.GetType("Mono.Runtime") is null)
             {
-                var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
-                var watcher = watcherField?.GetValue(null);
+                return;
+            }
 
-                if (watcher?.GetType().GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)?.GetValue(watcher) is Hashtable watches)
+            var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
+            var watcher = watcherField?.GetValue(null);
+
+            if (watcher?.GetType()
+                .GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)
+                ?.GetValue(watcher) is not Hashtable watches)
+            {
+                return;
+            }
+
+            var createFileDataMethod = watcher.GetType().GetMethod("CreateFileData", BindingFlags.Static | BindingFlags.NonPublic);
+            if (createFileDataMethod == null)
+            {
+                return;
+            }
+
+            lock (watches)
+            {
+                FieldInfo? incSubdirsField = null;
+                FieldInfo? filesLockField = null;
+                FieldInfo? filesField = null;
+
+                // DictionaryEntry<FileSystemWatcher, DefaultWatcherData>
+                foreach (DictionaryEntry entry in watches)
                 {
-                    FieldInfo? incSubdirsField = null;
-
-                    // DictionaryEntry<FileSystemWatcher, DefaultWatcherData>
-                    foreach (var data in watches)
+                    if (entry.Key is not FileSystemWatcher fsw)
                     {
-                        if (data is DictionaryEntry entry)
-                        {
-                            if (entry.Key is FileSystemWatcher fileSystemWatcher)
-                            {
-                                fileSystemWatcher.IncludeSubdirectories = false;
-                            }
+                        continue;
+                    }
 
-                            incSubdirsField ??= entry.Value.GetType().GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
-                            incSubdirsField?.SetValue(entry.Value, false);
+                    fsw.IncludeSubdirectories = false;
+
+                    var watcherDataType = entry.Value.GetType();
+
+                    incSubdirsField ??= watcherDataType.GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
+                    if (incSubdirsField?.GetValue(entry.Value) is bool incSubdirs
+                        && !incSubdirs)
+                    {
+                        continue;
+                    }
+
+                    incSubdirsField?.SetValue(entry.Value, false);
+
+                    filesLockField ??= watcherDataType.GetField("FilesLock", BindingFlags.Public | BindingFlags.Instance);
+                    var @lock = filesLockField?.GetValue(entry.Value);
+
+                    filesField ??= watcherDataType.GetField("Files", BindingFlags.Public | BindingFlags.Instance);
+                    var files = filesField?.GetValue(entry.Value);
+
+                    if (files is not Hashtable hashtable || @lock is null)
+                    {
+                        continue;
+                    }
+
+                    lock (@lock)
+                    {
+                        hashtable.Clear();
+
+                        if (!fsw.Filter.Equals("*.*"))
+                        {
+                            continue;
+                        }
+
+                        // Re add file data to not call OnCreated event in FileSystemWatcher
+
+                        var path = Path.GetFullPath(fsw.Path);
+                        foreach (var fileName in Directory.GetFileSystemEntries(path, "*"))
+                        {
+                            hashtable.Add(fileName, createFileDataMethod.Invoke(null, new object[] { path, fileName }));
                         }
                     }
                 }
@@ -358,7 +417,6 @@ namespace OpenMod.Runtime
             Serilog.Debugging.SelfLog.Enable(s =>
             {
                 Console.WriteLine(s);
-                Debugger.Break();
             });
 #endif
 
