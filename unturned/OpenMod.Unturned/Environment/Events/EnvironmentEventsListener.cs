@@ -1,7 +1,10 @@
-﻿using OpenMod.API;
+﻿using HarmonyLib;
+using OpenMod.API;
 using OpenMod.Unturned.Events;
+using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using System;
+using System.Reflection;
 
 namespace OpenMod.Unturned.Environment.Events
 {
@@ -48,6 +51,23 @@ namespace OpenMod.Unturned.Environment.Events
             var @event = new UnturnedWeatherUpdatedEvent(LevelLighting.rainyness, snow);
 
             Emit(@event);
+        }
+
+        [HarmonyPatch(typeof(LightingManager), "onPrePreLevelLoaded")]
+        private static class Patch_LightingManager
+        {
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex, MethodBase original)
+            {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(Patch_LightingManager), ex, original);
+                return null;
+            }
+
+            [HarmonyPrefix]
+            public static bool OnPrePreLevelLoaded()
+            {
+                return false;
+            }
         }
     }
 }
