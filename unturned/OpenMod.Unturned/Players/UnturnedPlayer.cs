@@ -116,7 +116,7 @@ namespace OpenMod.Unturned.Players
 
                 await UniTask.SwitchToMainThread();
 
-                var amount = (float)health - PlayerLife.food;
+                var amount = (float)health - PlayerLife.health;
                 if (amount == 0)
                 {
                     return;
