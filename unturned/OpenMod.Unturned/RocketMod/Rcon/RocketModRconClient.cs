@@ -47,6 +47,9 @@ namespace OpenMod.Unturned.RocketMod.Rcon
 
         protected override async Task OnDataReceivedAsync(ArraySegment<byte> data)
         {
+            m_Logger.LogDebug("Current buffer({BufferCount}): {Str}", m_Buffer.Count, BitConverter.ToString(m_Buffer.ToArray()));
+            m_Logger.LogDebug("Data receiived({DataCount}): {Str}", data.Count, BitConverter.ToString(data.ToArray()));
+
             for (var i = data.Offset; i < data.Count; i++)
             {
                 try
@@ -63,7 +66,6 @@ namespace OpenMod.Unturned.RocketMod.Rcon
                             if (++i >= data.Count)
                             {
                                 m_NewLineType ??= NewLineType.Mac;
-                                m_Logger.LogInformation("MAC1");
                                 break;
                             }
 
@@ -71,18 +73,15 @@ namespace OpenMod.Unturned.RocketMod.Rcon
                             if (nextBt is not 0x0A)
                             {
                                 m_NewLineType ??= NewLineType.Mac;
-                                m_Logger.LogInformation("MAC2");
                                 i--;
                                 break;
                             }
 
                             m_NewLineType ??= NewLineType.Windows;
-                            m_Logger.LogInformation("Windows");
                             break;
 
                         case 0x0A:
                             m_NewLineType ??= NewLineType.Linux;
-                            m_Logger.LogInformation("Linux");
                             break;
 
                         default:
