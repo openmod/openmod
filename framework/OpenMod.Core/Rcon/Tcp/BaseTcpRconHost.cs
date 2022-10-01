@@ -80,26 +80,27 @@ namespace OpenMod.Core.Rcon.Tcp
                             }
 
                             var eventSubs = new List<IDisposable>();
-                            var sub = m_EventBus.Subscribe<RconClientAuthenticatingEvent>(m_Runtime, async (_, _, e) =>
-                            {
-                                if (e.Client != client)
+                            //there is no need to use this event since base tcp rcon already handle fail cases
+                                /*var sub = m_EventBus.Subscribe<RconClientAuthenticatingEvent>(m_Runtime, async (_, _, e) =>
                                 {
-                                    return;
-                                }
-
-                                // Ensure clients get disconnected if authentication failed
-                                if (!e.IsAuthenticated)
-                                {
-                                    if (client.IsConnected)
+                                    if (e.Client != client)
                                     {
-                                        await client.DisconnectAsync("Authorization failed.", cancellationToken);
+                                        return;
                                     }
-                                }
-                            });
 
-                            eventSubs.Add(sub);
+                                    // Ensure clients get disconnected if authentication failed
+                                    if (!e.IsAuthenticated)
+                                    {
+                                        if (client.IsConnected)
+                                        {
+                                            await client.DisconnectAsync("Authorization failed.", cancellationToken);
+                                        }
+                                    }
+                                });
 
-                            sub = m_EventBus.Subscribe<RconClientDisconnectedEvent>(m_Runtime, async (_, _, e) =>
+                                eventSubs.Add(sub);*/
+
+                            var sub = m_EventBus.Subscribe<RconClientDisconnectedEvent>(m_Runtime, async (_, _, e) =>
                             {
                                 if (e.Client != client)
                                 {
