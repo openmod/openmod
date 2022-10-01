@@ -16,7 +16,7 @@
     <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2019.4.10">
 	  <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.22.15">
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.22.16">
 	  <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
   </ItemGroup>

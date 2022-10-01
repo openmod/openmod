@@ -12,11 +12,11 @@ namespace OpenMod.Unturned.Items
 {
     public class UnturnedItemDrop : IItemDrop
     {
-        private static readonly ClientStaticMethod<byte, byte, uint> s_SendTakeItem;
+        private static readonly ClientStaticMethod<byte, byte, uint, bool> s_SendDestroyItem;
 
         static UnturnedItemDrop()
         {
-            s_SendTakeItem = AccessTools.StaticFieldRefAccess<ItemManager, ClientStaticMethod<byte, byte, uint>>("SendTakeItem");
+            s_SendDestroyItem = AccessTools.StaticFieldRefAccess<ItemManager, ClientStaticMethod<byte, byte, uint, bool>>("SendDestroyItem");
         }
 
         private readonly ItemData m_ItemData;
@@ -76,9 +76,9 @@ namespace OpenMod.Unturned.Items
                     return false;
                 }
 
-                s_SendTakeItem.Invoke(ENetReliability.Reliable,
+                s_SendDestroyItem.Invoke(ENetReliability.Reliable,
                     Regions.EnumerateClients(RegionX, RegionY, ItemManager.ITEM_REGIONS),
-                    RegionX, RegionY, m_ItemData.instanceID);
+                    RegionX, RegionY, m_ItemData.instanceID, false);
 
                 return true;
             }
