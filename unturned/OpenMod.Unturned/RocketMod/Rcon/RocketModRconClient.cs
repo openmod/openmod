@@ -47,6 +47,9 @@ namespace OpenMod.Unturned.RocketMod.Rcon
 
         protected override async Task OnDataReceivedAsync(ArraySegment<byte> data)
         {
+            m_Logger.LogDebug("Current buffer({BufferCount}): {Str}", m_Buffer.Count, BitConverter.ToString(m_Buffer.ToArray()));
+            m_Logger.LogDebug("Data receiived({DataCount}): {Str}", data.Count, BitConverter.ToString(data.ToArray()));
+
             for (var i = data.Offset; i < data.Count; i++)
             {
                 try
