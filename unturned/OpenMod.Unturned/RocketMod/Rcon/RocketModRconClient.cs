@@ -63,7 +63,6 @@ namespace OpenMod.Unturned.RocketMod.Rcon
                             if (++i >= data.Count)
                             {
                                 m_NewLineType ??= NewLineType.Mac;
-                                m_Logger.LogInformation("MAC1");
                                 break;
                             }
 
@@ -71,18 +70,15 @@ namespace OpenMod.Unturned.RocketMod.Rcon
                             if (nextBt is not 0x0A)
                             {
                                 m_NewLineType ??= NewLineType.Mac;
-                                m_Logger.LogInformation("MAC2");
                                 i--;
                                 break;
                             }
 
                             m_NewLineType ??= NewLineType.Windows;
-                            m_Logger.LogInformation("Windows");
                             break;
 
                         case 0x0A:
                             m_NewLineType ??= NewLineType.Linux;
-                            m_Logger.LogInformation("Linux");
                             break;
 
                         default:
