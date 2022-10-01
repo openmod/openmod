@@ -1,7 +1,8 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ namespace OpenMod.Unturned.RocketMod.Rcon
     // ReSharper disable once ClassNeverInstantiated.Global
     public class RocketModRconClient : BaseTcpRconClient
     {
+        private readonly List<byte> m_Buffer;
         private readonly ILogger<RocketModRconClient> m_Logger;
         private NewLineType? m_NewLineType;
 
@@ -25,6 +27,7 @@ namespace OpenMod.Unturned.RocketMod.Rcon
             IServiceProvider serviceProvider) : base(tcpClient, host, serviceProvider)
         {
             m_Logger = logger;
+            m_Buffer = new List<byte>();
         }
 
         // ReSharper disable once MemberCanBePrivate.Global
@@ -44,67 +47,101 @@ namespace OpenMod.Unturned.RocketMod.Rcon
 
         protected override async Task OnDataReceivedAsync(ArraySegment<byte> data)
         {
-            using var stream = new MemoryStream(data.Array!, data.Offset, data.Count);
-
-            try
+            for (var i = data.Offset; i < data.Count; i++)
             {
-                var packet = await RocketModRconPacket.ReadFromStreamAsync(stream);
-                if (packet.Body != null)
+                try
                 {
-                    switch (m_NewLineType)
+                    var bt = data.Array![i];
+                    switch (bt)
                     {
-                        case NewLineType.Windows:
-                            packet.Body = packet.Body[..^2];//lenght - 2
+                        //putty negotiation FF XX XX, FF ...
+                        case 0xFF:
+                            i += 2;
+                            continue;
+
+                        case 0x0D: //check if nex char is \n
+                            if (++i >= data.Count)
+                            {
+                                m_NewLineType ??= NewLineType.Mac;
+                                m_Logger.LogInformation("MAC1");
+                                break;
+                            }
+
+                            var nextBt = data.Array[i];
+                            if (nextBt is not 0x0A)
+                            {
+                                m_NewLineType ??= NewLineType.Mac;
+                                m_Logger.LogInformation("MAC2");
+                                i--;
+                                break;
+                            }
+
+                            m_NewLineType ??= NewLineType.Windows;
+                            m_Logger.LogInformation("Windows");
                             break;
 
-                        case NewLineType.Linux:
-                        case NewLineType.Mac:
-                            packet.Body = packet.Body[..^1];//lenght - 1
+                        case 0x0A:
+                            m_NewLineType ??= NewLineType.Linux;
+                            m_Logger.LogInformation("Linux");
                             break;
 
                         default:
-                            if (packet.Body.EndsWith("\r\n"))
-                            {
-                                m_NewLineType = NewLineType.Windows;
-                                packet.Body = packet.Body[..^2];//lenght - 2
-                            }
-                            else if (packet.Body.EndsWith("\n"))
-                            {
-                                m_NewLineType = NewLineType.Linux;
-                                packet.Body = packet.Body[..^1];//lenght - 1
-                            }
-                            else if (packet.Body.EndsWith("\r"))
-                            {
-                                m_NewLineType = NewLineType.Mac;
-                                packet.Body = packet.Body[..^1];//lenght - 1
-                            }
-                            break;
+                            m_Buffer.Add(bt);
+                            continue;
                     }
                 }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError(ex, "Error while reading data received. Byte count: {DataCount} | Index: {I}",
+                        data.Count, i);
+                    continue;
+                }
 
-                await ProcessPacketAsync(packet);
-            }
-            catch (Exception ex)
-            {
-                m_Logger.LogError(ex, "Error while procesing packet. Byte count: {Count}", data.Count);
+                try
+                {
+                    if (m_Buffer.Count == 0)
+                    {
+                        if (!IsAuthenticated)
+                        {
+                            await OnExecuteCommandAsync("openmod");
+                        }
+                        continue;
+                    }
+
+                    //Buffer received a msg
+                    var packet = new RocketModRconPacket
+                    {
+                        Body = Encoding.UTF8.GetString(m_Buffer.ToArray())
+                    };
+                    m_Buffer.Clear();
+
+                    await ProcessPacketAsync(packet);
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError(ex, "Error while creating rocketmod rocn packet: {BufferCount}", m_Buffer.Count);
+                }
             }
         }
 
         protected virtual Task ProcessPacketAsync(RocketModRconPacket packet)
         {
-            if (string.IsNullOrEmpty(packet.Body))
+            try
             {
-                return Task.CompletedTask;
-            }
+                if (string.IsNullOrEmpty(packet.Body)) return Task.CompletedTask;
 
-            var arguments = packet.Body!.Split(' ');
-            var command = arguments.Length == 1 ? packet.Body : arguments.First();
-            if (command.Equals("login", StringComparison.InvariantCulture) && !IsAuthenticated)
+                var arguments = packet.Body!.Split(' ');
+                var command = arguments.Length == 1 ? packet.Body : arguments.First();
+                if (command.Equals("login", StringComparison.InvariantCulture) && !IsAuthenticated)
+                    return ProcessLoginAsync(packet);
+
+                return OnExecuteCommandAsync(packet.Body!);
+            }
+            catch (Exception ex)
             {
-                return ProcessLoginAsync(packet);
+                m_Logger.LogError(ex, "Error while procesing packet. Byte count: {Count}", packet.Body?.Length ?? -1);
+                return Task.FromException(ex);
             }
-
-            return OnExecuteCommandAsync(packet.Body!);
         }
 
         private async Task ProcessLoginAsync(RocketModRconPacket packet)
@@ -143,15 +180,19 @@ namespace OpenMod.Unturned.RocketMod.Rcon
 
         private bool ProcessRocketModLogin(RocketModRconPacket packet)
         {
-            var password = string.Join(" ", packet.Body!.Split(' ').Skip(1));
+            var password = string.Join(" ", packet.Body!.Split(' ').Skip(count: 1));
             var rocketPassword = R.Settings.Instance.RCON.Password.Trim();
 
-            if (rocketPassword.Equals("changeme", StringComparison.Ordinal))
-            {
-                return false;
-            }
+            if (rocketPassword.Equals("changeme", StringComparison.Ordinal)) return false;
 
             return string.Equals(password, rocketPassword, StringComparison.InvariantCulture);
+        }
+
+        public override ValueTask DisposeAsync(CancellationToken cancellationToken)
+        {
+            m_Buffer.Clear();
+            m_NewLineType = null;
+            return base.DisposeAsync(cancellationToken);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace OpenMod.Unturned.RocketMod.Rcon
 {
@@ -8,17 +6,6 @@ namespace OpenMod.Unturned.RocketMod.Rcon
     {
         public string? Body { get; set; }
         public NewLineType NewLineType { get; set; }
-
-        public static async Task<RocketModRconPacket> ReadFromStreamAsync(Stream stream)
-        {
-            var buffer = new byte[stream.Length];
-            _ = await stream.ReadAsync(buffer, 0, buffer.Length);
-
-            return new RocketModRconPacket
-            {
-                Body = Encoding.UTF8.GetString(buffer)
-            };
-        }
 
         public byte[] Serialize()
         {
