@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenMod.Core.Configuration;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -53,10 +54,7 @@ namespace OpenMod.Core.Users
             m_CachedUsersData = null!;
             m_FileChangeWatcher = null!;
 
-            AsyncHelper.RunSync(async () =>
-            {
-                m_CachedUsersData = await EnsureUserDataCreatedAsync();
-            });
+            AsyncHelper.RunSync(async () => { m_CachedUsersData = await EnsureUserDataCreatedAsync(); });
         }
 
         private async Task<UsersData> EnsureUserDataCreatedAsync()
@@ -66,7 +64,7 @@ namespace OpenMod.Core.Users
             {
                 m_CachedUsersData = new UsersData { Users = GetDefaultUsersData() };
 
-                await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
+                await SaveAsync();
                 created = true;
             }
 
@@ -144,7 +142,7 @@ namespace OpenMod.Core.Users
             {
                 return default;
             }
-            
+
             var serialized = _serializer.Serialize(dataObject);
 
             return _deserializer.Deserialize<T>(serialized);
@@ -235,7 +233,7 @@ namespace OpenMod.Core.Users
             m_CachedUsersData.Users = usersData;
             m_IsUpdating = true;
 
-            await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
+            await SaveAsync();
         }
 
         private List<UserData> GetDefaultUsersData()
@@ -271,7 +269,7 @@ namespace OpenMod.Core.Users
                     Users = GetDefaultUsersData()
                 };
 
-                await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
+                await SaveAsync();
                 return m_CachedUsersData;
             }
 
@@ -279,6 +277,22 @@ namespace OpenMod.Core.Users
             {
                 Users = GetDefaultUsersData()
             };
+        }
+
+        private async Task SaveAsync()
+        {
+            if (m_DataStore is YamlDataStore yamlDataStore)
+            {
+                await yamlDataStore.SaveAsync(
+                    c_UsersKey,
+                    m_CachedUsersData,
+                    header: $"# yaml-language-server: $schema=./{SchemaConstants.c_UsersSchemaPath}\n"
+                );
+
+                return;
+            }
+
+            await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
         }
 
         public async ValueTask DisposeAsync()
@@ -290,7 +304,7 @@ namespace OpenMod.Core.Users
                 throw new Exception("Tried to save null users data");
             }
 
-            await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
+            await SaveAsync();
         }
     }
 }
