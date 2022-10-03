@@ -55,6 +55,8 @@ namespace OpenMod.Core
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
             serviceCollection.AddTransient(typeof(IPluginAccessor<>), typeof(PluginAccessor<>));
             serviceCollection.AddSingleton<IAutoCompleteHandler, CommandAutoCompleteHandler>();
+
+            serviceCollection.AddHostedService<UsersSchemaGenerator>();
         }
     }
 }

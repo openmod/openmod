@@ -12,6 +12,7 @@ using OpenMod.Core.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using OpenMod.Core.Configuration;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -168,6 +169,17 @@ namespace OpenMod.Core.Permissions
 
         public virtual async Task SaveChangesAsync()
         {
+            if (m_DataStore is YamlDataStore yamlDataStore)
+            {
+                await yamlDataStore.SaveAsync(
+                    RolesKey,
+                    m_CachedPermissionRolesData,
+                    header: $"# yaml-language-server: $schema=./{SchemaConstants.c_RolesSchemaPath}\n"
+                );
+
+                return;
+            }
+
             await m_DataStore.SaveAsync(RolesKey, m_CachedPermissionRolesData);
         }
 

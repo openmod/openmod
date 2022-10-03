@@ -153,7 +153,12 @@ namespace OpenMod.Core.Persistence
             }
         }
 
-        public virtual Task SaveAsync<T>(string key, T? data) where T : class
+        public virtual async Task SaveAsync<T>(string key, T? data) where T : class
+        {
+            await SaveAsync(key, data, "");
+        }
+
+        internal Task SaveAsync<T>(string key, T? data, string header) where T : class
         {
             CheckKeyValid(key);
 
@@ -161,6 +166,11 @@ namespace OpenMod.Core.Persistence
                 data == null
                     ? string.Empty
                     : m_Serializer.Serialize(data);
+
+            if (header != "")
+            {
+                serializedYaml = header + serializedYaml;
+            }
 
             var encodedData = Encoding.UTF8.GetBytes(serializedYaml);
             var filePath = GetFilePathForKey(key);
@@ -351,7 +361,8 @@ namespace OpenMod.Core.Persistence
 
             if (!key.All(d => char.IsLetterOrDigit(d) || d == '.'))
             {
-                throw new Exception($"Invalid data store key: {key}. Key can only consist of alphanumeric characters and dot");
+                throw new Exception(
+                    $"Invalid data store key: {key}. Key can only consist of alphanumeric characters and dot");
             }
         }
 
