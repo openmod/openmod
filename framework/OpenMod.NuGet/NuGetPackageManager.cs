@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenMod.NuGet.Helpers;
+using System.Collections.Concurrent;
 
 namespace OpenMod.NuGet
 {
@@ -48,7 +49,7 @@ namespace OpenMod.NuGet
 
         private static readonly string[] s_PublisherBlacklist = new string[] {};
 
-        private static readonly Dictionary<string, List<Assembly>> s_LoadedPackages = new();
+        private static readonly ConcurrentDictionary<string, List<Assembly>> s_LoadedPackages = new();
         private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
         private AssemblyLoader m_AssemblyLoader;
@@ -542,9 +543,9 @@ namespace OpenMod.NuGet
                 throw new ArgumentNullException(nameof(nupkgFile));
             }
 
-            if (s_LoadedPackages.ContainsKey(nupkgFile))
+            if (s_LoadedPackages.TryGetValue(nupkgFile, out var loadedPackages))
             {
-                return s_LoadedPackages[nupkgFile];
+                return loadedPackages;
             }
 
             using var packageReader = new PackageArchiveReader(nupkgFile);
@@ -555,9 +556,9 @@ namespace OpenMod.NuGet
                 versionedIdentity += $"-{identity.Version.OriginalVersion}";
             }
 
-            if (s_LoadedPackages.ContainsKey(versionedIdentity))
+            if (s_LoadedPackages.TryGetValue(versionedIdentity, out loadedPackages))
             {
-                return s_LoadedPackages[versionedIdentity];
+                return loadedPackages;
             }
 
             Logger.LogInformation("Loading NuGet package: " + Path.GetFileName(nupkgFile));
@@ -645,8 +646,8 @@ namespace OpenMod.NuGet
             m_LoadedPackageAssemblies.Add(fullPath, assemblies);
             var result = assemblies.Select(d => d.Assembly.Target).Cast<Assembly>().ToList();
 
-            s_LoadedPackages.Add(versionedIdentity, result);
-            s_LoadedPackages.Add(nupkgFile, result);
+            s_LoadedPackages.TryAdd(versionedIdentity, result);
+            s_LoadedPackages.TryAdd(nupkgFile, result);
             return result;
         }
 
