@@ -1,7 +1,4 @@
 ﻿extern alias JetBrainsAnnotations;
-using System;
-using System.Linq;
-using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.Extensions.Games.Abstractions.Entities;
@@ -10,6 +7,9 @@ using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using Steamworks;
+using System;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace OpenMod.Unturned.Players.Life.Events
@@ -40,11 +40,13 @@ namespace OpenMod.Unturned.Players.Life.Events
         public override void SubscribePlayer(Player player)
         {
             player.life.onHurt += OnHurt;
+            player.life.OnFallDamageRequested += OnFallDamageRequested;
         }
 
         public override void UnsubscribePlayer(Player player)
         {
             player.life.onHurt -= OnHurt;
+            player.life.OnFallDamageRequested -= OnFallDamageRequested;
         }
 
         private IDamageSource? GetDamageSource(CSteamID killer)
@@ -111,6 +113,27 @@ namespace OpenMod.Unturned.Players.Life.Events
             var @event = new UnturnedPlayerDamagedEvent(player, damage, cause, limb, killer, source);
 
             Emit(@event);
+        }
+
+        private void OnFallDamageRequested(PlayerLife playerLife, float velocity, ref float damage, ref bool shouldBreakLegs)
+        {
+            var player = GetUnturnedPlayer(playerLife.player)!;
+            var source = GetDamageSource(player.SteamId);
+
+            var @event = new UnturnedPlayerFallDamagingEvent(player, velocity, (byte)damage, source, shouldBreakLegs);
+
+            Emit(@event);
+
+            if (@event.IsCancelled)
+            {
+                damage = 0;
+                shouldBreakLegs = false;
+            }
+            else
+            {
+                damage = @event.DamageAmount;
+                shouldBreakLegs = @event.ShouldBreakLegs;
+            }
         }
 
         private void OnPlayerDeath(PlayerLife sender, EDeathCause cause, ELimb limb, CSteamID instigator)
