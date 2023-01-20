@@ -122,7 +122,7 @@ Services can have to scopes: plugin scope and global scope.
 | IDataStore                                      | Serializes and deserializes persistent data            |
 | IDataStoreFactory                               | Creates data stores                                    |
 | IEventBus                                       | Subscribes to events and emits them                    |
-| IJobSchgeduler                                  | Schedules and manages jobs                             |
+| IJobScheduler                                   | Schedules and manages jobs                             |
 | ILogger<T\>                                     | Provides logging for the T class                       |
 | ILoggerFactory                                  | Creaters loggers                                       |
 | IOpenModStringLocalizer                         | Localizes messages from OpenMod's own translation file |
