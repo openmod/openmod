@@ -65,7 +65,7 @@ namespace OpenMod.Core.Permissions
             return openModComponents
                 .SelectMany(c => permissionRegistry
                     .GetPermissions(c)
-                    .Select(r => c.OpenModComponentId + '.' + r.Permission))
+                    .Select(r => c.OpenModComponentId + ':' + r.Permission))
                 .SelectMany(DefaultPermissionCheckProvider.BuildPermissionTree)
                 .ToHashSet();
         }
