@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29324.140
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33209.295
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.Core", "framework\OpenMod.Core\OpenMod.Core.csproj", "{4243D99F-BBA1-43E1-BC28-C61E4DD94B31}"
 EndProject
@@ -78,7 +78,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.EntityFrameworkCore.MySql", "framework\OpenMod.EntityFrameworkCore.MySql\OpenMod.EntityFrameworkCore.MySql.csproj", "{2D901FA0-D969-42D4-B730-1BD073553DC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.EntityFrameworkCore.MySql", "framework\OpenMod.EntityFrameworkCore.MySql\OpenMod.EntityFrameworkCore.MySql.csproj", "{2D901FA0-D969-42D4-B730-1BD073553DC4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{EB759E5D-7234-42D4-926C-0C817BED21D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.Core.Benchmark", "framework\benchmarks\OpenMod.Core.Benchmark\OpenMod.Core.Benchmark.csproj", "{4C3A7896-0EF3-4578-90C1-BCD4B90FD6C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -190,6 +194,10 @@ Global
 		{2D901FA0-D969-42D4-B730-1BD073553DC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D901FA0-D969-42D4-B730-1BD073553DC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D901FA0-D969-42D4-B730-1BD073553DC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C3A7896-0EF3-4578-90C1-BCD4B90FD6C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C3A7896-0EF3-4578-90C1-BCD4B90FD6C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C3A7896-0EF3-4578-90C1-BCD4B90FD6C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C3A7896-0EF3-4578-90C1-BCD4B90FD6C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -224,6 +232,8 @@ Global
 		{ABD8C0E6-6DD7-413A-BDDD-7E55927B7F84} = {42C946B3-E1EF-4278-A983-E99AA3F73527}
 		{0A7396D2-E877-4671-9647-6DBAE661470A} = {F6737FCE-E6A4-4970-A6AC-0D7061B820FB}
 		{2D901FA0-D969-42D4-B730-1BD073553DC4} = {42C946B3-E1EF-4278-A983-E99AA3F73527}
+		{EB759E5D-7234-42D4-926C-0C817BED21D3} = {42C946B3-E1EF-4278-A983-E99AA3F73527}
+		{4C3A7896-0EF3-4578-90C1-BCD4B90FD6C4} = {EB759E5D-7234-42D4-926C-0C817BED21D3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5384DBB4-E799-40C6-BD98-4C90698BE085}
