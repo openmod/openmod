@@ -654,11 +654,15 @@ namespace OpenMod.NuGet
             foreach (var dir in Directory.GetDirectories(PackagesDirectory))
             {
                 var directoryName = new DirectoryInfo(dir).Name;
+                if (!directoryName.StartsWith(packageId + ".", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
 
                 var nupkgFile = Path.Combine(dir, directoryName + ".nupkg");
                 if (!File.Exists(nupkgFile))
                 {
-                    Debug.Assert(false, "File should exists");
+                    Debug.Fail("File should exists");
                     return null;
                 }
 
