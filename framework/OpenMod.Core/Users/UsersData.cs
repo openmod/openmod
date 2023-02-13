@@ -23,6 +23,11 @@ namespace OpenMod.Core.Users
             {
                 Users = nestedObjectDeserializer(typeof(List<UserData>)) as List<UserData>;
             }
+            else
+            {
+                parser.Consume<Scalar>();
+            }
+
             parser.Consume<MappingEnd>();
         }
 
@@ -61,11 +66,13 @@ namespace OpenMod.Core.Users
                 emitter.Emit(new Scalar(AnchorName.Empty, FailsafeSchema.Tags.Str, "lastDisplayName", ScalarStyle.Plain, true, false));
                 emitter.Emit(new Scalar(AnchorName.Empty, tag, value, ScalarStyle.Any, true, false));
 
+                GetTagAndRenderedValue(user.FirstSeen, out tag, out value);
                 emitter.Emit(new Scalar(AnchorName.Empty, FailsafeSchema.Tags.Str, "firstSeen", ScalarStyle.Plain, true, false));
-                emitter.Emit(new Scalar(DefaultSchema.Tags.Timestamp, user.FirstSeen.GetValueOrDefault().ToString("o", CultureInfo.InvariantCulture)));
+                emitter.Emit(new Scalar(AnchorName.Empty, tag, value, ScalarStyle.Any, true, false));
 
+                GetTagAndRenderedValue(user.LastSeen, out tag, out value);
                 emitter.Emit(new Scalar(AnchorName.Empty, FailsafeSchema.Tags.Str, "lastSeen", ScalarStyle.Plain, true, false));
-                emitter.Emit(new Scalar(DefaultSchema.Tags.Timestamp, user.LastSeen.GetValueOrDefault().ToString("o", CultureInfo.InvariantCulture)));
+                emitter.Emit(new Scalar(AnchorName.Empty, tag, value, ScalarStyle.Any, true, false));
 
                 emitter.Emit(new Scalar(AnchorName.Empty, FailsafeSchema.Tags.Str, "banInfo", ScalarStyle.Plain, true, false));
                 if (user.BanInfo != null)
@@ -119,14 +126,28 @@ namespace OpenMod.Core.Users
             renderedValue = value ?? string.Empty;
         }
 
+        private static void GetTagAndRenderedValue(DateTime? value, out TagName tagName, out string renderedValue)
+        {
+            if (value.HasValue)
+            {
+                tagName = DefaultSchema.Tags.Timestamp;
+                renderedValue = value.Value.ToString("O", CultureInfo.InvariantCulture);
+                return;
+            }
+
+            tagName = JsonSchema.Tags.Null;
+            renderedValue = string.Empty;
+        }
+
         private static void EmitBanData(IEmitter emitter, BanData banData)
         {
             emitter.Emit(new MappingStart(AnchorName.Empty, TagName.Empty, true, MappingStyle.Any));
 
+            GetTagAndRenderedValue(banData.ExpireDate, out var tag, out var value);
             emitter.Emit(new Scalar(AnchorName.Empty, FailsafeSchema.Tags.Str, "expireDate", ScalarStyle.Plain, true, false));
-            emitter.Emit(new Scalar(DefaultSchema.Tags.Timestamp, banData.ExpireDate.GetValueOrDefault().ToString("o", CultureInfo.InvariantCulture)));
+            emitter.Emit(new Scalar(AnchorName.Empty, tag, value, ScalarStyle.Any, true, false));
 
-            GetTagAndRenderedValue(banData.InstigatorType, out var tag, out var value);
+            GetTagAndRenderedValue(banData.InstigatorType, out tag, out value);
             emitter.Emit(new Scalar(AnchorName.Empty, FailsafeSchema.Tags.Str, "instigatorType", ScalarStyle.Plain, true, false));
             emitter.Emit(new Scalar(AnchorName.Empty, tag, value, ScalarStyle.Any, true, false));
 

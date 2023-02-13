@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Persistence.Yaml;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -155,22 +157,22 @@ namespace OpenMod.Core.Persistence
 
         public virtual async Task SaveAsync<T>(string key, T? data) where T : class
         {
-            await SaveAsync(key, data, "");
+            await SaveAsync(key, data, string.Empty);
         }
 
-        internal Task SaveAsync<T>(string key, T? data, string header) where T : class
+        internal Task SaveAsync<T>(string key, T? data, string? header) where T : class
         {
             CheckKeyValid(key);
 
-            var serializedYaml =
-                data == null
-                    ? string.Empty
-                    : m_Serializer.Serialize(data);
-
-            if (header != "")
+            using var output = new StringWriter(new(256), CultureInfo.InvariantCulture);
+            if (!string.IsNullOrEmpty(header))
             {
-                serializedYaml = header + serializedYaml;
+                output.Write(header);
             }
+
+            m_Serializer.Serialize(new EmitterEx(output), data!);
+
+            var serializedYaml = output.ToString();
 
             var encodedData = Encoding.UTF8.GetBytes(serializedYaml);
             var filePath = GetFilePathForKey(key);

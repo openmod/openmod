@@ -15,30 +15,49 @@ using YamlDotNet.Serialization.TypeResolvers;
 using ITypeResolver = YamlDotNet.Serialization.ITypeResolver;
 
 [assembly: InternalsVisibleTo("OpenMod.Core.Benchmark")]
+[assembly: InternalsVisibleTo("OpenMod.Core.Tests")]
 
 namespace OpenMod.Core.Persistence.Yaml
 {
     internal sealed class ValueSerializerEx : IValueSerializer
     {
         private static readonly ITypeResolver s_TypeResolver = new DynamicTypeResolver();
+        private static readonly IYamlTypeConverter[] s_TypeConverters = BuildTypeConverters();
 
         private readonly IObjectGraphTraversalStrategy m_TraversalStrategy;
-        private readonly IEventEmitter m_EventEmitter;
-        private readonly IYamlTypeConverter[] m_TypeConverters;
         private readonly Func<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>>[] m_EmissionPhaseObjectGraphVisitorFactory;
         private readonly IObjectGraphVisitor<IEmitter> m_InnerObjectGraphVisitor;
 
         public ValueSerializerEx(INamingConvention namingConvention, bool ignoreFields, bool includeNonPublicProperties)
         {
             var typeInspector = BuildTypeInspector(namingConvention, ignoreFields, includeNonPublicProperties);
-            m_TypeConverters = BuildTypeConverters();
-            m_EventEmitter = BuildEventEmitter();
+            var eventEmitter = BuildEventEmitter();
+
             m_EmissionPhaseObjectGraphVisitorFactory = BuildEmissionPhaseObjectGraphVisitorFactory();
+            m_InnerObjectGraphVisitor = new EmittingObjectGraphVisitor(eventEmitter);
             m_TraversalStrategy = new FullObjectGraphTraversalStrategy(typeInspector, s_TypeResolver, 50, namingConvention);
-            m_InnerObjectGraphVisitor = new EmittingObjectGraphVisitor(m_EventEmitter);
         }
 
-        private ITypeInspector BuildTypeInspector(INamingConvention namingConvention, bool ignoreFields, bool includeNonPublicProperties)
+        public void SerializeValue(IEmitter emitter, object? value, Type? type)
+        {
+            var type2 = type ?? ((value != null) ? value.GetType() : typeof(object));
+            var staticType = type ?? typeof(object);
+            var graph = new ObjectDescriptor(value, type2, staticType);
+
+            void NestedObjectSerializer(object? v, Type? t)
+            {
+                SerializeValue(emitter, v, t);
+            }
+            ObjectSerializer objectSerializer = NestedObjectSerializer;
+
+            var visitor = m_EmissionPhaseObjectGraphVisitorFactory
+                .Aggregate(m_InnerObjectGraphVisitor, (inner, factory)
+                    => factory(new EmissionPhaseObjectGraphVisitorArgs(inner, objectSerializer)));
+
+            m_TraversalStrategy.Traverse(graph, visitor, emitter);
+        }
+
+        private static ITypeInspector BuildTypeInspector(INamingConvention namingConvention, bool ignoreFields, bool includeNonPublicProperties)
         {
             ITypeInspector innerInspector = new ReadablePropertiesTypeInspector(s_TypeResolver, includeNonPublicProperties);
             if (!ignoreFields)
@@ -56,7 +75,7 @@ namespace OpenMod.Core.Persistence.Yaml
             }.Aggregate(innerInspector, (inner, factory) => factory(inner));
         }
 
-        private IYamlTypeConverter[] BuildTypeConverters()
+        private static IYamlTypeConverter[] BuildTypeConverters()
         {
             return new IYamlTypeConverter[]
             {
@@ -65,7 +84,7 @@ namespace OpenMod.Core.Persistence.Yaml
             };
         }
 
-        private IEventEmitter BuildEventEmitter()
+        private static IEventEmitter BuildEventEmitter()
         {
             IEventEmitter innerEmitter = new WriterEventEmitter();
             return new Func<IEventEmitter, IEventEmitter>[]
@@ -74,46 +93,24 @@ namespace OpenMod.Core.Persistence.Yaml
             }.Aggregate(innerEmitter, (inner, factory) => factory(inner));
         }
 
-        private Func<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>>[] BuildEmissionPhaseObjectGraphVisitorFactory()
+        private static Func<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>>[] BuildEmissionPhaseObjectGraphVisitorFactory()
         {
             return new Func<EmissionPhaseObjectGraphVisitorArgs, IObjectGraphVisitor<IEmitter>>[]
             {
                 (args) => new CommentsObjectGraphVisitor(args.innerVisitor),
                 (args) => new DefaultValuesObjectGraphVisitor(DefaultValuesHandling.Preserve, args.innerVisitor),
-                (args) => new CustomSerializationObjectGraphVisitor(args.innerVisitor, args.typeConverters, args.objectSerializer),
+                (args) => new CustomSerializationObjectGraphVisitor(args.innerVisitor, s_TypeConverters, args.objectSerializer),
             };
-        }
-
-        public void SerializeValue(IEmitter emitter, object? value, Type? type)
-        {
-            var type2 = type ?? ((value != null) ? value.GetType() : typeof(object));
-            var staticType = type ?? typeof(object);
-            var graph = new ObjectDescriptor(value, type2, staticType);
-
-            void NestedObjectSerializer(object? v, Type? t)
-            {
-                SerializeValue(emitter, v, t);
-            }
-            ObjectSerializer objectSerializer = NestedObjectSerializer;
-
-            var visitor = m_EmissionPhaseObjectGraphVisitorFactory
-                .Aggregate(m_InnerObjectGraphVisitor, (inner, factory)
-                    => factory(new EmissionPhaseObjectGraphVisitorArgs(inner, m_TypeConverters, objectSerializer)));
-
-            m_TraversalStrategy.Traverse(graph, visitor, emitter);
         }
 
         private readonly struct EmissionPhaseObjectGraphVisitorArgs
         {
             public readonly IObjectGraphVisitor<IEmitter> innerVisitor;
-            public readonly IYamlTypeConverter[] typeConverters;
             public readonly ObjectSerializer objectSerializer;
 
-            public EmissionPhaseObjectGraphVisitorArgs(IObjectGraphVisitor<IEmitter> innerVisitor,
-                IYamlTypeConverter[] typeConverters, ObjectSerializer objectSerializer)
+            public EmissionPhaseObjectGraphVisitorArgs(IObjectGraphVisitor<IEmitter> innerVisitor, ObjectSerializer objectSerializer)
             {
                 this.innerVisitor = innerVisitor;
-                this.typeConverters = typeConverters;
                 this.objectSerializer = objectSerializer;
             }
         }
