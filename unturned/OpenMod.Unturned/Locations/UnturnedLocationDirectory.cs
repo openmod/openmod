@@ -16,7 +16,7 @@ namespace OpenMod.Unturned.Locations
     {
         public IReadOnlyCollection<UnturnedLocation> GetLocations()
         {
-            return LevelNodes.nodes.OfType<LocationNode>().Select(x => new UnturnedLocation(x)).ToArray();
+            return LocationDevkitNodeSystem.Get().GetAllNodes().OfType<LocationNode>().Select(x => new UnturnedLocation(x)).ToArray();
         }
 
         public UnturnedLocation? FindLocation(string name, bool exact = true)

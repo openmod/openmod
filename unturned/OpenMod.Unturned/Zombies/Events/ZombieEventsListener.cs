@@ -101,7 +101,7 @@ namespace OpenMod.Unturned.Zombies.Events
             //from method zombie.askdamage
             if (s_ZombieZombieRegion?.GetValue(zombie.Zombie) is ZombieRegion zombieRegion && zombieRegion.hasBeacon) 
             {
-                parameters.damage = MathfEx.CeilToUShort((float)(int)parameters.damage / ((float)Mathf.Max(1, BeaconManager.checkBeacon(zombie.Zombie.bound).initialParticipants) * 1.5f));
+                parameters.damage = MathfEx.CeilToUShort((int)parameters.damage / (Mathf.Max(1, BeaconManager.checkBeacon(zombie.Zombie.bound).initialParticipants) * 1.5f));
             }
 
             var damageAmount = (ushort)Math.Min(ushort.MaxValue, Mathf.FloorToInt(parameters.damage * parameters.times));
