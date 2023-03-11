@@ -119,7 +119,7 @@ namespace OpenMod.Common.Helpers
 
         public static IEnumerable<Type> FindTypes<T>(this Assembly assembly, bool includeAbstractAndInterfaces = false)
         {
-            return assembly.FindAllTypes(includeAbstractAndInterfaces).Where(c => typeof(T).IsAssignableFrom(c));
+            return assembly.FindAllTypes(includeAbstractAndInterfaces).Where(c => c.IsAssignableFrom(typeof(T)) || c.GetInterfaces().Any(x => x == typeof(T)));
         }
 
         public static string GetVersionIndependentName(string assemblyName)

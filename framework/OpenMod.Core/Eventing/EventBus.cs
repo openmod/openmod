@@ -28,7 +28,8 @@ namespace OpenMod.Core.Eventing
         private readonly List<EventSubscription> m_EventSubscriptions = new();
         private readonly object m_Lock = new();
 
-        private static readonly Type[] s_OmittedTypes = {
+        private static readonly Type[] s_OmittedTypes =
+        {
             typeof(IEvent),
             typeof(ICancellableEvent),
             typeof(EventBase),
@@ -68,37 +69,23 @@ namespace OpenMod.Core.Eventing
 
         public virtual IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback)
         {
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            if (callback == null) throw new ArgumentNullException(nameof(callback));
 
             var attribute = GetEventListenerAttribute(callback.Method);
 
             return Subscribe(component, eventName, callback, attribute);
         }
 
-        public virtual IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback, IEventListenerOptions options)
+        public virtual IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback,
+            IEventListenerOptions options)
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
+            if (component == null) throw new ArgumentNullException(nameof(component));
 
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            if (callback == null) throw new ArgumentNullException(nameof(callback));
 
-            if (string.IsNullOrEmpty(eventName))
-            {
-                throw new ArgumentException(eventName);
-            }
+            if (string.IsNullOrEmpty(eventName)) throw new ArgumentException(eventName);
 
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
+            if (options == null) throw new ArgumentNullException(nameof(options));
 
             if (!component.IsComponentAlive)
             {
@@ -107,39 +94,30 @@ namespace OpenMod.Core.Eventing
                 return NullDisposable.Instance;
             }
 
-            var subscription = new EventSubscription(component, callback.Invoke, options, eventName, component.LifetimeScope.BeginLifetimeScopeEx());
+            var subscription = new EventSubscription(component, callback.Invoke, options, eventName,
+                component.LifetimeScope.BeginLifetimeScopeEx());
 
             return SubscribeInternal(subscription);
         }
 
-        public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback) where TEvent : IEvent
+        public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback)
+            where TEvent : IEvent
         {
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            if (callback == null) throw new ArgumentNullException(nameof(callback));
 
             var attribute = GetEventListenerAttribute(callback.Method);
 
             return Subscribe(component, callback, attribute);
         }
 
-        public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback, IEventListenerOptions options) where TEvent : IEvent
+        public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback,
+            IEventListenerOptions options) where TEvent : IEvent
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
+            if (component == null) throw new ArgumentNullException(nameof(component));
 
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            if (callback == null) throw new ArgumentNullException(nameof(callback));
 
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
+            if (options == null) throw new ArgumentNullException(nameof(options));
 
             if (!component.IsComponentAlive)
             {
@@ -157,32 +135,21 @@ namespace OpenMod.Core.Eventing
 
         public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback)
         {
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            if (callback == null) throw new ArgumentNullException(nameof(callback));
 
             var attribute = GetEventListenerAttribute(callback.Method);
 
             return Subscribe(component, eventType, callback, attribute);
         }
 
-        public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback, IEventListenerOptions options)
+        public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback,
+            IEventListenerOptions options)
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
+            if (component == null) throw new ArgumentNullException(nameof(component));
 
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            if (callback == null) throw new ArgumentNullException(nameof(callback));
 
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
+            if (options == null) throw new ArgumentNullException(nameof(options));
 
             if (!component.IsComponentAlive)
             {
@@ -199,15 +166,9 @@ namespace OpenMod.Core.Eventing
 
         public virtual IDisposable Subscribe(IOpenModComponent component, Assembly assembly)
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
+            if (component == null) throw new ArgumentNullException(nameof(component));
 
-            if (assembly == null)
-            {
-                throw new ArgumentNullException(nameof(assembly));
-            }
+            if (assembly == null) throw new ArgumentNullException(nameof(assembly));
 
             if (!component.IsComponentAlive)
             {
@@ -219,7 +180,8 @@ namespace OpenMod.Core.Eventing
             m_Logger.LogDebug("Subscribing assembly \"{AssemblyName}\" for {ComponentId}",
                 assembly.FullName, component.OpenModComponentId);
 
-            List<(Type eventListenerType, MethodInfo method, EventListenerAttribute eventListenerAttribute, Type eventType)> eventListeners = new List<(Type, MethodInfo, EventListenerAttribute, Type)>();
+            List<(Type eventListenerType, MethodInfo method, EventListenerAttribute eventListenerAttribute, Type
+                eventType)> eventListeners = new();
             var scope = component.LifetimeScope.BeginLifetimeScopeEx(builder =>
             {
                 foreach (var type in assembly.FindTypes<IEventListener>())
@@ -251,7 +213,8 @@ namespace OpenMod.Core.Eventing
                         eventListeners.Add((type, method, handler, eventType));
                     }
 
-                    var lifetime = type.GetCustomAttribute<EventListenerLifetimeAttribute>()?.Lifetime ?? ServiceLifetime.Transient;
+                    var lifetime = type.GetCustomAttribute<EventListenerLifetimeAttribute>()?.Lifetime ??
+                                   ServiceLifetime.Transient;
 
                     builder.RegisterType(type)
                         .As(type)
@@ -277,10 +240,7 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Unsubscribe(IOpenModComponent component)
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
+            if (component == null) throw new ArgumentNullException(nameof(component));
 
             lock (m_Lock)
             {
@@ -290,55 +250,48 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Unsubscribe(IOpenModComponent component, string eventName)
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
+            if (component == null) throw new ArgumentNullException(nameof(component));
 
             lock (m_Lock)
             {
-                m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && c.EventName.Equals(eventName, StringComparison.OrdinalIgnoreCase));
+                m_EventSubscriptions.RemoveAll(c =>
+                    (!c.Owner.IsAlive || c.Owner.Target == component) &&
+                    c.EventName.Equals(eventName, StringComparison.OrdinalIgnoreCase));
             }
         }
 
         public virtual void Unsubscribe<TEvent>(IOpenModComponent component) where TEvent : IEvent
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
+            if (component == null) throw new ArgumentNullException(nameof(component));
 
             lock (m_Lock)
             {
-                m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == typeof(TEvent) || c.EventName.Equals(typeof(TEvent).Name, StringComparison.OrdinalIgnoreCase)));
+                m_EventSubscriptions.RemoveAll(c =>
+                    (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == typeof(TEvent) ||
+                                                                          c.EventName.Equals(typeof(TEvent).Name,
+                                                                              StringComparison.OrdinalIgnoreCase)));
             }
         }
 
         public virtual void Unsubscribe(IOpenModComponent component, Type eventType)
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
+            if (component == null) throw new ArgumentNullException(nameof(component));
 
             lock (m_Lock)
             {
-                m_EventSubscriptions.RemoveAll(c => (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == eventType || c.EventName.Equals(eventType.Name, StringComparison.OrdinalIgnoreCase)));
+                m_EventSubscriptions.RemoveAll(c =>
+                    (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == eventType ||
+                                                                          c.EventName.Equals(eventType.Name,
+                                                                              StringComparison.OrdinalIgnoreCase)));
             }
         }
 
         public virtual async Task EmitAsync(IOpenModComponent component, object? sender, IEvent @event,
             EventExecutedCallback? callback = null)
         {
-            if (component == null)
-            {
-                throw new ArgumentNullException(nameof(component));
-            }
+            if (component == null) throw new ArgumentNullException(nameof(component));
 
-            if (@event == null)
-            {
-                throw new ArgumentNullException(nameof(@event));
-            }
+            if (@event == null) throw new ArgumentNullException(nameof(@event));
 
             if (!component.IsComponentAlive)
             {
@@ -356,7 +309,7 @@ namespace OpenMod.Core.Eventing
                 currentType = currentType.BaseType;
             }
 
-            eventTypes.AddRange(@event.GetType().GetInterfaces().Where(d => typeof(IEvent).IsAssignableFrom(d)));
+            eventTypes.AddRange(@event.GetType().GetInterfaces().Where(d => typeof(IEvent).IsAssignableFrom(d)) );
 
             var cancellableEvent = @event as ICancellableEvent;
 
@@ -371,8 +324,10 @@ namespace OpenMod.Core.Eventing
                 {
                     eventSubscriptions = m_EventSubscriptions
                         .Where(c => c is not null && ((c.EventType != null && c.EventType == eventType)
-                                    || (eventName.Equals(c.EventName, StringComparison.OrdinalIgnoreCase)
-                                        && c.Owner.IsAlive && ((IOpenModComponent)c.Owner.Target).IsComponentAlive)))
+                                                      || (eventName.Equals(c.EventName,
+                                                              StringComparison.OrdinalIgnoreCase)
+                                                          && c.Owner.IsAlive &&
+                                                          ((IOpenModComponent)c.Owner.Target).IsComponentAlive)))
                         .ToList();
                 }
 
@@ -401,13 +356,10 @@ namespace OpenMod.Core.Eventing
                         // be resolved and nested lifetimes cannot be created from this LifetimeScope as it (or one of its parent scopes)
                         // has already been disposed." It means you injected a service to an IEventHandler
                         // that used the service *after* the event has finished (e.g. in a Task or by storing it somewhere).
-
                         await using var newScope = group.Key.BeginLifetimeScope("AutofacWebRequest");
                         foreach (var subscription in group)
                         {
-                            if (cancellableEvent != null
-                                && cancellableEvent.IsCancelled
-                                && !subscription.EventListenerOptions.IgnoreCancelled)
+                            if (cancellableEvent is { IsCancelled: true } && !subscription.EventListenerOptions.IgnoreCancelled)
                             {
                                 continue;
                             }
@@ -433,7 +385,7 @@ namespace OpenMod.Core.Eventing
                                         cancellableEvent.IsCancelled = wasCancelled;
                                         m_Logger.LogWarning(
                                             "{ComponentId} changed {EventName} cancellation status with Monitor priority which is not permitted",
-                                            ((IOpenModComponent)@subscription.Owner.Target).OpenModComponentId,
+                                            ((IOpenModComponent)subscription.Owner.Target).OpenModComponentId,
                                             eventName);
                                     }
                                 }
@@ -485,13 +437,17 @@ namespace OpenMod.Core.Eventing
             }
             m_IsDisposing = true;
 
-            await m_EventSubscriptions
-                .Select(d => d.Scope)
-                .Distinct()
-                .ToList()
-                .DisposeAllAsync();
+            List<ILifetimeScope> scopes;
+            lock (m_Lock)
+            {
+                scopes = m_EventSubscriptions
+                    .Select(d => d.Scope)
+                    .Distinct()
+                    .ToList();
+                m_EventSubscriptions.Clear();
+            }
 
-            m_EventSubscriptions.Clear();
+            await scopes.DisposeAllAsync();
         }
     }
 }

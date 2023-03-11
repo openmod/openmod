@@ -50,7 +50,8 @@ namespace OpenMod.Core.Plugins
             }
         }
 
-        private async Task<ICollection<Assembly>> InstallPackagesInEmbeddedFile(Assembly assembly, ICollection<Assembly> ignoredAssemblies)
+        private async Task<ICollection<Assembly>> InstallPackagesInEmbeddedFile(Assembly assembly,
+            ICollection<Assembly> ignoredAssemblies)
         {
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -152,7 +153,8 @@ namespace OpenMod.Core.Plugins
                     foreach (var loaderException in ex.LoaderExceptions)
                     {
                         m_Logger.LogDebug(loaderException,
-                            $"Exception occurred when getting types in plugin assembly: {providerAssembly.GetName().Name}");
+                            "Exception occurred when getting types in plugin assembly: {ProviderAssemblyName}",
+                            providerAssembly.GetName().Name);
                     }
 
                     var missingAssemblies = CheckRequiredDependencies(ex.LoaderExceptions);
@@ -164,11 +166,12 @@ namespace OpenMod.Core.Plugins
                         continue;
                     }
 
+                    //todo check result and try reload lib
                     await TryInstallRequiredDependenciesAsync(providerAssembly, missingAssemblies);
                     continue;
                 }
 
-                if (types.Any(d => typeof(IOpenModPlugin).IsAssignableFrom(d) && !d.IsAbstract && d.IsClass))
+                if (types.Any(d => d.GetInterfaces().Any(x => x == typeof(IOpenModPlugin)) && !d.IsAbstract && d.IsClass))
                 {
                     continue;
                 }
@@ -183,8 +186,13 @@ namespace OpenMod.Core.Plugins
             return providerAssemblies;
         }
 
-        private static readonly Regex MissingFileAssemblyVersionRegex = new("'(?<assembly>.+?), Version=(?<version>.+?), ", RegexOptions.Compiled);//TypeLoad detect to entriers for this regex and one is wrong
-        private static readonly Regex TypeLoadAssemblyVersionRegex = new("assembly:(?<assembly>.+?), Version=(?<version>.+?), ", RegexOptions.Compiled);//Missing file dont have assembly:
+        private static readonly Regex s_MissingFileAssemblyVersionRegex =
+            new("'(?<assembly>.+?), Version=(?<version>.+?), ",
+                RegexOptions.Compiled); //TypeLoad detect to entriers for this regex and one is wrong
+
+        private static readonly Regex s_TypeLoadAssemblyVersionRegex =
+            new("assembly:(?<assembly>.+?), Version=(?<version>.+?), ",
+                RegexOptions.Compiled); //Missing file dont have assembly:
 
         // ReSharper disable once MemberCanBeMadeStatic.Local
         private Dictionary<string, SemVersion> CheckRequiredDependencies(IEnumerable<Exception> exLoaderExceptions)
@@ -196,11 +204,11 @@ namespace OpenMod.Core.Plugins
                 switch (typeEx)
                 {
                     case TypeLoadException:
-                        match = TypeLoadAssemblyVersionRegex.Match(typeEx.Message);
+                        match = s_TypeLoadAssemblyVersionRegex.Match(typeEx.Message);
                         break;
 
                     case FileNotFoundException:
-                        match = MissingFileAssemblyVersionRegex.Match(typeEx.Message);
+                        match = s_MissingFileAssemblyVersionRegex.Match(typeEx.Message);
                         break;
 
                     default:
@@ -215,9 +223,8 @@ namespace OpenMod.Core.Plugins
 
                 //Example: Version is 1.1.2.0 to SemVersion is 1.1.0+2 but we need 1.1.2 to install from nuget
                 var assemblyVersion = new SemVersion(version.Major, version.Minor, version.Build);
-
                 if (missingAssemblies.TryGetValue(assemblyName, out var versionToInstall) &&
-                    versionToInstall > assemblyVersion)
+                    SemVersion.ComparePrecedence(versionToInstall, assemblyVersion) > 0)
                     continue;
 
                 missingAssemblies[assemblyName] = assemblyVersion;
@@ -226,32 +233,34 @@ namespace OpenMod.Core.Plugins
             return missingAssemblies;
         }
 
-        private async Task TryInstallRequiredDependenciesAsync(Assembly providerAssembly,
+        // ReSharper disable once UnusedMethodReturnValue.Local
+        private async Task<bool> TryInstallRequiredDependenciesAsync(Assembly providerAssembly,
             Dictionary<string, SemVersion> missingAssemblies)
         {
             foreach (var assembly in missingAssemblies)
             {
-                var packagetToInstall = await m_NuGetPackageManager.QueryPackageExactAsync(assembly.Key, assembly.Value.ToString());
-                if (packagetToInstall != null)
+                var packagetToInstall =
+                    await m_NuGetPackageManager.QueryPackageExactAsync(assembly.Key, assembly.Value.ToString());
+                if (packagetToInstall == null)
                 {
-                    var result = await m_NuGetPackageManager.InstallAsync(packagetToInstall.Identity);
-                    if (result.Code == NuGetInstallCode.Success || result.Code == NuGetInstallCode.NoUpdatesFound)
-                    {
-                        continue;
-                    }
-
-                    m_Logger.LogWarning("Failed to install \"{AssemblyName}\": {ResultCode}",
-                        assembly.Key, result.Code);
-                }
-                else
-                {
-                    m_Logger.LogWarning("Package not found: {AssemblyName}", assembly.Key);
+                    m_Logger.LogWarning(
+                        "Package not found: {AssemblyName}. Plugin \"{ProviderAssemblyName}\" can't load without it!",
+                        assembly.Key, providerAssembly.GetName().Name);
+                    return false;
                 }
 
-                m_Logger.LogWarning("Plugin \"{ProviderAssemblyName}\" can't load without it!",
-                    providerAssembly.GetName().Name);
-                return;
+                var result = await m_NuGetPackageManager.InstallAsync(packagetToInstall.Identity);
+                // ReSharper disable once InvertIf
+                if (result.Code is not (NuGetInstallCode.Success or NuGetInstallCode.NoUpdatesFound))
+                {
+                    m_Logger.LogWarning(
+                        "Failed to install \"{AssemblyName}\": {ResultCode}. Plugin \"{ProviderAssemblyName}\" can't load without it!",
+                        assembly.Key, result.Code, providerAssembly.GetName().Name);
+                    return false;
+                }
             }
+
+            return true;
         }
 
         public void Dispose()
