@@ -16,6 +16,13 @@ namespace OpenMod.Unturned.Zombies.Events
     [OpenModInternal]
     internal class ZombieEventsListener : UnturnedEventsListener
     {
+        private static readonly FieldInfo? s_ZombieZombieRegion;
+
+        static ZombieEventsListener()
+        {
+            s_ZombieZombieRegion = typeof(Zombie).GetField("zombieRegion", BindingFlags.Instance | BindingFlags.NonPublic);
+        }
+
         public ZombieEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
@@ -78,7 +85,26 @@ namespace OpenMod.Unturned.Zombies.Events
             var zombie = new UnturnedZombie(parameters.zombie);
             var player = GetUnturnedPlayer(parameters.instigator as Player);
 
-            var damageAmount = (ushort)Math.Min(ushort.MaxValue, Math.Floor(parameters.damage * parameters.times));
+            //from method damagetool.damageZombie
+            if (parameters.applyGlobalArmorMultiplier)
+            {
+                if (parameters.limb == ELimb.SKULL)
+                {
+                    parameters.times *= Provider.modeConfigData.Zombies.Armor_Multiplier;
+                }
+                else
+                {
+                    parameters.times *= Provider.modeConfigData.Zombies.NonHeadshot_Armor_Multiplier;
+                }
+            }
+
+            //from method zombie.askdamage
+            if (s_ZombieZombieRegion?.GetValue(zombie.Zombie) is ZombieRegion zombieRegion && zombieRegion.hasBeacon) 
+            {
+                parameters.damage = MathfEx.CeilToUShort((float)(int)parameters.damage / ((float)Mathf.Max(1, BeaconManager.checkBeacon(zombie.Zombie.bound).initialParticipants) * 1.5f));
+            }
+
+            var damageAmount = (ushort)Math.Min(ushort.MaxValue, Mathf.FloorToInt(parameters.damage * parameters.times));
 
             var @event = damageAmount >= zombie.Health
                 ? new UnturnedZombieDyingEvent(zombie, player, damageAmount, parameters.direction,
