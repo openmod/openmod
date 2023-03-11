@@ -13,7 +13,7 @@ namespace OpenMod.EntityFrameworkCore
             m_Configuration = configuration.GetSection("database");
         }
 
-        public string GetConnectionString(string name)
+        public string? GetConnectionString(string name)
         {
             return m_Configuration.GetConnectionString(name);
         }

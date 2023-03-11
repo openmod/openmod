@@ -15,7 +15,7 @@ namespace OpenMod.API.Jobs
                 throw new ArgumentException(nameof(jobName));
             }
 
-            if (string.IsNullOrEmpty(nameof(task)))
+            if (string.IsNullOrEmpty(task))
             {
                 throw new ArgumentException(nameof(task));
             }

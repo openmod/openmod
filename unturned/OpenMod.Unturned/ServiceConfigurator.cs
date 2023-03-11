@@ -31,9 +31,11 @@ namespace OpenMod.Unturned
     [UsedImplicitly]
     public class ServiceConfigurator : IServiceConfigurator
     {
-        public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
+        public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext,
+            IServiceCollection serviceCollection)
         {
-            var unturnedConfiguration = new OpenModUnturnedConfiguration(openModStartupContext.Runtime.WorkingDirectory);
+            var unturnedConfiguration =
+                new OpenModUnturnedConfiguration(openModStartupContext.Runtime.WorkingDirectory);
 
             serviceCollection.AddSingleton<IOpenModUnturnedConfiguration>(unturnedConfiguration);
 
@@ -57,7 +59,8 @@ namespace OpenMod.Unturned
                 options.AddCommandSource<UnturnedCommandSource>();
                 var logger = openModStartupContext.LoggerFactory.CreateLogger<OpenModComponentCommandSource>();
                 var host = openModStartupContext.Runtime.LifetimeScope.Resolve<IOpenModHost>();
-                options.AddCommandSource(new OpenModComponentCommandSource(logger, host, typeof(OpenModUnturnedHost).Assembly));
+                options.AddCommandSource(
+                    new OpenModComponentCommandSource(logger, host, typeof(OpenModUnturnedHost).Assembly));
             });
 
             serviceCollection.Configure<UserManagerOptions>(options =>
@@ -80,7 +83,7 @@ namespace OpenMod.Unturned
 
                 var permissionSystem = unturnedConfiguration.Configuration
                     .GetSection("rocketmodIntegration:permissionSystem")
-                    .Get<string>();
+                    .Get<string>() ?? string.Empty;
 
                 if (permissionSystem.Equals("RocketMod", StringComparison.OrdinalIgnoreCase))
                 {
@@ -96,7 +99,7 @@ namespace OpenMod.Unturned
 
                 var economySystem = unturnedConfiguration.Configuration
                     .GetSection("rocketmodIntegration:economySystem")
-                    .Get<string>();
+                    .Get<string>() ?? string.Empty;
 
                 if (economySystem.Equals("RocketMod_Uconomy", StringComparison.OrdinalIgnoreCase))
                 {
@@ -107,7 +110,8 @@ namespace OpenMod.Unturned
                     else
                     {
                         var logger = openModStartupContext.LoggerFactory.CreateLogger<RocketModIntegration>();
-                        logger.LogWarning("Economy system was set to RocketMod_Uconomy but Uconomy is not installed. Defaulting to Separate");
+                        logger.LogWarning(
+                            "Economy system was set to RocketMod_Uconomy but Uconomy is not installed. Defaulting to Separate");
                     }
                 }
             }

@@ -13,7 +13,7 @@ namespace OpenMod.Common.Helpers
     {
         public static MethodBase? GetCallingMethod(Type[]? skipTypes = null, MethodBase[]? skipMethods = null, bool applyAsyncMethodPatch = true)
         {
-            var skipList = new List<Type>(skipTypes ?? new Type[0]) { typeof(ReflectionExtensions) };
+            var skipList = new List<Type>(skipTypes ?? Type.EmptyTypes) { typeof(ReflectionExtensions) };
 
             var st = new StackTrace();
             var frameTarget = (StackFrame?)null;
@@ -25,7 +25,7 @@ namespace OpenMod.Common.Helpers
                     continue;
 
                 // Hot fix for async Task methods:
-                // If current frame method is called "MoveNext" and parent frame is from "AsyncMethodBuilderCore" type 
+                // If current frame method is called "MoveNext" and parent frame is from "AsyncMethodBuilderCore" type
                 //   it's an async method wrapper, so we need to skip these two frames to get the original calling async method
                 // Tested on .NET Core 2.1; should be tested on full .NET and mono too
                 if (applyAsyncMethodPatch && frameMethod is MethodInfo {Name: "MoveNext"})
@@ -127,7 +127,7 @@ namespace OpenMod.Common.Helpers
             return GetVersionIndependentName(assemblyName, out _);
         }
 
-        private static readonly Regex VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
+        private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
         public static string GetVersionIndependentName(string assemblyName, out string extractedVersion)
         {
             if (assemblyName == null)
@@ -135,9 +135,9 @@ namespace OpenMod.Common.Helpers
                 throw new ArgumentNullException(nameof(assemblyName));
             }
 
-            var match = VersionRegex.Match(assemblyName);
+            var match = s_VersionRegex.Match(assemblyName);
             extractedVersion = match.Groups[1].Value;
-            return VersionRegex.Replace(assemblyName, string.Empty);
+            return s_VersionRegex.Replace(assemblyName, string.Empty);
         }
 
         public static string GetDebugName(this MethodBase mb)

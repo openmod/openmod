@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Resources;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
+using OpenMod.Common.Helpers;
 using OpenMod.Common.Hotloading;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
@@ -29,9 +21,17 @@ using Semver;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Resources;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using AssemblyExtensions = OpenMod.Common.Helpers.AssemblyExtensions;
 
 namespace OpenMod.Runtime
 {
@@ -135,7 +135,7 @@ namespace OpenMod.Runtime
 
                 SetupSerilog(false);
 
-                m_Logger.LogInformation("OpenMod v{Version} is starting...", Version);
+                m_Logger!.LogInformation("OpenMod v{Version} is starting...", Version);
 
                 if (parameters.PackageManager is not NuGetPackageManager nugetPackageManager)
                 {
@@ -188,7 +188,7 @@ namespace OpenMod.Runtime
                                 hotReloadingEnabled = parsed;
                                 break;
                             default:
-                                m_Logger.LogWarning(
+                                m_Logger!.LogWarning(
                                     "Unknown config for 'hotreloading' in OpenMod configuration: {UnparsedConfig}",
                                     unparsed);
                                 break;
@@ -210,7 +210,7 @@ namespace OpenMod.Runtime
                                     tryInstallMissingDependencies = parsed;
                                     break;
                                 default:
-                                    m_Logger.LogWarning(
+                                    m_Logger!.LogWarning(
                                         "Unknown config for 'tryAutoInstallMissingDependencies' in OpenMod configuration: {UnparsedConfig}",
                                         unparsed);
                                     break;
@@ -276,7 +276,7 @@ namespace OpenMod.Runtime
                 catch (Exception ex)
                 {
                     Status = RuntimeStatus.Crashed;
-                    m_Logger.LogCritical(ex, "OpenMod has crashed");
+                    m_Logger!.LogCritical(ex, "OpenMod has crashed");
                     Log.CloseAndFlush();
                 }
 
@@ -286,7 +286,7 @@ namespace OpenMod.Runtime
                 }
                 catch (Exception ex)
                 {
-                    m_Logger.LogError(ex, "Failed to patch FileSystemWatcher");
+                    m_Logger!.LogError(ex, "Failed to patch FileSystemWatcher");
                 }
 
                 return Host;
@@ -321,7 +321,7 @@ namespace OpenMod.Runtime
                 return;
             }
 
-            var createFileDataMethod = watcher.GetType().GetMethod("CreateFileData", BindingFlags.Static | BindingFlags.NonPublic);
+            var createFileDataMethod = watcher?.GetType().GetMethod("CreateFileData", BindingFlags.Static | BindingFlags.NonPublic);
             if (createFileDataMethod == null)
             {
                 return;

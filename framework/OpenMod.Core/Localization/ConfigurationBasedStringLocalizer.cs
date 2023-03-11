@@ -35,7 +35,7 @@ namespace OpenMod.Core.Localization
                     continue;
                 }
 
-                list.Add(new LocalizedString(child.Path, child.Value));
+                list.Add(new LocalizedString(child.Path, child.Value ?? string.Empty));
             }
         }
 
@@ -50,8 +50,8 @@ namespace OpenMod.Core.Localization
             {
                 var configValue = m_Configuration.GetSection(name);
                 return !configValue.Exists() || string.IsNullOrEmpty(configValue.Value)
-                    ? new LocalizedString(name, name, true)
-                    : new LocalizedString(name, configValue.Value);
+                    ? new LocalizedString(name, name, resourceNotFound: true)
+                    : new LocalizedString(name, configValue.Value ?? string.Empty);
             }
         }
 
@@ -62,11 +62,11 @@ namespace OpenMod.Core.Localization
                 var configValue = m_Configuration.GetSection(name);
                 if (!configValue.Exists() || string.IsNullOrEmpty(configValue.Value))
                 {
-                    return new LocalizedString(name, name, true);
+                    return new LocalizedString(name, name, resourceNotFound: true);
                 }
 
                 var formatter = SmartFormatterHelper.ObtainSmartFormatter();
-                return new LocalizedString(name, formatter.Format(configValue.Value, arguments));
+                return new LocalizedString(name, formatter.Format(configValue.Value ?? string.Empty, arguments));
             }
         }
     }

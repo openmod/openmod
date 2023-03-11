@@ -427,7 +427,7 @@ namespace OpenMod.Core.Persistence
         {
             m_WriteCounter.Clear();
             m_WatchedFiles.Clear();
-            m_ChangeListeners?.Clear();
+            m_ChangeListeners.Clear();
             m_FileSystemWatcher?.Dispose();
             m_Locks.Clear();
             m_ContentHash.Clear();

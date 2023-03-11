@@ -24,7 +24,8 @@ namespace OpenMod.Unturned.RocketMod
 {
     public class RocketModPluginsLoadedEventListener : IEventListener<RocketModPluginsLoadedEvent>
     {
-        private const BindingFlags c_BindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
+        private const BindingFlags c_BindingFlags =
+            BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
 
         private readonly ILoggerFactory m_LoggerFactory;
         private readonly IRocketModComponent m_RocketModComponent;
@@ -47,7 +48,7 @@ namespace OpenMod.Unturned.RocketMod
         {
             var permissionSystem = m_UnturnedConfiguration.Configuration
                 .GetSection("rocketmodIntegration:permissionSystem")
-                .Get<string>();
+                .Get<string>() ?? string.Empty;
 
             if (permissionSystem.Equals("OpenMod", StringComparison.OrdinalIgnoreCase))
             {
@@ -58,7 +59,7 @@ namespace OpenMod.Unturned.RocketMod
 
             var economySystem = m_UnturnedConfiguration.Configuration
                 .GetSection("rocketmodIntegration:economySystem")
-                .Get<string>();
+                .Get<string>() ?? string.Empty;
 
             if (economySystem.Equals("OpenMod_Uconomy", StringComparison.OrdinalIgnoreCase))
             {
@@ -103,7 +104,8 @@ namespace OpenMod.Unturned.RocketMod
                 else
                 {
                     var logger = m_LoggerFactory.CreateLogger<RocketModIntegration>();
-                    logger.LogWarning("Economy system was set to OpenMod_Uconomy but Uconomy is not loaded. Defaulting to Separate");
+                    logger.LogWarning(
+                        "Economy system was set to OpenMod_Uconomy but Uconomy is not loaded. Defaulting to Separate");
                 }
             }
 
@@ -114,7 +116,8 @@ namespace OpenMod.Unturned.RocketMod
         private void OnPreIncreaseBalance(string id, decimal increaseby, ref decimal newbalance)
         {
             var economyProvider = m_RocketModComponent.LifetimeScope.Resolve<IEconomyProvider>();
-            AsyncHelper.RunSync(() => economyProvider.UpdateBalanceAsync(id, KnownActorTypes.Player, increaseby, reason: null));
+            AsyncHelper.RunSync(() =>
+                economyProvider.UpdateBalanceAsync(id, KnownActorTypes.Player, increaseby, reason: null));
         }
 
         // ReSharper disable once RedundantAssignment
@@ -149,8 +152,7 @@ namespace OpenMod.Unturned.RocketMod
                 if (field != null)
                 {
                     var delegates = (CheckPermissions)field.GetValue(shimmyDelegate.Target);
-                    field.SetValue(shimmyDelegate.Target, new CheckPermissions(delegate
-                    { })); // set to empty
+                    field.SetValue(shimmyDelegate.Target, new CheckPermissions(delegate { })); // set to empty
 
                     delegates += (CheckPermissions)shimmyDelegate;
                     checkPermissionsList = delegates.GetInvocationList();
