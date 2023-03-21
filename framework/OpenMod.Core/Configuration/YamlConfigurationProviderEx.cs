@@ -24,7 +24,7 @@ namespace OpenMod.Core.Configuration
         {
             var assembly = typeof(YamlConfigurationProvider).Assembly;
             s_ParserType = assembly.GetType("NetEscapades.Configuration.Yaml.YamlConfigurationFileParser");
-            s_ParseMethod = s_ParserType.GetMethod("Parse", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            s_ParseMethod = s_ParserType.GetMethod("Parse", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
         }
 
         public YamlConfigurationProviderEx(YamlConfigurationSourceEx source) : base(source)
@@ -49,7 +49,8 @@ namespace OpenMod.Core.Configuration
 
             try
             {
-                Data = (IDictionary<string, string>)s_ParseMethod.Invoke(parser, new object[] { outStream });
+                var invokeResult = s_ParseMethod.Invoke(parser, new object[] { outStream })!;
+                Data = (IDictionary<string, string?>)invokeResult;
             }
             catch (YamlException e)
             {
