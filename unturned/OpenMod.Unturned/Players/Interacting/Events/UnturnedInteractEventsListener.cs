@@ -29,14 +29,19 @@ namespace OpenMod.Unturned.Players.Interacting.Events
 
         private void Events_OnBedBedClaiming(InteractableBed bed, CSteamID steamid, ref bool cancel)
         {
-            var player = GetUnturnedPlayer(steamid)!;
-            var @event = new UnturnedPlayerBedClaimingEvent(bed, player)
+            var player = GetUnturnedPlayer(steamid);
+            // Very important to make sure the player's not null because it has a delay on the server when the player unclaiming the bed
+            // and it causes a null reference exception
+            if (player != null)
             {
-                IsCancelled = !cancel
-            };
+                var @event = new UnturnedPlayerBedClaimingEvent(bed, player)
+                {
+                    IsCancelled = !cancel
+                };
 
-            Emit(@event);
-            cancel = !@event.IsCancelled;
+                Emit(@event);
+                cancel = !@event.IsCancelled;
+            }
         }
 
         private delegate void BedClaiming(InteractableBed bed, CSteamID steamID, ref bool cancel);
