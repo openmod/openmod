@@ -1,6 +1,5 @@
 ﻿using OpenMod.Unturned.Players;
 using SDG.Unturned;
-using Steamworks;
 
 namespace OpenMod.Unturned.Building.Events
 {
