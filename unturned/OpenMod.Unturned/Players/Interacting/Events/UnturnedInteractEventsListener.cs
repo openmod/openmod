@@ -36,11 +36,11 @@ namespace OpenMod.Unturned.Players.Interacting.Events
             {
                 var @event = new UnturnedPlayerBedClaimingEvent(bed, player)
                 {
-                    IsCancelled = !cancel
+                    IsCancelled = cancel//by default cancel starts with false (check patch)
                 };
 
                 Emit(@event);
-                cancel = !@event.IsCancelled;
+                cancel = @event.IsCancelled;
             }
         }
 
