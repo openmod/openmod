@@ -16,14 +16,16 @@ namespace OpenMod.Unturned.Locations
     {
         public IReadOnlyCollection<UnturnedLocation> GetLocations()
         {
-            return LocationDevkitNodeSystem.Get().GetAllNodes().OfType<LocationNode>().Select(x => new UnturnedLocation(x)).ToArray();
+            return LocationDevkitNodeSystem.Get().GetAllNodes().Select(x => new UnturnedLocation(x)).ToArray();
         }
 
         public UnturnedLocation? FindLocation(string name, bool exact = true)
         {
             if (exact)
+            {
                 return GetLocations()
                     .FirstOrDefault(location => location.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            }
 
             return GetLocations()
                 .Where(location => location.Name.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0)
