@@ -1,20 +1,30 @@
 ﻿using OpenMod.UnityEngine.Extensions;
 using SDG.Unturned;
+using System;
 using System.Numerics;
 
 namespace OpenMod.Unturned.Locations
 {
     public class UnturnedLocation
     {
+        [Obsolete("Use constructor with " + nameof(LocationDevkitNode) + " parameter")]
         public UnturnedLocation(LocationNode node)
         {
-            Node = node;
+            throw new Exception($"Use constructor with {nameof(LocationDevkitNode)} parameter");
         }
 
-        public string Name => Node.name;
+        public UnturnedLocation(LocationDevkitNode node)
+        {
+            DevkitNode = node;
+        }
 
-        public Vector3 Position => Node.point.ToSystemVector();
+        public string Name => DevkitNode.locationName;
 
-        public LocationNode Node { get; }
+        public Vector3 Position => DevkitNode.transform.position.ToSystemVector();
+
+        [Obsolete("Use " + nameof(DevkitNode) + " parameter")]
+        public LocationNode Node => new(DevkitNode.transform.position, DevkitNode.locationName);
+
+        public LocationDevkitNode DevkitNode { get; }
     }
 }
