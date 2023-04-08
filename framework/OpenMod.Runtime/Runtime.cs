@@ -416,12 +416,10 @@ namespace OpenMod.Runtime
 
         private void SetupSerilog(LoggerConfiguration? loggerConfiguration = null)
         {
-#if DEBUG
             Serilog.Debugging.SelfLog.Enable(s =>
             {
                 Console.WriteLine(s);
             });
-#endif
 
             Log.CloseAndFlush();
             loggerConfiguration ??= new LoggerConfiguration();
