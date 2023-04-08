@@ -675,7 +675,7 @@ namespace OpenMod.NuGet
             }
 
             var package = packageIdentities.OrderByDescending(c => c.Version).FirstOrDefault();
-            if (!m_CachedPackageIdentity.ContainsKey(packageId))
+            if (package is not null && !m_CachedPackageIdentity.ContainsKey(packageId))
             {
                 m_CachedPackageIdentity.Add(packageId, package);
             }
