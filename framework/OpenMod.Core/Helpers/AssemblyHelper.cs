@@ -41,7 +41,7 @@ namespace OpenMod.Core.Helpers
                     continue;
                 }
 
-                if (!IsCosturaResource(resourceName))
+                if (IsCosturaResource(resourceName))
                 {
                     continue;
                 }
