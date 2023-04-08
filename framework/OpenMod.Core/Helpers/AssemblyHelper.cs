@@ -13,6 +13,9 @@ namespace OpenMod.Core.Helpers
     [OpenModInternal]
     public static class AssemblyHelper
     {
+        private const string c_CosturaResourceNameStart = "costura.";
+        private const string c_CosturaResourceNameEnd = ".dll.compressed";
+        private const int c_MinCosturaResourceNameCharactersLenght = 19;
         private static readonly string[] s_ExcludedResources = new[]
         {
             "packages.yaml"
@@ -29,9 +32,16 @@ namespace OpenMod.Core.Helpers
                 Directory.CreateDirectory(baseDir);
             }
 
-            foreach (var resourceName in resourceNames)
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for (var i = 0; i < resourceNames.Length; i++)
             {
+                var resourceName = resourceNames[i];
                 if (resourceName.EndsWith("..directory"))
+                {
+                    continue;
+                }
+
+                if (!IsCosturaResource(resourceName))
                 {
                     continue;
                 }
@@ -104,6 +114,20 @@ namespace OpenMod.Core.Helpers
 
                 File.WriteAllText(filePath, fileContent);
             }
+        }
+
+        private static bool IsCosturaResource(string? resourceName)
+        {
+            if (string.IsNullOrWhiteSpace(resourceName) == false)
+            {
+                if (resourceName!.Length > c_MinCosturaResourceNameCharactersLenght
+                    && resourceName.StartsWith(c_CosturaResourceNameStart)
+                    && resourceName.EndsWith(c_CosturaResourceNameEnd))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
