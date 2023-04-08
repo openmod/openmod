@@ -118,7 +118,7 @@ namespace OpenMod.Core.Helpers
 
         private static bool IsCosturaResource(string? resourceName)
         {
-            if (string.IsNullOrWhiteSpace(resourceName) == false)
+            if (!string.IsNullOrWhiteSpace(resourceName))
             {
                 if (resourceName!.Length > c_MinCosturaResourceNameCharactersLenght
                     && resourceName.StartsWith(c_CosturaResourceNameStart)
