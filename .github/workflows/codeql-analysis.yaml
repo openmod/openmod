@@ -26,6 +26,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    # Ignore commits in the /docs directory
+    - name: Remove docs directory
+      run: rm -rf docs
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
