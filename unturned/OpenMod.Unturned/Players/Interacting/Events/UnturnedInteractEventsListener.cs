@@ -59,9 +59,9 @@ namespace OpenMod.Unturned.Players.Interacting.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(InteractableBed), "ServerSetBedOwnerInternal")]
+            [HarmonyPatch(typeof(BarricadeManager), "ServerSetBedOwnerInternal")]
             [HarmonyPrefix]
-            public static bool ServerSetBedOwnerInternal(InteractableBed bed, byte x, byte y, ushort plant, BarricadeRegion region, CSteamID steamID)
+            public static bool ServerSetBedOwnerInternal(InteractableBed bed, CSteamID steamID)
             {
                 var cancel = false;
 
