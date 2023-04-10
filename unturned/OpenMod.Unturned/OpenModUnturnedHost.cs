@@ -126,7 +126,7 @@ namespace OpenMod.Unturned
 
             try
             {
-                HarmonyExceptionHandler.LoggerFactoryGetterEvent += () => m_LoggerFactory;
+                HarmonyExceptionHandler.LoggerFactoryGetterEvent += LoggerFactoryGetter;
                 m_Harmony = new Harmony(OpenModComponentId);
                 m_Harmony.PatchAll(GetType().Assembly);
             }
@@ -208,7 +208,7 @@ namespace OpenMod.Unturned
                 var initializeMethod = bootstrapperClass.GetMethod("initialize", BindingFlags.Instance | BindingFlags.Public);
                 var moduleInstance = instanceProperty!.GetValue(null);
 
-                initializeMethod!.Invoke(moduleInstance, new object[0]);
+                initializeMethod!.Invoke(moduleInstance, Array.Empty<object>());
             }
             catch (Exception ex)
             {
@@ -263,6 +263,11 @@ namespace OpenMod.Unturned
             return ShutdownTask().AsTask();
         }
 
+        private ILoggerFactory LoggerFactoryGetter()
+        {
+            return m_LoggerFactory;
+        }
+
         public void Dispose()
         {
             if (m_IsDisposing)
@@ -288,7 +293,7 @@ namespace OpenMod.Unturned
 
             try
             {
-                HarmonyExceptionHandler.LoggerFactoryGetterEvent -= () => m_LoggerFactory;
+                HarmonyExceptionHandler.LoggerFactoryGetterEvent -= LoggerFactoryGetter;
                 m_Harmony?.UnpatchAll(OpenModComponentId);
             }
             catch
