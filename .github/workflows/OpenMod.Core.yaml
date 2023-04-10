@@ -34,7 +34,7 @@ jobs:
     - uses: actions/setup-dotnet@v1
       name: Setup .NET
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 7.x
     - uses: ./.github/actions/project-build
       id: project-build
       with:
