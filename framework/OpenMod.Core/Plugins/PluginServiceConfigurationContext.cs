@@ -6,11 +6,13 @@ namespace OpenMod.Core.Plugins
 {
     public class PluginServiceConfigurationContext : IPluginServiceConfigurationContext
     {
-        public PluginServiceConfigurationContext(ILifetimeScope parentLifetimeScope, IConfigurationRoot configuration, ContainerBuilder containerBuilder)
+        public PluginServiceConfigurationContext(ILifetimeScope parentLifetimeScope, IConfigurationRoot configuration,
+            ContainerBuilder containerBuilder, string workingDirectory)
         {
             ParentLifetimeScope = parentLifetimeScope;
             Configuration = configuration;
             ContainerBuilder = containerBuilder;
+            WorkingDirectory = workingDirectory;
         }
 
         public ILifetimeScope ParentLifetimeScope { get; }
@@ -18,5 +20,7 @@ namespace OpenMod.Core.Plugins
         public IConfiguration Configuration { get; }
 
         public ContainerBuilder ContainerBuilder { get; }
+
+        public string WorkingDirectory { get; }
     }
 }
