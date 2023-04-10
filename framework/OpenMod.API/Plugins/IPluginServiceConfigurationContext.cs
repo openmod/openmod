@@ -22,5 +22,10 @@ namespace OpenMod.API.Plugins
         /// Gets the container builder.
         /// </summary>
         ContainerBuilder ContainerBuilder { get; }
+
+        /// <summary>
+        /// Gets the plugin working directory.
+        /// </summary>
+        string WorkingDirectory { get; }
     }
 }

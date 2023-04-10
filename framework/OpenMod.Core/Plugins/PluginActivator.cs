@@ -113,13 +113,13 @@ namespace OpenMod.Core.Plugins
                 {
                     var lifetimeScope = m_LifetimeScope.BeginLifetimeScopeEx(containerBuilder =>
                     {
-                        var workingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
+                        var pluginWorkingDirectory = PluginHelper.GetWorkingDirectory(m_Runtime, pluginMetadata.Id);
 
                         var configurationBuilder = new ConfigurationBuilder();
-                        if (Directory.Exists(workingDirectory))
+                        if (Directory.Exists(pluginWorkingDirectory))
                         {
                             configurationBuilder
-                                .SetBasePath(workingDirectory)
+                                .SetBasePath(pluginWorkingDirectory)
                                 .AddYamlFile("config.yaml", optional: true, reloadOnChange: true);
                         }
 
@@ -152,14 +152,14 @@ namespace OpenMod.Core.Plugins
 #pragma warning restore 618
                             Prefix = null,
                             Suffix = "data",
-                            WorkingDirectory = workingDirectory
+                            WorkingDirectory = pluginWorkingDirectory
                         }))
                             .As<IDataStore>()
                             .SingleInstance()
                             .OwnedByLifetimeScope();
 
-                        var stringLocalizer = Directory.Exists(workingDirectory)
-                            ? m_StringLocalizerFactory.Create("translations", workingDirectory)
+                        var stringLocalizer = Directory.Exists(pluginWorkingDirectory)
+                            ? m_StringLocalizerFactory.Create("translations", pluginWorkingDirectory)
                             : NullStringLocalizer.Instance;
 
                         containerBuilder.Register(_ => stringLocalizer)
@@ -194,11 +194,11 @@ namespace OpenMod.Core.Plugins
                         foreach (var type in pluginType.Assembly.FindTypes<IPluginContainerConfigurator>())
                         {
                             var configurator = (IPluginContainerConfigurator)ActivatorUtilitiesEx.CreateInstance(m_LifetimeScope, type);
-                            configurator.ConfigureContainer(new PluginServiceConfigurationContext(m_LifetimeScope, configuration, containerBuilder));
+                            configurator.ConfigureContainer(new PluginServiceConfigurationContext(m_LifetimeScope, configuration, containerBuilder, pluginWorkingDirectory));
                         }
 
                         var configurationEvent = new PluginContainerConfiguringEvent(pluginMetadata, pluginType,
-                            configuration, containerBuilder, workingDirectory);
+                            configuration, containerBuilder, pluginWorkingDirectory);
                         AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_Runtime, this, configurationEvent));
                     });
 
