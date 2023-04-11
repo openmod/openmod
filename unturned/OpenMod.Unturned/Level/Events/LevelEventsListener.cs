@@ -38,25 +38,25 @@ namespace OpenMod.Unturned.Level.Events
 
         private void OnPostLevelLoaded(int level)
         {
-            var @event = new UnturnedLevelEvent(level);
+            var @event = new UnturnedPostLevelLoadedEvent(level);
             Emit(@event);
         }
 
         private void OnPreLevelLoaded(int level)
         {
-            var @event = new UnturnedLevelEvent(level);
+            var @event = new UnturnedPreLevelLoadedEvent(level);
             Emit(@event);
         }
 
         private void OnPrePreLevelLoaded(int level)
         {
-            var @event = new UnturnedLevelEvent(level);
+            var @event = new UnturnedPrePreLevelLoadedEvent(level);
             Emit(@event);
         }
 
         private void OnLevelLoaded(int level)
         {
-            var @event = new UnturnedLevelEvent(level);
+            var @event = new UnturnedLevelLoadedEvent(level);
             Emit(@event);
         }
     }
