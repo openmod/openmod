@@ -18,13 +18,13 @@ namespace OpenMod.Unturned.Players.Input.Events
         public override void Subscribe()
         {
             PlayerInput.onPluginKeyTick += OnPluginKeyTick;
-            OnPlayerInputted += Events_OnPlayerInputted;
+            OnPlayerInputting += Events_OnPlayerInputting;
         }
 
         public override void Unsubscribe()
         {
             PlayerInput.onPluginKeyTick -= OnPluginKeyTick;
-            OnPlayerInputted -= Events_OnPlayerInputted;
+            OnPlayerInputting -= Events_OnPlayerInputting;
         }
 
 
@@ -50,7 +50,7 @@ namespace OpenMod.Unturned.Players.Input.Events
             Emit(@event);
         }
 
-        private void Events_OnPlayerInputted(PlayerInput input, ref InputInfo? inputinfo, bool doOcclusionCheck, ERaycastInfoUsage usage)
+        private void Events_OnPlayerInputting(PlayerInput input, ref InputInfo? inputinfo, bool doOcclusionCheck, ERaycastInfoUsage usage)
         {
             var player = GetUnturnedPlayer(input.player)!;
             var @event = new UnturnedPlayerInputtingEvent(player, inputinfo, doOcclusionCheck, usage);
@@ -60,9 +60,9 @@ namespace OpenMod.Unturned.Players.Input.Events
             inputinfo = @event.InputInfo;
         }
 
-        private delegate void PlayerInputted(PlayerInput input, ref InputInfo? inputInfo, bool doOcclusionCheck, ERaycastInfoUsage usage);
+        private delegate void PlayerInputting(PlayerInput input, ref InputInfo? inputInfo, bool doOcclusionCheck, ERaycastInfoUsage usage);
 
-        private static event PlayerInputted? OnPlayerInputted;
+        private static event PlayerInputting? OnPlayerInputting;
 
         [UsedImplicitly]
         [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -74,7 +74,7 @@ namespace OpenMod.Unturned.Players.Input.Events
             [HarmonyPostfix]
             public static void PostGetInput(PlayerInput __instance, ref InputInfo __result, bool doOcclusionCheck, ERaycastInfoUsage usage)
             {
-                OnPlayerInputted?.Invoke(__instance, ref __result!, doOcclusionCheck, usage);
+                OnPlayerInputting?.Invoke(__instance, ref __result!, doOcclusionCheck, usage);
             }
         }
     }
