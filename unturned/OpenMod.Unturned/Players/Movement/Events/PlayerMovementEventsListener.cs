@@ -10,6 +10,7 @@ using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using UnityEngine;
+using Vector2 = System.Numerics.Vector2;
 
 namespace OpenMod.Unturned.Players.Movement.Events
 {
@@ -25,6 +26,7 @@ namespace OpenMod.Unturned.Players.Movement.Events
             PlayerAnimator.OnGestureChanged_Global += PlayerAnimator_OnGestureChanged_Global;
             OnTeleporting += Events_OnTeleporting;
             OnPlayerJumped += PlayerMovementEventsListener_OnPlayerJumped;
+            OnSimulationEnd += Events_OnSimulationEnd;
         }
 
         public override void Unsubscribe()
@@ -32,6 +34,7 @@ namespace OpenMod.Unturned.Players.Movement.Events
             PlayerAnimator.OnGestureChanged_Global -= PlayerAnimator_OnGestureChanged_Global;
             OnTeleporting -= Events_OnTeleporting;
             OnPlayerJumped -= PlayerMovementEventsListener_OnPlayerJumped;
+            OnSimulationEnd -= Events_OnSimulationEnd;
         }
 
         public override void SubscribePlayer(Player player)
@@ -98,16 +101,34 @@ namespace OpenMod.Unturned.Players.Movement.Events
             Emit(@event);
         }
 
+        private void Events_OnSimulationEnd(PlayerMovement movement, uint simulation, int recov, int inputX,
+            int inputY, float lookX, float lookY, bool inputJump, bool inputSprint, float deltaTime)
+        {
+            var player = GetUnturnedPlayer(movement.player)!;
+
+            var input = new Vector2(inputX, inputY);
+            var look = new Vector2(lookX, lookY);
+
+            var @event = new UnturnedPlayerSimulationEndEvent(player, simulation, input, look, inputJump, inputSprint, deltaTime);
+
+            Emit(@event);
+        }
+
         private delegate void Teleporting(Player player, ref Vector3 position, ref float yaw, ref bool cancel);
         private static event Teleporting? OnTeleporting;
 
         private delegate void PlayerJumped(Player player);
         private static event PlayerJumped? OnPlayerJumped;
 
+        private delegate void SimulationEnd(PlayerMovement movement, uint simulation, int recov, int inputX,
+            int inputY, float lookX, float lookY, bool inputJump, bool inputSprint, float deltaTime);
+        private static event SimulationEnd? OnSimulationEnd;
+
         [UsedImplicitly]
         [HarmonyPatch]
         internal static class Patches
         {
+            [UsedImplicitly]
             [HarmonyCleanup]
             public static Exception? Cleanup(Exception ex, MethodBase original)
             {
@@ -127,6 +148,7 @@ namespace OpenMod.Unturned.Players.Movement.Events
                 return !cancel;
             }
 
+            [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerMovement), nameof(PlayerMovement.simulate),
                 argumentTypes: new[] { typeof(uint), typeof(int), typeof(int), typeof(int),
                     typeof(float), typeof(float), typeof(bool), typeof(bool), typeof(float) })]
@@ -156,6 +178,24 @@ namespace OpenMod.Unturned.Players.Movement.Events
             public static void OnJumpedEvent(PlayerMovement movement)
             {
                 OnPlayerJumped?.Invoke(movement.player);
+            }
+
+            [UsedImplicitly]
+            [HarmonyPatch(typeof(PlayerMovement), nameof(PlayerMovement.simulate),
+                typeof(uint),
+                typeof(int),
+                typeof(int),
+                typeof(int),
+                typeof(float),
+                typeof(float),
+                typeof(bool),
+                typeof(bool),
+                typeof(float))]
+            [HarmonyPostfix]
+            public static void PostSimulate(PlayerMovement __instance, uint simulation, int recov, int input_x, int input_y, float look_x, float look_y,
+                bool inputJump, bool inputSprint, float deltaTime)
+            {
+                OnSimulationEnd?.Invoke(__instance, simulation, recov, input_x, input_y, look_x, look_y, inputJump, inputSprint, deltaTime);
             }
         }
     }
