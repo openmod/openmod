@@ -5,7 +5,7 @@
     /// </summary>
     public class UnturnedPreLevelLoadedEvent : UnturnedLevelEvent
     {
-        public UnturnedPreLevelLoadedEvent(int level) : base(level)
+        public UnturnedPreLevelLoadedEvent() : base()
         {
         }
     }
