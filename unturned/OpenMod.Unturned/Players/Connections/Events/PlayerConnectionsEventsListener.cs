@@ -46,7 +46,7 @@ namespace OpenMod.Unturned.Players.Connections.Events
 
         private void OnPlayerRejected(CSteamID steamID, ESteamRejection rejection, string explanation)
         {
-            var @event = new UnturnedPlayerRejectingEvent(steamID, rejection, explanation);
+            var @event = new UnturnedPlayerRejectedEvent(steamID, rejection, explanation);
             Emit(@event);
         }
     }
