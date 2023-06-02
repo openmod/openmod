@@ -34,7 +34,7 @@
     "FullPluginName": {
       "type": "parameter",
       "datatype": "string",
-      "description": "Sets the dispaly name of the plugin",
+      "description": "Sets the display name of the plugin",
       "defaultValue": "My OpenMod Plugin",
       "replaces": "PLUGIN-NAME"
     },
