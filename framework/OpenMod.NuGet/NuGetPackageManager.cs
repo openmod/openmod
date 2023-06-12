@@ -479,56 +479,6 @@ namespace OpenMod.NuGet
             return new NuGetQueryResult(resolvedPackages);
         }
 
-        public virtual async Task<List<byte[]>> LoadAssemblyDataFromNuGetPackageAsync(string nupkgFile)
-        {
-            if (string.IsNullOrEmpty(nupkgFile))
-            {
-                throw new ArgumentException(nameof(nupkgFile));
-            }
-
-            using var packageReader = new PackageArchiveReader(nupkgFile);
-
-            var libItems = (await packageReader.GetLibItemsAsync(CancellationToken.None)).ToList();
-            var nearest = m_FrameworkReducer.GetNearest(m_CurrentFramework, libItems.Select(x => x.TargetFramework));
-            var assemblies = new List<byte[]>();
-
-            foreach (var file in libItems.Where(x => x.TargetFramework.Equals(nearest)))
-            {
-                foreach (var item in file.Items)
-                {
-                    try
-                    {
-                        if (!item.EndsWith(".dll"))
-                        {
-                            continue;
-                        }
-
-                        var entry = packageReader.GetEntry(item);
-                        using var stream = entry.Open();
-                        var ms = new MemoryStream();
-                        await stream.CopyToAsync(ms);
-
-                        try
-                        {
-                            assemblies.Add(ms.ToArray());
-                        }
-                        finally
-                        {
-                            ms.Close();
-                            stream.Close();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError($"Failed to load assembly at {item} from file {nupkgFile}");
-                        Logger.LogError(ex.ToString());
-                    }
-                }
-            }
-
-            return assemblies;
-        }
-
         public virtual async Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageAsync(string nupkgFile)
         {
             if (string.IsNullOrEmpty(nupkgFile))
