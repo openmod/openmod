@@ -421,12 +421,6 @@ namespace OpenMod.NuGet
             m_AssemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
         }
 
-        [Obsolete("Use SetAssemblyLoader(AssemblyLoader) instead")]
-        public void SetAssemblyLoader(Func<byte[], Assembly> assemblyLoader)
-        {
-            SetAssemblyLoader((assemblyData, _) => assemblyLoader(assemblyData));
-        }
-
         public virtual async Task<NuGetQueryResult> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext, bool allowPreReleaseVersions)
         {
             if (identity == null)
