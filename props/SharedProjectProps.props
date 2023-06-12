@@ -8,23 +8,23 @@
     <PackageOwners>OpenMod;Enes Sadık Özbek&lt;esozbek.me&gt;</PackageOwners>
     <PackageVersion>0.0.0</PackageVersion>
     <RepositoryUrl>https://github.com/openmod/openmod</RepositoryUrl>
-    <RepositoryType>git</RepositoryType> 
+    <RepositoryType>git</RepositoryType>
     <Authors>OpenMod</Authors>
     <Version>0.0.0</Version>
     <InformationalVersion>0.0.0</InformationalVersion>
     <Company>OpenMod</Company>
     <Copyright>Enes Sadık Özbek &lt;esozbek.me&gt;</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>11</LangVersion>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
-    <Nullable>enable</Nullable>	
+    <Nullable>enable</Nullable>
     <WarningsAsErrors>nullable</WarningsAsErrors>
     <NoWarn>$(NoWarn);NU1701;NU1702;CS0436;CS1591</NoWarn>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <WeaverConfiguration>
       <Weavers>
@@ -41,9 +41,9 @@
 
   <ItemGroup Condition="'$(TargetFramework)'== 'net461'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>	
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
-   
+
   <PropertyGroup>
     <TargetIsMono Condition="$(TargetFramework.StartsWith('net4')) and '$(OS)' == 'Unix'">true</TargetIsMono>
 
@@ -62,5 +62,5 @@
     <EnableFrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">true</EnableFrameworkPathOverride>
 
     <AssemblySearchPaths Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">$(FrameworkPathOverride)/Facades;$(AssemblySearchPaths)</AssemblySearchPaths>
-  </PropertyGroup>  
+  </PropertyGroup>
 </Project>

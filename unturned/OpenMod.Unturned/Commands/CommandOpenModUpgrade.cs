@@ -1,10 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using OpenMod.API;
 using OpenMod.Common.Hotloading;
 using OpenMod.Core.Commands;
+using Command = OpenMod.Core.Commands.Command;
 using OpenMod.Core.Commands.OpenModCommands;
+using OpenMod.NuGet;
 using SDG.Framework.Modules;
 using SDG.Unturned;
+using Semver;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -13,10 +17,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using OpenMod.NuGet;
-using Command = OpenMod.Core.Commands.Command;
-using Semver;
 
 namespace OpenMod.Unturned.Commands
 {
@@ -67,7 +67,7 @@ namespace OpenMod.Unturned.Commands
             var anyUpdated = false;
 
             var moduleAsset = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"));
-            if (moduleAsset != null && m_HostInformation.HostVersion.CompareTo(releaseVersion) < 0)
+            if (moduleAsset != null && SemVersion.ComparePrecedence(m_HostInformation.HostVersion, releaseVersion) < 0)
             {
                 BackupFiles(openModDirPath);
 
@@ -78,7 +78,7 @@ namespace OpenMod.Unturned.Commands
                     var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
 
                     await PrintAsync("Extracting update...");
-                    await ExtractArchiveAsync(stream, openModDirPath!);
+                    await ExtractArchiveAsync(stream, openModDirPath);
                 }
                 catch (Exception)
                 {
@@ -92,7 +92,7 @@ namespace OpenMod.Unturned.Commands
 
             foreach (var assembly in m_Runtime.HostAssemblies)
             {
-                var ident = await m_PackageManager.QueryPackageExactAsync(assembly.GetName().Name, null, isPre);
+                var ident = await m_PackageManager.QueryPackageExactAsync(assembly.GetName().Name, version: null, isPre);
                 if (ident == null)
                 {
                     m_Logger.LogWarning("No package found for assembly: {AssemblyName}", assembly.FullName);
@@ -138,7 +138,7 @@ namespace OpenMod.Unturned.Commands
                     var nexus = (IModuleNexus)Activator.CreateInstance(moduleNexusType);
 
                     // set OpenModUnturnedModule.IsDynamicLoad to true
-                    var isDynamicPropertySetter = moduleNexusType.GetProperty("IsDynamicLoad")?.GetSetMethod(true);
+                    var isDynamicPropertySetter = moduleNexusType.GetProperty("IsDynamicLoad")?.GetSetMethod(nonPublic: true);
                     isDynamicPropertySetter?.Invoke(nexus, new object[] { true });
 
                     nexus.initialize();
@@ -157,7 +157,6 @@ namespace OpenMod.Unturned.Commands
             {
                 await PrintAsync("Update has been installed. Restart to apply it.");
             }
-
         }
 
         private void DeleteBackup(string openModDirPath)
@@ -179,31 +178,35 @@ namespace OpenMod.Unturned.Commands
         {
             foreach (var file in Directory.GetFiles(openModDirPath))
             {
-                if (file.EndsWith(".bak"))
+                if (!file.EndsWith(".bak"))
                 {
-                    try
-                    {
-                        File.Delete(file);
-                    }
-                    catch (Exception ex)
-                    {
-                        m_Logger.LogDebug(ex, "Exception occurred while restoring backup");
-                    }
+                    continue;
+                }
+
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogDebug(ex, "Exception occurred while restoring backup");
                 }
             }
 
             foreach (var file in Directory.GetFiles(openModDirPath))
             {
-                if (file.EndsWith(".bak"))
+                if (!file.EndsWith(".bak"))
                 {
-                    try
-                    {
-                        File.Move(file, file.Replace(".bak", string.Empty));
-                    }
-                    catch (Exception ex)
-                    {
-                        m_Logger.LogError(ex, "Exception occurred while restoring backup");
-                    }
+                    continue;
+                }
+
+                try
+                {
+                    File.Move(file, file.Replace(".bak", string.Empty));
+                }
+                catch (Exception ex)
+                {
+                    m_Logger.LogError(ex, "Exception occurred while restoring backup");
                 }
             }
         }

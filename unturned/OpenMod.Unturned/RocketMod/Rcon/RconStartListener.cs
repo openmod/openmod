@@ -50,7 +50,7 @@ namespace OpenMod.Unturned.RocketMod.Rcon
                 return Task.CompletedTask;
             }
 
-            var bind = m_OpenModConfiguration.GetSection("rcon:bind").Get<string>();
+            var bind = m_OpenModConfiguration.GetSection("rcon:bind").Get<string>() ?? "127.0.0.1";;
             var port = m_UnturnedConfiguration.GetSection("rcon:rocketmod:port").Get<int>();
 
             StartRocketModRcon(bind, port);

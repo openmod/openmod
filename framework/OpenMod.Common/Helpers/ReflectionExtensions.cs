@@ -15,7 +15,7 @@ namespace OpenMod.Common.Helpers
 
         public static MethodBase? GetCallingMethod(Type[]? skipTypes = null, MethodBase[]? skipMethods = null, bool applyAsyncMethodPatch = true)
         {
-            var skipList = new List<Type>(skipTypes ?? new Type[0]) { typeof(ReflectionExtensions) };
+            var skipList = new List<Type>(skipTypes ?? Type.EmptyTypes) { typeof(ReflectionExtensions) };
 
             var st = new StackTrace();
             var frameTarget = (StackFrame?)null;
@@ -27,7 +27,7 @@ namespace OpenMod.Common.Helpers
                     continue;
 
                 // Hot fix for async Task methods:
-                // If current frame method is called "MoveNext" and parent frame is from "AsyncMethodBuilderCore" type 
+                // If current frame method is called "MoveNext" and parent frame is from "AsyncMethodBuilderCore" type
                 //   it's an async method wrapper, so we need to skip these two frames to get the original calling async method
                 // Tested on .NET Core 2.1; should be tested on full .NET and mono too
                 if (applyAsyncMethodPatch && frameMethod is MethodInfo {Name: "MoveNext"})
@@ -121,7 +121,7 @@ namespace OpenMod.Common.Helpers
 
         public static IEnumerable<Type> FindTypes<T>(this Assembly assembly, bool includeAbstractAndInterfaces = false)
         {
-            return assembly.FindAllTypes(includeAbstractAndInterfaces).Where(c => typeof(T).IsAssignableFrom(c));
+            return assembly.FindAllTypes(includeAbstractAndInterfaces).Where(c => c.IsAssignableFrom(typeof(T)) || c.GetInterfaces().Any(x => x == typeof(T)));
         }
 
         public static string GetVersionIndependentName(string assemblyName)
