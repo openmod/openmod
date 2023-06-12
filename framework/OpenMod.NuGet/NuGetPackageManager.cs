@@ -913,11 +913,7 @@ namespace OpenMod.NuGet
                 m_AssemblyResolverInstalled = false;
             }
 
-            foreach (var kv in m_LoadedPackageAssemblies)
-            {
-                kv.Value?.Clear();
-            }
-            m_LoadedPackageAssemblies.Clear();
+            ClearCache();
         }
 
         public virtual ICollection<NuGetAssembly> GetLoadedAssemblies()
@@ -929,8 +925,14 @@ namespace OpenMod.NuGet
 
         public void ClearCache()
         {
+            foreach (var kv in m_LoadedPackageAssemblies)
+            {
+                kv.Value?.Clear();
+            }
             m_LoadedPackageAssemblies.Clear();
+
             m_ResolveCache.Clear();
+            m_CachedPackageIdentity.Clear();
         }
     }
 }
