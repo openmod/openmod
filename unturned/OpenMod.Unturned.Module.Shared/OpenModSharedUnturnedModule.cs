@@ -24,6 +24,7 @@ namespace OpenMod.Unturned.Module.Shared
         private RemoteCertificateValidationCallback? m_OldCallBack;
         private Harmony? m_HarmonyInstance;
         private Assembly? m_ModuleAssembly;
+
         public bool Initialize(Assembly moduleAssembly, bool isDynamicLoad)
         {
             m_ModuleAssembly = moduleAssembly;
@@ -166,24 +167,23 @@ namespace OpenMod.Unturned.Module.Shared
         private Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var name = ReflectionExtensions.GetVersionIndependentName(args.Name);
-            if (m_ResolvedAssemblies.ContainsKey(name))
+            if (m_ResolvedAssemblies.TryGetValue(name, out var asm))
             {
-                return m_ResolvedAssemblies[name];
+                return asm;
             }
 
             var matcher = new Func<Assembly, bool>(d => ReflectionExtensions.GetVersionIndependentName(d.FullName).Equals(name));
-            var match = m_LoadedAssemblies.Values
+            asm = m_LoadedAssemblies.Values
                 .OrderByDescending(d => d.GetName().Version)
                 .FirstOrDefault(matcher);
 
-            if (match != null)
+            if (asm != null)
             {
-                m_ResolvedAssemblies.Add(name, match);
+                m_ResolvedAssemblies.Add(name, asm);
+                return asm;
             }
 
-            return AppDomain.CurrentDomain.GetAssemblies()
-                .OrderByDescending(d => d.GetName().Version)
-                .FirstOrDefault(matcher);
+            return null;
         }
 
         public void Shutdown()
