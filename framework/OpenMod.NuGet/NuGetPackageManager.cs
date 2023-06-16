@@ -350,33 +350,30 @@ namespace OpenMod.NuGet
             return GetDependenciesInternalAsync(identity, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
         }
 
-        private async Task<ICollection<PackageDependency>> GetDependenciesInternalAsync(PackageIdentity identity, ICollection<string> lookedUpIds)
+        private async Task<ICollection<PackageDependency>> GetDependenciesInternalAsync(PackageIdentity identity, ISet<string> lookedUpIds)
         {
             if (identity == null)
             {
                 throw new ArgumentNullException(nameof(identity));
             }
 
-            if (lookedUpIds.Contains(identity.Id))
+            if (!lookedUpIds.Add(identity.Id))
             {
-                return new List<PackageDependency>();
+                return Array.Empty<PackageDependency>();
             }
 
-            lookedUpIds.Add(identity.Id);
             var nupkgFile = GetNugetPackageFile(identity);
-
             if (!File.Exists(nupkgFile))
             {
                 throw new Exception($"GetDependenciesAsync on a nupkg that doesn't exist: {identity.Id} v{identity.Version}");
             }
 
             using var packageReader = new PackageArchiveReader(nupkgFile);
-            var list = new List<PackageDependency>();
             var dependencyGroups = (await packageReader.GetPackageDependenciesAsync(CancellationToken.None)).ToList();
 
             if (dependencyGroups.Count == 0)
             {
-                return list;
+                return Array.Empty<PackageDependency>();
             }
 
             var framework = m_FrameworkReducer.GetNearest(m_CurrentFramework,
@@ -385,6 +382,8 @@ namespace OpenMod.NuGet
             {
                 throw new Exception($"Failed to get dependencies of {identity.Id} v{identity.Version}: no supported framework found. {Environment.NewLine} Requested framework: {m_CurrentFramework.DotNetFrameworkName}, available frameworks: {string.Join(", ", dependencyGroups.Select(d => d.TargetFramework).Select(d => d.DotNetFrameworkName))}");
             }
+
+            var list = new List<PackageDependency>();
 
             var packages = dependencyGroups
                 .Find(d => d.TargetFramework == framework)
