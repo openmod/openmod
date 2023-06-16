@@ -1,12 +1,10 @@
 ﻿using System;
-using Cysharp.Threading.Tasks;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Users;
 using SDG.Unturned;
-using Serilog;
 
 namespace OpenMod.Unturned.Users
 {

@@ -8,12 +8,16 @@ namespace OpenMod.Unturned.Players.Voice.Events
     {
         public bool WantsToUseWalkieTalkie { get; }
         public bool ShouldBroadcastOverRadio { get; set; }
+        public PlayerVoice.RelayVoiceCullingHandler CullingHandler { get; set; }
+
         public bool IsCancelled { get; set; }
 
-        public UnturnedPlayerRelayingVoiceEvent(UnturnedPlayer player, bool wantsToUseWalkieTalkie, bool shouldBroadcastOverRadio) : base(player)
+        public UnturnedPlayerRelayingVoiceEvent(UnturnedPlayer player, bool wantsToUseWalkieTalkie,
+            bool shouldBroadcastOverRadio, PlayerVoice.RelayVoiceCullingHandler cullingHandler) : base(player)
         {
             WantsToUseWalkieTalkie = wantsToUseWalkieTalkie;
             ShouldBroadcastOverRadio = shouldBroadcastOverRadio;
+            CullingHandler = cullingHandler;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace OpenMod.Unturned.Locations
 
         public bool Supports(Type type)
         {
-            return type == typeof(UnturnedLocation) || type == typeof(LocationNode);
+            return type == typeof(UnturnedLocation) || type == typeof(LocationNode) || type == typeof(LocationDevkitNode);
         }
 
         public Task<object?> ResolveAsync(Type type, string input)
@@ -38,10 +38,16 @@ namespace OpenMod.Unturned.Locations
 
             var location = m_LocationDirectory.FindLocation(input, exact: false);
 
-            return Task.FromResult((object?) (
-                type == typeof(UnturnedLocation)
-                    ? location
-                    : location?.Node));
+            if (type == typeof(UnturnedLocation))
+            {
+                return Task.FromResult<object?>(location);
+            }
+            else if (type == typeof(LocationNode))
+            {
+                return Task.FromResult<object?>(location?.Node);
+            }
+
+            return Task.FromResult<object?>(location?.DevkitNode);
         }
     }
 }

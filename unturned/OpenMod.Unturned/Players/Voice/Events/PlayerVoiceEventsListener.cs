@@ -25,7 +25,7 @@ namespace OpenMod.Unturned.Players.Voice.Events
         {
             var player = GetUnturnedPlayer(speaker.player)!;
 
-            var @event = new UnturnedPlayerRelayingVoiceEvent(player, wantsToUseWalkieTalkie, shouldBroadcastOverRadio)
+            var @event = new UnturnedPlayerRelayingVoiceEvent(player, wantsToUseWalkieTalkie, shouldBroadcastOverRadio, cullingHandler)
             {
                 IsCancelled = !shouldAllow
             };
@@ -34,6 +34,7 @@ namespace OpenMod.Unturned.Players.Voice.Events
 
             shouldBroadcastOverRadio = @event.ShouldBroadcastOverRadio;
             shouldAllow = !@event.IsCancelled;
+            cullingHandler = @event.CullingHandler;
         }
 
         public override void Unsubscribe()

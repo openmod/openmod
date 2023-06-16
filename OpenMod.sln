@@ -76,6 +76,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3EE05A39-E395-49DE-98CC-3D0CA689E172}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		props\SharedProjectProps.props = props\SharedProjectProps.props
+		props\UnityEngineDependentProjectProps.props = props\UnityEngineDependentProjectProps.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.EntityFrameworkCore.MySql", "framework\OpenMod.EntityFrameworkCore.MySql\OpenMod.EntityFrameworkCore.MySql.csproj", "{2D901FA0-D969-42D4-B730-1BD073553DC4}"

@@ -18,12 +18,14 @@ namespace OpenMod.Unturned.Players.Connections.Events
         {
             Provider.onServerConnected += OnPlayerConnected;
             Provider.onServerDisconnected += OnPlayerDisconnected;
+            Provider.onRejectingPlayer += OnPlayerRejected;
         }
 
         public override void Unsubscribe()
         {
             Provider.onServerConnected -= OnPlayerConnected;
             Provider.onServerDisconnected -= OnPlayerDisconnected;
+            Provider.onRejectingPlayer -= OnPlayerRejected;
         }
 
         private void OnPlayerConnected(CSteamID steamID)
@@ -39,6 +41,12 @@ namespace OpenMod.Unturned.Players.Connections.Events
             var player = GetUnturnedPlayer(steamID)!;
 
             var @event = new UnturnedPlayerDisconnectedEvent(player);
+            Emit(@event);
+        }
+
+        private void OnPlayerRejected(CSteamID steamID, ESteamRejection rejection, string explanation)
+        {
+            var @event = new UnturnedPlayerRejectedEvent(steamID, rejection, explanation);
             Emit(@event);
         }
     }

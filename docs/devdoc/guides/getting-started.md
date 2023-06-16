@@ -36,7 +36,7 @@ cd C:\Users\<Username>\source\repos\MyPlugin\
 
 After that, install the OpenMod Plugin Templates for the .NET Core SDK:
 ```
-dotnet new -i "OpenMod.Templates::*"
+dotnet new install OpenMod.Templates::*
 ```
 
 Finally, you can generate the plugin project with this command:  
