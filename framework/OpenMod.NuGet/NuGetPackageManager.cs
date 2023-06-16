@@ -623,10 +623,9 @@ namespace OpenMod.NuGet
                 throw new ArgumentNullException(nameof(identity));
             }
 
-            var dir = m_PackagePathResolver.GetInstallPath(identity);
-            var dirName = new DirectoryInfo(dir).Name;
+            var dirName = m_PackagePathResolver.GetPackageDirectoryName(identity);
 
-            return Path.Combine(dir, dirName + ".nupkg");
+            return Path.Combine(PackagesDirectory, dirName, dirName + ".nupkg");
         }
 
         protected virtual async Task<PackageIdentity> QueryPackageLatestVersionAsync(
