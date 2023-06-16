@@ -466,7 +466,12 @@ namespace OpenMod.NuGet
             return new NuGetQueryResult(resolvedPackages);
         }
 
-        public virtual async Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageAsync(string nupkgFile)
+        public virtual Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageAsync(string nupkgFile)
+        {
+            return LoadAssembliesFromNuGetPackageInternalAsync(nupkgFile, true);
+        }
+
+        private async Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageInternalAsync(string nupkgFile, bool getAndLoadDependencies)
         {
             if (string.IsNullOrEmpty(nupkgFile))
             {
@@ -507,17 +512,25 @@ namespace OpenMod.NuGet
 
             var assemblies = new List<NuGetAssembly>();
 
-            var dependencies = await GetDependenciesAsync(identity);
-            foreach (var dependency in dependencies.Where(d => !d.Id.Equals(identity.Id)))
+            if (getAndLoadDependencies)
             {
-                var package = await GetLatestPackageIdentityAsync(dependency.Id);
-                if (package == null)
+                var dependencies = await GetDependenciesAsync(identity);
+                foreach (var dependency in dependencies.Reverse())
                 {
-                    throw new Exception($"Failed to load assemblies from {nupkgFile}: dependency {dependency.Id} {dependency.VersionRange.OriginalString} is not installed.");
-                }
+                    if (dependency.Id.Equals(identity.Id))
+                    {
+                        continue;
+                    }
 
-                var nupkg = GetNugetPackageFile(package);
-                await LoadAssembliesFromNuGetPackageAsync(nupkg);
+                    var package = await GetLatestPackageIdentityAsync(dependency.Id);
+                    if (package == null)
+                    {
+                        throw new Exception($"Failed to load assemblies from {nupkgFile}: dependency {dependency.Id} {dependency.VersionRange.OriginalString} is not installed.");
+                    }
+
+                    var nupkg = GetNugetPackageFile(package);
+                    await LoadAssembliesFromNuGetPackageInternalAsync(nupkg, false);
+                }
             }
 
             var libItems = (await packageReader.GetLibItemsAsync(CancellationToken.None)).ToList();
