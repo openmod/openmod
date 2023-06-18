@@ -914,7 +914,7 @@ namespace OpenMod.NuGet
                 .ToList();
         }
 
-        public void ClearCache()
+        public void ClearCache(bool clearGlobalCache = false)
         {
             foreach (var kv in m_LoadedPackageAssemblies)
             {
@@ -924,6 +924,11 @@ namespace OpenMod.NuGet
 
             m_ResolveCache.Clear();
             m_CachedPackageIdentity.Clear();
+
+            if (clearGlobalCache)
+            {
+                s_LoadedPackages.Clear();
+            }
         }
     }
 }
