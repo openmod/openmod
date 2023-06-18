@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using NuGet.Packaging.Core;
-using NuGet.Versioning;
 using OpenMod.API;
 using OpenMod.API.Plugins;
 using OpenMod.NuGet;
@@ -45,10 +43,9 @@ namespace OpenMod.Core.Plugins.NuGet
             return assemblies;
         }
 
-        public async Task<NuGetInstallResult> InstallPackageAsync(string packageName, string? version = null, bool isPreRelease = false)
+        public Task<NuGetInstallResult> InstallPackageAsync(string packageName, string? version = null, bool isPreRelease = false)
         {
-            var exists = await m_NuGetPackageManager.IsPackageInstalledAsync(packageName);
-            return await InstallOrUpdateAsync(packageName, version, isPreRelease, exists);
+            return InstallOrUpdateAsync(packageName, version, isPreRelease, false);
         }
 
         public Task<NuGetInstallResult> UpdatePackageAsync(string packageName, string? version = null, bool isPreRelease = false)
@@ -59,12 +56,7 @@ namespace OpenMod.Core.Plugins.NuGet
         public async Task<bool> UninstallPackageAsync(string packageName)
         {
             var package = await m_NuGetPackageManager.GetLatestPackageIdentityAsync(packageName);
-            if (package == null)
-            {
-                return false;
-            }
-
-            return await m_NuGetPackageManager.RemoveAsync(package);
+            return package != null && await m_NuGetPackageManager.RemoveAsync(package);
         }
 
         public virtual Task<bool> IsPackageInstalledAsync(string packageName)
@@ -80,7 +72,6 @@ namespace OpenMod.Core.Plugins.NuGet
             }
 
             var previousVersion = await m_NuGetPackageManager.GetLatestPackageIdentityAsync(packageName);
-
             if (isUpdate && previousVersion == null)
             {
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
@@ -92,12 +83,8 @@ namespace OpenMod.Core.Plugins.NuGet
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
             }
 
-            version ??= package.Identity.Version.OriginalVersion;
-
-            var packageIdentity = new PackageIdentity(package.Identity.Id, new NuGetVersion(version));
-
-            var result = await m_NuGetPackageManager.InstallAsync(packageIdentity, isPreRelease);
-            if (result.Code != NuGetInstallCode.Success && result.Code != NuGetInstallCode.NoUpdatesFound)
+            var result = await m_NuGetPackageManager.InstallAsync(package.Identity, isPreRelease);
+            if (result.Code is not NuGetInstallCode.Success and not NuGetInstallCode.NoUpdatesFound)
             {
                 return result;
             }
