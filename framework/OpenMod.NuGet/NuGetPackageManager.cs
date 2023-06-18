@@ -789,13 +789,18 @@ namespace OpenMod.NuGet
                 return assembly;
             }
 
-            var matchingAssemblies =
-                m_LoadedPackageAssemblies.Values.SelectMany(d => d)
-                    .Where(d => d.Assembly.IsAlive && (d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase)
-                        || Hotloader.GetRealAssemblyName((Assembly)d.Assembly.Target).Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
-                    .OrderByDescending(d => d.Version);
+            var matchedAssembly = m_LoadedPackageAssemblies.Values
+                .SelectMany(d => d)
+                .Where(d => d.Assembly.IsAlive && d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(d => d.Version)
+                .FirstOrDefault();
 
-            assembly = matchingAssemblies.FirstOrDefault()?.Assembly.Target as Assembly ?? Hotloader.GetAssembly(args.Name);
+            assembly = (matchedAssembly?.Assembly.Target as Assembly) ?? Hotloader.GetAssembly(args.Name);
+
+            assembly ??= s_LoadedPackages.Values
+                .SelectMany(a => a)
+                .FirstOrDefault(x =>
+                    ReflectionExtensions.GetVersionIndependentName(x.FullName).Equals(name, StringComparison.OrdinalIgnoreCase));
 
             if (assembly != null)
             {
