@@ -15,6 +15,8 @@ namespace OpenMod.Common.Hotloading
     public static class Hotloader
     {
         private static readonly Dictionary<string, Assembly> s_Assemblies;
+        private static readonly bool s_IsMono;
+        private static readonly ModuleContext s_ModuleContext;
 
         /// <summary>
         /// Defines if hotloading is enabled.
@@ -24,6 +26,8 @@ namespace OpenMod.Common.Hotloading
         static Hotloader()
         {
             s_Assemblies = new Dictionary<string, Assembly>();
+            s_IsMono = Type.GetType("Mono.Runtime") is not null;
+            s_ModuleContext = ModuleDef.CreateModuleContext(); // should be singleton
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
         }
 
@@ -55,16 +59,11 @@ namespace OpenMod.Common.Hotloading
                 return Assembly.Load(assemblyData, assemblySymbols);
             }
 
-            using var input = new MemoryStream(assemblyData, writable: false);
-            using var output = new MemoryStream();
+            using var module = ModuleDefMD.Load(assemblyData, s_ModuleContext);
 
-            var modCtx = ModuleDef.CreateModuleContext();
-            var module = ModuleDefMD.Load(input, modCtx);
+            var isStrongNamed = module.Assembly.PublicKey is not null and { IsNullOrEmpty: false };
 
-            var isMono = Type.GetType("Mono.Runtime") != null;
-            var isStrongNamed = module.Assembly.PublicKey != null;
-
-            if (!isMono && isStrongNamed)
+            if (!s_IsMono && isStrongNamed)
             {
                 // Don't hotload strong-named assemblies unless mono
                 // Will cause FileLoadException's if not mono
@@ -73,20 +72,17 @@ namespace OpenMod.Common.Hotloading
 
             var realFullname = module.Assembly.FullName;
 
-            if (s_Assemblies.ContainsKey(realFullname))
-            {
-                s_Assemblies.Remove(realFullname);
-            }
+            s_Assemblies.Remove(realFullname);
 
-            var guid = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 6);
+            var guid = Guid.NewGuid().ToString("N").Substring(0, 6);
             var name = $"{module.Assembly.Name}-{guid}";
 
             module.Assembly.Name = name;
             module.Assembly.PublicKey = null;
             module.Assembly.HasPublicKey = false;
 
+            using var output = new MemoryStream();
             module.Write(output);
-            output.Seek(offset: 0, SeekOrigin.Begin);
 
             var newAssemblyData = output.ToArray();
             var assembly = Assembly.Load(newAssemblyData, assemblySymbols);
