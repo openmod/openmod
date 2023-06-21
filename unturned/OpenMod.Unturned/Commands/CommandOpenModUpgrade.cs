@@ -116,7 +116,10 @@ namespace OpenMod.Unturned.Commands
                 return;
             }
 
-            if (Hotloader.Enabled)
+            await PrintAsync("Update has been installed. Restart to apply it.");
+
+            // fix hard-reload to support reloading after upgrading
+            /*if (Hotloader.Enabled)
             {
                 var modulePath = Path.Combine(openModDirPath, "OpenMod.Unturned.Module.dll");
                 var moduleAssembly = Hotloader.LoadAssembly(File.ReadAllBytes(modulePath));
@@ -156,7 +159,7 @@ namespace OpenMod.Unturned.Commands
             else
             {
                 await PrintAsync("Update has been installed. Restart to apply it.");
-            }
+            }*/
         }
 
         private void DeleteBackup(string openModDirPath)
