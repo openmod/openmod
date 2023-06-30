@@ -64,12 +64,6 @@ namespace OpenMod.Unturned.Module.Shared
             {
                 SystemDrawingRedirect.Install();
                 InstallTlsWorkaround();
-                InstallAssemblyResolver();
-            }
-
-            foreach (var file in Directory.GetFiles(openModDirPath, "*.dll"))
-            {
-                LoadAssembly(openModDirPath, file);
             }
 
             return true;
@@ -158,39 +152,10 @@ namespace OpenMod.Unturned.Module.Shared
             File.Copy(openModNewtonsoftFile, unturnedNewtonsoftFile);
         }
 
-        private void InstallAssemblyResolver()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-        }
-
-        private Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            var name = ReflectionExtensions.GetVersionIndependentName(args.Name);
-            if (m_ResolvedAssemblies.ContainsKey(name))
-            {
-                return m_ResolvedAssemblies[name];
-            }
-
-            var matcher = new Func<Assembly, bool>(d => ReflectionExtensions.GetVersionIndependentName(d.FullName).Equals(name));
-            var match = m_LoadedAssemblies.Values
-                .OrderByDescending(d => d.GetName().Version)
-                .FirstOrDefault(matcher);
-
-            if (match != null)
-            {
-                m_ResolvedAssemblies.Add(name, match);
-            }
-
-            return AppDomain.CurrentDomain.GetAssemblies()
-                .OrderByDescending(d => d.GetName().Version)
-                .FirstOrDefault(matcher);
-        }
-
         public void Shutdown()
         {
             ServicePointManager.ServerCertificateValidationCallback = m_OldCallBack;
             SystemDrawingRedirect.Uninstall();
-            AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
             m_HarmonyInstance?.UnpatchAll(c_HarmonyInstanceId);
         }
 
@@ -230,42 +195,6 @@ namespace OpenMod.Unturned.Module.Shared
             }
 
             return isOk;
-        }
-
-        public void LoadAssembly(string baseDirectory, string dllName)
-        {
-            //Load the dll from the same directory as this assembly
-            var dllFullPath = Path.GetFullPath(Path.Combine(baseDirectory, dllName));
-
-            if (string.Equals(baseDirectory, dllFullPath, StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            if (dllName.Equals("OpenMod.API.dll") && !m_ModuleAssembly!.FullName.Contains(".Dev"))
-            {
-                try
-                {
-                    File.Delete(dllFullPath);
-                }
-                catch
-                {
-                    // ignored 
-                    return;
-                }
-            }
-
-            var data = File.ReadAllBytes(dllFullPath);
-            var asm = Assembly.Load(data);
-
-            var name = ReflectionExtensions.GetVersionIndependentName(asm.FullName, out _);
-
-            if (m_LoadedAssemblies.ContainsKey(name))
-            {
-                return;
-            }
-
-            m_LoadedAssemblies.Add(name, asm);
         }
 
         public void OnPostInitialize()
