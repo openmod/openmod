@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using dnlib.DotNet.Emit;
 using OpenMod.API.Commands;
 using Rocket.API;
 
@@ -29,7 +29,7 @@ namespace OpenMod.Unturned.RocketMod.Commands
 
         public void Execute(IRocketPlayer player, string[] command)
         {
-            throw new InvalidMethodException($"OpenmodCommand: {Name} can not be execute directly.");
+            throw new InvalidOperationException($"OpenmodCommand: {Name} can not be execute directly.");
         }
     }
 }
