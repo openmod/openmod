@@ -1,10 +1,18 @@
-﻿using dnlib.DotNet;
+﻿using AsmResolver;
+using AsmResolver.IO;
+using AsmResolver.PE;
+using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using OpenMod.Common.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace OpenMod.Common.Hotloading
 {
@@ -14,9 +22,8 @@ namespace OpenMod.Common.Hotloading
     /// </summary>
     public static class Hotloader
     {
-        private static readonly Dictionary<string, Assembly> s_Assemblies;
+        private static readonly Dictionary<AssemblyName, Assembly> s_Assemblies;
         private static readonly bool s_IsMono;
-        private static readonly ModuleContext s_ModuleContext;
 
         /// <summary>
         /// Defines if hotloading is enabled.
@@ -25,15 +32,14 @@ namespace OpenMod.Common.Hotloading
 
         static Hotloader()
         {
-            s_Assemblies = new Dictionary<string, Assembly>();
+            s_Assemblies = new(AssemblyNameEqualityComparer.Instance);
             s_IsMono = Type.GetType("Mono.Runtime") is not null;
-            s_ModuleContext = ModuleDef.CreateModuleContext(); // should be singleton
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
         }
 
         private static Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            return GetAssembly(args.Name);
+            return FindAssembly(new(args.Name));
         }
 
         /// <summary>
@@ -59,9 +65,8 @@ namespace OpenMod.Common.Hotloading
                 return Assembly.Load(assemblyData, assemblySymbols);
             }
 
-            using var module = ModuleDefMD.Load(assemblyData, s_ModuleContext);
-
-            var isStrongNamed = module.Assembly.PublicKey is not null and { IsNullOrEmpty: false };
+            var image = PEImage.FromBytes(assemblyData);
+            var isStrongNamed = (image.DotNetDirectory!.Flags & DotNetDirectoryFlags.StrongNameSigned) == DotNetDirectoryFlags.StrongNameSigned;
 
             if (!s_IsMono && isStrongNamed)
             {
@@ -70,23 +75,55 @@ namespace OpenMod.Common.Hotloading
                 return Assembly.Load(assemblyData, assemblySymbols);
             }
 
-            var realFullname = module.Assembly.FullName;
+            var metadata = image.DotNetDirectory.Metadata!;
+            var tablesStream = metadata.GetStream<TablesStream>();
+            var oldStringsStream = metadata.GetStream<StringsStream>();
 
-            s_Assemblies.Remove(realFullname);
+            // get reference to assembly def row
+            ref var assemblyRow = ref tablesStream
+                .GetTable<AssemblyDefinitionRow>(TableIndex.Assembly)
+                .GetRowRef(1);
 
+            // get original name
+            string name = oldStringsStream.GetStringByIndex(assemblyRow.Name)!;
+
+            // structure full name
+            var version = new Version(assemblyRow.MajorVersion, assemblyRow.MinorVersion, assemblyRow.BuildNumber, assemblyRow.RevisionNumber);
+            var realFullName = $"{name}, Version={version}, Culture=neutral, PublicKeyToken=null";
+            var realAssemblyName = new AssemblyName(realFullName);
+
+            // generate new name
             var guid = Guid.NewGuid().ToString("N").Substring(0, 6);
-            var name = $"{module.Assembly.Name}-{guid}";
+            var newName = $"{name}-{guid}";
 
-            module.Assembly.Name = name;
-            module.Assembly.PublicKey = null;
-            module.Assembly.HasPublicKey = false;
-
+            // update assembly def name
+            assemblyRow.Name = oldStringsStream.GetPhysicalSize();
             using var output = new MemoryStream();
-            module.Write(output);
+
+            var writer = new BinaryStreamWriter(output);
+
+            writer.WriteBytes(oldStringsStream.CreateReader().ReadToEnd());
+            writer.WriteBytes(Encoding.UTF8.GetBytes(newName));
+            writer.WriteByte(0); // Add Null Terminator
+            writer.Align(4);
+
+            var newStringsStream = new SerializedStringsStream(output.ToArray());
+            // strings index size may have changed, updating in tables stream
+            tablesStream.StringIndexSize = newStringsStream.IndexSize;
+
+            // replace old strings with new one
+            metadata.Streams[metadata.Streams.IndexOf(oldStringsStream)] = newStringsStream;
+
+            var builder = new ManagedPEFileBuilder();
+            // reuse old output stream
+            output.SetLength(0);
+
+            builder.CreateFile(image).Write(output);
 
             var newAssemblyData = output.ToArray();
+
             var assembly = Assembly.Load(newAssemblyData, assemblySymbols);
-            s_Assemblies.Add(realFullname, assembly);
+            s_Assemblies[realAssemblyName] = assembly;
             return assembly;
         }
 
@@ -110,21 +147,22 @@ namespace OpenMod.Common.Hotloading
         /// </summary>
         /// <param name="fullname">The assembly name to resolve.</param>
         /// <returns><b>The hotloaded assembly</b> if found; otherwise, <b>null</b>.</returns>
+        [Obsolete("Use " + nameof(FindAssembly) + " method instead")]
         public static Assembly? GetAssembly(string fullname)
         {
-            if (s_Assemblies.TryGetValue(fullname, out var assembly))
+            return FindAssembly(new AssemblyName(fullname));
+        }
+
+        /// <summary>
+        /// Resolves a hotloaded assembly. Hotloaded assemblies have an auto generated assembly name.
+        /// </summary>
+        /// <param name="name">The assembly name to resolve.</param>
+        /// <returns><b>The hotloaded assembly</b> if found; otherwise, <b>null</b>.</returns>
+        public static Assembly? FindAssembly(AssemblyName name)
+        {
+            if (s_Assemblies.TryGetValue(name, out var assembly))
             {
                 return assembly;
-            }
-
-            var name = ReflectionExtensions.GetVersionIndependentName(fullname);
-
-            foreach (var kv in s_Assemblies)
-            {
-                if (ReflectionExtensions.GetVersionIndependentName(kv.Key).Equals(name))
-                {
-                    return kv.Value;
-                }
             }
 
             return null;
@@ -150,7 +188,7 @@ namespace OpenMod.Common.Hotloading
             {
                 if (kv.Value == assembly)
                 {
-                    return new AssemblyName(kv.Key);
+                    return kv.Key;
                 }
             }
 

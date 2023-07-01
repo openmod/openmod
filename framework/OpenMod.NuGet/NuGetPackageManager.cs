@@ -16,9 +16,9 @@ using NuGet.Packaging.Signing;
 using NuGet.Protocol.Core.Types;
 using NuGet.Resolver;
 using NuGet.Versioning;
-using OpenMod.Common.Helpers;
 using OpenMod.Common.Hotloading;
 using OpenMod.NuGet.Helpers;
+using OpenMod.Common.Helpers;
 
 namespace OpenMod.NuGet
 {
@@ -36,7 +36,7 @@ namespace OpenMod.NuGet
         private readonly PackageResolver m_PackageResolver;
         private readonly PackageSourceProvider m_PackageSourceProvider;
         private readonly SourceRepositoryProvider m_SourceRepositoryProvider;
-        private readonly Dictionary<string, Assembly> m_ResolveCache;
+        private readonly Dictionary<AssemblyName, Assembly> m_ResolveCache;
         private readonly Dictionary<string, List<NuGetAssembly>> m_LoadedPackageAssemblies;
         private readonly HashSet<string> m_IgnoredDependendencies;
         private readonly PackagesDataStore? m_PackagesDataStore;
@@ -115,7 +115,7 @@ namespace OpenMod.NuGet
             m_PackagePathResolver = new PackagePathResolver(packagesDirectory);
             m_PackageResolver = new PackageResolver();
             m_LoadedPackageAssemblies = new Dictionary<string, List<NuGetAssembly>>(StringComparer.OrdinalIgnoreCase);
-            m_ResolveCache = new Dictionary<string, Assembly>();
+            m_ResolveCache = new Dictionary<AssemblyName, Assembly>(AssemblyNameEqualityComparer.Instance);
             m_IgnoredDependendencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             m_CachedPackageIdentity = new(StringComparer.OrdinalIgnoreCase);
 
@@ -550,19 +550,12 @@ namespace OpenMod.NuGet
                         : null;
 
                     var asm = m_AssemblyLoader(assemblyData, assemblySymbols);
-
-                    var fullName = Hotloader.Enabled
-                        ? Hotloader.GetRealAssemblyName(asm).FullName
-                        : asm.FullName;
-
-                    var name = ReflectionExtensions.GetVersionIndependentName(fullName, out var extractedVersion);
-                    var parsedVersion = new Version(extractedVersion);
+                    var assemblyName = Hotloader.GetRealAssemblyName(asm);
 
                     assemblies.Add(new NuGetAssembly
                     {
                         Assembly = new WeakReference(asm),
-                        AssemblyName = name,
-                        Version = parsedVersion,
+                        AssemblyName2 = assemblyName,
                         Package = identity
                     });
                 }
@@ -810,7 +803,7 @@ namespace OpenMod.NuGet
 
         private Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            var name = ReflectionExtensions.GetVersionIndependentName(args.Name);
+            var name = new AssemblyName(args.Name);
             if (m_ResolveCache.TryGetValue(name, out var assembly))
             {
                 return assembly;
@@ -818,17 +811,11 @@ namespace OpenMod.NuGet
 
             var matchedAssembly = m_LoadedPackageAssemblies.Values
                 .SelectMany(d => d)
-                .Where(d => d.Assembly.IsAlive && d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(d => d.Version)
+                .Where(d => d.Assembly.IsAlive && d.AssemblyName2.Name.Equals(name.Name, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(d => d.AssemblyName2.Version)
                 .FirstOrDefault();
 
-            assembly = (matchedAssembly?.Assembly.Target as Assembly) ?? Hotloader.GetAssembly(args.Name);
-
-            assembly ??= s_LoadedPackages.Values
-                .SelectMany(a => a)
-                .FirstOrDefault(x =>
-                    ReflectionExtensions.GetVersionIndependentName(x.FullName).Equals(name, StringComparison.OrdinalIgnoreCase));
-
+            assembly = (matchedAssembly?.Assembly.Target as Assembly) ?? Hotloader.FindAssembly(name);
             if (assembly != null)
             {
                 m_ResolveCache.Add(name, assembly);
