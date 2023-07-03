@@ -49,7 +49,7 @@ namespace OpenMod.EntityFrameworkCore.MySql.Extensions
             return AddMySqlDbContextInternal(containerBuilder, dbContextType, optionsBuilder, serviceLifetime);
         }
 
-        internal static ContainerBuilder AddMySqlDbContextInternal(this ContainerBuilder containerBuilder,
+        private static ContainerBuilder AddMySqlDbContextInternal(this ContainerBuilder containerBuilder,
             Type dbContextType,
             Action<DbContextOptionsBuilder>? optionsBuilder,
             ServiceLifetime? serviceLifetime)
@@ -65,7 +65,7 @@ namespace OpenMod.EntityFrameworkCore.MySql.Extensions
                 .SingleInstance()
                 .AutoActivate();
 
-            containerBuilder.AddDbContextInternal(dbContextType, optionsBuilder,
+            containerBuilder.AddDbContext(dbContextType, optionsBuilder,
                 serviceLifetime ?? ServiceLifetime.Transient, new MySqlDbContextConfigurator());
 
             return containerBuilder;
