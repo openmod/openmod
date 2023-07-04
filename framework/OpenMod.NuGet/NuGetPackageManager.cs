@@ -211,7 +211,7 @@ namespace OpenMod.NuGet
 
         public async Task RemoveOutdatedPackagesAsync()
         {
-            var installedVersions = new Dictionary<string, List<NuGetVersion>>();
+            var installedVersions = new Dictionary<string, List<PackageIdentity>>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var directory in Directory.GetDirectories(PackagesDirectory))
             {
@@ -229,23 +229,31 @@ namespace OpenMod.NuGet
 
                 if (!installedVersions.TryGetValue(identity.Id, out var versions))
                 {
-                    versions = new();
+                    versions = new(1);
                     installedVersions.Add(identity.Id, versions);
                 }
 
-                versions.Add(identity.Version);
+                versions.Add(identity);
             }
 
             foreach (var kvp in installedVersions)
             {
-                var versions = kvp.Value
-                    .OrderByDescending(d => d);
+                var identities = kvp.Value
+                    .OrderByDescending(d => d.Version)
+                    .ToArray();
 
-                foreach (var version in versions.Skip(1))
+                if (identities.Length == 1)
                 {
-                    await RemoveAsync(new PackageIdentity(kvp.Key, version));
+                    continue;
                 }
+
+                foreach (var identity in identities.Skip(1))
+                {
+                    await RemoveAsync(identity);
             }
+
+                m_CachedPackageIdentity[kvp.Key] = identities[0];
+        }
         }
 
         public virtual async Task<bool> IsPackageInstalledAsync(string packageId)
