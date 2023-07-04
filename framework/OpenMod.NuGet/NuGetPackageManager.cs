@@ -160,15 +160,6 @@ namespace OpenMod.NuGet
 
             if (queryResult.Packages?.Count > 0)
             {
-                var packageExtractionContext = new PackageExtractionContext(
-                PackageSaveMode.Nupkg,
-                XmlDocFileSaveMode.None,
-                ClientPolicyContext.GetClientPolicy(m_NugetSettings, Logger),
-                Logger)
-                {
-                    CopySatelliteFiles = false
-                };
-                var downloadContext = new PackageDownloadContext(cacheContext);
                 var globalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder(m_NugetSettings);
 
                 foreach (var dependencyPackage in queryResult.Packages)
@@ -195,18 +186,13 @@ namespace OpenMod.NuGet
 
                         using var downloadResult = await downloadResource.GetDownloadResourceResultAsync(
                             dependencyPackage,
-                            downloadContext,
+                            new PackageDownloadContext(cacheContext),
                             globalPackagesFolder,
                             Logger, CancellationToken.None);
 
-                        await PackageExtractor.ExtractPackageAsync(
-                             downloadResult.PackageSource,
-                             downloadResult.PackageStream,
-                             m_PackagePathResolver,
-                             packageExtractionContext,
-                             CancellationToken.None);
+                        downloadResult.PackageStream.CopyToFile(installedPath);
 
-                        m_CachedPackageIdentity.Remove(dependencyPackage.Id);
+                        m_CachedPackageIdentity[dependencyPackage.Id] = downloadResult.PackageReader.GetIdentity();
                     }
 
                     await LoadAssembliesFromNuGetPackageAsync(installedPath);
