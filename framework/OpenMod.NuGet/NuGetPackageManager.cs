@@ -697,12 +697,14 @@ namespace OpenMod.NuGet
                 return;
             }
 
+            foreach (var sourceRepository in repositories)
+            {
             Logger.LogDebug("GetPackageDependencies: " + package);
-            var dependencyInfo = await FindDependencyInfoAsync(package, cacheContext, repositories);
+                var dependencyInfo = await FindDependencyInfoAsync(package, cacheContext, sourceRepository);
 
             if (dependencyInfo == null)
             {
-                return;
+                    continue;
             }
 
             availablePackages.Add(dependencyInfo);
@@ -711,8 +713,6 @@ namespace OpenMod.NuGet
                 return;
             }
 
-            foreach (var sourceRepository in repositories)
-            {
                 Logger.LogDebug("GetResourceAsync (FindPackageById) for " + dependencyInfo.Source.PackageSource.SourceUri);
                 var packageResource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
 
@@ -755,15 +755,15 @@ namespace OpenMod.NuGet
                 {
                     await QueryPackageDependenciesAsync(dependency, cacheContext, repositories, availablePackages, allowPreReleaseVersions);
                 }
+
+                return;
             }
         }
 
         private async Task<SourcePackageDependencyInfo?> FindDependencyInfoAsync(
             PackageIdentity package,
             SourceCacheContext cacheContext,
-            IEnumerable<SourceRepository> repositories)
-        {
-            foreach (var sourceRepository in repositories)
+            SourceRepository sourceRepository)
             {
                 Logger.LogDebug("GetResourceAsync (DependencyInfoResource) for " + sourceRepository.PackageSource.SourceUri);
                 var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
@@ -773,16 +773,13 @@ namespace OpenMod.NuGet
                 if (dependencyInfo == null)
                 {
                     Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
-                    continue;
+                return null;
                 }
 
                 Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
 
                 return dependencyInfo;
             }
-
-            return null;
-        }
 
         public virtual void InstallAssemblyResolver()
         {
