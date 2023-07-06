@@ -12,10 +12,8 @@ using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
-using NuGet.Packaging.Signing;
 using NuGet.Protocol.Core.Types;
 using NuGet.Resolver;
-using NuGet.Versioning;
 using OpenMod.Common.Hotloading;
 using OpenMod.NuGet.Helpers;
 using OpenMod.Common.Helpers;
@@ -110,7 +108,7 @@ namespace OpenMod.NuGet
 
             m_CurrentFramework = frameworkName == null
                 ? NuGetFramework.AnyFramework
-                : NuGetFramework.ParseFrameworkName(frameworkName, new DefaultFrameworkNameProvider());
+                : NuGetFramework.ParseFrameworkName(frameworkName, DefaultFrameworkNameProvider.Instance);
 
             m_PackagePathResolver = new PackagePathResolver(packagesDirectory);
             m_PackageResolver = new PackageResolver();
@@ -250,10 +248,10 @@ namespace OpenMod.NuGet
                 foreach (var identity in identities.Skip(1))
                 {
                     await RemoveAsync(identity);
-            }
+                }
 
                 m_CachedPackageIdentity[kvp.Key] = identities[0];
-        }
+            }
         }
 
         public virtual async Task<bool> IsPackageInstalledAsync(string packageId)
@@ -504,7 +502,7 @@ namespace OpenMod.NuGet
 
             if (getAndLoadDependencies)
             {
-                foreach (var dependency in (await GetDependenciesAsync(identity)).Reverse())
+                foreach (var dependency in await GetDependenciesAsync(identity))
                 {
                     if (dependency.Id.Equals(identity.Id, StringComparison.OrdinalIgnoreCase))
                     {
@@ -561,8 +559,8 @@ namespace OpenMod.NuGet
             }
 
             m_LoadedPackageAssemblies.Add(fullPath, assemblies);
-            var result = assemblies.ConvertAll(d => (Assembly)d.Assembly.Target);
 
+            var result = assemblies.ConvertAll(d => (Assembly)d.Assembly.Target);
             s_LoadedPackages.TryAdd(fullPath, result);
             return result;
         }
@@ -574,9 +572,9 @@ namespace OpenMod.NuGet
                 throw new ArgumentNullException(nameof(packageId));
             }
 
-            if (m_CachedPackageIdentity.TryGetValue(packageId, out var result))
+            if (m_CachedPackageIdentity.TryGetValue(packageId, out var package))
             {
-                return result;
+                return package;
             }
 
             var packageIdentities = new List<PackageIdentity>();
@@ -603,10 +601,10 @@ namespace OpenMod.NuGet
                 }
             }
 
-            var package = packageIdentities.OrderByDescending(c => c.Version).FirstOrDefault();
-            if (package is not null && !m_CachedPackageIdentity.ContainsKey(packageId))
+            package = packageIdentities.OrderByDescending(c => c.Version).FirstOrDefault();
+            if (package is not null)
             {
-                m_CachedPackageIdentity.Add(packageId, package);
+                m_CachedPackageIdentity[packageId] = package;
             }
 
             return package;
@@ -699,19 +697,19 @@ namespace OpenMod.NuGet
 
             foreach (var sourceRepository in repositories)
             {
-            Logger.LogDebug("GetPackageDependencies: " + package);
+                Logger.LogDebug("GetPackageDependencies: " + package);
                 var dependencyInfo = await FindDependencyInfoAsync(package, cacheContext, sourceRepository);
 
-            if (dependencyInfo == null)
-            {
+                if (dependencyInfo == null)
+                {
                     continue;
-            }
+                }
 
-            availablePackages.Add(dependencyInfo);
-            if (!dependencyInfo.Dependencies.Any())
-            {
-                return;
-            }
+                availablePackages.Add(dependencyInfo);
+                if (!dependencyInfo.Dependencies.Any())
+                {
+                    return;
+                }
 
                 Logger.LogDebug("GetResourceAsync (FindPackageById) for " + dependencyInfo.Source.PackageSource.SourceUri);
                 var packageResource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
@@ -764,22 +762,22 @@ namespace OpenMod.NuGet
             PackageIdentity package,
             SourceCacheContext cacheContext,
             SourceRepository sourceRepository)
+        {
+            Logger.LogDebug("GetResourceAsync (DependencyInfoResource) for " + sourceRepository.PackageSource.SourceUri);
+            var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
+
+            Logger.LogDebug("ResolvePackage");
+            var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFramework, cacheContext, Logger, CancellationToken.None);
+            if (dependencyInfo == null)
             {
-                Logger.LogDebug("GetResourceAsync (DependencyInfoResource) for " + sourceRepository.PackageSource.SourceUri);
-                var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
-
-                Logger.LogDebug("ResolvePackage");
-                var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFramework, cacheContext, Logger, CancellationToken.None);
-                if (dependencyInfo == null)
-                {
-                    Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
+                Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
                 return null;
-                }
-
-                Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
-
-                return dependencyInfo;
             }
+
+            Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
+
+            return dependencyInfo;
+        }
 
         public virtual void InstallAssemblyResolver()
         {
