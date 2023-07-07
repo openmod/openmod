@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Autofac;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.Core.Commands.Events;
+using OpenMod.Core.Events;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Patching;
@@ -180,9 +182,14 @@ namespace OpenMod.Unturned.RocketMod
 
             if (U.Settings != null)
             {
-                // Rocketmod already initialized
-                OnRocketModIntialized();
-                OnRocketModPluginsLoaded();
+                // Rocketmod already initialized.
+                // In order to listen for rocketmod loaded events we have to wait for openmod to load
+                m_EventBus.Subscribe<OpenModInitializedEvent>(m_RocketModComponent, (_, _, _) =>
+                {
+                    OnRocketModIntialized();
+                    OnRocketModPluginsLoaded();
+                    return Task.CompletedTask;
+                });
             }
             else
             {
