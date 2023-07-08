@@ -133,9 +133,12 @@ namespace OpenMod.Common.Hotloading
         /// <param name="assembly">The assembly to remove.</param>
         public static void Remove(Assembly assembly)
         {
-            foreach (var kv in s_Assemblies.Where(kv => kv.Value == assembly))
+            foreach (var key in s_Assemblies
+                .Where(kv => kv.Value == assembly)
+                .Select(x => x.Key)
+                .ToArray())
             {
-                s_Assemblies.Remove(kv.Key);
+                s_Assemblies.Remove(key);
             }
         }
 

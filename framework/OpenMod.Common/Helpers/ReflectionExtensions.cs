@@ -11,6 +11,8 @@ namespace OpenMod.Common.Helpers
 {
     public static class ReflectionExtensions
     {
+        private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
+
         public static MethodBase? GetCallingMethod(Type[]? skipTypes = null, MethodBase[]? skipMethods = null, bool applyAsyncMethodPatch = true)
         {
             var skipList = new List<Type>(skipTypes ?? Type.EmptyTypes) { typeof(ReflectionExtensions) };
@@ -127,7 +129,6 @@ namespace OpenMod.Common.Helpers
             return GetVersionIndependentName(assemblyName, out _);
         }
 
-        private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
         public static string GetVersionIndependentName(string assemblyName, out string extractedVersion)
         {
             if (assemblyName == null)
