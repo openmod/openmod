@@ -805,6 +805,15 @@ namespace OpenMod.NuGet
                 .FirstOrDefault();
 
             assembly = (matchedAssembly?.Assembly.Target as Assembly) ?? Hotloader.FindAssembly(name);
+
+            assembly ??= s_LoadedPackages.Values
+                .SelectMany(x => x)
+                .Select(x => (assembly: x, name: x.GetName()))
+                .Where(x => AssemblyNameEqualityComparer.Instance.Equals(x.name, name))
+                .OrderByDescending(x => x.name.Version)
+                .FirstOrDefault()
+                .assembly;
+
             if (assembly != null)
             {
                 m_ResolveCache.Add(name, assembly);
