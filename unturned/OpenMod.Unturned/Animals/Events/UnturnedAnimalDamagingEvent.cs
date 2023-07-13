@@ -1,7 +1,6 @@
 ﻿using OpenMod.API.Eventing;
 using SDG.Unturned;
 using System.Numerics;
-using OpenMod.Unturned.Users;
 using Steamworks;
 
 namespace OpenMod.Unturned.Animals.Events
@@ -16,15 +15,18 @@ namespace OpenMod.Unturned.Animals.Events
         
         public CSteamID Instigator { get; set; }
 
+        public ELimb Limb { get; set; }
+
         public bool IsCancelled { get; set; }
 
         public UnturnedAnimalDamagingEvent(UnturnedAnimal animal, ushort damageAmount, Vector3 ragdoll,
-            ERagdollEffect ragdollEffect, CSteamID instigator) : base(animal)
+            ERagdollEffect ragdollEffect, CSteamID instigator, ELimb limb) : base(animal)
         {
             DamageAmount = damageAmount;
             Ragdoll = ragdoll;
             RagdollEffect = ragdollEffect;
             Instigator = instigator;
+            Limb = limb;
         }
     }
 }
