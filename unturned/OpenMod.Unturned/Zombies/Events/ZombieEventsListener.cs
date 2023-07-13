@@ -16,13 +16,6 @@ namespace OpenMod.Unturned.Zombies.Events
     [OpenModInternal]
     internal class ZombieEventsListener : UnturnedEventsListener
     {
-        private static readonly FieldInfo? s_ZombieZombieRegion;
-
-        static ZombieEventsListener()
-        {
-            s_ZombieZombieRegion = typeof(Zombie).GetField("zombieRegion", BindingFlags.Instance | BindingFlags.NonPublic);
-        }
-
         public ZombieEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
@@ -88,23 +81,23 @@ namespace OpenMod.Unturned.Zombies.Events
             //from method damagetool.damageZombie
             if (parameters.applyGlobalArmorMultiplier)
             {
-                if (parameters.limb == ELimb.SKULL)
+                parameters.times *= parameters.limb switch
                 {
-                    parameters.times *= Provider.modeConfigData.Zombies.Armor_Multiplier;
-                }
-                else
-                {
-                    parameters.times *= Provider.modeConfigData.Zombies.NonHeadshot_Armor_Multiplier;
-                }
+                    ELimb.SKULL => Provider.modeConfigData.Zombies.Armor_Multiplier,
+                    _ => Provider.modeConfigData.Zombies.NonHeadshot_Armor_Multiplier,
+                };
             }
+
+            var damageAmount = (ushort)Mathf.Min(ushort.MaxValue, Mathf.FloorToInt(parameters.damage * parameters.times));
+            var beaconDamageDecreasePercent = 1f;
 
             //from method zombie.askdamage
-            if (s_ZombieZombieRegion?.GetValue(zombie.Zombie) is ZombieRegion zombieRegion && zombieRegion.hasBeacon) 
+            var region = ZombieManager.regions[zombie.Zombie.bound];
+            if (region.hasBeacon)
             {
-                parameters.damage = MathfEx.CeilToUShort((int)parameters.damage / (Mathf.Max(1, BeaconManager.checkBeacon(zombie.Zombie.bound).initialParticipants) * 1.5f));
+                beaconDamageDecreasePercent = Mathf.Max(1f, BeaconManager.checkBeacon(region.nav).initialParticipants) * 1.5f;
+                damageAmount = MathfEx.CeilToUShort(damageAmount / beaconDamageDecreasePercent);
             }
-
-            var damageAmount = (ushort)Math.Min(ushort.MaxValue, Mathf.FloorToInt(parameters.damage * parameters.times));
 
             var @event = damageAmount >= zombie.Health
                 ? new UnturnedZombieDyingEvent(zombie, player, damageAmount, parameters.direction,
@@ -115,11 +108,14 @@ namespace OpenMod.Unturned.Zombies.Events
             @event.IsCancelled = !shouldAllow;
             Emit(@event);
 
-            parameters.damage = @event.DamageAmount;
+            // remove damage reduction due to beacon
+            var newDamageAmount = @event.DamageAmount * beaconDamageDecreasePercent;
+
+            parameters.damage = newDamageAmount;
             parameters.times = 1;
             parameters.direction = @event.Ragdoll;
             parameters.ragdollEffect = @event.RagdollEffect;
-            parameters.instigator = @event.Instigator?.Player;
+            parameters.instigator = player != null ? @event.Instigator?.Player : parameters.instigator;
             parameters.zombieStunOverride = @event.StunOverride;
             parameters.limb = @event.Limb;
             shouldAllow = !@event.IsCancelled;
@@ -152,7 +148,6 @@ namespace OpenMod.Unturned.Zombies.Events
             Emit(@event);
         }
 
-#pragma warning disable RCS1213 // Remove unused member declaration.
         private delegate void ZombieAlertingPlayer(Zombie nativeZombie, ref Player? player, ref bool cancel);
         private static event ZombieAlertingPlayer? OnZombieAlertingPlayer;
 
@@ -165,7 +160,6 @@ namespace OpenMod.Unturned.Zombies.Events
 
         private delegate void ZombieDead(Zombie nativeZombie, Vector3 ragdoll, ERagdollEffect ragdollEffect);
         private static event ZombieDead? OnZombieDead;
-#pragma warning restore RCS1213 // Remove unused member declaration.
 
         [UsedImplicitly]
         [HarmonyPatch]
