@@ -1,22 +1,20 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OpenMod.API;
-using OpenMod.Common.Hotloading;
 using OpenMod.Core.Commands;
 using Command = OpenMod.Core.Commands.Command;
 using OpenMod.Core.Commands.OpenModCommands;
 using OpenMod.NuGet;
-using SDG.Framework.Modules;
 using SDG.Unturned;
 using Semver;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using NuGet.Packaging;
 
 namespace OpenMod.Unturned.Commands
 {
@@ -49,7 +47,6 @@ namespace OpenMod.Unturned.Commands
             "Readme.txt"
         };
 
-
         protected override async Task OnExecuteAsync()
         {
             var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
@@ -75,12 +72,12 @@ namespace OpenMod.Unturned.Commands
                 {
                     await PrintAsync($"Downloading {moduleAsset.AssetName} v{releaseVersion}...");
 
-                    var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
+                    using var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
 
                     await PrintAsync("Extracting update...");
                     await ExtractArchiveAsync(stream, openModDirPath);
                 }
-                catch (Exception)
+                catch
                 {
                     RestoreFiles(openModDirPath);
                     throw;
@@ -234,7 +231,7 @@ namespace OpenMod.Unturned.Commands
             }
         }
 
-        private async Task ExtractArchiveAsync(Stream archiveStream, string directory)
+        private Task ExtractArchiveAsync(Stream archiveStream, string directory)
         {
             if (!Directory.Exists(directory))
             {
@@ -252,14 +249,12 @@ namespace OpenMod.Unturned.Commands
 
                 var path = Path.Combine(directory, file.Name);
 
-                using var fileStream = file.Open();
-                using var ms = new MemoryStream();
+                using var zipStream = file.Open();
 
-                await fileStream.CopyToAsync(ms);
-                ms.Seek(offset: 0, SeekOrigin.Begin);
-
-                File.WriteAllBytes(path, ms.ToArray());
+                zipStream.CopyToFile(path);
             }
+
+            return Task.CompletedTask;
         }
 
         private class LatestRelease
