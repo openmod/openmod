@@ -181,7 +181,7 @@ namespace OpenMod.Unturned.Commands
         {
             foreach (var file in Directory.GetFiles(openModDirPath))
             {
-                if (!file.EndsWith(".bak"))
+                if (file.EndsWith(".bak"))
                 {
                     continue;
                 }
