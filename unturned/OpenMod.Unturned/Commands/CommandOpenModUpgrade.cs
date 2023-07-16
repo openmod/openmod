@@ -73,7 +73,7 @@ namespace OpenMod.Unturned.Commands
 
                 try
                 {
-                    await PrintAsync($"Downloading {moduleAsset.AssetName}...");
+                    await PrintAsync($"Downloading {moduleAsset.AssetName} v{releaseVersion}...");
 
                     var stream = await client.GetStreamAsync(moduleAsset.BrowserDownloadUrl);
 
