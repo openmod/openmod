@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenMod.API;
 
 namespace OpenMod.Core.Localization
@@ -11,10 +12,12 @@ namespace OpenMod.Core.Localization
     public class ConfigurationBasedStringLocalizerFactory : IStringLocalizerFactory
     {
         private readonly ILogger<ConfigurationBasedStringLocalizer> m_Logger;
+        private readonly IOptions<SmartFormatOptions> m_Options;
 
-        public ConfigurationBasedStringLocalizerFactory(ILogger<ConfigurationBasedStringLocalizer> logger)
+        public ConfigurationBasedStringLocalizerFactory(ILogger<ConfigurationBasedStringLocalizer> logger, IOptions<SmartFormatOptions> options)
         {
             m_Logger = logger;
+            m_Options = options;
         }
 
         public IStringLocalizer Create(Type resourceSource)
@@ -45,7 +48,7 @@ namespace OpenMod.Core.Localization
 
             ReloadToken();
 
-            return new ConfigurationBasedStringLocalizer(translations);
+            return new ConfigurationBasedStringLocalizer(translations, m_Options);
         }
     }
 }
