@@ -68,6 +68,18 @@ public class SmartFormatOptions
     }
 
     /// <summary>
+    /// Searches for the specific <see cref="IFormatter"/> and returns it
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="formatter">The formatter</param>
+    /// <returns><see langword="true"/>, if the extension was found</returns>
+    public bool TryGetFormatter<T>(out T formatter) where T : class, IFormatter
+    {
+        formatter = (m_Formatters.Find(f => f is T) as T)!;
+        return formatter != null;
+    }
+
+    /// <summary>
     /// Adds <see cref="ISource"/> extension to the source list
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -96,6 +108,18 @@ public class SmartFormatOptions
         CheckInitialized();
 
         return m_Sources.RemoveAll(f => f is T) > 0;
+    }
+
+    /// <summary>
+    /// Searches for the specific <see cref="ISource"/> and returns it
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="source">The source</param>
+    /// <returns><see langword="true"/>, if the extension was found</returns>
+    public bool TryGetSource<T>(out T source) where T : class, ISource
+    {
+        source = (m_Sources.Find(f => f is T) as T)!;
+        return source != null;
     }
 
     public void SetLocalizationProvider(ILocalizationProvider? localizationProvider)
