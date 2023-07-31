@@ -11,9 +11,9 @@ namespace OpenMod.Core.Commands
     [OpenModInternal]
     [UsedImplicitly]
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
-    public class ThreadLocalCurrentCommandContextAccessor : ICurrentCommandContextAccessor
+    public class AsyncLocalCurrentCommandContextAccessor : ICurrentCommandContextAccessor
     {
-        private readonly ThreadLocal<ICommandContext?> m_Context = new(() => null);
+        private readonly AsyncLocal<ICommandContext?> m_Context = new();
 
         public ICommandContext? Context
         {
