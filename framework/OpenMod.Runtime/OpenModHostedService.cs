@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Jobs;
@@ -9,9 +10,8 @@ using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
 using OpenMod.Core.Events;
 using OpenMod.Core.Helpers;
+using OpenMod.Core.Localization;
 using SmartFormat;
-using SmartFormat.Core.Settings;
-using SmartFormat.Extensions;
 
 namespace OpenMod.Runtime
 {
@@ -27,6 +27,7 @@ namespace OpenMod.Runtime
         private readonly IEventBus m_EventBus;
         private readonly IJobScheduler m_JobScheduler;
         private readonly IRuntime m_Runtime;
+        private readonly IOptions<SmartFormatOptions> m_SmartFormatOptions;
 
         public OpenModHostedService(
             ILogger<OpenModHostedService> logger,
@@ -37,8 +38,8 @@ namespace OpenMod.Runtime
             IPluginActivator pluginActivator,
             IEventBus eventBus,
             IJobScheduler jobScheduler,
-            IRuntime runtime
-        )
+            IRuntime runtime,
+            IOptions<SmartFormatOptions> smartFormatOptions)
         {
             m_Logger = logger;
             m_PermissionChecker = permissionChecker;
@@ -49,15 +50,13 @@ namespace OpenMod.Runtime
             m_EventBus = eventBus;
             m_JobScheduler = jobScheduler;
             m_Runtime = runtime;
+            m_SmartFormatOptions = smartFormatOptions;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await m_PermissionChecker.InitAsync();
-            
-            // https://github.com/axuno/SmartFormat/wiki/Async-and-Thread-Safety
-            SmartSettings.IsThreadSafeMode = true;
-            Smart.Default = SmartFormatterHelper.ObtainSmartFormatter();
+            Smart.Default = m_SmartFormatOptions.Value.GetSmartFormatter();
 
             m_Logger.LogInformation("Initializing for host: {HostName} v{HostVersion}",
                 m_HostInformation.HostName, m_HostInformation.HostVersion);
