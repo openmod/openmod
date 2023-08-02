@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using NuGet.Packaging.Core;
+using NuGet.Versioning;
 using OpenMod.API;
 using OpenMod.API.Plugins;
 using OpenMod.NuGet;
@@ -83,7 +85,11 @@ namespace OpenMod.Core.Plugins.NuGet
                 return new NuGetInstallResult(NuGetInstallCode.PackageOrVersionNotFound);
             }
 
-            var result = await m_NuGetPackageManager.InstallAsync(package.Identity, isPreRelease);
+            var packageIdentity = version is null
+                ? package.Identity
+                : new PackageIdentity(package.Identity.Id, new NuGetVersion(version));
+
+            var result = await m_NuGetPackageManager.InstallAsync(packageIdentity, isPreRelease);
             if (result.Code is not NuGetInstallCode.Success and not NuGetInstallCode.NoUpdatesFound)
             {
                 return result;
