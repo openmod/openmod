@@ -55,7 +55,7 @@ namespace OpenMod.Core
 
             serviceCollection.Configure<SmartFormatOptions>(options =>
             {
-                options.TryAddFormatter(new TimeFormatter());
+                options.TryAddFormatter<TimeFormatter>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();

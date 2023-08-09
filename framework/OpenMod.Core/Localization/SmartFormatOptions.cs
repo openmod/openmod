@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using Nito.Disposables.Internals;
 using OpenMod.Core.Helpers;
 using SmartFormat;
 using SmartFormat.Core.Extensions;
@@ -10,8 +12,8 @@ using SmartFormat.Utilities;
 namespace OpenMod.Core.Localization;
 public class SmartFormatOptions
 {
-    private readonly List<IFormatter> m_Formatters;
-    private readonly List<ISource> m_Sources;
+    private readonly List<FormatterFactory<IFormatter>> m_Formatters;
+    private readonly List<FormatterFactory<ISource>> m_Sources;
     private readonly SmartSettings m_SmartSettings;
 
     // used to check if formatter already initialized,
@@ -25,8 +27,41 @@ public class SmartFormatOptions
         var defaultFormatter = Smart.Default;
 
         // copy formatters and sources
-        m_Formatters = defaultFormatter.GetFormatterExtensions().ToList();
-        m_Sources = defaultFormatter.GetSourceExtensions().ToList();
+        m_Formatters = new();
+        foreach (var formatter in defaultFormatter.GetFormatterExtensions())
+        {
+            var formatterType = formatter.GetType();
+
+            m_Formatters.Add(new(formatterType, factory =>
+            {
+                try
+                {
+                    return Activator.CreateInstance(factory.Type) as IFormatter;
+                }
+                catch
+                {
+                    return null;
+                }
+            }));
+        }
+
+        m_Sources = new();
+        foreach (var source in defaultFormatter.GetSourceExtensions())
+        {
+            var sourceType = source.GetType();
+
+            m_Sources.Add(new(sourceType, factory =>
+            {
+                try
+                {
+                    return Activator.CreateInstance(factory.Type) as ISource;
+                }
+                catch
+                {
+                    return null;
+                }
+            }));
+        }
 
         // Smartformatter will be used in threading, so make sure it is thread safe mode is set
         // more info: https://github.com/axuno/SmartFormat/wiki/Async-and-Thread-Safety
@@ -40,18 +75,17 @@ public class SmartFormatOptions
     /// Adds <see cref="IFormatter"/> extension to the formatters list
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="formatter"><see cref="IFormatter"/> instance</param>
     /// <returns><see langword="true"/>, if the extension was added.</returns>
-    public bool TryAddFormatter<T>(T formatter) where T : class, IFormatter
+    public bool TryAddFormatter<T>() where T : class, IFormatter, new()
     {
         CheckInitialized();
 
-        if (m_Formatters.OfType<T>().FirstOrDefault() is not null)
+        if (m_Formatters.Any(x => x.Type == typeof(T)))
         {
             return false;
         }
 
-        m_Formatters.Add(formatter);
+        m_Formatters.Add(new(typeof(T), _ => new T()));
         return true;
     }
 
@@ -64,37 +98,31 @@ public class SmartFormatOptions
     {
         CheckInitialized();
 
-        return m_Formatters.RemoveAll(f => f is T) > 0;
-    }
+        var index = m_Formatters.FindIndex(f => f.Type == typeof(T));
+        if (index == -1)
+        {
+            return false;
+        }
 
-    /// <summary>
-    /// Searches for the specific <see cref="IFormatter"/> and returns it
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="formatter">The formatter</param>
-    /// <returns><see langword="true"/>, if the extension was found</returns>
-    public bool TryGetFormatter<T>(out T formatter) where T : class, IFormatter
-    {
-        formatter = (m_Formatters.Find(f => f is T) as T)!;
-        return formatter != null;
+        m_Formatters.RemoveAt(index);
+        return true;
     }
 
     /// <summary>
     /// Adds <see cref="ISource"/> extension to the source list
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="source"><see cref="ISource"/> instance</param>
     /// <returns><see langword="true"/>, if the extension was added.</returns>
-    public bool TryAddSource<T>(T source) where T : class, ISource
+    public bool TryAddSource<T>() where T : class, ISource, new()
     {
         CheckInitialized();
 
-        if (m_Sources.OfType<T>().FirstOrDefault() is not null)
+        if (m_Sources.Any(x => x.Type == typeof(T)))
         {
             return false;
         }
 
-        m_Sources.Add(source);
+        m_Sources.Add(new(typeof(T), _ => new T()));
         return true;
     }
 
@@ -107,19 +135,14 @@ public class SmartFormatOptions
     {
         CheckInitialized();
 
-        return m_Sources.RemoveAll(f => f is T) > 0;
-    }
+        var index = m_Sources.FindIndex(f => f.Type == typeof(T));
+        if (index == -1)
+        {
+            return false;
+        }
 
-    /// <summary>
-    /// Searches for the specific <see cref="ISource"/> and returns it
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="source">The source</param>
-    /// <returns><see langword="true"/>, if the extension was found</returns>
-    public bool TryGetSource<T>(out T source) where T : class, ISource
-    {
-        source = (m_Sources.Find(f => f is T) as T)!;
-        return source != null;
+        m_Sources.RemoveAt(index);
+        return true;
     }
 
     public void SetLocalizationProvider(ILocalizationProvider? localizationProvider)
@@ -149,7 +172,23 @@ public class SmartFormatOptions
         m_IsInitialized = true;
 
         return new SmartFormatter(m_SmartSettings)
-            .AddExtensions(m_Sources.ToArray())
-            .AddExtensions(m_Formatters.ToArray());
+            .AddExtensions(m_Sources.Select(x => x.Factory(x))
+                .WhereNotNull()
+                .ToArray())
+            .AddExtensions(m_Formatters.Select(x => x.Factory(x))
+                .WhereNotNull()
+                .ToArray());
+    }
+
+    private sealed class FormatterFactory<T>
+    {
+        public Func<FormatterFactory<T>, T?> Factory { get; }
+        public Type Type { get; }
+
+        public FormatterFactory(Type type, Func<FormatterFactory<T>, T?> factory)
+        {
+            Factory = factory;
+            Type = type;
+        }
     }
 }
