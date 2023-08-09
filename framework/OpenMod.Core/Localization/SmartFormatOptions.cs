@@ -44,7 +44,6 @@ public class SmartFormatOptions
                 }
             }));
         }
-        Debug.Assert(defaultFormatter.GetFormatterExtensions().Count == m_Formatters.Count);
 
         m_Sources = new();
         foreach (var source in defaultFormatter.GetSourceExtensions())
@@ -63,7 +62,6 @@ public class SmartFormatOptions
                 }
             }));
         }
-        Debug.Assert(defaultFormatter.GetSourceExtensions().Count == m_Sources.Count);
 
         // Smartformatter will be used in threading, so make sure it is thread safe mode is set
         // more info: https://github.com/axuno/SmartFormat/wiki/Async-and-Thread-Safety
@@ -182,7 +180,6 @@ public class SmartFormatOptions
                 .ToArray());
     }
 
-    // [DebuggerDisplay("{Type}")]
     private sealed class FormatterFactory<T>
     {
         public Func<FormatterFactory<T>, T?> Factory { get; }
