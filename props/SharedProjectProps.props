@@ -30,8 +30,6 @@
     <WeaverConfiguration>
       <Weavers>
         <RuntimeNullables CheckNonPublic="true" CheckOutputs="false" />
-        <InlineIL />
-        <Undisposed />
       </Weavers>
     </WeaverConfiguration>
   </PropertyGroup>
