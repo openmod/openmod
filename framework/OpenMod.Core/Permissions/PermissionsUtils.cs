@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using MoreLinq;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
+#if !NETSTANDARD2_1_OR_GREATER
+using MoreLinq;
+#endif
 
 namespace OpenMod.Core.Permissions
 {
@@ -52,7 +54,7 @@ namespace OpenMod.Core.Permissions
                         .Select(r => permission + '.' + r.Permission) ?? Enumerable.Empty<string>();
 
                     // ReSharper disable once InvokeAsExtensionMethod
-                    return MoreEnumerable.Append(permissionRegistrations, permission);
+                    return MoreLinq.MoreEnumerable.Append(permissionRegistrations, permission);
                 })
                 .SelectMany(DefaultPermissionCheckProvider.BuildPermissionTree)
                 .ToHashSet();
