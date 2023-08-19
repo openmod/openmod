@@ -7,24 +7,21 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-
 namespace OpenMod.Analyzers
 {
     [UsedImplicitly]
-    [DiagnosticAnalyzer("CSharp")]
+    [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class InternalUsageDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         public const string Id = "OM1001";
 
-        public const string MessageFormat  = "{0} is an internal API that supports the OpenMod infrastructure and is not meant to be used by plugins.";
+        public const string MessageFormat  = "{0} is an internal API that supports the OpenMod infrastructure and is not meant to be used by plugins";
 
-
-        protected const string DefaultTitle = "Internal OpenMod API usage.";
+        protected const string DefaultTitle = "Internal OpenMod API usage";
         protected const string Category = "Usage";
 
         private static readonly int s_OmLen = "OpenMod".Length;
 
-#pragma warning disable RS2008
         private static readonly DiagnosticDescriptor s_Descriptor
             = new(
                 Id,
@@ -33,7 +30,6 @@ namespace OpenMod.Analyzers
                 category: Category,
                 defaultSeverity: DiagnosticSeverity.Warning,
                 isEnabledByDefault: true);
-#pragma warning restore RS2008
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(s_Descriptor);
 
