@@ -18,25 +18,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AsmResolver.PE" Version="5.4.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
-	<!--TODO: remove this when AsmResolver will be updated to 5.4.0-->
-	<ItemGroup>
-		<Reference Include="AsmResolver">
-			<HintPath>..\..\unturned\OpenMod.Unturned.Module\runtimelibs\AsmResolver.dll</HintPath>
-		</Reference>
-		<Reference Include="AsmResolver.PE">
-			<HintPath>..\..\unturned\OpenMod.Unturned.Module\runtimelibs\AsmResolver.PE.dll</HintPath>
-		</Reference>
-		<Reference Include="AsmResolver.PE.File">
-			<HintPath>..\..\unturned\OpenMod.Unturned.Module\runtimelibs\AsmResolver.PE.File.dll</HintPath>
-		</Reference>
-	</ItemGroup>
-
-	<Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
 
 </Project>
