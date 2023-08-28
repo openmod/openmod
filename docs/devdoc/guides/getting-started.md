@@ -28,7 +28,7 @@ If you are using Linux and do not want to use Visual Studio Code, you can instal
 ## Generating the Plugin Project
 Start cmd or Powershell and navigate to the folder where you want to create the plugin project.
 
-E.g.
+E.g. ([optional])
 ```
 mkdir C:\Users\<Username>\source\repos\MyPlugin\
 cd C:\Users\<Username>\source\repos\MyPlugin\
@@ -69,7 +69,7 @@ dotnet new openmod-unturned-plugin --FullPluginName "My Unturned Plugin" --Plugi
 ```
 
 ## Adding a basic command
-Now that you've set up your plugin, open the .csproj file with the IDE you have installed earlier.
+Now that you've set up your plugin, open the .cs file with the IDE you have installed earlier.
 
 In this example we are creating an echo command. Create a new class (how you do this depends on your IDE). By convention command classes are prefixed with "Command" so call it CommandEcho. Since this will be an universal command that works on all platforms, we will make it inherit from `Command`. If this command would be only for Unturned, we would inherit from `UnturnedCommand` instead.
 
