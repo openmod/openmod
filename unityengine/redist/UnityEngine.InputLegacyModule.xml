@@ -1,0 +1,706 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<doc>
+  <members>
+    <assembly>
+      <name>UnityEngine.InputLegacyModule</name>
+    </assembly>
+    <member name="T:UnityEngine.AccelerationEvent">
+      <summary>
+        <para>Structure describing acceleration status of the device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.AccelerationEvent.acceleration">
+      <summary>
+        <para>Value of acceleration.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.AccelerationEvent.deltaTime">
+      <summary>
+        <para>Amount of time passed since last accelerometer measurement.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.AndroidInput">
+      <summary>
+        <para>AndroidInput provides support for off-screen touch input, such as a touchpad.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.AndroidInput.secondaryTouchEnabled">
+      <summary>
+        <para>Property indicating whether the system provides secondary touch input.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.AndroidInput.secondaryTouchHeight">
+      <summary>
+        <para>Property indicating the height of the secondary touchpad.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.AndroidInput.secondaryTouchWidth">
+      <summary>
+        <para>Property indicating the width of the secondary touchpad.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.AndroidInput.touchCountSecondary">
+      <summary>
+        <para>Number of secondary touches. Guaranteed not to change throughout the frame. (Read Only).</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidInput.GetSecondaryTouch(System.Int32)">
+      <summary>
+        <para>Returns object representing status of a specific touch on a secondary touchpad (Does not allocate temporary variables).</para>
+      </summary>
+      <param name="index"></param>
+    </member>
+    <member name="T:UnityEngine.Compass">
+      <summary>
+        <para>Interface into compass functionality.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Compass.enabled">
+      <summary>
+        <para>Used to enable or disable compass. Note, that if you want Input.compass.trueHeading property to contain a valid value, you must also enable location updates by calling Input.location.Start().</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Compass.headingAccuracy">
+      <summary>
+        <para>Accuracy of heading reading in degrees.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Compass.magneticHeading">
+      <summary>
+        <para>The heading in degrees relative to the magnetic North Pole. (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Compass.rawVector">
+      <summary>
+        <para>The raw geomagnetic data measured in microteslas. (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Compass.timestamp">
+      <summary>
+        <para>Timestamp (in seconds since 1970) when the heading was last time updated. (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Compass.trueHeading">
+      <summary>
+        <para>The heading in degrees relative to the geographic North Pole. (Read Only)</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.DeviceOrientation">
+      <summary>
+        <para>Describes physical orientation of the device as determined by the OS.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.DeviceOrientation.FaceDown">
+      <summary>
+        <para>The device is held parallel to the ground with the screen facing downwards.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.DeviceOrientation.FaceUp">
+      <summary>
+        <para>The device is held parallel to the ground with the screen facing upwards.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.DeviceOrientation.LandscapeLeft">
+      <summary>
+        <para>The device is in landscape mode, with the device held upright and the home button on the right side.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.DeviceOrientation.LandscapeRight">
+      <summary>
+        <para>The device is in landscape mode, with the device held upright and the home button on the left side.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.DeviceOrientation.Portrait">
+      <summary>
+        <para>The device is in portrait mode, with the device held upright and the home button at the bottom.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.DeviceOrientation.PortraitUpsideDown">
+      <summary>
+        <para>The device is in portrait mode but upside down, with the device held upright and the home button at the top.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.DeviceOrientation.Unknown">
+      <summary>
+        <para>The orientation of the device cannot be determined.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Gyroscope">
+      <summary>
+        <para>Interface into the Gyroscope.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Gyroscope.attitude">
+      <summary>
+        <para>Returns the attitude (ie, orientation in space) of the device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Gyroscope.enabled">
+      <summary>
+        <para>Sets or retrieves the enabled status of this gyroscope.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Gyroscope.gravity">
+      <summary>
+        <para>Returns the gravity acceleration vector expressed in the device's reference frame.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Gyroscope.rotationRate">
+      <summary>
+        <para>Returns rotation rate as measured by the device's gyroscope.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Gyroscope.rotationRateUnbiased">
+      <summary>
+        <para>Returns unbiased rotation rate as measured by the device's gyroscope.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Gyroscope.updateInterval">
+      <summary>
+        <para>Sets or retrieves gyroscope interval in seconds.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Gyroscope.userAcceleration">
+      <summary>
+        <para>Returns the acceleration that the user is giving to the device.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.IMECompositionMode">
+      <summary>
+        <para>Controls IME input.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.IMECompositionMode.Auto">
+      <summary>
+        <para>Enable IME input only when a text field is selected (default).</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.IMECompositionMode.Off">
+      <summary>
+        <para>Disable IME input.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.IMECompositionMode.On">
+      <summary>
+        <para>Enable IME input.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Input">
+      <summary>
+        <para>Interface into the Input system.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.acceleration">
+      <summary>
+        <para>Last measured linear acceleration of a device in three-dimensional space. (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.accelerationEventCount">
+      <summary>
+        <para>Number of acceleration measurements which occurred during last frame.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.accelerationEvents">
+      <summary>
+        <para>Returns list of acceleration measurements which occurred during the last frame. (Read Only) (Allocates temporary variables).</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.anyKey">
+      <summary>
+        <para>Is any key or mouse button currently held down? (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.anyKeyDown">
+      <summary>
+        <para>Returns true the first frame the user hits any key or mouse button. (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.backButtonLeavesApp">
+      <summary>
+        <para>Should  Back button quit the application?
+
+Only usable on Android, Windows Phone or Windows Tablets.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.compass">
+      <summary>
+        <para>Property for accessing compass (handheld devices only). (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.compensateSensors">
+      <summary>
+        <para>This property controls if input sensors should be compensated for screen orientation.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.compositionCursorPos">
+      <summary>
+        <para>The current text input position used by IMEs to open windows.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.compositionString">
+      <summary>
+        <para>The current IME composition string being typed by the user.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.deviceOrientation">
+      <summary>
+        <para>Device physical orientation as reported by OS. (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.eatKeyPressOnTextFieldFocus">
+      <summary>
+        <para>Property indicating whether keypresses are eaten by a textinput if it has focus (default true).</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.gyro">
+      <summary>
+        <para>Returns default gyroscope.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.imeCompositionMode">
+      <summary>
+        <para>Controls enabling and disabling of IME input composition.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.imeIsSelected">
+      <summary>
+        <para>Does the user have an IME keyboard input source selected?</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.inputString">
+      <summary>
+        <para>Returns the keyboard input entered this frame. (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.location">
+      <summary>
+        <para>Property for accessing device location (handheld devices only). (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.mousePosition">
+      <summary>
+        <para>The current mouse position in pixel coordinates. (Read Only).</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.mousePresent">
+      <summary>
+        <para>Indicates if a mouse device is detected.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.mouseScrollDelta">
+      <summary>
+        <para>The current mouse scroll delta. (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.multiTouchEnabled">
+      <summary>
+        <para>Property indicating whether the system handles multiple touches.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.simulateMouseWithTouches">
+      <summary>
+        <para>Enables/Disables mouse simulation with touches. By default this option is enabled.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.stylusTouchSupported">
+      <summary>
+        <para>Returns true when Stylus Touch is supported by a device or platform.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.touchCount">
+      <summary>
+        <para>Number of touches. Guaranteed not to change throughout the frame. (Read Only)</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.touches">
+      <summary>
+        <para>Returns list of objects representing status of all touches during last frame. (Read Only) (Allocates temporary variables).</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.touchPressureSupported">
+      <summary>
+        <para>Bool value which let's users check if touch pressure is supported.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Input.touchSupported">
+      <summary>
+        <para>Returns whether the device on which application is currently running supports touch input.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Input.GetAccelerationEvent(System.Int32)">
+      <summary>
+        <para>Returns specific acceleration measurement which occurred during last frame. (Does not allocate temporary variables).</para>
+      </summary>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetAxis(System.String)">
+      <summary>
+        <para>Returns the value of the virtual axis identified by axisName.</para>
+      </summary>
+      <param name="axisName"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetAxisRaw(System.String)">
+      <summary>
+        <para>Returns the value of the virtual axis identified by axisName with no smoothing filtering applied.</para>
+      </summary>
+      <param name="axisName"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetButton(System.String)">
+      <summary>
+        <para>Returns true while the virtual button identified by buttonName is held down.</para>
+      </summary>
+      <param name="buttonName">The name of the button such as Jump.</param>
+      <returns>
+        <para>True when an axis has been pressed and not released.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.Input.GetButtonDown(System.String)">
+      <summary>
+        <para>Returns true during the frame the user pressed down the virtual button identified by buttonName.</para>
+      </summary>
+      <param name="buttonName"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetButtonUp(System.String)">
+      <summary>
+        <para>Returns true the first frame the user releases the virtual button identified by buttonName.</para>
+      </summary>
+      <param name="buttonName"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetJoystickNames">
+      <summary>
+        <para>Retrieves a list of input device names corresponding to the index of an Axis configured within Input Manager.</para>
+      </summary>
+      <returns>
+        <para>Returns an array of joystick and gamepad device names.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.Input.GetKey(System.String)">
+      <summary>
+        <para>Returns true while the user holds down the key identified by name.</para>
+      </summary>
+      <param name="name"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetKey(UnityEngine.KeyCode)">
+      <summary>
+        <para>Returns true while the user holds down the key identified by the key KeyCode enum parameter.</para>
+      </summary>
+      <param name="key"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetKeyDown(System.String)">
+      <summary>
+        <para>Returns true during the frame the user starts pressing down the key identified by name.</para>
+      </summary>
+      <param name="name"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode)">
+      <summary>
+        <para>Returns true during the frame the user starts pressing down the key identified by the key KeyCode enum parameter.</para>
+      </summary>
+      <param name="key"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetKeyUp(System.String)">
+      <summary>
+        <para>Returns true during the frame the user releases the key identified by name.</para>
+      </summary>
+      <param name="name"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetKeyUp(UnityEngine.KeyCode)">
+      <summary>
+        <para>Returns true during the frame the user releases the key identified by the key KeyCode enum parameter.</para>
+      </summary>
+      <param name="key"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetMouseButton(System.Int32)">
+      <summary>
+        <para>Returns whether the given mouse button is held down.</para>
+      </summary>
+      <param name="button"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetMouseButtonDown(System.Int32)">
+      <summary>
+        <para>Returns true during the frame the user pressed the given mouse button.</para>
+      </summary>
+      <param name="button"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetMouseButtonUp(System.Int32)">
+      <summary>
+        <para>Returns true during the frame the user releases the given mouse button.</para>
+      </summary>
+      <param name="button"></param>
+    </member>
+    <member name="M:UnityEngine.Input.GetTouch(System.Int32)">
+      <summary>
+        <para>Call Input.GetTouch to obtain a Touch struct.</para>
+      </summary>
+      <param name="index">The touch input on the device screen.</param>
+      <returns>
+        <para>Touch details in the struct.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.Input.IsJoystickPreconfigured(System.String)">
+      <summary>
+        <para>Determine whether a particular joystick model has been preconfigured by Unity. (Linux-only).</para>
+      </summary>
+      <param name="joystickName">The name of the joystick to check (returned by Input.GetJoystickNames).</param>
+      <returns>
+        <para>True if the joystick layout has been preconfigured; false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.Input.ResetInputAxes">
+      <summary>
+        <para>Resets all input. After ResetInputAxes all axes return to 0 and all buttons return to 0 for one frame.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.LocationInfo">
+      <summary>
+        <para>Structure describing device location.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.LocationInfo.altitude">
+      <summary>
+        <para>Geographical device location altitude.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.LocationInfo.horizontalAccuracy">
+      <summary>
+        <para>Horizontal accuracy of the location.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.LocationInfo.latitude">
+      <summary>
+        <para>Geographical device location latitude.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.LocationInfo.longitude">
+      <summary>
+        <para>Geographical device location longitude.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.LocationInfo.timestamp">
+      <summary>
+        <para>Timestamp (in seconds since 1970) when location was last time updated.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.LocationInfo.verticalAccuracy">
+      <summary>
+        <para>Vertical accuracy of the location.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.LocationService">
+      <summary>
+        <para>Provides methods that allow an application to access the device's location.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.LocationService.isEnabledByUser">
+      <summary>
+        <para>Indicates whether the device allows access the application to access the location service.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.LocationService.lastData">
+      <summary>
+        <para>The last geographical location that the device registered.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.LocationService.status">
+      <summary>
+        <para>Returns the location service status.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.LocationService.Start">
+      <summary>
+        <para>Starts location service updates.</para>
+      </summary>
+      <param name="desiredAccuracyInMeters">
+                    The service accuracy you want to use, in meters. This determines the accuracy of the device's last location coordinates. Higher values like 500 don't require the device to use its GPS chip and
+                    thus save battery power. Lower values like 5-10 provide the best accuracy but require the GPS chip and thus use more battery power. The default value is 10 meters.
+                </param>
+      <param name="updateDistanceInMeters">
+                    The minimum distance, in meters, that the device must move laterally before Unity updates Input.location. Higher values like 500 produce fewer updates and are less resource intensive to process. The default is 10 meters.
+                </param>
+    </member>
+    <member name="M:UnityEngine.LocationService.Start(System.Single)">
+      <summary>
+        <para>Starts location service updates.</para>
+      </summary>
+      <param name="desiredAccuracyInMeters">
+                    The service accuracy you want to use, in meters. This determines the accuracy of the device's last location coordinates. Higher values like 500 don't require the device to use its GPS chip and
+                    thus save battery power. Lower values like 5-10 provide the best accuracy but require the GPS chip and thus use more battery power. The default value is 10 meters.
+                </param>
+      <param name="updateDistanceInMeters">
+                    The minimum distance, in meters, that the device must move laterally before Unity updates Input.location. Higher values like 500 produce fewer updates and are less resource intensive to process. The default is 10 meters.
+                </param>
+    </member>
+    <member name="M:UnityEngine.LocationService.Start(System.Single,System.Single)">
+      <summary>
+        <para>Starts location service updates.</para>
+      </summary>
+      <param name="desiredAccuracyInMeters">
+                    The service accuracy you want to use, in meters. This determines the accuracy of the device's last location coordinates. Higher values like 500 don't require the device to use its GPS chip and
+                    thus save battery power. Lower values like 5-10 provide the best accuracy but require the GPS chip and thus use more battery power. The default value is 10 meters.
+                </param>
+      <param name="updateDistanceInMeters">
+                    The minimum distance, in meters, that the device must move laterally before Unity updates Input.location. Higher values like 500 produce fewer updates and are less resource intensive to process. The default is 10 meters.
+                </param>
+    </member>
+    <member name="M:UnityEngine.LocationService.Stop">
+      <summary>
+        <para>Stops location service updates. This is useful to save battery power when the application doesn't require the location service.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.LocationServiceStatus">
+      <summary>
+        <para>Describes the location service status for a device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.LocationServiceStatus.Failed">
+      <summary>
+        <para>Location service initialization failed. The user denied access to the location service.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.LocationServiceStatus.Initializing">
+      <summary>
+        <para>The location service is initializing.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.LocationServiceStatus.Running">
+      <summary>
+        <para>The location service is running and the application can query for locations.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.LocationServiceStatus.Stopped">
+      <summary>
+        <para>The location service is not running.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Touch">
+      <summary>
+        <para>Structure describing the status of a finger touching the screen.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.altitudeAngle">
+      <summary>
+        <para>Value of 0 radians indicates that the stylus is parallel to the surface, pi/2 indicates that it is perpendicular.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.azimuthAngle">
+      <summary>
+        <para>Value of 0 radians indicates that the stylus is pointed along the x-axis of the device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.deltaPosition">
+      <summary>
+        <para>The position delta since last change in pixel coordinates.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.deltaTime">
+      <summary>
+        <para>Amount of time that has passed since the last recorded change in Touch values.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.fingerId">
+      <summary>
+        <para>The unique index for the touch.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.maximumPossiblePressure">
+      <summary>
+        <para>The maximum possible pressure value for a platform.  If Input.touchPressureSupported returns false, the value of this property will always be 1.0f.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.phase">
+      <summary>
+        <para>Describes the phase of the touch.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.position">
+      <summary>
+        <para>The position of the touch in screen space pixel coordinates.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.pressure">
+      <summary>
+        <para>The current amount of pressure being applied to a touch.  1.0f is considered to be the pressure of an average touch.  If Input.touchPressureSupported returns false, the value of this property will always be 1.0f.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.radius">
+      <summary>
+        <para>An estimated value of the radius of a touch.  Add radiusVariance to get the maximum touch size, subtract it to get the minimum touch size.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.radiusVariance">
+      <summary>
+        <para>This value determines the accuracy of the touch radius. Add this value to the radius to get the maximum touch size, subtract it to get the minimum touch size.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.rawPosition">
+      <summary>
+        <para>The first position of the touch contact in screen space pixel coordinates.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.tapCount">
+      <summary>
+        <para>Number of taps.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Touch.type">
+      <summary>
+        <para>A value that indicates whether a touch was of Direct, Indirect (or remote), or Stylus type.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.TouchPhase">
+      <summary>
+        <para>Describes phase of a finger touch.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.TouchPhase.Began">
+      <summary>
+        <para>A finger touched the screen.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.TouchPhase.Canceled">
+      <summary>
+        <para>The system cancelled tracking for the touch.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.TouchPhase.Ended">
+      <summary>
+        <para>A finger was lifted from the screen. This is the final phase of a touch.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.TouchPhase.Moved">
+      <summary>
+        <para>A finger moved on the screen.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.TouchPhase.Stationary">
+      <summary>
+        <para>A finger is touching the screen but hasn't moved.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.TouchType">
+      <summary>
+        <para>Describes whether a touch is direct, indirect (or remote), or from a stylus.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.TouchType.Direct">
+      <summary>
+        <para>A direct touch on a device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.TouchType.Indirect">
+      <summary>
+        <para>An Indirect, or remote, touch on a device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.TouchType.Stylus">
+      <summary>
+        <para>A touch from a stylus on a device.</para>
+      </summary>
+    </member>
+    <member name="A:UnityEngine.InputLegacyModule">
+      <summary>
+        <para>The InputLegacy module implements the Input class used to read player Input.</para>
+      </summary>
+    </member>
+  </members>
+</doc>
