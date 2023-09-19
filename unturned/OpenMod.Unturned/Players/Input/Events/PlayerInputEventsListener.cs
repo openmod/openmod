@@ -11,37 +11,37 @@ using Steamworks;
 namespace OpenMod.Unturned.Players.Input.Events
 {
     [JetBrainsAnnotations::JetBrains.Annotations.UsedImplicitlyAttribute]
-    internal class PlayerInputEventsListener : UnturnedEventsListener
+    internal class PlayerInputEventsListener : UnturnedPlayerEventsListener
     {
+        private readonly Dictionary<CSteamID, bool[]> m_LastInputs = new();
+
         public PlayerInputEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
         public override void Subscribe()
         {
-            Provider.onServerConnected += OnServerConnected;
-            Provider.onServerDisconnected += OnServerDisconnected;
             PlayerInput.onPluginKeyTick += OnPluginKeyTick;
         }
 
         public override void Unsubscribe()
         {
-            Provider.onServerConnected -= OnServerConnected;
-            Provider.onServerDisconnected -= OnServerDisconnected;
             PlayerInput.onPluginKeyTick -= OnPluginKeyTick;
         }
 
-        private void OnServerConnected(CSteamID steamID)
+        public override void SubscribePlayer(Player player)
         {
-            m_LastInputs.Add(steamID, new bool[ControlsSettings.NUM_PLUGIN_KEYS]);
+            var playerSteamId = GetSteamIdOf(player);
+
+            m_LastInputs.Add(playerSteamId, new bool[ControlsSettings.NUM_PLUGIN_KEYS]);
         }
 
-        private void OnServerDisconnected(CSteamID steamID)
+        public override void UnsubscribePlayer(Player player)
         {
-            m_LastInputs.Remove(steamID);
-        }
+            var playerSteamId = GetSteamIdOf(player);
 
-        private readonly Dictionary<CSteamID, bool[]> m_LastInputs = new();
+            m_LastInputs.Remove(playerSteamId);
+        }
 
         private void OnPluginKeyTick(Player nativePlayer, uint simulation, byte key, bool state)
         {
@@ -50,7 +50,7 @@ namespace OpenMod.Unturned.Players.Input.Events
                 return;
             }
 
-            var playerSteamId = nativePlayer.channel.owner.playerID.steamID;
+            var playerSteamId = GetSteamIdOf(nativePlayer);
 
             if (m_LastInputs[playerSteamId][key] == state)
             {
@@ -63,6 +63,11 @@ namespace OpenMod.Unturned.Players.Input.Events
             var @event = new UnturnedPlayerPluginKeyStateChangedEvent(player, key, state);
 
             Emit(@event);
+        }
+
+        private CSteamID GetSteamIdOf(Player nativePlayer)
+        {
+            return nativePlayer.channel.owner.playerID.steamID;
         }
     }
 }
