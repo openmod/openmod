@@ -48,3 +48,6 @@ See [LICENSE](LICENSE) file for more information.
 
 ### Rust
 [![OpenMod.Rust.Redist](https://github.com/openmod/OpenMod/workflows/OpenMod.Rust.Redist/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Rust.Redist) [![OpenMod.Rust](https://github.com/openmod/OpenMod/workflows/OpenMod.Rust/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Rust) [![OpenMod.Rust.Oxide.Redist](https://github.com/openmod/OpenMod/workflows/OpenMod.Rust.Oxide.Redist/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Rust.Oxide.Redist) [![OpenMod.Rust.Oxide](https://github.com/openmod/OpenMod/workflows/OpenMod.Rust.Oxide/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Rust.Oxide) [![OpenMod.Rust.Oxide.Extension](https://github.com/openmod/OpenMod/workflows/OpenMod.Rust.Oxide.Extension/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Rust.Oxide.Extension) [![OpenMod.Rust.Oxide.PermissionLink](https://github.com/openmod/OpenMod/workflows/OpenMod.Rust.Oxide.PermissionLink/badge.svg)](https://github.com/openmod/OpenMod/actions?query=workflow%3AOpenMod.Rust.Oxide.PermissionLink)
+
+## .NET Foundation
+This project is supported by the [.NET Foundation](https://dotnetfoundation.org).
