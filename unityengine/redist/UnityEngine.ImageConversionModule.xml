@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<doc>
+  <members>
+    <assembly>
+      <name>UnityEngine.ImageConversionModule</name>
+    </assembly>
+    <member name="T:UnityEngine.ImageConversion">
+      <summary>
+        <para>This class provides utility and extension methods to convert image data from or to PNG, EXR, TGA, and JPEG formats.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.ImageConversion.EnableLegacyPngGammaRuntimeLoadBehavior">
+      <summary>
+        <para>Enables legacy PNG runtime import behavior.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeArrayToEXR(System.Array,UnityEngine.Experimental.Rendering.GraphicsFormat,System.UInt32,System.UInt32,System.UInt32,UnityEngine.Texture2D/EXRFlags)">
+      <summary>
+        <para>Encodes this array into the EXR format.</para>
+      </summary>
+      <param name="array">The byte array to convert.</param>
+      <param name="format">The pixel format of the image data.</param>
+      <param name="width">The width of the image data in pixels.</param>
+      <param name="height">The height of the image data in pixels.</param>
+      <param name="rowBytes">The length of a single row in bytes. The default is 0, which means Unity calculates the length automatically.</param>
+      <param name="flags">Flags used to control compression and the output format. The default is Texture2D.EXRFlags.None</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeArrayToJPG(System.Array,UnityEngine.Experimental.Rendering.GraphicsFormat,System.UInt32,System.UInt32,System.UInt32,System.Int32)">
+      <summary>
+        <para>Encodes this array into JPG format.</para>
+      </summary>
+      <param name="array">The byte array to convert.</param>
+      <param name="format">The pixel format of the image data.</param>
+      <param name="width">The width of the image data in pixels.</param>
+      <param name="height">The height of the image data in pixels.</param>
+      <param name="rowBytes">The length of a single row in bytes. The default is 0, which means Unity calculates the length automatically.</param>
+      <param name="quality">JPG quality to encode with. The range is 1 through 100. 1 is the lowest quality. The default is 75.</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeArrayToPNG(System.Array,UnityEngine.Experimental.Rendering.GraphicsFormat,System.UInt32,System.UInt32,System.UInt32)">
+      <summary>
+        <para>Encodes this array into PNG format.</para>
+      </summary>
+      <param name="array">The byte array to convert.</param>
+      <param name="format">The pixel format of the image data.</param>
+      <param name="width">The width of the image data in pixels.</param>
+      <param name="height">The height of the image data in pixels.</param>
+      <param name="rowBytes">The length of a single row in bytes. The default is 0, which means Unity calculates the length automatically.</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeArrayToTGA(System.Array,UnityEngine.Experimental.Rendering.GraphicsFormat,System.UInt32,System.UInt32,System.UInt32)">
+      <summary>
+        <para>Encodes this array into TGA format.</para>
+      </summary>
+      <param name="array">The byte array to convert.</param>
+      <param name="format">The pixel format of the image data.</param>
+      <param name="width">The width of the image data in pixels.</param>
+      <param name="height">The height of the image data in pixels.</param>
+      <param name="rowBytes">The length of a single row in bytes. The default is 0, which means Unity calculates the length automatically.</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeNativeArrayToEXR(Unity.Collections.NativeArray`1&lt;T&gt;,UnityEngine.Experimental.Rendering.GraphicsFormat,System.UInt32,System.UInt32,System.UInt32,UnityEngine.Texture2D/EXRFlags)">
+      <summary>
+        <para>Encodes this native array into the EXR format.</para>
+      </summary>
+      <param name="input">The native array to convert.</param>
+      <param name="format">The pixel format of the image data.</param>
+      <param name="width">The width of the image data in pixels.</param>
+      <param name="height">The height of the image data in pixels.</param>
+      <param name="rowBytes">The length of a single row in bytes. The default is 0, which means Unity calculates the length automatically.</param>
+      <param name="flags">Flags used to control compression and the output format. The default is Texture2D.EXRFlags.None</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeNativeArrayToJPG(Unity.Collections.NativeArray`1&lt;T&gt;,UnityEngine.Experimental.Rendering.GraphicsFormat,System.UInt32,System.UInt32,System.UInt32,System.Int32)">
+      <summary>
+        <para>Encodes this native array into JPG format.</para>
+      </summary>
+      <param name="input">The native array to convert.</param>
+      <param name="format">The pixel format of the image data.</param>
+      <param name="width">The width of the image data in pixels.</param>
+      <param name="height">The height of the image data in pixels.</param>
+      <param name="rowBytes">The length of a single row in bytes. The default is 0, which means Unity calculates the length automatically.</param>
+      <param name="quality">JPG quality to encode with. The range is 1 through 100. 1 is the lowest quality. The default is 75.</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeNativeArrayToPNG(Unity.Collections.NativeArray`1&lt;T&gt;,UnityEngine.Experimental.Rendering.GraphicsFormat,System.UInt32,System.UInt32,System.UInt32)">
+      <summary>
+        <para>Encodes this native array into PNG format.</para>
+      </summary>
+      <param name="input">The native array to convert.</param>
+      <param name="format">The pixel format of the image data.</param>
+      <param name="width">The width of the image data in pixels.</param>
+      <param name="height">The height of the image data in pixels.</param>
+      <param name="rowBytes">The length of a single row in bytes. The default is 0, which means Unity calculates the length automatically.</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeNativeArrayToTGA(Unity.Collections.NativeArray`1&lt;T&gt;,UnityEngine.Experimental.Rendering.GraphicsFormat,System.UInt32,System.UInt32,System.UInt32)">
+      <summary>
+        <para>Encodes this native array into TGA format.</para>
+      </summary>
+      <param name="input">The native array to convert.</param>
+      <param name="format">The pixel format of the image data.</param>
+      <param name="width">The width of the image data in pixels.</param>
+      <param name="height">The height of the image data in pixels.</param>
+      <param name="rowBytes">The length of a single row in bytes. The default is 0, which means Unity calculates the length automatically.</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeToEXR(UnityEngine.Texture2D,UnityEngine.Texture2D/EXRFlags)">
+      <summary>
+        <para>Encodes this texture into the EXR format.</para>
+      </summary>
+      <param name="tex">The texture to convert.</param>
+      <param name="flags">Flags used to control compression and the output format. The default is Texture2D.EXRFlags.None</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeToJPG(UnityEngine.Texture2D,System.Int32)">
+      <summary>
+        <para>Encodes this texture into JPG format.</para>
+      </summary>
+      <param name="tex">Text texture to convert.</param>
+      <param name="quality">JPG quality to encode with. The range is 1 through 100. 1 is the lowest quality. The default is 75.</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeToJPG(UnityEngine.Texture2D)">
+      <summary>
+        <para>Encodes this texture into JPG format.</para>
+      </summary>
+      <param name="tex">Text texture to convert.</param>
+      <param name="quality">JPG quality to encode with. The range is 1 through 100. 1 is the lowest quality. The default is 75.</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeToPNG(UnityEngine.Texture2D)">
+      <summary>
+        <para>Encodes this texture into PNG format.</para>
+      </summary>
+      <param name="tex">The texture to convert.</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.EncodeToTGA(UnityEngine.Texture2D)">
+      <summary>
+        <para>Encodes the specified texture in TGA format.</para>
+      </summary>
+      <param name="tex">The texture to encode.</param>
+    </member>
+    <member name="M:UnityEngine.ImageConversion.LoadImage(UnityEngine.Texture2D,System.Byte[],System.Boolean)">
+      <summary>
+        <para>Loads PNG or JPG image byte array into a texture.</para>
+      </summary>
+      <param name="tex">The texture to load the image into.</param>
+      <param name="data">The byte array containing the image data to load.</param>
+      <param name="markNonReadable">Set to false by default, pass true to optionally mark the texture as non-readable.</param>
+      <returns>
+        <para>Returns true if the data can be loaded, false otherwise.</para>
+      </returns>
+    </member>
+    <member name="A:UnityEngine.ImageConversionModule">
+      <summary>
+        <para>The ImageConversion module implements the ImageConversion class which provides helper methods to convert images from and to PNG, JPEG or EXR formats.</para>
+      </summary>
+    </member>
+  </members>
+</doc>
