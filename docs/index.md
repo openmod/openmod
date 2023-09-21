@@ -17,3 +17,6 @@ If you want to make plugins for OpenMod, you can get started by reading the [Mak
 # Links
 [![](https://img.shields.io/github/stars/openmod/openmod?style=for-the-badge&logo=GitHub) GitHub](https://github.com/openmod/openmod)  
 [![](https://img.shields.io/discord/666327627124047872?label=Discord&style=for-the-badge&logo=Discord) Discord](https://discord.com/invite/jRrCJVm)
+
+## .NET Foundation
+This project is supported by the [.NET Foundation](https://dotnetfoundation.org).
