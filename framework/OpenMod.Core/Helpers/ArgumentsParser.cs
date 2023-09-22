@@ -83,7 +83,9 @@ namespace OpenMod.Core.Helpers
             if (inQuote || inApostrophes) //command: 'command "player    ' -> args: 'command', 'player'
                 currentArg = TrimEnd(currentArg);
 
-            args.Add(currentArg.ToString());
+            if (currentArg.Length != 0)
+                args.Add(currentArg.ToString());
+
             return args.ToArray();
         }
 
