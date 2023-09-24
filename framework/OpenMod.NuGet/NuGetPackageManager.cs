@@ -28,7 +28,7 @@ namespace OpenMod.NuGet
         public string PackagesDirectory { get; }
 
         private readonly ISettings m_NugetSettings;
-        private readonly NuGetFramework m_CurrentFramework;
+        private readonly NuGetFramework[] m_CurrentFrameworks;
         private readonly FrameworkReducer m_FrameworkReducer;
         private readonly PackagePathResolver m_PackagePathResolver;
         private readonly PackageResolver m_PackageResolver;
@@ -101,12 +101,24 @@ namespace OpenMod.NuGet
 
             m_FrameworkReducer = new FrameworkReducer();
 
-            var frameworkName = Assembly.GetExecutingAssembly().GetCustomAttributes(true)
-                                           .OfType<System.Runtime.Versioning.TargetFrameworkAttribute>()
-                                           .Select(x => x.FrameworkName)
-                                           .FirstOrDefault();
+#if NETSTANDARD2_1_OR_GREATER
+            // checking if running under Mono
+            if (Type.GetType("Mono.Runtime") is not null)
+            {
+                m_CurrentFrameworks = new NuGetFramework[2];
 
-            m_CurrentFramework = frameworkName == null
+                // Using Mono that supports .netstandard2.1 and .net4.8.0
+                m_CurrentFrameworks[1] = new NuGetFramework(".NETFramework", new Version(4, 8, 0, 0));
+            }
+#endif
+
+            m_CurrentFrameworks ??= new NuGetFramework[1];
+
+            var frameworkName = typeof(NuGetPackageManager).Assembly
+                .GetCustomAttribute<System.Runtime.Versioning.TargetFrameworkAttribute>()
+                ?.FrameworkName;
+
+            m_CurrentFrameworks[0] = frameworkName == null
                 ? NuGetFramework.AnyFramework
                 : NuGetFramework.ParseFrameworkName(frameworkName, DefaultFrameworkNameProvider.Instance);
 
@@ -281,7 +293,7 @@ namespace OpenMod.NuGet
             var searchFilter = new SearchFilter(includePreRelease)
             {
                 IncludeDelisted = false,
-                SupportedFrameworks = new[] { m_CurrentFramework.DotNetFrameworkName } // todo: add support for from .net461 to .net481
+                SupportedFrameworks = m_CurrentFrameworks.Select(x => x.DotNetFrameworkName)
             };
 
             Logger.LogInformation("Searching repository for package: " + packageId);
@@ -378,11 +390,10 @@ namespace OpenMod.NuGet
                 return Array.Empty<PackageDependency>();
             }
 
-            var framework = m_FrameworkReducer.GetNearest(m_CurrentFramework,
-                dependencyGroups.Select(d => d.TargetFramework));
+            var framework = GetNearestFramework(dependencyGroups.Select(d => d.TargetFramework));
             if (framework == null)
             {
-                throw new Exception($"Failed to get dependencies of {identity.Id} v{identity.Version}: no supported framework found. {Environment.NewLine} Requested framework: {m_CurrentFramework.DotNetFrameworkName}, available frameworks: {string.Join(", ", dependencyGroups.Select(d => d.TargetFramework).Select(d => d.DotNetFrameworkName))}");
+                throw new Exception($"Failed to get dependencies of {identity.Id} v{identity.Version}: no supported framework found. {Environment.NewLine} Requested framework: {m_CurrentFrameworks[0].DotNetFrameworkName}, available frameworks: {string.Join(", ", dependencyGroups.Select(d => d.TargetFramework).Select(d => d.DotNetFrameworkName))}");
             }
 
             var dependencies = new HashSet<PackageDependency>(dependencyGroups
@@ -523,7 +534,7 @@ namespace OpenMod.NuGet
             var assemblies = new List<NuGetAssembly>();
 
             var libItems = (await packageReader.GetLibItemsAsync(CancellationToken.None)).ToList();
-            var nearest = m_FrameworkReducer.GetNearest(m_CurrentFramework, libItems.Select(x => x.TargetFramework));
+            var nearest = GetNearestFramework(libItems.Select(x => x.TargetFramework));
             var file = libItems.Find(x => x.TargetFramework == nearest);
 
             foreach (var item in file?.Items ?? Enumerable.Empty<string>())
@@ -767,7 +778,20 @@ namespace OpenMod.NuGet
             var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
 
             Logger.LogDebug("ResolvePackage");
-            var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFramework, cacheContext, Logger, CancellationToken.None);
+
+            SourcePackageDependencyInfo? dependencyInfo;
+            if (m_CurrentFrameworks.Length == 1)
+            {
+                dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFrameworks[0], cacheContext, Logger, CancellationToken.None);
+            }
+            else
+            {
+                var tasks = m_CurrentFrameworks
+                    .Select(f => dependencyInfoResource.ResolvePackage(package, f, cacheContext, Logger, CancellationToken.None));
+
+                dependencyInfo = (await Task.WhenAll(tasks)).FirstOrDefault(x => x != null);
+            }
+
             if (dependencyInfo == null)
             {
                 Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
@@ -941,6 +965,18 @@ namespace OpenMod.NuGet
             {
                 s_LoadedPackages.Clear();
             }
+        }
+
+        private NuGetFramework GetNearestFramework(IEnumerable<NuGetFramework> frameworks)
+        {
+            if (m_CurrentFrameworks.Length == 1)
+            {
+                return m_FrameworkReducer.GetNearest(m_CurrentFrameworks[0], frameworks);
+            }
+
+            return m_CurrentFrameworks
+                .Select(f => m_FrameworkReducer.GetNearest(f, frameworks))
+                .FirstOrDefault(f => f != null);
         }
     }
 }
