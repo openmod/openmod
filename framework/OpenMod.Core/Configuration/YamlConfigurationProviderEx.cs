@@ -23,7 +23,7 @@ namespace OpenMod.Core.Configuration
         static YamlConfigurationProviderEx()
         {
             var assembly = typeof(YamlConfigurationProvider).Assembly;
-            s_ParserType = assembly.GetType("NetEscapades.Configuration.Yaml.YamlConfigurationFileParser");
+            s_ParserType = assembly.GetType("NetEscapades.Configuration.Yaml.YamlConfigurationStreamParser");
             s_ParseMethod = s_ParserType.GetMethod("Parse", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
         }
 

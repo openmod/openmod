@@ -11,12 +11,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NuGet.Configuration" Version="6.1.0" />
-    <PackageReference Include="NuGet.Frameworks" Version="6.1.0" />
-    <PackageReference Include="NuGet.Packaging" Version="6.1.0" />
-    <PackageReference Include="NuGet.Protocol" Version="6.1.0" />
-    <PackageReference Include="NuGet.Resolver" Version="6.1.0" />
-    <PackageReference Include="YamlDotNet" Version="11.2.1" />
+    <PackageReference Include="NuGet.Configuration" Version="6.7.0" />
+    <PackageReference Include="NuGet.Frameworks" Version="6.7.0" />
+    <PackageReference Include="NuGet.Packaging" Version="6.7.0" />
+    <PackageReference Include="NuGet.Protocol" Version="6.7.0" />
+    <PackageReference Include="NuGet.Resolver" Version="6.7.0" />
+    <PackageReference Include="YamlDotNet" Version="13.4.0" />
   </ItemGroup>
 
   <ItemGroup>

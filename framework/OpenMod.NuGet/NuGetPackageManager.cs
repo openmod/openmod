@@ -17,6 +17,7 @@ using NuGet.Resolver;
 using OpenMod.Common.Hotloading;
 using OpenMod.NuGet.Helpers;
 using OpenMod.Common.Helpers;
+using NuGet.Versioning;
 
 namespace OpenMod.NuGet
 {
@@ -295,6 +296,9 @@ namespace OpenMod.NuGet
                 IncludeDelisted = false,
                 SupportedFrameworks = m_CurrentFrameworks.Select(x => x.DotNetFrameworkName)
             };
+            var nugetVersion = version == null
+                ? null
+                : new NuGetVersion(version);
 
             Logger.LogInformation("Searching repository for package: " + packageId);
 
@@ -314,7 +318,7 @@ namespace OpenMod.NuGet
                     continue;
                 }
 
-                if (version == null)
+                if (nugetVersion == null)
                 {
                     Logger.LogDebug("version == null, adding searchResult: " + searchResult.Length);
                     matches.AddRange(searchResult);
@@ -324,7 +328,7 @@ namespace OpenMod.NuGet
                 foreach (var packageMeta in searchResult)
                 {
                     var versions = await packageMeta.GetVersionsAsync();
-                    if (!versions.Any(d => d.Version.OriginalVersion.Equals(version, StringComparison.OrdinalIgnoreCase)))
+                    if (!versions.Any(d => d.Version.Equals(nugetVersion, VersionComparison.Default)))
                     {
                         continue;
                     }
@@ -971,12 +975,12 @@ namespace OpenMod.NuGet
         {
             if (m_CurrentFrameworks.Length == 1)
             {
-                return m_FrameworkReducer.GetNearest(m_CurrentFrameworks[0], frameworks);
+                return m_FrameworkReducer.GetNearest(m_CurrentFrameworks[0], frameworks)!;
             }
 
             return m_CurrentFrameworks
                 .Select(f => m_FrameworkReducer.GetNearest(f, frameworks))
-                .FirstOrDefault(f => f != null);
+                .FirstOrDefault(f => f != null)!;
         }
     }
 }
