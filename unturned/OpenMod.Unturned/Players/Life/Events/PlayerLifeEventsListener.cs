@@ -180,6 +180,7 @@ namespace OpenMod.Unturned.Players.Life.Events
             [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerLife), "doDamage")]
             [HarmonyPrefix]
+            // ReSharper disable once InconsistentNaming
             public static bool DoDamage(PlayerLife __instance, ref byte amount, // lgtm [cs/too-many-ref-parameters]
                 ref EDeathCause newCause, ref ELimb newLimb,
                 ref CSteamID newKiller, ref bool trackKill,
