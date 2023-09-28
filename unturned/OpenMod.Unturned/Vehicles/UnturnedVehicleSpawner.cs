@@ -54,7 +54,7 @@ namespace OpenMod.Unturned.Vehicles
 
                         if (itemBatteryId != Guid.Empty)
                         {
-                            UnturnedVehicleState.s_BatteryItemGuidField?.SetValue(iVehicle, itemBatteryId);
+                            UnturnedVehicleState.BatteryItemGuidField?.SetValue(iVehicle, itemBatteryId);
                         }
 
                         if (items != null)
@@ -114,14 +114,14 @@ namespace OpenMod.Unturned.Vehicles
             using var stream = new MemoryStream(buffer, false);
             using var reader = new BinaryReader(stream);
 
-            var version = UnturnedVehicleState.c_InitialSaveDataVersion;
+            var version = UnturnedVehicleState.InitialSaveDataVersion;
             // if the last value of buffer is 255, then read the version
             if (buffer[^1] == 255)
             {
                 version = reader.ReadByte();
             }
 
-            if (version == UnturnedVehicleState.c_InitialSaveDataVersion)
+            if (version == UnturnedVehicleState.InitialSaveDataVersion)
             {
                 reader.ReadUInt16(); // id
                 reader.ReadUInt32(); // instanceId
@@ -134,7 +134,7 @@ namespace OpenMod.Unturned.Vehicles
             health = reader.ReadUInt16();
             batteryCharge = reader.ReadUInt16();
 
-            if (version >= UnturnedVehicleState.c_SaveDataVersionBatteryGuid)
+            if (version >= UnturnedVehicleState.SaveDataVersionBatteryGuid)
             {
                 var guidBuffer = new byte[16];
                 reader.Read(guidBuffer, 0, 16);

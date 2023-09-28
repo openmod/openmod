@@ -174,7 +174,7 @@ namespace OpenMod.Core.Permissions
                 await yamlDataStore.SaveAsync(
                     RolesKey,
                     m_CachedPermissionRolesData,
-                    header: $"# yaml-language-server: $schema=./{SchemaConstants.c_RolesSchemaPath}\n"
+                    header: $"# yaml-language-server: $schema=./{SchemaConstants.RolesSchemaPath}\n"
                 );
 
                 return;

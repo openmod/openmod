@@ -9,15 +9,15 @@ namespace OpenMod.Unturned.Vehicles
 {
     public class UnturnedVehicleState : IVehicleState
     {
-        internal const byte c_NewestSaveDataVersion = c_SaveDataVersionBatteryGuid;
-        internal const byte c_InitialSaveDataVersion = 12;
-        internal const byte c_SaveDataVersionBatteryGuid = VehicleManager.SAVEDATA_VERSION_BATTERY_GUID;
+        internal const byte NewestSaveDataVersion = SaveDataVersionBatteryGuid;
+        internal const byte InitialSaveDataVersion = 12;
+        internal const byte SaveDataVersionBatteryGuid = VehicleManager.SAVEDATA_VERSION_BATTERY_GUID;
 
-        internal static readonly FieldInfo? s_BatteryItemGuidField;
+        internal static readonly FieldInfo? BatteryItemGuidField;
 
         static UnturnedVehicleState()
         {
-            s_BatteryItemGuidField = typeof(InteractableVehicle).GetField("batteryItemGuid", BindingFlags.NonPublic | BindingFlags.Instance);
+            BatteryItemGuidField = typeof(InteractableVehicle).GetField("batteryItemGuid", BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
         private readonly InteractableVehicle m_Vehicle;
@@ -44,7 +44,7 @@ namespace OpenMod.Unturned.Vehicles
                 // Position and rotation can't be saved to the state because it maybe is called from another thread
                 // only solution is call ThreadUtil.assertIsGameThread();
 
-                writer.Write(c_NewestSaveDataVersion);
+                writer.Write(NewestSaveDataVersion);
                 // removed: vehicle guid
                 // removed: instanceID
                 writer.Write(m_Vehicle.skinID);
@@ -55,9 +55,9 @@ namespace OpenMod.Unturned.Vehicles
                 writer.Write(m_Vehicle.batteryCharge);
 
                 var batteryItemGuid = Guid.Empty;
-                if (s_BatteryItemGuidField != null)
+                if (BatteryItemGuidField != null)
                 {
-                    batteryItemGuid = (Guid)s_BatteryItemGuidField.GetValue(m_Vehicle);
+                    batteryItemGuid = (Guid)BatteryItemGuidField.GetValue(m_Vehicle);
                 }
                 writer.Write(batteryItemGuid.ToByteArray());
                 writer.Write(m_Vehicle.tireAliveMask);

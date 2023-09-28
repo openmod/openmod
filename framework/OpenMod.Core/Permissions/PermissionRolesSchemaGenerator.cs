@@ -22,10 +22,10 @@ namespace OpenMod.Core.Permissions
 
         public Task HandleEventAsync(object? sender, OpenModInitializedEvent @event)
         {
-            var rolesSchemaFile = Path.Combine(@event.Host.WorkingDirectory, SchemaConstants.c_RolesSchemaPath);
+            var rolesSchemaFile = Path.Combine(@event.Host.WorkingDirectory, SchemaConstants.RolesSchemaPath);
 
             AsyncHelper.Schedule(
-                "Writing " + SchemaConstants.c_RolesSchemaPath,
+                "Writing " + SchemaConstants.RolesSchemaPath,
                 async () => await WriteSchemaAsync(rolesSchemaFile)
             );
 
