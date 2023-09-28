@@ -28,8 +28,8 @@ namespace OpenMod.Core.Users
         private IDisposable m_FileChangeWatcher;
         private bool m_IsUpdating;
 
-        private readonly ISerializer _serializer;
-        private readonly IDeserializer _deserializer;
+        private readonly ISerializer m_Serializer;
+        private readonly IDeserializer m_Deserializer;
 
         public UserDataStore(
             IOpenModDataStoreAccessor dataStoreAccessor,
@@ -38,13 +38,13 @@ namespace OpenMod.Core.Users
             m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
 
-            _serializer = new SerializerBuilder()
+            m_Serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .WithTypeConverter(new YamlNullableEnumTypeConverter())
                 .DisableAliases()
                 .Build();
 
-            _deserializer = new DeserializerBuilder()
+            m_Deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .IgnoreUnmatchedProperties()
                 .WithTypeConverter(new YamlNullableEnumTypeConverter())
@@ -143,9 +143,9 @@ namespace OpenMod.Core.Users
                 return default;
             }
 
-            var serialized = _serializer.Serialize(dataObject);
+            var serialized = m_Serializer.Serialize(dataObject);
 
-            return _deserializer.Deserialize<T>(serialized);
+            return m_Deserializer.Deserialize<T>(serialized);
         }
 
         public async Task SetUserDataAsync<T>(string userId, string userType, string key, T? value)

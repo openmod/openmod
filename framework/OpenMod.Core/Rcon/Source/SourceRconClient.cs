@@ -14,8 +14,8 @@ namespace OpenMod.Core.Rcon.Source
     {
         private readonly List<string> m_CommandMessageBuffer = new();
         private readonly ILogger<SourceRconClient> m_Logger;
-        private int _authRequestId = -1;
-        private int _latestCommandId;
+        private int m_AuthRequestId = -1;
+        private int m_LatestCommandId;
 
         public SourceRconClient(
             TcpClient tcpClient,
@@ -71,7 +71,7 @@ namespace OpenMod.Core.Rcon.Source
             switch (packet.Type)
             {
                 case SourceRconPacket.ServerDataAuthPacket:
-                    _authRequestId = packet.RequestId;
+                    m_AuthRequestId = packet.RequestId;
 
                     var line = packet.Body!;
                     if (!line.Contains(":"))
@@ -93,7 +93,7 @@ namespace OpenMod.Core.Rcon.Source
                         break;
                     }
 
-                    _latestCommandId = packet.RequestId;
+                    m_LatestCommandId = packet.RequestId;
                     await OnExecuteCommandAsync(packet.Body!);
 
                     var message = "Command executed.";
@@ -103,7 +103,7 @@ namespace OpenMod.Core.Rcon.Source
                         m_CommandMessageBuffer.Clear();
                     }
 
-                    await SendMessageAsync(_latestCommandId, message);
+                    await SendMessageAsync(m_LatestCommandId, message);
                     break;
 
                 default:
@@ -118,7 +118,7 @@ namespace OpenMod.Core.Rcon.Source
 
             await SendPacketAsync(new SourceRconPacket
             {
-                RequestId = _authRequestId,
+                RequestId = m_AuthRequestId,
                 Type = SourceRconPacket.ServerDataResponsePacket
             });
 
@@ -133,17 +133,17 @@ namespace OpenMod.Core.Rcon.Source
         {
             await SendPacketAsync(new SourceRconPacket
             {
-                RequestId = _authRequestId,
+                RequestId = m_AuthRequestId,
                 Type = SourceRconPacket.ServerDataResponsePacket
             });
 
             await SendPacketAsync(new SourceRconPacket
             {
-                RequestId = _authRequestId,
+                RequestId = m_AuthRequestId,
                 Type = SourceRconPacket.ServerDataAuthResponsePacket
             });
 
-            _authRequestId = -1;
+            m_AuthRequestId = -1;
         }
     }
 }
