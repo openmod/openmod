@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenMod.API.Commands;
 
 namespace OpenMod.Unturned.RocketMod.Permissions
 {
@@ -38,19 +39,16 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             permission = permission.Trim();
 
             var rocketPlayer = new RocketPlayer(actor.Id, actor.DisplayName);
-            var permissions  = R.Permissions.GetPermissions(rocketPlayer);
+            var permissions = R.Permissions.GetPermissions(rocketPlayer);
 
             if (m_Cooldowns.TryGetValue(actor.Id, out var permissionCooldown))
             {
                 if (permissionCooldown.TryGetValue(permission, out var finishDate))
                 {
-                    var timeLeft = (finishDate - DateTime.UtcNow).TotalSeconds;
-                    if (timeLeft > 0)
+                    var timeLeft = finishDate - DateTime.UtcNow;
+                    if (timeLeft > TimeSpan.Zero)
                     {
-                        AsyncHelper.RunSync(() =>
-                            ((IPlayerUser) actor).PrintMessageAsync(
-                                m_StringLocalizer["rocket:permissions:command_cooldown", new {TimeLeft = timeLeft}],
-                                Color.Red));
+                        PrintCommandIsOnCooldown((ICommandActor) actor, timeLeft);
                         return Task.FromResult(PermissionGrantResult.Deny);
                     }
 
@@ -73,6 +71,18 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             permissionCooldown[permission] = DateTime.UtcNow.AddSeconds(rocketPermission.Cooldown);
             m_Cooldowns[actor.Id] = permissionCooldown;
             return Task.FromResult(PermissionGrantResult.Default);
+        }
+
+        private void PrintCommandIsOnCooldown(ICommandActor actor, TimeSpan timeLeft)
+        {
+            var message = m_StringLocalizer[
+                "rocket:permissions:command_cooldown",
+                new { TimeLeft = timeLeft.TotalSeconds, TimeLeftSpan = timeLeft }
+            ];
+
+            AsyncHelper.RunSync(() =>
+                actor.PrintMessageAsync(message, Color.Red)
+            );
         }
     }
 }
