@@ -51,7 +51,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
         {
             var commands = await m_CommandStore.GetCommandsAsync();
 
-            const int c_ItemsPerPage = 10;
+            const int itemsPerPage = 10;
 
             var currentPage = 1;
             if (Context.Parameters.Length == 0 || Context.Parameters.TryGet(0, out currentPage))
@@ -64,10 +64,10 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 var parents = commands.Where(x => x.ParentId is null).ToList();
 
                 var pageCommands = parents
-                    .Skip(c_ItemsPerPage * (currentPage - 1))
-                    .Take(c_ItemsPerPage);
+                    .Skip(itemsPerPage * (currentPage - 1))
+                    .Take(itemsPerPage);
 
-                await PrintPageAsync(currentPage, (int)Math.Ceiling((double)parents.Count / c_ItemsPerPage), pageCommands);
+                await PrintPageAsync(currentPage, (int)Math.Ceiling((double)parents.Count / itemsPerPage), pageCommands);
             }
             else if (Context.Parameters.Length > 0)
             {

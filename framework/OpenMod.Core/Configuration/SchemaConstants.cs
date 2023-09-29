@@ -4,8 +4,8 @@ namespace OpenMod.Core.Configuration
     {
         private const string c_SchemasDirectory = ".schemas";
 
-        public const string c_RolesSchemaPath = c_SchemasDirectory + "/openmod.roles.yaml.schema.json";
+        public const string RolesSchemaPath = c_SchemasDirectory + "/openmod.roles.yaml.schema.json";
 
-        public const string c_UsersSchemaPath = c_SchemasDirectory + "/openmod.users.yaml.schema.json";
+        public const string UsersSchemaPath = c_SchemasDirectory + "/openmod.users.yaml.schema.json";
     }
 }

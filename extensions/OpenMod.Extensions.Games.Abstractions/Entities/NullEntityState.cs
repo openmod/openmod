@@ -5,12 +5,12 @@
     /// </summary>
     public sealed class NullEntityState : IEntityState
     {
-        private static NullEntityState? m_Instance;
+        private static NullEntityState? s_Instance;
         public static NullEntityState Instance
         {
             get
             {
-                return m_Instance ??= new NullEntityState();
+                return s_Instance ??= new NullEntityState();
             }
         }
 

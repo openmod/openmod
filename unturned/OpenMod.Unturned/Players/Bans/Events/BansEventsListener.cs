@@ -166,6 +166,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
             [UsedImplicitly]
             [HarmonyPatch(typeof(SteamBlacklist), nameof(SteamBlacklist.unban))]
             [HarmonyPostfix]
+            // ReSharper disable once InconsistentNaming
             public static void Unban(CSteamID playerID, bool __result)
             {
                 if (__result)

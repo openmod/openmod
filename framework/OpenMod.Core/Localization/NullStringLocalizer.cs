@@ -7,11 +7,11 @@ namespace OpenMod.Core.Localization
 {
     public class NullStringLocalizer : IStringLocalizer
     {
-        private static NullStringLocalizer? m_Instance;
+        private static NullStringLocalizer? s_Instance;
 
         public static NullStringLocalizer Instance
         {
-            get { return m_Instance ??= new NullStringLocalizer(); }
+            get { return s_Instance ??= new NullStringLocalizer(); }
         }
 
         private NullStringLocalizer()

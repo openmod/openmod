@@ -18,8 +18,8 @@ namespace OpenMod.Core.Rcon.Minecraft
         private readonly List<string> m_CommandMessageBuffer = new();
         private readonly ILogger<MinecraftRconClient> m_Logger;
         private readonly Encoding m_Encoding;
-        private int _loginRequestId = -1;
-        private int _latestCommandId = -1;
+        private int m_LoginRequestId = -1;
+        private int m_LatestCommandId = -1;
 
 
         public MinecraftRconClient(
@@ -90,7 +90,7 @@ namespace OpenMod.Core.Rcon.Minecraft
             switch (packet.Type)
             {
                 case MinecraftPacketType.Command:
-                    _latestCommandId = packet.RequestId;
+                    m_LatestCommandId = packet.RequestId;
                     var command = m_Encoding.GetString(packet.Payload!);
                     await OnExecuteCommandAsync(command);
 
@@ -101,11 +101,11 @@ namespace OpenMod.Core.Rcon.Minecraft
                         m_CommandMessageBuffer.Clear();
                     }
 
-                    await SendMessageAsync(_latestCommandId, message);
+                    await SendMessageAsync(m_LatestCommandId, message);
                     break;
 
                 case MinecraftPacketType.Login:
-                    _loginRequestId = packet.RequestId;
+                    m_LoginRequestId = packet.RequestId;
 
                     var line = m_Encoding.GetString(packet.Payload!);
                     if (!line.Contains(":"))
@@ -127,8 +127,8 @@ namespace OpenMod.Core.Rcon.Minecraft
 
         protected override async Task OnClientAuthenticatedAsync()
         {
-            await SendMessageAsync(_loginRequestId, $"Logged in as {Id}.");
-            _loginRequestId = -1;
+            await SendMessageAsync(m_LoginRequestId, $"Logged in as {Id}.");
+            m_LoginRequestId = -1;
         }
 
         protected override async Task OnClientAuthenticationFailedAsync()

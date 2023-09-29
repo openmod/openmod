@@ -22,7 +22,7 @@ namespace OpenMod.Core.Cooldowns
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class CommandCooldownStore : ICommandCooldownStore
     {
-        private const string DataStoreKey = "cooldowns";
+        private const string c_DataStoreKey = "cooldowns";
 
         private readonly IConfiguration m_Configuration;
         private readonly IDataStore? m_DataStore;
@@ -120,7 +120,7 @@ namespace OpenMod.Core.Cooldowns
 
             if (!await m_DataStore.ExistsAsync("cooldowns")) return;
 
-            var persistedRecords = (await m_DataStore.LoadAsync<CooldownRecords>(DataStoreKey))?.Records;
+            var persistedRecords = (await m_DataStore.LoadAsync<CooldownRecords>(c_DataStoreKey))?.Records;
 
             if (persistedRecords == null || persistedRecords.Count == 0) return;
 
@@ -150,7 +150,7 @@ namespace OpenMod.Core.Cooldowns
 
             var persistedRecords = new CooldownRecords(m_Records);
 
-            await m_DataStore.SaveAsync(DataStoreKey, persistedRecords);
+            await m_DataStore.SaveAsync(c_DataStoreKey, persistedRecords);
         }
 
         public async Task<DateTime?> GetLastExecutedAsync(ICommandActor actor, string command)

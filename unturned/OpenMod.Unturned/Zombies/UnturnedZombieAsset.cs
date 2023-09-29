@@ -5,12 +5,12 @@ namespace OpenMod.Unturned.Zombies
 {
     public class UnturnedZombieAsset : IEntityAsset
     {
-        private static UnturnedZombieAsset? m_Instance;
+        private static UnturnedZombieAsset? s_Instance;
         public static UnturnedZombieAsset Instance
         {
             get
             {
-                return m_Instance ??= new UnturnedZombieAsset();
+                return s_Instance ??= new UnturnedZombieAsset();
             }
         }
 

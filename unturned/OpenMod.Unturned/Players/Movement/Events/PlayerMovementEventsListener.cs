@@ -1,10 +1,9 @@
-﻿extern alias JetBrainsAnnotations;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
-using JetBrainsAnnotations::JetBrains.Annotations;
+using JetBrains.Annotations;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Patching;
@@ -118,6 +117,7 @@ namespace OpenMod.Unturned.Players.Movement.Events
             [UsedImplicitly]
             [HarmonyPatch(typeof(Player), nameof(Player.teleportToLocationUnsafe))]
             [HarmonyPrefix]
+            // ReSharper disable once InconsistentNaming
             public static bool TeleportToLocationUnsafe(Player __instance, ref Vector3 position, ref float yaw)
             {
                 var cancel = false;

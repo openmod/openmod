@@ -4,6 +4,7 @@ using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace OpenMod.Unturned.Environment.Events
@@ -54,6 +55,7 @@ namespace OpenMod.Unturned.Environment.Events
         }
 
         [HarmonyPatch(typeof(LightingManager), "onPrePreLevelLoaded")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static class Patch_LightingManager
         {
             [HarmonyCleanup]

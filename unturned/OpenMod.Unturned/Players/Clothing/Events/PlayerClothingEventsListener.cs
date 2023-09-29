@@ -1,5 +1,6 @@
 ﻿extern alias JetBrainsAnnotations;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
@@ -382,6 +383,7 @@ namespace OpenMod.Unturned.Players.Clothing.Events
 
         [UsedImplicitly]
         [HarmonyPatch]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         internal static class Patches
         {
             [HarmonyCleanup]
