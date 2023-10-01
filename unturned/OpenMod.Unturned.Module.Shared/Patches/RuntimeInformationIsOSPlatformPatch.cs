@@ -10,6 +10,7 @@ namespace OpenMod.Unturned.Module.Shared.Patches
     public static class RuntimeInformationIsOSPlatformPatch
     {
         [HarmonyPrefix]
+        // ReSharper disable once InconsistentNaming
         public static bool IsOsPlatform(OSPlatform osPlatform, ref bool __result)
         {
             if (osPlatform == OSPlatform.OSX)
@@ -23,7 +24,7 @@ namespace OpenMod.Unturned.Module.Shared.Patches
                 __result = Application.platform == RuntimePlatform.LinuxPlayer;
                 return false;
             }
-            
+
             if (osPlatform == OSPlatform.Windows)
             {
                 __result = Application.platform == RuntimePlatform.WindowsPlayer;

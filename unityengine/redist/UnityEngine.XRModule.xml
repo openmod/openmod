@@ -1,0 +1,2273 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<doc>
+  <members>
+    <assembly>
+      <name>UnityEngine.XRModule</name>
+    </assembly>
+    <member name="A:UnityEngine.XRModule">
+      <summary>
+        <para>The XR module contains the VR and AR related platform support functionality.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.Bone">
+      <summary>
+        <para>A tracked bone on the device at an XR.XRNode in the XR input subsystem.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.Bone.TryGetChildBones(System.Collections.Generic.List`1&lt;UnityEngine.XR.Bone&gt;)">
+      <summary>
+        <para>Get the child bones of this bone.</para>
+      </summary>
+      <param name="childBones">A list of bones that will be filled out with the children bones of this bone.</param>
+      <returns>
+        <para>true if bone can be queried for child bones; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.Bone.TryGetParentBone(UnityEngine.XR.Bone&amp;)">
+      <summary>
+        <para>Gets the parent of this bone.</para>
+      </summary>
+      <param name="parentBone">Bone struct that receives the parent bone of this bone.</param>
+      <returns>
+        <para>true if the rotation was retrieved, false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.Bone.TryGetPosition(UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Gets the world position of the bone</para>
+      </summary>
+      <param name="position">Vector3 to receive the position of the bone in Unity world space.</param>
+      <returns>
+        <para>true if the rotation was retrieved, false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.Bone.TryGetRotation(UnityEngine.Quaternion&amp;)">
+      <summary>
+        <para>Gets the world rotation of the bone.</para>
+      </summary>
+      <param name="rotation">Quaternion to receive the rotation of the bone in Unity world space.</param>
+      <returns>
+        <para>true if the rotation was retrieved, false otherwise.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.CommonUsages">
+      <summary>
+        <para>Defines static variables that are used to retrieve input features from XR.InputDevice.TryGetFeatureValue.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.batteryLevel">
+      <summary>
+        <para>Value representing the current battery life of this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.centerEyeAcceleration">
+      <summary>
+        <para>The acceleration of the center eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.centerEyeAngularAcceleration">
+      <summary>
+        <para>The angular acceleration of the center eye on this device, formatted as euler angles.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.centerEyeAngularVelocity">
+      <summary>
+        <para>The angular velocity of the center eye on this device, formatted as euler angles.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.centerEyePosition">
+      <summary>
+        <para>The position of the center eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.centerEyeRotation">
+      <summary>
+        <para>The rotation of the center eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.centerEyeVelocity">
+      <summary>
+        <para>The velocity of the center eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.colorCameraAcceleration">
+      <summary>
+        <para>The acceleration of the color camera on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.colorCameraAngularAcceleration">
+      <summary>
+        <para>The angular acceleration of the color camera on this device, formatted as euler angles.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.colorCameraAngularVelocity">
+      <summary>
+        <para>The angular velocity of the color camera on this device, formatted as euler angles.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.colorCameraPosition">
+      <summary>
+        <para>The position of the color camera on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.colorCameraRotation">
+      <summary>
+        <para>The rotation of the color camera on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.colorCameraVelocity">
+      <summary>
+        <para>The velocity of the color camera on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.deviceAcceleration">
+      <summary>
+        <para>The acceleration of the device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.deviceAngularAcceleration">
+      <summary>
+        <para>The angular acceleration of this device, formatted as euler angles.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.deviceAngularVelocity">
+      <summary>
+        <para>The angular velocity of this device, formatted as euler angles.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.devicePosition">
+      <summary>
+        <para>The position of the device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.deviceRotation">
+      <summary>
+        <para>The rotation of this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.deviceVelocity">
+      <summary>
+        <para>The velocity of the device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.dPad">
+      <summary>
+        <para>A non-handed 2D axis.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.eyesData">
+      <summary>
+        <para>An Eyes struct containing eye tracking data collected from the device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.grip">
+      <summary>
+        <para>Represents the users grip on the controller.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.gripButton">
+      <summary>
+        <para>A binary measure of whether the device is being gripped.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.handData">
+      <summary>
+        <para>Value representing the hand data for this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.indexFinger">
+      <summary>
+        <para>Represents the grip pressure or angle of the index finger.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.indexTouch">
+      <summary>
+        <para>Represents a touch of the trigger or index finger.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.isTracked">
+      <summary>
+        <para>Informs to the developer whether the device is currently being tracked.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.leftEyeAcceleration">
+      <summary>
+        <para>The acceleration of the left eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.leftEyeAngularAcceleration">
+      <summary>
+        <para>The angular acceleration of the left eye on this device, formatted as euler angles.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.leftEyeAngularVelocity">
+      <summary>
+        <para>The angular velocity of the left eye on this device, formatted as euler angles.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.leftEyePosition">
+      <summary>
+        <para>The position of the left eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.leftEyeRotation">
+      <summary>
+        <para>The rotation of the left eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.leftEyeVelocity">
+      <summary>
+        <para>The velocity of the left eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.menuButton">
+      <summary>
+        <para>Represents a menu button, used to pause, go back, or otherwise exit gameplay.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.middleFinger">
+      <summary>
+        <para>Represents the grip pressure or angle of the middle finger.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.pinkyFinger">
+      <summary>
+        <para>Represents the grip pressure or angle of the pinky finger.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.primary2DAxis">
+      <summary>
+        <para>The primary touchpad or joystick on a device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.primary2DAxisClick">
+      <summary>
+        <para>Represents the primary 2D axis being clicked or otherwise depressed.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.primary2DAxisTouch">
+      <summary>
+        <para>Represents the primary 2D axis being touched.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.primaryButton">
+      <summary>
+        <para>The primary face button being pressed on a device, or sole button if only one is available.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.primaryTouch">
+      <summary>
+        <para>The primary face button being touched on a device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.rightEyeAcceleration">
+      <summary>
+        <para>The acceleration of the right eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.rightEyeAngularAcceleration">
+      <summary>
+        <para>The angular acceleration of the right eye on this device, formatted as euler angles.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.rightEyeAngularVelocity">
+      <summary>
+        <para>The angular velocity of the right eye on this device, formatted as euler angles.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.rightEyePosition">
+      <summary>
+        <para>The position of the right eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.rightEyeRotation">
+      <summary>
+        <para>The rotation of the right eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.rightEyeVelocity">
+      <summary>
+        <para>The velocity of the right eye on this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.ringFinger">
+      <summary>
+        <para>Represents the grip pressure or angle of the ring finger.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.secondary2DAxis">
+      <summary>
+        <para>A secondary touchpad or joystick on a device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.secondary2DAxisClick">
+      <summary>
+        <para>Represents the secondary 2D axis being clicked or otherwise depressed.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.secondary2DAxisTouch">
+      <summary>
+        <para>Represents the secondary 2D axis being touched.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.secondaryButton">
+      <summary>
+        <para>The secondary face button being pressed on a device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.secondaryTouch">
+      <summary>
+        <para>The secondary face button being touched on a device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.thumbrest">
+      <summary>
+        <para>Represents a thumbrest or light thumb touch.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.thumbTouch">
+      <summary>
+        <para>Represents the thumb pressing any input or feature.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.trackingState">
+      <summary>
+        <para>Represents the values being tracked for this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.trigger">
+      <summary>
+        <para>A trigger-like control, pressed with the index finger.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.triggerButton">
+      <summary>
+        <para>A binary measure of whether the index finger is activating the trigger.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.CommonUsages.userPresence">
+      <summary>
+        <para>Use this property to test whether the user is currently wearing and/or interacting with the XR device. The exact behavior of this property varies with each type of device: some devices have a sensor specifically to detect user proximity, however you can reasonably infer that a user is present with the device when the property is UserPresenceState.Present.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.Eyes">
+      <summary>
+        <para>Contains eye tracking data from the device at an XR.XRNode in the XR input subsystem.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.Eyes.TryGetFixationPoint(UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Gets the point represents the convergence of the line of sight for both eyes.</para>
+      </summary>
+      <param name="fixationPoint">A Vector3 struct that is filled in with the fixation position.</param>
+      <returns>
+        <para>true if eyes can be queried for the fixation point; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.Eyes.TryGetLeftEyeOpenAmount(System.Single&amp;)">
+      <summary>
+        <para>Gets a value that represents the how far the left eye is open.</para>
+      </summary>
+      <param name="OpenAmount">A float value, with a range of 0.0 to 1.0, that indicates how open the left eye is. A value of 0.0 indicates that the eye is fully closed, while a value of 1.0 indicates that the eye is fully open.</param>
+      <param name="openAmount"></param>
+      <returns>
+        <para>true if eyes can be queried for the amount that the left eye is open; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.Eyes.TryGetLeftEyePosition(UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Gets the Vector3 that describes the position of the left eye.</para>
+      </summary>
+      <param name="positionOut">A Vector3 struct to receive the left eye position.</param>
+      <param name="position"></param>
+      <returns>
+        <para>true if eyes can be queried for the left eye position; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.Eyes.TryGetLeftEyeRotation(UnityEngine.Quaternion&amp;)">
+      <summary>
+        <para>Gets the Quaternion that describes the rotation of the left eye.</para>
+      </summary>
+      <param name="rotationOut">A Quaternion struct to receive the left eye rotation.</param>
+      <param name="rotation"></param>
+      <returns>
+        <para>true if eyes can be queried for the left eye rotation; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.Eyes.TryGetRightEyeOpenAmount(System.Single&amp;)">
+      <summary>
+        <para>Gets a value that represents the how far the right eye is open.</para>
+      </summary>
+      <param name="OpenAmount">A float value, with a range of 0.0 to 1.0, that indicates how open the right eye is. A value of 0.0 indicates that the eye is fully closed, while a value of 1.0 indicates that the eye is fully open.</param>
+      <param name="openAmount"></param>
+      <returns>
+        <para>true if eyes can be queried for the amount that the right eye is open; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.Eyes.TryGetRightEyePosition(UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Gets the Vector3 that describes the position of the right eye.</para>
+      </summary>
+      <param name="positionOut">A Vector3 struct to receive the right eye position.</param>
+      <param name="position"></param>
+      <returns>
+        <para>true if eyes can be queried for the right eye position; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.Eyes.TryGetRightEyeRotation(UnityEngine.Quaternion&amp;)">
+      <summary>
+        <para>Gets the Quaternion that describes the rotation of the right eye.</para>
+      </summary>
+      <param name="rotationOut">A Quaternion struct to receive the right eye rotation.</param>
+      <param name="rotation"></param>
+      <returns>
+        <para>true if eyes can be queried for the right eye rotation; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.Hand">
+      <summary>
+        <para>A tracked hand on the device at an XR.XRNode in the XR input subsystem.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.Hand.TryGetFingerBones(UnityEngine.XR.HandFinger,System.Collections.Generic.List`1&lt;UnityEngine.XR.Bone&gt;)">
+      <summary>
+        <para>Gets a list of the finger bones for a finger on this hand.</para>
+      </summary>
+      <param name="finger">HandFinger enum value for this finger.</param>
+      <param name="bonesOut">A list of bones that will be filled out for this finger.</param>
+      <returns>
+        <para>true if hand can be queried for this finger; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.Hand.TryGetRootBone(UnityEngine.XR.Bone&amp;)">
+      <summary>
+        <para>Gets the root bone for this hand.</para>
+      </summary>
+      <param name="boneOut">A Bone struct to receive the root bone.</param>
+      <returns>
+        <para>true if hand can be queried for the root bone; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.HandFinger">
+      <summary>
+        <para>Enumeration describing the AR rendering mode used with XR.Hand.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.HandFinger.Index">
+      <summary>
+        <para>Index finger on a hand.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.HandFinger.Middle">
+      <summary>
+        <para>Middle finger on a hand.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.HandFinger.Pinky">
+      <summary>
+        <para>Pinky finger on a hand.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.HandFinger.Ring">
+      <summary>
+        <para>Ring finger on a hand.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.HandFinger.Thumb">
+      <summary>
+        <para>Thumb finger on a hand.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.HapticCapabilities">
+      <summary>
+        <para>Describes the haptic capabilities of the device at an XR.XRNode in the XR input subsystem.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.HapticCapabilities.bufferFrequencyHz">
+      <summary>
+        <para>The frequency (in Hz) that this device plays back buffered haptic data.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.HapticCapabilities.bufferMaxSize">
+      <summary>
+        <para>The maximum amount of data that can be sent to an InputDevice via InputDevice.SendHapticBuffer.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.HapticCapabilities.bufferOptimalSize">
+      <summary>
+        <para>The optimal buffer size an InputDevice expects to be sent via InputDevice.SendHapticBuffer in order to provide a continuous rumble between individual frames.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.HapticCapabilities.numChannels">
+      <summary>
+        <para>The number of channels that this device plays back haptic data.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.HapticCapabilities.supportsBuffer">
+      <summary>
+        <para>True if this device supports sending a haptic buffer.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.HapticCapabilities.supportsImpulse">
+      <summary>
+        <para>True if this device supports sending a haptic impulse.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.InputDevice">
+      <summary>
+        <para>Defines an input device in the XR input subsystem.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputDevice.characteristics">
+      <summary>
+        <para>Read Only. A bitmask of enumerated flags describing the characteristics of this InputDevice.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputDevice.isValid">
+      <summary>
+        <para>Read Only. True if the device is currently a valid input device; otherwise false.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputDevice.manufacturer">
+      <summary>
+        <para>The manufacturer of the connected Input Device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputDevice.name">
+      <summary>
+        <para>Read Only. The name of the device in the XR system. This is a platform provided unique identifier for the device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputDevice.role">
+      <summary>
+        <para>Read Only. The InputDeviceRole of the device in the XR system. This is a platform provided description of how the device is used.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputDevice.serialNumber">
+      <summary>
+        <para>The serial number of the connected Input Device.  Blank if no serial number is available.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputDevice.subsystem">
+      <summary>
+        <para>Gets the XRInputSubsystem that reported this InputDevice.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.SendHapticBuffer(System.UInt32,System.Byte[])">
+      <summary>
+        <para>Sends a raw buffer of haptic data to the device.</para>
+      </summary>
+      <param name="channel">The channel to receive the data.</param>
+      <param name="buffer">A raw byte buffer that contains the haptic data to send to the device.</param>
+      <returns>
+        <para>Returns true if successful. Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.SendHapticImpulse(System.UInt32,System.Single,System.Single)">
+      <summary>
+        <para>Sends a haptic impulse to a device.</para>
+      </summary>
+      <param name="channel">The channel to receive the impulse.</param>
+      <param name="amplitude">The normalized (0.0 to 1.0) amplitude value of the haptic impulse to play on the device.</param>
+      <param name="duration">The duration in seconds that the haptic impulse will play. Only supported on Oculus.</param>
+      <returns>
+        <para>Returns true if successful. Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.StopHaptics">
+      <summary>
+        <para>Stop all haptic playback for a device.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureUsages(System.Collections.Generic.List`1&lt;UnityEngine.XR.InputFeatureUsage&gt;)">
+      <summary>
+        <para>Gets a list of all the input feature usages available on this device. For example, "Trigger" or "Device Position".</para>
+      </summary>
+      <param name="featureUsages">A List of InputFeatureUsage structures to receive the available features on this device.</param>
+      <returns>
+        <para>true if device can be queried; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;System.Boolean&gt;,System.Boolean&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;System.UInt32&gt;,System.UInt32&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;System.Single&gt;,System.Single&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.Vector2&gt;,UnityEngine.Vector2&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.Vector3&gt;,UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.Quaternion&gt;,UnityEngine.Quaternion&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.XR.Bone&gt;,UnityEngine.XR.Bone&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.XR.Hand&gt;,UnityEngine.XR.Hand&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.XR.Eyes&gt;,UnityEngine.XR.Eyes&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.XR.InputTrackingState&gt;,UnityEngine.XR.InputTrackingState&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;System.Boolean&gt;,System.DateTime,System.Boolean&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;System.UInt32&gt;,System.DateTime,System.UInt32&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;System.Single&gt;,System.DateTime,System.Single&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.Vector2&gt;,System.DateTime,UnityEngine.Vector2&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.Vector3&gt;,System.DateTime,UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.Quaternion&gt;,System.DateTime,UnityEngine.Quaternion&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetFeatureValue(UnityEngine.XR.InputFeatureUsage`1&lt;UnityEngine.XR.InputTrackingState&gt;,System.DateTime,UnityEngine.XR.InputTrackingState&amp;)">
+      <summary>
+        <para>Retrieves information about the input feature specified by the Usage parameter. Those functions which take a time parameter allow querying for that feature at a particular point in time</para>
+      </summary>
+      <param name="usage">Usage that describes the feature to retrieve.</param>
+      <param name="time">A DateTime struct with the local time at which to query for data.</param>
+      <param name="value">A variable of the appropriate type to receive the information about the feature.</param>
+      <returns>
+        <para>True if the feature information is retrieved; otherwise false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevice.TryGetHapticCapabilities(UnityEngine.XR.HapticCapabilities&amp;)">
+      <summary>
+        <para>Gets the haptic capabilities of the device.</para>
+      </summary>
+      <param name="capabilities">A HapticCapabilities struct to receive the capabilities of this device.</param>
+      <returns>
+        <para>Returns true if the device supports any form of haptics. Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.InputDeviceCharacteristics">
+      <summary>
+        <para>A set of bit flags describing XR.InputDevice characteristics.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.Camera">
+      <summary>
+        <para>The InputDevice has a camera and associated camera tracking information.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.Controller">
+      <summary>
+        <para>The InputDevice is a game controller.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.EyeTracking">
+      <summary>
+        <para>The InputDevice provides eye tracking information via an Eyes input feature.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.HandTracking">
+      <summary>
+        <para>The InputDevice provides hand tracking information via a Hand input feature.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.HeadMounted">
+      <summary>
+        <para>The InputDevice is attached to the head.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.HeldInHand">
+      <summary>
+        <para>The InputDevice is held in the user's hand. Typically, a tracked controller.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.Left">
+      <summary>
+        <para>The InputDevice is associated with the left side of the user.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.None">
+      <summary>
+        <para>A default value specifying no flags.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.Right">
+      <summary>
+        <para>The InputDevice is associated with the right side of the user.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.Simulated6DOF">
+      <summary>
+        <para>The InputDevice reports software approximated, positional data.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.TrackedDevice">
+      <summary>
+        <para>The InputDevice provides 3DOF or 6DOF tracking data.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceCharacteristics.TrackingReference">
+      <summary>
+        <para>The InputDevice is an unmoving reference object used to locate and track other objects in the world.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.InputDeviceRole">
+      <summary>
+        <para>Enumeration describing the role of a XR.InputDevice in providing input.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceRole.GameController">
+      <summary>
+        <para>This device is a game controller.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceRole.Generic">
+      <summary>
+        <para>This device is typically a HMD or Camera.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceRole.HardwareTracker">
+      <summary>
+        <para>This device is a hardware tracker.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceRole.LeftHanded">
+      <summary>
+        <para>This device is a controller that represents the left hand.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceRole.LegacyController">
+      <summary>
+        <para>This device is a legacy controller.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceRole.RightHanded">
+      <summary>
+        <para>This device is a controller that represents the right hand.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceRole.TrackingReference">
+      <summary>
+        <para>This device is a tracking reference used to track other devices in 3D.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputDeviceRole.Unknown">
+      <summary>
+        <para>This device does not have a known role.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.InputDevices">
+      <summary>
+        <para>An interface for accessing devices in the XR input subsytem.</para>
+      </summary>
+    </member>
+    <member name="?:UnityEngine.XR.InputDevices.deviceConfigChanged(System.Action`1&lt;UnityEngine.XR.InputDevice&gt;)">
+      <summary>
+        <para>Defines the delegate to use to register events when an InputDevice's configuration changes.</para>
+      </summary>
+      <param name="value">The InputDevice whose configuration has changed.</param>
+    </member>
+    <member name="?:UnityEngine.XR.InputDevices.deviceConnected(System.Action`1&lt;UnityEngine.XR.InputDevice&gt;)">
+      <summary>
+        <para>Defines the delegate to use to register events when an InputDevice is connected.</para>
+      </summary>
+      <param name="value">The InputDevice that just connected.</param>
+    </member>
+    <member name="?:UnityEngine.XR.InputDevices.deviceDisconnected(System.Action`1&lt;UnityEngine.XR.InputDevice&gt;)">
+      <summary>
+        <para>Defines the delegate to use to register events when an InputDevice is disconnected.</para>
+      </summary>
+      <param name="value">The InputDevice that just disconnected.</param>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode)">
+      <summary>
+        <para>Gets the input device at a given XR.XRNode endpoint.</para>
+      </summary>
+      <param name="node">The XRNode that owns the requested device.</param>
+      <returns>
+        <para>An XR.InputDevice at this [[XR.XRNode].</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevices.GetDevices(System.Collections.Generic.List`1&lt;UnityEngine.XR.InputDevice&gt;)">
+      <summary>
+        <para>Gets a list of active input devices available to the XR Input Subsystem.</para>
+      </summary>
+      <param name="inputDevices">A List of type InputDevices to receive the available input devices.</param>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevices.GetDevicesAtXRNode(UnityEngine.XR.XRNode,System.Collections.Generic.List`1&lt;UnityEngine.XR.InputDevice&gt;)">
+      <summary>
+        <para>Gets a list of active input devices available to the XR Input Subsystem at a given XR.XRNode endpoint.</para>
+      </summary>
+      <param name="node">The XRNode that owns the requested device.</param>
+      <param name="inputDevices">A List of type InputDevices to receive the available input devices.</param>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevices.GetDevicesWithCharacteristics(UnityEngine.XR.InputDeviceCharacteristics,System.Collections.Generic.List`1&lt;UnityEngine.XR.InputDevice&gt;)">
+      <summary>
+        <para>Gets the list of active XR input devices that match the specified InputDeviceCharacteristics.</para>
+      </summary>
+      <param name="desiredCharacteristics">A bitwise combination of the characteristics you are looking for.</param>
+      <param name="inputDevices">A List&lt;InputDevice&gt; object to receive the available input devices.</param>
+    </member>
+    <member name="M:UnityEngine.XR.InputDevices.GetDevicesWithRole(UnityEngine.XR.InputDeviceRole,System.Collections.Generic.List`1&lt;UnityEngine.XR.InputDevice&gt;)">
+      <summary>
+        <para>Gets a list of active input devices available to the XR Input Subsystem that match the specified role.</para>
+      </summary>
+      <param name="role">XR.InputDeviceRole that is defined for the devices returned.</param>
+      <param name="inputDevices">A List of type InputDevices to receive the available input devices.</param>
+    </member>
+    <member name="T:UnityEngine.XR.InputFeatureUsage">
+      <summary>
+        <para>Defines a generic usage that maps to an input feature on a device. Use the As method to turn into a generic usage.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputFeatureUsage.name">
+      <summary>
+        <para>The string name of this usage feature; used internally to map to an input feature on a device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputFeatureUsage.type">
+      <summary>
+        <para>The type of this usage feature; used internally to map to an input feature on a device.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.InputFeatureUsage.As">
+      <summary>
+        <para>Returns the generic version of this type for retrieving a feature value from a device.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.InputFeatureUsage`1">
+      <summary>
+        <para>Defines a generic usage that maps to an input feature on a device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputFeatureUsage_1.name">
+      <summary>
+        <para>The string name of this usage feature; used internally to map to an input feature on a device.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.InputFeatureUsage_1.#ctor(System.String)">
+      <summary>
+        <para>Construct a usage from a usage name.</para>
+      </summary>
+      <param name="usageName">The name of the feature usage to query for.</param>
+    </member>
+    <member name="?:UnityEngine.XR.InputFeatureUsage_1.explop_InputFeatureUsage(InputFeatureUsage&lt;T&gt;)(UnityEngine.XR.InputFeatureUsage`1&lt;T&gt;)">
+      <summary>
+        <para>Converts a generic InputFeatureUsage&lt;T&gt; into an InputFeatureUsage.</para>
+      </summary>
+      <param name="self">The generic InputFeatureUsage_1 to conver into an InputFeatureUsage.</param>
+    </member>
+    <member name="T:UnityEngine.XR.InputTracking">
+      <summary>
+        <para>A collection of methods and properties for accessing XR input devices by their XR Node representation.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.InputTracking.disablePositionalTracking">
+      <summary>
+        <para>Disables positional tracking in XR. This takes effect the next time the head pose is sampled.  If set to true the camera only tracks headset rotation state.</para>
+      </summary>
+    </member>
+    <member name="?:UnityEngine.XR.InputTracking.nodeAdded(System.Action`1&lt;UnityEngine.XR.XRNodeState&gt;)">
+      <summary>
+        <para>Called when a tracked node is added to the underlying XR system.</para>
+      </summary>
+      <param name="nodeState">Describes the node that has been added.</param>
+      <param name="value"></param>
+    </member>
+    <member name="?:UnityEngine.XR.InputTracking.nodeRemoved(System.Action`1&lt;UnityEngine.XR.XRNodeState&gt;)">
+      <summary>
+        <para>Called when a tracked node is removed from the underlying XR system.</para>
+      </summary>
+      <param name="nodeState">Describes the node that has been removed.</param>
+      <param name="value"></param>
+    </member>
+    <member name="?:UnityEngine.XR.InputTracking.trackingAcquired(System.Action`1&lt;UnityEngine.XR.XRNodeState&gt;)">
+      <summary>
+        <para>Called when a tracked node begins reporting tracking information.</para>
+      </summary>
+      <param name="nodeState">Describes the node that has begun being tracked.</param>
+      <param name="value"></param>
+    </member>
+    <member name="?:UnityEngine.XR.InputTracking.trackingLost(System.Action`1&lt;UnityEngine.XR.XRNodeState&gt;)">
+      <summary>
+        <para>Called when a tracked node stops reporting tracking information.</para>
+      </summary>
+      <param name="nodeState">Describes the node that has lost tracking.</param>
+      <param name="value"></param>
+    </member>
+    <member name="M:UnityEngine.XR.InputTracking.GetLocalPosition(UnityEngine.XR.XRNode)">
+      <summary>
+        <para>Note: This API has been marked as obsolete in code, and is no longer in use. Please use InputTracking.GetNodeStates and look for the XRNodeState with the corresponding XRNode type instead.
+Gets the position of a specific node.</para>
+      </summary>
+      <param name="node">Specifies which node's position should be returned.</param>
+      <returns>
+        <para>The position of the node in its local tracking space.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputTracking.GetLocalRotation(UnityEngine.XR.XRNode)">
+      <summary>
+        <para>Note: This API has been marked as obsolete in code, and is no longer in use. Please use InputTracking.GetNodeStates and look for the XRNodeState with the corresponding XRNode type instead.
+Gets the rotation of a specific node.</para>
+      </summary>
+      <param name="node">Specifies which node's rotation should be returned.</param>
+      <returns>
+        <para>The rotation of the node in its local tracking space.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputTracking.GetNodeName(System.UInt64)">
+      <summary>
+        <para>Accepts the unique identifier for a tracked node and returns a friendly name for it.</para>
+      </summary>
+      <param name="uniqueID">The unique identifier for the Node index.</param>
+      <param name="uniqueId"></param>
+      <returns>
+        <para>The name of the tracked node if the given 64-bit identifier maps to a currently tracked node. Empty string otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.InputTracking.GetNodeStates(System.Collections.Generic.List`1&lt;UnityEngine.XR.XRNodeState&gt;)">
+      <summary>
+        <para>Describes all currently connected XRNodes and provides available tracking states for each.</para>
+      </summary>
+      <param name="nodeStates">A list that is populated with XR.XRNodeState objects.</param>
+    </member>
+    <member name="M:UnityEngine.XR.InputTracking.Recenter">
+      <summary>
+        <para>Center tracking to the current position and orientation of the HMD.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.InputTrackingState">
+      <summary>
+        <para>Represents the values being tracked for this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputTrackingState.Acceleration">
+      <summary>
+        <para>Represents acceleration being tracked for this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputTrackingState.All">
+      <summary>
+        <para>Represents all InputTrackingState values being tracked for this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputTrackingState.AngularAcceleration">
+      <summary>
+        <para>Represents angular acceleration being tracked for this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputTrackingState.AngularVelocity">
+      <summary>
+        <para>Represents no angular velocity being tracked for this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputTrackingState.None">
+      <summary>
+        <para>Represents no values being tracked for this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputTrackingState.Position">
+      <summary>
+        <para>Represents position being tracked for this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputTrackingState.Rotation">
+      <summary>
+        <para>Represents rotation being tracked for this device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.InputTrackingState.Velocity">
+      <summary>
+        <para>Represents velocity being tracked for this device.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.MeshChangeState">
+      <summary>
+        <para>The state of a tracked mesh since the last query.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshChangeState.Added">
+      <summary>
+        <para>The mesh has been added since the last call to XRMeshSubsystem.TryGetMeshInfos.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshChangeState.Removed">
+      <summary>
+        <para>The mesh has been removed since the last call to XRMeshSubsystem.TryGetMeshInfos.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshChangeState.Unchanged">
+      <summary>
+        <para>The mesh has not changed since the last call to XRMeshSubsystem.TryGetMeshInfos.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshChangeState.Updated">
+      <summary>
+        <para>The mesh has been updated since the last call to XRMeshSubsystem.TryGetMeshInfos.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.MeshGenerationOptions">
+      <summary>
+        <para>Options for generating meshes.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshGenerationOptions.ConsumeTransform">
+      <summary>
+        <para>Indicates you plan to consume the resulting mesh's transform.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshGenerationOptions.None">
+      <summary>
+        <para>No options are specified.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.MeshGenerationResult">
+      <summary>
+        <para>Contains event information related to a generated mesh.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshGenerationResult.Attributes">
+      <summary>
+        <para>The MeshVertexAttributes that were written to the MeshGenerationResult.Mesh.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshGenerationResult.Mesh">
+      <summary>
+        <para>If the generation was successful, data has been written to this Mesh.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshGenerationResult.MeshCollider">
+      <summary>
+        <para>If the generation was successful, physics data has been written to this MeshCollider.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshGenerationResult.MeshId">
+      <summary>
+        <para>The MeshId of the tracked mesh that was generated.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshGenerationResult.Position">
+      <summary>
+        <para>The position associated with the generated mesh relative to the session origin.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshGenerationResult.Rotation">
+      <summary>
+        <para>The rotation associated with the generated mesh relative to the session origin.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshGenerationResult.Scale">
+      <summary>
+        <para>The scale associated with the generated mesh relative to the session origin.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshGenerationResult.Status">
+      <summary>
+        <para>The MeshGenerationStatus of the mesh generation task.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshGenerationResult.Timestamp">
+      <summary>
+        <para>The timestamp associated with the generated mesh.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.MeshGenerationStatus">
+      <summary>
+        <para>The status of a XRMeshSubsystem.GenerateMeshAsync.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshGenerationStatus.Canceled">
+      <summary>
+        <para>The mesh generation was canceled.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshGenerationStatus.GenerationAlreadyInProgress">
+      <summary>
+        <para>The XRMeshSubsystem was already generating the requested mesh.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshGenerationStatus.InvalidMeshId">
+      <summary>
+        <para>The mesh generation failed because the mesh does not exist.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshGenerationStatus.Success">
+      <summary>
+        <para>The mesh generation was successful.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshGenerationStatus.UnknownError">
+      <summary>
+        <para>The mesh generation failed for unknown reasons.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.MeshId">
+      <summary>
+        <para>A session-unique identifier for trackables in the environment, e.g., planes and feature points.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshId.InvalidId">
+      <summary>
+        <para>Represents an invalid id.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.MeshId.ToString">
+      <summary>
+        <para>Generates a nicely formatted version of the id.</para>
+      </summary>
+      <returns>
+        <para>A string unique to this id</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.MeshInfo">
+      <summary>
+        <para>Contains state information related to a tracked mesh.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshInfo.ChangeState">
+      <summary>
+        <para>The change state (e.g., Added, Removed) of the tracked mesh.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshInfo.MeshId">
+      <summary>
+        <para>The MeshId of the tracked mesh.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshInfo.PriorityHint">
+      <summary>
+        <para>A hint that can be used to determine when this mesh should be processed.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.MeshTransform">
+      <summary>
+        <para>Contains transform information related to a tracked mesh.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.MeshTransform.#ctor(UnityEngine.XR.MeshId&amp;,System.UInt64,UnityEngine.Vector3&amp;,UnityEngine.Quaternion&amp;,UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Creates a new MeshTransform.</para>
+      </summary>
+      <param name="meshId">The identifier of the mesh.</param>
+      <param name="timestamp">The timestamp for the mesh's transform. Larger values indicate newer transforms.</param>
+      <param name="position">The position of the mesh relative to the session origin.</param>
+      <param name="rotation">The rotation of the mesh relative to the session origin.</param>
+      <param name="scale">The scale of the mesh relative to the session origin.</param>
+    </member>
+    <member name="P:UnityEngine.XR.MeshTransform.MeshId">
+      <summary>
+        <para>The session-unique identifier of the tracked mesh.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshTransform.Position">
+      <summary>
+        <para>The position of the mesh, relative to the session origin.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshTransform.Rotation">
+      <summary>
+        <para>The rotation of the mesh, relative to the session origin.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshTransform.Scale">
+      <summary>
+        <para>The scale of the mesh, relative to the session origin.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.MeshTransform.Timestamp">
+      <summary>
+        <para>The timestamp associated with this transform.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.MeshVertexAttributes">
+      <summary>
+        <para>A set of vertex attributes.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshVertexAttributes.Colors">
+      <summary>
+        <para>Vertex normals</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshVertexAttributes.None">
+      <summary>
+        <para>No vertex attributes</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshVertexAttributes.Normals">
+      <summary>
+        <para>Vertex normals</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshVertexAttributes.Tangents">
+      <summary>
+        <para>Vertex tangents</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.MeshVertexAttributes.UVs">
+      <summary>
+        <para>Vertex UVs</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.Provider.XRStats">
+      <summary>
+        <para>Provides timing and other statistics from XR subsystems.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.Provider.XRStats.TryGetStat(UnityEngine.IntegratedSubsystem,System.String,System.Single&amp;)">
+      <summary>
+        <para>Retrieve a statistic for an XR subsystem.</para>
+      </summary>
+      <param name="xrSubsystem">The subsystem with which the stat is registered.</param>
+      <param name="tag">The tag used to query for a statistic.</param>
+      <param name="value">Receives the current value of the requested statistic. Contains a valid value when this method returns true.</param>
+      <returns>
+        <para>True, if the requested statistic is available, false otherwise.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.TrackingOriginModeFlags">
+      <summary>
+        <para>This enum provides context to where the 0,0,0 point of tracking for InputDevices is.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.TrackingOriginModeFlags.Device">
+      <summary>
+        <para>XRInputSubsystem tracks all InputDevices in reference to the first known location of a specific InputDevice when set to TrackingOriginModeFlags.Device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.TrackingOriginModeFlags.Floor">
+      <summary>
+        <para>XRInputSubsystem tracks all InputDevices in reference to a point on the floor when set to TrackingOriginModeFlags.Floor.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.TrackingOriginModeFlags.TrackingReference">
+      <summary>
+        <para>XRInputSubsystem tracks all InputDevices in reference to an InputDevice with the InputDeviceCharacteristics.TrackingReference flag set when set to TrackingOriginModeFlags.TrackingReference.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.TrackingOriginModeFlags.Unbounded">
+      <summary>
+        <para>XRInputSubsystem tracks all InputDevices in relation to a world anchor. This world anchor can change at any time, and is chosen by the runtime.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.TrackingOriginModeFlags.Unknown">
+      <summary>
+        <para>TrackingOriginModeFlags.Unknown enumerates when the XRInputSubsystem was not able to set its tracking origin or has no tracking.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.XRDisplaySubsystem">
+      <summary>
+        <para>An XRDisplaySubsystem controls rendering to a head tracked display.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.contentProtectionEnabled">
+      <summary>
+        <para>Sets or gets the state of content protection for the current active provider.
+
+                For most providers, content protection allows you to use write only textures for rendering. This stops the ability for apps to read textures from the graphics card and view/record images that may be protected in some way.
+                </para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.disableLegacyRenderer">
+      <summary>
+        <para>Disables the legacy renderer while this XRDisplaySubsystem is active.</para>
+      </summary>
+    </member>
+    <member name="?:UnityEngine.XR.XRDisplaySubsystem.displayFocusChanged(System.Action`1&lt;System.Boolean&gt;)">
+      <summary>
+        <para>Event sent when XR display focus changes.</para>
+      </summary>
+      <param name="value">Delegate method to call when the event is sent.</param>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.displayOpaque">
+      <summary>
+        <para>Determines if the current attached device has an opaque display.
+
+                Most VR devices are opaque in order to increase the immersive experience, AR devices are transparent to allow for interaction with an augmentation of the current environment.
+                </para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.occlusionMaskScale">
+      <summary>
+        <para>A scale applied to the standard occulsion mask.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.reprojectionMode">
+      <summary>
+        <para>The kind of reprojection the app requests to stabilize its holographic rendering relative to the user's head motion.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.scaleOfAllRenderTargets">
+      <summary>
+        <para>Controls the size of the textures submitted to the display as a multiplier of the display's default resolution.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.scaleOfAllViewports">
+      <summary>
+        <para>Controls how much of the allocated display texture should be used for rendering.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.singlePassRenderingDisabled">
+      <summary>
+        <para>Returns true when single pass stereo rendering is disabled and returns false if otherwise.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.supportedTextureLayouts">
+      <summary>
+        <para>Specifies all texture layouts supported by this display subsystem. This var is a bit field that could be combination of XRDisplaySubsystem.TextureLayout.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.textureLayout">
+      <summary>
+        <para>Set DisplaySubsystem to use certain texture layout. Should query supported texture layout through XRDisplaySubsystem.supportedTextureLayouts
+ first for the capabilities.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.zFar">
+      <summary>
+        <para>Set DisplaySubsystem to use zFar for rendering.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystem.zNear">
+      <summary>
+        <para>Set DisplaySubsystem to use zNear for rendering.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.AddGraphicsThreadMirrorViewBlit(UnityEngine.Rendering.CommandBuffer,System.Boolean)">
+      <summary>
+        <para>This function records the display subsystem's native blit event to the target command buffer. This function is typically called by a scriptable rendering pipeline.</para>
+      </summary>
+      <param name="cmd">The target CommandBuffer that records the native blit event.</param>
+      <param name="allowGraphicsStateInvalidate">True causes the graphics device to invalidate internal states before and after calling into the provider's native blit. This ensures the GFX internal states' consistency with the cost of some runtime performance.</param>
+      <param name="mode">The XRMirrorViewBlitMode XR display should perform.</param>
+      <returns>
+        <para>Returns true if native blit event is successfully recorded. Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.AddGraphicsThreadMirrorViewBlit(UnityEngine.Rendering.CommandBuffer,System.Boolean,System.Int32)">
+      <summary>
+        <para>This function records the display subsystem's native blit event to the target command buffer. This function is typically called by a scriptable rendering pipeline.</para>
+      </summary>
+      <param name="cmd">The target CommandBuffer that records the native blit event.</param>
+      <param name="allowGraphicsStateInvalidate">True causes the graphics device to invalidate internal states before and after calling into the provider's native blit. This ensures the GFX internal states' consistency with the cost of some runtime performance.</param>
+      <param name="mode">The XRMirrorViewBlitMode XR display should perform.</param>
+      <returns>
+        <para>Returns true if native blit event is successfully recorded. Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.BeginRecordingIfLateLatched(UnityEngine.Camera)">
+      <summary>
+        <para>This function enables late latching recording of constant buffer memory locations which are later patched with the latest pose data.</para>
+      </summary>
+      <param name="camera">The camera where late latch recording is to be enabled.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.EndRecordingIfLateLatched(UnityEngine.Camera)">
+      <summary>
+        <para>This function disables late latching recording of constant buffer locations.</para>
+      </summary>
+      <param name="camera">The camera where late latch end recording is to be done.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.GetCullingParameters(UnityEngine.Camera,System.Int32,UnityEngine.Rendering.ScriptableCullingParameters&amp;)">
+      <summary>
+        <para>Gets culling parameters for a specific culling pass index.</para>
+      </summary>
+      <param name="camera">Camera for the basis of the culling view and frustum.</param>
+      <param name="cullingPassIndex">Index of the culling pass obtained from XR.XRDisplaySubsystem.XRRenderPass.cullingPassIndex|XRRenderPass.cullingPassIndex.</param>
+      <param name="scriptableCullingParameters">Scriptable culling parameters to populate.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.GetMirrorViewBlitDesc(UnityEngine.RenderTexture,UnityEngine.XR.XRDisplaySubsystem/XRMirrorViewBlitDesc&amp;)">
+      <summary>
+        <para>Get a mirror view blit operation descriptor from the current display subsystem.</para>
+      </summary>
+      <param name="mirrorRt">A render texture representing mirror view's render target.</param>
+      <param name="outDesc">Information that describes desired mirror view blit operation.</param>
+      <param name="mode">The XRMirrorViewBlitMode XR display should perform.</param>
+      <returns>
+        <para>Return true if information is retrieved successfully, false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.GetMirrorViewBlitDesc(UnityEngine.RenderTexture,UnityEngine.XR.XRDisplaySubsystem/XRMirrorViewBlitDesc&amp;,System.Int32)">
+      <summary>
+        <para>Get a mirror view blit operation descriptor from the current display subsystem.</para>
+      </summary>
+      <param name="mirrorRt">A render texture representing mirror view's render target.</param>
+      <param name="outDesc">Information that describes desired mirror view blit operation.</param>
+      <param name="mode">The XRMirrorViewBlitMode XR display should perform.</param>
+      <returns>
+        <para>Return true if information is retrieved successfully, false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.GetPreferredMirrorBlitMode">
+      <summary>
+        <para>Returns the XR display's preferred mirror blit mode.</para>
+      </summary>
+      <returns>
+        <para>Display subsystem's preferred blit mode.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.GetRenderPass(System.Int32,UnityEngine.XR.XRDisplaySubsystem/XRRenderPass&amp;)">
+      <summary>
+        <para>Gets an XRRenderPass of a specific index.</para>
+      </summary>
+      <param name="renderPassIndex">The index of the render pass to get.  Must be less than GetRenderPassCount.</param>
+      <param name="renderPass">Render pass to populate.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.GetRenderPassCount">
+      <summary>
+        <para>The number of XRRenderPass entries for this XR Display.</para>
+      </summary>
+      <returns>
+        <para>Count of render passes.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.GetRenderTextureForRenderPass(System.Int32)">
+      <summary>
+        <para>Given a render pass, return the RenderTexture instance backing that render pass. If the render pass is invalid, or if the render texture does not exist, return null.</para>
+      </summary>
+      <param name="renderPass">The render pass index to get the render texture for.</param>
+      <returns>
+        <para>The render texture associated with that render pass, or null if not found.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.GetSharedDepthTextureForRenderPass(System.Int32)">
+      <summary>
+        <para>Given a render pass, return the shared depth buffer RenderTexture instance backing that render pass. If the render pass is invalid, or if the render texture does not exist, return null.</para>
+      </summary>
+      <param name="renderPass">The render pass index to get the shared depth buffer render texture for.</param>
+      <returns>
+        <para>The shared depth buffer render texture associated with that render pass, or null if not found.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.XRDisplaySubsystem.LateLatchNode">
+      <summary>
+        <para>Type of node to be late latched.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.LateLatchNode.Head">
+      <summary>
+        <para>Head node type for late latching. This represents the camera node in the pose hierarchy.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.LateLatchNode.LeftHand">
+      <summary>
+        <para>Left hand node type for late latching. This represents the left hand anchor node in the pose hierarchy.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.LateLatchNode.RightHand">
+      <summary>
+        <para>Right hand node type for late latching. This represents the right hand anchor node in the pose hierarchy.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.MarkTransformLateLatched(UnityEngine.Transform,UnityEngine.XR.XRDisplaySubsystem/LateLatchNode)">
+      <summary>
+        <para>This marks a given GameObject's transform to be late latched in the next frame. Once marked for late latching, the GameObject transform and its descendants will be updated with the latest VR pose updates before rendering is submitted to the GPU.</para>
+      </summary>
+      <param name="transform">The transform of the GameObject to be late latched.</param>
+      <param name="nodeType">The late latch node type to be associated with the transform.</param>
+    </member>
+    <member name="T:UnityEngine.XR.XRDisplaySubsystem.ReprojectionMode">
+      <summary>
+        <para>The kind of reprojection the app requests to stabilize its holographic rendering relative to the user's head motion.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.ReprojectionMode.None">
+      <summary>
+        <para>Does not stabalize the image for the user's head motion and instead fixes it in the display. Note that this is only comfortable for users when you use it sparingly, for example when the only visible content is a small cursor.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.ReprojectionMode.OrientationOnly">
+      <summary>
+        <para>Stabalizes the image only for changes to the user's head orientation, ignores changes in position. This is best for body-locked content that you want to move with the user as they walk around, such as a 360-degree video.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.ReprojectionMode.PositionAndOrientation">
+      <summary>
+        <para>Stabalizes the image for changes to both the user's head position and orientation. This is best for world-locked content that you want to remain stationary as the user walks around.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.ReprojectionMode.Unspecified">
+      <summary>
+        <para>Does not specify the type of reprojection mode to use.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.SetFocusPlane(UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3)">
+      <summary>
+        <para>Sets a point in 3D space that acts as the focal point of the Scene for this frame. This helps to improve the visual fidelity of content around this point. You must set this value every frame.
+
+                Note that specifying body-locked content in focus improves the fidelity of body-locked content at the expense of content not locked to the body. This is especially apparent when the user moves.
+                </para>
+      </summary>
+      <param name="point">The position of the focal point in the Scene, relative to the Camera.</param>
+      <param name="normal">Surface normal of the plane being viewed at the focal point.</param>
+      <param name="velocity">A vector that describes how the focus point moves in the Scene at this point in time. This allows the device to compensate for both your head movement and the movement of the object in the Scene.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.SetMSAALevel(System.Int32)">
+      <summary>
+        <para>Set MSAA level for the DisplaySubsystem's render texture.</para>
+      </summary>
+      <param name="level">The MSAA level.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.SetPreferredMirrorBlitMode(System.Int32)">
+      <summary>
+        <para>Override the XR display's preferred mirror blit mode from the script.</para>
+      </summary>
+      <param name="blitMode">XRMirrorViewBlitMode to set.</param>
+    </member>
+    <member name="T:UnityEngine.XR.XRDisplaySubsystem.TextureLayout">
+      <summary>
+        <para>Flags that represents supported texture layout.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.TextureLayout.SeparateTexture2Ds">
+      <summary>
+        <para>Textures could be configured to multiple texture2D type.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.TextureLayout.SingleTexture2D">
+      <summary>
+        <para>Textures could be configured to a texture2D that represents multiple views.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.TextureLayout.Texture2DArray">
+      <summary>
+        <para>Textures could be configured to a texture2DArray type.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.TryGetAppGPUTimeLastFrame(System.Single&amp;)">
+      <summary>
+        <para>Retrieves the time the GPU has spent on executing commands from the application's last frame, as reported by the XR Plugin. Measured in seconds.</para>
+      </summary>
+      <param name="gpuTimeLastFrame">Outputs the time spent by the GPU during the last frame.</param>
+      <returns>
+        <para>Returns true if the GPU time spent on the last frame is available. Returns false if that time is unavailable.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.TryGetCompositorGPUTimeLastFrame">
+      <summary>
+        <para>Retrieves the amount of time that the GPU spent executing the compositor renderer during the last frame, as reported by the XR Plugin. Measured in seconds.</para>
+      </summary>
+      <param name="gpuTimeLastFrameCompositor">Outputs the time spent by the GPU for the compositor during the last frame.</param>
+      <returns>
+        <para>Returns true if the GPU time spent on the last frame is available. Returns false if that time is unavailable.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.TryGetCompositorGPUTimeLastFrame(System.Single&amp;)">
+      <summary>
+        <para>Retrieves the amount of time that the GPU spent executing the compositor renderer during the last frame, as reported by the XR Plugin. Measured in seconds.</para>
+      </summary>
+      <param name="gpuTimeLastFrameCompositor">Outputs the time spent by the GPU for the compositor during the last frame.</param>
+      <returns>
+        <para>Returns true if the GPU time spent on the last frame is available. Returns false if that time is unavailable.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.TryGetDisplayRefreshRate(System.Single&amp;)">
+      <summary>
+        <para>Retrieves the refresh rate of the display as reported by the XR Plugin.</para>
+      </summary>
+      <param name="hmdRefreshRate">Outputs the display refresh rate in Hz.</param>
+      <param name="displayRefreshRate"></param>
+      <returns>
+        <para>Returns true if the display refresh rate is available. Returns false if that rate is unavailable.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.TryGetDroppedFrameCount(System.Int32&amp;)">
+      <summary>
+        <para>Retrieves the number of dropped frames reported by the XR Plugin.</para>
+      </summary>
+      <param name="droppedFrameCount">Outputs the number of frames dropped since the last update.</param>
+      <returns>
+        <para>Returns true if the dropped frame count is available. Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.TryGetFramePresentCount(System.Int32&amp;)">
+      <summary>
+        <para>Retrieves the number of times the current frame has been drawn to the device as reported by the XR Plugin.</para>
+      </summary>
+      <param name="framePresentCount">Outputs the number of times the current frame has been presented.</param>
+      <returns>
+        <para>Returns true if the current frame count is available. Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.TryGetMotionToPhoton(System.Single&amp;)">
+      <summary>
+        <para>Retrieves the motion-to-photon value as reported by the XR Plugin.</para>
+      </summary>
+      <param name="motionToPhoton">Outputs the motion-to-photon value.</param>
+      <returns>
+        <para>Returns true if the motion-to-photon value is available. Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.XRDisplaySubsystem.XRBlitParams">
+      <summary>
+        <para>This struct  holds data for a single blit operation.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRBlitParams.destRect">
+      <summary>
+        <para>Destination Rect area that the blit operation wants to blit to.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRBlitParams.srcRect">
+      <summary>
+        <para>Source Rect area that the blit operation wants to blit from.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRBlitParams.srcTex">
+      <summary>
+        <para>Source render texture that the blit operation wants to blit from.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRBlitParams.srcTexArraySlice">
+      <summary>
+        <para>Describes source texture's desired array slice. Texture2D will have array slice 1.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.XRDisplaySubsystem.XRMirrorViewBlitDesc">
+      <summary>
+        <para>All information in this struct describes the desired mirror view blit operation.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRMirrorViewBlitDesc.blitParamsCount">
+      <summary>
+        <para>The number of XRBlitParams entries for this XRMirrorViewBlitDesc.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRMirrorViewBlitDesc.nativeBlitAvailable">
+      <summary>
+        <para>When this is true, the current display subsystem supports native blit and AddGraphicsThreadMirrorViewBlit must be called to perform native blit.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRMirrorViewBlitDesc.nativeBlitInvalidStates">
+      <summary>
+        <para>When this is true, display subsystem will modifiy the graphics state.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.XRMirrorViewBlitDesc.GetBlitParameter(System.Int32,UnityEngine.XR.XRDisplaySubsystem/XRBlitParams&amp;)">
+      <summary>
+        <para>Gets an XRBlitParams for a specific XRMirrorViewBlitDesc.</para>
+      </summary>
+      <param name="blitParameterIndex">Index of the blit parameter to get.</param>
+      <param name="blitParameter">XRBlitParams to populate.</param>
+    </member>
+    <member name="T:UnityEngine.XR.XRDisplaySubsystem.XRRenderParameter">
+      <summary>
+        <para>A single viewpoint that must be rendered by the render pipeline.  Contains a target viewport and texture array slice within a corresponding XR.XRDisplaySubsystem.XRRenderPass.renderTarget|renderTarget.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderParameter.isPreviousViewValid">
+      <summary>
+        <para>Determines whether XR.XRDisplaySubsystem.XRRenderParameter.previousView is valid for use in a frame.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderParameter.occlusionMesh">
+      <summary>
+        <para>Represents the area in screen-space that is not visible on the XR Display.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderParameter.previousView">
+      <summary>
+        <para>Previous frame view matrix for use in motion vector calculation. Use XR.XRDisplaySubsystem.XRRenderParameter.isPreviousViewValid to determine if previous view is valid for use. When late latching is enabled, previous view is also adjusted for late latching. </para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderParameter.projection">
+      <summary>
+        <para>The projection matrix that the render pipeline should use to render to the XR.XRDisplaySubsystem.XRRenderPass.renderTarget|renderTarget.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderParameter.textureArraySlice">
+      <summary>
+        <para>The slice of the output texture array that the render pipeline should render to.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderParameter.view">
+      <summary>
+        <para>World transform that the render pipeline should use to render to the XR.XRDisplaySubsystem.XRRenderPass.renderTarget|renderTarget.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderParameter.viewport">
+      <summary>
+        <para>Selects the viewport of the output texture XR.XRDisplaySubsystem.XRRenderPass.renderTarget|renderTarget.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass">
+      <summary>
+        <para>Contains configuration parameters about which view into the Scene the renderer should rasterize, and a render target (which can be a texture array) for the result of the rasterization.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass.cullingPassIndex">
+      <summary>
+        <para>An index that a render pipeline can pass to XR.XRDisplaySubsystem.GetCullingParameters to obtain culling information.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass.hasMotionVectorPass">
+      <summary>
+        <para>A boolean indicating if this render pass contains a motion-vector generation pass.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass.motionVectorRenderTarget">
+      <summary>
+        <para>The output render-texture target for the motion-vector generation render pass.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass.motionVectorRenderTargetDesc">
+      <summary>
+        <para>The render texture description for the target texture for the motion-vector render pass.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass.renderPassIndex">
+      <summary>
+        <para>The index of the render pass (originally passed in to XRDisplaySubsystem.GetRenderPass).</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass.renderTarget">
+      <summary>
+        <para>The output target for the render pass.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass.renderTargetDesc">
+      <summary>
+        <para>Descriptor that can be passed to RenderTexture.GetTemporary to create temporary textures that match the XR Display render target.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass.shouldFillOutDepth">
+      <summary>
+        <para>When this is false an optimal renderer can avoid resolving the depth buffer.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass.GetRenderParameter(UnityEngine.Camera,System.Int32,UnityEngine.XR.XRDisplaySubsystem/XRRenderParameter&amp;)">
+      <summary>
+        <para>Gets an XRRenderParameter for a specific XRRenderPass.</para>
+      </summary>
+      <param name="camera">Camera for the basis of the view and projection.</param>
+      <param name="renderParameterIndex">Index of the render parameter to get.  Must be less than GetRenderParameterCount.</param>
+      <param name="renderParameter">XRRenderParameter to populate.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystem.XRRenderPass.GetRenderParameterCount">
+      <summary>
+        <para>The number of XRRenderParameter entries for this XRRenderPass.</para>
+      </summary>
+      <returns>
+        <para>Count of render parameters.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.XRDisplaySubsystemDescriptor">
+      <summary>
+        <para>Class providing information about XRDisplaySubsystem registration.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystemDescriptor.disablesLegacyVr">
+      <summary>
+        <para>Indicates whether legacy VR settings must be disabled for the subsystem. Set to true if the Editor must disable the legacy VR settings  disabled; otherwise false.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDisplaySubsystemDescriptor.enableBackBufferMSAA">
+      <summary>
+        <para>Indicates whether MSAA must be resolved in the back buffer. Set to true if MSAA needs to be resolved in the back buffer; otherwise false.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystemDescriptor.GetAvailableMirrorBlitModeCount">
+      <summary>
+        <para>Get current display subsystem's total number of supported mirror blit modes.</para>
+      </summary>
+      <returns>
+        <para>Number of supported mirror blit modes.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDisplaySubsystemDescriptor.GetMirrorBlitModeByIndex(System.Int32,UnityEngine.XR.XRMirrorViewBlitModeDesc&amp;)">
+      <summary>
+        <para>Get a supported mirror view blit mode from the current display subsystem descriptor.</para>
+      </summary>
+      <param name="mode">XRMirrorViewBlitMode to populate.</param>
+      <param name="index">Index of the mirror blit mode to get.</param>
+    </member>
+    <member name="T:UnityEngine.XR.XRInputSubsystem">
+      <summary>
+        <para>XRInputSubsystem
+Instance is used to enable and disable the inputs coming from a specific plugin.</para>
+      </summary>
+    </member>
+    <member name="?:UnityEngine.XR.XRInputSubsystem.boundaryChanged(System.Action`1&lt;UnityEngine.XR.XRInputSubsystem&gt;)">
+      <summary>
+        <para>An event that takes the delegate instance that the XRInputSubsystem calls when it changes its tracking boundary.</para>
+      </summary>
+      <param name="value">Unity calls this delegate when the tracking boundary changes.</param>
+    </member>
+    <member name="?:UnityEngine.XR.XRInputSubsystem.trackingOriginUpdated(System.Action`1&lt;UnityEngine.XR.XRInputSubsystem&gt;)">
+      <summary>
+        <para>An event that takes the delegate instance that the XRInputSubsystem calls when it changes the origin it reports devices at.</para>
+      </summary>
+      <param name="value">Unity calls this delegate when the TrackingOriginFlags changes.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRInputSubsystem.GetSupportedTrackingOriginModes">
+      <summary>
+        <para>Gets all TrackingOriginModeFlags that this subsystem supports.</para>
+      </summary>
+      <returns>
+        <para>A single series of flags that contains all supported TrackingOriginModeFlags.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRInputSubsystem.GetTrackingOriginMode">
+      <summary>
+        <para>Gets the Tracking Origin Mode.</para>
+      </summary>
+      <returns>
+        <para>The Tracking Origin Mode that this subsystem is in.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRInputSubsystem.TryGetBoundaryPoints">
+      <summary>
+        <para>Gets the list of 3D position values that represents the SDK-set boundary.</para>
+      </summary>
+      <param name="boundary">The list of boundary points.</param>
+      <returns>
+        <para>True if this XRInputSubsystem supports boundary points and they are available.  Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRInputSubsystem.TryGetInputDevices(System.Collections.Generic.List`1&lt;UnityEngine.XR.InputDevice&gt;)">
+      <summary>
+        <para>Gets a list of all connected InputDevices reported by this XRInputSubsystem.</para>
+      </summary>
+      <param name="devices">The list of devices reported by this subsystem.</param>
+      <returns>
+        <para>True, if the XRInputSubsystem retrieves any devices.  Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRInputSubsystem.TryRecenter">
+      <summary>
+        <para>Centers the tracking features on all InputDevices to the current position and orientation of the head-mounted device.</para>
+      </summary>
+      <returns>
+        <para>True if the method recenters the XRInputSubsystem. Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRInputSubsystem.TrySetTrackingOriginMode">
+      <summary>
+        <para>Attempts to set the TrackingOriginModeFlags of the subsystem.</para>
+      </summary>
+      <param name="origin">The new TrackingOriginModeFlags that you'd like to change to.</param>
+      <returns>
+        <para>True if the method changes the origin. Returns false otherwise.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.XRInputSubsystemDescriptor">
+      <summary>
+        <para>Information about an Input subsystem.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRInputSubsystemDescriptor.disablesLegacyInput">
+      <summary>
+        <para>When true, will suppress legacy support for Daydream, Oculus, OpenVR, and Windows MR built directly into the Unity runtime from generating input. This is useful when adding an XRInputSubsystem that supports these devices.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.XRMeshSubsystem">
+      <summary>
+        <para>Allows external systems to provide dynamic meshes to Unity.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRMeshSubsystem.meshDensity">
+      <summary>
+        <para>Call this function to request a change in the density of the generated Meshes. Unity gives the density level as a value within the range 0.0 to 1.0 and the provider determines how to map that value to their implementation.
+Setting this value does not guarantee an immediate change in the density of any currently created Mesh and may only change the density for new or updated Meshes.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRMeshSubsystem.GenerateMeshAsync(UnityEngine.XR.MeshId,UnityEngine.Mesh,UnityEngine.MeshCollider,UnityEngine.XR.MeshVertexAttributes,System.Action`1&lt;UnityEngine.XR.MeshGenerationResult&gt;)">
+      <summary>
+        <para>Requests the generation of the Mesh with MeshId meshId. Unity calls onMeshGenerationComplete when generation finishes.</para>
+      </summary>
+      <param name="meshId">The MeshId of the mesh you wish to generate.</param>
+      <param name="mesh">The Mesh to write the results into.</param>
+      <param name="meshCollider">(Optional) The MeshCollider to populate with physics data. This may be null.</param>
+      <param name="attributes">The vertex attributes you'd like to use.</param>
+      <param name="onMeshGenerationComplete">The delegate to invoke when the generation completes.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRMeshSubsystem.GenerateMeshAsync(UnityEngine.XR.MeshId,UnityEngine.Mesh,UnityEngine.MeshCollider,UnityEngine.XR.MeshVertexAttributes,System.Action`1&lt;UnityEngine.XR.MeshGenerationResult&gt;,UnityEngine.XR.MeshGenerationOptions)">
+      <summary>
+        <para>Requests the generation of the Mesh with MeshId meshId. Unity calls onMeshGenerationComplete when generation finishes.</para>
+      </summary>
+      <param name="meshId">The MeshId of the mesh you wish to generate.</param>
+      <param name="mesh">The Mesh to write the results into.</param>
+      <param name="meshCollider">(Optional) The MeshCollider to populate with physics data. This may be null.</param>
+      <param name="attributes">The vertex attributes you'd like to use.</param>
+      <param name="onMeshGenerationComplete">The delegate to invoke when the generation completes.</param>
+      <param name="options">The mesh generation options.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRMeshSubsystem.GetUpdatedMeshTransforms(Unity.Collections.Allocator)">
+      <summary>
+        <para>Gets the updated mesh transforms.</para>
+      </summary>
+      <param name="allocator">The allocator to use for the returned NativeArray.</param>
+      <returns>
+        <para>A new NativeArray of MeshTransforms.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRMeshSubsystem.SetBoundingVolume(UnityEngine.Vector3,UnityEngine.Vector3)">
+      <summary>
+        <para>Set the bounding volume to restrict the space in which Unity generates and tracks Meshes.
+
+The bounding volume is an Axis Aligned Bounding Box (AABB) centered at the origin and extends in each dimension as defined in extents.
+
+The units of measurement depend on the provider.</para>
+      </summary>
+      <param name="origin"></param>
+      <param name="extents"></param>
+    </member>
+    <member name="M:UnityEngine.XR.XRMeshSubsystem.TryGetMeshInfos(System.Collections.Generic.List`1&lt;UnityEngine.XR.MeshInfo&gt;)">
+      <summary>
+        <para>Gets information about every Mesh the system currently tracks.</para>
+      </summary>
+      <param name="meshInfosOut">A List of MeshInfos to be filled. Passing null will throw an ArgumentNullException.</param>
+      <returns>
+        <para>True if the List was populated.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.XRMeshSubsystemDescriptor">
+      <summary>
+        <para>Information about an XRMeshSubsystem.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.XRMirrorViewBlitMode">
+      <summary>
+        <para>Engine reserved blit modes. Blit mode capabilities should be queried from XRDisplaySubsystemDescriptor.GetAvailableMirrorBlitModeCount and XRDisplaySubsystemDescriptor.GetMirrorBlitModeByIndex.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRMirrorViewBlitMode.Default">
+      <summary>
+        <para>Mirror view pass should blit platform default image to the mirror target.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRMirrorViewBlitMode.Distort">
+      <summary>
+        <para>Mirror view pass should blit after distortion pass image to the mirror target.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRMirrorViewBlitMode.LeftEye">
+      <summary>
+        <para>Mirror view pass should blit left eye image to the mirror target.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRMirrorViewBlitMode.None">
+      <summary>
+        <para>Mirror view pass should not be performed.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRMirrorViewBlitMode.RightEye">
+      <summary>
+        <para>Mirror view pass should blit right eye image to the mirror target.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRMirrorViewBlitMode.SideBySide">
+      <summary>
+        <para>Mirror view pass should blit left eye image and right eye image in a side-by-side fashion to the mirror target.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRMirrorViewBlitMode.SideBySideOcclusionMesh">
+      <summary>
+        <para>Mirror view pass should blit similar to side-by-side mode, but also showing not rendered pixels saved by the occlusion mesh.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.XRMirrorViewBlitModeDesc">
+      <summary>
+        <para>Struct that describes the mirror view blit mode.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRMirrorViewBlitModeDesc.blitMode">
+      <summary>
+        <para>Mirror view blit mode Id. For details, see XRMirrorViewBlitMode. In case of provider's custom blit mode, the value wouldn't be the reserved XRMirrorViewBlitMode.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRMirrorViewBlitModeDesc.blitModeDesc">
+      <summary>
+        <para>String that describes the mirror view blit mode.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.XRNode">
+      <summary>
+        <para>Enumeration of XR nodes which can be updated by XR input or sent haptic data.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRNode.CenterEye">
+      <summary>
+        <para>Node representing a point between the left and right eyes.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRNode.GameController">
+      <summary>
+        <para>Represents a tracked game Controller not associated with a specific hand.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRNode.HardwareTracker">
+      <summary>
+        <para>Represents a physical device that provides tracking data for objects to which it is attached.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRNode.Head">
+      <summary>
+        <para>Node representing the user's head.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRNode.LeftEye">
+      <summary>
+        <para>Node representing the left eye.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRNode.LeftHand">
+      <summary>
+        <para>Node representing the left hand.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRNode.RightEye">
+      <summary>
+        <para>Node representing the right eye.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRNode.RightHand">
+      <summary>
+        <para>Node representing the right hand.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRNode.TrackingReference">
+      <summary>
+        <para>Represents a stationary physical device that can be used as a point of reference in the tracked area.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRNodeState.acceleration">
+      <summary>
+        <para>Sets the vector representing the current acceleration of the tracked node.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRNodeState.angularAcceleration">
+      <summary>
+        <para>Sets the vector representing the current angular acceleration of the tracked node.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRNodeState.angularVelocity">
+      <summary>
+        <para>Sets the vector representing the current angular velocity of the tracked node.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRNodeState.nodeType">
+      <summary>
+        <para>The type of the tracked node as specified in XR.XRNode.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRNodeState.position">
+      <summary>
+        <para>Sets the vector representing the current position of the tracked node.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRNodeState.rotation">
+      <summary>
+        <para>Sets the quaternion representing the current rotation of the tracked node.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRNodeState.tracked">
+      <summary>
+        <para>
+          Set to true if the node is presently being tracked by the underlying XR system,
+and false if the node is not presently being tracked by the underlying XR system.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRNodeState.uniqueID">
+      <summary>
+        <para>The unique identifier of the tracked node.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRNodeState.velocity">
+      <summary>
+        <para>Sets the vector representing the current velocity of the tracked node.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRNodeState.TryGetAcceleration(UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Attempt to retrieve a vector representing the current acceleration of the tracked node.</para>
+      </summary>
+      <param name="acceleration"></param>
+      <returns>
+        <para>True if the acceleration was set in the output parameter. False if the acceleration is not available due to limitations of the underlying platform or if the node is not presently tracked.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRNodeState.TryGetAngularAcceleration(UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Attempt to retrieve a Vector3 representing the current angular acceleration of the tracked node.</para>
+      </summary>
+      <param name="angularAcceleration"></param>
+      <returns>
+        <para>True if the angular acceleration was set in the output parameter. False if the angular acceleration is not available due to limitations of the underlying platform or if the node is not presently tracked.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRNodeState.TryGetAngularVelocity(UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Attempt to retrieve a Vector3 representing the current angular velocity of the tracked node.</para>
+      </summary>
+      <param name="angularVelocity"></param>
+      <returns>
+        <para>True if the angular velocity was set in the output parameter. False if the angular velocity is not available due to limitations of the underlying platform or if the node is not presently tracked.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRNodeState.TryGetPosition(UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Attempt to retrieve a vector representing the current position of the tracked node.</para>
+      </summary>
+      <param name="position"></param>
+      <returns>
+        <para>True if the position was set in the output parameter. False if the position is not available due to limitations of the underlying platform or if the node is not presently tracked.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRNodeState.TryGetRotation(UnityEngine.Quaternion&amp;)">
+      <summary>
+        <para>Attempt to retrieve a quaternion representing the current rotation of the tracked node.</para>
+      </summary>
+      <param name="rotation"></param>
+      <returns>
+        <para>True if the rotation was set in the output parameter. False if the rotation is not available due to limitations of the underlying platform or if the node is not presently tracked.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRNodeState.TryGetVelocity(UnityEngine.Vector3&amp;)">
+      <summary>
+        <para>Attempt to retrieve a vector representing the current velocity of the tracked node.</para>
+      </summary>
+      <param name="velocity"></param>
+      <returns>
+        <para>True if the velocity was set in the output parameter. False if the velocity is not available due to limitations of the underlying platform or if the node is not presently tracked.</para>
+      </returns>
+    </member>
+  </members>
+</doc>

@@ -494,16 +494,16 @@ namespace OpenMod.Runtime
 
             void SetupDefaultLogger(LoggerConfiguration configuration)
             {
-                const string c_DefaultConsoleLogTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
-                const string c_DefaultFileLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
+                const string defaultConsoleLogTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
+                const string defaultFileLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
 
                 m_DateLogger ??= DateTime.Now;
                 var logFilePath = $"{WorkingDirectory}/logs/openmod-{m_DateLogger:yyyy-MM-dd-HH-mm-ss}.log"
                     .Replace(@"\", "/");
 
                 configuration
-                   .WriteTo.Async(c => c.Console(LogEventLevel.Information, c_DefaultConsoleLogTemplate))
-                   .WriteTo.Async(c => c.File(logFilePath, LogEventLevel.Information, outputTemplate: c_DefaultFileLogTemplate));
+                   .WriteTo.Async(c => c.Console(LogEventLevel.Information, defaultConsoleLogTemplate))
+                   .WriteTo.Async(c => c.File(logFilePath, LogEventLevel.Information, outputTemplate: defaultFileLogTemplate));
             }
         }
 

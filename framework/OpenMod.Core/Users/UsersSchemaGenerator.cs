@@ -51,10 +51,10 @@ namespace OpenMod.Core.Users
 
         private void ScheduleSchemaReload()
         {
-            var rolesSchemaFile = Path.Combine(m_OpenModHost.WorkingDirectory, SchemaConstants.c_UsersSchemaPath);
+            var rolesSchemaFile = Path.Combine(m_OpenModHost.WorkingDirectory, SchemaConstants.UsersSchemaPath);
 
             AsyncHelper.Schedule(
-                "Writing " + SchemaConstants.c_UsersSchemaPath,
+                "Writing " + SchemaConstants.UsersSchemaPath,
                 async () => await WriteSchemaAsync(rolesSchemaFile)
             );
         }

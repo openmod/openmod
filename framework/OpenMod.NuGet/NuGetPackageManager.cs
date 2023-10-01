@@ -732,10 +732,10 @@ namespace OpenMod.NuGet
                 var bag = new ConcurrentBag<PackageDependency>(dependencyInfo.Dependencies);
                 var deps = new ConcurrentBag<PackageIdentity>();
 
-                const int MaxConcurrencyTasks = 5;
+                const int maxConcurrencyTasks = 5;
 
                 // Task.WhenAll( dependencyInfo.Dependencies.Select ) starts all tasks, but which for some reason causes slower loading
-                var tasks = Enumerable.Range(0, Math.Min(MaxConcurrencyTasks, bag.Count))
+                var tasks = Enumerable.Range(0, Math.Min(maxConcurrencyTasks, bag.Count))
                     .Select(async _ =>
                     {
                         while (bag.TryTake(out var dependency))

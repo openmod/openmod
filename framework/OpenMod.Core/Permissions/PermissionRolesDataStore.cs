@@ -31,8 +31,8 @@ namespace OpenMod.Core.Permissions
         private IDisposable? m_FileChangeWatcher;
         private PermissionRolesData? m_CachedPermissionRolesData;
 
-        private readonly ISerializer _serializer;
-        private readonly IDeserializer _deserializer;
+        private readonly ISerializer m_Serializer;
+        private readonly IDeserializer m_Deserializer;
 
         public List<PermissionRoleData> Roles { get => m_CachedPermissionRolesData!.Roles ?? new List<PermissionRoleData>(); }
 
@@ -46,13 +46,13 @@ namespace OpenMod.Core.Permissions
             m_Logger = logger;
             m_Runtime = runtime;
 
-            _serializer = new SerializerBuilder()
+            m_Serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .WithTypeConverter(new YamlNullableEnumTypeConverter())
                 .DisableAliases()
                 .Build();
 
-            _deserializer = new DeserializerBuilder()
+            m_Deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .IgnoreUnmatchedProperties()
                 .WithTypeConverter(new YamlNullableEnumTypeConverter())
@@ -156,9 +156,9 @@ namespace OpenMod.Core.Permissions
                 return Task.FromResult<T?>(default);
             }
 
-            var serialized = _serializer.Serialize(dataObject);
+            var serialized = m_Serializer.Serialize(dataObject);
 
-            return Task.FromResult<T?>(_deserializer.Deserialize<T>(serialized));
+            return Task.FromResult<T?>(m_Deserializer.Deserialize<T>(serialized));
         }
 
         public virtual async Task ReloadAsync()
@@ -174,7 +174,7 @@ namespace OpenMod.Core.Permissions
                 await yamlDataStore.SaveAsync(
                     RolesKey,
                     m_CachedPermissionRolesData,
-                    header: $"# yaml-language-server: $schema=./{SchemaConstants.c_RolesSchemaPath}\n"
+                    header: $"# yaml-language-server: $schema=./{SchemaConstants.RolesSchemaPath}\n"
                 );
 
                 return;

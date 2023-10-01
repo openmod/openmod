@@ -1,0 +1,1980 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<doc>
+  <members>
+    <assembly>
+      <name>UnityEngine.AndroidJNIModule</name>
+    </assembly>
+    <member name="T:UnityEngine.Android.AndroidAssetPackError">
+      <summary>
+        <para>Values that indicate the type of Android asset pack error when the status is either AndroidAssetPackStatus.Failed or AndroidAssetPackStatus.Unknown.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.AccessDenied">
+      <summary>
+        <para>Indicates that the application does not have permission to download asset packs under the current device circumstances.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.ApiNotAvailable">
+      <summary>
+        <para>Indicates that the Asset Delivery API is not available.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.AppNotOwned">
+      <summary>
+        <para>Indicates that the end user does not own the application on the device.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.AppUnavailable">
+      <summary>
+        <para>Indicates that this application is unavailable in the Google's Play Store.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.DownloadNotFound">
+      <summary>
+        <para>Indicates that the requested download is not found.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.InsufficientStorage">
+      <summary>
+        <para>Indicates that there is not enough storage space on the device to download the Android asset pack.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.InternalError">
+      <summary>
+        <para>Indicates that unknown error occured while downloading an asset pack.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.InvalidRequest">
+      <summary>
+        <para>Indicates that the request was invalid.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.NetworkError">
+      <summary>
+        <para>Indicates that the Android asset pack is not accessible because there was an error related to the network connection.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.NetworkUnrestricted">
+      <summary>
+        <para>Indicates that the app requested to use mobile data while there were no Android asset packs waiting for WiFi.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.NoError">
+      <summary>
+        <para>Indicates that there is no error.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.PackUnavailable">
+      <summary>
+        <para>Indicates that the requested Android asset pack is not available in the Google Play Store.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackError.PlayStoreNotFound">
+      <summary>
+        <para>Indicates that the device does not have the Play Store application installed or has an unofficial version.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Android.AndroidAssetPackInfo">
+      <summary>
+        <para>Represents the download progress of a single Android asset pack.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPackInfo.bytesDownloaded">
+      <summary>
+        <para>The downloaded size of the Android asset pack in bytes.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPackInfo.error">
+      <summary>
+        <para>Indicates an error which the device encountered when downloading the Android asset pack.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPackInfo.name">
+      <summary>
+        <para>The name of the Android asset pack that the device is downloading.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPackInfo.size">
+      <summary>
+        <para>The total size of the Android asset pack in bytes.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPackInfo.status">
+      <summary>
+        <para>The status of the Android asset pack that the device is downloading.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPackInfo.transferProgress">
+      <summary>
+        <para>The transfering progress of the downloaded Android asset pack.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Android.AndroidAssetPacks">
+      <summary>
+        <para>Provides methods for handling Android asset packs.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPacks.coreUnityAssetPacksDownloaded">
+      <summary>
+        <para>Checks if all core Unity asset packs are downloaded.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidAssetPacks.CancelAssetPackDownload(System.String[])">
+      <summary>
+        <para>Cancels Android asset pack downloads.</para>
+      </summary>
+      <param name="assetPackNames">The array of names of the Android asset packs to cancel the download for.</param>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidAssetPacks.DownloadAssetPackAsync(System.String[])">
+      <summary>
+        <para>Downloads Android asset packs.</para>
+      </summary>
+      <param name="assetPackNames">The array of names of Android asset packs to download.</param>
+      <returns>
+        <para>Returns an object that represents the download operation. If you yield this object inside a coroutine, the coroutine pauses until the operation is complete.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidAssetPacks.DownloadAssetPackAsync(System.String[],System.Action`1&lt;UnityEngine.Android.AndroidAssetPackInfo&gt;)">
+      <summary>
+        <para>Downloads Android asset packs.</para>
+      </summary>
+      <param name="assetPackNames">The array of names of Android asset packs to download.</param>
+      <param name="callback">The callback method to inform about download progress. It gets called multiple times for each asset pack during its download. The callback method must have a parameter of AndroidAssetPackInfo type.
+The default value is null.</param>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidAssetPacks.GetAssetPackPath(System.String)">
+      <summary>
+        <para>Gets the full path to the location where the device stores the assets for the Android asset pack.</para>
+      </summary>
+      <param name="assetPackName">The name of the Android asset pack to get path.</param>
+      <returns>
+        <para>Returns the full path to the location where the device stores the assets for the Android asset pack. If the asset pack you specify is not on the device, or if it does not use the fast-follow or on-demand delivery type, this returns an empty string.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidAssetPacks.GetAssetPackStateAsync(System.String[])">
+      <summary>
+        <para>Queries the state of Android asset packs.</para>
+      </summary>
+      <param name="assetPackNames">The array of names of the Android asset packs to query the state of.</param>
+      <returns>
+        <para>Returns an object that represents the query operation. If you yield this object inside a coroutine, the coroutine pauses until the operation is complete.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidAssetPacks.GetAssetPackStateAsync(System.String[],System.Action`2&lt;System.UInt64,UnityEngine.Android.AndroidAssetPackState[]&gt;)">
+      <summary>
+        <para>Queries the state of Android asset packs.</para>
+      </summary>
+      <param name="assetPackNames">The array of names of the Android asset packs to query the state of.</param>
+      <param name="callback">The callback method to get the result. Unity raises this callback once when the query is complete and the callback receives the state of queried Android asset packs. The callback method must have two parameters:
+
+* A ulong type parameter which indicates the total size of the queried asset packs.
+* An array of AndroidAssetPackState which contains the state of each queried asset pack.
+
+</param>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidAssetPacks.GetCoreUnityAssetPackNames">
+      <summary>
+        <para>Gets the name of every core Unity asset pack built for this application that use either the fast-follow or on-demand delivery type.</para>
+      </summary>
+      <returns>
+        <para>Returns an array of asset pack names for core Unity asset packs with the fast-follow or on-demand delivery type. If Unity did not create any core asset packs for this application with previously mentioned delivery types, or if the PlayCore plugin is missing, this returns an empty array.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidAssetPacks.RemoveAssetPack(System.String)">
+      <summary>
+        <para>Removes Android asset pack.</para>
+      </summary>
+      <param name="assetPackName">The name of the Android asset pack to remove.</param>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidAssetPacks.RequestToUseMobileDataAsync">
+      <summary>
+        <para>Requests to use mobile data to download Android asset packs.</para>
+      </summary>
+      <returns>
+        <para>Returns an object that represents the request operation. If you yield this object inside a coroutine, the coroutine pauses until the operation is complete.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidAssetPacks.RequestToUseMobileDataAsync(System.Action`1&lt;UnityEngine.Android.AndroidAssetPackUseMobileDataRequestResult&gt;)">
+      <summary>
+        <para>Requests to use mobile data to download Android asset packs.</para>
+      </summary>
+      <param name="callback">The callback method to get the result. The callback method must have an AndroidAssetPackUseMobileDataRequestResult parameter. This contains the value that indicates the end user's choice. The application raises this callback a single time after the end user submits their decision.</param>
+    </member>
+    <member name="T:UnityEngine.Android.AndroidAssetPackState">
+      <summary>
+        <para>Represents the state of a single Android asset pack.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPackState.error">
+      <summary>
+        <para>Indicates an error code that describes what happened when querying the Android asset pack state.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPackState.name">
+      <summary>
+        <para>The name of the Android asset pack the status query is for.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPackState.status">
+      <summary>
+        <para>The status of the Android asset pack.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Android.AndroidAssetPackStatus">
+      <summary>
+        <para>Values that indicate the status of an Android asset pack.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackStatus.Canceled">
+      <summary>
+        <para>Indicates that the Android asset pack download is canceled.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackStatus.Completed">
+      <summary>
+        <para>Indicates that the device has downloaded the Android asset pack and the asset pack is available to the application.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackStatus.Downloading">
+      <summary>
+        <para>Indicates that the device is downloading the Android asset pack.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackStatus.Failed">
+      <summary>
+        <para>Indicates that the device failed to download the Android asset pack.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackStatus.NotInstalled">
+      <summary>
+        <para>Indicates that the Android asset pack is not installed.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackStatus.Pending">
+      <summary>
+        <para>Indicates that the Android asset pack status should soon change.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackStatus.Transferring">
+      <summary>
+        <para>Indicates that the device has downloaded the Android asset pack and is unpacking the asset pack to its final location.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackStatus.Unknown">
+      <summary>
+        <para>Indicates that the Android asset pack is not available for the application.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidAssetPackStatus.WaitingForWifi">
+      <summary>
+        <para>Indicates that the device has paused the Android asset pack download until it connects to the WiFi network.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Android.AndroidAssetPackUseMobileDataRequestResult">
+      <summary>
+        <para>Represents the choice of an end user that indicates if your application can use mobile data to download Android asset packs.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidAssetPackUseMobileDataRequestResult.allowed">
+      <summary>
+        <para>Indicates if mobile data can be used to download Android asset packs.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Android.AndroidDevice">
+      <summary>
+        <para>Interface into Android specific functionality.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.AndroidDevice.hardwareType">
+      <summary>
+        <para>When running on a Chrome OS device, hardwareType is set to AndroidHardwareType.ChromeOS. It is set to AndroidHardwareType.Generic in all other cases.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Android.AndroidDevice.SetSustainedPerformanceMode(System.Boolean)">
+      <summary>
+        <para>Set sustained performance mode. When enabled, sustained performance mode is intended to provide a consistent level of performance for a prolonged amount of time.</para>
+      </summary>
+      <param name="enabled"></param>
+    </member>
+    <member name="T:UnityEngine.Android.AndroidHardwareType">
+      <summary>
+        <para>AndroidHardwareType describes the type of Android device on which the app is running.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidHardwareType.ChromeOS">
+      <summary>
+        <para>Chrome OS devices are capable of running Android apps and typically have a laptop form factor.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.AndroidHardwareType.Generic">
+      <summary>
+        <para>The Generic category includes all other Android devices.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Android.DiagnosticsReporting">
+      <summary>
+        <para>Class with options for reporting diagnostics information to the Android system.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Android.DiagnosticsReporting.CallReportFullyDrawn">
+      <summary>
+        <para>Calls &lt;a href="https:developer.android.comreferenceandroidappActivity#reportFullyDrawn()"&gt;reportFullyDrawn()&lt;/a&gt; on the main Activity in the Android application, which is used for diagnostic and optimization purposes in Android.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Android.DownloadAssetPackAsyncOperation">
+      <summary>
+        <para>Represents an asynchronous Android asset pack download operation. AndroidAssetPacks.DownloadAssetPackAsync returns an instance of this class.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.DownloadAssetPackAsyncOperation.downloadedAssetPacks">
+      <summary>
+        <para>Gets the names of Android asset packs downloaded by this operation.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.DownloadAssetPackAsyncOperation.downloadFailedAssetPacks">
+      <summary>
+        <para>Gets the names of Android asset packs that failed to download.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.DownloadAssetPackAsyncOperation.isDone">
+      <summary>
+        <para>Checks if the operation is finished.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.DownloadAssetPackAsyncOperation.keepWaiting">
+      <summary>
+        <para>Checks if the operation is still running.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.DownloadAssetPackAsyncOperation.progress">
+      <summary>
+        <para>Gets the progress of the operation.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Android.GetAssetPackStateAsyncOperation">
+      <summary>
+        <para>Represents an asynchronous Android asset pack state request operation. AndroidAssetPacks.GetAssetPackStateAsync returns an instance of this class.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.GetAssetPackStateAsyncOperation.isDone">
+      <summary>
+        <para>Checks if the operation is finished.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.GetAssetPackStateAsyncOperation.keepWaiting">
+      <summary>
+        <para>Checks if the operation is still running.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.GetAssetPackStateAsyncOperation.size">
+      <summary>
+        <para>Gets the total size in bytes of all Android asset packs that had their status checked by this operation.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.GetAssetPackStateAsyncOperation.states">
+      <summary>
+        <para>Gets the states of all Android asset packs that had their status checked by this operation.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Android.Permission">
+      <summary>
+        <para>Structure describing a permission that requires user authorization.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.Permission.Camera">
+      <summary>
+        <para>Used when requesting permission or checking if permission has been granted to use the camera.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.Permission.CoarseLocation">
+      <summary>
+        <para>Used when requesting permission or checking if permission has been granted to use the users location with coarse granularity.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.Permission.ExternalStorageRead">
+      <summary>
+        <para>Used when requesting permission or checking if permission has been granted to read from external storage such as a SD card.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.Permission.ExternalStorageWrite">
+      <summary>
+        <para>Used when requesting permission or checking if permission has been granted to write to external storage such as a SD card.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Android.Permission.FineLocation">
+      <summary>
+        <para>Used when requesting permission or checking if permission has been granted to use the users location with high precision.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Android.Permission.HasUserAuthorizedPermission(System.String)">
+      <summary>
+        <para>Check if the user has granted access to a device resource or information that requires authorization.</para>
+      </summary>
+      <param name="permission">A string representing the permission to request. For permissions which Unity has not predefined, you can provide Android's in-built permission strings such as "android.permission.READ_CONTACTS". For a list of permission strings, refer to Android's documentation on &lt;a href="https:developer.android.comreferenceandroidManifest.permission"&gt; Manifest.permission&lt;a&gt;.</param>
+      <returns>
+        <para>Whether the requested permission has been granted.</para>
+      </returns>
+    </member>
+    <member name="F:UnityEngine.Android.Permission.Microphone">
+      <summary>
+        <para>Used when requesting permission or checking if permission has been granted to use the microphone.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Android.Permission.RequestUserPermission(System.String)">
+      <summary>
+        <para>Request the user to grant access to a device resource or information that requires authorization.</para>
+      </summary>
+      <param name="permission">A string that describes the permission to request. For permissions which Unity has not predefined, you can provide Android's in-built permission strings such as "android.permission.READ_CONTACTS". For a list of permission strings, refer to Android's documentation on &lt;a href="https:developer.android.comreferenceandroidManifest.permission"&gt; Manifest.permission&lt;a&gt;.</param>
+      <param name="callbacks">An instance of callbacks invoked when permission request is executed.</param>
+    </member>
+    <member name="M:UnityEngine.Android.Permission.RequestUserPermission(System.String,UnityEngine.Android.PermissionCallbacks)">
+      <summary>
+        <para>Request the user to grant access to a device resource or information that requires authorization.</para>
+      </summary>
+      <param name="permission">A string that describes the permission to request. For permissions which Unity has not predefined, you can provide Android's in-built permission strings such as "android.permission.READ_CONTACTS". For a list of permission strings, refer to Android's documentation on &lt;a href="https:developer.android.comreferenceandroidManifest.permission"&gt; Manifest.permission&lt;a&gt;.</param>
+      <param name="callbacks">An instance of callbacks invoked when permission request is executed.</param>
+    </member>
+    <member name="M:UnityEngine.Android.Permission.RequestUserPermissions(System.String[],UnityEngine.Android.PermissionCallbacks)">
+      <summary>
+        <para>Request the user to grant access to multiple device resources or information that requires authorization.</para>
+      </summary>
+      <param name="callbacks">An instance of callbacks invoked when permission request is executed.</param>
+      <param name="permissions">An array of strings that describe the permissions to request.</param>
+    </member>
+    <member name="M:UnityEngine.Android.Permission.RequestUserPermissions(System.String[])">
+      <summary>
+        <para>Request the user to grant access to multiple device resources or information that requires authorization.</para>
+      </summary>
+      <param name="callbacks">An instance of callbacks invoked when permission request is executed.</param>
+      <param name="permissions">An array of strings that describe the permissions to request.</param>
+    </member>
+    <member name="T:UnityEngine.Android.PermissionCallbacks">
+      <summary>
+        <para>Contains callbacks invoked when permission request is executed using Permission.RequestUserPermission.</para>
+      </summary>
+    </member>
+    <member name="?:UnityEngine.Android.PermissionCallbacks.PermissionDenied(System.Action`1&lt;System.String&gt;)">
+      <summary>
+        <para>Executed when user chooses Deny when requesting permission.</para>
+      </summary>
+      <param name="value"></param>
+    </member>
+    <member name="?:UnityEngine.Android.PermissionCallbacks.PermissionDeniedAndDontAskAgain(System.Action`1&lt;System.String&gt;)">
+      <summary>
+        <para>Executed when user chooses Deny And Don't Ask Again (on newer Android versions it is expressed by Denying for the second time) when requesting permission or the operating system determines that it should not be requested again.
+If this event is not subscribed to, PermissionCallbacks.PermissionDenied will be fired as a fallback.
+Unreliable on newer Android versions, recommended to only connect to PermissionCallbacks.PermissionDenied.</para>
+      </summary>
+      <param name="value">Permission name.</param>
+    </member>
+    <member name="?:UnityEngine.Android.PermissionCallbacks.PermissionGranted(System.Action`1&lt;System.String&gt;)">
+      <summary>
+        <para>Executed when user chooses Allow when requesting permission.</para>
+      </summary>
+      <param name="value"></param>
+    </member>
+    <member name="T:UnityEngine.Android.RequestToUseMobileDataAsyncOperation">
+      <summary>
+        <para>Represents an asynchronous operation that requests to use mobile data to download Android asset packs.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.RequestToUseMobileDataAsyncOperation.isDone">
+      <summary>
+        <para>Checks if the operation is finished.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.RequestToUseMobileDataAsyncOperation.keepWaiting">
+      <summary>
+        <para>Checks if the operation is still running.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Android.RequestToUseMobileDataAsyncOperation.result">
+      <summary>
+        <para>Indicates whether the end user allowed the application to use mobile data to download Android asset packs.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.AndroidJavaClass">
+      <summary>
+        <para>AndroidJavaClass is the Unity representation of a generic instance of java.lang.Class.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaClass.#ctor(System.String)">
+      <summary>
+        <para>Construct an AndroidJavaClass from the class name.</para>
+      </summary>
+      <param name="className">Specifies the Java class name (e.g. &lt;tt&gt;java.lang.String&lt;/tt&gt;).</param>
+    </member>
+    <member name="T:UnityEngine.AndroidJavaObject">
+      <summary>
+        <para>AndroidJavaObject is the Unity representation of a generic instance of java.lang.Object.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.Call(System.String,System.Object[])">
+      <summary>
+        <para>Calls a Java method on an object (non-static).</para>
+      </summary>
+      <param name="methodName">Specifies which method to call.</param>
+      <param name="args">An array of parameters passed to the method.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.Call(System.String,System.Object[])">
+      <summary>
+        <para>Call a Java method on an object.</para>
+      </summary>
+      <param name="methodName">Specifies which method to call.</param>
+      <param name="args">An array of parameters passed to the method.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.CallStatic(System.String,System.Object[])">
+      <summary>
+        <para>Call a static Java method on a class.</para>
+      </summary>
+      <param name="methodName">Specifies which method to call.</param>
+      <param name="args">An array of parameters passed to the method.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.CallStatic(System.String,System.Object[])">
+      <summary>
+        <para>Call a static Java method on a class.</para>
+      </summary>
+      <param name="methodName">Specifies which method to call.</param>
+      <param name="args">An array of parameters passed to the method.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.CloneReference">
+      <summary>
+        <para>Creates a clone of the C# object that references the same Java object.</para>
+      </summary>
+      <returns>
+        <para>A new C# object which references the same Java object as the original instance.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.#ctor(System.String,System.Object[])">
+      <summary>
+        <para>Construct an AndroidJavaObject based on the name of the class.</para>
+      </summary>
+      <param name="className">Specifies the Java class name (e.g. "&lt;tt&gt;java.lang.String&lt;tt&gt;" or "&lt;tt&gt;javalangString&lt;tt&gt;").</param>
+      <param name="args">An array of parameters passed to the constructor.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.Dispose">
+      <summary>
+        <para>IDisposable callback.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.Get(System.String)">
+      <summary>
+        <para>Get the value of a field in an object (non-static).</para>
+      </summary>
+      <param name="fieldName">The name of the field (e.g. int counter; would have fieldName = "counter").</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.GetRawClass">
+      <summary>
+        <para>Retrieves the raw &lt;tt&gt;jclass&lt;/tt&gt; pointer to the Java class.
+
+Note: Using raw JNI functions requires advanced knowledge of the Android Java Native Interface (JNI). Please take note.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.GetRawObject">
+      <summary>
+        <para>Retrieves the raw &lt;tt&gt;jobject&lt;/tt&gt; pointer to the Java object.
+
+Note: Using raw JNI functions requires advanced knowledge of the Android Java Native Interface (JNI). Please take note.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.GetStatic(System.String)">
+      <summary>
+        <para>Get the value of a static field in an object type.</para>
+      </summary>
+      <param name="fieldName">The name of the field (e.g. &lt;i&gt;int counter;&lt;/i&gt; would have fieldName = "counter").</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.Set(System.String,FieldType)">
+      <summary>
+        <para>Set the value of a field in an object (non-static).</para>
+      </summary>
+      <param name="fieldName">The name of the field (e.g. int counter; would have fieldName = "counter").</param>
+      <param name="val">The value to assign to the field. It has to match the field type.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaObject.SetStatic(System.String,FieldType)">
+      <summary>
+        <para>Set the value of a static field in an object type.</para>
+      </summary>
+      <param name="fieldName">The name of the field (e.g. int counter; would have fieldName = "counter").</param>
+      <param name="val">The value to assign to the field. It has to match the field type.</param>
+    </member>
+    <member name="T:UnityEngine.AndroidJavaProxy">
+      <summary>
+        <para>This class can be used to implement any java interface. Any java vm method invocation matching the interface on the proxy object will automatically be passed to the c# implementation.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaProxy.equals(UnityEngine.AndroidJavaObject)">
+      <summary>
+        <para>The equivalent of the java.lang.Object equals() method.</para>
+      </summary>
+      <param name="obj"></param>
+      <returns>
+        <para>Returns true when the objects are equal and false if otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaProxy.hashCode">
+      <summary>
+        <para>The equivalent of the java.lang.Object hashCode() method.</para>
+      </summary>
+      <returns>
+        <para>Returns the hash code of the java proxy object.</para>
+      </returns>
+    </member>
+    <member name="F:UnityEngine.AndroidJavaProxy.javaInterface">
+      <summary>
+        <para>Java interface implemented by the proxy.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaProxy.toString">
+      <summary>
+        <para>The equivalent of the java.lang.Object toString() method.</para>
+      </summary>
+      <returns>
+        <para>Returns C# class name + " &lt;c# proxy java object&gt;".</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaProxy.#ctor(System.String)">
+      <summary>
+        <para></para>
+      </summary>
+      <param name="javaInterface">Java interface to be implemented by the proxy.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaProxy.#ctor(UnityEngine.AndroidJavaClass)">
+      <summary>
+        <para></para>
+      </summary>
+      <param name="javaInterface">Java interface to be implemented by the proxy.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaProxy.Invoke(System.String,System.Object[])">
+      <summary>
+        <para>Called by the java vm whenever a method is invoked on the java proxy interface. You can override this to run special code on method invocation, or you can leave the implementation as is, and leave the default behavior which is to look for c# methods matching the signature of the java method.</para>
+      </summary>
+      <param name="methodName">Name of the invoked java method.</param>
+      <param name="args">Arguments passed from the java vm - converted into AndroidJavaObject, AndroidJavaClass or a primitive.</param>
+      <param name="javaArgs">Arguments passed from the java vm - all objects are represented by AndroidJavaObject, int for instance is represented by a java.lang.Integer object.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJavaProxy.Invoke(System.String,UnityEngine.AndroidJavaObject[])">
+      <summary>
+        <para>Called by the java vm whenever a method is invoked on the java proxy interface. You can override this to run special code on method invocation, or you can leave the implementation as is, and leave the default behavior which is to look for c# methods matching the signature of the java method.</para>
+      </summary>
+      <param name="methodName">Name of the invoked java method.</param>
+      <param name="args">Arguments passed from the java vm - converted into AndroidJavaObject, AndroidJavaClass or a primitive.</param>
+      <param name="javaArgs">Arguments passed from the java vm - all objects are represented by AndroidJavaObject, int for instance is represented by a java.lang.Integer object.</param>
+    </member>
+    <member name="T:UnityEngine.AndroidJavaRunnable">
+      <summary>
+        <para>AndroidJavaRunnable is the Unity representation of a java.lang.Runnable object.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.AndroidJNI">
+      <summary>
+        <para>'Raw' JNI interface to Android Java VM from Unity scripting (C#).
+
+Note: Using raw JNI functions requires advanced knowledge of the Android Java Native Interface (JNI). Please take note.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.AllocObject(System.IntPtr)">
+      <summary>
+        <para>Allocates a new Java object without invoking any of the constructors for the object.</para>
+      </summary>
+      <param name="clazz"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.AttachCurrentThread">
+      <summary>
+        <para>Attaches the current thread to a Java (Dalvik) VM.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallBooleanMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallByteMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallCharMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallDoubleMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallFloatMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallIntMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallLongMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallObjectMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallSByteMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallShortMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticBooleanMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticByteMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticCharMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticDoubleMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticFloatMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticIntMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticLongMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticObjectMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticSByteMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticShortMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticStringMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStaticVoidMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Invokes the specified &lt;tt&gt;methodID&lt;tt&gt; static method on a Java object, optionally passing in an array of arguments (&lt;tt&gt;args&lt;tt&gt;).</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallStringMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.CallVoidMethod(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Calls a Java instance method defined by &lt;tt&gt;methodID&lt;tt&gt;, optionally passing an array of arguments (&lt;tt&gt;args&lt;tt&gt;) to the method.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.DeleteGlobalRef(System.IntPtr)">
+      <summary>
+        <para>Deletes the global reference pointed to by &lt;tt&gt;obj&lt;/tt&gt;.</para>
+      </summary>
+      <param name="obj"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.DeleteLocalRef(System.IntPtr)">
+      <summary>
+        <para>Deletes the local reference pointed to by &lt;tt&gt;obj&lt;/tt&gt;.</para>
+      </summary>
+      <param name="obj"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.DeleteWeakGlobalRef(System.IntPtr)">
+      <summary>
+        <para>Deletes the global weak reference pointed to by &lt;tt&gt;obj&lt;/tt&gt;.</para>
+      </summary>
+      <param name="obj"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.DetachCurrentThread">
+      <summary>
+        <para>Detaches the current thread from a Java (Dalvik) VM.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.EnsureLocalCapacity(System.Int32)">
+      <summary>
+        <para>Ensures that at least a given number of local references can be created in the current thread.</para>
+      </summary>
+      <param name="capacity"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ExceptionClear">
+      <summary>
+        <para>Clears any exception that is currently being thrown.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ExceptionDescribe">
+      <summary>
+        <para>Prints an exception and a backtrace of the stack to the &lt;tt&gt;logcat&lt;/tt&gt;</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ExceptionOccurred">
+      <summary>
+        <para>Determines if an exception is being thrown.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FatalError(System.String)">
+      <summary>
+        <para>Raises a fatal error and does not expect the VM to recover. This function does not return.</para>
+      </summary>
+      <param name="message"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FindClass(System.String)">
+      <summary>
+        <para>This function loads a locally-defined class.</para>
+      </summary>
+      <param name="name"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromBooleanArray(System.IntPtr)">
+      <summary>
+        <para>Converts a Java array of &lt;tt&gt;boolean&lt;/tt&gt; to a managed array of System.Boolean.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromByteArray(System.IntPtr)">
+      <summary>
+        <para>Converts a Java array of &lt;tt&gt;byte&lt;/tt&gt; to a managed array of System.Byte.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromCharArray(System.IntPtr)">
+      <summary>
+        <para>Converts a Java array of &lt;tt&gt;char&lt;/tt&gt; to a managed array of System.Char.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromDoubleArray(System.IntPtr)">
+      <summary>
+        <para>Converts a Java array of &lt;tt&gt;double&lt;/tt&gt; to a managed array of System.Double.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromFloatArray(System.IntPtr)">
+      <summary>
+        <para>Converts a Java array of &lt;tt&gt;float&lt;/tt&gt; to a managed array of System.Single.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromIntArray(System.IntPtr)">
+      <summary>
+        <para>Converts a Java array of &lt;tt&gt;int&lt;/tt&gt; to a managed array of System.Int32.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromLongArray(System.IntPtr)">
+      <summary>
+        <para>Converts a Java array of &lt;tt&gt;long&lt;/tt&gt; to a managed array of System.Int64.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromObjectArray(System.IntPtr)">
+      <summary>
+        <para>Converts a Java array of &lt;tt&gt;java.lang.Object&lt;/tt&gt; to a managed array of System.IntPtr, representing Java objects.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromReflectedField(System.IntPtr)">
+      <summary>
+        <para>Converts a &lt;tt&gt;java.lang.reflect.Field&lt;/tt&gt; to a field ID.</para>
+      </summary>
+      <param name="refField"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromReflectedMethod(System.IntPtr)">
+      <summary>
+        <para>Converts a &lt;tt&gt;java.lang.reflect.Method&lt;tt&gt; or &lt;tt&gt;java.lang.reflect.Constructor&lt;tt&gt; object to a method ID.</para>
+      </summary>
+      <param name="refMethod"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromSByteArray(System.IntPtr)">
+      <summary>
+        <para>Converts a Java array of &lt;tt&gt;byte&lt;/tt&gt; to a managed array of System.SByte.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.FromShortArray(System.IntPtr)">
+      <summary>
+        <para>Converts a Java array of &lt;tt&gt;short&lt;/tt&gt; to a managed array of System.Int16.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetArrayLength(System.IntPtr)">
+      <summary>
+        <para>Returns the number of elements in the array.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetBooleanArrayElement(System.IntPtr,System.Int32)">
+      <summary>
+        <para>Returns the value of one element of a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetBooleanField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetByteArrayElement(System.IntPtr,System.Int32)">
+      <summary>
+        <para>Returns the value of one element of a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetByteField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetCharArrayElement(System.IntPtr,System.Int32)">
+      <summary>
+        <para>Returns the value of one element of a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetCharField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetDoubleArrayElement(System.IntPtr,System.Int32)">
+      <summary>
+        <para>Returns the value of one element of a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetDoubleField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetFieldID(System.IntPtr,System.String,System.String)">
+      <summary>
+        <para>Returns the field ID for an instance (nonstatic) field of a class.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="name"></param>
+      <param name="sig"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetFloatArrayElement(System.IntPtr,System.Int32)">
+      <summary>
+        <para>Returns the value of one element of a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetFloatField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetIntArrayElement(System.IntPtr,System.Int32)">
+      <summary>
+        <para>Returns the value of one element of a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetIntField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetLongArrayElement(System.IntPtr,System.Int32)">
+      <summary>
+        <para>Returns the value of one element of a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetLongField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetMethodID(System.IntPtr,System.String,System.String)">
+      <summary>
+        <para>Returns the method ID for an instance (nonstatic) method of a class or interface.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="name"></param>
+      <param name="sig"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetObjectArrayElement(System.IntPtr,System.Int32)">
+      <summary>
+        <para>Returns an element of an &lt;tt&gt;Object&lt;/tt&gt; array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetObjectClass(System.IntPtr)">
+      <summary>
+        <para>Returns the class of an object.</para>
+      </summary>
+      <param name="obj"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetObjectField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetSByteArrayElement(System.IntPtr,System.Int32)">
+      <summary>
+        <para>Returns the value of one element of a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetSByteField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetShortArrayElement(System.IntPtr,System.Int32)">
+      <summary>
+        <para>Returns the value of one element of a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetShortField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticBooleanField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticByteField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticCharField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticDoubleField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticFieldID(System.IntPtr,System.String,System.String)">
+      <summary>
+        <para>Returns the field ID for a static field of a class.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="name"></param>
+      <param name="sig"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticFloatField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticIntField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticLongField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticMethodID(System.IntPtr,System.String,System.String)">
+      <summary>
+        <para>Returns the method ID for a static method of a class.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="name"></param>
+      <param name="sig"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticObjectField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticSByteField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticShortField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStaticStringField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of a static field of an object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStringChars(System.IntPtr)">
+      <summary>
+        <para>Returns a pointer to the array of Unicode characters of the string. This pointer is valid until ReleaseStringchars() is called.</para>
+      </summary>
+      <param name="str"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStringField(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Returns the value of an instance (nonstatic) field of an object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStringLength(System.IntPtr)">
+      <summary>
+        <para>Returns the length (the count of Unicode characters) of a Java string.</para>
+      </summary>
+      <param name="str"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStringUTFChars(System.IntPtr)">
+      <summary>
+        <para>Returns a managed string object representing the string in modified UTF-8 encoding.</para>
+      </summary>
+      <param name="str"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetStringUTFLength(System.IntPtr)">
+      <summary>
+        <para>Returns the length in bytes of the modified UTF-8 representation of a string.</para>
+      </summary>
+      <param name="str"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetSuperclass(System.IntPtr)">
+      <summary>
+        <para>If &lt;tt&gt;clazz&lt;tt&gt; represents any class other than the class &lt;tt&gt;Object&lt;tt&gt;, then this function returns the object that represents the superclass of the class specified by &lt;tt&gt;clazz&lt;/tt&gt;.</para>
+      </summary>
+      <param name="clazz"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.GetVersion">
+      <summary>
+        <para>Returns the version of the native method interface.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.IsAssignableFrom(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Determines whether an object of &lt;tt&gt;clazz1&lt;tt&gt; can be safely cast to &lt;tt&gt;clazz2&lt;tt&gt;.</para>
+      </summary>
+      <param name="clazz1"></param>
+      <param name="clazz2"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.IsInstanceOf(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Tests whether an object is an instance of a class.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="clazz"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.IsSameObject(System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Tests whether two references refer to the same Java object.</para>
+      </summary>
+      <param name="obj1"></param>
+      <param name="obj2"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewBooleanArray(System.Int32)">
+      <summary>
+        <para>Constructs a new primitive array object.</para>
+      </summary>
+      <param name="size"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewByteArray(System.Int32)">
+      <summary>
+        <para>Constructs a new primitive array object.</para>
+      </summary>
+      <param name="size"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewCharArray(System.Int32)">
+      <summary>
+        <para>Constructs a new primitive array object.</para>
+      </summary>
+      <param name="size"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewDoubleArray(System.Int32)">
+      <summary>
+        <para>Constructs a new primitive array object.</para>
+      </summary>
+      <param name="size"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewFloatArray(System.Int32)">
+      <summary>
+        <para>Constructs a new primitive array object.</para>
+      </summary>
+      <param name="size"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewGlobalRef(System.IntPtr)">
+      <summary>
+        <para>Creates a new global reference to the object referred to by the &lt;tt&gt;obj&lt;/tt&gt; argument.</para>
+      </summary>
+      <param name="obj"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewIntArray(System.Int32)">
+      <summary>
+        <para>Constructs a new primitive array object.</para>
+      </summary>
+      <param name="size"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewLocalRef(System.IntPtr)">
+      <summary>
+        <para>Creates a new local reference that refers to the same object as &lt;tt&gt;obj&lt;/tt&gt;.</para>
+      </summary>
+      <param name="obj"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewLongArray(System.Int32)">
+      <summary>
+        <para>Constructs a new primitive array object.</para>
+      </summary>
+      <param name="size"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewObject(System.IntPtr,System.IntPtr,UnityEngine.jvalue[])">
+      <summary>
+        <para>Constructs a new Java object. The method ID indicates which constructor method to invoke. This ID must be obtained by calling GetMethodID() with &lt;init&gt; as the method name and void (V) as the return type.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="args"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewObjectArray(System.Int32,System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Constructs a new array holding objects in class &lt;tt&gt;clazz&lt;tt&gt;. All elements are initially set to &lt;tt&gt;obj&lt;tt&gt;.</para>
+      </summary>
+      <param name="size"></param>
+      <param name="clazz"></param>
+      <param name="obj"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewSByteArray(System.Int32)">
+      <summary>
+        <para>Constructs a new primitive array object.</para>
+      </summary>
+      <param name="size"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewShortArray(System.Int32)">
+      <summary>
+        <para>Constructs a new primitive array object.</para>
+      </summary>
+      <param name="size"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewString(System.String)">
+      <summary>
+        <para>Constructs a new &lt;tt&gt;java.lang.String&lt;/tt&gt; object from an array of Unicode characters.</para>
+      </summary>
+      <param name="chars"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewString(System.Char[])">
+      <summary>
+        <para>Constructs a new &lt;tt&gt;java.lang.String&lt;/tt&gt; object from an array of Unicode characters.</para>
+      </summary>
+      <param name="chars"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewStringUTF(System.String)">
+      <summary>
+        <para>Constructs a new &lt;tt&gt;java.lang.String&lt;/tt&gt; object from an array of characters in modified UTF-8 encoding.</para>
+      </summary>
+      <param name="bytes"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.NewWeakGlobalRef(System.IntPtr)">
+      <summary>
+        <para>Creates a new global weak reference to the object referred to by the &lt;tt&gt;obj&lt;/tt&gt; argument.</para>
+      </summary>
+      <param name="obj"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.PopLocalFrame(System.IntPtr)">
+      <summary>
+        <para>Pops off the current local reference frame, frees all the local references, and returns a local reference in the previous local reference frame for the given &lt;tt&gt;result&lt;/tt&gt; object.</para>
+      </summary>
+      <param name="ptr"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.PushLocalFrame(System.Int32)">
+      <summary>
+        <para>Creates a new local reference frame, in which at least a given number of local references can be created.</para>
+      </summary>
+      <param name="capacity"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetBooleanArrayElement(System.IntPtr,System.Int32,System.Boolean)">
+      <summary>
+        <para>Sets the boolean value of one element in a primitive array.</para>
+      </summary>
+      <param name="array">The array of native booleans.</param>
+      <param name="index">Index of the array element to set.</param>
+      <param name="val">The value to set.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetBooleanArrayElement(System.IntPtr,System.Int32,System.Byte)">
+      <summary>
+        <para>Sets the boolean value of one element in a primitive array.</para>
+      </summary>
+      <param name="array">The array of native booleans.</param>
+      <param name="index">Index of the array element to set.</param>
+      <param name="val">The value to set - for 'true' use 1, for 'false' use 0.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetBooleanField(System.IntPtr,System.IntPtr,System.Boolean)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetByteArrayElement(System.IntPtr,System.Int32,System.SByte)">
+      <summary>
+        <para>Sets the sbyte value of one element in a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetByteField(System.IntPtr,System.IntPtr,System.Byte)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetCharArrayElement(System.IntPtr,System.Int32,System.Char)">
+      <summary>
+        <para>Sets the char value of one element in a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetCharField(System.IntPtr,System.IntPtr,System.Char)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetDoubleArrayElement(System.IntPtr,System.Int32,System.Double)">
+      <summary>
+        <para>Sets the double value of one element in a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetDoubleField(System.IntPtr,System.IntPtr,System.Double)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetFloatArrayElement(System.IntPtr,System.Int32,System.Single)">
+      <summary>
+        <para>Sets the float value of one element in a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetFloatField(System.IntPtr,System.IntPtr,System.Single)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetIntArrayElement(System.IntPtr,System.Int32,System.Int32)">
+      <summary>
+        <para>Sets the int value of one element in a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetIntField(System.IntPtr,System.IntPtr,System.Int32)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetLongArrayElement(System.IntPtr,System.Int32,System.Int64)">
+      <summary>
+        <para>Sets the long value of one element in a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetLongField(System.IntPtr,System.IntPtr,System.Int64)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetObjectArrayElement(System.IntPtr,System.Int32,System.IntPtr)">
+      <summary>
+        <para>Sets an element of an &lt;tt&gt;Object&lt;/tt&gt; array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+      <param name="obj"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetObjectField(System.IntPtr,System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetSByteArrayElement(System.IntPtr,System.Int32,System.SByte)">
+      <summary>
+        <para>Sets the sbyte value of one element in a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetSByteField(System.IntPtr,System.IntPtr,System.SByte)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetShortArrayElement(System.IntPtr,System.Int32,System.Int16)">
+      <summary>
+        <para>Sets the short value of one element in a primitive array.</para>
+      </summary>
+      <param name="array"></param>
+      <param name="index"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetShortField(System.IntPtr,System.IntPtr,System.Int16)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticBooleanField(System.IntPtr,System.IntPtr,System.Boolean)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticByteField(System.IntPtr,System.IntPtr,System.Byte)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticCharField(System.IntPtr,System.IntPtr,System.Char)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticDoubleField(System.IntPtr,System.IntPtr,System.Double)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticFloatField(System.IntPtr,System.IntPtr,System.Single)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticIntField(System.IntPtr,System.IntPtr,System.Int32)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticLongField(System.IntPtr,System.IntPtr,System.Int64)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticObjectField(System.IntPtr,System.IntPtr,System.IntPtr)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticSByteField(System.IntPtr,System.IntPtr,System.SByte)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticShortField(System.IntPtr,System.IntPtr,System.Int16)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStaticStringField(System.IntPtr,System.IntPtr,System.String)">
+      <summary>
+        <para>Sets the value of a static field in the specified object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.SetStringField(System.IntPtr,System.IntPtr,System.String)">
+      <summary>
+        <para>Sets the value of an instance field of the specified object.</para>
+      </summary>
+      <param name="obj"></param>
+      <param name="fieldID"></param>
+      <param name="val"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.Throw(System.IntPtr)">
+      <summary>
+        <para>Causes a &lt;tt&gt;java.lang.Throwable&lt;/tt&gt; object to be thrown.</para>
+      </summary>
+      <param name="obj"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ThrowNew(System.IntPtr,System.String)">
+      <summary>
+        <para>Constructs an exception object from the specified class with the &lt;tt&gt;message&lt;/tt&gt; specified by message and causes that exception to be thrown.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="message"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToBooleanArray(System.Boolean[])">
+      <summary>
+        <para>Converts a managed array of System.Boolean to a Java array of &lt;tt&gt;boolean&lt;/tt&gt;.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToByteArray(System.Byte[])">
+      <summary>
+        <para>Converts a managed array of System.Byte to a Java array of &lt;tt&gt;byte&lt;/tt&gt;.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToCharArray(System.Char[])">
+      <summary>
+        <para>Converts a managed array of System.Char to a Java array of &lt;tt&gt;char&lt;/tt&gt;.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToDoubleArray(System.Double[])">
+      <summary>
+        <para>Converts a managed array of System.Double to a Java array of &lt;tt&gt;double&lt;/tt&gt;.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToFloatArray(System.Single[])">
+      <summary>
+        <para>Converts a managed array of System.Single to a Java array of &lt;tt&gt;float&lt;/tt&gt;.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToIntArray(System.Int32[])">
+      <summary>
+        <para>Converts a managed array of System.Int32 to a Java array of &lt;tt&gt;int&lt;/tt&gt;.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToLongArray(System.Int64[])">
+      <summary>
+        <para>Converts a managed array of System.Int64 to a Java array of &lt;tt&gt;long&lt;/tt&gt;.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToObjectArray(System.IntPtr[])">
+      <summary>
+        <para>Converts a managed array of System.IntPtr, representing Java objects, to a Java array of &lt;tt&gt;java.lang.Object&lt;/tt&gt;.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToReflectedField(System.IntPtr,System.IntPtr,System.Boolean)">
+      <summary>
+        <para>Converts a field ID derived from cls to a &lt;tt&gt;java.lang.reflect.Field&lt;/tt&gt; object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="fieldID"></param>
+      <param name="isStatic"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToReflectedMethod(System.IntPtr,System.IntPtr,System.Boolean)">
+      <summary>
+        <para>Converts a method ID derived from clazz to a &lt;tt&gt;java.lang.reflect.Method&lt;tt&gt; or &lt;tt&gt;java.lang.reflect.Constructor&lt;tt&gt; object.</para>
+      </summary>
+      <param name="clazz"></param>
+      <param name="methodID"></param>
+      <param name="isStatic"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToSByteArray(System.SByte[])">
+      <summary>
+        <para>Converts a managed array of System.SByte to a Java array of &lt;tt&gt;byte&lt;/tt&gt;.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNI.ToShortArray(System.Int16[])">
+      <summary>
+        <para>Converts a managed array of System.Int16 to a Java array of &lt;tt&gt;short&lt;/tt&gt;.</para>
+      </summary>
+      <param name="array"></param>
+    </member>
+    <member name="T:UnityEngine.AndroidJNIHelper">
+      <summary>
+        <para>Helper interface for JNI interaction; signature creation and method lookups.
+
+Note: Using raw JNI functions requires advanced knowledge of the Android Java Native Interface (JNI). Please take note.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.AndroidJNIHelper.debug">
+      <summary>
+        <para>Set debug to true to log calls through the AndroidJNIHelper.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.ConvertFromJNIArray(System.IntPtr)">
+      <summary>
+        <para>Creates a managed array from a Java array.</para>
+      </summary>
+      <param name="array">Java array object to be converted into a managed array.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.ConvertToJNIArray(System.Array)">
+      <summary>
+        <para>Creates a Java array from a managed array.</para>
+      </summary>
+      <param name="array">Managed array to be converted into a Java array object.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.CreateJavaProxy(UnityEngine.AndroidJavaProxy)">
+      <summary>
+        <para>Creates a java proxy object which connects to the supplied proxy implementation.</para>
+      </summary>
+      <param name="proxy">An implementatinon of a java interface in c#.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.CreateJavaRunnable(UnityEngine.AndroidJavaRunnable)">
+      <summary>
+        <para>Creates a UnityJavaRunnable object (implements java.lang.Runnable).</para>
+      </summary>
+      <param name="runnable">A delegate representing the java.lang.Runnable.</param>
+      <param name="jrunnable"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.CreateJNIArgArray(System.Object[])">
+      <summary>
+        <para>Creates the parameter array to be used as argument list when invoking Java code through CallMethod() in AndroidJNI.</para>
+      </summary>
+      <param name="args">An array of objects that should be converted to Call parameters.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.DeleteJNIArgArray(System.Object[],UnityEngine.jvalue[])">
+      <summary>
+        <para>Deletes any local jni references previously allocated by CreateJNIArgArray().</para>
+      </summary>
+      <param name="args">The array of arguments used as a parameter to CreateJNIArgArray().</param>
+      <param name="jniArgs">The array returned by CreateJNIArgArray().</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetConstructorID(System.IntPtr)">
+      <summary>
+        <para>Scans a particular Java class for a constructor method matching a signature.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="signature">Constructor method signature (e.g. obtained by calling AndroidJNIHelper.GetSignature).</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetConstructorID(System.IntPtr,System.String)">
+      <summary>
+        <para>Scans a particular Java class for a constructor method matching a signature.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="signature">Constructor method signature (e.g. obtained by calling AndroidJNIHelper.GetSignature).</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetConstructorID(System.IntPtr,System.Object[])">
+      <summary>
+        <para>Get a JNI method ID for a constructor based on calling arguments.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="args">Array with parameters to be passed to the constructor when invoked.</param>
+      <param name="jclass"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetFieldID(System.IntPtr,System.String)">
+      <summary>
+        <para>Scans a particular Java class for a field matching a name and a signature.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="fieldName">Name of the field as declared in Java.</param>
+      <param name="signature">Field signature (e.g. obtained by calling AndroidJNIHelper.GetSignature).</param>
+      <param name="isStatic">Set to &lt;tt&gt;true&lt;tt&gt; for static fields; &lt;tt&gt;false&lt;tt&gt; for instance (nonstatic) fields.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetFieldID(System.IntPtr,System.String,System.String)">
+      <summary>
+        <para>Scans a particular Java class for a field matching a name and a signature.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="fieldName">Name of the field as declared in Java.</param>
+      <param name="signature">Field signature (e.g. obtained by calling AndroidJNIHelper.GetSignature).</param>
+      <param name="isStatic">Set to &lt;tt&gt;true&lt;tt&gt; for static fields; &lt;tt&gt;false&lt;tt&gt; for instance (nonstatic) fields.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetFieldID(System.IntPtr,System.String,System.String,System.Boolean)">
+      <summary>
+        <para>Scans a particular Java class for a field matching a name and a signature.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="fieldName">Name of the field as declared in Java.</param>
+      <param name="signature">Field signature (e.g. obtained by calling AndroidJNIHelper.GetSignature).</param>
+      <param name="isStatic">Set to &lt;tt&gt;true&lt;tt&gt; for static fields; &lt;tt&gt;false&lt;tt&gt; for instance (nonstatic) fields.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetFieldID(System.IntPtr,System.String,System.Boolean)">
+      <summary>
+        <para>Get a JNI field ID based on type detection. Generic parameter represents the field type.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="fieldName">Name of the field as declared in Java.</param>
+      <param name="isStatic">Set to &lt;tt&gt;true&lt;tt&gt; for static fields; &lt;tt&gt;false&lt;tt&gt; for instance (nonstatic) fields.</param>
+      <param name="jclass"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetMethodID(System.IntPtr,System.String)">
+      <summary>
+        <para>Scans a particular Java class for a method matching a name and a signature.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="methodName">Name of the method as declared in Java.</param>
+      <param name="signature">Method signature (e.g. obtained by calling AndroidJNIHelper.GetSignature).</param>
+      <param name="isStatic">Set to &lt;tt&gt;true&lt;tt&gt; for static methods; &lt;tt&gt;false&lt;tt&gt; for instance (nonstatic) methods.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetMethodID(System.IntPtr,System.String,System.String)">
+      <summary>
+        <para>Scans a particular Java class for a method matching a name and a signature.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="methodName">Name of the method as declared in Java.</param>
+      <param name="signature">Method signature (e.g. obtained by calling AndroidJNIHelper.GetSignature).</param>
+      <param name="isStatic">Set to &lt;tt&gt;true&lt;tt&gt; for static methods; &lt;tt&gt;false&lt;tt&gt; for instance (nonstatic) methods.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetMethodID(System.IntPtr,System.String,System.String,System.Boolean)">
+      <summary>
+        <para>Scans a particular Java class for a method matching a name and a signature.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="methodName">Name of the method as declared in Java.</param>
+      <param name="signature">Method signature (e.g. obtained by calling AndroidJNIHelper.GetSignature).</param>
+      <param name="isStatic">Set to &lt;tt&gt;true&lt;tt&gt; for static methods; &lt;tt&gt;false&lt;tt&gt; for instance (nonstatic) methods.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetMethodID(System.IntPtr,System.String,System.Object[],System.Boolean)">
+      <summary>
+        <para>Get a JNI method ID based on calling arguments.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="methodName">Name of the method as declared in Java.</param>
+      <param name="args">Array with parameters to be passed to the method when invoked.</param>
+      <param name="isStatic">Set to &lt;tt&gt;true&lt;tt&gt; for static methods; &lt;tt&gt;false&lt;tt&gt; for instance (nonstatic) methods.</param>
+      <param name="jclass"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetMethodID(System.IntPtr,System.String,System.Object[],System.Boolean)">
+      <summary>
+        <para>Get a JNI method ID based on calling arguments.</para>
+      </summary>
+      <param name="javaClass">Raw JNI Java class object (obtained by calling AndroidJNI.FindClass).</param>
+      <param name="methodName">Name of the method as declared in Java.</param>
+      <param name="args">Array with parameters to be passed to the method when invoked.</param>
+      <param name="isStatic">Set to &lt;tt&gt;true&lt;tt&gt; for static methods; &lt;tt&gt;false&lt;tt&gt; for instance (nonstatic) methods.</param>
+      <param name="jclass"></param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetSignature(System.Object)">
+      <summary>
+        <para>Creates the JNI signature string for particular object type.</para>
+      </summary>
+      <param name="obj">Object for which a signature is to be produced.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetSignature(System.Object[])">
+      <summary>
+        <para>Creates the JNI signature string for an object parameter list.</para>
+      </summary>
+      <param name="args">Array of object for which a signature is to be produced.</param>
+    </member>
+    <member name="M:UnityEngine.AndroidJNIHelper.GetSignature(System.Object[])">
+      <summary>
+        <para>Creates the JNI signature string for an object parameter list.</para>
+      </summary>
+      <param name="args">Array of object for which a signature is to be produced.</param>
+    </member>
+    <member name="A:UnityEngine.AndroidJNIModule">
+      <summary>
+        <para>AndroidJNI module allows you to call Java code.</para>
+      </summary>
+    </member>
+  </members>
+</doc>
