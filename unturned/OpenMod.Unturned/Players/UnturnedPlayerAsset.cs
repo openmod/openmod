@@ -5,12 +5,12 @@ namespace OpenMod.Unturned.Players
 {
     public class UnturnedPlayerAsset : IEntityAsset
     {
-        private static UnturnedPlayerAsset? m_Instance;
+        private static UnturnedPlayerAsset? s_Instance;
         public static UnturnedPlayerAsset Instance
         {
             get
             {
-                return m_Instance ??= new UnturnedPlayerAsset();
+                return s_Instance ??= new UnturnedPlayerAsset();
             }
         }
 

@@ -2,14 +2,17 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>OpenMod.UnityEngine.Redist</id>
-    <version>2020.3.38</version>
+    <version>2021.3.28.1</version>
     <description>UnityEngine redistributables for OpenMod</description>
     <authors>Unity;OpenMod</authors>
-	<license type="file">LICENSE.txt</license>
-	<requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="file">LICENSE.txt</license>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
   </metadata>
   <files>
-    <file src="*.dll" target="lib\net461" />
-    <file src="LICENSE.txt" target="" />
+    <file src="*.dll" target="lib\netstandard2.0"/>
+    <file src="*.xml" target="lib\netstandard2.0"/>
+    <file src="*.dll" target="lib\netstandard2.1"/>
+    <file src="*.xml" target="lib\netstandard2.1"/>
+    <file src="LICENSE.txt" target=""/>
   </files>
 </package>

@@ -6,9 +6,20 @@ namespace OpenMod.NuGet
 {
     public class NuGetConsoleLogger : LoggerBase
     {
+        private readonly LogLevel m_MinimalLogLevel;
+
+        public NuGetConsoleLogger() : base(LogLevel.Information)
+        {
+        }
+
+        public NuGetConsoleLogger(LogLevel minimalLogLevel)
+        {
+            m_MinimalLogLevel = minimalLogLevel;
+        }
+
         public override void Log(ILogMessage message)
         {
-            if (message.Level < LogLevel.Information)
+            if (message.Level < m_MinimalLogLevel)
             {
                 return;
             }

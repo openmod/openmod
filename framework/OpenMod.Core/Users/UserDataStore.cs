@@ -22,14 +22,15 @@ namespace OpenMod.Core.Users
     public class UserDataStore : IUserDataStore, IAsyncDisposable
     {
         private readonly IRuntime m_Runtime;
-        public const string c_UsersKey = "users";
         private readonly IDataStore m_DataStore;
         private UsersData m_CachedUsersData;
         private IDisposable m_FileChangeWatcher;
         private bool m_IsUpdating;
 
-        private readonly ISerializer _serializer;
-        private readonly IDeserializer _deserializer;
+        private readonly ISerializer m_Serializer;
+        private readonly IDeserializer m_Deserializer;
+
+        public const string UsersKey = "users";
 
         public UserDataStore(
             IOpenModDataStoreAccessor dataStoreAccessor,
@@ -38,13 +39,13 @@ namespace OpenMod.Core.Users
             m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
 
-            _serializer = new SerializerBuilder()
+            m_Serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .WithTypeConverter(new YamlNullableEnumTypeConverter())
                 .DisableAliases()
                 .Build();
 
-            _deserializer = new DeserializerBuilder()
+            m_Deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .IgnoreUnmatchedProperties()
                 .WithTypeConverter(new YamlNullableEnumTypeConverter())
@@ -60,7 +61,7 @@ namespace OpenMod.Core.Users
         private async Task<UsersData> EnsureUserDataCreatedAsync()
         {
             var created = false;
-            if (!await m_DataStore.ExistsAsync(c_UsersKey))
+            if (!await m_DataStore.ExistsAsync(UsersKey))
             {
                 m_CachedUsersData = new UsersData { Users = GetDefaultUsersData() };
 
@@ -68,7 +69,7 @@ namespace OpenMod.Core.Users
                 created = true;
             }
 
-            m_FileChangeWatcher = m_DataStore.AddChangeWatcher(c_UsersKey, m_Runtime, () =>
+            m_FileChangeWatcher = m_DataStore.AddChangeWatcher(UsersKey, m_Runtime, () =>
             {
                 if (!m_IsUpdating)
                 {
@@ -143,9 +144,9 @@ namespace OpenMod.Core.Users
                 return default;
             }
 
-            var serialized = _serializer.Serialize(dataObject);
+            var serialized = m_Serializer.Serialize(dataObject);
 
-            return _deserializer.Deserialize<T>(serialized);
+            return m_Deserializer.Deserialize<T>(serialized);
         }
 
         public async Task SetUserDataAsync<T>(string userId, string userType, string key, T? value)
@@ -262,7 +263,7 @@ namespace OpenMod.Core.Users
 
         private async Task<UsersData> LoadUsersDataFromDiskAsync()
         {
-            if (!await m_DataStore.ExistsAsync(c_UsersKey))
+            if (!await m_DataStore.ExistsAsync(UsersKey))
             {
                 m_CachedUsersData = new UsersData
                 {
@@ -273,7 +274,7 @@ namespace OpenMod.Core.Users
                 return m_CachedUsersData;
             }
 
-            return await m_DataStore.LoadAsync<UsersData>(c_UsersKey) ?? new UsersData
+            return await m_DataStore.LoadAsync<UsersData>(UsersKey) ?? new UsersData
             {
                 Users = GetDefaultUsersData()
             };
@@ -284,15 +285,15 @@ namespace OpenMod.Core.Users
             if (m_DataStore is YamlDataStore yamlDataStore)
             {
                 await yamlDataStore.SaveAsync(
-                    c_UsersKey,
+                    UsersKey,
                     m_CachedUsersData,
-                    header: $"# yaml-language-server: $schema=./{SchemaConstants.c_UsersSchemaPath}\n"
+                    header: $"# yaml-language-server: $schema=./{SchemaConstants.UsersSchemaPath}\n"
                 );
 
                 return;
             }
 
-            await m_DataStore.SaveAsync(c_UsersKey, m_CachedUsersData);
+            await m_DataStore.SaveAsync(UsersKey, m_CachedUsersData);
         }
 
         public async ValueTask DisposeAsync()

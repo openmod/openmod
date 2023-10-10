@@ -13,6 +13,7 @@ using OpenMod.Core.Plugins;
 using OpenMod.Core.Users;
 using System;
 using OpenMod.Core.Jobs;
+using SmartFormat.Extensions;
 
 namespace OpenMod.Core
 {
@@ -50,6 +51,11 @@ namespace OpenMod.Core
             {
                 options.AddJobExecutor<OpenModCommandTaskExecutor>();
                 options.AddJobExecutor<SystemCommandTaskExecutor>();
+            });
+
+            serviceCollection.Configure<SmartFormatOptions>(options =>
+            {
+                options.TryAddFormatter<TimeFormatter>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();

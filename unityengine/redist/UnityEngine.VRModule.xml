@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<doc>
+  <members>
+    <assembly>
+      <name>UnityEngine.VRModule</name>
+    </assembly>
+    <member name="A:UnityEngine.VRModule">
+      <summary>
+        <para>The VR module implements support for virtual reality devices in Unity.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.GameViewRenderMode">
+      <summary>
+        <para>Enumeration of available modes for XR rendering in the Game view or in the main window on a host PC. XR rendering only occurs when the Unity Editor is in Play Mode.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.GameViewRenderMode.BothEyes">
+      <summary>
+        <para>Renders both eyes of the XR device side-by-side in the Game view or in the main window on a host PC.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.GameViewRenderMode.LeftEye">
+      <summary>
+        <para>Renders the left eye of the XR device in the Game View window or in main window on a host PC.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.GameViewRenderMode.None">
+      <summary>
+        <para>Disables rendering of any eyes in the Game view or in the main window on a host PC.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.GameViewRenderMode.OcclusionMesh">
+      <summary>
+        <para>Renders both eyes of the XR device, and the occlusion mesh, side-by-side in the Game view or in the main window on a host PC.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.GameViewRenderMode.RightEye">
+      <summary>
+        <para>Renders the right eye of the XR device in the Game View window or in main window on a host PC.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.TrackingSpaceType">
+      <summary>
+        <para>Represents the size of physical space available for XR.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.TrackingSpaceType.RoomScale">
+      <summary>
+        <para>Represents a space large enough for free movement.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.TrackingSpaceType.Stationary">
+      <summary>
+        <para>Represents a small space where movement may be constrained or positional tracking is unavailable.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.XRDevice">
+      <summary>
+        <para>Contains all functionality related to a XR device.</para>
+      </summary>
+    </member>
+    <member name="?:UnityEngine.XR.XRDevice.deviceLoaded(System.Action`1&lt;System.String&gt;)">
+      <summary>
+        <para>Subscribe a delegate to this event to get notified when an XRDevice is successfully loaded.</para>
+      </summary>
+      <param name="value"></param>
+    </member>
+    <member name="P:UnityEngine.XR.XRDevice.fovZoomFactor">
+      <summary>
+        <para>Zooms the XR projection.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDevice.isPresent">
+      <summary>
+        <para>Successfully detected a XR device in working order.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRDevice.refreshRate">
+      <summary>
+        <para>Refresh rate of the display in Hertz.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRDevice.DisableAutoXRCameraTracking">
+      <summary>
+        <para>Sets whether the camera passed in the first parameter is controlled implicitly by the XR Device</para>
+      </summary>
+      <param name="Camera">The camera that we wish to change behavior on</param>
+      <param name="Disabled">True if the camera's transform is set externally. False if the camera is to be driven implicitly by XRDevice, </param>
+      <returns>
+        <para>Nothing.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDevice.GetNativePtr">
+      <summary>
+        <para>This method returns an IntPtr representing the native pointer to the XR device if one is available, otherwise the value will be IntPtr.Zero.</para>
+      </summary>
+      <returns>
+        <para>The native pointer to the XR device.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDevice.GetTrackingSpaceType">
+      <summary>
+        <para>Returns the device's current TrackingSpaceType. This value determines how the camera is positioned relative to its starting position. For more, see the section "Understanding the camera" in.</para>
+      </summary>
+      <returns>
+        <para>The device's current TrackingSpaceType.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDevice.SetTrackingSpaceType(UnityEngine.XR.TrackingSpaceType)">
+      <summary>
+        <para>Sets the device's current TrackingSpaceType. Returns true on success. Returns false if the given TrackingSpaceType is not supported or the device fails to switch.</para>
+      </summary>
+      <param name="TrackingSpaceType">The TrackingSpaceType the device should switch to.</param>
+      <param name="trackingSpaceType"></param>
+      <returns>
+        <para>True on success. False if the given TrackingSpaceType is not supported or the device fails to switch.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRDevice.UpdateEyeTextureMSAASetting">
+      <summary>
+        <para>Recreates the XR platform's eye texture swap chain with the appropriate anti-aliasing sample count.  The reallocation of the eye texture will only occur if the MSAA quality setting's sample count is different from the sample count of the current eye texture.  Reallocations of the eye textures will happen at the beginning of the next frame.  This is an expensive operation and should only be used when necessary.</para>
+      </summary>
+      <returns>
+        <para>Nothing.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.XR.XRSettings">
+      <summary>
+        <para>Global XR related settings.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.deviceEyeTextureDimension">
+      <summary>
+        <para>Fetch the device eye texture dimension from the active stereo device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.enabled">
+      <summary>
+        <para>Globally enables or disables XR for the application.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.eyeTextureDesc">
+      <summary>
+        <para>Fetch the eye texture RenderTextureDescriptor from the active stereo device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.eyeTextureHeight">
+      <summary>
+        <para>The current height of an eye texture for the loaded device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.eyeTextureResolutionScale">
+      <summary>
+        <para>Controls the actual size of eye textures as a multiplier of the device's default resolution.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.eyeTextureWidth">
+      <summary>
+        <para>The current width of an eye texture for the loaded device.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.gameViewRenderMode">
+      <summary>
+        <para>Sets the render mode for the XR device. The render mode controls how the view of the XR device renders in the Game view and in the main window on a host PC.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.isDeviceActive">
+      <summary>
+        <para>Read-only value that can be used to determine if the XR device is active.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.loadedDeviceName">
+      <summary>
+        <para>Type of XR device that is currently loaded.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.occlusionMaskScale">
+      <summary>
+        <para>A scale applied to the standard occulsion mask for each platform.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.renderViewportScale">
+      <summary>
+        <para>Controls how much of the allocated eye texture should be used for rendering.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.showDeviceView">
+      <summary>
+        <para>This property has been deprecated. Use XRSettings.gameViewRenderMode instead.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.stereoRenderingMode">
+      <summary>
+        <para>The stereo rendering mode that is currently in use.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.supportedDevices">
+      <summary>
+        <para>Returns a list of supported XR devices that were included at build time.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.XR.XRSettings.useOcclusionMesh">
+      <summary>
+        <para>Specifies whether or not the occlusion mesh should be used when rendering. Enabled by default.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRSettings.LoadDeviceByName(System.String)">
+      <summary>
+        <para>Loads the requested device at the beginning of the next frame.</para>
+      </summary>
+      <param name="deviceName">Name of the device from XRSettings.supportedDevices.</param>
+      <param name="prioritizedDeviceNameList">Prioritized list of device names from XRSettings.supportedDevices.</param>
+    </member>
+    <member name="M:UnityEngine.XR.XRSettings.LoadDeviceByName(System.String[])">
+      <summary>
+        <para>Loads the requested device at the beginning of the next frame.</para>
+      </summary>
+      <param name="deviceName">Name of the device from XRSettings.supportedDevices.</param>
+      <param name="prioritizedDeviceNameList">Prioritized list of device names from XRSettings.supportedDevices.</param>
+    </member>
+    <member name="T:UnityEngine.XR.XRSettings.StereoRenderingMode">
+      <summary>
+        <para>Enum type signifying the different stereo rendering modes available.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRSettings.StereoRenderingMode.MultiPass">
+      <summary>
+        <para>This is the reference stereo rendering path for VR.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRSettings.StereoRenderingMode.SinglePass">
+      <summary>
+        <para>This is a faster rendering path for VR than XRSettings.StereoRenderingMode.MultiPass.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRSettings.StereoRenderingMode.SinglePassInstanced">
+      <summary>
+        <para>This is an optimized version of the XRSettings.StereoRenderingMode.SinglePass mode.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.XR.XRSettings.StereoRenderingMode.SinglePassMultiview">
+      <summary>
+        <para>This is a OpenGL optimized version of the XRSettings.StereoRenderingMode.SinglePassInstanced mode.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.XR.XRStats">
+      <summary>
+        <para>Timing and other statistics from the XR subsystem.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.XR.XRStats.TryGetDroppedFrameCount(System.Int32&amp;)">
+      <summary>
+        <para>Retrieves the number of dropped frames reported by the XR SDK.</para>
+      </summary>
+      <param name="droppedFrameCount">Outputs the number of frames dropped since the last update.</param>
+      <returns>
+        <para>True if the dropped frame count is available, false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRStats.TryGetFramePresentCount(System.Int32&amp;)">
+      <summary>
+        <para>Retrieves the number of times the current frame has been drawn to the device as reported by the XR SDK.</para>
+      </summary>
+      <param name="framePresentCount">Outputs the number of times the current frame has been presented.</param>
+      <returns>
+        <para>True if the frame present count is available, false otherwise.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.XR.XRStats.TryGetGPUTimeLastFrame(System.Single&amp;)">
+      <summary>
+        <para>Retrieves the time spent by the GPU last frame, in seconds, as reported by the XR SDK.</para>
+      </summary>
+      <param name="gpuTimeLastFrame">Outputs the time spent by the GPU last frame.</param>
+      <returns>
+        <para>True if the GPU time spent last frame is available, false otherwise.</para>
+      </returns>
+    </member>
+  </members>
+</doc>

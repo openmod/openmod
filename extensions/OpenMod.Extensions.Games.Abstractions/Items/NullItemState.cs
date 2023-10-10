@@ -5,12 +5,12 @@
     /// </summary>
     public class NullItemState : IItemState
     {
-        private static NullItemState? m_ItemState;
+        private static NullItemState? s_ItemState;
         public static NullItemState Instance
         {
             get
             {
-                return m_ItemState ??= new NullItemState();
+                return s_ItemState ??= new NullItemState();
             }
         }
 

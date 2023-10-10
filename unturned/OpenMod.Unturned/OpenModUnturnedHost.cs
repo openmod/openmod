@@ -198,7 +198,7 @@ namespace OpenMod.Unturned
             {
                 await m_Runtime.ShutdownAsync();
                 shutdownPerformed = true;
-                m_NuGetPackageManager.ClearCache();
+                m_NuGetPackageManager.ClearCache(clearGlobalCache: true);
 
                 var bootstrapperAssembly = AppDomain.CurrentDomain.GetAssemblies()
                     .FirstOrDefault(d => d.GetName().Name.Equals("OpenMod.Unturned.Module.Bootstrapper"));

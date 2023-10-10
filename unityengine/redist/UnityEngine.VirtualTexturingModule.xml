@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<doc>
+  <members>
+    <assembly>
+      <name>UnityEngine.VirtualTexturingModule</name>
+    </assembly>
+    <member name="T:UnityEngine.Rendering.VirtualTexturing.FilterMode">
+      <summary>
+        <para>Filtering modes available in the virtual texturing system.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Rendering.VirtualTexturing.FilterMode.Bilinear">
+      <summary>
+        <para>Bilinear filtering.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Rendering.VirtualTexturing.FilterMode.Trilinear">
+      <summary>
+        <para>Trilinear filtering.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Rendering.VirtualTexturing.GPUCacheSetting">
+      <summary>
+        <para>Settings for a virtual texturing GPU cache.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Rendering.VirtualTexturing.GPUCacheSetting.format">
+      <summary>
+        <para>Format of the cache these settings are applied to.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Rendering.VirtualTexturing.GPUCacheSetting.sizeInMegaBytes">
+      <summary>
+        <para>Size in MegaBytes of the cache created with these settings.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Rendering.VirtualTexturing.Procedural">
+      <summary>
+        <para>Static class representing the Procedural Virtual Texturing system. Unity does not currently support this system.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.Rendering.VirtualTexturing.Resolver">
+      <summary>
+        <para>Class responsable for virtual texturing feedback analysis.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Resolver.#ctor">
+      <summary>
+        <para>Create a new VirtualTextureResolver object.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Rendering.VirtualTexturing.Resolver.CurrentHeight">
+      <summary>
+        <para>&gt;Height of the texture that the internal buffers can hold.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Rendering.VirtualTexturing.Resolver.CurrentWidth">
+      <summary>
+        <para>Width of the texture that the internal buffers can hold.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Resolver.Dispose">
+      <summary>
+        <para>Disposes this object.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Resolver.Process(UnityEngine.Rendering.CommandBuffer,UnityEngine.Rendering.RenderTargetIdentifier,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+      <summary>
+        <para>Process the passed in feedback texture.</para>
+      </summary>
+      <param name="cmd">The commandbuffer used to schedule processing.</param>
+      <param name="rt">Texture containing the feedback data.</param>
+      <param name="x">X position of the subrect that is processed.</param>
+      <param name="width">Width of the subrect that is processed.</param>
+      <param name="y">Y position of the subrect that is processed.</param>
+      <param name="height">Height of the subrect that is processed.</param>
+      <param name="mip">Miplevel of the texture to process.</param>
+      <param name="slice">Arrayslice of the texture to process.</param>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Resolver.Process(UnityEngine.Rendering.CommandBuffer,UnityEngine.Rendering.RenderTargetIdentifier)">
+      <summary>
+        <para>Process the passed in feedback texture.</para>
+      </summary>
+      <param name="cmd">The commandbuffer used to schedule processing.</param>
+      <param name="rt">Texture containing the feedback data.</param>
+      <param name="x">X position of the subrect that is processed.</param>
+      <param name="width">Width of the subrect that is processed.</param>
+      <param name="y">Y position of the subrect that is processed.</param>
+      <param name="height">Height of the subrect that is processed.</param>
+      <param name="mip">Miplevel of the texture to process.</param>
+      <param name="slice">Arrayslice of the texture to process.</param>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Resolver.UpdateSize(System.Int32,System.Int32)">
+      <summary>
+        <para>Update the internal buffers.</para>
+      </summary>
+      <param name="width">Width of the texture passed in during Process.</param>
+      <param name="height">Height of the texture passed in during Process.</param>
+    </member>
+    <member name="T:UnityEngine.Rendering.VirtualTexturing.Streaming">
+      <summary>
+        <para>Static class representing the Streaming Virtual Texturing system.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Streaming.GetCPUCacheSize">
+      <summary>
+        <para>Gets the CPU cache size (in MegaBytes) used by Streaming Virtual Texturing.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Streaming.GetGPUCacheSettings">
+      <summary>
+        <para>Gets the GPU cache settings used by Streaming Virtual Texturing.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Streaming.GetTextureStackSize(UnityEngine.Material,System.Int32,System.Int32&amp;,System.Int32&amp;)">
+      <summary>
+        <para>Gets the width and height of a Virtual Texture Stack, in pixels.</para>
+      </summary>
+      <param name="mat">The Material that contains the Virtual Texture Stack. The Virtual Texture Stacks contained in a Material are declared in the Material's Shader.</param>
+      <param name="stackNameId">The unique identifier for the name of the Virtual Texture Stack, as declared in the Shader. To find the identifier for a given Shader property name, use Shader.PropertyToID.</param>
+      <param name="width">Unity populates width with the width of the Virtual Texture Stack, in pixels.</param>
+      <param name="height">Unity populates height with the height of the Virtual Texture Stack, in pixels.</param>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Streaming.RequestRegion(UnityEngine.Material,System.Int32,UnityEngine.Rect,System.Int32,System.Int32)">
+      <summary>
+        <para>Make a rectangle in UV space resident for a given Virtual Texture Stack.</para>
+      </summary>
+      <param name="mat">The Material that contains the Virtual Texture Stack. The Virtual Texture Stacks contained in a Material are declared in the Material's Shader.</param>
+      <param name="stackNameId">The unique identifier for the name of the Virtual Texture Stack, as declared in the Shader. To find the identifier for a given Shader property name, use Shader.PropertyToID.</param>
+      <param name="r">The rectangle in 0-1 UV space to make resident.  Anything outside the [ 0...1 [ x [ 0...1 [ rectangle will be silently ignored.</param>
+      <param name="mipMap">The mip level to make resident. Mips are numbered from 0 (= full resolution) to n (= lowest resolution) where n is the mipmap level what is a single tile in size.  Requesting invalid mips is silently ignored.</param>
+      <param name="numMips">The number of mip levels starting from 'mipMap' to make resident. Requesting invalid mips is silently ignored.</param>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Streaming.SetCPUCacheSize(System.Int32)">
+      <summary>
+        <para>Sets the CPU cache size (in MegaBytes) used by Streaming Virtual Texturing.</para>
+      </summary>
+      <param name="sizeInMegabytes"></param>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.Streaming.SetGPUCacheSettings(UnityEngine.Rendering.VirtualTexturing.GPUCacheSetting[])">
+      <summary>
+        <para>Sets the GPU cache settings used by Streaming Virtual Texturing.</para>
+      </summary>
+      <param name="cacheSettings"></param>
+    </member>
+    <member name="T:UnityEngine.Rendering.VirtualTexturing.System">
+      <summary>
+        <para>The virtual texturing system.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.Rendering.VirtualTexturing.System.AllMips">
+      <summary>
+        <para>Request all avalable mips.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Rendering.VirtualTexturing.System.Update">
+      <summary>
+        <para>Update the virtual texturing system.</para>
+      </summary>
+    </member>
+    <member name="A:UnityEngine.VirtualTexturingModule">
+      <summary>
+        <para>Module that implements virtual texturing.</para>
+      </summary>
+    </member>
+  </members>
+</doc>

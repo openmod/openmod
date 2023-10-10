@@ -50,8 +50,10 @@ namespace OpenMod.Unturned.Players.Inventory.Events
             player.inventory.onInventoryUpdated -= (page, index, jar) => OnInventoryUpdated(player, page, index, jar);
         }
 
+        // ReSharper disable InconsistentNaming
         private void OnTakeItemRequested(Player nativePlayer, byte x, byte y, uint instanceID, byte to_x, byte to_y, byte to_rot,
             byte to_page, ItemData itemData, ref bool shouldAllow)
+            // ReSharper restore InconsistentNaming
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
 
@@ -158,6 +160,7 @@ namespace OpenMod.Unturned.Players.Inventory.Events
             [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerInventory), nameof(PlayerInventory.openStorage))]
             [HarmonyPostfix]
+            // ReSharper disable once InconsistentNaming
             public static void OpenStorage(PlayerInventory __instance)
             {
                 OnOpenedStorage?.Invoke(__instance.player);

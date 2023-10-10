@@ -3,8 +3,8 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using OpenMod.API;
-using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Localization
 {
@@ -12,10 +12,12 @@ namespace OpenMod.Core.Localization
     public class ConfigurationBasedStringLocalizer : IStringLocalizer
     {
         private readonly IConfiguration m_Configuration;
+        private readonly IOptions<SmartFormatOptions> m_Options;
 
-        public ConfigurationBasedStringLocalizer(IConfiguration configuration)
+        public ConfigurationBasedStringLocalizer(IConfiguration configuration, IOptions<SmartFormatOptions> options)
         {
             m_Configuration = configuration;
+            m_Options = options;
         }
 
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
@@ -65,7 +67,7 @@ namespace OpenMod.Core.Localization
                     return new LocalizedString(name, name, resourceNotFound: true);
                 }
 
-                var formatter = SmartFormatterHelper.ObtainSmartFormatter();
+                var formatter = m_Options.Value.GetSmartFormatter();
                 return new LocalizedString(name, formatter.Format(configValue.Value ?? string.Empty, arguments));
             }
         }

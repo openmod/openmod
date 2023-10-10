@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<doc>
+  <members>
+    <assembly>
+      <name>UnityEngine.SubsystemsModule</name>
+    </assembly>
+    <member name="T:UnityEngine.IntegratedSubsystem">
+      <summary>
+        <para>An IntegratedSubsystem is initialized from an IntegratedSubsystemDescriptor for a given Subsystem (Example, Input, Environment, Display, etc.) and provides an interface to interact with that given IntegratedSubsystem until it is Destroyed. After an IntegratedSubsystem is created it can be Started or Stopped to turn on and off functionality (and preserve performance). The base type for IntegratedSubsystem only exposes this functionality; this class is designed to be a base class for derived classes that expose more functionality specific to a given IntegratedSubsystem.
+
+            Note: initializing a second IntegratedSubsystem from the same IntegratedSubsystemDescriptor will return a reference to the existing IntegratedSubsystem as only one IntegratedSubsystem is currently allowed for a single IntegratedSubsystem provider.
+            </para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.IntegratedSubsystem.running">
+      <summary>
+        <para>Whether or not the subsystem is running.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.IntegratedSubsystem.Destroy">
+      <summary>
+        <para>Destroys this instance of a subsystem.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.IntegratedSubsystem.Start">
+      <summary>
+        <para>Starts an instance of a subsystem.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.IntegratedSubsystem.Stop">
+      <summary>
+        <para>Stops an instance of a subsystem.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.IntegratedSubsystemDescriptor">
+      <summary>
+        <para>Information about a subsystem that can be queried before creating a subsystem instance.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.IntegratedSubsystemDescriptor.id">
+      <summary>
+        <para>A unique string that identifies the subsystem that this Descriptor can create.</para>
+      </summary>
+    </member>
+    <member name="?:UnityEngine.ISubsystem">
+      <summary>
+        <para>Interface implemented by both Subsystem and IntegratedSubsystem which provides control over the state of either.
+            </para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.ISubsystem.running">
+      <summary>
+        <para>Will be true if asking the subsytem to start was successful. False in the case that the subsystem has stopped, was asked to stop or has not been started yet.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.ISubsystem.Destroy">
+      <summary>
+        <para>Destroys this instance of a subsystem.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.ISubsystem.Start">
+      <summary>
+        <para>Starts an instance of a subsystem.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.ISubsystem.Stop">
+      <summary>
+        <para>Stops an instance of a subsystem.</para>
+      </summary>
+    </member>
+    <member name="?:UnityEngine.ISubsystemDescriptor">
+      <summary>
+        <para>A subsystem descriptor is metadata about a subsystem which can be inspected before loading / initializing a subsystem.
+            </para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.ISubsystemDescriptor.id">
+      <summary>
+        <para>A unique string that identifies the subsystem that this Descriptor can create.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.ISubsystemDescriptor.Create">
+      <summary>
+        <para>Creates an ISubsystem from this descriptor.</para>
+      </summary>
+      <returns>
+        <para>An instance of ISubsystem.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.Subsystem">
+      <summary>
+        <para>A Subsystem is initialized from a SubsystemDescriptorWithProvider for a given Subsystem (Example, Input, Display, etc.) and provides an interface to interact with that given Subsystem until it is Destroyed. After a Subsystem is created it can be Started or Stopped to turn on and off functionality (and improve performance). The base type for subsystems only exposes this functionality; this class is designed to be a base class for derived classes that expose more functionality specific to a given Subsystem.
+
+            Note: initializing a second Subsystem from the same SubsystemDescriptor will return a reference to the existing Subsystem as only one Subsystem is currently allowed for a single Subsystem provider.
+
+This subsystem base-class is deprecated. If you are creating a new subsystem type, derive from SubsystemWithProvider instead.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.Subsystem.running">
+      <summary>
+        <para>Whether or not the subsystem is running.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Subsystem.Destroy">
+      <summary>
+        <para>Destroys this instance of a subsystem.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Subsystem.Start">
+      <summary>
+        <para>Starts an instance of a subsystem.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.Subsystem.Stop">
+      <summary>
+        <para>Stops an instance of a subsystem.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.SubsystemDescriptor">
+      <summary>
+        <para>Information about a subsystem that can be queried before creating a subsystem instance.
+
+This subsystem descriptor base-class is deprecated. If you are creating a new subsystem type, derive from SubsystemDecriptorWithProvider instead.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.SubsystemDescriptor.id">
+      <summary>
+        <para>A unique string that identifies the subsystem that this Descriptor can create.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.SubsystemDescriptor.subsystemImplementationType">
+      <summary>
+        <para>The System.Type of the subsystem implementation associated with this descriptor.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.SubsystemManager">
+      <summary>
+        <para>Gives access to subsystems which provide additional functionality through plugins.</para>
+      </summary>
+    </member>
+    <member name="?:UnityEngine.SubsystemManager.afterReloadSubsystems(System.Action)">
+      <summary>
+        <para>Called from SubsystemManager when it has completed reloading all XR SDK Provider packaged subsystems.</para>
+      </summary>
+      <param name="value"></param>
+    </member>
+    <member name="?:UnityEngine.SubsystemManager.beforeReloadSubsystems(System.Action)">
+      <summary>
+        <para>Called from SubsystemManager before reloading all XR SDK Provider packaged subsystems.</para>
+      </summary>
+      <param name="value"></param>
+    </member>
+    <member name="?:UnityEngine.SubsystemManager.reloadSubsytemsCompleted(System.Action)">
+      <summary>
+        <para>Called from SubsystemManager when it has completed reloading all XR SDK Provider packaged subsystems.</para>
+      </summary>
+      <param name="value"></param>
+    </member>
+    <member name="?:UnityEngine.SubsystemManager.reloadSubsytemsStarted(System.Action)">
+      <summary>
+        <para>Called from SubsystemManager before reloading all XR SDK Provider packaged subsystems.</para>
+      </summary>
+      <param name="value"></param>
+    </member>
+    <member name="M:UnityEngine.SubsystemManager.GetAllSubsystemDescriptors(System.Collections.Generic.List`1&lt;UnityEngine.ISubsystemDescriptor&gt;)">
+      <summary>
+        <para>Gets all of the currently known subsystem descriptors regardless of specific subsystem type.</para>
+      </summary>
+      <param name="descriptors">Subsystem descriptors.</param>
+    </member>
+    <member name="M:UnityEngine.SubsystemManager.GetInstances(System.Collections.Generic.List`1&lt;T&gt;)">
+      <summary>
+        <para>Returns active Subsystems of a specific instance type.
+
+*Note:* This method is deprecated, use GetSubsystems instead.</para>
+      </summary>
+      <param name="instances">Active instances.</param>
+      <param name="subsystems"></param>
+    </member>
+    <member name="M:UnityEngine.SubsystemManager.GetSubsystemDescriptors(System.Collections.Generic.List`1&lt;T&gt;)">
+      <summary>
+        <para>Returns a list of SubsystemDescriptors which describe additional functionality that can be enabled.</para>
+      </summary>
+      <param name="descriptors">Subsystem specific descriptors.</param>
+    </member>
+    <member name="M:UnityEngine.SubsystemManager.GetSubsystems(System.Collections.Generic.List`1&lt;T&gt;)">
+      <summary>
+        <para>Returns active Subsystems of a specific instance type.</para>
+      </summary>
+      <param name="subsystems">Active subsystems.</param>
+    </member>
+    <member name="T:UnityEngine.SubsystemsImplementation.SubsystemDescriptorStore">
+      <summary>
+        <para>Registration entry point for subsystems to register their descriptor.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.SubsystemsImplementation.SubsystemDescriptorWithProvider">
+      <summary>
+        <para>Information about a SubsystemWithProvider that can be queried before creating a subsystem instance.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.SubsystemsImplementation.SubsystemDescriptorWithProvider.id">
+      <summary>
+        <para>A unique string that identifies the SubsystemWithProvider that this descriptor can create.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.SubsystemsImplementation.SubsystemProvider">
+      <summary>
+        <para>A provider that supplies data to a subsystem, generally for platform-specific implementations.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.SubsystemsImplementation.SubsystemWithProvider">
+      <summary>
+        <para>A subsystem is initialized from a SubsystemDescriptorWithProvider for a given subsystem (Session, Plane, Face, etc.) and provides an interface to interact with that given subsystem until it is Destroyed. After a subsystem is created, it can be Started or Stopped to turn on and off functionality and preserve performance. The base type for the subsystem only exposes this functionality; this class is designed to be a base class for derived classes that expose more functionality specific to a given subsystem.
+
+*Note:* Initializing a second subsystem from the same subsystem descriptor will return a reference to the existing subsystem, because only one subsystem is currently allowed for a single subsystem provider.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.SubsystemsImplementation.SubsystemWithProvider.running">
+      <summary>
+        <para>Whether or not the subsystem is running.
+
+This returns true after Start has been called on the subsystem, and false after Stop is called.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.SubsystemsImplementation.SubsystemWithProvider.Destroy">
+      <summary>
+        <para>Destroys this instance of a subsystem.
+
+Also unloads all resources acquired during the initialization step. Call this when you no longer need this instance of a subsystem.
+
+Note: Once a subsystem is Destroyed, script can still hold a reference but calling a method on it will result in a NullArgumentException.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.SubsystemsImplementation.SubsystemWithProvider.Start">
+      <summary>
+        <para>Starts an instance of a subsystem.
+
+Once the instance is started, the subsystem representing this instance is active and can be interacted with.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.SubsystemsImplementation.SubsystemWithProvider.Stop">
+      <summary>
+        <para>Stops an instance of a subsystem.
+
+Once the instance is stopped, the subsystem representing this instance is no longer active and should not consume CPU resources.</para>
+      </summary>
+    </member>
+    <member name="A:UnityEngine.SubsystemsModule">
+      <summary>
+        <para>The Subsystem module contains the definitions and runtime support for general subsystems in Unity.</para>
+      </summary>
+    </member>
+  </members>
+</doc>

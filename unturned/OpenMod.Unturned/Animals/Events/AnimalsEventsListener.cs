@@ -18,13 +18,6 @@ namespace OpenMod.Unturned.Animals.Events
     [UsedImplicitly]
     internal class AnimalsEventsListener : UnturnedEventsListener
     {
-        private static readonly FieldInfo? s_BumperVehicleField;
-
-        static AnimalsEventsListener()
-        {
-            s_BumperVehicleField = typeof(Bumper).GetField("vehicle", BindingFlags.Instance | BindingFlags.NonPublic);
-        }
-
         public AnimalsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
@@ -72,42 +65,68 @@ namespace OpenMod.Unturned.Animals.Events
         private void DamageToolOndamageAnimalRequested(ref DamageAnimalParameters parameters, ref bool shouldallow)
         {
             var animal = new UnturnedAnimal(parameters.animal);
-            var amount = (ushort)Math.Min(ushort.MaxValue, Math.Floor(parameters.damage * parameters.times));
-            var ragdoll = (amount * parameters.direction).ToSystemVector();
-            var ragdollEffect = parameters.ragdollEffect;
+            var ragdollDirection = parameters.direction.ToSystemVector();
 
-            var instigator = CSteamID.Nil;
+            // from method damagetool.damageAnimal
+            if (parameters.applyGlobalArmorMultiplier)
+            {
+                parameters.times *= Provider.modeConfigData.Animals.Armor_Multiplier;
+            }
+
+            var damageAmount = (ushort)Mathf.Min(ushort.MaxValue, Mathf.FloorToInt(parameters.damage * parameters.times));
+
+            CSteamID instigator;
+            Player? savedPlayer = null;
             switch (parameters.instigator)
             {
                 case KillVolume or Barrier or InteractableTrap or InteractableSentry:
                     instigator = Provider.server;
                     break;
                 case Bumper bumper:
-                    if (s_BumperVehicleField is null)
+                    var rootVehicle = bumper.transform.root;
+
+                    // Trains are linked with VehicleRef
+                    InteractableVehicle? vehicle;
+                    if (rootVehicle == null)
                     {
-                        break;
+                        vehicle = null;
+                    }
+                    else if (rootVehicle.TryGetComponent<VehicleRef>(out var vehicleRef))
+                    {
+                        vehicle = vehicleRef.vehicle;
+                    }
+                    else if (!rootVehicle.TryGetComponent(out vehicle))
+                    {
+                        vehicle = null;
                     }
 
-                    var vehicle = (InteractableVehicle)s_BumperVehicleField.GetValue(bumper);
-#pragma warning disable RCS1146 // Use conditional access.
-                    instigator = vehicle != null && vehicle.isDriven
-#pragma warning restore RCS1146 // Use conditional access.
-                        ? vehicle.passengers[0].player.playerID.steamID
-                        : Provider.server;
+                    if (vehicle != null && vehicle.isDriven)
+                    {
+                        savedPlayer = vehicle.passengers[0].player.player;
+                        instigator = savedPlayer.channel.owner.playerID.steamID;
+                    }
+                    else
+                    {
+                        instigator = Provider.server;
+                    }
 
                     break;
 
                 case Player player:
+                    savedPlayer = player;
                     instigator = player.channel.owner.playerID.steamID;
+                    break;
+
+                default:
+                    instigator = CSteamID.Nil;
                     break;
             }
 
-            var @event = amount >= animal.Health
-                ? new UnturnedAnimalDyingEvent(animal, amount, ragdoll, ragdollEffect, instigator)
-                : new UnturnedAnimalDamagingEvent(animal, amount, ragdoll, ragdollEffect, instigator);
+            var @event = damageAmount >= animal.Health
+                ? new UnturnedAnimalDyingEvent(animal, damageAmount, ragdollDirection, parameters.ragdollEffect, instigator, parameters.limb)
+                : new UnturnedAnimalDamagingEvent(animal, damageAmount, ragdollDirection, parameters.ragdollEffect, instigator, parameters.limb);
 
             @event.IsCancelled = !shouldallow;
-
             Emit(@event);
 
             shouldallow = !@event.IsCancelled;
@@ -115,6 +134,16 @@ namespace OpenMod.Unturned.Animals.Events
             parameters.times = 1;
             parameters.direction = @event.Ragdoll.ToUnityVector();
             parameters.ragdollEffect = @event.RagdollEffect;
+            parameters.limb = @event.Limb;
+
+            if (savedPlayer != null && (parameters.instigator as Player) != savedPlayer)
+            {
+                parameters.instigator = PlayerTool.getPlayer(@event.Instigator);
+            }
+            else if (instigator != Provider.server)
+            {
+                parameters.instigator = null;
+            }
         }
 
         private void Events_OnAnimalDead(Animal nativeAnimal, Vector3 ragdoll, ERagdollEffect ragdollEffect)
@@ -127,7 +156,7 @@ namespace OpenMod.Unturned.Animals.Events
         }
 
         private void Events_OnAnimalFleeing(Animal nativeAnimal, ref Vector3 direction, ref bool sendToPack,
-            ref bool cancel) // lgtm [cs/too-many-ref-parameters]
+            ref bool cancel)
         {
             var animal = new UnturnedAnimal(nativeAnimal);
 
@@ -144,7 +173,7 @@ namespace OpenMod.Unturned.Animals.Events
         }
 
         private void Events_OnAnimalAttackingPoint(Animal nativeAnimal, ref Vector3 point, ref bool sendToPack,
-            ref bool cancel) // lgtm [cs/too-many-ref-parameters]
+            ref bool cancel)
         {
             var animal = new UnturnedAnimal(nativeAnimal);
 
@@ -161,7 +190,7 @@ namespace OpenMod.Unturned.Animals.Events
         }
 
         private void Events_OnAnimalAttackingPlayer(Animal nativeAnimal, ref Player nativePlayer,
-            ref bool sendToPack, // lgtm [cs/too-many-ref-parameters]
+            ref bool sendToPack,
             ref bool cancel)
         {
             var animal = new UnturnedAnimal(nativeAnimal);

@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<doc>
+  <members>
+    <assembly>
+      <name>UnityEngine.NVIDIAModule</name>
+    </assembly>
+    <member name="T:UnityEngine.NVIDIA.DLSSCommandExecutionData">
+      <summary>
+        <para>Represents the state of a DLSSContext. If you call Device.ExecuteDLSS, Unity sends the values in this struct to the runtime. After this, you can change the values in this struct without any side effects.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.invertXAxis">
+      <summary>
+        <para>Indicates if the X axis is inverted. Set to 0 or 1.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.invertYAxis">
+      <summary>
+        <para>Indicates if the Y axis is inverted. Set to 0 or 1.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.jitterOffsetX">
+      <summary>
+        <para>The x-axis jitter camera offset in device coordinates.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.jitterOffsetY">
+      <summary>
+        <para>The y-axis jitter camera offset in device coordinates.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.mvScaleX">
+      <summary>
+        <para>If you set the NVIDIA.DLSSFeatureFlags.MVLowRes flag, this value indicates the scale (smaller) of the motion vector buffer input texture used in the x-axis.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.mvScaleY">
+      <summary>
+        <para>If you set the NVIDIA.DLSSFeatureFlags.MVLowRes flag, this value indicates the scale (smaller) of the motion vector buffer input texture used in the y-axis.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.preExposure">
+      <summary>
+        <para>Specifies a pre exposure multiplier for the input color texture.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.reset">
+      <summary>
+        <para>Indicates whether to invalidate the history buffers.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.sharpness">
+      <summary>
+        <para>Specifies how sharp the frame should look as a value from 0 to 1.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.subrectHeight">
+      <summary>
+        <para>The subrectangle height of input buffers to use.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.subrectOffsetX">
+      <summary>
+        <para>The subrectangle x-axis offset of input buffers to use.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.subrectOffsetY">
+      <summary>
+        <para>The subrectangle y-axis offset of input buffers to use.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandExecutionData.subrectWidth">
+      <summary>
+        <para>The subrectangle width of input buffers to use.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.DLSSCommandInitializationData">
+      <summary>
+        <para>Represent the initialization state of a DLSSContext. You can only use and set this when calling GraphicsDevice.CreateFeature.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandInitializationData.featureFlags">
+      <summary>
+        <para>Bit mask containing feature flags to be used for DLSS.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandInitializationData.inputRTHeight">
+      <summary>
+        <para>The texture input height size of the input buffers in texels.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandInitializationData.inputRTWidth">
+      <summary>
+        <para>The texture input width size of the input buffers in texels.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandInitializationData.outputRTHeight">
+      <summary>
+        <para>The output buffer height size in texels to upscale to.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandInitializationData.outputRTWidth">
+      <summary>
+        <para>The output buffer width size in texels to upscale to.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSCommandInitializationData.quality">
+      <summary>
+        <para>The quality property for DLSS.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.DLSSCommandInitializationData.GetFlag(UnityEngine.NVIDIA.DLSSFeatureFlags)">
+      <summary>
+        <para>Helper function. Gets weither if a DLSS feature is set or unset. See Also: NVIDIA.DLSSFeatureFlags.</para>
+      </summary>
+      <param name="flag">The feature flag to get the state from.</param>
+      <returns>
+        <para>Indicates whether the feautre state is set or unset.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.DLSSCommandInitializationData.SetFlag(UnityEngine.NVIDIA.DLSSFeatureFlags,System.Boolean)">
+      <summary>
+        <para>Helper function. Controls the feature flags used by DLSS. See Also: NVIDIA.DLSSFeatureFlags.</para>
+      </summary>
+      <param name="flag">The feature flag to set or unset.</param>
+      <param name="value">Indicates whether to set or unset the flag.</param>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.DLSSContext">
+      <summary>
+        <para>Represents the state of DLSS.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSContext.executeData">
+      <summary>
+        <para>The mutable state of the current DLSS object.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSContext.initData">
+      <summary>
+        <para>The immutable initialization data the DLSSContext requires.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.DLSSDebugFeatureInfos">
+      <summary>
+        <para>Represents debug information for a particular DLSSContext.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSDebugFeatureInfos.execData">
+      <summary>
+        <para>The last execution data which the DLSSContext during execution. See Also: GraphicsDevice.ExecuteDLSS</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSDebugFeatureInfos.featureSlot">
+      <summary>
+        <para>The internal feature slot ID. You can use this feature slot as a unique identifier for DLSSCommand objects. Only use this for debugging purposes.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSDebugFeatureInfos.initData">
+      <summary>
+        <para>The init data which the DLSSContext used.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSDebugFeatureInfos.validFeature">
+      <summary>
+        <para>Debug information that indicates whether the feature last execution was valid or not.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.DLSSFeatureFlags">
+      <summary>
+        <para>Options that represent subfeatures of DLSS.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.DLSSFeatureFlags.DepthInverted">
+      <summary>
+        <para>Indicates whether to invert the depth buffer or not.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.DLSSFeatureFlags.DoSharpening">
+      <summary>
+        <para>Indicates whether to use the sharpening feature or not.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.DLSSFeatureFlags.IsHDR">
+      <summary>
+        <para>Indicates whether the input buffer uses high dynamic range. If set, the input buffer is raw luminance, if not set, the input buffer is normalized color.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.DLSSFeatureFlags.MVJittered">
+      <summary>
+        <para>Indicates whether the input motion vector buffer is jittered or not. If set, you must specify NVIDIA.DLSSCommandExecutionData.jitterOffsetX and NVIDIA.DLSSCommandExecutionData.jitterOffsetY.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.DLSSFeatureFlags.MVLowRes">
+      <summary>
+        <para>Indicates whether the input motion vector buffer is a lower resolution than the output. If set, you must specify NVIDIA.DLSSCommandExecutionData.mvScaleX and NVIDIA.DLSSCommandExecutionData.mvScaleY.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.DLSSFeatureFlags.None">
+      <summary>
+        <para>Disables every subfeature.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.DLSSQuality">
+      <summary>
+        <para>Options for DLSS performance modes.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.DLSSQuality.Balanced">
+      <summary>
+        <para>Balances performance with quality.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.DLSSQuality.MaximumPerformance">
+      <summary>
+        <para>Fast performance, lower quality.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.DLSSQuality.MaximumQuality">
+      <summary>
+        <para>High quality, less performant.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.DLSSQuality.UltraPerformance">
+      <summary>
+        <para>Fastest performance, lowest quality.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.DLSSTextureTable">
+      <summary>
+        <para>The set of texture slots available for the DLSSContext. SA GraphicsDevice.ExecuteDLSS</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSTextureTable.biasColorMask">
+      <summary>
+        <para>A mask, same size as colorInput, preferably of format R8_UNORM that informs DLSS of possible moving pixels. If heavy ghosting is encountered, set pixels to this mask to fix the problem. This texture is optional.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSTextureTable.colorInput">
+      <summary>
+        <para>The input color buffer to upsample for DLSSContext. This texture is mandatory and you must set it to a non-null value.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSTextureTable.colorOutput">
+      <summary>
+        <para>The output color buffer to write the upsampling result for DLSSContext. This must be large enough to fit in the output rect specified in the command. This texture is mandatory and you must set it to a non-null value.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSTextureTable.depth">
+      <summary>
+        <para>The input depth buffer. This must be the same size as the input color buffer. This texture is mandatory and you must set it to a non-null value.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSTextureTable.exposureTexture">
+      <summary>
+        <para>A 1x1 texture with pre-exposure values. If you do not use pre-exposure, do not set this texture. This texture is optional.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSTextureTable.motionVectors">
+      <summary>
+        <para>The motion vectors requested by the DLSSContext. Depending on the NVIDIA.DLSSFeatureFlags specified in DLSSContext.initData, this buffer can be a smaller scale or the full output resolution. This texture is mandatory and you must set it to a non-null value.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.DLSSTextureTable.transparencyMask">
+      <summary>
+        <para>A transparency bit mask. This must be the same size as the input texture. This texture helps the DLSSContext with ghosting issues. This texture is optional.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.GraphicsDevice">
+      <summary>
+        <para>Provides the main entry point for the NVIDIA Module. Use this to interact with specific NVIDIA graphics card features.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.GraphicsDevice.device">
+      <summary>
+        <para>Gets the device created by GraphicsDevice.CreateGraphicsDevice. If the device hasn't been created this property evaluates to null.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.GraphicsDevice.version">
+      <summary>
+        <para>Gets the version that corresponds to Unity's host plugin that manages the NVIDIA.NVUnityPlugin official library.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.CreateDebugView">
+      <summary>
+        <para>Creates an object containing debug information of the device.</para>
+      </summary>
+      <returns>
+        <para>Returns an object of type NVIDIA.GraphicsDeviceDebugView. This object contains a snapshot of the debug information of the device..</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.CreateFeature(UnityEngine.Rendering.CommandBuffer,UnityEngine.NVIDIA.DLSSCommandInitializationData&amp;)">
+      <summary>
+        <para>Creates a specific NVIDIA feature.</para>
+      </summary>
+      <param name="cmd">The rendering command buffer to record commands into. This call does not execute the command buffer, you must execute the command buffer yourself at any time after this call.</param>
+      <param name="initSettings">Initial settings structure for the specific feature.</param>
+      <returns>
+        <para>Returns a Deep Learning Super Sampling (DLSS) context object.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.CreateGraphicsDevice">
+      <summary>
+        <para>Creates the main API object. Call this method only once in your application.</para>
+      </summary>
+      <param name="projectID">The projectID of the Unity project. Only the first call to this function uses this ID.</param>
+      <param name="appDir">Specifies the directory in which the NVIDIA DLLS are located at. When not used, the system will locate the DLLs right next to the executable of the editor.</param>
+      <returns>
+        <para>The Device API object to access NVIDIA features. If you call this function again, the function returns the same device, regardless of whether you pass in a different projectID.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.CreateGraphicsDevice(System.String)">
+      <summary>
+        <para>Creates the main API object. Call this method only once in your application.</para>
+      </summary>
+      <param name="projectID">The projectID of the Unity project. Only the first call to this function uses this ID.</param>
+      <param name="appDir">Specifies the directory in which the NVIDIA DLLS are located at. When not used, the system will locate the DLLs right next to the executable of the editor.</param>
+      <returns>
+        <para>The Device API object to access NVIDIA features. If you call this function again, the function returns the same device, regardless of whether you pass in a different projectID.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.CreateGraphicsDevice(System.String,System.String)">
+      <summary>
+        <para>Creates the main API object. Call this method only once in your application.</para>
+      </summary>
+      <param name="projectID">The projectID of the Unity project. Only the first call to this function uses this ID.</param>
+      <param name="appDir">Specifies the directory in which the NVIDIA DLLS are located at. When not used, the system will locate the DLLs right next to the executable of the editor.</param>
+      <returns>
+        <para>The Device API object to access NVIDIA features. If you call this function again, the function returns the same device, regardless of whether you pass in a different projectID.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.CreateGraphicsDevice(System.String,System.String)">
+      <summary>
+        <para>Creates the main API object. Call this method only once in your application.</para>
+      </summary>
+      <param name="projectID">The projectID of the Unity project. Only the first call to this function uses this ID.</param>
+      <param name="appDir">Specifies the directory in which the NVIDIA DLLS are located at. When not used, the system will locate the DLLs right next to the executable of the editor.</param>
+      <returns>
+        <para>The Device API object to access NVIDIA features. If you call this function again, the function returns the same device, regardless of whether you pass in a different projectID.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.DeleteDebugView(UnityEngine.NVIDIA.GraphicsDeviceDebugView)">
+      <summary>
+        <para>Deletes a debug view created with GraphicsDevice.CreateDebugView.</para>
+      </summary>
+      <param name="debugView">The debug view object to use. This is the object that GraphicsDevice.CreateDebugView returns.</param>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.DestroyFeature(UnityEngine.Rendering.CommandBuffer,UnityEngine.NVIDIA.DLSSContext)">
+      <summary>
+        <para>Destroys a specific feature created with GraphicsDevice.CreateFeature.</para>
+      </summary>
+      <param name="cmd">The rendering command buffer to record commands into. This call does not execute the command buffer, you must execute the command buffer yourself at any time after this call.</param>
+      <param name="dlssContext">The command object to destroy.</param>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.ExecuteDLSS(UnityEngine.Rendering.CommandBuffer,UnityEngine.NVIDIA.DLSSContext,UnityEngine.NVIDIA.DLSSTextureTable&amp;)">
+      <summary>
+        <para>Records the execution of DLSS into a rendering command buffer. This call does not execute the command buffer, it only appends custom commands into it.</para>
+      </summary>
+      <param name="cmd">The rendering command buffer to record commands into. This call does not execute the command buffer, you must execute the command buffer yourself at any time after this call.</param>
+      <param name="dlssContext">The source feature context to execute. You must set the parameters for this command in the DLSSContext object prior to this call.</param>
+      <param name="textures">The texture table, where inputs / outputs are specified for DLSS to execute.</param>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.GetOptimalSettings(System.UInt32,System.UInt32,UnityEngine.NVIDIA.DLSSQuality,UnityEngine.NVIDIA.OptimalDLSSSettingsData&amp;)">
+      <summary>
+        <para>Returns a structure containing the optimal settings for a specific target resolution and quality.</para>
+      </summary>
+      <param name="targetWidth">Target width in pixels.</param>
+      <param name="targetHeight">Target height in pixels.</param>
+      <param name="quality">Current quality setting.</param>
+      <param name="optimalSettings">Output structure, which will be filled with the recommended optimal settings data.</param>
+      <returns>
+        <para>True if the function has successfully populated optimalSettings. False if it failed.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.IsFeatureAvailable(UnityEngine.NVIDIA.GraphicsDeviceFeature)">
+      <summary>
+        <para>Checks if the current NVIDIA graphics card supports the feature you specify using the GraphicsDeviceFeature enum.</para>
+      </summary>
+      <param name="featureID">The Feature enum value that represents the feature to check support for.</param>
+      <returns>
+        <para>Returns true if the graphics card supports the feature. Otherwise, returns false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.GraphicsDevice.UpdateDebugView(UnityEngine.NVIDIA.GraphicsDeviceDebugView)">
+      <summary>
+        <para>Updates a snapshpot of the debug information for the view object passed.</para>
+      </summary>
+      <param name="debugView">The object to update. You must create this using GraphicsDevice.CreateDebugView before you call this function.</param>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.GraphicsDeviceDebugView">
+      <summary>
+        <para>Represents a memory snapshot of the current feature states. The memory of the arrays/buffers in this struct are tied to the lifetime of the debug view. See Also: GraphicsDevice.CreateDebugView, GraphicsDevice.UpdateDebugView and GraphicsDevice.DeleteDebugView.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.GraphicsDeviceDebugView.deviceVersion">
+      <summary>
+        <para>The version that corresponds to Unity's host plugin NVUnityPlugin.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.GraphicsDeviceDebugView.dlssFeatureInfos">
+      <summary>
+        <para>A snapshot enumeration of all the active dlss features information currently active in the runtime. The method GraphicsDevice.UpdateDebugView will performs update on this snapshot.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.GraphicsDeviceDebugView.ngxVersion">
+      <summary>
+        <para>The current version id of the official internal NV NGX library. This version can change if you swap the DLLs for DLSS.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.GraphicsDeviceFeature">
+      <summary>
+        <para>Lists every feature ID the NVIDIA.GraphicsDevice API supports. For now, this only includes Deep Learning Super Sampling (DLSS). To check if the device supports a feature, call NVIDIA.GraphicsDevice.IsFeatureAvailable.</para>
+      </summary>
+    </member>
+    <member name="F:UnityEngine.NVIDIA.GraphicsDeviceFeature.DLSS">
+      <summary>
+        <para>Represents the Deep Learning Super Sampling (DLSS) feature.</para>
+      </summary>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.NVUnityPlugin">
+      <summary>
+        <para>Provides methods to manage loading and unloading NVIDIA module plugins.</para>
+      </summary>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.NVUnityPlugin.IsLoaded">
+      <summary>
+        <para>Checks wether the native plugin NVUnityPlugin in the NVIDIA native module has been loaded or not.</para>
+      </summary>
+      <returns>
+        <para>Returns true if the native plug has been loaded. Otherwise, returns false.</para>
+      </returns>
+    </member>
+    <member name="M:UnityEngine.NVIDIA.NVUnityPlugin.Load">
+      <summary>
+        <para>Attempts to dynamically load the plugin NVUnityPlugin.</para>
+      </summary>
+      <returns>
+        <para>Returns true if the function loaded the plugin successfully. Otherwise, returns false.</para>
+      </returns>
+    </member>
+    <member name="T:UnityEngine.NVIDIA.OptimalDLSSSettingsData">
+      <summary>
+        <para>Represents the performance settings that DLSS recommends based on the system's graphics card and the size of the input and output color buffers. See Also: GraphicsDevice.GetOptimalSettings</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.OptimalDLSSSettingsData.maxHeight">
+      <summary>
+        <para>The maximum height that DLSS recommends for dynamic resolution.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.OptimalDLSSSettingsData.maxWidth">
+      <summary>
+        <para>The maximum width that DLSS recommends for dynamic resolution.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.OptimalDLSSSettingsData.minHeight">
+      <summary>
+        <para>The minimum height that DLSS recommends for dynamic resolution.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.OptimalDLSSSettingsData.minWidth">
+      <summary>
+        <para>The minimum width that DLSS recommends for dynamic resolution.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.OptimalDLSSSettingsData.outRenderHeight">
+      <summary>
+        <para>The height of the output render resolution that DLSS recommends.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.OptimalDLSSSettingsData.outRenderWidth">
+      <summary>
+        <para>The width of the output render resolution that DLSS recommends.</para>
+      </summary>
+    </member>
+    <member name="P:UnityEngine.NVIDIA.OptimalDLSSSettingsData.sharpness">
+      <summary>
+        <para>The sharpness value that DLSS recommends.</para>
+      </summary>
+    </member>
+    <member name="A:UnityEngine.NVIDIAModule">
+      <summary>
+        <para>A module that contains API you can use to interact with NVIDIA graphics cards.</para>
+      </summary>
+    </member>
+  </members>
+</doc>

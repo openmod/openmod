@@ -1,23 +1,22 @@
-﻿using NuGet.Common;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
-using NuGet.Packaging.Signing;
 using NuGet.Protocol.Core.Types;
 using NuGet.Resolver;
-using NuGet.Versioning;
 using OpenMod.Common.Hotloading;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using OpenMod.NuGet.Helpers;
-using System.Collections.Concurrent;
+using OpenMod.Common.Helpers;
 
 namespace OpenMod.NuGet
 {
@@ -26,18 +25,20 @@ namespace OpenMod.NuGet
         public delegate Assembly AssemblyLoader(byte[] assemblyData, byte[]? assemblySymbols);
 
         public ILogger Logger { get; set; }
-
         public string PackagesDirectory { get; }
-        private readonly List<Lazy<INuGetResourceProvider>> m_Providers;
+
         private readonly ISettings m_NugetSettings;
         private readonly NuGetFramework m_CurrentFramework;
         private readonly FrameworkReducer m_FrameworkReducer;
         private readonly PackagePathResolver m_PackagePathResolver;
         private readonly PackageResolver m_PackageResolver;
-        private readonly Dictionary<string, Assembly> m_ResolveCache;
+        private readonly PackageSourceProvider m_PackageSourceProvider;
+        private readonly SourceRepositoryProvider m_SourceRepositoryProvider;
+        private readonly Dictionary<AssemblyName, Assembly> m_ResolveCache;
         private readonly Dictionary<string, List<NuGetAssembly>> m_LoadedPackageAssemblies;
         private readonly HashSet<string> m_IgnoredDependendencies;
         private readonly PackagesDataStore? m_PackagesDataStore;
+        private readonly Dictionary<string, PackageIdentity> m_CachedPackageIdentity;
 
         private static readonly string[] s_PackageBlacklist =
         {
@@ -47,16 +48,14 @@ namespace OpenMod.NuGet
             "F.ItemRestrictions"
         };
 
-        private static readonly string[] s_PublisherBlacklist = new string[] {};
+        private static readonly string[] s_PublisherBlacklist = new string[] { };
 
         private static readonly ConcurrentDictionary<string, List<Assembly>> s_LoadedPackages = new();
-        private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
         private bool m_AssemblyResolverInstalled;
         private AssemblyLoader m_AssemblyLoader;
 
         public NuGetPackageManager(string packagesDirectory) : this(packagesDirectory, usePackagesFiles: true)
         {
-
         }
 
         public NuGetPackageManager(string packagesDirectory, bool usePackagesFiles)
@@ -81,11 +80,8 @@ namespace OpenMod.NuGet
             }
 
             Logger = new NullLogger();
-            m_Providers = new List<Lazy<INuGetResourceProvider>>();
-            m_Providers.AddRange(Repository.Provider.GetCoreV3()); // Add v3 API support
 
             const string nugetFile = "NuGet.Config";
-
 
             var nugetConfig = Path.Combine(packagesDirectory, nugetFile);
             if (!File.Exists(nugetConfig))
@@ -112,13 +108,17 @@ namespace OpenMod.NuGet
 
             m_CurrentFramework = frameworkName == null
                 ? NuGetFramework.AnyFramework
-                : NuGetFramework.ParseFrameworkName(frameworkName, new DefaultFrameworkNameProvider());
+                : NuGetFramework.ParseFrameworkName(frameworkName, DefaultFrameworkNameProvider.Instance);
 
             m_PackagePathResolver = new PackagePathResolver(packagesDirectory);
             m_PackageResolver = new PackageResolver();
-            m_LoadedPackageAssemblies = new Dictionary<string, List<NuGetAssembly>>();
-            m_ResolveCache = new Dictionary<string, Assembly>();
+            m_LoadedPackageAssemblies = new Dictionary<string, List<NuGetAssembly>>(StringComparer.OrdinalIgnoreCase);
+            m_ResolveCache = new Dictionary<AssemblyName, Assembly>(AssemblyNameEqualityComparer.Instance);
             m_IgnoredDependendencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            m_CachedPackageIdentity = new(StringComparer.OrdinalIgnoreCase);
+
+            m_PackageSourceProvider = new(m_NugetSettings);
+            m_SourceRepositoryProvider = new(m_PackageSourceProvider, Repository.Provider.GetCoreV3());
 
             // ReSharper disable once VirtualMemberCallInConstructor
             InstallAssemblyResolver();
@@ -156,14 +156,10 @@ namespace OpenMod.NuGet
                 return new NuGetInstallResult(queryResult.Code, queryResult.InstalledPackage);
             }
 
-            var packageExtractionContext = new PackageExtractionContext(
-                PackageSaveMode.Nupkg,
-                XmlDocFileSaveMode.None,
-                ClientPolicyContext.GetClientPolicy(m_NugetSettings, Logger),
-                Logger);
-
-            if (queryResult.Packages != null)
+            if (queryResult.Packages?.Count > 0)
             {
+                var globalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder(m_NugetSettings);
+
                 foreach (var dependencyPackage in queryResult.Packages)
                 {
                     if (m_IgnoredDependendencies.Contains(dependencyPackage.Id))
@@ -172,37 +168,32 @@ namespace OpenMod.NuGet
                     }
 
                     var installed = await GetLatestPackageIdentityAsync(dependencyPackage.Id);
-                    if (installed != null)
+                    if (installed != null && dependencyPackage.HasVersion && installed.Version >= dependencyPackage.Version)
                     {
-                        if (dependencyPackage.HasVersion && installed.Version >= dependencyPackage.Version)
-                        {
-                            continue;
-                        }
+                        continue;
                     }
 
-                    var installedPath = m_PackagePathResolver.GetInstalledPath(dependencyPackage);
-                    if (installedPath == null)
+                    var installedPath = GetNugetPackageFile(dependencyPackage);
+                    if (!File.Exists(installedPath))
                     {
                         Logger.LogInformation(
                             $"Downloading: {dependencyPackage.Id} v{dependencyPackage.Version.OriginalVersion}");
 
                         var downloadResource =
                             await dependencyPackage.Source.GetResourceAsync<DownloadResource>(CancellationToken.None);
-                        var downloadResult = await downloadResource.GetDownloadResourceResultAsync(
+
+                        using var downloadResult = await downloadResource.GetDownloadResourceResultAsync(
                             dependencyPackage,
                             new PackageDownloadContext(cacheContext),
-                            SettingsUtility.GetGlobalPackagesFolder(m_NugetSettings),
+                            globalPackagesFolder,
                             Logger, CancellationToken.None);
 
-                        await PackageExtractor.ExtractPackageAsync(
-                            downloadResult.PackageSource,
-                            downloadResult.PackageStream,
-                            m_PackagePathResolver,
-                            packageExtractionContext,
-                            CancellationToken.None);
+                        downloadResult.PackageStream.CopyToFile(installedPath);
+
+                        m_CachedPackageIdentity[dependencyPackage.Id] = downloadResult.PackageReader.GetIdentity();
                     }
 
-                    await LoadAssembliesFromNuGetPackageAsync(GetNugetPackageFile(dependencyPackage));
+                    await LoadAssembliesFromNuGetPackageAsync(installedPath);
                 }
             }
 
@@ -218,7 +209,7 @@ namespace OpenMod.NuGet
 
         public async Task RemoveOutdatedPackagesAsync()
         {
-            var installedVersions = new Dictionary<string, List<NuGetVersion>>();
+            var installedVersions = new Dictionary<string, List<PackageIdentity>>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var directory in Directory.GetDirectories(PackagesDirectory))
             {
@@ -234,23 +225,32 @@ namespace OpenMod.NuGet
                 using var packageReader = new PackageArchiveReader(nupkgFile);
                 var identity = await packageReader.GetIdentityAsync(CancellationToken.None);
 
-                if (!installedVersions.ContainsKey(identity.Id))
+                if (!installedVersions.TryGetValue(identity.Id, out var versions))
                 {
-                    installedVersions.Add(identity.Id, new List<NuGetVersion>());
+                    versions = new(1);
+                    installedVersions.Add(identity.Id, versions);
                 }
 
-                installedVersions[identity.Id].Add(identity.Version);
+                versions.Add(identity);
             }
 
-            foreach (var package in installedVersions.Keys)
+            foreach (var kvp in installedVersions)
             {
-                var versions = installedVersions[package]
-                    .OrderByDescending(d => d);
+                var identities = kvp.Value
+                    .OrderByDescending(d => d.Version)
+                    .ToArray();
 
-                foreach (var version in versions.Skip(1))
+                if (identities.Length == 1)
                 {
-                    await RemoveAsync(new PackageIdentity(package, version));
+                    continue;
                 }
+
+                foreach (var identity in identities.Skip(1))
+                {
+                    await RemoveAsync(identity);
+                }
+
+                m_CachedPackageIdentity[kvp.Key] = identities[0];
             }
         }
 
@@ -278,27 +278,22 @@ namespace OpenMod.NuGet
             }
 
             var matches = new List<IPackageSearchMetadata>();
+            var searchFilter = new SearchFilter(includePreRelease)
+            {
+                IncludeDelisted = false,
+                SupportedFrameworks = new[] { m_CurrentFramework.DotNetFrameworkName } // todo: add support for from .net461 to .net481
+            };
 
             Logger.LogInformation("Searching repository for package: " + packageId);
 
-            var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
-            var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, m_Providers);
-
-            var sourceRepositories = sourceRepositoryProvider.GetRepositories();
-
-            foreach (var sourceRepository in sourceRepositories)
+            foreach (var sourceRepository in m_SourceRepositoryProvider.GetRepositories())
             {
                 var searchResource = await sourceRepository.GetResourceAsync<PackageSearchResource>();
-                var searchFilter = new SearchFilter(includePreRelease)
-                {
-                    IncludeDelisted = false,
-                    SupportedFrameworks = new[] { m_CurrentFramework.DotNetFrameworkName }
-                };
 
-                IEnumerable<IPackageSearchMetadata> searchResult;
+                IPackageSearchMetadata[] searchResult;
                 try
                 {
-                    searchResult = (await searchResource.SearchAsync(packageId, searchFilter, 0, 10, Logger, CancellationToken.None)).ToList();
+                    searchResult = (await searchResource.SearchAsync(packageId, searchFilter, 0, 10, Logger, CancellationToken.None)).ToArray();
                 }
                 catch (Exception ex)
                 {
@@ -309,17 +304,18 @@ namespace OpenMod.NuGet
 
                 if (version == null)
                 {
-                    Logger.LogDebug("version == null, adding searchResult: " + searchResult.Count());
+                    Logger.LogDebug("version == null, adding searchResult: " + searchResult.Length);
                     matches.AddRange(searchResult);
                     continue;
                 }
 
                 foreach (var packageMeta in searchResult)
                 {
-                    var versions = (await packageMeta.GetVersionsAsync()).ToList();
-                    if (!versions.Any(d
-                        => d.Version.OriginalVersion.Equals(version, StringComparison.OrdinalIgnoreCase)))
+                    var versions = await packageMeta.GetVersionsAsync();
+                    if (!versions.Any(d => d.Version.OriginalVersion.Equals(version, StringComparison.OrdinalIgnoreCase)))
+                    {
                         continue;
+                    }
 
                     Logger.LogDebug("adding packageMeta: "
                                     + packageMeta.Identity.Id
@@ -331,8 +327,13 @@ namespace OpenMod.NuGet
 
             return matches.Where(a =>
             {
-                return !s_PackageBlacklist.Any(l => string.Equals(a.Identity?.Id?.Trim(), l, StringComparison.OrdinalIgnoreCase))
-                    && !s_PublisherBlacklist.Any(l => a.Owners?.ToLowerInvariant().Contains(l.ToLowerInvariant()) ?? false);
+                if (s_PackageBlacklist.Any(p => p.Equals(a.Identity?.Id, StringComparison.OrdinalIgnoreCase)))
+                    return false;
+
+                if (s_PublisherBlacklist.Any(p => a.Owners.IndexOf(p, StringComparison.OrdinalIgnoreCase) >= 0))
+                    return false;
+
+                return true;
             });
         }
 
@@ -343,89 +344,69 @@ namespace OpenMod.NuGet
                 throw new ArgumentNullException(nameof(packageIds));
             }
 
-            m_IgnoredDependendencies.AddRange(packageIds);
+            m_IgnoredDependendencies.UnionWith(packageIds);
         }
 
         public virtual Task<ICollection<PackageDependency>> GetDependenciesAsync(PackageIdentity identity)
         {
-            return GetDependenciesInternalAsync(identity, new List<string>());
+            return GetDependenciesInternalAsync(identity, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
         }
 
-        private async Task<ICollection<PackageDependency>> GetDependenciesInternalAsync(PackageIdentity identity, ICollection<string> lookedUpIds)
+        private async Task<ICollection<PackageDependency>> GetDependenciesInternalAsync(PackageIdentity identity, ISet<string> lookedUpIds)
         {
             if (identity == null)
             {
                 throw new ArgumentNullException(nameof(identity));
             }
 
-            if (lookedUpIds == null)
+            if (!lookedUpIds.Add(identity.Id))
             {
-                throw new ArgumentNullException(nameof(lookedUpIds));
+                return Array.Empty<PackageDependency>();
             }
 
-            if (lookedUpIds.Any(d => string.Equals(d, identity.Id, StringComparison.OrdinalIgnoreCase)))
-            {
-                return new List<PackageDependency>();
-            }
-
-            lookedUpIds.Add(identity.Id);
             var nupkgFile = GetNugetPackageFile(identity);
-
             if (!File.Exists(nupkgFile))
             {
                 throw new Exception($"GetDependenciesAsync on a nupkg that doesn't exist: {identity.Id} v{identity.Version}");
             }
 
             using var packageReader = new PackageArchiveReader(nupkgFile);
-            var list = new List<PackageDependency>();
             var dependencyGroups = (await packageReader.GetPackageDependenciesAsync(CancellationToken.None)).ToList();
 
             if (dependencyGroups.Count == 0)
             {
-                return list;
+                return Array.Empty<PackageDependency>();
             }
 
-            var framework = m_FrameworkReducer.GetNearest(m_CurrentFramework, dependencyGroups.Select(d => d.TargetFramework));
+            var framework = m_FrameworkReducer.GetNearest(m_CurrentFramework,
+                dependencyGroups.Select(d => d.TargetFramework));
             if (framework == null)
             {
                 throw new Exception($"Failed to get dependencies of {identity.Id} v{identity.Version}: no supported framework found. {Environment.NewLine} Requested framework: {m_CurrentFramework.DotNetFrameworkName}, available frameworks: {string.Join(", ", dependencyGroups.Select(d => d.TargetFramework).Select(d => d.DotNetFrameworkName))}");
             }
 
-            var packages = dependencyGroups
-                .First(d => d.TargetFramework == framework)
-                .Packages;
+            var dependencies = new HashSet<PackageDependency>(dependencyGroups
+                .Find(d => d.TargetFramework == framework)
+                .Packages
+                .Where(d => !m_IgnoredDependendencies.Contains(d.Id)), PackageDependencyComparerSlim.Default);
 
-            list.AddRange(packages);
-            list.RemoveAll(d => m_IgnoredDependendencies.Contains(d.Id));
-
-            foreach (var dependency in list.ToList())
+            foreach (var dependency in dependencies.ToList())
             {
-                if (m_IgnoredDependendencies.Contains(dependency.Id))
-                {
-                    continue;
-                }
-
                 var dependencyPackage = await GetLatestPackageIdentityAsync(dependency.Id);
                 if (dependencyPackage == null)
                 {
                     throw new Exception($"Failed to get dependencies of {identity.Id} v{identity.Version}: dependency {dependency.Id} {dependency.VersionRange.OriginalString} is not installed!");
                 }
 
-                list.AddRange(await GetDependenciesInternalAsync(dependencyPackage, lookedUpIds));
+                dependencies.UnionWith(await GetDependenciesInternalAsync(dependencyPackage, lookedUpIds));
             }
 
-            return list;
+            return dependencies;
         }
 
         public void SetAssemblyLoader(AssemblyLoader assemblyLoader)
         {
             m_AssemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
-        }
-
-        [Obsolete("Use SetAssemblyLoader(AssemblyLoader) instead")]
-        public void SetAssemblyLoader(Func<byte[], Assembly> assemblyLoader)
-        {
-            SetAssemblyLoader((assemblyData, _) => assemblyLoader(assemblyData));
         }
 
         public virtual async Task<NuGetQueryResult> QueryDependenciesAsync(PackageIdentity identity, SourceCacheContext cacheContext, bool allowPreReleaseVersions)
@@ -440,10 +421,7 @@ namespace OpenMod.NuGet
                 throw new ArgumentNullException(nameof(cacheContext));
             }
 
-            var packageSourceProvider = new PackageSourceProvider(m_NugetSettings);
-            var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, m_Providers);
-
-            var sourceRepositories = sourceRepositoryProvider.GetRepositories().ToArray();
+            var sourceRepositories = m_SourceRepositoryProvider.GetRepositories();
             var availablePackages = new HashSet<SourcePackageDependencyInfo>(PackageIdentityComparer.Default);
 
             if (!identity.HasVersion)
@@ -474,7 +452,7 @@ namespace OpenMod.NuGet
                 Enumerable.Empty<PackageReference>(),
                 Enumerable.Empty<PackageIdentity>(),
                 availablePackages,
-                sourceRepositoryProvider.GetRepositories().Select(s => s.PackageSource),
+                sourceRepositories.Select(s => s.PackageSource),
                 Logger);
 
             var resolvedPackages = m_PackageResolver.Resolve(resolverContext, CancellationToken.None)
@@ -486,168 +464,104 @@ namespace OpenMod.NuGet
             return new NuGetQueryResult(resolvedPackages);
         }
 
-        public virtual async Task<List<byte[]>> LoadAssemblyDataFromNuGetPackageAsync(string nupkgFile)
+        public virtual Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageAsync(string nupkgFile)
         {
-            if (string.IsNullOrEmpty(nupkgFile))
-            {
-                throw new ArgumentException(nameof(nupkgFile));
-            }
-
-            using var packageReader = new PackageArchiveReader(nupkgFile);
-
-            var libItems = (await packageReader.GetLibItemsAsync(CancellationToken.None)).ToList();
-            var nearest = m_FrameworkReducer.GetNearest(m_CurrentFramework, libItems.Select(x => x.TargetFramework));
-            var assemblies = new List<byte[]>();
-
-            foreach (var file in libItems.Where(x => x.TargetFramework.Equals(nearest)))
-            {
-                foreach (var item in file.Items)
-                {
-                    try
-                    {
-                        if (!item.EndsWith(".dll"))
-                        {
-                            continue;
-                        }
-
-                        var entry = packageReader.GetEntry(item);
-                        using var stream = entry.Open();
-                        var ms = new MemoryStream();
-                        await stream.CopyToAsync(ms);
-
-                        try
-                        {
-                            assemblies.Add(ms.ToArray());
-                        }
-                        finally
-                        {
-                            ms.Close();
-                            stream.Close();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError($"Failed to load assembly at {item} from file {nupkgFile}");
-                        Logger.LogError(ex.ToString());
-                    }
-                }
-            }
-
-            return assemblies;
+            return LoadAssembliesFromNuGetPackageInternalAsync(nupkgFile, true);
         }
 
-        public virtual async Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageAsync(string nupkgFile)
+        private async Task<IEnumerable<Assembly>> LoadAssembliesFromNuGetPackageInternalAsync(string nupkgFile, bool getAndLoadDependencies)
         {
             if (string.IsNullOrEmpty(nupkgFile))
             {
                 throw new ArgumentNullException(nameof(nupkgFile));
             }
 
-            if (s_LoadedPackages.TryGetValue(nupkgFile, out var loadedPackages))
+            var fullPath = Path.GetFullPath(nupkgFile);
+
+            if (s_LoadedPackages.TryGetValue(fullPath, out var loadedPackages))
             {
                 return loadedPackages;
             }
 
-            using var packageReader = new PackageArchiveReader(nupkgFile);
-            var identity = await packageReader.GetIdentityAsync(CancellationToken.None);
-            var versionedIdentity = identity.Id;
-            if (identity.HasVersion)
+            if (m_LoadedPackageAssemblies.TryGetValue(fullPath, out var loadedAssemblies))
             {
-                versionedIdentity += $"-{identity.Version.OriginalVersion}";
-            }
-
-            if (s_LoadedPackages.TryGetValue(versionedIdentity, out loadedPackages))
-            {
-                return loadedPackages;
-            }
-
-            Logger.LogInformation("Loading NuGet package: " + Path.GetFileName(nupkgFile));
-
-            var fullPath = Path.GetFullPath(nupkgFile).ToLower();
-
-            if (m_LoadedPackageAssemblies.ContainsKey(fullPath))
-            {
-                if (m_LoadedPackageAssemblies[fullPath].All(d => d.Assembly.IsAlive))
+                if (loadedAssemblies.All(d => d.Assembly.IsAlive))
                 {
-                    return m_LoadedPackageAssemblies[fullPath].Select(d => d.Assembly.Target).Cast<Assembly>();
+                    return loadedAssemblies.ConvertAll(x => (Assembly)x.Assembly.Target);
                 }
 
                 m_LoadedPackageAssemblies.Remove(fullPath);
             }
 
-            var assemblies = new List<NuGetAssembly>();
+            var packageName = Path.GetFileName(nupkgFile);
 
-            var dependencies = await GetDependenciesAsync(identity);
-            foreach (var dependency in dependencies.Where(d => !d.Id.Equals(identity.Id)))
+            Logger.LogInformation("Loading NuGet package: " + packageName);
+
+            using var packageReader = new PackageArchiveReader(nupkgFile);
+            var identity = await packageReader.GetIdentityAsync(CancellationToken.None);
+
+            if (getAndLoadDependencies)
             {
-                var package = await GetLatestPackageIdentityAsync(dependency.Id);
-                if (package == null)
+                foreach (var dependency in await GetDependenciesAsync(identity))
                 {
-                    throw new Exception($"Failed to load assemblies from {nupkgFile}: dependency {dependency.Id} {dependency.VersionRange.OriginalString} is not installed.");
-                }
-
-                var nupkg = GetNugetPackageFile(package);
-                if (!File.Exists(nupkg))
-                {
-                    var latestInstalledVersion = await GetLatestPackageIdentityAsync(dependency.Id);
-                    if (latestInstalledVersion == null)
+                    if (dependency.Id.Equals(identity.Id, StringComparison.OrdinalIgnoreCase))
                     {
-                        Logger.LogWarning("Failed to resolve: " + dependency.Id);
                         continue;
                     }
 
-                    nupkg = GetNugetPackageFile(latestInstalledVersion);
-                }
+                    var package = await GetLatestPackageIdentityAsync(dependency.Id);
+                    if (package == null)
+                    {
+                        throw new Exception($"Failed to load assemblies from {nupkgFile}: dependency {dependency.Id} {dependency.VersionRange.OriginalString} is not installed.");
+                    }
 
-                await LoadAssembliesFromNuGetPackageAsync(nupkg);
+                    var nupkg = GetNugetPackageFile(package);
+                    await LoadAssembliesFromNuGetPackageInternalAsync(nupkg, false);
+                }
             }
+
+            var assemblies = new List<NuGetAssembly>();
 
             var libItems = (await packageReader.GetLibItemsAsync(CancellationToken.None)).ToList();
             var nearest = m_FrameworkReducer.GetNearest(m_CurrentFramework, libItems.Select(x => x.TargetFramework));
+            var file = libItems.Find(x => x.TargetFramework == nearest);
 
-            foreach (var file in libItems.Where(x => x.TargetFramework.Equals(nearest)))
+            foreach (var item in file?.Items ?? Enumerable.Empty<string>())
             {
-                foreach (var item in file.Items)
+                try
                 {
-                    try
+                    if (!item.EndsWith(".dll", StringComparison.Ordinal))
                     {
-                        if (!item.EndsWith(".dll"))
-                        {
-                            continue;
-                        }
-
-                        var assemblyData = packageReader.ReadAllBytes(item);
-                        var assemblySymbolsPath = Path.ChangeExtension(item, "pdb");
-                        var assemblySymbols = file.Items.Contains(assemblySymbolsPath)
-                            ? packageReader.ReadAllBytes(assemblySymbolsPath)
-                            : null;
-
-                        var asm = m_AssemblyLoader(assemblyData, assemblySymbols);
-
-                        var name = GetVersionIndependentName(asm.FullName, out var extractedVersion);
-                        var parsedVersion = new Version(extractedVersion);
-
-                        assemblies.Add(new NuGetAssembly
-                        {
-                            Assembly = new WeakReference(asm),
-                            AssemblyName = name,
-                            Version = parsedVersion,
-                            Package = identity
-                        });
+                        continue;
                     }
-                    catch (Exception ex)
+
+                    var assemblyData = packageReader.ReadAllBytes(item);
+                    var assemblySymbolsPath = Path.ChangeExtension(item, "pdb");
+                    var assemblySymbols = file!.Items.Contains(assemblySymbolsPath)
+                        ? packageReader.ReadAllBytes(assemblySymbolsPath)
+                        : null;
+
+                    var asm = m_AssemblyLoader(assemblyData, assemblySymbols);
+                    var assemblyName = Hotloader.GetRealAssemblyName(asm);
+
+                    assemblies.Add(new NuGetAssembly
                     {
-                        Logger.LogError($"Failed to load assembly at {item} from file {nupkgFile}");
-                        Logger.LogError(ex.ToString());
-                    }
+                        Assembly = new WeakReference(asm),
+                        AssemblyName2 = assemblyName,
+                        Package = identity
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"Failed to load assembly at {item} from file {nupkgFile}");
+                    Logger.LogError(ex.ToString());
                 }
             }
 
             m_LoadedPackageAssemblies.Add(fullPath, assemblies);
-            var result = assemblies.Select(d => d.Assembly.Target).Cast<Assembly>().ToList();
 
-            s_LoadedPackages.TryAdd(versionedIdentity, result);
-            s_LoadedPackages.TryAdd(nupkgFile, result);
+            var result = assemblies.ConvertAll(d => (Assembly)d.Assembly.Target);
+            s_LoadedPackages.TryAdd(fullPath, result);
             return result;
         }
 
@@ -658,35 +572,42 @@ namespace OpenMod.NuGet
                 throw new ArgumentNullException(nameof(packageId));
             }
 
-            if (!Directory.Exists(PackagesDirectory))
+            if (m_CachedPackageIdentity.TryGetValue(packageId, out var package))
             {
-                return null;
+                return package;
             }
 
             var packageIdentities = new List<PackageIdentity>();
             foreach (var dir in Directory.GetDirectories(PackagesDirectory))
             {
-                var dirName = new DirectoryInfo(dir).Name;
-                if (!dirName.StartsWith(packageId + ".", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
                 var directoryName = new DirectoryInfo(dir).Name;
+                if (!directoryName.StartsWith(packageId + ".", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 var nupkgFile = Path.Combine(dir, directoryName + ".nupkg");
                 if (!File.Exists(nupkgFile))
                 {
+                    Debug.Fail("File should exists");
                     return null;
                 }
 
                 using var reader = new PackageArchiveReader(nupkgFile);
                 var identity = await reader.GetIdentityAsync(CancellationToken.None);
-
                 if (identity.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase))
                 {
                     packageIdentities.Add(identity);
                 }
             }
 
-            return packageIdentities.OrderByDescending(c => c.Version).FirstOrDefault();
+            package = packageIdentities.OrderByDescending(c => c.Version).FirstOrDefault();
+            if (package is not null)
+            {
+                m_CachedPackageIdentity[packageId] = package;
+            }
+
+            return package;
         }
 
         public virtual string GetNugetPackageFile(PackageIdentity identity)
@@ -696,10 +617,9 @@ namespace OpenMod.NuGet
                 throw new ArgumentNullException(nameof(identity));
             }
 
-            var dir = m_PackagePathResolver.GetInstallPath(identity);
-            var dirName = new DirectoryInfo(dir).Name;
+            var dirName = m_PackagePathResolver.GetPackageDirectoryName(identity);
 
-            return Path.Combine(dir, dirName + ".nupkg");
+            return Path.Combine(PackagesDirectory, dirName, dirName + ".nupkg");
         }
 
         protected virtual async Task<PackageIdentity> QueryPackageLatestVersionAsync(
@@ -724,16 +644,15 @@ namespace OpenMod.NuGet
             }
 
             Logger.LogDebug("GetPackageLatestVersion: " + package);
-            var repos = repositories.ToArray();
 
-            foreach (var sourceRepository in repos)
+            foreach (var sourceRepository in repositories)
             {
                 Logger.LogDebug("GetResourceAsync (MetadataResource) for " + sourceRepository.PackageSource.SourceUri);
                 var metadataResource = await sourceRepository.GetResourceAsync<MetadataResource>();
 
                 Logger.LogDebug("GetLatestVersion");
                 var latestVersion = await metadataResource.GetLatestVersion(package.Id, allowPreReleaseVersions, false, cacheContext, Logger, CancellationToken.None);
-                if (latestVersion == null || package.HasVersion && package.Version < latestVersion)
+                if (latestVersion == null || (package.HasVersion && package.Version < latestVersion))
                 {
                     continue;
                 }
@@ -776,62 +695,88 @@ namespace OpenMod.NuGet
                 return;
             }
 
-            Logger.LogDebug("GetPackageDependencies: " + package);
-            var repos = repositories.ToList();
-            var dependencyInfo = await FindDependencyInfoAsync(package, cacheContext, repos);
-
-            if (dependencyInfo == null)
+            foreach (var sourceRepository in repositories)
             {
-                return;
-            }
+                Logger.LogDebug("GetPackageDependencies: " + package);
+                var dependencyInfo = await FindDependencyInfoAsync(package, cacheContext, sourceRepository);
 
-            availablePackages.Add(dependencyInfo);
+                if (dependencyInfo == null)
+                {
+                    continue;
+                }
 
-            foreach (var sourceRepository in repos)
-            {
+                availablePackages.Add(dependencyInfo);
+                if (!dependencyInfo.Dependencies.Any())
+                {
+                    return;
+                }
+
                 Logger.LogDebug("GetResourceAsync (FindPackageById) for " + dependencyInfo.Source.PackageSource.SourceUri);
                 var packageResource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
 
-                foreach (var dependency in dependencyInfo.Dependencies)
-                {
-                    var versions = (await packageResource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None))
-                        ?.ToArray();
+                var bag = new ConcurrentBag<PackageDependency>(dependencyInfo.Dependencies);
+                var deps = new ConcurrentBag<PackageIdentity>();
 
-                    if (versions?.Length == 0)
+                const int maxConcurrencyTasks = 5;
+
+                // Task.WhenAll( dependencyInfo.Dependencies.Select ) starts all tasks, but which for some reason causes slower loading
+                var tasks = Enumerable.Range(0, Math.Min(maxConcurrencyTasks, bag.Count))
+                    .Select(async _ =>
                     {
-                        Logger.LogDebug("Versions could not be found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
-                        continue;
-                    }
+                        while (bag.TryTake(out var dependency))
+                        {
+                            var latestInstalledPackage = await GetLatestPackageIdentityAsync(dependency.Id);
+                            if (latestInstalledPackage != null
+                                && dependency.VersionRange.IsBetter(null, latestInstalledPackage.Version))
+                            {
+                                deps.Add(latestInstalledPackage);
+                                continue;
+                            }
 
-                    await QueryPackageDependenciesAsync(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)), cacheContext, repos, availablePackages, allowPreReleaseVersions);
+                            var versions = await packageResource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None);
+                            if (!versions.Any())
+                            {
+                                continue;
+                            }
+
+                            versions = allowPreReleaseVersions
+                                ? versions
+                                : versions.Where(x => !x.IsPrerelease);
+
+                            deps.Add(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)));
+                        }
+                    });
+
+                await Task.WhenAll(tasks);
+
+                foreach (var dependency in deps)
+                {
+                    await QueryPackageDependenciesAsync(dependency, cacheContext, repositories, availablePackages, allowPreReleaseVersions);
                 }
+
+                return;
             }
         }
 
         private async Task<SourcePackageDependencyInfo?> FindDependencyInfoAsync(
             PackageIdentity package,
             SourceCacheContext cacheContext,
-            IEnumerable<SourceRepository> repositories)
+            SourceRepository sourceRepository)
         {
-            foreach (var sourceRepository in repositories)
+            Logger.LogDebug("GetResourceAsync (DependencyInfoResource) for " + sourceRepository.PackageSource.SourceUri);
+            var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
+
+            Logger.LogDebug("ResolvePackage");
+            var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFramework, cacheContext, Logger, CancellationToken.None);
+            if (dependencyInfo == null)
             {
-                Logger.LogDebug("GetResourceAsync (DependencyInfoResource) for " + sourceRepository.PackageSource.SourceUri);
-                var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
-
-                Logger.LogDebug("ResolvePackage");
-                var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFramework, cacheContext, Logger, CancellationToken.None);
-                if (dependencyInfo == null)
-                {
-                    Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
-                    continue;
-                }
-
-                Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
-
-                return dependencyInfo;
+                Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
+                return null;
             }
 
-            return null;
+            Logger.LogDebug("Dependency was found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
+
+            return dependencyInfo;
         }
 
         public virtual void InstallAssemblyResolver()
@@ -847,51 +792,46 @@ namespace OpenMod.NuGet
 
         private Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            var name = GetVersionIndependentName(args.Name, out _);
-            if (m_ResolveCache.ContainsKey(name))
+            var name = new AssemblyName(args.Name);
+            if (m_ResolveCache.TryGetValue(name, out var assembly))
             {
-                return m_ResolveCache[name];
+                return assembly;
             }
 
-            var matchingAssemblies =
-                m_LoadedPackageAssemblies.Values.SelectMany(d => d)
-                    .Where(d => d.Assembly.IsAlive && (d.AssemblyName.Equals(name, StringComparison.OrdinalIgnoreCase)
-                        || Hotloader.GetRealAssemblyName((Assembly)d.Assembly.Target).Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
-                    .OrderByDescending(d => d.Version);
+            var matchedAssembly = m_LoadedPackageAssemblies.Values
+                .SelectMany(d => d)
+                .Where(d => d.Assembly.IsAlive && d.AssemblyName2.Name.Equals(name.Name, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(d => d.AssemblyName2.Version)
+                .FirstOrDefault();
 
-            var result = (Assembly?)matchingAssemblies.FirstOrDefault()?.Assembly.Target;
+            assembly = (matchedAssembly?.Assembly.Target as Assembly) ?? Hotloader.FindAssembly(name);
 
-            result ??= Hotloader.GetAssembly(args.Name);
+            assembly ??= s_LoadedPackages.Values
+                .SelectMany(x => x)
+                .Select(x => (assembly: x, name: x.GetName()))
+                .Where(x => AssemblyNameEqualityComparer.Instance.Equals(x.name, name))
+                .OrderByDescending(x => x.name.Version)
+                .FirstOrDefault()
+                .assembly;
 
-            if (result != null)
+            if (assembly != null)
             {
-                m_ResolveCache.Add(name, result);
+                m_ResolveCache.Add(name, assembly);
             }
 
-            Logger.LogDebug(result == null
+            Logger.LogDebug(assembly == null
                 ? $"Failed to resolve {args.Name}"
-                : $"Resolved assembly from NuGet: {args.Name} @ v{result.GetName().Version}");
+                : $"Resolved assembly from NuGet: {args.Name} @ v{assembly.GetName().Version}");
 
-            return result;
-        }
-
-        protected static string GetVersionIndependentName(string fullAssemblyName, out string extractedVersion)
-        {
-            if (string.IsNullOrEmpty(fullAssemblyName))
-            {
-                throw new ArgumentNullException(nameof(fullAssemblyName));
-            }
-
-            var match = s_VersionRegex.Match(fullAssemblyName);
-            extractedVersion = match.Groups[1].Value;
-            return s_VersionRegex.Replace(fullAssemblyName, string.Empty);
+            return assembly;
         }
 
         public async Task InstallPackagesAsync(ICollection<PackageIdentity> packages, bool updateExisting = true)
         {
             foreach (var package in packages)
             {
-                if (!await IsPackageInstalledAsync(package.Id))
+                var installedPackage = await GetLatestPackageIdentityAsync(package.Id);
+                if (installedPackage == null)
                 {
                     await LogAndInstallPackage(package, false);
                     continue;
@@ -908,7 +848,6 @@ namespace OpenMod.NuGet
                     continue;
                 }
 
-                var installedPackage = await GetLatestPackageIdentityAsync(package.Id);
                 if (installedPackage?.Version == null || package.Version > installedPackage.Version)
                 {
                     await LogAndInstallPackage(package, false);
@@ -964,6 +903,8 @@ namespace OpenMod.NuGet
                 await m_PackagesDataStore.RemovePackageAsync(packageIdentity.Id);
             }
 
+            m_CachedPackageIdentity.Remove(packageIdentity.Id);
+
             return true;
         }
 
@@ -975,11 +916,7 @@ namespace OpenMod.NuGet
                 m_AssemblyResolverInstalled = false;
             }
 
-            foreach (var kv in m_LoadedPackageAssemblies)
-            {
-                kv.Value?.Clear();
-            }
-            m_LoadedPackageAssemblies.Clear();
+            ClearCache();
         }
 
         public virtual ICollection<NuGetAssembly> GetLoadedAssemblies()
@@ -989,10 +926,21 @@ namespace OpenMod.NuGet
                 .ToList();
         }
 
-        public void ClearCache()
+        public void ClearCache(bool clearGlobalCache = false)
         {
+            foreach (var kv in m_LoadedPackageAssemblies)
+            {
+                kv.Value?.Clear();
+            }
             m_LoadedPackageAssemblies.Clear();
+
             m_ResolveCache.Clear();
+            m_CachedPackageIdentity.Clear();
+
+            if (clearGlobalCache)
+            {
+                s_LoadedPackages.Clear();
+            }
         }
     }
 }
