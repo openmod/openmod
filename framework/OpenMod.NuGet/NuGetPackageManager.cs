@@ -134,7 +134,6 @@ namespace OpenMod.NuGet
                     : NuGetFramework.Parse(frameworkName);
             }
 
-
             m_PackagePathResolver = new PackagePathResolver(packagesDirectory);
             m_PackageResolver = new PackageResolver();
             m_LoadedPackageAssemblies = new Dictionary<string, List<NuGetAssembly>>(StringComparer.OrdinalIgnoreCase);
@@ -307,8 +306,8 @@ namespace OpenMod.NuGet
             {
                 IncludeDelisted = false,
                 SupportedFrameworks = m_CurrentFramework is FallbackFramework ff
-                    ? ff.Fallback.Select(x => x.DotNetFrameworkName)
-                    : new[] { m_CurrentFramework.DotNetFrameworkName }
+                    ? ff.Fallback.Select(x => x.GetShortFolderName())
+                    : new[] { m_CurrentFramework.GetShortFolderName() }
             };
             var nugetVersion = version == null
                 ? null
@@ -353,6 +352,7 @@ namespace OpenMod.NuGet
                                     + packageMeta.Identity.Version);
                     matches.Add(packageMeta);
                 }
+                break;
             }
 
             return matches.Where(a =>
@@ -741,42 +741,35 @@ namespace OpenMod.NuGet
                 }
 
                 Logger.LogDebug("GetResourceAsync (FindPackageById) for " + dependencyInfo.Source.PackageSource.SourceUri);
-                var packageResource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
 
-                var bag = new ConcurrentBag<PackageDependency>(dependencyInfo.Dependencies);
+                var dependenciesInfo = dependencyInfo.Dependencies.ToList();
+                var bag = new ConcurrentBag<PackageDependency>(dependenciesInfo);
                 var deps = new ConcurrentBag<PackageIdentity>();
 
-                const int maxConcurrencyTasks = 5;
+                await FindBestDependencies(cacheContext, sourceRepository, bag, deps, allowPreReleaseVersions);
 
-                // Task.WhenAll( dependencyInfo.Dependencies.Select ) starts all tasks, but which for some reason causes slower loading
-                var tasks = Enumerable.Range(0, Math.Min(maxConcurrencyTasks, bag.Count))
-                    .Select(async _ =>
+                if (dependenciesInfo.Count != deps.Count)
+                {
+                    Logger.LogDebug("Some packages are not found, trying to find them in other sources");
+
+                    var missingDependencies = dependenciesInfo.ToList();
+                    UpdateMissingDependenciesList(missingDependencies, deps);
+
+                    foreach (var sourceRepository2 in repositories.Where(r => r != sourceRepository))
                     {
-                        while (bag.TryTake(out var dependency))
+                        Logger.LogDebug($"Searching {missingDependencies.Count} missing packages in {sourceRepository2.PackageSource.SourceUri}");
+
+                        var copiedMissingDependencies = new ConcurrentBag<PackageDependency>(missingDependencies);
+                        await FindBestDependencies(cacheContext, sourceRepository2, copiedMissingDependencies, deps, allowPreReleaseVersions);
+
+                        UpdateMissingDependenciesList(missingDependencies, deps);
+
+                        if (missingDependencies.Count == 0)
                         {
-                            var latestInstalledPackage = await GetLatestPackageIdentityAsync(dependency.Id);
-                            if (latestInstalledPackage != null
-                                && dependency.VersionRange.IsBetter(null, latestInstalledPackage.Version))
-                            {
-                                deps.Add(latestInstalledPackage);
-                                continue;
-                            }
-
-                            var versions = await packageResource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None);
-                            if (!versions.Any())
-                            {
-                                continue;
-                            }
-
-                            versions = allowPreReleaseVersions
-                                ? versions
-                                : versions.Where(x => !x.IsPrerelease);
-
-                            deps.Add(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)));
+                            break;
                         }
-                    });
-
-                await Task.WhenAll(tasks);
+                    }
+                }
 
                 foreach (var dependency in deps)
                 {
@@ -785,6 +778,57 @@ namespace OpenMod.NuGet
 
                 return;
             }
+
+            void UpdateMissingDependenciesList(List<PackageDependency> missingDependencies, ConcurrentBag<PackageIdentity> allDependencies)
+            {
+                for (var i = missingDependencies.Count - 1; i >= 0; i--)
+                {
+                    var dependency = missingDependencies[i];
+                    if (allDependencies.Any(d => d.Id.Equals(dependency.Id, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        missingDependencies.RemoveAt(i);
+                        continue;
+                    }
+                }
+            }
+        }
+
+        private async Task FindBestDependencies(SourceCacheContext cacheContext, SourceRepository sourceRepository,
+            ConcurrentBag<PackageDependency> dependencies, ConcurrentBag<PackageIdentity> result, bool allowPreReleaseVersions)
+        {
+            var resource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
+
+            const int maxConcurrencyTasks = 5;
+
+            // Task.WhenAll( dependencyInfo.Dependencies.Select ) starts all tasks, but which for some reason causes slower loading
+            var tasks = Enumerable.Range(0, Math.Min(maxConcurrencyTasks, dependencies.Count))
+                .Select(async _ =>
+                {
+                    while (dependencies.TryTake(out var dependency))
+                    {
+                        var latestInstalledPackage = await GetLatestPackageIdentityAsync(dependency.Id);
+                        if (latestInstalledPackage != null
+                            && dependency.VersionRange.IsBetter(null, latestInstalledPackage.Version))
+                        {
+                            result.Add(latestInstalledPackage);
+                            continue;
+                        }
+
+                        var versions = await resource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None);
+                        if (!versions.Any())
+                        {
+                            continue;
+                        }
+
+                        versions = allowPreReleaseVersions
+                            ? versions
+                            : versions.Where(x => !x.IsPrerelease);
+
+                        result.Add(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)));
+                    }
+                });
+
+            await Task.WhenAll(tasks);
         }
 
         private async Task<SourcePackageDependencyInfo?> FindDependencyInfoAsync(
