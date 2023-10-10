@@ -214,7 +214,25 @@ namespace OpenMod.Unturned.Module.Shared
                     "NETStandard.Library",
                     "OpenMod.UnityEngine.Redist",
                     "OpenMod.Unturned.Redist",
-                    "System.IO.FileSystem.Watcher");
+                    "System.IO.FileSystem.Watcher",
+                    "System.Buffers",
+                    "System.Collections.Immutable",
+                    "System.ComponentModel.Annotations",
+                    "System.Memory",
+                    "System.Numerics.Vectors",
+                    "System.Resources.ResourceManager",
+                    "System.Runtime.CompilerServices.Unsafe",
+                    "System.Runtime",
+                    "System.Runtime.Extensions",
+                    "System.Runtime.InteropServices",
+                    "System.Runtime.Serialization",
+                    "System.Security.Cryptography.Cng",
+                    "System.Security.Cryptography.Pkcs",
+                    "System.Security.Cryptography.ProtectedData",
+                    "System.Security.Principal.Windows",
+                    "System.Security.Cryptography.Cng",
+                    "System.Threading.Tasks.Extensions",
+                    "System.ValueTuple");
 
                 return nugetPackageManager;
             }
