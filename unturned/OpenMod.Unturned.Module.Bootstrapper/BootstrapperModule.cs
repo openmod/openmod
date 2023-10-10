@@ -61,7 +61,10 @@ namespace OpenMod.Unturned.Module.Bootstrapper
                     continue;
                 }
 
-                var assembly = Assembly.Load(File.ReadAllBytes(assemblyFilePath));
+                var symbolsFilePath = Path.ChangeExtension(assemblyFilePath, "pdb");
+                var symbols = File.Exists(symbolsFilePath) ? File.ReadAllBytes(symbolsFilePath) : null;
+
+                var assembly = Assembly.Load(File.ReadAllBytes(assemblyFilePath), symbols);
                 m_LoadedAssemblies.TryAdd(assembly.GetName().Name, assembly);
 
                 var fileName = Path.GetFileName(assemblyFilePath);
