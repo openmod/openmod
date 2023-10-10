@@ -46,8 +46,9 @@
 	  <PrivateAssets>all</PrivateAssets>
 	</PackageReference>
     <PackageReference Include="Serilog" Version="3.0.1" />
-    <PackageReference Include="SmartFormat.NET" Version="3.3.0" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
+    <PackageReference Include="SmartFormat" Version="3.3.0" />
+    <PackageReference Include="SmartFormat.Extensions.Time" Version="3.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net461'">
@@ -55,7 +56,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OpenMod.Analyzers\OpenMod.Analyzers.csproj" />
+	  <ProjectReference Include="..\OpenMod.Analyzers\OpenMod.Analyzers.csproj">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </ProjectReference>
     <ProjectReference Include="..\OpenMod.API\OpenMod.API.csproj" />
     <ProjectReference Include="..\OpenMod.Common\OpenMod.Common.csproj" />
     <ProjectReference Include="..\OpenMod.NuGet\OpenMod.NuGet.csproj" />
