@@ -1,43 +1,71 @@
-﻿using JetBrains.Annotations;
-using SDG.Framework.Modules;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Path = System.IO.Path;
+using JetBrains.Annotations;
+using SDG.Framework.Modules;
 
 namespace OpenMod.Unturned.Module.Bootstrapper
 {
+    /// <summary>
+    /// Bootstrapper of main or dev OpenMod module.
+    /// </summary>
     [UsedImplicitly]
     public class BootstrapperModule : IModuleNexus
     {
         private IModuleNexus? m_BootstrappedModule;
+        private ConcurrentDictionary<string, Assembly>? m_LoadedAssemblies;
+
+        /// <summary>
+        /// Instance of bootstrapper.
+        /// </summary>
+        /// <remarks>
+        /// Note, this instance is used in hard-reload via reflection.
+        /// </remarks>
         public static BootstrapperModule? Instance { get; private set; }
-        private static string? s_SelfLocation;
 
         public void initialize()
         {
             Instance = this;
 
-            if (string.IsNullOrEmpty(s_SelfLocation))
+            var openModModuleDirectory = string.Empty;
+            var bootstrapperAssemblyFilePath = string.Empty;
+            var bootstrapperAssembly = typeof(BootstrapperModule).Assembly;
+
+            foreach (var module in ModuleHook.modules)
             {
-                s_SelfLocation = Path.GetFullPath(typeof(BootstrapperModule).Assembly.Location);
+                if (module.assemblies is { Length: > 0 } && module.assemblies[0] == bootstrapperAssembly)
+                {
+                    openModModuleDirectory = module.config.DirectoryPath;
+                    bootstrapperAssemblyFilePath = module.config.DirectoryPath + module.config.Assemblies[0].Path;
+                    break;
+                }
             }
 
-            var openModModuleDir = Path.GetDirectoryName(s_SelfLocation)!;
+            if (string.IsNullOrEmpty(openModModuleDirectory))
+            {
+                throw new Exception("Failed to get OpenMod module directory");
+            }
+
+            m_LoadedAssemblies = new();
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+
             Assembly? moduleAssembly = null;
 
-            foreach (var assemblyFilePath in Directory.GetFiles(openModModuleDir, "*.dll", SearchOption.TopDirectoryOnly))
+            foreach (var assemblyFilePath in Directory.GetFiles(openModModuleDirectory, "*.dll", SearchOption.TopDirectoryOnly))
             {
-                if (assemblyFilePath == s_SelfLocation)
+                // ignore bootstrapper assembly file
+                if (assemblyFilePath == bootstrapperAssemblyFilePath)
                 {
                     continue;
                 }
 
-                //Hotloader.Enabled = true;
-                //var assembly = Hotloader.LoadAssembly(File.ReadAllBytes(assemblyFile));
-                var assembly = Assembly.Load(File.ReadAllBytes(assemblyFilePath));
+                var symbolsFilePath = Path.ChangeExtension(assemblyFilePath, "pdb");
+                var symbols = File.Exists(symbolsFilePath) ? File.ReadAllBytes(symbolsFilePath) : null;
+
+                var assembly = Assembly.Load(File.ReadAllBytes(assemblyFilePath), symbols);
+                m_LoadedAssemblies.TryAdd(assembly.GetName().Name, assembly);
 
                 var fileName = Path.GetFileName(assemblyFilePath);
                 if (fileName.Equals("OpenMod.Unturned.Module.dll")
@@ -52,14 +80,16 @@ namespace OpenMod.Unturned.Module.Bootstrapper
                 throw new Exception("Failed to find OpenMod module assembly!");
             }
 
-            ICollection<Type> types;
+            AddRocketModResolveAssemblies();
+
+            Type[] types;
             try
             {
                 types = moduleAssembly.GetTypes();
             }
             catch (ReflectionTypeLoadException ex)
             {
-                types = ex.Types.Where(d => d != null).ToList();
+                types = ex.Types.Where(d => d != null).ToArray();
             }
 
             var moduleType = types.SingleOrDefault(d => d.Name.Equals("OpenModUnturnedModule"));
@@ -72,9 +102,68 @@ namespace OpenMod.Unturned.Module.Bootstrapper
             m_BootstrappedModule.initialize();
         }
 
+        /// <summary>
+        /// Adds LDM assemblies to our assembly resolver to fix assembly resolve issue due to using different version
+        /// </summary>
+        private void AddRocketModResolveAssemblies()
+        {
+            foreach (var module in ModuleHook.modules)
+            {
+                if (!module.config.Name.Equals("Rocket.Unturned", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                foreach (var moduleAssembly in module.config.Assemblies)
+                {
+                    var path = module.config.DirectoryPath + moduleAssembly.Path;
+
+                    // let Unturned get the assembly
+                    var assembly = ModuleHook.resolveAssemblyPath(path);
+
+                    if (assembly == null)
+                    {
+                        // should not return null
+                        return;
+                    }
+
+                    m_LoadedAssemblies?.TryAdd(assembly.GetName().Name, assembly);
+                }
+
+                return;
+            }
+        }
+
+        private Assembly? CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (m_LoadedAssemblies == null)
+            {
+                return null;
+            }
+
+            if (m_LoadedAssemblies.TryGetValue(args.Name, out var assembly))
+            {
+                return assembly;
+            }
+
+            var assemblyName = new AssemblyName(args.Name).Name;
+            if (m_LoadedAssemblies.TryGetValue(assemblyName, out assembly))
+            {
+                m_LoadedAssemblies.TryAdd(args.Name, assembly);
+                return assembly;
+            }
+
+            return null;
+        }
+
         public void shutdown()
         {
             m_BootstrappedModule?.shutdown();
+
+            m_LoadedAssemblies?.Clear();
+            m_LoadedAssemblies = null;
+            AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomain_AssemblyResolve;
+
             Instance = null;
         }
     }

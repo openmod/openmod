@@ -19,7 +19,7 @@ namespace OpenMod.Unturned.Module.Dev
         {
             m_SharedModule = new OpenModSharedUnturnedModule();
 
-            if (!m_SharedModule.Initialize(GetType().Assembly, isDynamicLoad: false))
+            if (!m_SharedModule.Initialize(isDynamicLoad: false))
             {
                 return;
             }

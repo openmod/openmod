@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using OpenMod.Bootstrapper;
 using OpenMod.NuGet;
 using OpenMod.Unturned.Module.Shared;
@@ -19,7 +18,7 @@ namespace OpenMod.Unturned.Module
         public void initialize()
         {
             m_SharedModule = new OpenModSharedUnturnedModule();
-            if (!m_SharedModule.Initialize(GetType().Assembly, IsDynamicLoad))
+            if (!m_SharedModule.Initialize(IsDynamicLoad))
             {
                 return;
             }
@@ -33,7 +32,6 @@ namespace OpenMod.Unturned.Module
             m_SharedModule = null;
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private void OnInitialize()
         {
             Environment.CurrentDirectory = ReadWrite.PATH;
