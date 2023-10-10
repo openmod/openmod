@@ -8,7 +8,7 @@ namespace OpenMod.API.Commands
     /// Represents the parameters of a command.
     /// </summary>
     /// <remarks>
-    ///  When a command was entered as "/mycommand test 5 b", this class will handle and represent "test", "a" and "b".
+    ///  When a command was entered as "/mycommand test 5 b", this class will handle and represent "test", "5" and "b".
     /// </remarks>
     public interface ICommandParameters : IReadOnlyCollection<string>
     {
