@@ -42,8 +42,9 @@
 
   <!--Replaces the .netstandard2.0 version of Newtonsoft.Json to .net45-->
   <!--Can be removed if Unturned will use by default .netstandard2.1-->
+  <!--https://duanenewman.net/blog/post/a-better-way-to-override-references-with-packagereference/-->
   <Target Name="CopyNewtonsoftJson" AfterTargets="AfterBuild">
-  	<Copy SourceFiles="$(PkgNewtonsoft_Json)\lib\net45\Newtonsoft.Json.dll" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="$(PkgNewtonsoft_Json)\lib\net45\Newtonsoft.Json.dll" DestinationFolder="$(OutDir)" />
   </Target>
 
   <ItemGroup>
