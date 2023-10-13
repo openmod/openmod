@@ -2,11 +2,9 @@
 using OpenMod.Common.Helpers;
 using OpenMod.NuGet;
 using SDG.Framework.Modules;
-using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Reflection;
@@ -17,87 +15,75 @@ namespace OpenMod.Unturned.Module.Shared
     public sealed class OpenModSharedUnturnedModule
     {
         private const string c_HarmonyInstanceId = "com.get-openmod.unturned.module";
-        private readonly Dictionary<string, Assembly> m_LoadedAssemblies = new();
-        private readonly Dictionary<string, Assembly> m_ResolvedAssemblies = new();
-        private readonly string[] m_IncompatibleModules = { "Redox.Unturned" };
-        private readonly string[] m_CompatibleModules = { "AviRockets", "uScript.Unturned", "Rocket.Unturned" };
+        private readonly HashSet<string> m_IncompatibleModules = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Redox.Unturned"
+        };
+        private readonly HashSet<string> m_CompatibleModules = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "AviRockets",
+            "uScript.Unturned",
+            "Rocket.Unturned",
+        };
         private RemoteCertificateValidationCallback? m_OldCallBack;
         private Harmony? m_HarmonyInstance;
-        private Assembly? m_ModuleAssembly;
 
-        public bool Initialize(Assembly moduleAssembly, bool isDynamicLoad)
+        public bool Initialize(bool isDynamicLoad)
         {
-            m_ModuleAssembly = moduleAssembly;
+            string? openModModuleDirectory = null;
+            foreach (var module in ModuleHook.modules)
+            {
+                if (module.config.Name.StartsWith("OpenMod.Unturned", StringComparison.OrdinalIgnoreCase))
+                {
+                    openModModuleDirectory = module.config.DirectoryPath;
+                    break;
+                }
+            }
 
-            var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
-            var openModDirPath = Path.GetDirectoryName(Directory
-                .GetFiles(modulesDirectory, "OpenMod.Unturned.Module.Shared.dll", SearchOption.AllDirectories)
-                .FirstOrDefault() ?? throw new Exception("Failed to find OpenMod directory"))!;
+            if (openModModuleDirectory == null)
+            {
+                throw new Exception("Failed to find OpenMod module directory");
+            }
 
-            if (HasIncompatibleModules(Path.GetFileName(openModDirPath), modulesDirectory))
+            if (HasIncompatibleModules(openModModuleDirectory))
             {
                 return false;
             }
 
             m_HarmonyInstance = new Harmony(c_HarmonyInstanceId);
-            m_HarmonyInstance.PatchAll(GetType().Assembly);
+            m_HarmonyInstance.PatchAll(typeof(OpenModSharedUnturnedModule).Assembly);
 
-            InstallNewtonsoftJson(openModDirPath);
-
-            var rocketUnturnedFile = Directory
-                .GetFiles(modulesDirectory, "Rocket.Unturned.module", SearchOption.AllDirectories)
-                .FirstOrDefault();
-
-            var rocketModDirectory = rocketUnturnedFile != null
-                ? Path.GetDirectoryName(rocketUnturnedFile)!
-                : null;
-
-            if (rocketModDirectory != null)
-            {
-                foreach (var file in Directory.GetFiles(rocketModDirectory, "*.dll"))
-                {
-                    var assembly = Assembly.LoadFile(file);
-                    m_ResolvedAssemblies.Add(ReflectionExtensions.GetVersionIndependentName(assembly.FullName), assembly);
-                }
-            }
+            InstallNewtonsoftJson(openModModuleDirectory);
 
             if (!isDynamicLoad)
             {
                 SystemDrawingRedirect.Install();
                 InstallTlsWorkaround();
-                InstallAssemblyResolver();
-            }
-
-            foreach (var file in Directory.GetFiles(openModDirPath, "*.dll"))
-            {
-                LoadAssembly(openModDirPath, file);
             }
 
             return true;
         }
 
-        private bool HasIncompatibleModules(string openModDirName, string modulesDirectory)
+        private bool HasIncompatibleModules(string openModDirPath)
         {
-            foreach (var modulePath in Directory.GetDirectories(modulesDirectory))
+            foreach (var module in ModuleHook.modules)
             {
-                var moduleDirName = Path.GetFileName(modulePath);
-                // ReSharper disable once PossibleNullReferenceException
-                if (moduleDirName.Equals(openModDirName))
+                if (module.config.DirectoryPath == openModDirPath)
                 {
                     continue; // OpenMod's own directory
                 }
 
-                if (m_CompatibleModules.Any(d => d.Equals(moduleDirName, StringComparison.OrdinalIgnoreCase)))
+                if (m_CompatibleModules.Contains(module.config.Name))
                 {
                     continue;
                 }
 
                 var previousColor = Console.ForegroundColor;
-                if (m_IncompatibleModules.Any(d => d.Equals(moduleDirName, StringComparison.OrdinalIgnoreCase)))
+                if (m_IncompatibleModules.Contains(module.config.Name))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("================================================================");
-                    Console.WriteLine($"Incompatible module detected: {moduleDirName}");
+                    Console.WriteLine($"Incompatible module detected: {module.config.Name}");
                     Console.WriteLine("Please remove the module in order to use OpenMod.");
                     Console.WriteLine("OpenMod will abort loading.");
                     Console.WriteLine("================================================================");
@@ -106,7 +92,7 @@ namespace OpenMod.Unturned.Module.Shared
                 }
 
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Unknown module detected: {moduleDirName}");
+                Console.WriteLine($"Unknown module detected: {module.config.Name}");
                 Console.WriteLine("This module may conflict with OpenMod.");
                 Console.WriteLine("OpenMod may not work correctly.");
                 Console.ForegroundColor = previousColor;
@@ -159,38 +145,10 @@ namespace OpenMod.Unturned.Module.Shared
             File.Copy(openModNewtonsoftFile, unturnedNewtonsoftFile);
         }
 
-        private void InstallAssemblyResolver()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-        }
-
-        private Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            var name = ReflectionExtensions.GetVersionIndependentName(args.Name);
-            if (m_ResolvedAssemblies.TryGetValue(name, out var asm))
-            {
-                return asm;
-            }
-
-            var matcher = new Func<Assembly, bool>(d => ReflectionExtensions.GetVersionIndependentName(d.FullName).Equals(name));
-            asm = m_LoadedAssemblies.Values
-                .OrderByDescending(d => d.GetName().Version)
-                .FirstOrDefault(matcher);
-
-            if (asm != null)
-            {
-                m_ResolvedAssemblies.Add(name, asm);
-                return asm;
-            }
-
-            return null;
-        }
-
         public void Shutdown()
         {
             ServicePointManager.ServerCertificateValidationCallback = m_OldCallBack;
             SystemDrawingRedirect.Uninstall();
-            AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
             m_HarmonyInstance?.UnpatchAll(c_HarmonyInstanceId);
         }
 
@@ -230,42 +188,6 @@ namespace OpenMod.Unturned.Module.Shared
             }
 
             return isOk;
-        }
-
-        public void LoadAssembly(string baseDirectory, string dllName)
-        {
-            //Load the dll from the same directory as this assembly
-            var dllFullPath = Path.GetFullPath(Path.Combine(baseDirectory, dllName));
-
-            if (string.Equals(baseDirectory, dllFullPath, StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            if (dllName.Equals("OpenMod.API.dll") && !m_ModuleAssembly!.FullName.Contains(".Dev"))
-            {
-                try
-                {
-                    File.Delete(dllFullPath);
-                }
-                catch
-                {
-                    // ignored 
-                    return;
-                }
-            }
-
-            var data = File.ReadAllBytes(dllFullPath);
-            var asm = Assembly.Load(data);
-
-            var name = ReflectionExtensions.GetVersionIndependentName(asm.FullName, out _);
-
-            if (m_LoadedAssemblies.ContainsKey(name))
-            {
-                return;
-            }
-
-            m_LoadedAssemblies.Add(name, asm);
         }
 
         public void OnPostInitialize()
