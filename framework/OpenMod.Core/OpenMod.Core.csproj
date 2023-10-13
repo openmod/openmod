@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net461</TargetFrameworks>
     <PackageDescription>Core service implementations for OpenMod</PackageDescription>
   </PropertyGroup>
 
@@ -21,46 +21,45 @@
   </ItemGroup>
 
   <ItemGroup>
-  	<PackageReference Include="Contrib.Bcl.Ranges" Version="1.0.0" />
   	<PackageReference Include="Cronos" Version="0.7.1" />
   	<PackageReference Include="DotNet.Glob" Version="3.1.3" />
-  	<PackageReference Include="Fody" Version="6.6.0">
+  	<PackageReference Include="Fody" Version="6.8.0">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
   	</PackageReference>
-  	<PackageReference Include="InlineIL.Fody" Version="1.7.1" />
   	<PackageReference Include="Lib.Harmony" Version="2.2.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.24" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.24" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="3.1.24" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.24" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.24" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.32" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.32" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="3.1.32" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.32" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.32" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="morelinq" Version="3.3.2" />
-    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="3.1.24" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.24" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="morelinq" Version="3.4.2" />
+    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="3.1.32" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.32" />
     <PackageReference Include="Nito.AsyncEx.Context" Version="5.1.2" />
     <PackageReference Include="Nito.AsyncEx.Tasks" Version="5.1.2" />
-    <PackageReference Include="RuntimeNullables.Fody" Version="1.0.2" />
-    <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="SmartFormat.NET" Version="3.0.0" />
+    <PackageReference Include="RuntimeNullables.Fody" Version="1.0.6">
+	  <PrivateAssets>all</PrivateAssets>
+	</PackageReference>
+    <PackageReference Include="Serilog" Version="3.0.1" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
-    <PackageReference Include="Undisposed.Fody" Version="3.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="SmartFormat" Version="3.3.0" />
+    <PackageReference Include="SmartFormat.Extensions.Time" Version="3.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net461'">
+  	<PackageReference Include="Contrib.Bcl.Ranges" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OpenMod.Analyzers\OpenMod.Analyzers.csproj" />
+	  <ProjectReference Include="..\OpenMod.Analyzers\OpenMod.Analyzers.csproj">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </ProjectReference>
     <ProjectReference Include="..\OpenMod.API\OpenMod.API.csproj" />
     <ProjectReference Include="..\OpenMod.Common\OpenMod.Common.csproj" />
     <ProjectReference Include="..\OpenMod.NuGet\OpenMod.NuGet.csproj" />

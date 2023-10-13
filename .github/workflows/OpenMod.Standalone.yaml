@@ -43,29 +43,16 @@ jobs:
     - name: Install zip
       if: github.event_name == 'release'
       run: sudo apt-get install zip
-    - name: Zip net461 artifacts
+    - name: Zip net7.0 artifacts
       if: github.event_name == 'release'
-      run: "cd ./standalone/OpenMod.Standalone/bin/Release/net461 && zip -qq -r ./release.zip *"
-    - name: Upload net461 release asset
-      if: github.event_name == 'release'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.get-release.outputs.upload_url }}
-        asset_path: ./standalone/OpenMod.Standalone/bin/Release/net461/release.zip
-        asset_name: OpenMod.Standalone-v${{ steps.project-build.outputs.version }}-net461.zip
-        asset_content_type: application/zip
-    - name: Zip netcoreapp3.1 artifacts
-      if: github.event_name == 'release'
-      run: "cd ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1 && zip -qq -r ./release.zip *"
-    - name: Upload netcoreapp3.1 release asset
+      run: "cd ./standalone/OpenMod.Standalone/bin/Release/net7.0 && zip -qq -r ./release.zip *"
+    - name: Upload net7.0 release asset
       if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get-release.outputs.upload_url }}
-        asset_path: ./standalone/OpenMod.Standalone/bin/Release/netcoreapp3.1/release.zip
-        asset_name: OpenMod.Standalone-v${{ steps.project-build.outputs.version }}-netcoreapp3.1.zip
+        asset_path: ./standalone/OpenMod.Standalone/bin/Release/net7.0/release.zip
+        asset_name: OpenMod.Standalone-v${{ steps.project-build.outputs.version }}-net7.0.zip
         asset_content_type: application/zip

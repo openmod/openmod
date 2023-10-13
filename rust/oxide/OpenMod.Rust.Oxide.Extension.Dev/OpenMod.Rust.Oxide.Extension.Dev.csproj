@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="OpenMod.Rust.Oxide.Redist" Version="2.0.4765">
-	  <IncludeAssets>compile</IncludeAssets>
+      <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 

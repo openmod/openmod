@@ -17,6 +17,7 @@ using NuGet.Resolver;
 using OpenMod.Common.Hotloading;
 using OpenMod.NuGet.Helpers;
 using OpenMod.Common.Helpers;
+using NuGet.Versioning;
 
 namespace OpenMod.NuGet
 {
@@ -101,14 +102,37 @@ namespace OpenMod.NuGet
 
             m_FrameworkReducer = new FrameworkReducer();
 
-            var frameworkName = Assembly.GetExecutingAssembly().GetCustomAttributes(true)
-                                           .OfType<System.Runtime.Versioning.TargetFrameworkAttribute>()
-                                           .Select(x => x.FrameworkName)
-                                           .FirstOrDefault();
+#if NETSTANDARD2_1_OR_GREATER
+            // checking if running under Mono
+            if (RuntimeEnvironmentHelper.IsMono)
+#else
+            if (false)
+#endif
+            {
+                // Using Mono that supports .netstandard2.1 and .net4.8.0
+                var net48 = new NuGetFramework(".NETFramework", new Version(4, 8, 0, 0));
+                var net481 = new NuGetFramework(".NETFramework", new Version(4, 8, 1, 0));
+                m_CurrentFramework = new FallbackFramework(FrameworkConstants.CommonFrameworks.NetStandard21, new List<NuGetFramework>
+                {
+                    FrameworkConstants.CommonFrameworks.Net461,
+                    FrameworkConstants.CommonFrameworks.Net462,
+                    FrameworkConstants.CommonFrameworks.Net47,
+                    FrameworkConstants.CommonFrameworks.Net471,
+                    FrameworkConstants.CommonFrameworks.Net472,
+                    net48,
+                    net481
+                });
+            }
+            else
+            {
+                var frameworkName = typeof(NuGetPackageManager).Assembly
+                    .GetCustomAttribute<System.Runtime.Versioning.TargetFrameworkAttribute>()
+                    ?.FrameworkName;
 
-            m_CurrentFramework = frameworkName == null
-                ? NuGetFramework.AnyFramework
-                : NuGetFramework.ParseFrameworkName(frameworkName, DefaultFrameworkNameProvider.Instance);
+                m_CurrentFramework = frameworkName == null
+                    ? NuGetFramework.AnyFramework
+                    : NuGetFramework.Parse(frameworkName);
+            }
 
             m_PackagePathResolver = new PackagePathResolver(packagesDirectory);
             m_PackageResolver = new PackageResolver();
@@ -281,8 +305,13 @@ namespace OpenMod.NuGet
             var searchFilter = new SearchFilter(includePreRelease)
             {
                 IncludeDelisted = false,
-                SupportedFrameworks = new[] { m_CurrentFramework.DotNetFrameworkName } // todo: add support for from .net461 to .net481
+                SupportedFrameworks = m_CurrentFramework is FallbackFramework ff
+                    ? ff.Fallback.Select(x => x.GetShortFolderName())
+                    : new[] { m_CurrentFramework.GetShortFolderName() }
             };
+            var nugetVersion = version == null
+                ? null
+                : new NuGetVersion(version);
 
             Logger.LogInformation("Searching repository for package: " + packageId);
 
@@ -302,7 +331,7 @@ namespace OpenMod.NuGet
                     continue;
                 }
 
-                if (version == null)
+                if (nugetVersion == null)
                 {
                     Logger.LogDebug("version == null, adding searchResult: " + searchResult.Length);
                     matches.AddRange(searchResult);
@@ -312,7 +341,7 @@ namespace OpenMod.NuGet
                 foreach (var packageMeta in searchResult)
                 {
                     var versions = await packageMeta.GetVersionsAsync();
-                    if (!versions.Any(d => d.Version.OriginalVersion.Equals(version, StringComparison.OrdinalIgnoreCase)))
+                    if (!versions.Any(d => d.Version.Equals(nugetVersion, VersionComparison.Default)))
                     {
                         continue;
                     }
@@ -323,6 +352,7 @@ namespace OpenMod.NuGet
                                     + packageMeta.Identity.Version);
                     matches.Add(packageMeta);
                 }
+                break;
             }
 
             return matches.Where(a =>
@@ -378,8 +408,7 @@ namespace OpenMod.NuGet
                 return Array.Empty<PackageDependency>();
             }
 
-            var framework = m_FrameworkReducer.GetNearest(m_CurrentFramework,
-                dependencyGroups.Select(d => d.TargetFramework));
+            var framework = m_FrameworkReducer.GetNearest(m_CurrentFramework, dependencyGroups.Select(d => d.TargetFramework));
             if (framework == null)
             {
                 throw new Exception($"Failed to get dependencies of {identity.Id} v{identity.Version}: no supported framework found. {Environment.NewLine} Requested framework: {m_CurrentFramework.DotNetFrameworkName}, available frameworks: {string.Join(", ", dependencyGroups.Select(d => d.TargetFramework).Select(d => d.DotNetFrameworkName))}");
@@ -712,42 +741,35 @@ namespace OpenMod.NuGet
                 }
 
                 Logger.LogDebug("GetResourceAsync (FindPackageById) for " + dependencyInfo.Source.PackageSource.SourceUri);
-                var packageResource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
 
-                var bag = new ConcurrentBag<PackageDependency>(dependencyInfo.Dependencies);
+                var dependenciesInfo = dependencyInfo.Dependencies.ToList();
+                var bag = new ConcurrentBag<PackageDependency>(dependenciesInfo);
                 var deps = new ConcurrentBag<PackageIdentity>();
 
-                const int maxConcurrencyTasks = 5;
+                await FindBestDependencies(cacheContext, sourceRepository, bag, deps, allowPreReleaseVersions);
 
-                // Task.WhenAll( dependencyInfo.Dependencies.Select ) starts all tasks, but which for some reason causes slower loading
-                var tasks = Enumerable.Range(0, Math.Min(maxConcurrencyTasks, bag.Count))
-                    .Select(async _ =>
+                if (dependenciesInfo.Count != deps.Count)
+                {
+                    Logger.LogDebug("Some packages are not found, trying to find them in other sources");
+
+                    var missingDependencies = dependenciesInfo.ToList();
+                    UpdateMissingDependenciesList(missingDependencies, deps);
+
+                    foreach (var sourceRepository2 in repositories.Where(r => r != sourceRepository))
                     {
-                        while (bag.TryTake(out var dependency))
+                        Logger.LogDebug($"Searching {missingDependencies.Count} missing packages in {sourceRepository2.PackageSource.SourceUri}");
+
+                        var copiedMissingDependencies = new ConcurrentBag<PackageDependency>(missingDependencies);
+                        await FindBestDependencies(cacheContext, sourceRepository2, copiedMissingDependencies, deps, allowPreReleaseVersions);
+
+                        UpdateMissingDependenciesList(missingDependencies, deps);
+
+                        if (missingDependencies.Count == 0)
                         {
-                            var latestInstalledPackage = await GetLatestPackageIdentityAsync(dependency.Id);
-                            if (latestInstalledPackage != null
-                                && dependency.VersionRange.IsBetter(null, latestInstalledPackage.Version))
-                            {
-                                deps.Add(latestInstalledPackage);
-                                continue;
-                            }
-
-                            var versions = await packageResource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None);
-                            if (!versions.Any())
-                            {
-                                continue;
-                            }
-
-                            versions = allowPreReleaseVersions
-                                ? versions
-                                : versions.Where(x => !x.IsPrerelease);
-
-                            deps.Add(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)));
+                            break;
                         }
-                    });
-
-                await Task.WhenAll(tasks);
+                    }
+                }
 
                 foreach (var dependency in deps)
                 {
@@ -756,6 +778,57 @@ namespace OpenMod.NuGet
 
                 return;
             }
+
+            void UpdateMissingDependenciesList(List<PackageDependency> missingDependencies, ConcurrentBag<PackageIdentity> allDependencies)
+            {
+                for (var i = missingDependencies.Count - 1; i >= 0; i--)
+                {
+                    var dependency = missingDependencies[i];
+                    if (allDependencies.Any(d => d.Id.Equals(dependency.Id, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        missingDependencies.RemoveAt(i);
+                        continue;
+                    }
+                }
+            }
+        }
+
+        private async Task FindBestDependencies(SourceCacheContext cacheContext, SourceRepository sourceRepository,
+            ConcurrentBag<PackageDependency> dependencies, ConcurrentBag<PackageIdentity> result, bool allowPreReleaseVersions)
+        {
+            var resource = await sourceRepository.GetResourceAsync<FindPackageByIdResource>();
+
+            const int maxConcurrencyTasks = 5;
+
+            // Task.WhenAll( dependencyInfo.Dependencies.Select ) starts all tasks, but which for some reason causes slower loading
+            var tasks = Enumerable.Range(0, Math.Min(maxConcurrencyTasks, dependencies.Count))
+                .Select(async _ =>
+                {
+                    while (dependencies.TryTake(out var dependency))
+                    {
+                        var latestInstalledPackage = await GetLatestPackageIdentityAsync(dependency.Id);
+                        if (latestInstalledPackage != null
+                            && dependency.VersionRange.IsBetter(null, latestInstalledPackage.Version))
+                        {
+                            result.Add(latestInstalledPackage);
+                            continue;
+                        }
+
+                        var versions = await resource.GetAllVersionsAsync(dependency.Id, cacheContext, Logger, CancellationToken.None);
+                        if (!versions.Any())
+                        {
+                            continue;
+                        }
+
+                        versions = allowPreReleaseVersions
+                            ? versions
+                            : versions.Where(x => !x.IsPrerelease);
+
+                        result.Add(new PackageIdentity(dependency.Id, dependency.VersionRange.FindBestMatch(versions)));
+                    }
+                });
+
+            await Task.WhenAll(tasks);
         }
 
         private async Task<SourcePackageDependencyInfo?> FindDependencyInfoAsync(
@@ -767,7 +840,10 @@ namespace OpenMod.NuGet
             var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
 
             Logger.LogDebug("ResolvePackage");
-            var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFramework, cacheContext, Logger, CancellationToken.None);
+
+            SourcePackageDependencyInfo? dependencyInfo;
+            dependencyInfo = await dependencyInfoResource.ResolvePackage(package, m_CurrentFramework, cacheContext, Logger, CancellationToken.None);
+
             if (dependencyInfo == null)
             {
                 Logger.LogDebug("Dependency was not found: " + package + " in " + sourceRepository.PackageSource.SourceUri);
@@ -800,7 +876,7 @@ namespace OpenMod.NuGet
 
             var matchedAssembly = m_LoadedPackageAssemblies.Values
                 .SelectMany(d => d)
-                .Where(d => d.Assembly.IsAlive && d.AssemblyName2.Name.Equals(name.Name, StringComparison.OrdinalIgnoreCase))
+                .Where(d => d.Assembly.IsAlive && AssemblyNameEqualityComparer.Instance.Equals(d.AssemblyName2, name))
                 .OrderByDescending(d => d.AssemblyName2.Version)
                 .FirstOrDefault();
 
