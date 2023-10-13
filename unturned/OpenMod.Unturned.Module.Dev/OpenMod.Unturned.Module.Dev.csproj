@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" GeneratePathProperty="true" Version="13.0.3" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -34,6 +35,13 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(DependencyFiles)" DestinationFolder="$(OutDir)" Condition="@(DependencyFiles-&gt;Count()) != 0" />
+  </Target>
+
+  <!--Replaces the .netstandard2.0 version of Newtonsoft.Json to .net45-->
+  <!--Can be removed if Unturned will use by default .netstandard2.1-->
+  <!--https://duanenewman.net/blog/post/a-better-way-to-override-references-with-packagereference/-->
+  <Target Name="CopyNewtonsoftJson" AfterTargets="AfterBuild">
+    <Copy SourceFiles="$(PkgNewtonsoft_Json)\lib\net45\Newtonsoft.Json.dll" DestinationFolder="$(OutDir)" />
   </Target>
 
 </Project>
