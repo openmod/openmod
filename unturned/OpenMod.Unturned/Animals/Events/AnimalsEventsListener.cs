@@ -300,12 +300,12 @@ namespace OpenMod.Unturned.Animals.Events
             [UsedImplicitly]
             [HarmonyPatch(typeof(Animal), nameof(Animal.alertPlayer))]
             [HarmonyPrefix]
-            public static bool AlertPlayer(Animal __instance, ref Player newPlayer, ref bool sendToPack)
+            public static bool AlertPlayer(Animal __instance, ref Player potentialTargetPlayer, ref bool sendToPack)
             {
                 // Attacking player
                 var cancel = false;
 
-                OnAnimalAttackingPlayer?.Invoke(__instance, ref newPlayer, ref sendToPack, ref cancel);
+                OnAnimalAttackingPlayer?.Invoke(__instance, ref potentialTargetPlayer, ref sendToPack, ref cancel);
 
                 return !cancel;
             }
