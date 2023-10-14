@@ -223,7 +223,7 @@ namespace OpenMod.Runtime
 
                     PluginAssemblyStore.TryInstallMissingDependencies = tryInstallMissingDependencies;
 
-                    var reloadOnChange = false;
+                    var reloadOnChange = true;
                     if (config.TryGetValue("files", out unparsed) && unparsed is Dictionary<object, object> filesConfig)
                     {
                         if (filesConfig.TryGetValue("reloadOnChange", out unparsed))
