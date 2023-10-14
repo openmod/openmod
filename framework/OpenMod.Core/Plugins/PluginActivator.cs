@@ -12,6 +12,7 @@ using OpenMod.API.Persistence;
 using OpenMod.API.Plugins;
 using OpenMod.API.Prioritization;
 using OpenMod.Common.Helpers;
+using OpenMod.Core.Files;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Ioc.Extensions;
@@ -48,7 +49,8 @@ namespace OpenMod.Core.Plugins
             ILogger<PluginActivator> logger,
             IStringLocalizerFactory stringLocalizerFactory,
             ILifetimeScope lifetimeScope,
-            IDataStoreFactory dataStoreFactory, IEventBus eventBus)
+            IDataStoreFactory dataStoreFactory,
+            IEventBus eventBus)
         {
             m_Runtime = runtime;
             m_Logger = logger;
@@ -120,7 +122,7 @@ namespace OpenMod.Core.Plugins
                         {
                             configurationBuilder
                                 .SetBasePath(pluginWorkingDirectory)
-                                .AddYamlFile("config.yaml", optional: true, reloadOnChange: true);
+                                .AddYamlFile("config.yaml", optional: true, reloadOnChange: FileSettings.ReloadFilesOnChange);
                         }
 
                         var configuration = configurationBuilder
@@ -207,7 +209,10 @@ namespace OpenMod.Core.Plugins
                     var pluginLoggerType = typeof(ILogger<>).MakeGenericType(pluginType);
                     var pluginLogger = (ILogger)pluginInstance.LifetimeScope.Resolve(pluginLoggerType);
 
-                    RegisterConfigChangeCallback(pluginInstance, pluginLogger);
+                    if (FileSettings.ReloadFilesOnChange)
+                    {
+                        RegisterConfigChangeCallback(pluginInstance, pluginLogger);
+                    }
 
                     var pluginActivateEvent = new PluginActivatingEvent(pluginInstance);
                     await m_EventBus.EmitAsync(m_Runtime, this, pluginActivateEvent);

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using OpenMod.Core.Files;
 
 namespace OpenMod.Unturned.Configuration
 {
@@ -8,7 +9,7 @@ namespace OpenMod.Unturned.Configuration
         {
             Configuration = new ConfigurationBuilder()
                 .SetBasePath(workingDirectory)
-                .AddYamlFile("openmod.unturned.yaml", optional: false, reloadOnChange: true)
+                .AddYamlFile("openmod.unturned.yaml", optional: false, reloadOnChange: FileSettings.ReloadFilesOnChange)
                 .Build();
         }
 

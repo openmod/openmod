@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Persistence;
+using OpenMod.Core.Files;
 using OpenMod.Core.Helpers;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -92,6 +93,11 @@ namespace OpenMod.Core.Persistence
                 }
 
                 Directory.CreateDirectory(m_BasePath);
+            }
+
+            if(!FileSettings.ReloadFilesOnChange)
+            {
+                return;
             }
 
             m_FileSystemWatcher = new FileSystemWatcher(m_BasePath)

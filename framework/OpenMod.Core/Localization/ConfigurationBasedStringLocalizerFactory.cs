@@ -5,6 +5,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenMod.API;
+using OpenMod.Core.Files;
 
 namespace OpenMod.Core.Localization
 {
@@ -34,7 +35,7 @@ namespace OpenMod.Core.Localization
 
             var translations = new ConfigurationBuilder()
                 .SetBasePath(location)
-                .AddYamlFile(baseName + ".yaml", true, reloadOnChange: true)
+                .AddYamlFile(baseName + ".yaml", true, reloadOnChange: FileSettings.ReloadFilesOnChange)
                 .Build();
 
             void ReloadToken()

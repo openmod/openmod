@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using AsmResolver.PE.Imports;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.Common.Helpers;
 using OpenMod.Common.Hotloading;
+using OpenMod.Core.Files;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
 using OpenMod.Core.Permissions;
@@ -166,6 +168,7 @@ namespace OpenMod.Runtime
                 }
 
                 var configFile = Path.Combine(WorkingDirectory, "openmod.yaml");
+
                 if (File.Exists(configFile))
                 {
                     var yaml = File.ReadAllText(configFile);
@@ -219,8 +222,32 @@ namespace OpenMod.Runtime
                     }
 
                     PluginAssemblyStore.TryInstallMissingDependencies = tryInstallMissingDependencies;
-                }
 
+                    var reloadOnChange = false;
+                    if (config.TryGetValue("files", out unparsed) && unparsed is Dictionary<object, object> filesConfig)
+                    {
+                        if (filesConfig.TryGetValue("reloadOnChange", out unparsed))
+                        {
+                            switch (unparsed)
+                            {
+                                case bool value:
+                                    reloadOnChange = value;
+                                    break;
+                                case string strValue when bool.TryParse(strValue, out var parsed):
+                                    reloadOnChange = parsed;
+                                    break;
+                                default:
+                                    m_Logger!.LogWarning(
+                                        "Unknown config for 'reloadOnChange' in OpenMod configuration: {UnparsedConfig}",
+                                        unparsed);
+                                    break;
+
+                            }
+                        }
+                    }
+
+                    FileSettings.ReloadFilesOnChange = reloadOnChange;
+                }
                 await nugetPackageManager.InstallMissingPackagesAsync(updateExisting: true);
                 await startup.LoadPluginAssembliesAsync();
 
@@ -394,7 +421,7 @@ namespace OpenMod.Runtime
         {
             builder
                 .SetBasePath(WorkingDirectory)
-                .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
+                .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: FileSettings.ReloadFilesOnChange)
                 .AddEnvironmentVariables("OpenMod_");
             startup.ConfigureConfiguration(builder);
         }
