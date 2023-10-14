@@ -3,7 +3,7 @@ hotreloading: true
 
 # Determines if changes to configurations and translations should be applied automatically without reloading. Take in mind that enabling this uses more CPU
 files:
-  reloadOnChange: false 
+  reloadOnChange: false
 
 # Enables advanced console input. May cause issues with some web consoles.
 console: 
