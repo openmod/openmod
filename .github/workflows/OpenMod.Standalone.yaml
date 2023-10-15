@@ -18,7 +18,7 @@ on:
 
 jobs:
   build:
-    name: "OpenMod.Standalone Build"
+    name: "OpenMod.Standalone Build Ubuntu"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -30,10 +30,12 @@ jobs:
       with:
         dotnet-version: 7.x
     - uses: ./.github/actions/project-build
+      name: Building Project
       id: project-build
       with:
         project_path: standalone/OpenMod.Standalone
         nuget_push: false
+        runtime_version: linux-x64
     - name: Get Release
       if: github.event_name == 'release'
       id: get-release
@@ -59,7 +61,7 @@ jobs:
 
   build-windows:
     name: "OpenMod.Standalone Build Windows"
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
       name: Checkout Repository
@@ -70,10 +72,12 @@ jobs:
       with:
         dotnet-version: 7.x
     - uses: ./.github/actions/project-build
+      name: Building Project
       id: project-build
       with:
         project_path: standalone/OpenMod.Standalone
         nuget_push: false
+        runtime_version: win-x64
     - name: Get Release
       if: github.event_name == 'release'
       id: get-release
