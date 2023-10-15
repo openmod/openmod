@@ -58,7 +58,7 @@ jobs:
         asset_content_type: application/zip
 
   build-windows:
-    name: "OpenMod.Standalone Build"
+    name: "OpenMod.Standalone Build Windows"
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
