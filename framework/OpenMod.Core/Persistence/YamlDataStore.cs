@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
@@ -37,7 +38,8 @@ namespace OpenMod.Core.Persistence
 
         public YamlDataStore(DataStoreCreationParameters parameters,
             ILogger<YamlDataStore>? logger,
-            IRuntime? runtime)
+            IRuntime? runtime,
+            IOptions<YamlDataStoreOptions> options)
         {
             m_LogOnChange = parameters.LogOnChange;
             m_Logger = logger;
@@ -59,17 +61,21 @@ namespace OpenMod.Core.Persistence
                 m_Suffix = $".{parameters.Suffix}";
             }
 
-            m_Serializer = new SerializerBuilder()
+            var serializerBuilder = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeConverter(new YamlNullableEnumTypeConverter())
-                .DisableAliases()
-                .Build();
+                .DisableAliases();
+            var deserializerBuilder = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties();
 
-            m_Deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .IgnoreUnmatchedProperties()
-                .WithTypeConverter(new YamlNullableEnumTypeConverter())
-                .Build();
+            foreach(var converter in options.Value.Converters)
+            {
+                serializerBuilder.WithTypeConverter(converter);
+                deserializerBuilder.WithTypeConverter(converter);
+            }
+
+            m_Serializer = serializerBuilder.Build();
+            m_Deserializer = deserializerBuilder.Build();
 
             m_ChangeListeners = new List<RegisteredChangeListener>();
             m_Locks = new ConcurrentDictionary<string, object>();
