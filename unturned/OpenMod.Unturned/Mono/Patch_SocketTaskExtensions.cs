@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 using HarmonyLib;
 
 namespace OpenMod.Unturned.Mono;
+
+/// <summary>
+/// Fixes <see cref="SocketTaskExtensions.ReceiveAsync(Socket, Memory{byte}, SocketFlags, CancellationToken)"/>, that <see cref="Memory{byte}"/> is always empty due
+/// to coping the memory array.
+/// https://github.com/Unity-Technologies/mono/blob/unity-main/mcs/class/System/System.Net.Sockets/SocketTaskExtensions.cs
+/// </summary>
 [HarmonyPatch]
 internal static class Patch_SocketTaskExtensions
 {
@@ -15,32 +21,58 @@ internal static class Patch_SocketTaskExtensions
     public static bool SocketTaskExtensionsReceiveAsync(Socket socket, Memory<byte> memory, SocketFlags socketFlags, CancellationToken cancellationToken,
         out ValueTask<int> __result)
     {
+        var tcs = new TaskCompletionSource<int>(socket);
         if (MemoryMarshal.TryGetArray((ReadOnlyMemory<byte>)memory, out var segment))
         {
-            var taskCompletionSource = new TaskCompletionSource<int>(socket);
-            socket.BeginReceive(segment.Array, segment.Offset, segment.Count, socketFlags, iar =>
+            // We were able to extract the underlying byte[] from the Memory<byte>. Use it.
+
+            socket.BeginReceive(segment.Array, segment.Offset, segment.Count, socketFlags, static iar =>
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                var taskCompletionSource2 = (TaskCompletionSource<int>)iar.AsyncState;
-                var socket2 = (Socket)taskCompletionSource2.Task.AsyncState;
+                var state = (Tuple<TaskCompletionSource<int>, CancellationToken>)iar.AsyncState;
+
+                state.Item2.ThrowIfCancellationRequested();
                 try
                 {
-                    taskCompletionSource2.TrySetResult(socket2.EndReceive(iar));
+                    state.Item1.TrySetResult(((Socket)state.Item1.Task.AsyncState).EndReceive(iar));
                 }
                 catch (Exception ex)
                 {
-                    taskCompletionSource2.TrySetException(ex);
+                    state.Item1.TrySetException(ex);
                 }
-            }, taskCompletionSource);
+            }, Tuple.Create(tcs, cancellationToken));
 
             cancellationToken.ThrowIfCancellationRequested();
-            __result = new ValueTask<int>(taskCompletionSource.Task);
         }
         else
         {
-            __result = new(0);
+            // We weren't able to extract an underlying byte[] from the Memory<byte>.
+            // Instead read into an ArrayPool array, then copy from that into the memory.
+
+            var poolArray = ArrayPool<byte>.Shared.Rent(memory.Length);
+            
+            socket.BeginReceive(poolArray, 0, memory.Length, socketFlags, static iar =>
+            {
+                var state = (Tuple<TaskCompletionSource<int>, Memory<byte>, byte[], CancellationToken>)iar.AsyncState;
+                try
+                {
+                    var bytesCopied = ((Socket)state.Item1.Task.AsyncState).EndReceive(iar);
+                    new ReadOnlyMemory<byte>(state.Item3, 0, bytesCopied).Span.CopyTo(state.Item2.Span);
+                    state.Item1.TrySetResult(bytesCopied);
+                }
+                catch (Exception e)
+                {
+                    state.Item1.TrySetException(e);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(state.Item3);
+                }
+            }, Tuple.Create(tcs, memory, poolArray, cancellationToken));
+
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
+        __result = new ValueTask<int>(tcs.Task);
         return false;
     }
 }

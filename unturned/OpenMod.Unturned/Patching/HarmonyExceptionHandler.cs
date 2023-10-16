@@ -25,7 +25,7 @@ namespace OpenMod.Unturned.Patching
 
             var logger = loggerFactory.CreateLogger("OpenMod.Harmony");
             logger.LogError(exception, "Failed to patch original method {MethodName} from patching type {TypeName}",
-                originalMethod?.FullDescription(), type.FullDescription());
+                originalMethod.FullDescription(), type.FullDescription());
         }
     }
 }
