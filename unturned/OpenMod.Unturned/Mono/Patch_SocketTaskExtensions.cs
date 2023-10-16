@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Buffers;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
+using OpenMod.Unturned.Patching;
 
 namespace OpenMod.Unturned.Mono;
 
@@ -15,6 +18,13 @@ namespace OpenMod.Unturned.Mono;
 [HarmonyPatch]
 internal static class Patch_SocketTaskExtensions
 {
+    [HarmonyCleanup]
+    public static Exception? Cleanup(Exception ex, MethodBase original)
+    {
+        HarmonyExceptionHandler.ReportCleanupException(typeof(Patch_SocketTaskExtensions), ex, original);
+        return null;
+    }
+
     [HarmonyPatch(typeof(SocketTaskExtensions), nameof(SocketTaskExtensions.ReceiveAsync),
     new[] { typeof(Socket), typeof(Memory<byte>), typeof(SocketFlags), typeof(CancellationToken) })]
     [HarmonyPrefix]
