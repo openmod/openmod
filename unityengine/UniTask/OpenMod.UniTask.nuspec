@@ -2,14 +2,17 @@
 <package>
   <metadata>
     <id>OpenMod.UniTask</id>
-    <version>2019.2.2.5</version>
+    <version>2021.2.4.1</version>
     <authors>Cysharp;OpenMod</authors>
     <owners>OpenMod</owners>
-	<description>UniTask for OpenMod</description>
-	<license type="expression">MIT</license>
+    <description>UniTask for OpenMod</description>
+    <license type="expression">MIT</license>
     <copyright>© Cysharp, Inc.</copyright>
   </metadata>
   <files>
-    <file src="*.dll" target="lib\net461" />
+    <file src="netstandard2.1\*.dll" target="lib\netstandard2.1"/>
+    <file src="netstandard2.0\*.dll" target="lib\netstandard2.0"/>
+    <file src="*.xml" target="lib\netstandard2.1"/>
+    <file src="*.xml" target="lib\netstandard2.0"/>
   </files>
 </package>
