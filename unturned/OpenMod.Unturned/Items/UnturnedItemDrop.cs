@@ -77,7 +77,7 @@ namespace OpenMod.Unturned.Items
                 }
 
                 s_SendDestroyItem.Invoke(ENetReliability.Reliable,
-                    Regions.EnumerateClients(RegionX, RegionY, ItemManager.ITEM_REGIONS),
+                    Regions.GatherClientConnections(RegionX, RegionY, ItemManager.ITEM_REGIONS),
                     RegionX, RegionY, m_ItemData.instanceID, false);
 
                 return true;
