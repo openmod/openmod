@@ -8,7 +8,7 @@ using YamlDotNet.Serialization;
 namespace OpenMod.Core.Persistence;
 
 [OpenModInternal]
-public class Vector3YamlConverter : IYamlTypeConverter
+public class YamlVector3TypeConverter : IYamlTypeConverter
 {
     public bool Accepts(Type type)
     {
