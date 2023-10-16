@@ -18,7 +18,7 @@ internal static class Patch_SocketTaskExtensions
         if (MemoryMarshal.TryGetArray((ReadOnlyMemory<byte>)memory, out var segment))
         {
             var taskCompletionSource = new TaskCompletionSource<int>(socket);
-            socket.BeginReceive(segment.Array, 0, segment.Array.Length, socketFlags, iar =>
+            socket.BeginReceive(segment.Array, segment.Offset, segment.Count, socketFlags, iar =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var taskCompletionSource2 = (TaskCompletionSource<int>)iar.AsyncState;
