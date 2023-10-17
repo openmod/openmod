@@ -1,10 +1,19 @@
-﻿using Autofac;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Resources;
+using System.Threading.Tasks;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NuGet.Common;
 using OpenMod.API;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
@@ -21,15 +30,6 @@ using Semver;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Resources;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -72,7 +72,6 @@ namespace OpenMod.Runtime
         private DateTime? m_DateLogger;
         private ILoggerFactory? m_LoggerFactory;
         private ILogger<Runtime>? m_Logger;
-        private IHostApplicationLifetime? m_AppLifeTime;
 
         // these variables are used for soft reloads
         private List<Assembly>? m_OpenModHostAssemblies;
@@ -147,7 +146,7 @@ namespace OpenMod.Runtime
 
                 await nugetPackageManager.RemoveOutdatedPackagesAsync();
                 nugetPackageManager.InstallAssemblyResolver();
-                nugetPackageManager.SetAssemblyLoader((NuGetPackageManager.AssemblyLoader)Hotloader.LoadAssembly);
+                nugetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
 
                 var startupContext = new OpenModStartupContext
                 {
@@ -225,19 +224,25 @@ namespace OpenMod.Runtime
                 await startup.LoadPluginAssembliesAsync();
 
                 hostBuilder
-                    .UseContentRoot(parameters.WorkingDirectory)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                     .ConfigureHostConfiguration(builder =>
                     {
                         ConfigureConfiguration(builder, startup);
-                        ((OpenModStartupContext)startup.Context).Configuration = builder.Build();
                     })
-                    .ConfigureAppConfiguration(builder => ConfigureConfiguration(builder, startup))
-                    .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, startup))
-                    .ConfigureServices(services => SetupServices(services, startup))
-                    .UseSerilog((_, configuration) =>
+                    .ConfigureAppConfiguration((context, builder) =>
                     {
-                        SetupSerilog(configuration);
+                        startup.Context.DataStore["HostBuilderContext"] = context;
+
+                        ConfigureAppConfiguration(context, builder, startup);
+                    })
+                    .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, startup))
+                    .ConfigureServices((context, services) =>
+                    {
+                        SetupServices(services, startup);
+                    })
+                    .UseSerilog((context, configuration) =>
+                    {
+                        SetupSerilog(configuration, context.Configuration);
                     });
 
                 Host = hostBuilder.Build();
@@ -246,8 +251,8 @@ namespace OpenMod.Runtime
                 m_Logger = m_LoggerFactory.CreateLogger<Runtime>();
                 nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
 
-                m_AppLifeTime = Host.Services.GetRequiredService<IHostApplicationLifetime>();
-                m_AppLifeTime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
+                var applicationLifetime = Host.Services.GetRequiredService<IHostApplicationLifetime>();
+                applicationLifetime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
 
                 Status = RuntimeStatus.Initialized;
                 LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>().BeginLifetimeScopeEx(
@@ -310,26 +315,38 @@ namespace OpenMod.Runtime
 
         private void PerformFileSystemWatcherPatch()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Type.GetType("Mono.Runtime") is null)
+            if (!RuntimeEnvironmentHelper.IsMono)
             {
                 return;
             }
 
-            var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
-            var watcher = watcherField?.GetValue(null);
+            if (RuntimeEnvironmentHelper.IsLinux)
+            {
+                using var tempFileSystemWatcher = new FileSystemWatcher();
 
-            if (watcher?.GetType()
+                var internalWatcher = typeof(FileSystemWatcher)
+                    .GetField("watcher", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(tempFileSystemWatcher);
+
+                m_Logger.LogInformation("Using watcher: {FileWatcherImplementation}", internalWatcher.GetType().Name);
+                return;
+            }
+
+            var watcher = typeof(FileSystemWatcher).Assembly
+                .GetType("System.IO.DefaultWatcher")
+                .GetField("instance", BindingFlags.Static | BindingFlags.NonPublic)
+                .GetValue(null);
+
+            var watcherType = watcher.GetType();
+
+            if (watcherType
                 .GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)
-                ?.GetValue(watcher) is not Hashtable watches)
+                .GetValue(watcher) is not Hashtable watches)
             {
-                return;
+                throw new Exception("watches is not Hashtable");
             }
 
-            var createFileDataMethod = watcher?.GetType().GetMethod("CreateFileData", BindingFlags.Static | BindingFlags.NonPublic);
-            if (createFileDataMethod == null)
-            {
-                return;
-            }
+            var createFileDataMethod = watcherType.GetMethod("CreateFileData", BindingFlags.Static | BindingFlags.NonPublic);
 
             lock (watches)
             {
@@ -350,8 +367,7 @@ namespace OpenMod.Runtime
                     var watcherDataType = entry.Value.GetType();
 
                     incSubdirsField ??= watcherDataType.GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
-                    if (incSubdirsField?.GetValue(entry.Value) is bool incSubdirs
-                        && !incSubdirs)
+                    if (incSubdirsField?.GetValue(entry.Value) is bool incSubdirs && !incSubdirs)
                     {
                         continue;
                     }
@@ -395,8 +411,38 @@ namespace OpenMod.Runtime
             builder
                 .SetBasePath(WorkingDirectory)
                 .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
-                .AddEnvironmentVariables("OpenMod_");
+                .AddEnvironmentVariables("OpenMod_")
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    { HostDefaults.ContentRootKey, WorkingDirectory },
+                    { HostDefaults.ApplicationKey, "OpenMod" },
+                });
             startup.ConfigureConfiguration(builder);
+        }
+
+        private void ConfigureAppConfiguration(HostBuilderContext? hostBuilderContext, IConfigurationBuilder builder, OpenModStartup? startup = null)
+        {
+            m_DateLogger ??= DateTime.Now;
+
+            if (hostBuilderContext != null && startup?.Context is OpenModStartupContext context)
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                context.Configuration = (IConfigurationRoot)hostBuilderContext.Configuration;
+#pragma warning restore CS0618 // Type or member is obsolete
+            }
+
+            builder
+                .SetBasePath(WorkingDirectory)
+                .AddYamlFileEx(s =>
+                {
+                    s.Path = "logging.yaml";
+                    s.Optional = false;
+                    s.Variables = new Dictionary<string, string>
+                    {
+                        { "workingDirectory", WorkingDirectory.Replace(@"\", "/") },
+                        { "date", m_DateLogger.Value.ToString("yyyy-MM-dd-HH-mm-ss") }
+                    };
+                });
         }
 
         private void SetupServices(IServiceCollection services, OpenModStartup startup)
@@ -414,7 +460,7 @@ namespace OpenMod.Runtime
             startup.SetupContainer(containerBuilder);
         }
 
-        private void SetupSerilog(LoggerConfiguration? loggerConfiguration = null)
+        private void SetupSerilog(LoggerConfiguration? loggerConfiguration = null, IConfiguration? configuration = null)
         {
             Serilog.Debugging.SelfLog.Enable(s =>
             {
@@ -442,23 +488,13 @@ namespace OpenMod.Runtime
                     File.WriteAllText(loggingPath, fileContent);
                 }
 
-                m_DateLogger ??= DateTime.Now;
+                if (configuration == null)
+                {
+                    var builder = new ConfigurationBuilder();
+                    ConfigureAppConfiguration(null, builder);
 
-                var configuration = new ConfigurationBuilder()
-                    .SetBasePath(WorkingDirectory)
-                    .AddYamlFileEx(s =>
-                    {
-                        s.Path = "logging.yaml";
-                        s.Optional = false;
-                        s.Variables = new Dictionary<string, string>
-                        {
-                            { "workingDirectory", WorkingDirectory.Replace(@"\", "/") },
-                            { "date", m_DateLogger.Value.ToString("yyyy-MM-dd-HH-mm-ss") }
-                        };
-                        s.ResolveFileProvider();
-                    })
-                    .AddEnvironmentVariables()
-                    .Build();
+                    configuration = builder.Build();
+                }
 
                 loggerConfiguration.ReadFrom.Configuration(configuration);
             }
@@ -520,13 +556,13 @@ namespace OpenMod.Runtime
             if (Host is not null)
             {
                 await Host.DisposeSyncOrAsync();
+                Host = null;
             }
 
             Status = RuntimeStatus.Unloaded;
 
             m_DateLogger = null;
             m_LoggerFactory = null;
-            m_AppLifeTime = null;
             m_Logger = null;
             Log.CloseAndFlush();
         }

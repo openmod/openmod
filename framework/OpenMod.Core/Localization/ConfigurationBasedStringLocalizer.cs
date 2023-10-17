@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +10,7 @@ using OpenMod.API;
 namespace OpenMod.Core.Localization
 {
     [OpenModInternal]
-    public class ConfigurationBasedStringLocalizer : IStringLocalizer
+    public class ConfigurationBasedStringLocalizer : IStringLocalizer, IDisposable
     {
         private readonly IConfiguration m_Configuration;
         private readonly IOptions<SmartFormatOptions> m_Options;
@@ -70,6 +71,11 @@ namespace OpenMod.Core.Localization
                 var formatter = m_Options.Value.GetSmartFormatter();
                 return new LocalizedString(name, formatter.Format(configValue.Value ?? string.Empty, arguments));
             }
+        }
+
+        public void Dispose()
+        {
+            (m_Configuration as IDisposable)?.Dispose();
         }
     }
 }
