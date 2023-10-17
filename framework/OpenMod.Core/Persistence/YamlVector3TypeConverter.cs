@@ -23,10 +23,7 @@ public class YamlVector3TypeConverter : IYamlTypeConverter
 
     public object? ReadYaml(IParser parser, Type type)
     {
-        if (!parser.TryConsume<MappingStart>(out _))
-        {
-            throw new InvalidOperationException("Invalid Vector3 format in YAML");
-        }
+        parser.Consume<MappingStart>();
 
         float x = 0, y = 0, z = 0;
 
