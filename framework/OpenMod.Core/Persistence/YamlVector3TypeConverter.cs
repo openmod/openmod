@@ -35,13 +35,13 @@ public class YamlVector3TypeConverter : IYamlTypeConverter
             switch (key.Value)
             {
                 case c_YamlKeyOfX:
-                    x = float.Parse(value.Value, YamlFormatter.Default.NumberFormat);
+                    x = float.Parse(value.Value);
                     break;
                 case c_YamlKeyOfY:
-                    y = float.Parse(value.Value, YamlFormatter.Default.NumberFormat);
+                    y = float.Parse(value.Value);
                     break;
                 case c_YamlKeyOfZ:
-                    z = float.Parse(value.Value, YamlFormatter.Default.NumberFormat);
+                    z = float.Parse(value.Value);
                     break;
             }
         }
