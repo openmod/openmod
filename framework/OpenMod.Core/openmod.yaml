@@ -10,6 +10,11 @@ console:
 cooldowns:
   reloadPersistence: true
 
+# YAML related configurations
+yaml:
+  # Enables System.Numerics.Vector3 conversion in YAML data stores  
+  enableVector3Converter: true
+
 # NuGet related configurations. See packages/NuGet.Config for more configuration options such as feeds to use.
 nuget:
   # The following OpenMod commands are restricted to some users even if they have permissions.
