@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>UniTask.Linq</name>
+    </assembly>
+    <members>
+        <member name="M:Cysharp.Threading.Tasks.Linq.UniTaskAsyncEnumerable.ForEachAsync``1(Cysharp.Threading.Tasks.IUniTaskAsyncEnumerable{``0},System.Func{``0,Cysharp.Threading.Tasks.UniTask},System.Threading.CancellationToken)">
+            <summary>Obsolete(Error), Use Use ForEachAwaitAsync instead.</summary>
+        </member>
+        <member name="M:Cysharp.Threading.Tasks.Linq.UniTaskAsyncEnumerable.ForEachAsync``1(Cysharp.Threading.Tasks.IUniTaskAsyncEnumerable{``0},System.Func{``0,System.Int32,Cysharp.Threading.Tasks.UniTask},System.Threading.CancellationToken)">
+            <summary>Obsolete(Error), Use Use ForEachAwaitAsync instead.</summary>
+        </member>
+        <member name="M:Cysharp.Threading.Tasks.Linq.AsyncEnumeratorBase`2.TryMoveNextCore(System.Boolean,System.Boolean@)">
+            <summary>
+            If return value is false, continue source.MoveNext.
+            </summary>
+        </member>
+    </members>
+</doc>
