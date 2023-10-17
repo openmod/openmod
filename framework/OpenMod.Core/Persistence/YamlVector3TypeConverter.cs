@@ -56,6 +56,11 @@ public class YamlVector3TypeConverter : IYamlTypeConverter
 
     public void WriteYaml(IEmitter emitter, object? value, Type type)
     {
+        static string FormatNumber(float number)
+        {
+            return YamlFormatter.Default.FormatNumber(number);
+        }
+
         if (value == null)
         {
             throw new NullReferenceException(nameof(value));
@@ -66,13 +71,13 @@ public class YamlVector3TypeConverter : IYamlTypeConverter
         emitter.Emit(new MappingStart());
 
         emitter.Emit(new Scalar(c_YamlKeyOfX));
-        emitter.Emit(new Scalar(vector.X.ToString()));
+        emitter.Emit(new Scalar(FormatNumber(vector.X)));
 
         emitter.Emit(new Scalar(c_YamlKeyOfY));
-        emitter.Emit(new Scalar(vector.Y.ToString()));
+        emitter.Emit(new Scalar(FormatNumber(vector.Y)));
 
         emitter.Emit(new Scalar(c_YamlKeyOfZ));
-        emitter.Emit(new Scalar(vector.Z.ToString()));
+        emitter.Emit(new Scalar(FormatNumber(vector.Z)));
 
         emitter.Emit(new MappingEnd());
     }
