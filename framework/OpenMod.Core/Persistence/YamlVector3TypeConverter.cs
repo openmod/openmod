@@ -58,7 +58,7 @@ public class YamlVector3TypeConverter : IYamlTypeConverter
     {
         if (value == null)
         {
-            return;
+            throw new NullReferenceException(nameof(value));
         }
 
         var vector = (Vector3)value;
