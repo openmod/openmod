@@ -15,7 +15,6 @@ using System;
 using OpenMod.Core.Jobs;
 using SmartFormat.Extensions;
 using OpenMod.Core.Persistence;
-using Microsoft.Extensions.Configuration;
 
 namespace OpenMod.Core
 {
@@ -63,13 +62,7 @@ namespace OpenMod.Core
             serviceCollection.Configure<YamlDataStoreOptions>(options =>
             {
                 options.TryAddConverter<YamlNullableEnumTypeConverter>();
-
-                var shouldAddVector3Converter = openModStartupContext.Configuration.GetSection("yaml:enableVector3Converter").Get<bool>();
-
-                if (shouldAddVector3Converter)
-                {
-                    options.TryAddConverter<YamlVector3TypeConverter>();
-                }
+                options.TryAddConverter<YamlVector3TypeConverter>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
