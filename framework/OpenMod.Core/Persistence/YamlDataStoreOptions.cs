@@ -6,8 +6,10 @@ namespace OpenMod.Core.Persistence;
 
 public class YamlDataStoreOptions
 {
-    public IReadOnlyList<IYamlTypeConverter> Converters {
-        get {
+    public IReadOnlyList<IYamlTypeConverter> Converters
+    {
+        get
+        {
             return m_Converters.AsReadOnly();
         }
     }
