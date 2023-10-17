@@ -10,16 +10,22 @@ namespace OpenMod.Core.Persistence;
 [OpenModInternal]
 public class YamlVector3TypeConverter : IYamlTypeConverter
 {
+    private const string c_YamlKeyOfX = "x";
+
+    private const string c_YamlKeyOfY = "y";
+
+    private const string c_YamlKeyOfZ = "z";
+
     public bool Accepts(Type type)
     {
         return type == typeof(Vector3);
     }
 
-    public object ReadYaml(IParser parser, Type type)
+    public object? ReadYaml(IParser parser, Type type)
     {
         if (!parser.TryConsume<MappingStart>(out _))
         {
-            throw new InvalidOperationException("Invalid Vector3 format in YAML.");
+            throw new InvalidOperationException("Invalid Vector3 format in YAML");
         }
 
         float x = 0, y = 0, z = 0;
@@ -31,13 +37,13 @@ public class YamlVector3TypeConverter : IYamlTypeConverter
 
             switch (key.Value)
             {
-                case "X":
+                case c_YamlKeyOfX:
                     x = float.Parse(value.Value);
                     break;
-                case "Y":
+                case c_YamlKeyOfY:
                     y = float.Parse(value.Value);
                     break;
-                case "Z":
+                case c_YamlKeyOfZ:
                     z = float.Parse(value.Value);
                     break;
             }
@@ -56,12 +62,16 @@ public class YamlVector3TypeConverter : IYamlTypeConverter
         var vector = (Vector3)value;
 
         emitter.Emit(new MappingStart());
-        emitter.Emit(new Scalar("X"));
+
+        emitter.Emit(new Scalar(c_YamlKeyOfX));
         emitter.Emit(new Scalar(vector.X.ToString()));
-        emitter.Emit(new Scalar("Y"));
+
+        emitter.Emit(new Scalar(c_YamlKeyOfY));
         emitter.Emit(new Scalar(vector.Y.ToString()));
-        emitter.Emit(new Scalar("Z"));
+
+        emitter.Emit(new Scalar(c_YamlKeyOfZ));
         emitter.Emit(new Scalar(vector.Z.ToString()));
+
         emitter.Emit(new MappingEnd());
     }
 }
