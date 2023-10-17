@@ -1,15 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace OpenMod.Unturned.Configuration
 {
     public class OpenModUnturnedConfiguration : IOpenModUnturnedConfiguration
     {
-        public OpenModUnturnedConfiguration(string workingDirectory)
+        public OpenModUnturnedConfiguration(HostBuilderContext context)
         {
-            Configuration = new ConfigurationBuilder()
-                .SetBasePath(workingDirectory)
-                .AddYamlFile("openmod.unturned.yaml", optional: false, reloadOnChange: true)
-                .Build();
+            Configuration = context.Configuration;
         }
 
         public IConfiguration Configuration { get; }

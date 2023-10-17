@@ -3,6 +3,7 @@ using Autofac;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
@@ -35,7 +36,7 @@ namespace OpenMod.Unturned
             IServiceCollection serviceCollection)
         {
             var unturnedConfiguration =
-                new OpenModUnturnedConfiguration(openModStartupContext.Runtime.WorkingDirectory);
+                new OpenModUnturnedConfiguration((HostBuilderContext)openModStartupContext.DataStore["HostBuilderContext"]);
 
             serviceCollection.AddSingleton<IOpenModUnturnedConfiguration>(unturnedConfiguration);
 
