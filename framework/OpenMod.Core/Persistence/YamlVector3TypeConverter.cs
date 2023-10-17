@@ -23,6 +23,11 @@ public class YamlVector3TypeConverter : IYamlTypeConverter
 
     public object? ReadYaml(IParser parser, Type type)
     {
+        static float ParseNumber(Scalar scalar)
+        {
+            return float.Parse(scalar.Value, YamlFormatter.Default.NumberFormat);
+        }
+
         parser.Consume<MappingStart>();
 
         float x = 0, y = 0, z = 0;
@@ -35,13 +40,13 @@ public class YamlVector3TypeConverter : IYamlTypeConverter
             switch (key.Value)
             {
                 case c_YamlKeyOfX:
-                    x = float.Parse(value.Value);
+                    x = ParseNumber(value);
                     break;
                 case c_YamlKeyOfY:
-                    y = float.Parse(value.Value);
+                    y = ParseNumber(value);
                     break;
                 case c_YamlKeyOfZ:
-                    z = float.Parse(value.Value);
+                    z = ParseNumber(value);
                     break;
             }
         }
