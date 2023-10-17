@@ -310,26 +310,38 @@ namespace OpenMod.Runtime
 
         private void PerformFileSystemWatcherPatch()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Type.GetType("Mono.Runtime") is null)
+            if (!RuntimeEnvironmentHelper.IsMono)
             {
                 return;
             }
 
-            var watcherField = typeof(FileSystemWatcher).GetField("watcher", BindingFlags.Static | BindingFlags.NonPublic);
-            var watcher = watcherField?.GetValue(null);
+            if (RuntimeEnvironmentHelper.IsLinux)
+            {
+                using var tempFileSystemWatcher = new FileSystemWatcher();
 
-            if (watcher?.GetType()
+                var internalWatcher = typeof(FileSystemWatcher)
+                    .GetField("watcher", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(tempFileSystemWatcher);
+
+                m_Logger.LogInformation("Using watcher: {FileWatcherImplementation}", internalWatcher.GetType().Name);
+                return;
+            }
+
+            var watcher = typeof(FileSystemWatcher).Assembly
+                .GetType("System.IO.DefaultWatcher")
+                .GetField("instance", BindingFlags.Static | BindingFlags.NonPublic)
+                .GetValue(null);
+
+            var watcherType = watcher.GetType();
+
+            if (watcherType
                 .GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)
-                ?.GetValue(watcher) is not Hashtable watches)
+                .GetValue(watcher) is not Hashtable watches)
             {
-                return;
+                throw new Exception("watches is not Hashtable");
             }
 
-            var createFileDataMethod = watcher?.GetType().GetMethod("CreateFileData", BindingFlags.Static | BindingFlags.NonPublic);
-            if (createFileDataMethod == null)
-            {
-                return;
-            }
+            var createFileDataMethod = watcherType.GetMethod("CreateFileData", BindingFlags.Static | BindingFlags.NonPublic);
 
             lock (watches)
             {
@@ -350,8 +362,7 @@ namespace OpenMod.Runtime
                     var watcherDataType = entry.Value.GetType();
 
                     incSubdirsField ??= watcherDataType.GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
-                    if (incSubdirsField?.GetValue(entry.Value) is bool incSubdirs
-                        && !incSubdirs)
+                    if (incSubdirsField?.GetValue(entry.Value) is bool incSubdirs && !incSubdirs)
                     {
                         continue;
                     }
