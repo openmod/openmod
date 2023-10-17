@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.Localization;
 using OpenMod.API;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 
 namespace OpenMod.Core.Localization
 {
     [OpenModInternal]
-    public class ProxyStringLocalizer : IStringLocalizer
+    public class ProxyStringLocalizer : IStringLocalizer, IDisposable
     {
         private readonly IStringLocalizer m_StringLocalizer;
 
@@ -23,7 +24,7 @@ namespace OpenMod.Core.Localization
 #pragma warning disable 618 // disable obsolete warning
         public IStringLocalizer WithCulture(CultureInfo culture)
         {
-            return m_StringLocalizer.WithCulture(culture); // lgtm [cs/call-to-obsolete-method]
+            return m_StringLocalizer.WithCulture(culture);
         }
 #pragma warning restore 618
 
@@ -35,6 +36,11 @@ namespace OpenMod.Core.Localization
         public LocalizedString this[string name, params object[] arguments]
         {
             get { return m_StringLocalizer[name, arguments]; }
+        }
+
+        public void Dispose()
+        {
+            (m_StringLocalizer as IDisposable)?.Dispose();
         }
     }
 }

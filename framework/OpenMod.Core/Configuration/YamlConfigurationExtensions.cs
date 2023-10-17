@@ -106,8 +106,8 @@ namespace Microsoft.Extensions.Configuration
                 s.Path = path;
                 s.Optional = optional;
                 s.ReloadOnChange = reloadOnChange;
-                s.ResolveFileProvider();
                 s.Variables = variables;
+                s.ResolveFileProvider();
             });
         }
 
