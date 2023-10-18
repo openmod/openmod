@@ -14,6 +14,7 @@ using OpenMod.Core.Users;
 using System;
 using OpenMod.Core.Jobs;
 using SmartFormat.Extensions;
+using OpenMod.Core.Persistence;
 
 namespace OpenMod.Core
 {
@@ -56,6 +57,12 @@ namespace OpenMod.Core
             serviceCollection.Configure<SmartFormatOptions>(options =>
             {
                 options.TryAddFormatter<TimeFormatter>();
+            });
+
+            serviceCollection.Configure<YamlDataStoreOptions>(options =>
+            {
+                options.TryAddConverter<YamlNullableEnumTypeConverter>();
+                options.TryAddConverter<YamlVector3TypeConverter>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
