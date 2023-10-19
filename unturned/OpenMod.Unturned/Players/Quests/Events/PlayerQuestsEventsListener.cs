@@ -1,5 +1,4 @@
-﻿extern alias JetBrainsAnnotations;
-using JetBrainsAnnotations::JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using Steamworks;
@@ -12,6 +11,11 @@ namespace OpenMod.Unturned.Players.Quests.Events
     {
         public PlayerQuestsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            SubscribePlayer<GroupRankChangedHandler>(
+                static (player, handler) => player.quests.groupRankChanged += handler,
+                static (player, handler) => player.quests.groupRankChanged -= handler,
+                player => OnGroupRankChanged
+            );
         }
 
         public override void Subscribe()
@@ -24,16 +28,6 @@ namespace OpenMod.Unturned.Players.Quests.Events
         {
             PlayerQuests.onGroupChanged -= OnGroupChanged;
             PlayerQuests.onAnyFlagChanged -= OnAnyFlagChanged;
-        }
-
-        public override void SubscribePlayer(Player player)
-        {
-            player.quests.groupRankChanged += OnGroupRankChanged;
-        }
-
-        public override void UnsubscribePlayer(Player player)
-        {
-            player.quests.groupRankChanged -= OnGroupRankChanged;
         }
 
         private void OnAnyFlagChanged(PlayerQuests quests, PlayerQuestFlag flag)

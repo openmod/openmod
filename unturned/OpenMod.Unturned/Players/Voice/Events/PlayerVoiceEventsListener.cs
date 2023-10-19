@@ -2,10 +2,6 @@
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Players.Voice.Events
 {
@@ -14,6 +10,11 @@ namespace OpenMod.Unturned.Players.Voice.Events
     {
         public PlayerVoiceEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            SubscribePlayer<Talked>(
+                static (player, handler) => player.voice.onTalkingChanged += handler,
+                static (player, handler) => player.voice.onTalkingChanged -= handler,
+                player => isTalking => OnTalkingChanged(player, isTalking)
+            );
         }
 
         public override void Subscribe()
@@ -42,11 +43,6 @@ namespace OpenMod.Unturned.Players.Voice.Events
             PlayerVoice.onRelayVoice -= PlayerVoice_onRelayVoice;
         }
 
-        public override void SubscribePlayer(Player player)
-        {
-            player.voice.onTalkingChanged += (isTalking) => OnTalkingChanged(player, isTalking);
-        }
-
         private void OnTalkingChanged(Player nativePlayer, bool isTalking)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
@@ -54,11 +50,6 @@ namespace OpenMod.Unturned.Players.Voice.Events
             var @event = new UnturnedPlayerTalkingUpdatedEvent(player, isTalking);
 
             Emit(@event);
-        }
-
-        public override void UnsubscribePlayer(Player player)
-        {
-            player.voice.onTalkingChanged -= (isTalking) => OnTalkingChanged(player, isTalking);
         }
     }
 }

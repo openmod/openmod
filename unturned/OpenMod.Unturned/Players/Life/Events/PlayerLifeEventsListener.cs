@@ -1,6 +1,5 @@
-﻿extern alias JetBrainsAnnotations;
-using HarmonyLib;
-using JetBrainsAnnotations::JetBrains.Annotations;
+﻿using HarmonyLib;
+using JetBrains.Annotations;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
@@ -19,6 +18,17 @@ namespace OpenMod.Unturned.Players.Life.Events
     {
         public PlayerLifeEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            SubscribePlayer<Hurt>(
+                static (player, handler) => player.life.onHurt += handler,
+                static (player, handler) => player.life.onHurt -= handler,
+                player => OnHurt
+            );
+
+            SubscribePlayer<PlayerLife.FallDamageRequestHandler>(
+                static (player, handler) => player.life.OnFallDamageRequested += handler,
+                static (player, handler) => player.life.OnFallDamageRequested -= handler,
+                player => OnFallDamageRequested
+            );
         }
 
         public override void Subscribe()
@@ -35,18 +45,6 @@ namespace OpenMod.Unturned.Players.Life.Events
 
             PlayerLife.onPlayerDied -= OnPlayerDeath;
             PlayerLife.onPlayerLifeUpdated -= OnPlayerLifeUpdated;
-        }
-
-        public override void SubscribePlayer(Player player)
-        {
-            player.life.onHurt += OnHurt;
-            player.life.OnFallDamageRequested += OnFallDamageRequested;
-        }
-
-        public override void UnsubscribePlayer(Player player)
-        {
-            player.life.onHurt -= OnHurt;
-            player.life.OnFallDamageRequested -= OnFallDamageRequested;
         }
 
         private IDamageSource? GetDamageSource(CSteamID killer)

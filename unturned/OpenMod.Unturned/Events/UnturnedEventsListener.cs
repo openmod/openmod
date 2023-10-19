@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Eventing;
-using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
 using OpenMod.Unturned.Players;
 using SDG.Unturned;
@@ -14,13 +13,11 @@ namespace OpenMod.Unturned.Events
     {
         private readonly IOpenModHost m_OpenModHost;
         private readonly IEventBus m_EventBus;
-        protected readonly IUserManager UserManager;
 
         protected UnturnedEventsListener(IServiceProvider serviceProvider)
         {
             m_OpenModHost = serviceProvider.GetRequiredService<IOpenModHost>();
             m_EventBus = serviceProvider.GetRequiredService<IEventBus>();
-            UserManager = serviceProvider.GetRequiredService<IUserManager>();
         }
 
         protected UnturnedPlayer? GetUnturnedPlayer(Player? player)
@@ -40,11 +37,6 @@ namespace OpenMod.Unturned.Events
 
         protected void Emit(IEvent @event)
         {
-            if (@event == null)
-            {
-                throw new ArgumentNullException(nameof(@event));
-            }
-
             AsyncHelper.RunSync(() => m_EventBus.EmitAsync(m_OpenModHost, this, @event));
         }
 

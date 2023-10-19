@@ -17,6 +17,14 @@ namespace OpenMod.Unturned.Players.Movement.Events
     {
         public PlayerMovementEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            SubscribePlayer(
+                static player => ref player.stance.onStanceUpdated,
+                player => () => OnStanceUpdated(player)
+            );
+            SubscribePlayer(
+                static player => ref player.movement.onSafetyUpdated,
+                player => safe => OnSafetyUpdated(player, safe)
+            );
         }
 
         public override void Subscribe()
@@ -31,18 +39,6 @@ namespace OpenMod.Unturned.Players.Movement.Events
             PlayerAnimator.OnGestureChanged_Global -= PlayerAnimator_OnGestureChanged_Global;
             OnTeleporting -= Events_OnTeleporting;
             OnPlayerJumped -= PlayerMovementEventsListener_OnPlayerJumped;
-        }
-
-        public override void SubscribePlayer(Player player)
-        {
-            player.stance.onStanceUpdated += () => OnStanceUpdated(player);
-            player.movement.onSafetyUpdated += (safe) => OnSafetyUpdated(player, safe);
-        }
-
-        public override void UnsubscribePlayer(Player player)
-        {
-            player.stance.onStanceUpdated -= () => OnStanceUpdated(player);
-            player.movement.onSafetyUpdated -= (safe) => OnSafetyUpdated(player, safe);
         }
 
         private void PlayerAnimator_OnGestureChanged_Global(PlayerAnimator animator, EPlayerGesture gesture)
