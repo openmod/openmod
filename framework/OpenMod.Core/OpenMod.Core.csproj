@@ -52,10 +52,6 @@
     <PackageReference Include="SmartFormat.Extensions.Time" Version="3.3.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net461'">
-  	<PackageReference Include="Contrib.Bcl.Ranges" Version="1.0.0" />
-  </ItemGroup>
-
   <ItemGroup>
 	  <ProjectReference Include="..\OpenMod.Analyzers\OpenMod.Analyzers.csproj">
 		  <PrivateAssets>all</PrivateAssets>

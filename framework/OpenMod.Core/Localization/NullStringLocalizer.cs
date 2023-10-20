@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Localization;
@@ -24,6 +26,13 @@ namespace OpenMod.Core.Localization
             return Enumerable.Empty<LocalizedString>();
         }
 
+        [Obsolete]
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
+        public IStringLocalizer WithCulture(CultureInfo culture)
+        {
+            return this;
+        }
 
         public LocalizedString this[string name]
         {
