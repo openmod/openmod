@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageDescription>Rust integration for OpenMod</PackageDescription>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
@@ -12,8 +12,8 @@
     <PackageReference Include="OpenMod.Rust.Redist" Version="2260.199.1">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenMod.UniTask" Version="2019.2.2.5" />
-    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2019.4.10">
+    <PackageReference Include="OpenMod.UniTask" Version="2021.2.4.1" />
+    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2021.3.28.1">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
   </ItemGroup>

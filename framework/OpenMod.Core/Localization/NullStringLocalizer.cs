@@ -24,10 +24,6 @@ namespace OpenMod.Core.Localization
             return Enumerable.Empty<LocalizedString>();
         }
 
-        public IStringLocalizer WithCulture(CultureInfo culture)
-        {
-            return this;
-        }
 
         public LocalizedString this[string name]
         {

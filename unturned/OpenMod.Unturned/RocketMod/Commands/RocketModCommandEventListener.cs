@@ -168,7 +168,7 @@ namespace OpenMod.Unturned.RocketMod.Commands
                     {
                         @event.CommandContext.Exception = new UserFriendlyException(
                             m_StringLocalizer["commands:errors:cooldown",
-                                new { TimeLeft = cooldownSpan - spanSinceLast }]);
+                                new { TimeLeft = cooldownSpan - spanSinceLast }]!);
 
                         @event.ExceptionHandled = false;
                         return false;

@@ -7,7 +7,7 @@ namespace OpenMod.Core.Commands
     public class NotEnoughPermissionException : UserFriendlyException
     {
         public NotEnoughPermissionException(IOpenModStringLocalizer stringLocalizer, string permission)
-            : base(stringLocalizer["commands:errors:not_enough_permission", new { Permission = permission }])
+            : base(stringLocalizer["commands:errors:not_enough_permission", new { Permission = permission }]!)
         {
         }
 

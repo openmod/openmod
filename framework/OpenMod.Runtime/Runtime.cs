@@ -448,7 +448,7 @@ namespace OpenMod.Runtime
         private void SetupServices(IServiceCollection services, OpenModStartup startup)
         {
             services.AddSingleton<IRuntime>(this);
-            services.AddSingleton(HostInformation);
+            services.AddSingleton(HostInformation!);
             services.AddHostedService<OpenModHostedService>();
             services.AddOptions();
             services.AddSingleton(((OpenModStartupContext)startup.Context).NuGetPackageManager);

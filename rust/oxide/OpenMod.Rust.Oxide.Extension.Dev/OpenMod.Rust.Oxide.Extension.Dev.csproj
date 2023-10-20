@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>Oxide.Ext.OpenMod.Rust.Dev</AssemblyName>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\props\UnityEngineDependentProjectProps.props" />
