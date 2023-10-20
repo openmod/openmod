@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
+using JetBrains.Annotations;
 using OpenMod.Unturned.Patching;
 
 namespace OpenMod.Unturned.Mono;
@@ -16,6 +17,7 @@ namespace OpenMod.Unturned.Mono;
 /// to coping the memory array.
 /// https://github.com/Unity-Technologies/mono/blob/unity-main/mcs/class/System/System.Net.Sockets/SocketTaskExtensions.cs
 /// </summary>
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [HarmonyPatch]
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 internal static class PatchSocketTaskExtensions
