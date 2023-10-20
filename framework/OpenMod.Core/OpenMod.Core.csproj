@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net461</TargetFrameworks>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <PackageDescription>Core service implementations for OpenMod</PackageDescription>
   </PropertyGroup>
 
@@ -27,19 +27,20 @@
       <PrivateAssets>all</PrivateAssets>
   	</PackageReference>
   	<PackageReference Include="Lib.Harmony" Version="2.2.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.32" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.32" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="3.1.32" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.32" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.32" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="5.0.17" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="morelinq" Version="3.4.2" />
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="3.1.32" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.32" />
+
     <PackageReference Include="Nito.AsyncEx.Context" Version="5.1.2" />
     <PackageReference Include="Nito.AsyncEx.Tasks" Version="5.1.2" />
     <PackageReference Include="RuntimeNullables.Fody" Version="1.0.6">
