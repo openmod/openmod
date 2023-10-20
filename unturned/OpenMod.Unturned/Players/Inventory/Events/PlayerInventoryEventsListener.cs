@@ -1,8 +1,7 @@
-﻿extern alias JetBrainsAnnotations;
-using System;
+﻿using System;
 using System.Reflection;
 using HarmonyLib;
-using JetBrainsAnnotations::JetBrains.Annotations;
+using JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Patching;
 using SDG.Unturned;
@@ -14,6 +13,30 @@ namespace OpenMod.Unturned.Players.Inventory.Events
     {
         public PlayerInventoryEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            SubscribePlayer(
+                static player => ref player.inventory.onDropItemRequested,
+                player => OnDropItemRequested
+            );
+            SubscribePlayer(
+                static player => ref player.inventory.onInventoryResized,
+                player => (page, width, height) => OnInventoryResized(player, page, width, height)
+            );
+            SubscribePlayer(
+                static player => ref player.inventory.onInventoryStateUpdated,
+                player => () => OnInventoryStateUpdated(player)
+            );
+            SubscribePlayer(
+                static player => ref player.inventory.onInventoryAdded,
+                player => (page, index, jar) => OnInventoryAdded(player, page, index, jar)
+            );
+            SubscribePlayer(
+                static player => ref player.inventory.onInventoryRemoved,
+                player => (page, index, jar) => OnInventoryRemoved(player, page, index, jar)
+            );
+            SubscribePlayer(
+                static player => ref player.inventory.onInventoryUpdated,
+                player => (page, index, jar) => OnInventoryUpdated(player, page, index, jar)
+            );
         }
 
         public override void Subscribe()
@@ -26,28 +49,6 @@ namespace OpenMod.Unturned.Players.Inventory.Events
         {
             ItemManager.onTakeItemRequested -= OnTakeItemRequested;
             OnOpenedStorage -= Events_OnOpenedStorage;
-        }
-
-        public override void SubscribePlayer(Player player)
-        {
-            player.inventory.onDropItemRequested += OnDropItemRequested;
-            player.inventory.onInventoryResized +=
-                (page, width, height) => OnInventoryResized(player, page, width, height);
-            player.inventory.onInventoryStateUpdated += () => OnInventoryStateUpdated(player);
-            player.inventory.onInventoryAdded += (page, index, jar) => OnInventoryAdded(player, page, index, jar);
-            player.inventory.onInventoryRemoved += (page, index, jar) => OnInventoryRemoved(player, page, index, jar);
-            player.inventory.onInventoryUpdated += (page, index, jar) => OnInventoryUpdated(player, page, index, jar);
-        }
-
-        public override void UnsubscribePlayer(Player player)
-        {
-            player.inventory.onDropItemRequested -= OnDropItemRequested;
-            player.inventory.onInventoryResized -=
-                (page, width, height) => OnInventoryResized(player, page, width, height);
-            player.inventory.onInventoryStateUpdated -= () => OnInventoryStateUpdated(player);
-            player.inventory.onInventoryAdded -= (page, index, jar) => OnInventoryAdded(player, page, index, jar);
-            player.inventory.onInventoryRemoved -= (page, index, jar) => OnInventoryRemoved(player, page, index, jar);
-            player.inventory.onInventoryUpdated -= (page, index, jar) => OnInventoryUpdated(player, page, index, jar);
         }
 
         // ReSharper disable InconsistentNaming

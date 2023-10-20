@@ -1,8 +1,7 @@
-﻿extern alias JetBrainsAnnotations;
-using System;
+﻿using System;
 using System.Reflection;
 using HarmonyLib;
-using JetBrainsAnnotations::JetBrains.Annotations;
+using JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Items;
 using OpenMod.Unturned.Patching;
@@ -15,6 +14,8 @@ namespace OpenMod.Unturned.Players.Equipment.Events
     {
         public PlayerEquipmentEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            SubscribePlayer(static player => ref player.equipment.onEquipRequested, player => OnEquipRequested);
+            SubscribePlayer(static player => ref player.equipment.onDequipRequested, player => OnDequipRequested);
         }
 
         public override void Subscribe()
@@ -29,18 +30,6 @@ namespace OpenMod.Unturned.Players.Equipment.Events
             OnItemEquipped -= Events_OnItemEquipped;
             OnItemUnequipped -= Events_OnItemUnequipped;
             PlayerEquipment.OnPunch_Global -= Events_OnPunchGlobal;
-        }
-
-        public override void SubscribePlayer(Player player)
-        {
-            player.equipment.onEquipRequested += OnEquipRequested;
-            player.equipment.onDequipRequested += OnDequipRequested;
-        }
-
-        public override void UnsubscribePlayer(Player player)
-        {
-            player.equipment.onEquipRequested -= OnEquipRequested;
-            player.equipment.onDequipRequested -= OnDequipRequested;
         }
 
         private void Events_OnItemEquipped(Player nativePlayer)

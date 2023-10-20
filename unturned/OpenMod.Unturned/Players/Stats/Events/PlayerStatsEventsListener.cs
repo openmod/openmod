@@ -1,6 +1,5 @@
-﻿extern alias JetBrainsAnnotations;
-using System;
-using JetBrainsAnnotations::JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using OpenMod.Unturned.Events;
 using SDG.Unturned;
 
@@ -11,6 +10,30 @@ namespace OpenMod.Unturned.Players.Stats.Events
     {
         public PlayerStatsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
+            SubscribePlayer(
+                static player => ref player.life.onLifeUpdated,
+                player => isDead => OnLifeUpdated(player, isDead)
+            );
+            SubscribePlayer(
+                static player => ref player.life.onOxygenUpdated,
+                player => oxygen => OnOxygenUpdated(player, oxygen)
+            );
+            SubscribePlayer(
+                static player => ref player.life.onStaminaUpdated,
+                player => stamina => OnStaminaUpdated(player, stamina)
+            );
+            SubscribePlayer(
+                static player => ref player.life.onTemperatureUpdated,
+                player => temperature => OnTemperatureUpdated(player, temperature)
+            );
+            SubscribePlayer(
+                static player => ref player.life.onVisionUpdated,
+                player => viewing => OnVisionUpdated(player, viewing)
+            );
+            SubscribePlayer(
+                static player => ref player.life.onVirusUpdated,
+                player => virus => OnVirusUpdated(player, virus)
+            );
         }
 
         public override void Subscribe()
@@ -31,26 +54,6 @@ namespace OpenMod.Unturned.Players.Stats.Events
             PlayerLife.OnTellFood_Global -= OnTellFood_Global;
             PlayerLife.OnTellHealth_Global -= OnTellHealth_Global;
             PlayerLife.OnTellWater_Global -= OnTellWater_Global;
-        }
-
-        public override void SubscribePlayer(Player player)
-        {
-            player.life.onLifeUpdated += isDead => OnLifeUpdated(player, isDead);
-            player.life.onOxygenUpdated += oxygen => OnOxygenUpdated(player, oxygen);
-            player.life.onStaminaUpdated += stamina => OnStaminaUpdated(player, stamina);
-            player.life.onTemperatureUpdated += temperature => OnTemperatureUpdated(player, temperature);
-            player.life.onVisionUpdated += viewing => OnVisionUpdated(player, viewing);
-            player.life.onVirusUpdated += virus => OnVirusUpdated(player, virus);
-        }
-
-        public override void UnsubscribePlayer(Player player)
-        {
-            player.life.onLifeUpdated -= isDead => OnLifeUpdated(player, isDead);
-            player.life.onOxygenUpdated -= oxygen => OnOxygenUpdated(player, oxygen);
-            player.life.onStaminaUpdated -= stamina => OnStaminaUpdated(player, stamina);
-            player.life.onTemperatureUpdated -= temperature => OnTemperatureUpdated(player, temperature);
-            player.life.onVisionUpdated -= viewing => OnVisionUpdated(player, viewing);
-            player.life.onVirusUpdated -= virus => OnVirusUpdated(player, virus);
         }
 
         private void OnTellWater_Global(PlayerLife life)

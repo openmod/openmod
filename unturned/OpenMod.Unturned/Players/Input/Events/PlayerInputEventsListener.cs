@@ -1,16 +1,13 @@
-﻿extern alias JetBrainsAnnotations;
-using System;
+﻿using System;
 using System.Collections.Generic;
-
+using JetBrains.Annotations;
 using OpenMod.Unturned.Events;
-
 using SDG.Unturned;
-
 using Steamworks;
 
 namespace OpenMod.Unturned.Players.Input.Events
 {
-    [JetBrainsAnnotations::JetBrains.Annotations.UsedImplicitlyAttribute]
+    [UsedImplicitly]
     internal class PlayerInputEventsListener : UnturnedPlayerEventsListener
     {
         private readonly Dictionary<CSteamID, bool[]> m_LastInputs = new();
@@ -31,15 +28,17 @@ namespace OpenMod.Unturned.Players.Input.Events
 
         public override void SubscribePlayer(Player player)
         {
-            var playerSteamId = GetSteamIdOf(player);
+            base.SubscribePlayer(player);
 
+            var playerSteamId = GetSteamIdOf(player);
             m_LastInputs.Add(playerSteamId, new bool[ControlsSettings.NUM_PLUGIN_KEYS]);
         }
 
         public override void UnsubscribePlayer(Player player)
         {
-            var playerSteamId = GetSteamIdOf(player);
+            base.UnsubscribePlayer(player);
 
+            var playerSteamId = GetSteamIdOf(player);
             m_LastInputs.Remove(playerSteamId);
         }
 
