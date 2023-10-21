@@ -31,13 +31,13 @@ namespace OpenMod.Core.Commands
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
 
-            var lifetime = serviceProvider.GetService<ILifetimeScope>();
+            var lifetime = serviceProvider.GetRequiredService<ILifetimeScope>();
             var sources = new List<ICommandSource>();
             sources.AddRange(m_CommandSources);
 
             foreach (var type in m_CommandSourceTypes)
             {
-                sources.Add((ICommandSource)ActivatorUtilitiesEx.CreateInstance(lifetime!, type));
+                sources.Add((ICommandSource)ActivatorUtilitiesEx.CreateInstance(lifetime, type));
             }
 
             return sources;
