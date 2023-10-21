@@ -14,7 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2021.3.28">
+    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2021.3.28.1">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
   </ItemGroup>
