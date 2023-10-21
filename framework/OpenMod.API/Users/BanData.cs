@@ -19,14 +19,16 @@ namespace OpenMod.API.Users
 
         }
 
-        public BanData(string reason, IPermissionActor? instigator = null, DateTime? expireDate = null)
+        public BanData(string? reason = null, IPermissionActor? instigator = null, DateTime? expireDate = null)
         {
             ExpireDate = expireDate ?? DateTime.MaxValue;
 
             InstigatorType = instigator?.Type;
             InstigatorId = instigator?.Id;
 
-            Reason = reason;
+            Reason = string.IsNullOrWhiteSpace(reason) == false
+                ? reason
+                : "None";
         }
     }
 }
