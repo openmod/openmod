@@ -8,8 +8,8 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-    <PackageReference Include="OpenMod.UniTask" Version="2019.2.2.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageReference Include="OpenMod.UniTask" Version="2021.2.4.1" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -328,7 +328,7 @@ namespace OpenMod.Runtime
                     .GetField("watcher", BindingFlags.Instance | BindingFlags.NonPublic)
                     .GetValue(tempFileSystemWatcher);
 
-                m_Logger.LogInformation("Using watcher: {FileWatcherImplementation}", internalWatcher.GetType().Name);
+                m_Logger!.LogInformation("Using watcher: {FileWatcherImplementation}", internalWatcher.GetType().Name);
                 return;
             }
 
@@ -412,7 +412,7 @@ namespace OpenMod.Runtime
                 .SetBasePath(WorkingDirectory)
                 .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables("OpenMod_")
-                .AddInMemoryCollection(new Dictionary<string, string>
+                .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     { HostDefaults.ContentRootKey, WorkingDirectory },
                     { HostDefaults.ApplicationKey, "OpenMod" },
@@ -551,7 +551,7 @@ namespace OpenMod.Runtime
             }
 
             IsDisposing = true;
-            m_Logger.LogInformation("OpenMod is shutting down...");
+            m_Logger!.LogInformation("OpenMod is shutting down...");
 
             if (Host is not null)
             {
