@@ -2,9 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using OpenMod.EntityFrameworkCore.Configurator;
-using Pomelo.EntityFrameworkCore.MySql.Storage;
 
 namespace OpenMod.EntityFrameworkCore.MySql.Configurator
 {
@@ -28,15 +27,29 @@ namespace OpenMod.EntityFrameworkCore.MySql.Configurator
             }
             catch (MySqlException)
             {
-                serverVersion = ServerVersion.Default;
+                // if mysql server is not up, use default version instead
+                serverVersion = ServerVersion.Parse("8.0.21");
             }
 
-            optionsBuilder.UseMySql(connectionString,
-                options =>
-                {
-                    options.MigrationsHistoryTable(dbContext.MigrationsTableName);
-                    options.ServerVersion(serverVersion);
-                });
+            optionsBuilder.UseMySql(connectionString, serverVersion, options =>
+            {
+                options.MigrationsHistoryTable(dbContext.MigrationsTableName);
+
+                /* Fixes this exception:
+                 * System.InvalidOperationException: The LINQ expression 'DbSet<Server>()
+                 *       .Where(s => s.Instance.Equals(
+                 *          value: __serverID_0,
+                 *          comparisonType: Ordinal))' could not be translated.
+                 *  
+                 *  Translation of the 'String.Equals' overload with a 'StringComparison' parameter is not supported by default.
+                 *  For general EF Core information about this error, see https://go.microsoft.com/fwlink/?linkid=2129535 for more information.
+                 *  Either rewrite the query in a form that can be translated, or switch to client evaluation explicitly by inserting a call to 'AsEnumerable', 'AsAsyncEnumerable', 'ToList', or 'ToListAsync'.
+                 *  See https://go.microsoft.com/fwlink/?linkid=2101038 for more information.
+                 *  
+                 *  In future this option will be removed.
+                 */
+                options.EnableStringComparisonTranslations(enable: true);
+            });
         }
 
         public void Configure<TDbContext>(OpenModDbContext<TDbContext> dbContext, ModelBuilder modelBuilder)
