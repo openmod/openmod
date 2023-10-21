@@ -42,11 +42,6 @@ namespace OpenMod.Core.Localization
             }
         }
 
-        public IStringLocalizer WithCulture(CultureInfo culture)
-        {
-            return this; // no culture support
-        }
-
         public LocalizedString this[string name]
         {
             get

@@ -26,14 +26,6 @@ namespace OpenMod.Core.Localization
             return Enumerable.Empty<LocalizedString>();
         }
 
-        [Obsolete]
-        [SuppressMessage("ReSharper", "UnusedMember.Global")]
-        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
-        public IStringLocalizer WithCulture(CultureInfo culture)
-        {
-            return this;
-        }
-
         public LocalizedString this[string name]
         {
             get { return new(name, name, true); }
