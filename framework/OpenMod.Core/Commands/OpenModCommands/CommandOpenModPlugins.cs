@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Protocol.Plugins;
 using OpenMod.API.Plugins;
 using OpenMod.API.Prioritization;
 
@@ -23,35 +25,60 @@ namespace OpenMod.Core.Commands.OpenModCommands
 
         protected override async Task OnExecuteAsync()
         {
-            var pageNumber = Context.Parameters.Length > 0 ? await Context.Parameters.GetAsync<int>(0) : 1;
             const int itemsPerPage = 10;
-
+            var pageNumber = await GetPageNumber();
             var totalCount = m_PluginActivator.ActivatedPlugins.Count;
-            var pageCount = (int) Math.Ceiling((double) totalCount / itemsPerPage);
-            var plugins = m_PluginActivator.ActivatedPlugins
+            var pageCount = CalculatePageCount(totalCount, itemsPerPage);
+
+            var plugins = GetPluginsForPage(pageNumber, itemsPerPage);
+
+            await DisplayPluginsInfoAsync(pageNumber, pageCount, plugins);
+        }
+
+        private async Task<int> GetPageNumber()
+        {
+            return Context.Parameters.Length > 0
+                ? await Context.Parameters.GetAsync<int>(0)
+                : 1;
+        }
+        private int CalculatePageCount(int total, int perPage)
+        {
+            return (int)Math.Ceiling((double)total / perPage);
+        }
+        private List<IOpenModPlugin> GetPluginsForPage(int pageNumber, int itemsPerPage)
+        {
+            return m_PluginActivator.ActivatedPlugins
                 .Skip((pageNumber - 1) * itemsPerPage)
                 .Take(itemsPerPage)
                 .ToList();
-
+        }
+        private async Task DisplayPluginsInfoAsync(int pageNumber, int pageCount, List<IOpenModPlugin> plugins)
+        {
             await PrintAsync($"[{pageNumber}/{pageCount}] OpenMod Plugins", Color.CornflowerBlue);
-          
+
             if (plugins.Count == 0)
             {
                 await PrintAsync("No plugins found.", Color.Red);
             }
-
-            foreach (var plugin in plugins)
+            else
             {
-                var sb = new StringBuilder(); // lgtm [cs/stringbuilder-creation-in-loop]
-                sb.Append($"{plugin.DisplayName} v{plugin.Version}");
-
-                if (!string.IsNullOrEmpty(plugin.Author))
+                foreach (var plugin in plugins)
                 {
-                    sb.Append($" by {plugin.Author}");
+                    await PrintPluginInfoAsync(plugin);
                 }
-
-                await PrintAsync(sb.ToString(), Color.Green);
             }
+        }
+        private Task PrintPluginInfoAsync(IOpenModPlugin plugin)
+        {
+            var sb = new StringBuilder();
+            sb.Append($"{plugin.DisplayName} v{plugin.Version}");
+
+            if (!string.IsNullOrEmpty(plugin.Author))
+            {
+                sb.Append($" by {plugin.Author}");
+            }
+
+            return PrintAsync(sb.ToString(), Color.Green);
         }
     }
 }
