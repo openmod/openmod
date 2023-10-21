@@ -1,7 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 using OpenMod.EntityFrameworkCore.Configurator;
+using Pomelo.EntityFrameworkCore.MySql.Storage;
 
 namespace OpenMod.EntityFrameworkCore.MySql.Configurator
 {
@@ -13,12 +16,26 @@ namespace OpenMod.EntityFrameworkCore.MySql.Configurator
             var connectionStringName = dbContext.GetConnectionStringName();
             var connectionStringAccessor = dbContext.ServiceProvider.GetRequiredService<IConnectionStringAccessor>();
             var connectionString = connectionStringAccessor.GetConnectionString(connectionStringName);
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new ArgumentException("ConnectionString cannot be null or white space.");
+            }
 
+            ServerVersion serverVersion;
+            try
+            {
+                serverVersion = ServerVersion.AutoDetect(connectionString);
+            }
+            catch (MySqlException)
+            {
+                serverVersion = ServerVersion.Default;
+            }
 
-            optionsBuilder.UseMySql(ServerVersion.AutoDetect(connectionString),
+            optionsBuilder.UseMySql(connectionString,
                 options =>
                 {
                     options.MigrationsHistoryTable(dbContext.MigrationsTableName);
+                    options.ServerVersion(serverVersion);
                 });
         }
 
