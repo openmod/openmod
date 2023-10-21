@@ -26,7 +26,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
         protected override async Task OnExecuteAsync()
         {
             const int itemsPerPage = 10;
-            var pageNumber = await GetPageNumber();
+            var pageNumber = await GetPageNumberAsync();
             var totalCount = m_PluginActivator.ActivatedPlugins.Count;
             var pageCount = CalculatePageCount(totalCount, itemsPerPage);
 
@@ -35,7 +35,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
             await DisplayPluginsInfoAsync(pageNumber, pageCount, plugins);
         }
 
-        private async Task<int> GetPageNumber()
+        private async Task<int> GetPageNumberAsync()
         {
             return Context.Parameters.Length > 0
                 ? await Context.Parameters.GetAsync<int>(0)
