@@ -26,7 +26,7 @@ namespace OpenMod.API.Users
             InstigatorType = instigator?.Type;
             InstigatorId = instigator?.Id;
 
-            Reason = string.IsNullOrWhiteSpace(reason) == false
+            Reason = !string.IsNullOrWhiteSpace(reason)
                 ? reason
                 : "None";
         }
