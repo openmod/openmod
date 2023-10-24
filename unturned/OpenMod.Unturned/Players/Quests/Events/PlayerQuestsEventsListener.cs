@@ -25,12 +25,16 @@ namespace OpenMod.Unturned.Players.Quests.Events
         {
             PlayerQuests.onGroupChanged += OnGroupChanged;
             PlayerQuests.onAnyFlagChanged += OnAnyFlagChanged;
+            OnPlayerJoiningGroup += Events_OnPlayerJoiningGroup;
+            OnPlayerLeavingGroup += Events_OnPlayerLeavingGroup;
         }
 
         public override void Unsubscribe()
         {
             PlayerQuests.onGroupChanged -= OnGroupChanged;
             PlayerQuests.onAnyFlagChanged -= OnAnyFlagChanged;
+            OnPlayerJoiningGroup -= Events_OnPlayerJoiningGroup;
+            OnPlayerLeavingGroup -= Events_OnPlayerLeavingGroup;
         }
 
         private void OnAnyFlagChanged(PlayerQuests quests, PlayerQuestFlag flag)
@@ -63,6 +67,30 @@ namespace OpenMod.Unturned.Players.Quests.Events
                 new UnturnedPlayerGroupRankChangedEvent(player, oldGroupRank, newGroupRank);
 
             Emit(@event);
+        }
+
+        private void Events_OnPlayerJoiningGroup(PlayerQuests playerQuests, CSteamID newGroupID, EPlayerGroupRank newGroupRank, ref bool isCancelled)
+        {
+            var player = GetUnturnedPlayer(playerQuests.player)!;
+
+            var @event =
+                new UnturnedPlayerJoiningGroupEvent(player, newGroupID, newGroupRank);
+
+            Emit(@event);
+
+            isCancelled = @event.IsCancelled;
+        }
+
+        private void Events_OnPlayerLeavingGroup(PlayerQuests playerQuests, ref bool isCancelled)
+        {
+            var player = GetUnturnedPlayer(playerQuests.player)!;
+
+            var @event =
+                new UnturnedPlayerLeavingGroupEvent(player);
+
+            Emit(@event);
+
+            isCancelled = @event.IsCancelled;
         }
 
         private delegate void PlayerJoiningGroup(PlayerQuests playerQuests, CSteamID newGroupID, EPlayerGroupRank newGroupRank, ref bool isCancelled);
