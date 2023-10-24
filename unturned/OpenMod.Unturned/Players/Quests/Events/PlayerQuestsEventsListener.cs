@@ -1,8 +1,11 @@
-﻿using JetBrains.Annotations;
+﻿using HarmonyLib;
+using JetBrains.Annotations;
 using OpenMod.Unturned.Events;
+using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Reflection;
 
 namespace OpenMod.Unturned.Players.Quests.Events
 {
@@ -60,6 +63,52 @@ namespace OpenMod.Unturned.Players.Quests.Events
                 new UnturnedPlayerGroupRankChangedEvent(player, oldGroupRank, newGroupRank);
 
             Emit(@event);
+        }
+
+        private delegate void PlayerJoiningGroup(PlayerQuests playerQuests, ref bool isCancelled);
+
+        private delegate void PlayerLeavingGroup(PlayerQuests playerQuests, ref bool isCancelled);
+
+        private static event PlayerJoiningGroup? OnPlayerJoiningGroup;
+
+        private static event PlayerLeavingGroup? OnPlayerLeavingGroup;
+
+        [UsedImplicitly]
+        [HarmonyPatch]
+        internal static class Patches
+        {
+            [HarmonyCleanup]
+            public static Exception? Cleanup(Exception ex, MethodBase original)
+            {
+                HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
+                return null;
+            }
+
+            [UsedImplicitly]
+            [HarmonyPatch(typeof(PlayerQuests), nameof(PlayerQuests.ReceiveGroupState))]
+            [HarmonyPrefix]
+            // ReSharper disable once InconsistentNaming
+            public static bool ReceiveGroupState(PlayerQuests __instance)
+            {
+                var isCancelled = false;
+
+                OnPlayerJoiningGroup?.Invoke(__instance, ref isCancelled);
+
+                return !isCancelled;
+            }
+
+            [UsedImplicitly]
+            [HarmonyPatch(typeof(PlayerQuests), nameof(PlayerQuests.ReceiveLeaveGroupRequest))]
+            [HarmonyPrefix]
+            // ReSharper disable once InconsistentNaming
+            public static bool ReceiveLeaveGroupRequest(PlayerQuests __instance)
+            {
+                var isCancelled = false;
+
+                OnPlayerLeavingGroup?.Invoke(__instance, ref isCancelled);
+
+                return !isCancelled;
+            }
         }
     }
 }
