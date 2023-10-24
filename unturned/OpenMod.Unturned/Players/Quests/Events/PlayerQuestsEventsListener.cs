@@ -65,7 +65,7 @@ namespace OpenMod.Unturned.Players.Quests.Events
             Emit(@event);
         }
 
-        private delegate void PlayerJoiningGroup(PlayerQuests playerQuests, ref bool isCancelled);
+        private delegate void PlayerJoiningGroup(PlayerQuests playerQuests, CSteamID newGroupID, EPlayerGroupRank newGroupRank, ref bool isCancelled);
 
         private delegate void PlayerLeavingGroup(PlayerQuests playerQuests, ref bool isCancelled);
 
@@ -88,11 +88,11 @@ namespace OpenMod.Unturned.Players.Quests.Events
             [HarmonyPatch(typeof(PlayerQuests), nameof(PlayerQuests.ReceiveGroupState))]
             [HarmonyPrefix]
             // ReSharper disable once InconsistentNaming
-            public static bool ReceiveGroupState(PlayerQuests __instance)
+            public static bool ReceiveGroupState(PlayerQuests __instance, CSteamID newGroupID, EPlayerGroupRank newGroupRank)
             {
                 var isCancelled = false;
 
-                OnPlayerJoiningGroup?.Invoke(__instance, ref isCancelled);
+                OnPlayerJoiningGroup?.Invoke(__instance, newGroupID, newGroupRank, ref isCancelled);
 
                 return !isCancelled;
             }
