@@ -51,12 +51,17 @@ namespace OpenMod.Unturned.Players.Input.Events
 
             var playerSteamId = GetSteamIdOf(nativePlayer);
 
-            if (m_LastInputs[playerSteamId][key] == state)
+            if (!m_LastInputs.TryGetValue(playerSteamId, out var lastInputs))
             {
                 return;
             }
 
-            m_LastInputs[playerSteamId][key] = state;
+            if (lastInputs[key] == state)
+            {
+                return;
+            }
+
+            lastInputs[key] = state;
 
             var player = GetUnturnedPlayer(nativePlayer)!;
             var @event = new UnturnedPlayerPluginKeyStateChangedEvent(player, key, state);
