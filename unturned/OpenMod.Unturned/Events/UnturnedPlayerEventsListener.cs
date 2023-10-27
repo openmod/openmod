@@ -1,7 +1,8 @@
-﻿using SDG.Unturned;
+﻿extern alias MonoModILHelpers;
+using MonoModILHelpers::System.Runtime.CompilerServices;
+using SDG.Unturned;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace OpenMod.Unturned.Events;
 
