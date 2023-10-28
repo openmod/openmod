@@ -13,12 +13,13 @@ namespace OpenMod.Unturned.Items
     {
         public Task<IReadOnlyCollection<IItemAsset>> GetItemAssetsAsync()
         {
-            var items = Assets.find(EAssetType.ITEM)
-                .Cast<ItemAsset>()
-                .Select(d => new UnturnedItemAsset(d))
-                .ToList();
+            var items = new List<ItemAsset>();
+            Assets.find(items);
 
-            return Task.FromResult<IReadOnlyCollection<IItemAsset>>(items);
+            var unturnedItems = items
+                .ConvertAll(d => new UnturnedItemAsset(d));
+
+            return Task.FromResult<IReadOnlyCollection<IItemAsset>>(unturnedItems);
         }
 
         public Task<IReadOnlyCollection<IItemDrop>> GetItemDropsAsync()

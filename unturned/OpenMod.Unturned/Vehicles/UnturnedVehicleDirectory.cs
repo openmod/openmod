@@ -3,7 +3,6 @@ using OpenMod.API.Prioritization;
 using OpenMod.Extensions.Games.Abstractions.Vehicles;
 using SDG.Unturned;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace OpenMod.Unturned.Vehicles
@@ -13,12 +12,13 @@ namespace OpenMod.Unturned.Vehicles
     {
         public Task<IReadOnlyCollection<IVehicleAsset>> GetVehicleAssetsAsync()
         {
-            var items = Assets.find(EAssetType.VEHICLE)
-                .Cast<VehicleAsset>()
-                .Select(d => new UnturnedVehicleAsset(d))
-                .ToList();
+            var verhicles = new List<VehicleAsset>();
+            Assets.find(verhicles);
 
-            return Task.FromResult<IReadOnlyCollection<IVehicleAsset>>(items);
+            var unturnedVehicles = verhicles
+                .ConvertAll<IVehicleAsset>(v => new UnturnedVehicleAsset(v));
+
+            return Task.FromResult<IReadOnlyCollection<IVehicleAsset>>(unturnedVehicles);
         }
 
         public Task<IReadOnlyCollection<IVehicle>> GetVehiclesAsync()

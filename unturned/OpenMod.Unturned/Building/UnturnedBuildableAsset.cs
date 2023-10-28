@@ -12,15 +12,14 @@ namespace OpenMod.Unturned.Building
 
         public string BuildableType { get; }
 
+        public UnturnedBuildableAsset(ItemPlaceableAsset barricadeAsset) : this((Asset)barricadeAsset)
+        { }
+
         public UnturnedBuildableAsset(ItemBarricadeAsset barricadeAsset) : this((Asset)barricadeAsset)
-        {
-            BuildableType = "barricade";
-        }
+        { }
 
         public UnturnedBuildableAsset(ItemStructureAsset structureAsset) : this((Asset)structureAsset)
-        {
-            BuildableType = "structure";
-        }
+        { }
 
         protected UnturnedBuildableAsset(Asset asset)
         {

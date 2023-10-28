@@ -36,20 +36,21 @@ namespace OpenMod.Unturned.Entities
             return entities;
         }
 
-        public async Task<IReadOnlyCollection<IEntityAsset>> GetEntityAssetsAsync()
+        public Task<IReadOnlyCollection<IEntityAsset>> GetEntityAssetsAsync()
         {
-            await UniTask.SwitchToMainThread();
+            UniTask<IReadOnlyCollection<IEntityAsset>> GetEntityAssetsTask()
+            {
+                var animals = new List<AnimalAsset>();
+                Assets.find(animals);
 
-            var assets = new List<IEntityAsset>();
+                var assets = animals.ConvertAll<IEntityAsset>(d => new UnturnedAnimalAsset(d));
+                assets.Add(UnturnedPlayerAsset.Instance);
+                assets.Add(UnturnedZombieAsset.Instance);
 
-            assets.AddRange(Assets.find(EAssetType.ANIMAL)
-                .Cast<AnimalAsset>()
-                .Select(d => new UnturnedAnimalAsset(d)));
+                return UniTask.FromResult<IReadOnlyCollection<IEntityAsset>>(assets);
+            }
 
-            assets.Add(UnturnedPlayerAsset.Instance);
-            assets.Add(UnturnedZombieAsset.Instance);
-
-            return assets;
+            return GetEntityAssetsTask().AsTask();
         }
     }
 }

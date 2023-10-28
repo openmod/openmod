@@ -14,17 +14,13 @@ namespace OpenMod.Unturned.Building
     {
         public Task<IReadOnlyCollection<IBuildableAsset>> GetBuildableAssetsAsync()
         {
-            var barricadeAssets = Assets.find(EAssetType.ITEM)
-                .Where(k => k is ItemBarricadeAsset || k is ItemStructureAsset)
-                .Select(d =>
-                {
-                    if (d is ItemBarricadeAsset barricadeAsset)
-                        return new UnturnedBuildableAsset(barricadeAsset);
-                    return new UnturnedBuildableAsset((ItemStructureAsset)d);
-                })
-                .ToList();
+            var placeables = new List<ItemPlaceableAsset>();
+            Assets.find(placeables);
 
-            return Task.FromResult<IReadOnlyCollection<IBuildableAsset>>(barricadeAssets);
+            var placeablesAssets = placeables
+                .ConvertAll(d => new UnturnedBuildableAsset(d));
+
+            return Task.FromResult<IReadOnlyCollection<IBuildableAsset>>(placeablesAssets);
         }
 
         public Task<IReadOnlyCollection<IBuildable>> GetBuildablesAsync()
@@ -43,12 +39,13 @@ namespace OpenMod.Unturned.Building
                 var barricadeDrops = barricadeRegions.SelectMany(brd => brd.drops).ToList();
                 var structureDrops = structureRegions.SelectMany(str => str.drops).ToList();
 
-                return barricadeDrops
-                    .Select(d => new UnturnedBarricadeBuildable(d))
-                    .Cast<UnturnedBuildable>()
-                    .Concat(structureDrops.Select(d => new UnturnedStructureBuildable(d)))
-                    .Select(d => d!)
-                    .ToList();
+                var buildables = barricadeDrops
+                    .ConvertAll<UnturnedBuildable>(d => new UnturnedBarricadeBuildable(d));
+
+                buildables.AddRange(
+                        structureDrops.ConvertAll(d => new UnturnedStructureBuildable(d)));
+
+                return buildables;
             }
 
             return GetBuildablesTask().AsTask();
