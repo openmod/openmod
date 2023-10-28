@@ -43,8 +43,8 @@
     <PackageReference Include="Nito.AsyncEx.Context" Version="5.1.2" />
     <PackageReference Include="Nito.AsyncEx.Tasks" Version="5.1.2" />
     <PackageReference Include="RuntimeNullables.Fody" Version="1.0.6">
-	  <PrivateAssets>all</PrivateAssets>
-	</PackageReference>
+	    <PrivateAssets>all</PrivateAssets>
+	  </PackageReference>
     <PackageReference Include="Serilog" Version="3.0.1" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
     <PackageReference Include="SmartFormat" Version="3.3.0" />
