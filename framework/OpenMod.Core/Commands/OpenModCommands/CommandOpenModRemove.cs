@@ -26,7 +26,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
         public CommandOpenModRemove(
             IOpenModStringLocalizer stringLocalizer,
             IConfiguration configuration,
-            IServiceProvider serviceProvider, 
+            IServiceProvider serviceProvider,
             NuGetPluginAssembliesSource nuGetPlugis) : base(serviceProvider)
         {
             m_StringLocalizer = stringLocalizer;
@@ -44,7 +44,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
             var allowedActors = m_Configuration.GetSection("nuget:remove:allowedActors").Get<string[]>();
             if (allowedActors.All(d => d.Trim() != "*" && !Context.Actor.Type.Equals(d.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
-                throw new UserFriendlyException(this.m_StringLocalizer["commands:openmod:restricted"]);
+                throw new UserFriendlyException(this.m_StringLocalizer["commands:openmod:restricted"]!);
             }
 
             string packageName = Context.Parameters[0];

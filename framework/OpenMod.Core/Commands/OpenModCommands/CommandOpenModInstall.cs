@@ -45,7 +45,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
             if (allowedActors.All(d =>
                 d.Trim() != "*" && !Context.Actor.Type.Equals(d.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
-                throw new UserFriendlyException(m_StringLocalizer["commands:openmod:restricted"]);
+                throw new UserFriendlyException(m_StringLocalizer["commands:openmod:restricted"]!);
             }
 
             var args = Context.Parameters.ToList();

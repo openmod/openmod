@@ -52,12 +52,12 @@ namespace OpenMod.Core.Commands
             }
             catch (Exception ex) when (ex.InnerException is OverflowException)
             {
-                var parseException = new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:overflow_error", new { Value = input, Type = type }], input, type);
+                var parseException = new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:overflow_error", new { Value = input, Type = type }]!, input, type);
                 return Task.FromException<object?>(parseException);
             }
             catch (Exception ex) when (ex.InnerException is FormatException)
             {
-                var parseException = new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:parse_error", new { Value = input, Type = type }], input, type);
+                var parseException = new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:parse_error", new { Value = input, Type = type }]!, input, type);
                 return Task.FromException<object?>(parseException);
             }
         }

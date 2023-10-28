@@ -41,7 +41,7 @@ namespace OpenMod.Core.Cooldowns
                     var spanSinceLast = DateTime.Now - lastExecuted.Value;
                     if (spanSinceLast < cooldownSpan)
                     {
-                        @event.CommandContext.Exception = new UserFriendlyException(m_StringLocalizer["commands:errors:cooldown", new { TimeLeft = cooldownSpan - spanSinceLast }]);
+                        @event.CommandContext.Exception = new UserFriendlyException(m_StringLocalizer["commands:errors:cooldown", new { TimeLeft = cooldownSpan - spanSinceLast }]!);
                     }
                 }
             }

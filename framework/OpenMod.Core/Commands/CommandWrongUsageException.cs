@@ -11,7 +11,7 @@ namespace OpenMod.Core.Commands
         }
 
         public CommandWrongUsageException(ICommandContext context, IOpenModStringLocalizer localizer)
-            : base(localizer["commands:errors:wrong_usage", new { Command = context.CommandPrefix + context.CommandAlias, Args = string.Join(" ", context.Parameters), context.CommandRegistration!.Syntax }])
+            : base(localizer["commands:errors:wrong_usage", new { Command = context.CommandPrefix + context.CommandAlias, Args = string.Join(" ", context.Parameters), context.CommandRegistration!.Syntax }]!)
         {
         }
 

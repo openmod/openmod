@@ -70,7 +70,7 @@ namespace UserDatabasePlugin.Commands
 
             if (lastJoinTime == null)
             {
-                throw new UserFriendlyException(m_StringLocalizer["user_not_found", new { User = userNameOrId }]);
+                throw new UserFriendlyException(m_StringLocalizer["user_not_found", new { User = userNameOrId }]!);
             }
 
             await PrintAsync($"Id: {userId}");
