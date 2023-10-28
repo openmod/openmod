@@ -422,7 +422,7 @@ namespace OpenMod.Runtime
 
         private void ConfigureAppConfiguration(HostBuilderContext? hostBuilderContext, IConfigurationBuilder builder, OpenModStartup? startup = null)
         {
-            m_DateLogger ??= DateTime.Now;
+            var dateLogger = m_DateLogger ??= DateTime.Now;
 
             if (hostBuilderContext != null && startup?.Context is OpenModStartupContext context)
             {
@@ -440,7 +440,7 @@ namespace OpenMod.Runtime
                     s.Variables = new Dictionary<string, string>
                     {
                         { "workingDirectory", WorkingDirectory.Replace(@"\", "/") },
-                        { "date", m_DateLogger.Value.ToString("yyyy-MM-dd-HH-mm-ss") }
+                        { "date", dateLogger.ToString("yyyy-MM-dd-HH-mm-ss") }
                     };
                 });
         }
@@ -448,7 +448,7 @@ namespace OpenMod.Runtime
         private void SetupServices(IServiceCollection services, OpenModStartup startup)
         {
             services.AddSingleton<IRuntime>(this);
-            services.AddSingleton(HostInformation);
+            services.AddSingleton(HostInformation!);
             services.AddHostedService<OpenModHostedService>();
             services.AddOptions();
             services.AddSingleton(((OpenModStartupContext)startup.Context).NuGetPackageManager);
@@ -564,7 +564,7 @@ namespace OpenMod.Runtime
             m_DateLogger = null;
             m_LoggerFactory = null;
             m_Logger = null;
-            Log.CloseAndFlush();
+            await Log.CloseAndFlushAsync();
         }
     }
 }
