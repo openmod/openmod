@@ -25,7 +25,7 @@ namespace OpenMod.Core.Plugins
         private readonly NuGetPackageManager m_NuGetPackageManager;
 
         /// <summary>
-        /// Defines if openmod would try to install missing dependencies.
+        /// Defines if OpenMod would try to install missing dependencies.
         /// </summary>
         public static bool TryInstallMissingDependencies { get; set; }
 
@@ -63,9 +63,18 @@ namespace OpenMod.Core.Plugins
             {
                 var packagesResourceName = assembly.GetManifestResourceNames()
                     .FirstOrDefault(x => x.EndsWith("packages.yaml"));
-                if (packagesResourceName == null) return newPlugins;
+                if (packagesResourceName == null)
+                    return newPlugins;
 
+                var packagesRosourceInfo = assembly.GetManifestResourceInfo(packagesResourceName);
+                m_Logger.LogDebug("Found packages.yaml with name {PackagesResourceName}.", packagesResourceName);
+                m_Logger.LogDebug("Package resource info {PackagesRosourceInfo}.", packagesRosourceInfo);
+
+#if NETSTANDARD2_1_OR_GREATER
+                await using var stream = assembly.GetManifestResourceStream(packagesResourceName);
+#else
                 using var stream = assembly.GetManifestResourceStream(packagesResourceName);
+#endif
                 if (stream == null) return newPlugins;
 
                 using var reader = new StreamReader(stream);
@@ -91,6 +100,7 @@ namespace OpenMod.Core.Plugins
 
                 var newAssemblies = m_NuGetPackageManager.GetLoadedAssemblies().Except(existingPackages);
 
+                // ReSharper disable once LoopCanBeConvertedToQuery
                 foreach (var newAssembly in newAssemblies.Select(x => (Assembly)x.Assembly.Target))
                 {
                     if (newAssembly == null) continue;
@@ -171,7 +181,7 @@ namespace OpenMod.Core.Plugins
                     continue;
                 }
 
-                if (types.Any(d => d.GetInterfaces().Any(x => x == typeof(IOpenModPlugin)) && !d.IsAbstract && d.IsClass))
+                if (types.Any(d => d.GetInterfaces().Any(x => x == typeof(IOpenModPlugin)) && d is { IsAbstract: false, IsClass: true }))
                 {
                     continue;
                 }
