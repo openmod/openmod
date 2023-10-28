@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.23.8">
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.23.12-preview">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
