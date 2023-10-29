@@ -12,11 +12,11 @@ namespace OpenMod.Unturned.Vehicles
     {
         public Task<IReadOnlyCollection<IVehicleAsset>> GetVehicleAssetsAsync()
         {
-            var verhicles = new List<VehicleAsset>();
-            Assets.find(verhicles);
+            var assets = new List<VehicleAsset>();
+            Assets.find(assets);
 
             var unturnedVehicles = verhicles
-                .ConvertAll<IVehicleAsset>(v => new UnturnedVehicleAsset(v));
+                .ConvertAll(v => new UnturnedVehicleAsset(v));
 
             return Task.FromResult<IReadOnlyCollection<IVehicleAsset>>(unturnedVehicles);
         }

@@ -14,10 +14,10 @@ namespace OpenMod.Unturned.Building
     {
         public Task<IReadOnlyCollection<IBuildableAsset>> GetBuildableAssetsAsync()
         {
-            var placeables = new List<ItemPlaceableAsset>();
-            Assets.find(placeables);
+            var assets = new List<ItemPlaceableAsset>();
+            Assets.find(assets);
 
-            var placeablesAssets = placeables
+            var placeablesAssets = assets
                 .ConvertAll(d => new UnturnedBuildableAsset(d));
 
             return Task.FromResult<IReadOnlyCollection<IBuildableAsset>>(placeablesAssets);
