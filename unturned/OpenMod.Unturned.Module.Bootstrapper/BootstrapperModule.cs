@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 using SDG.Framework.Modules;
+using SDG.Unturned;
+using UnityEngine;
 
 namespace OpenMod.Unturned.Module.Bootstrapper
 {
@@ -103,6 +105,44 @@ namespace OpenMod.Unturned.Module.Bootstrapper
 
             m_OpenModUnturndModule = (IModuleNexus)Activator.CreateInstance(moduleType);
             m_OpenModUnturndModule.initialize();
+
+            PatchUnturnedVanillaAssemblyResolve();
+        }
+
+        /// <summary>
+        /// To prevent unnecessary errors and warning about assemblies resolving
+        /// We will make Unturned Resolve Assemblies as last resource
+        /// With this patch other components like hotloader wil try to resolve assemblies before unturned
+        /// </summary>
+        private void PatchUnturnedVanillaAssemblyResolve()
+        {
+            var assemblyResolveMethod = typeof(ModuleHook).GetMethod("handleAssemblyResolve", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (assemblyResolveMethod == null)
+            {
+                Console.WriteLine($"Couldn't find OnAssemblyResolve method for {nameof(ModuleHook)}!");
+                return;
+            }
+
+            //using
+            var provider = typeof(Provider).GetField("steam", BindingFlags.NonPublic | BindingFlags.Static)
+                ?.GetValue(null) as MonoBehaviour;
+            if (provider == null)
+            {
+                Console.WriteLine("Couldn't find Provider instance!");
+                return;
+            }
+
+            var moduleHook = provider.GetComponent<ModuleHook>();
+            if (moduleHook == null)
+            {
+                Console.WriteLine("Couldn't get ModuleHook instance from Provider!");
+                return;
+            }
+
+            var vanillaDelegate = (ResolveEventHandler)assemblyResolveMethod.CreateDelegate(typeof(ResolveEventHandler), moduleHook);
+
+            AppDomain.CurrentDomain.AssemblyResolve -= vanillaDelegate;
+            AppDomain.CurrentDomain.AssemblyResolve += vanillaDelegate;
         }
 
         /// <summary>
