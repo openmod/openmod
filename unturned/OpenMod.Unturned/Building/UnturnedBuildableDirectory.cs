@@ -14,15 +14,16 @@ namespace OpenMod.Unturned.Building
     {
         public Task<IReadOnlyCollection<IBuildableAsset>> GetBuildableAssetsAsync()
         {
-            var barricadeAssets = Assets.find(EAssetType.ITEM)
-                .Where(k => k is ItemBarricadeAsset || k is ItemStructureAsset)
-                .Select(d =>
+            var assets = new List<ItemPlaceableAsset>();
+            Assets.find(assets);
+
+            var barricadeAssets = assets
+                .ConvertAll(d =>
                 {
                     if (d is ItemBarricadeAsset barricadeAsset)
                         return new UnturnedBuildableAsset(barricadeAsset);
                     return new UnturnedBuildableAsset((ItemStructureAsset)d);
-                })
-                .ToList();
+                });
 
             return Task.FromResult<IReadOnlyCollection<IBuildableAsset>>(barricadeAssets);
         }
