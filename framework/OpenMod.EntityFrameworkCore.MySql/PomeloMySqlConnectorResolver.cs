@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using OpenMod.Common.Hotloading;
 using OpenMod.NuGet;
 using System;
@@ -40,26 +39,25 @@ namespace OpenMod.EntityFrameworkCore.MySql
 
             logger.LogDebug("Loaded MySqlConnector v0.69 into Hotloader");
 
-            var nuGetResolverInstalled =
-                AccessTools.FieldRefAccess<NuGetPackageManager, bool>("m_AssemblyResolverInstalled")(
-                    nuGetPackageManager);
 
-            if (nuGetResolverInstalled)
+            if (!nuGetPackageManager.AssemblyResolverInstalled)
             {
-                var assemblyResolveMethod = typeof(NuGetPackageManager).GetMethod("OnAssemblyResolve",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
+                return;
+            }
 
-                if (assemblyResolveMethod == null)
-                {
-                    logger.LogCritical($"Couldn't find OnAssemblyResolve method for {nameof(NuGetPackageManager)}!");
-                }
-                else
-                {
-                    var @delegate = (ResolveEventHandler)assemblyResolveMethod.CreateDelegate(typeof(ResolveEventHandler), nuGetPackageManager);
+            var assemblyResolveMethod = typeof(NuGetPackageManager).GetMethod("OnAssemblyResolve",
+                BindingFlags.NonPublic | BindingFlags.Instance);
 
-                    AppDomain.CurrentDomain.AssemblyResolve -= @delegate;
-                    AppDomain.CurrentDomain.AssemblyResolve += @delegate;
-                }
+            if (assemblyResolveMethod == null)
+            {
+                logger.LogCritical($"Couldn't find OnAssemblyResolve method for {nameof(NuGetPackageManager)}!");
+            }
+            else
+            {
+                var @delegate = (ResolveEventHandler)assemblyResolveMethod.CreateDelegate(typeof(ResolveEventHandler), nuGetPackageManager);
+
+                AppDomain.CurrentDomain.AssemblyResolve -= @delegate;
+                AppDomain.CurrentDomain.AssemblyResolve += @delegate;
             }
         }
     }
