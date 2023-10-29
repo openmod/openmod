@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using SDG.Framework.Modules;
 
 namespace OpenMod.Unturned.Module.Shared
 {
@@ -7,7 +8,7 @@ namespace OpenMod.Unturned.Module.Shared
     {
         public static void Install()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+            ModuleHook.PreVanillaAssemblyResolve += OnAssemblyResolve;
         }
 
         private static Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
@@ -22,7 +23,7 @@ namespace OpenMod.Unturned.Module.Shared
 
         public static void Uninstall()
         {
-            AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
+            ModuleHook.PreVanillaAssemblyResolve -= OnAssemblyResolve;
         }
     }
 }
