@@ -129,7 +129,7 @@ namespace OpenMod.Bootstrapper
                     {
                         logger.LogInformation($"Downloading {latestPackageIdentity!.Id} v{latestPackageIdentity!.Version} via NuGet");
                         var installResult = await packageManager.InstallAsync(latestPackageIdentity!, allowPrereleaseVersions);
-                        if (installResult.Code == NuGetInstallCode.Success || installResult.Code == NuGetInstallCode.NoUpdatesFound)
+                        if (installResult.Code is NuGetInstallCode.Success or NuGetInstallCode.NoUpdatesFound)
                         {
                             packageIdentity = installResult.Identity;
                             logger.LogInformation(installResult.Code == NuGetInstallCode.Success
