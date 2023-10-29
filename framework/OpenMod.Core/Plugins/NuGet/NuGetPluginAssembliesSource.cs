@@ -47,7 +47,7 @@ namespace OpenMod.Core.Plugins.NuGet
 
         public Task<NuGetInstallResult> InstallPackageAsync(string packageName, string? version = null, bool isPreRelease = false)
         {
-            return InstallOrUpdateAsync(packageName, version, isPreRelease, false);
+            return InstallOrUpdateAsync(packageName, version, isPreRelease);
         }
 
         public Task<NuGetInstallResult> UpdatePackageAsync(string packageName, string? version = null, bool isPreRelease = false)
@@ -80,10 +80,9 @@ namespace OpenMod.Core.Plugins.NuGet
             }
 
             NuGetVersion? nuGetVersion = null;
-            if (version is not null)
+            if (version is not null && !NuGetVersion.TryParse(version, out nuGetVersion))
             {
-                if (!NuGetVersion.TryParse(version, out nuGetVersion))
-                    return new NuGetInstallResult(NuGetInstallCode.InvalidVersion);
+                return new NuGetInstallResult(NuGetInstallCode.InvalidVersion);
             }
 
             var package = await m_NuGetPackageManager.QueryPackageExactAsync(packageName, version, isPreRelease);
