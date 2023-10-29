@@ -15,7 +15,7 @@ namespace OpenMod.Unturned.Vehicles
             var assets = new List<VehicleAsset>();
             Assets.find(assets);
 
-            var unturnedVehicles = verhicles
+            var unturnedVehicles = assets
                 .ConvertAll(v => new UnturnedVehicleAsset(v));
 
             return Task.FromResult<IReadOnlyCollection<IVehicleAsset>>(unturnedVehicles);
