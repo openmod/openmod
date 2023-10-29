@@ -32,7 +32,7 @@ namespace OpenMod.Core.Helpers
             var assemblyNameDot = $"{assemblyName.Name}.";
             var assemblyNameDotRegex = new Regex(Regex.Escape(assemblyNameDot));
 
-            Log.Debug("Found {ResourceNames.Length} resources for {AssemblyName}.", resourceNames, assemblyName.Name);
+            Log.Debug("Found {Length} resources for {AssemblyName}.", resourceNames.Length, assemblyName.Name);
 
             foreach (var resourceName in resourceNames)
             {
@@ -54,12 +54,11 @@ namespace OpenMod.Core.Helpers
                     continue;
                 }
 
-                Log.Debug("Working on {ResourceName} resource with name {FileName.}", resourceName, fileName);
+                Log.Debug("Working on {ResourceName} resource with name {FileName}.", resourceName, fileName);
 
                 var fileNameParts = fileName.Split('.');
-                fileName = string.Empty;
 
-                var fileNameSb = new StringBuilder(assemblyNameDot);
+                var fileNameSb = new StringBuilder();
                 var pathSb = new StringBuilder(assemblyNameDot);
 
                 foreach (var part in fileNameParts)
@@ -68,12 +67,11 @@ namespace OpenMod.Core.Helpers
                     pathSb.Append(partDot);
 
                     using var tmpStream = assembly.GetManifestResourceStream(pathSb + ".directory");
-
                     var isDirectory = tmpStream != null;
                     fileNameSb.Append(isDirectory ? $"{part}{Path.DirectorySeparatorChar}" : partDot);
                 }
 
-                fileName = fileNameSb[^1] == '.' ? fileNameSb.ToString(0, fileName.Length - 1) : fileNameSb.ToString();
+                fileName = fileNameSb[^1] == '.' ? fileNameSb.ToString(0, fileNameSb.Length - 1) : fileNameSb.ToString();
 
                 var directory = Path.GetDirectoryName(fileName);
                 if (directory != null)
