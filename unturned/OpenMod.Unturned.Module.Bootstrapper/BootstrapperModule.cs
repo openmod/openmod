@@ -49,7 +49,7 @@ namespace OpenMod.Unturned.Module.Bootstrapper
             }
 
             m_LoadedAssemblies = new();
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            ModuleHook.PreVanillaAssemblyResolvePostRedirects += UnturnedPreVanillaAssemblyResolve;
 
             Assembly? moduleAssembly = null;
 
@@ -137,7 +137,7 @@ namespace OpenMod.Unturned.Module.Bootstrapper
             }
         }
 
-        private Assembly? CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly? UnturnedPreVanillaAssemblyResolve(object sender, ResolveEventArgs args)
         {
             if (m_LoadedAssemblies == null)
             {
@@ -165,7 +165,7 @@ namespace OpenMod.Unturned.Module.Bootstrapper
 
             m_LoadedAssemblies?.Clear();
             m_LoadedAssemblies = null;
-            AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomain_AssemblyResolve;
+            ModuleHook.PreVanillaAssemblyResolvePostRedirects -= UnturnedPreVanillaAssemblyResolve;
 
             Instance = null;
         }
