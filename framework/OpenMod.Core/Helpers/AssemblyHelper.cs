@@ -73,6 +73,7 @@ namespace OpenMod.Core.Helpers
 
                 fileName = fileNameSb[^1] == '.' ? fileNameSb.ToString(0, fileNameSb.Length - 1) : fileNameSb.ToString();
 
+                Log.Debug("Resource {ResourceName} with name {FileName} after checks.", resourceName, fileName);
                 var directory = Path.GetDirectoryName(fileName);
                 if (directory != null)
                 {
