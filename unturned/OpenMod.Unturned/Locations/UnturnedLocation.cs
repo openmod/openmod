@@ -7,7 +7,7 @@ namespace OpenMod.Unturned.Locations
 {
     public class UnturnedLocation
     {
-        [Obsolete("Use constructor with " + nameof(LocationDevkitNode) + " parameter")]
+        [Obsolete("Use constructor with " + nameof(LocationDevkitNode) + " parameter", true)]
         public UnturnedLocation(LocationNode node)
         {
             throw new Exception($"Use constructor with {nameof(LocationDevkitNode)} parameter");

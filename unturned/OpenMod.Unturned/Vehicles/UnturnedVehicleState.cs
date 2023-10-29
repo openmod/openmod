@@ -113,7 +113,9 @@ namespace OpenMod.Unturned.Vehicles
                 writer.Write((byte)255);
                 writer.Flush();
 
+                stream.SetLength(stream.Position);
                 var stateData = stream.ToArray();
+
                 ArrayPool<byte>.Shared.Return(buffer);
 
                 return stateData;

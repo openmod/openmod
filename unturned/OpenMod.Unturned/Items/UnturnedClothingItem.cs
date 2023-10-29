@@ -58,7 +58,7 @@ namespace OpenMod.Unturned.Items
                 var method = GetInstanceMethod(ClothingType);
 
                 method.InvokeAndLoopback(playerClothing.GetNetId(), ENetReliability.Reliable,
-                    Provider.EnumerateClients_Remote(), Guid.Empty, 0, Array.Empty<byte>(), true);
+                    Provider.GatherRemoteClientConnections(), Guid.Empty, 0, Array.Empty<byte>(), true);
 
                 return true;
             }

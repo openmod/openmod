@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using MoreLinq;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using OpenMod.Extensions.Games.Abstractions.Entities;
@@ -36,20 +37,16 @@ namespace OpenMod.Unturned.Entities
             return entities;
         }
 
-        public async Task<IReadOnlyCollection<IEntityAsset>> GetEntityAssetsAsync()
+        public Task<IReadOnlyCollection<IEntityAsset>> GetEntityAssetsAsync()
         {
-            await UniTask.SwitchToMainThread();
+            var list = new List<AnimalAsset>();
+            Assets.find(list);
 
-            var assets = new List<IEntityAsset>();
-
-            assets.AddRange(Assets.find(EAssetType.ANIMAL)
-                .Cast<AnimalAsset>()
-                .Select(d => new UnturnedAnimalAsset(d)));
-
+            var assets = list.ConvertAll<IEntityAsset>(a => new UnturnedAnimalAsset(a));
             assets.Add(UnturnedPlayerAsset.Instance);
             assets.Add(UnturnedZombieAsset.Instance);
 
-            return assets;
+            return Task.FromResult<IReadOnlyCollection<IEntityAsset>>(assets);
         }
     }
 }
