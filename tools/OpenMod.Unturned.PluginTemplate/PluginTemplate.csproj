@@ -16,7 +16,6 @@ $if$ ($author$ != "")    <PackageAuthor>$author$</PackageAuthor>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>nullable</WarningsAsErrors>
     <NoWarn>$(NoWarn);NU1701;NU1702;CS0436</NoWarn>
-    <LangVersion>9.0</LangVersion>
     <Version>0.0.0</Version>
     <InformationalVersion>0.0.0</InformationalVersion>
     <PackageVersion>0.0.0</PackageVersion>
@@ -24,13 +23,6 @@ $if$ ($author$ != "")    <PackageAuthor>$author$</PackageAuthor>
 
   <ItemGroup>
     <PackageReference Include="OpenMod.Unturned" Version="3.6.1" />
-    <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
