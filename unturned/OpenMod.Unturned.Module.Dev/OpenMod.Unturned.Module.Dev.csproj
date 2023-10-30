@@ -32,7 +32,7 @@
 
   <Target Name="CopyRuntimeLibraries" AfterTargets="AfterBuild">
     <ItemGroup>
-      <DependencyFiles Include="$(MSBuildThisFileDirectory)runtimelibs\*.dll" />
+      <DependencyFiles Include="$(MSBuildThisFileDirectory)\..\runtimelibs\*.dll" />
     </ItemGroup>
 
     <Copy SourceFiles="@(DependencyFiles)" DestinationFolder="$(OutDir)" Condition="@(DependencyFiles-&gt;Count()) != 0" />
