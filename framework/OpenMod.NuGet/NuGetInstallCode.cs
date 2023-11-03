@@ -4,6 +4,7 @@
     {
         Success,
         NoUpdatesFound,
-        PackageOrVersionNotFound
+        PackageOrVersionNotFound,
+        InvalidVersion
     }
 }

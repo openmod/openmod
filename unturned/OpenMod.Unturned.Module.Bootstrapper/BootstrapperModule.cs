@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 using SDG.Framework.Modules;
+using SDG.Unturned;
+using UnityEngine;
 
 namespace OpenMod.Unturned.Module.Bootstrapper
 {
@@ -14,7 +16,7 @@ namespace OpenMod.Unturned.Module.Bootstrapper
     [UsedImplicitly]
     public class BootstrapperModule : IModuleNexus
     {
-        private IModuleNexus? m_BootstrappedModule;
+        private IModuleNexus? m_OpenModUnturndModule;
         private ConcurrentDictionary<string, Assembly>? m_LoadedAssemblies;
 
         /// <summary>
@@ -30,15 +32,15 @@ namespace OpenMod.Unturned.Module.Bootstrapper
             Instance = this;
 
             var openModModuleDirectory = string.Empty;
-            var bootstrapperAssemblyFilePath = string.Empty;
+            var bootstrapperAssemblyFileName = string.Empty;
             var bootstrapperAssembly = typeof(BootstrapperModule).Assembly;
 
             foreach (var module in ModuleHook.modules)
             {
                 if (module.assemblies is { Length: > 0 } && module.assemblies[0] == bootstrapperAssembly)
                 {
-                    openModModuleDirectory = module.config.DirectoryPath;
-                    bootstrapperAssemblyFilePath = module.config.DirectoryPath + module.config.Assemblies[0].Path;
+                    openModModuleDirectory = Path.GetFullPath(module.config.DirectoryPath);
+                    bootstrapperAssemblyFileName = Path.GetFileName(module.config.Assemblies[0].Path);
                     break;
                 }
             }
@@ -49,14 +51,16 @@ namespace OpenMod.Unturned.Module.Bootstrapper
             }
 
             m_LoadedAssemblies = new();
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            ModuleHook.PreVanillaAssemblyResolvePostRedirects += UnturnedPreVanillaAssemblyResolve;
 
             Assembly? moduleAssembly = null;
 
             foreach (var assemblyFilePath in Directory.GetFiles(openModModuleDirectory, "*.dll", SearchOption.TopDirectoryOnly))
             {
-                // ignore bootstrapper assembly file
-                if (assemblyFilePath == bootstrapperAssemblyFilePath)
+                //Workaround
+                //Unturned_Server/Modules\OM\OpenMod.Unturned.Module.Bootstrapper.dll -> assemblyFilePath
+                //Unturned_Server/Modules\OM/OpenMod.Unturned.Module.Bootstrapper.dll -> Old BootstrapperAssemblyPath
+                if (Path.GetFileName(assemblyFilePath).Equals(bootstrapperAssemblyFileName, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -89,6 +93,7 @@ namespace OpenMod.Unturned.Module.Bootstrapper
             }
             catch (ReflectionTypeLoadException ex)
             {
+                Console.WriteLine($"OpenMod Unturned Module somedependencies are missing: {ex}");
                 types = ex.Types.Where(d => d != null).ToArray();
             }
 
@@ -98,8 +103,46 @@ namespace OpenMod.Unturned.Module.Bootstrapper
                 throw new Exception($"Failed to find OpenModUnturnedModule class in {moduleAssembly}!");
             }
 
-            m_BootstrappedModule = (IModuleNexus)Activator.CreateInstance(moduleType);
-            m_BootstrappedModule.initialize();
+            m_OpenModUnturndModule = (IModuleNexus)Activator.CreateInstance(moduleType);
+            m_OpenModUnturndModule.initialize();
+
+            PatchUnturnedVanillaAssemblyResolve();
+        }
+
+        /// <summary>
+        /// To prevent unnecessary errors and warning about assemblies resolving
+        /// We will make Unturned Resolve Assemblies as last resource
+        /// With this patch other components like hotloader wil try to resolve assemblies before unturned
+        /// </summary>
+        private void PatchUnturnedVanillaAssemblyResolve()
+        {
+            var assemblyResolveMethod = typeof(ModuleHook).GetMethod("handleAssemblyResolve", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (assemblyResolveMethod == null)
+            {
+                Console.WriteLine($"Couldn't find OnAssemblyResolve method for {nameof(ModuleHook)}!");
+                return;
+            }
+
+            //using
+            var provider = typeof(Provider).GetField("steam", BindingFlags.NonPublic | BindingFlags.Static)
+                ?.GetValue(null) as MonoBehaviour;
+            if (provider == null)
+            {
+                Console.WriteLine("Couldn't find Provider instance!");
+                return;
+            }
+
+            var moduleHook = provider.GetComponent<ModuleHook>();
+            if (moduleHook == null)
+            {
+                Console.WriteLine("Couldn't get ModuleHook instance from Provider!");
+                return;
+            }
+
+            var vanillaDelegate = (ResolveEventHandler)assemblyResolveMethod.CreateDelegate(typeof(ResolveEventHandler), moduleHook);
+
+            AppDomain.CurrentDomain.AssemblyResolve -= vanillaDelegate;
+            AppDomain.CurrentDomain.AssemblyResolve += vanillaDelegate;
         }
 
         /// <summary>
@@ -134,7 +177,7 @@ namespace OpenMod.Unturned.Module.Bootstrapper
             }
         }
 
-        private Assembly? CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly? UnturnedPreVanillaAssemblyResolve(object sender, ResolveEventArgs args)
         {
             if (m_LoadedAssemblies == null)
             {
@@ -158,11 +201,11 @@ namespace OpenMod.Unturned.Module.Bootstrapper
 
         public void shutdown()
         {
-            m_BootstrappedModule?.shutdown();
+            m_OpenModUnturndModule?.shutdown();
 
             m_LoadedAssemblies?.Clear();
             m_LoadedAssemblies = null;
-            AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomain_AssemblyResolve;
+            ModuleHook.PreVanillaAssemblyResolvePostRedirects -= UnturnedPreVanillaAssemblyResolve;
 
             Instance = null;
         }

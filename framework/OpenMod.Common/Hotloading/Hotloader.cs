@@ -1,5 +1,4 @@
-﻿using AsmResolver;
-using AsmResolver.IO;
+﻿using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Builder;
@@ -160,18 +159,14 @@ namespace OpenMod.Common.Hotloading
         /// <returns><b>The hotloaded assembly</b> if found; otherwise, <b>null</b>.</returns>
         public static Assembly? FindAssembly(AssemblyName name)
         {
-            if (s_Assemblies.TryGetValue(name, out var assembly))
-            {
-                return assembly;
-            }
-
-            return null;
+            return s_Assemblies.TryGetValue(name, out var assembly) ? assembly : null;
         }
 
         /// <summary>
         /// Gets all hotloaded assemblies.
         /// </summary>
         /// <returns>The hotloaded assemblies.</returns>
+        // ReSharper disable once UnusedMember.Global
         public static IReadOnlyCollection<Assembly> GetHotloadedAssemblies()
         {
             return s_Assemblies.Values;
@@ -184,15 +179,8 @@ namespace OpenMod.Common.Hotloading
         /// <returns><b>The real assembly name</b> of the hotloaded assembly. If the given assembly was not hotloaded, it will return <b>the assembly's name</b>.</returns>
         public static AssemblyName GetRealAssemblyName(Assembly assembly)
         {
-            foreach (var kv in s_Assemblies)
-            {
-                if (kv.Value == assembly)
-                {
-                    return kv.Key;
-                }
-            }
-
-            return assembly.GetName();
+            var assemblyName = s_Assemblies.FirstOrDefault(kv => kv.Value == assembly).Key;
+            return assemblyName ?? assembly.GetName();
         }
     }
 }

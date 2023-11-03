@@ -23,11 +23,16 @@ namespace OpenMod.Core.Helpers
             baseDir ??= string.Empty;
 
             var resourceNames = assembly.GetManifestResourceNames();
-
             if (resourceNames.Length > 0 && !Directory.Exists(baseDir))
             {
                 Directory.CreateDirectory(baseDir);
             }
+
+            var assemblyName = Hotloader.GetRealAssemblyName(assembly);
+            var assemblyNameDot = $"{assemblyName.Name}.";
+            var assemblyNameDotRegex = new Regex(Regex.Escape(assemblyNameDot));
+
+            Log.Debug("Found {Length} resources for {AssemblyName}.", resourceNames.Length, assemblyName.Name);
 
             foreach (var resourceName in resourceNames)
             {
@@ -36,50 +41,40 @@ namespace OpenMod.Core.Helpers
                     continue;
                 }
 
-                var assemblyName = Hotloader.GetRealAssemblyName(assembly);
-
-                if (!resourceName.Contains(assemblyName.Name + "."))
+                if (!resourceName.Contains(assemblyNameDot))
                 {
                     Log.Warning(
                         "{ResourceName} does not contain assembly name in assembly: {AssemblyName}. <AssemblyName> and <RootNamespace> must be equal inside your plugins .csproj file",
                         resourceName, assemblyName.Name);
                 }
 
-                var regex = new Regex(Regex.Escape(assemblyName.Name + "."));
-                var fileName = regex.Replace(resourceName, string.Empty, 1);
-
+                var fileName = assemblyNameDotRegex.Replace(resourceName, string.Empty, 1);
                 if (s_ExcludedResources.Contains(fileName))
                 {
                     continue;
                 }
 
-                var parts = fileName.Split('.');
-                fileName = "";
+                Log.Debug("Working on {ResourceName} resource with name {FileName}.", resourceName, fileName);
 
-                var pathSb = new StringBuilder(assemblyName.Name + ".");
-                foreach (var part in parts)
+                var fileNameParts = fileName.Split('.');
+
+                var fileNameSb = new StringBuilder();
+                var pathSb = new StringBuilder(assemblyNameDot);
+
+                foreach (var part in fileNameParts)
                 {
-                    pathSb.Append(part + ".");
+                    var partDot = $"{part}.";
+                    pathSb.Append(partDot);
+
                     using var tmpStream = assembly.GetManifestResourceStream(pathSb + ".directory");
-
                     var isDirectory = tmpStream != null;
-                    if (isDirectory)
-                    {
-                        fileName += part + Path.DirectorySeparatorChar;
-                    }
-                    else
-                    {
-                        fileName += part + ".";
-                    }
+                    fileNameSb.Append(isDirectory ? $"{part}{Path.DirectorySeparatorChar}" : partDot);
                 }
 
-                if (fileName.EndsWith("."))
-                {
-                    fileName = fileName.Substring(0, fileName.Length - 1);
-                }
+                fileName = fileNameSb[^1] == '.' ? fileNameSb.ToString(0, fileNameSb.Length - 1) : fileNameSb.ToString();
 
+                Log.Debug("Resource {ResourceName} with name {FileName} after checks.", resourceName, fileName);
                 var directory = Path.GetDirectoryName(fileName);
-
                 if (directory != null)
                 {
                     directory = Path.Combine(baseDir, directory);
