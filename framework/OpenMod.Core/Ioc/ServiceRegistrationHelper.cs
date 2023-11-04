@@ -5,37 +5,23 @@ using System.Reflection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
 using OpenMod.API.Ioc;
-using AssemblyExtensions = OpenMod.Common.Helpers.AssemblyExtensions;
+using OpenMod.Common.Helpers;
 
 namespace OpenMod.Core.Ioc
 {
     [OpenModInternal]
     public static class ServiceRegistrationHelper
     {
+        // This method doesn't warn about missing dependencies
+        // At normal om running it already notified user
         public static IEnumerable<ServiceRegistration> FindFromAssembly<T>(Assembly assembly, ILogger? logger = null) where T : ServiceImplementationAttribute
         {
-            List<Type> types;
-            try
-            {
-                types = AssemblyExtensions.GetLoadableTypes(assembly)
-                    .Where(d => d.IsClass && !d.IsInterface && !d.IsAbstract)
-                    .ToList();
-            }
-            catch (ReflectionTypeLoadException ex) //this ignores missing optional dependencies
-            {
-                logger?.LogTrace(ex, "Some optional dependencies are missing for \"{Assembly}\"", assembly);
-                if (ex.LoaderExceptions != null && ex.LoaderExceptions.Length > 0)
-                {
-                    foreach (var loaderException in ex.LoaderExceptions)
-                    {
-                        logger?.LogTrace(loaderException, "Loader Exception: ");
-                    }
-                }
+            var types = assembly.GetLoadableTypes();
+            return types.Where(t => t.IsClass && !t.IsAbstract).FindServicesFromTypes<T>();
+        }
 
-                types = ex.Types.Where(tp => tp != null && tp.IsClass && !tp.IsInterface && !tp.IsAbstract)
-                    .ToList();
-            }
-
+        public static IEnumerable<ServiceRegistration> FindServicesFromTypes<T>(this IEnumerable<Type> types, ILogger? logger = null, string? assemblyName = null) where T : ServiceImplementationAttribute
+        {
             foreach (var type in types)
             {
                 T? attribute;
@@ -43,7 +29,8 @@ namespace OpenMod.Core.Ioc
 
                 try
                 {
-                    attribute = Array.Find(type.GetCustomAttributes(inherit: false), x => x.GetType() == typeof(T)) as T;
+                    attribute = type.GetCustomAttribute<T>(inherit: false);
+                    
                     if (attribute == null)
                     {
                         continue;
@@ -57,7 +44,7 @@ namespace OpenMod.Core.Ioc
                     {
                         logger?.LogWarning(
                             "Type {TypeName} in assembly {AssemblyName} has been marked as ServiceImplementation but does not inherit any services!\nDid you forget to add [Service] to your interfaces?",
-                            type.FullName, assembly.FullName);
+                            type.FullName, assemblyName ?? type.Assembly.FullName);
                         continue;
                     }
                 }
