@@ -170,19 +170,24 @@ namespace OpenMod.Runtime
 
         internal void SetupServices(IServiceCollection serviceCollection)
         {
-            var sourceServiceDescriptor = new SortedList<Priority, ServiceDescriptor>(new PriorityComparer(PriortyComparisonMode.LowestFirst));
+            var sourceServices = new SortedSet<ServiceRegistration>(new PriorityComparer(PriortyComparisonMode.LowestFirst));
             m_PluginAssembliesSources.ForEach(source =>
             {
                 var sourceType = source.GetType();
                 var serviceImplementationAttribute = sourceType.GetCustomAttribute<ServiceImplementationAttribute>();
 
                 var priority = serviceImplementationAttribute?.Priority ?? Priority.Normal;
-                var serviceDescriptor = new ServiceDescriptor(sourceType, sourceType, serviceImplementationAttribute?.Lifetime ?? ServiceLifetime.Singleton);
+                var serviceRegistration = new ServiceRegistration()
+                {
+                    ServiceImplementationType = sourceType,
+                    Priority = priority,
+                    Lifetime = serviceImplementationAttribute?.Lifetime ?? ServiceLifetime.Singleton
+                };
 
-                sourceServiceDescriptor.Add(priority, serviceDescriptor);
+                sourceServices.Add(serviceRegistration);
             });
 
-            serviceCollection.Add(sourceServiceDescriptor.Values);
+            serviceCollection.Add(sourceServices.Select(s => new ServiceDescriptor(s.ServiceImplementationType, s.ServiceImplementationType, s.Lifetime)));
 
             serviceCollection.AddSingleton<IPluginAssemblyStore>(m_PluginAssemblyStore);
             var serviceConfiguratorTypes = m_Assemblies
