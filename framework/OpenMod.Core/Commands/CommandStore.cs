@@ -107,7 +107,7 @@ namespace OpenMod.Core.Commands
             }
 
             var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync();
-            if (commandsData?.Commands == null)
+            if (commandsData.Commands == null)
             {
                 throw new Exception("Failed to register commands: command data was null");
             }
@@ -204,7 +204,7 @@ namespace OpenMod.Core.Commands
 
             m_IsDisposing = true;
             var commandsData = await m_CommandDataStore.GetRegisteredCommandsAsync();
-            if (commandsData?.Commands != null && commandsData.Commands.Count > 0)
+            if (commandsData?.Commands is { Count: > 0 })
             {
                 // clear unknown commands
 
