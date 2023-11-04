@@ -15,6 +15,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NuGet.Common;
 using OpenMod.API;
+using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.Common.Helpers;
@@ -57,7 +58,7 @@ namespace OpenMod.Runtime
 
         public string WorkingDirectory { get; private set; } = null!;
 
-        public string[] CommandlineArgs { get; private set; } = new string[0];
+        public string[] CommandlineArgs { get; private set; } = Array.Empty<string>();
 
         public IDataStore DataStore { get; private set; } = null!;
 
@@ -105,18 +106,6 @@ namespace OpenMod.Runtime
                     openModHostAssemblies.Insert(0, openModCoreAssembly);
                 }
 
-                var hostInformationType = openModHostAssemblies
-                    .Select(asm =>
-                        AssemblyExtensions.GetLoadableTypes(asm)
-                            .FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
-                    .LastOrDefault(d => d != null);
-
-                if (hostInformationType == null)
-                {
-                    throw new Exception("Failed to find IHostInformation in host assemblies.");
-                }
-
-                HostInformation = (IHostInformation)Activator.CreateInstance(hostInformationType);
                 m_OpenModHostAssemblies = openModHostAssemblies;
                 m_HostBuilderFunc = hostBuilderFunc;
                 m_RuntimeInitParameters = parameters;
@@ -135,6 +124,17 @@ namespace OpenMod.Runtime
                 SetupSerilog();
 
                 m_Logger!.LogInformation("OpenMod v{Version} is starting...", Version);
+
+                var hostInformationType = openModHostAssemblies
+                    .Select(asm =>
+                        AssemblyExtensions.GetLoadableTypes(asm)
+                            .FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
+                    .LastOrDefault(d => d != null);
+                if (hostInformationType == null)
+                {
+                    throw new Exception("Failed to find IHostInformation in host assemblies.");
+                }
+                HostInformation = (IHostInformation)Activator.CreateInstance(hostInformationType);
 
                 if (parameters.PackageManager is not NuGetPackageManager nugetPackageManager)
                 {
@@ -420,7 +420,7 @@ namespace OpenMod.Runtime
             startup.ConfigureConfiguration(builder);
         }
 
-        private void ConfigureAppConfiguration(HostBuilderContext? hostBuilderContext, IConfigurationBuilder builder, OpenModStartup? startup = null)
+        private void ConfigureAppConfiguration(HostBuilderContext? hostBuilderContext, IConfigurationBuilder builder, IOpenModStartup? startup = null)
         {
             m_DateLogger ??= DateTime.Now;
 
