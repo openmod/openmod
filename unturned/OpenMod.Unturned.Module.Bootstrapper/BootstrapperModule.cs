@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -35,8 +36,10 @@ namespace OpenMod.Unturned.Module.Bootstrapper
             var bootstrapperAssemblyFileName = string.Empty;
             var bootstrapperAssembly = typeof(BootstrapperModule).Assembly;
 
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var module in ModuleHook.modules)
             {
+                // ReSharper disable once InvertIf
                 if (module.assemblies is { Length: > 0 } && module.assemblies[0] == bootstrapperAssembly)
                 {
                     openModModuleDirectory = Path.GetFullPath(module.config.DirectoryPath);
@@ -50,7 +53,7 @@ namespace OpenMod.Unturned.Module.Bootstrapper
                 throw new Exception("Failed to get OpenMod module directory");
             }
 
-            m_LoadedAssemblies = new();
+            m_LoadedAssemblies = new ConcurrentDictionary<string, Assembly>();
             ModuleHook.PreVanillaAssemblyResolvePostRedirects += UnturnedPreVanillaAssemblyResolve;
 
             Assembly? moduleAssembly = null;
@@ -86,23 +89,24 @@ namespace OpenMod.Unturned.Module.Bootstrapper
 
             AddRocketModResolveAssemblies();
 
-            Type[] types;
+            IEnumerable<Type> types;
             try
             {
                 types = moduleAssembly.GetTypes();
             }
             catch (ReflectionTypeLoadException ex)
             {
-                Console.WriteLine($"OpenMod Unturned Module somedependencies are missing: {ex}");
-                types = ex.Types.Where(d => d != null).ToArray();
+                Console.WriteLine($"OpenMod Bootstrap Module fail to obtain assembly types: {ex}");
+                foreach (var loaderException in ex.LoaderExceptions)
+                {
+                    Console.WriteLine($"Loader exception: {loaderException}");
+                }
+
+                Console.WriteLine("Trying to load bootstrap anyways...");
+                types = ex.Types.Where(d => d != null);
             }
 
-            var moduleType = types.SingleOrDefault(d => d.Name.Equals("OpenModUnturnedModule"));
-            if (moduleType == null)
-            {
-                throw new Exception($"Failed to find OpenModUnturnedModule class in {moduleAssembly}!");
-            }
-
+            var moduleType = types.SingleOrDefault(d => d.Name.Equals("OpenModUnturnedModule")) ?? throw new Exception($"Failed to find OpenModUnturnedModule class in {moduleAssembly}!");
             m_OpenModUnturndModule = (IModuleNexus)Activator.CreateInstance(moduleType);
             m_OpenModUnturndModule.initialize();
 
