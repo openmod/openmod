@@ -13,6 +13,7 @@ namespace OpenMod.Common.Helpers
     {
         private static readonly Regex s_VersionRegex = new("Version=(?<version>.+?), ", RegexOptions.Compiled);
 
+        // ReSharper disable once UnusedMember.Global
         public static MethodBase? GetCallingMethod(Type[]? skipTypes = null, MethodBase[]? skipMethods = null, bool applyAsyncMethodPatch = true)
         {
             var skipList = new List<Type>(skipTypes ?? Type.EmptyTypes) { typeof(ReflectionExtensions) };
@@ -39,9 +40,7 @@ namespace OpenMod.Common.Helpers
                     frameMethod = frame.GetMethod();
 
                     // Check parent frame - if its from AsyncMethodBuilderCore, its definitely an async Task
-                    if (frameMethod is MethodInfo parentFrameMethodInfo &&
-                        (parentFrameMethodInfo.DeclaringType?.Name == "AsyncMethodBuilderCore"
-                            || parentFrameMethodInfo.DeclaringType?.Name == "AsyncTaskMethodBuilder"))
+                    if (frameMethod is MethodInfo { DeclaringType.Name: "AsyncMethodBuilderCore" or "AsyncTaskMethodBuilder" })
                     {
                         frame = st.GetFrame(++tmpIndex);
                         frameMethod = frame.GetMethod();
@@ -69,6 +68,7 @@ namespace OpenMod.Common.Helpers
             return frameTarget?.GetMethod();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public static MethodBase? GetCallingMethod(params Assembly[] skipAssemblies)
         {
             var st = new StackTrace();
@@ -85,6 +85,7 @@ namespace OpenMod.Common.Helpers
             return frameTarget?.GetMethod();
         }
 
+        // ReSharper disable once UnusedMember.Global
         public static IEnumerable<Type> GetTypeHierarchy(this Type type)
         {
             if (type == null)
@@ -108,22 +109,27 @@ namespace OpenMod.Common.Helpers
                 throw new ArgumentNullException(nameof(assembly));
             }
 
-            try
-            {
-                return assembly.GetLoadableTypes()
-                              .Where(c => includeAbstractAndInterfaces || !c.IsAbstract && !c.IsInterface);
-            }
-            catch (ReflectionTypeLoadException e)
-            {
-                return e.Types.Where(t => t != null);
-            }
+#pragma warning disable CS0618 // this is just a warning for others using this method
+            var types = assembly.GetLoadableTypes();
+#pragma warning restore CS0618
+            return includeAbstractAndInterfaces ? types : types.Where(t => !t.IsAbstract && !t.IsInterface);
         }
 
         public static IEnumerable<Type> FindTypes<T>(this Assembly assembly, bool includeAbstractAndInterfaces = false)
         {
-            return assembly.FindAllTypes(includeAbstractAndInterfaces).Where(c => c.IsAssignableFrom(typeof(T)) || c.GetInterfaces().Any(x => x == typeof(T)));
+            var wantedType = typeof(T);
+            var types = assembly.FindAllTypes(includeAbstractAndInterfaces);
+            return types.Where(t => t.IsAssignableFrom(wantedType) || t.GetInterfaces().Any(x => x == wantedType));
         }
 
+        public static IEnumerable<Type> FindTypes<T>(this IEnumerable<Type> types, bool includeAbstractAndInterfaces = false)
+        {
+            var wantedType = typeof(T);
+            var validTypes = types.Where(type => includeAbstractAndInterfaces || (!type.IsAbstract && !type.IsInterface));
+            return validTypes.Where(type => type.IsAssignableFrom(wantedType) || type.GetInterfaces().Any(x => x == wantedType)).ToList();
+        }
+
+        // ReSharper disable once UnusedMember.Global
         public static string GetVersionIndependentName(string assemblyName)
         {
             return GetVersionIndependentName(assemblyName, out _);
@@ -141,6 +147,7 @@ namespace OpenMod.Common.Helpers
             return s_VersionRegex.Replace(assemblyName, string.Empty);
         }
 
+        // ReSharper disable once UnusedMember.Global
         public static string GetDebugName(this MethodBase mb)
         {
             if (mb == null)
@@ -148,12 +155,12 @@ namespace OpenMod.Common.Helpers
                 throw new ArgumentNullException(nameof(mb));
             }
 
-            if (mb is MemberInfo mi && mi.DeclaringType != null)
+            if (mb is MemberInfo { DeclaringType: not null } mi)
             {
-                return mi.DeclaringType.Name + "." + mi.Name;
+                return $"{mi.DeclaringType.Name}.{mi.Name}";
             }
 
-            return "<anonymous>#" + mb.Name;
+            return $"<anonymous>#{mb.Name}";
         }
 
         public static Task InvokeWithTaskSupportAsync(this MethodBase method, object? instance, object?[] @params)
@@ -212,9 +219,9 @@ namespace OpenMod.Common.Helpers
 
         public static bool HasConversionOperator(this Type from, Type to)
         {
-            if (@from == null)
+            if (from == null)
             {
-                throw new ArgumentNullException(nameof(@from));
+                throw new ArgumentNullException(nameof(from));
             }
 
             if (to == null)
@@ -223,7 +230,7 @@ namespace OpenMod.Common.Helpers
             }
 
             UnaryExpression BodyFunction(Expression body) => Expression.Convert(body, to);
-            ParameterExpression inp = Expression.Parameter(from, "inp");
+            var inp = Expression.Parameter(from, "inp");
             try
             {
                 // If this succeeds then we can cast 'from' type to 'to' type using implicit coercion
