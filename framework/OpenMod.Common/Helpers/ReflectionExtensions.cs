@@ -126,7 +126,7 @@ namespace OpenMod.Common.Helpers
         {
             var wantedType = typeof(T);
             var validTypes = types.Where(type => includeAbstractAndInterfaces || (!type.IsAbstract && !type.IsInterface));
-            return validTypes.Where(type => type.IsAssignableFrom(wantedType) || type.GetInterfaces().Any(x => x == wantedType)).ToList();
+            return validTypes.Where(type => type.IsAssignableFrom(wantedType) || type.GetInterfaces().Any(x => x == wantedType));
         }
 
         // ReSharper disable once UnusedMember.Global

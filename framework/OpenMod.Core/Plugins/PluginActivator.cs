@@ -81,6 +81,14 @@ namespace OpenMod.Core.Plugins
                     throw new ObjectDisposedException(nameof(PluginActivator));
                 }
 
+                var dependencies = assembly.GetReferencedAssemblies();
+                var missingDependencies = dependencies.Where(s => !AppDomain.CurrentDomain.GetAssemblies().Any(c => c.GetName().Name.Equals(s.Name, StringComparison.OrdinalIgnoreCase))).ToList();
+                if (missingDependencies.Any())
+                {
+                    m_Logger.LogWarning("Some dependencies for {Assembly} may be missing. Plugin will try to load anyways...", assembly.GetNameVersion());
+                    m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies.Select(s => s.GetNameVersion())));
+                }
+
                 Type[] assemblyTypes;
                 try
                 {
@@ -88,13 +96,8 @@ namespace OpenMod.Core.Plugins
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
-                    m_Logger.LogWarning(ex, "Some types from assembly {Assembly} couldn't be loaded.", assembly);
-                    m_Logger.LogWarning("Maybe some dependencies are missing. Plugin will try to load anyways...");
-
-                    var missingDependencies = ex.GetMissingDependencies();
-                    m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies.Keys));
-
                     assemblyTypes = ex.Types.Where(t => t != null).ToArray();
+                    m_Logger.LogDebug(ex, "ReflectionTypeLoadException {Assembly}", assembly.GetNameVersion());
                 }
 
                 var pluginMetadata = assembly.GetCustomAttribute<PluginMetadataAttribute>();

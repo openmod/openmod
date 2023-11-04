@@ -9,7 +9,7 @@ namespace OpenMod.Common.Helpers
         {
             using var stream = File.Open(path, FileMode.Open);
             var buffer = new byte[stream.Length];
-            await stream.ReadAsync(buffer, offset: 0, count: (int) stream.Length);
+            _ = await stream.ReadAsync(buffer, offset: 0, count: (int) stream.Length);
             return buffer;
         }
     }
