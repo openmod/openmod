@@ -81,6 +81,22 @@ namespace OpenMod.Core.Plugins
                     throw new ObjectDisposedException(nameof(PluginActivator));
                 }
 
+                Type[] assemblyTypes;
+                try
+                {
+                    assemblyTypes = assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    m_Logger.LogWarning(ex, "Some types from assembly {Assembly} couldn't be loaded.", assembly);
+                    m_Logger.LogWarning("Maybe some dependencies are missing. Plugin will try to load anyways...");
+
+                    var missingDependencies = ex.GetMissingDependencies();
+                    m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies.Keys));
+
+                    assemblyTypes = ex.Types.Where(t => t != null).ToArray();
+                }
+
                 var pluginMetadata = assembly.GetCustomAttribute<PluginMetadataAttribute>();
                 if (pluginMetadata == null)
                 {
@@ -89,22 +105,21 @@ namespace OpenMod.Core.Plugins
                         assembly);
                     return null;
                 }
-
-                var pluginTypes = assembly.FindTypes<IOpenModPlugin>().ToList();
-                if (pluginTypes.Count == 0)
+                
+                var pluginTypes = assemblyTypes.FindTypes<IOpenModPlugin>().ToArray();
+                switch (pluginTypes.Length)
                 {
-                    m_Logger.LogError(
-                        "Failed to load plugin from assembly {Assembly}: couldn't find any IOpenModPlugin implementation",
-                        assembly);
-                    return null;
-                }
+                    case 0:
+                        m_Logger.LogError(
+                            "Failed to load plugin from assembly {Assembly}: couldn't find any IOpenModPlugin implementation",
+                            assembly);
+                        return null;
 
-                if (pluginTypes.Count > 1)
-                {
-                    m_Logger.LogError(
-                        "Failed to load plugin from assembly {Assembly}: assembly has multiple IOpenModPlugin instances",
-                        assembly);
-                    return null;
+                    case > 1:
+                        m_Logger.LogError(
+                            "Failed to load plugin from assembly {Assembly}: assembly has multiple IOpenModPlugin instances",
+                            assembly);
+                        return null;
                 }
 
                 var pluginType = pluginTypes.Single();
@@ -167,9 +182,7 @@ namespace OpenMod.Core.Plugins
                             .SingleInstance()
                             .OwnedByLifetimeScope();
 
-                        var services =
-                            ServiceRegistrationHelper.FindFromAssembly<PluginServiceImplementationAttribute>(assembly,
-                                m_Logger);
+                        var services = assemblyTypes.FindServicesFromTypes<PluginServiceImplementationAttribute>(m_Logger, assembly.FullName);
 
                         var servicesRegistrations = services.OrderBy(d => d.Priority,
                             new PriorityComparer(PriortyComparisonMode.LowestFirst));
@@ -191,7 +204,7 @@ namespace OpenMod.Core.Plugins
                             }
                         }
 
-                        foreach (var type in pluginType.Assembly.FindTypes<IPluginContainerConfigurator>())
+                        foreach (var type in assemblyTypes.FindTypes<IPluginContainerConfigurator>())
                         {
                             var configurator = (IPluginContainerConfigurator)ActivatorUtilitiesEx.CreateInstance(m_LifetimeScope, type);
                             configurator.ConfigureContainer(new PluginServiceConfigurationContext(m_LifetimeScope, configuration, containerBuilder, pluginWorkingDirectory));
