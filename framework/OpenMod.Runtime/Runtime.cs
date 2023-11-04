@@ -125,15 +125,7 @@ namespace OpenMod.Runtime
 
                 m_Logger!.LogInformation("OpenMod v{Version} is starting...", Version);
 
-                var hostInformationType = openModHostAssemblies
-                    .Select(asm =>
-                        AssemblyExtensions.GetLoadableTypes(asm)
-                            .FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
-                    .LastOrDefault(d => d != null);
-                if (hostInformationType == null)
-                {
-                    throw new Exception("Failed to find IHostInformation in host assemblies.");
-                }
+                var hostInformationType = GetOpenmodHostInformation(openModHostAssemblies) ?? throw new Exception("Failed to find IHostInformation in host assemblies.");
                 HostInformation = (IHostInformation)Activator.CreateInstance(hostInformationType);
 
                 if (parameters.PackageManager is not NuGetPackageManager nugetPackageManager)
@@ -305,6 +297,37 @@ namespace OpenMod.Runtime
                 Console.WriteLine(ex);
                 throw;
             }
+        }
+
+        private Type? GetOpenmodHostInformation(IEnumerable<Assembly> openModHostAssemblies)
+        {
+            var missingOpenmodDepedencies = false;
+            var assembliesTypes = new List<Type>();
+
+            foreach (var openModHostAssembly in openModHostAssemblies)
+            {
+                try
+                {
+                    assembliesTypes.AddRange(openModHostAssembly.GetTypes());
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    if (!missingOpenmodDepedencies)
+                    {
+                        missingOpenmodDepedencies = true;
+                        m_Logger.LogWarning("Some OpenMod dependencies are missing, OpenMod could not work properly.");
+                    }
+
+                    assembliesTypes.AddRange(ex.Types.Where(t => t != null));
+
+                    m_Logger.LogWarning(ex, "Some types from assembly {Assembly} couldn't be loaded.", openModHostAssembly.FullName);
+
+                    var missingDependencies = ex.GetMissingDependencies();
+                    m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies.Keys));
+                }
+            }
+
+            return assembliesTypes.FirstOrDefault(t => t.IsAssignableTo<IHostInformation>());
         }
 
         public async Task PerformSoftReloadAsync()
