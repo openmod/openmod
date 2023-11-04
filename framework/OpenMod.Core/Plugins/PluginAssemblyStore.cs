@@ -167,14 +167,17 @@ namespace OpenMod.Core.Plugins
                             providerAssembly.GetName().Name);
                     }
 
-                    var missingAssemblies = ex.GetMissingDependencies();
+                    var missingAssemblies = ex.GetMissingDependencies().ToList();
+                    m_Logger.LogWarning(
+                        "Couldn't load plugin from {ProviderAssembly}: Failed to resolve required dependencies: {MissingAssemblies}",
+                        providerAssembly, string.Join(", ", missingAssemblies));
+
                     if (!TryInstallMissingDependencies)
                     {
-                        m_Logger.LogWarning(
-                            "Couldn't load plugin from {ProviderAssembly}: Failed to resolve required dependencies: {MissingAssemblies}",
-                            providerAssembly, string.Join(", ", missingAssemblies.Keys));
                         continue;
                     }
+
+                    m_Logger.LogWarning("Trying to install missing dependencies");
 
                     var success = await TryInstallRequiredDependenciesAsync(providerAssembly, missingAssemblies);
                     if (!Hotloader.Enabled)
@@ -206,16 +209,16 @@ namespace OpenMod.Core.Plugins
 
         // ReSharper disable once UnusedMethodReturnValue.Local
         private async Task<bool> TryInstallRequiredDependenciesAsync(Assembly providerAssembly,
-            IReadOnlyDictionary<string, Version> missingAssemblies)
+            IEnumerable<AssemblyName> missingAssemblies)
         {
             foreach (var assembly in missingAssemblies)
             {
-                var packagetToInstall = await m_NuGetPackageManager.QueryPackageExactAsync(assembly.Key, assembly.Value.ToString(3));
+                var packagetToInstall = await m_NuGetPackageManager.QueryPackageExactAsync(assembly.Name, assembly.Version.ToString(3));
                 if (packagetToInstall == null)
                 {
                     m_Logger.LogWarning(
                         "Package not found: {AssemblyName}. Plugin \"{ProviderAssemblyName}\" can't load without it!",
-                        assembly.Key, providerAssembly.GetName().Name);
+                        assembly.Name, providerAssembly.GetName().Name);
                     return false;
                 }
 
@@ -225,7 +228,7 @@ namespace OpenMod.Core.Plugins
                 {
                     m_Logger.LogWarning(
                         "Failed to install \"{AssemblyName}\": {ResultCode}. Plugin \"{ProviderAssemblyName}\" can't load without it!",
-                        assembly.Key, result.Code, providerAssembly.GetName().Name);
+                        assembly.Name, result.Code, providerAssembly.GetName().Name);
                     return false;
                 }
             }

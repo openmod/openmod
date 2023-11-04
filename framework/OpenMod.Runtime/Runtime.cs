@@ -237,6 +237,9 @@ namespace OpenMod.Runtime
                         SetupSerilog(configuration, context.Configuration);
                     });
 
+                //TODO maybe add here dependencies missing msg
+                //assembly.GetTypes() dont throw exception here
+                //but after hostBuilder.Build() it does
                 Host = hostBuilder.Build();
 
                 m_LoggerFactory = Host.Services.GetRequiredService<ILoggerFactory>();
@@ -320,10 +323,11 @@ namespace OpenMod.Runtime
 
                     assembliesTypes.AddRange(ex.Types.Where(t => t != null));
 
-                    m_Logger.LogWarning(ex, "Some types from assembly {Assembly} couldn't be loaded.", openModHostAssembly.FullName);
+                    m_Logger.LogDebug(ex, "Missing dependencies");
+                    m_Logger.LogWarning("Some types from assembly {Assembly} couldn't be loaded.", openModHostAssembly.FullName);
 
                     var missingDependencies = ex.GetMissingDependencies();
-                    m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies.Keys));
+                    m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies));
                 }
             }
 
