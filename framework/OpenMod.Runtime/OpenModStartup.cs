@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using NuGet.Packaging;
 using OpenMod.API;
@@ -169,17 +170,19 @@ namespace OpenMod.Runtime
 
         internal void SetupServices(IServiceCollection serviceCollection)
         {
-            var sortedSources = m_PluginAssembliesSources
-                .OrderBy(d =>
-                        d.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Priority ?? Priority.Normal
-                    , new PriorityComparer(PriortyComparisonMode.LowestFirst));
-
-            foreach (var source in sortedSources)
+            var sourceServiceDescriptor = new SortedList<Priority, ServiceDescriptor>(new PriorityComparer(PriortyComparisonMode.LowestFirst));
+            m_PluginAssembliesSources.ForEach(source =>
             {
-                var lifetime = source.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Lifetime ??
-                               ServiceLifetime.Singleton;
-                serviceCollection.Add(new ServiceDescriptor(source.GetType(), source.GetType(), lifetime));
-            }
+                var sourceType = source.GetType();
+                var serviceImplementationAttribute = sourceType.GetCustomAttribute<ServiceImplementationAttribute>();
+
+                var priority = serviceImplementationAttribute?.Priority ?? Priority.Normal;
+                var serviceDescriptor = new ServiceDescriptor(sourceType, sourceType, serviceImplementationAttribute?.Lifetime ?? ServiceLifetime.Singleton);
+
+                sourceServiceDescriptor.Add(priority, serviceDescriptor);
+            });
+
+            serviceCollection.Add(sourceServiceDescriptor.Values);
 
             serviceCollection.AddSingleton<IPluginAssemblyStore>(m_PluginAssemblyStore);
             var serviceConfiguratorTypes = m_Assemblies
