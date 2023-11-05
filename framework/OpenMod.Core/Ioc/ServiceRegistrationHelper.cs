@@ -16,9 +16,7 @@ namespace OpenMod.Core.Ioc
         // At normal om running it already notified user
         public static IEnumerable<ServiceRegistration> FindFromAssembly<T>(Assembly assembly, ILogger? logger = null) where T : ServiceImplementationAttribute
         {
-#pragma warning disable CS0618 // this is just a warning for others using this method
             var types = assembly.GetLoadableTypes();
-#pragma warning restore CS0618 
             return types.Where(t => t.IsClass && !t.IsAbstract).FindServicesFromTypes<T>();
         }
 

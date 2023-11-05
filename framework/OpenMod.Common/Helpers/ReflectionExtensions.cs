@@ -109,9 +109,7 @@ namespace OpenMod.Common.Helpers
                 throw new ArgumentNullException(nameof(assembly));
             }
 
-#pragma warning disable CS0618 // this is just a warning for others using this method
             var types = assembly.GetLoadableTypes();
-#pragma warning restore CS0618
             return includeAbstractAndInterfaces ? types : types.Where(t => !t.IsAbstract && !t.IsInterface);
         }
 

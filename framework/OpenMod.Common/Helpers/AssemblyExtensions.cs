@@ -22,8 +22,9 @@ namespace OpenMod.Common.Helpers
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="assembly" /> is <see langword="null" />.
         /// </exception>
-        //This method is not really obsolete is more about warning others using it
-        [Obsolete("Avoid using this method, unless you don't care about missing types")]
+        /// <remarks>
+        /// Avoid using this method, unless you don't care about missing types
+        /// </remarks>
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {
             if (assembly == null)
