@@ -44,18 +44,15 @@ namespace OpenMod.Common.Helpers
 
         private static readonly Regex s_MissingFileAssemblyVersionRegex =
             new("'(?<assembly>\\S+?), Version=(?<version>.+?), ",
-                RegexOptions.Compiled); //TypeLoad detect to entries for this regex and one is wrong
+                RegexOptions.Compiled);
 
         private static readonly Regex s_TypeLoadAssemblyVersionRegex =
             new("assembly:(?<assembly>\\S+?), Version=(?<version>.+?), ",
-                RegexOptions.Compiled); //Missing file don't have assembly:
+                RegexOptions.Compiled);
 
         /// <summary>
-        /// Returns the set of key values where the key is a missing assembly name and the the value its the version.
+        /// Gets the missing assembly names based on ReflectionTypeLoadException
         /// </summary>
-        /// <exception cref="System.ArgumentNullException">
-        /// Thrown if <paramref name="reflectionTypeLoadException" /> is <see langword="null" />.
-        /// </exception>
         public static IEnumerable<AssemblyName> GetMissingDependencies(this ReflectionTypeLoadException reflectionTypeLoadException)
         {
             if (reflectionTypeLoadException == null)
