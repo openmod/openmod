@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using OpenMod.Common.Hotloading;
 
 namespace OpenMod.Core.Plugins
 {
@@ -81,8 +82,20 @@ namespace OpenMod.Core.Plugins
                     throw new ObjectDisposedException(nameof(PluginActivator));
                 }
 
+                var assemblyComparer = AssemblyNameEqualityComparer.Instance;
                 var dependencies = assembly.GetReferencedAssemblies();
-                var missingDependencies = dependencies.Where(s => !AppDomain.CurrentDomain.GetAssemblies().Any(c => c.GetName().Name.Equals(s.Name, StringComparison.OrdinalIgnoreCase))).ToList();
+                var missingDependencies = new List<AssemblyName>();
+                foreach (var dependency in dependencies)
+                {
+                    if (Hotloader.Enabled && Hotloader.ContainsAssembly(dependency))
+                        continue;
+
+                    if (AppDomain.CurrentDomain.GetAssemblies().Any(s => assemblyComparer.Equals(s.GetName(), dependency)))
+                        continue;
+
+                    missingDependencies.Add(dependency);
+                }
+
                 if (missingDependencies.Any())
                 {
                     m_Logger.LogWarning("Some dependencies for {Assembly} may be missing. Plugin will try to load anyways...", assembly.GetNameVersion());
