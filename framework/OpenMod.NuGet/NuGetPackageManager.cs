@@ -52,6 +52,7 @@ namespace OpenMod.NuGet
         private static readonly string[] s_PublisherBlacklist = new string[] { };
 
         private static readonly ConcurrentDictionary<string, List<Assembly>> s_LoadedPackages = new();
+        public bool AssemblyResolverInstalled => m_AssemblyResolverInstalled;
         private bool m_AssemblyResolverInstalled;
         private AssemblyLoader m_AssemblyLoader;
 

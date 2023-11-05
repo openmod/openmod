@@ -82,6 +82,9 @@ namespace OpenMod.Core.Commands.OpenModCommands
                         await PrintAsync(
                             $"No updates found for {result.Identity!.Id}.", Color.DarkGreen);
                         break;
+                    case NuGetInstallCode.InvalidVersion:
+                        await PrintAsync($"Failed to install \"{packageName}@{packageVersion}\": " + result.Code, Color.DarkRed);
+                        break;
                     default:
                         await PrintAsync($"Failed to install \"{packageName}\": " + result.Code, Color.DarkRed);
                         break;

@@ -158,7 +158,7 @@ namespace OpenMod.Unturned.Items
                 }
 
                 itemJar = inventory.items[page].getItem((byte)(inventory.items[page].getItemCount() - 1));
-                if (!player.equipment.isSelected && itemAsset.slot.canEquipInPage(page) && itemAsset.canPlayerEquip)
+                if (!player.equipment.HasValidUseable && itemAsset.slot.canEquipInPage(page) && itemAsset.canPlayerEquip)
                 {
                     player.equipment.ServerEquip(page, itemJar.x, itemJar.y);
                 }
@@ -180,7 +180,7 @@ namespace OpenMod.Unturned.Items
             }
 
             player.equipment.sendSlot(page);
-            if (!player.equipment.isSelected)
+            if (!player.equipment.HasValidUseable)
             {
                 player.equipment.ServerEquip(page, 0, 0);
             }
