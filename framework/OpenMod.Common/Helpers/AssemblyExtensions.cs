@@ -41,11 +41,11 @@ namespace OpenMod.Common.Helpers
             }
         }
 
-        public static readonly Regex MissingFileAssemblyVersionRegex =
+        private static readonly Regex s_MissingFileAssemblyVersionRegex =
             new("'(?<assembly>\\S+?), Version=(?<version>.+?), ",
                 RegexOptions.Compiled); //TypeLoad detect to entries for this regex and one is wrong
 
-        public static readonly Regex TypeLoadAssemblyVersionRegex =
+        private static readonly Regex s_TypeLoadAssemblyVersionRegex =
             new("assembly:(?<assembly>\\S+?), Version=(?<version>.+?), ",
                 RegexOptions.Compiled); //Missing file don't have assembly:
 
@@ -67,15 +67,12 @@ namespace OpenMod.Common.Helpers
             foreach (var loaderException in loaderExceptions)
             {
                 //TypeLoadException is just matching with MissingFileAssemblyVersionRegex
-                var match = MissingFileAssemblyVersionRegex.Match(loaderException.Message);
+                var match = s_MissingFileAssemblyVersionRegex.Match(loaderException.Message);
                 if (!match.Success)
-                    match = TypeLoadAssemblyVersionRegex.Match(loaderException.Message);
+                    match = s_TypeLoadAssemblyVersionRegex.Match(loaderException.Message);
 
                 if (!match.Success)
-                {
-                    Console.WriteLine("NOT MATCH " + loaderException.Message);
                     continue;
-                }
                 
                 var assemblyName = match.Groups["assembly"].Value;
                 var version = Version.Parse(match.Groups["version"].Value);
