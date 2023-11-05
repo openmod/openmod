@@ -60,11 +60,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
         {
             var sb = new StringBuilder();
 
-            sb.Append('[');
-            sb.Append(pageNumber);
-            sb.Append('/');
-            sb.Append(pageCount);
-            sb.Append("] OpenMod Plugins");
+            sb.Append($"[{pageNumber}/{pageCount}] OpenMod Plugins");
 
             await PrintAsync(sb.ToString(), Color.CornflowerBlue);
 
@@ -83,14 +79,11 @@ namespace OpenMod.Core.Commands.OpenModCommands
         private Task PrintPluginInfoAsync(IOpenModPlugin plugin, StringBuilder sb)
         {
             sb.Clear();
-            sb.Append(plugin.DisplayName);
-            sb.Append(" v");
-            sb.Append(plugin.Version);
+            sb.Append($"{plugin.DisplayName} v{plugin.Version}");
 
             if (!string.IsNullOrEmpty(plugin.Author))
             {
-                sb.Append(" by ");
-                sb.Append(plugin.Author);
+                sb.Append($" by {plugin.Author}");
             }
 
             return PrintAsync(sb.ToString(), Color.Green);
