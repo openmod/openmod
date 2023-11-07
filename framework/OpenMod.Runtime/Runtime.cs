@@ -376,7 +376,7 @@ namespace OpenMod.Runtime
             var createFileDataMethod = watcherType.GetMethod("CreateFileData", BindingFlags.Static | BindingFlags.NonPublic);
             if (createFileDataMethod == null)
             {
-                m_Logger.LogWarning("Watcher CreateFileData not found.");
+                m_Logger!.LogWarning("Watcher CreateFileData not found.");
                 return;
             }
 
