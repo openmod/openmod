@@ -37,7 +37,7 @@ namespace OpenMod.Core.Commands
 
             foreach (var type in m_CommandSourceTypes)
             {
-                sources.Add((ICommandSource)ActivatorUtilitiesEx.CreateInstance(lifetime, type));
+                sources.Add((ICommandSource)ActivatorUtilitiesEx.CreateInstance(lifetime!, type));
             }
 
             return sources;

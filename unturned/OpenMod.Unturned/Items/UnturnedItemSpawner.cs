@@ -236,7 +236,7 @@ namespace OpenMod.Unturned.Items
                     return;
 
                 case {ItemAmount: < 1}:
-                    throw new ArgumentException($"Item amount cannot be less than 1.", nameof(state));
+                    throw new ArgumentException("Item amount cannot be less than 1.", nameof(state));
 
                 case {ItemAmount: > byte.MaxValue}:
                     throw new ArgumentException($"Item amount cannot be more than {byte.MaxValue}.", nameof(state));

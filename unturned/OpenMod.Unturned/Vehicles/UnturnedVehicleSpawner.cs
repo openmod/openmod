@@ -48,27 +48,21 @@ namespace OpenMod.Unturned.Vehicles
                         position.ToUnityVector(), rotation.ToUnityQuaternion(), false, false, false,
                         false, fuel, health, batteryCharge, owner, group, locked, turrets, tireAliveMask);
 
-                    if (iVehicle != null)
+                    if (iVehicle == null)
+                        return vehicle;
+
+                    vehicle = new UnturnedVehicle(iVehicle);
+                    if (itemBatteryId != Guid.Empty)
                     {
-                        vehicle = new UnturnedVehicle(iVehicle);
+                        UnturnedVehicleState.BatteryItemGuidField?.SetValue(iVehicle, itemBatteryId);
+                    }
 
-                        if (itemBatteryId != Guid.Empty)
-                        {
-                            UnturnedVehicleState.BatteryItemGuidField?.SetValue(iVehicle, itemBatteryId);
-                        }
+                    if (items == null)
+                        return vehicle;
 
-                        if (items != null)
-                        {
-                            foreach (var item in items)
-                            {
-                                if (item == null)
-                                {
-                                    continue;
-                                }
-
-                                iVehicle.trunkItems.loadItem(item.x, item.y, item.rot, item.item);
-                            }
-                        }
+                    foreach (var item in items)
+                    {
+                        iVehicle.trunkItems.loadItem(item.x, item.y, item.rot, item.item);
                     }
                 }
                 else
@@ -107,7 +101,7 @@ namespace OpenMod.Unturned.Vehicles
             return SpawnVehicleAsync(position, rotation, vehicleAssetId, state);
         }
 
-        private void ReadState(byte[] buffer, out ushort skinID, out ushort mythicID,
+        private void ReadState(byte[] buffer, out ushort skinId, out ushort mythicId,
             out float roadPosition, out ushort fuel, out ushort health, out ushort batteryCharge, out Guid itemBatteryId,
             out CSteamID owner, out CSteamID group, out bool locked, out byte[][] turrets, out byte tireAliveMask, out ItemJar[]? items)
         {
@@ -127,17 +121,17 @@ namespace OpenMod.Unturned.Vehicles
                 reader.ReadUInt32(); // instanceId
             }
 
-            skinID = reader.ReadUInt16();
-            mythicID = reader.ReadUInt16();
+            skinId = reader.ReadUInt16();
+            mythicId = reader.ReadUInt16();
             roadPosition = reader.ReadSingle();
             fuel = reader.ReadUInt16();
             health = reader.ReadUInt16();
             batteryCharge = reader.ReadUInt16();
-
+            
             if (version >= UnturnedVehicleState.SaveDataVersionBatteryGuid)
             {
                 var guidBuffer = new byte[16];
-                reader.Read(guidBuffer, 0, 16);
+                _ = reader.Read(guidBuffer, 0, 16);
                 itemBatteryId = new Guid(guidBuffer);
             }
             else
@@ -156,7 +150,7 @@ namespace OpenMod.Unturned.Vehicles
             {
                 var stateLength = reader.ReadByte();
                 turrets[b] = new byte[stateLength];
-                reader.Read(turrets[b], 0, stateLength);
+                _ = reader.Read(turrets[b], 0, stateLength);
             }
 
             var hasTruckItems = reader.ReadBoolean();
@@ -180,13 +174,13 @@ namespace OpenMod.Unturned.Vehicles
                 var stateLength = reader.ReadByte();
                 var state = new byte[stateLength];
 
-                reader.Read(state, 0, stateLength);
+                _ = reader.Read(state, 0, stateLength);
 
-                if (Assets.find(EAssetType.ITEM, id) is ItemAsset)
-                {
-                    var item = new Item(id, amount, quality, state);
-                    items[b] = new(x, y, rot, item);
-                }
+                if (Assets.find(EAssetType.ITEM, id) is not ItemAsset)
+                    continue;
+
+                var item = new Item(id, amount, quality, state);
+                items[b] = new ItemJar(x, y, rot, item);
             }
         }
     }

@@ -22,7 +22,7 @@ namespace OpenMod.Unturned.Locations
 
         public Vector3 Position => DevkitNode.transform.position.ToSystemVector();
 
-        [Obsolete("Use " + nameof(DevkitNode) + " parameter")]
+        [Obsolete("Use " + nameof(DevkitNode) + " parameter", true)]
         public LocationNode Node => new(DevkitNode.transform.position, DevkitNode.locationName);
 
         public LocationDevkitNode DevkitNode { get; }

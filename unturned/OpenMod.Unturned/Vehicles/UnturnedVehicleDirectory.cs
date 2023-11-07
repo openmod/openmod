@@ -15,10 +15,10 @@ namespace OpenMod.Unturned.Vehicles
             var assets = new List<VehicleAsset>();
             Assets.find(assets);
 
-            var items = assets
-                .ConvertAll(d => new UnturnedVehicleAsset(d));
+            var unturnedVehicles = assets
+                .ConvertAll(v => new UnturnedVehicleAsset(v));
 
-            return Task.FromResult<IReadOnlyCollection<IVehicleAsset>>(items);
+            return Task.FromResult<IReadOnlyCollection<IVehicleAsset>>(unturnedVehicles);
         }
 
         public Task<IReadOnlyCollection<IVehicle>> GetVehiclesAsync()

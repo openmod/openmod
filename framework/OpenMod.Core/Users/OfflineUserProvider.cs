@@ -76,7 +76,7 @@ namespace OpenMod.Core.Users
 
             expireDate ??= DateTime.MaxValue;
             reason ??= m_StringLocalizer["ban_default"];
-            data.BanInfo = new BanData(reason, instigator, expireDate);
+            data.BanInfo = new BanData(reason!, instigator, expireDate);
 
             await m_UserDataStore.SetUserDataAsync(data);
             return true;
