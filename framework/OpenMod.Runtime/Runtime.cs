@@ -333,12 +333,12 @@ namespace OpenMod.Runtime
 
                 if (internalWatcherField == null)
                 {
-                    m_Logger.LogWarning("Fail to obtain file system watcher.");
+                    m_Logger!.LogWarning("Fail to obtain file system watcher.");
                     return;
                 }
 
                 var internalWatcher = internalWatcherField.GetValue(tempFileSystemWatcher);
-                m_Logger.LogInformation("Using watcher: {FileWatcherImplementation}", internalWatcher.GetType().Name);
+                m_Logger!.LogInformation("Using watcher: {FileWatcherImplementation}", internalWatcher.GetType().Name);
                 return;
             }
 
@@ -346,14 +346,14 @@ namespace OpenMod.Runtime
                 .GetType("System.IO.DefaultWatcher");
             if (defaultWatcherType == null)
             {
-                m_Logger.LogWarning("Fail to obtain default watcher type.");
+                m_Logger!.LogWarning("Fail to obtain default watcher type.");
                 return;
             }
 
             var watcherInstanceField = defaultWatcherType.GetField("instance", BindingFlags.Static | BindingFlags.NonPublic);
             if (watcherInstanceField == null)
             {
-                m_Logger.LogWarning("Fail to obtain watcher istance.");
+                m_Logger!.LogWarning("Fail to obtain watcher istance.");
                 return;
             }
 
@@ -363,13 +363,13 @@ namespace OpenMod.Runtime
 
             if (watchesField == null)
             {
-                m_Logger.LogWarning("Fail to obtain watches field.");
+                m_Logger!.LogWarning("Fail to obtain watches field.");
                 return;
             }
 
             if (watchesField.GetValue(watcherInstance) is not Hashtable watches)
             {
-                m_Logger.LogWarning("Watches is not Hashtable.");
+                m_Logger!.LogWarning("Watches is not Hashtable.");
                 return;
             }
 
@@ -595,7 +595,7 @@ namespace OpenMod.Runtime
             m_DateLogger = null;
             m_LoggerFactory = null;
             m_Logger = null;
-            
+
             Log.CloseAndFlush();
         }
     }
