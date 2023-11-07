@@ -10,7 +10,7 @@ namespace OpenMod.NuGet
         public string AssemblyName
         {
             get { return AssemblyName2.Name; }
-            set { /* ignore set */ }
+            set { AssemblyName2.Name = value; }
         }
         public AssemblyName AssemblyName2 { get; set; } = null!;
 
@@ -18,7 +18,7 @@ namespace OpenMod.NuGet
         public Version Version
         {
             get { return AssemblyName2.Version; }
-            set { /* ignore set */ }
+            set { AssemblyName2.Version = value; }
         }
 
         public WeakReference Assembly { get; set; } = null!;

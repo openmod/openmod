@@ -227,7 +227,7 @@ namespace OpenMod.Runtime
                         ConfigureAppConfiguration(context, builder, startup);
                     })
                     .ConfigureContainer<ContainerBuilder>(builder => SetupContainer(builder, startup))
-                    .ConfigureServices((context, services) =>
+                    .ConfigureServices((_, services) =>
                     {
                         SetupServices(services, startup);
                     })
@@ -339,6 +339,8 @@ namespace OpenMod.Runtime
             await InitAsync(m_OpenModHostAssemblies!, m_RuntimeInitParameters!, m_HostBuilderFunc);
         }
 
+        private static readonly Type s_FileSytemWatcherType = typeof(FileSystemWatcher);
+
         private void PerformFileSystemWatcherPatch()
         {
             if (!RuntimeEnvironmentHelper.IsMono)
@@ -350,29 +352,57 @@ namespace OpenMod.Runtime
             {
                 using var tempFileSystemWatcher = new FileSystemWatcher();
 
-                var internalWatcher = typeof(FileSystemWatcher)
-                    .GetField("watcher", BindingFlags.Instance | BindingFlags.NonPublic)
-                    .GetValue(tempFileSystemWatcher);
+                var internalWatcherField = s_FileSytemWatcherType
+                    .GetField("watcher", BindingFlags.Instance | BindingFlags.NonPublic);
 
+                if (internalWatcherField == null)
+                {
+                    m_Logger.LogWarning("Fail to obtain file system watcher.");
+                    return;
+                }
+
+                var internalWatcher = internalWatcherField.GetValue(tempFileSystemWatcher);
                 m_Logger.LogInformation("Using watcher: {FileWatcherImplementation}", internalWatcher.GetType().Name);
                 return;
             }
 
-            var watcher = typeof(FileSystemWatcher).Assembly
-                .GetType("System.IO.DefaultWatcher")
-                .GetField("instance", BindingFlags.Static | BindingFlags.NonPublic)
-                .GetValue(null);
-
-            var watcherType = watcher.GetType();
-
-            if (watcherType
-                .GetField("watches", BindingFlags.Static | BindingFlags.NonPublic)
-                .GetValue(watcher) is not Hashtable watches)
+            var defaultWatcherType = s_FileSytemWatcherType.Assembly
+                .GetType("System.IO.DefaultWatcher");
+            if (defaultWatcherType == null)
             {
-                throw new Exception("watches is not Hashtable");
+                m_Logger.LogWarning("Fail to obtain default watcher type.");
+                return;
+            }
+
+            var watcherInstanceField = defaultWatcherType.GetField("instance", BindingFlags.Static | BindingFlags.NonPublic);
+            if (watcherInstanceField == null)
+            {
+                m_Logger.LogWarning("Fail to obtain watcher istance.");
+                return;
+            }
+
+            var watcherInstance = watcherInstanceField.GetValue(null);
+            var watcherType = watcherInstance.GetType();
+            var watchesField = watcherType.GetField("watches", BindingFlags.Static | BindingFlags.NonPublic);
+
+            if (watchesField == null)
+            {
+                m_Logger.LogWarning("Fail to obtain watches field.");
+                return;
+            }
+
+            if (watchesField.GetValue(watcherInstance) is not Hashtable watches)
+            {
+                m_Logger.LogWarning("Watches is not Hashtable.");
+                return;
             }
 
             var createFileDataMethod = watcherType.GetMethod("CreateFileData", BindingFlags.Static | BindingFlags.NonPublic);
+            if (createFileDataMethod == null)
+            {
+                m_Logger.LogWarning("Watcher CreateFileData not found.");
+                return;
+            }
 
             lock (watches)
             {
@@ -393,7 +423,7 @@ namespace OpenMod.Runtime
                     var watcherDataType = entry.Value.GetType();
 
                     incSubdirsField ??= watcherDataType.GetField("IncludeSubdirs", BindingFlags.Public | BindingFlags.Instance);
-                    if (incSubdirsField?.GetValue(entry.Value) is bool incSubdirs && !incSubdirs)
+                    if (incSubdirsField?.GetValue(entry.Value) is false)//convert to bool and check if false
                     {
                         continue;
                     }
@@ -448,7 +478,7 @@ namespace OpenMod.Runtime
 
         private void ConfigureAppConfiguration(HostBuilderContext? hostBuilderContext, IConfigurationBuilder builder, IOpenModStartup? startup = null)
         {
-            m_DateLogger ??= DateTime.Now;
+            var dateLogger = m_DateLogger ??= DateTime.Now;
 
             if (hostBuilderContext != null && startup?.Context is OpenModStartupContext context)
             {
@@ -466,7 +496,7 @@ namespace OpenMod.Runtime
                     s.Variables = new Dictionary<string, string>
                     {
                         { "workingDirectory", WorkingDirectory.Replace(@"\", "/") },
-                        { "date", m_DateLogger.Value.ToString("yyyy-MM-dd-HH-mm-ss") }
+                        { "date", dateLogger.ToString("yyyy-MM-dd-HH-mm-ss") }
                     };
                 });
         }
@@ -474,7 +504,7 @@ namespace OpenMod.Runtime
         private void SetupServices(IServiceCollection services, OpenModStartup startup)
         {
             services.AddSingleton<IRuntime>(this);
-            services.AddSingleton(HostInformation);
+            services.AddSingleton(HostInformation!);
             services.AddHostedService<OpenModHostedService>();
             services.AddOptions();
             services.AddSingleton(((OpenModStartupContext)startup.Context).NuGetPackageManager);
@@ -488,10 +518,7 @@ namespace OpenMod.Runtime
 
         private void SetupSerilog(LoggerConfiguration? loggerConfiguration = null, IConfiguration? configuration = null)
         {
-            Serilog.Debugging.SelfLog.Enable(s =>
-            {
-                Console.WriteLine(s);
-            });
+            Serilog.Debugging.SelfLog.Enable(Console.WriteLine);
 
             Log.CloseAndFlush();
             loggerConfiguration ??= new LoggerConfiguration();
@@ -547,26 +574,28 @@ namespace OpenMod.Runtime
             }
 
             // setup global log only for first time (before loading NuGet packages)
-            if (m_LoggerFactory == null)
+            if (m_LoggerFactory != null)
             {
-                Log.Logger = loggerConfiguration.CreateLogger();
-                m_LoggerFactory = new SerilogLoggerFactory();
-                m_Logger = m_LoggerFactory.CreateLogger<Runtime>();
+                return;
             }
 
-            void SetupDefaultLogger(LoggerConfiguration configuration)
-            {
-                const string defaultConsoleLogTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
-                const string defaultFileLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
+            Log.Logger = loggerConfiguration.CreateLogger();
+            m_LoggerFactory = new SerilogLoggerFactory();
+            m_Logger = m_LoggerFactory.CreateLogger<Runtime>();
+        }
 
-                m_DateLogger ??= DateTime.Now;
-                var logFilePath = $"{WorkingDirectory}/logs/openmod-{m_DateLogger:yyyy-MM-dd-HH-mm-ss}.log"
-                    .Replace(@"\", "/");
+        private void SetupDefaultLogger(LoggerConfiguration loggerConfiguration)
+        {
+            const string defaultConsoleLogTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
+            const string defaultFileLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}";
 
-                configuration
-                   .WriteTo.Async(c => c.Console(LogEventLevel.Information, defaultConsoleLogTemplate))
-                   .WriteTo.Async(c => c.File(logFilePath, LogEventLevel.Information, outputTemplate: defaultFileLogTemplate));
-            }
+            m_DateLogger ??= DateTime.Now;
+            var logFilePath = $"{WorkingDirectory}/logs/openmod-{m_DateLogger:yyyy-MM-dd-HH-mm-ss}.log"
+                .Replace(@"\", "/");
+
+            loggerConfiguration
+                .WriteTo.Async(c => c.Console(LogEventLevel.Information, defaultConsoleLogTemplate))
+                .WriteTo.Async(c => c.File(logFilePath, LogEventLevel.Information, outputTemplate: defaultFileLogTemplate));
         }
 
         public async Task ShutdownAsync()
@@ -590,6 +619,7 @@ namespace OpenMod.Runtime
             m_DateLogger = null;
             m_LoggerFactory = null;
             m_Logger = null;
+            
             Log.CloseAndFlush();
         }
     }

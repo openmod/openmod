@@ -356,7 +356,7 @@ namespace OpenMod.Unturned.Users
             var data = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
             if (data != null)
             {
-                data.BanInfo = new BanData(reason, instigator, expireDate);
+                data.BanInfo = new BanData(reason!, instigator, expireDate);
                 await m_UserDataStore.SetUserDataAsync(data);
             }
 

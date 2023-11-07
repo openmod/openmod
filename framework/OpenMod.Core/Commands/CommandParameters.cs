@@ -47,7 +47,7 @@ namespace OpenMod.Core.Commands
 
             if (Length <= index)
             {
-                throw new CommandIndexOutOfRangeException(m_OpenModStringLocalizer["commands:errors:out_of_range_error", new { Index = index, Type = type, Length }], index, Length);
+                throw new CommandIndexOutOfRangeException(m_OpenModStringLocalizer["commands:errors:out_of_range_error", new { Index = index, Type = type, Length }]!, index, Length);
             }
 
             if (index < 0)
@@ -63,7 +63,7 @@ namespace OpenMod.Core.Commands
                 return value;
             }
 
-            throw new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:parse_error", new { Value = arg, Type = type }], arg, type);
+            throw new CommandParameterParseException(m_OpenModStringLocalizer["commands:errors:parse_error", new { Value = arg, Type = type }]!, arg, type);
         }
 
         /// <inheritdoc />

@@ -81,7 +81,7 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             ];
 
             AsyncHelper.RunSync(() =>
-                actor.PrintMessageAsync(message, Color.Red)
+                actor.PrintMessageAsync(message!, Color.Red)
             );
         }
     }
