@@ -76,7 +76,7 @@ namespace OpenMod.Core.Commands
             {
                 var exceptionContext = new CommandContext(null, actor, args.First(), prefix,  args.Skip(1).ToList(), m_LifetimeScope.BeginLifetimeScopeEx());
                 var localizer = m_LifetimeScope.Resolve<IOpenModStringLocalizer>();
-                exceptionContext.Exception = new CommandNotFoundException(localizer["commands:errors:not_found", new { CommandName = args[0], Args = args }]);
+                exceptionContext.Exception = new CommandNotFoundException(localizer["commands:errors:not_found", new { CommandName = args[0], Args = args }]!);
                 //await actor.PrintMessageAsync(Color.Red, exceptionContext.Exception.Message);
                 return exceptionContext;
             }

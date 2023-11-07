@@ -38,7 +38,7 @@ namespace OpenMod.Core.Users
             {
             	return null;
             }
-            
+
             return new OfflineUser(this, m_UserDataStore, data);
         }
 
@@ -57,7 +57,7 @@ namespace OpenMod.Core.Users
         {
             return Task.CompletedTask;
         }
-        
+
         public Task<bool> BanAsync(IUser user, string? reason = null, DateTime? endTime = null)
         {
             return BanAsync(user, instigator: null, reason, endTime);
@@ -76,7 +76,7 @@ namespace OpenMod.Core.Users
 
             expireDate ??= DateTime.MaxValue;
             reason ??= m_StringLocalizer["ban_default"];
-            data.BanInfo = new BanData(reason, instigator, expireDate);
+            data.BanInfo = new BanData(reason!, instigator, expireDate);
 
             await m_UserDataStore.SetUserDataAsync(data);
             return true;

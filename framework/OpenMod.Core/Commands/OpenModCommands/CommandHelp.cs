@@ -75,7 +75,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 if (context.CommandRegistration == null)
                 {
                     await PrintAsync(m_StringLocalizer["commands:errors:not_found",
-                        new { CommandName = context.GetCommandLine(includeArguments: false) }], Color.Red);
+                        new { CommandName = context.GetCommandLine(includeArguments: false) }]!, Color.Red);
                     return;
                 }
 

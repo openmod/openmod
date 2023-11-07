@@ -196,7 +196,7 @@ namespace OpenMod.Unturned.RocketMod.Economy
                     {
                         throw new NotEnoughBalanceException(
                             m_StringLocalizer["rocket:uconomy:not_enough_balance",
-                                new {Balance = balance, EconomyProvider = this}], balance);
+                                new {Balance = balance, EconomyProvider = this}]!, balance);
                     }
                 }
 
