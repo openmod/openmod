@@ -317,16 +317,16 @@ namespace OpenMod.Runtime
                     if (!missingOpenmodDepedencies)
                     {
                         missingOpenmodDepedencies = true;
-                        m_Logger.LogWarning("Some OpenMod dependencies are missing, OpenMod could not work properly.");
+                        m_Logger!.LogWarning("Some OpenMod dependencies are missing, OpenMod could not work properly.");
                     }
 
                     assembliesTypes.AddRange(ex.Types.Where(t => t != null));
 
-                    m_Logger.LogDebug(ex, "Missing dependencies");
-                    m_Logger.LogWarning("Some types from assembly {Assembly} couldn't be loaded.", openModHostAssembly.FullName);
+                    m_Logger!.LogDebug(ex, "Missing dependencies");
+                    m_Logger!.LogWarning("Some types from assembly {Assembly} couldn't be loaded.", openModHostAssembly.FullName);
 
                     var missingDependencies = ex.GetMissingDependencies();
-                    m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies));
+                    m_Logger!.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies));
                 }
             }
 
