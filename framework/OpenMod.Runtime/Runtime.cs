@@ -15,6 +15,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NuGet.Common;
 using OpenMod.API;
+using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.Common.Helpers;
@@ -105,20 +106,6 @@ namespace OpenMod.Runtime
                     openModHostAssemblies.Insert(0, openModCoreAssembly);
                 }
 
-                var hostInformationType = openModHostAssemblies
-                    .Select(asm =>
-                        asm.GetLoadableTypes()
-                            .FirstOrDefault(t => typeof(IHostInformation).IsAssignableFrom(t)))
-                    .LastOrDefault(d => d != null);
-
-#pragma warning disable IDE0270
-                if (hostInformationType == null)
-                {
-                    throw new Exception("Failed to find IHostInformation in host assemblies.");
-                }
-#pragma warning restore IDE0270
-
-                HostInformation = (IHostInformation)Activator.CreateInstance(hostInformationType);
                 m_OpenModHostAssemblies = openModHostAssemblies;
                 m_HostBuilderFunc = hostBuilderFunc;
                 m_RuntimeInitParameters = parameters;
@@ -138,6 +125,9 @@ namespace OpenMod.Runtime
 
                 m_Logger!.LogInformation("OpenMod v{Version} is starting...", Version);
 
+                var hostInformationType = GetOpenmodHostInformation(openModHostAssemblies) ?? throw new Exception("Failed to find IHostInformation in host assemblies.");
+                HostInformation = (IHostInformation)Activator.CreateInstance(hostInformationType);
+
                 if (parameters.PackageManager is not NuGetPackageManager nugetPackageManager)
                 {
                     var packagesDirectory = Path.Combine(WorkingDirectory, "packages");
@@ -147,7 +137,6 @@ namespace OpenMod.Runtime
                 nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory!.CreateLogger("NuGet"));
 
                 await nugetPackageManager.RemoveOutdatedPackagesAsync();
-                nugetPackageManager.InstallAssemblyResolver();
                 nugetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
 
                 var startupContext = new OpenModStartupContext
@@ -247,6 +236,9 @@ namespace OpenMod.Runtime
                         SetupSerilog(configuration, context.Configuration);
                     });
 
+                //TODO maybe add here dependencies missing msg
+                //assembly.GetTypes() dont throw exception here
+                //but after hostBuilder.Build() it does
                 Host = hostBuilder.Build();
 
                 m_LoggerFactory = Host.Services.GetRequiredService<ILoggerFactory>();
@@ -307,6 +299,38 @@ namespace OpenMod.Runtime
                 Console.WriteLine(ex);
                 throw;
             }
+        }
+
+        private Type? GetOpenmodHostInformation(IEnumerable<Assembly> openModHostAssemblies)
+        {
+            var missingOpenmodDepedencies = false;
+            var assembliesTypes = new List<Type>();
+
+            foreach (var openModHostAssembly in openModHostAssemblies)
+            {
+                try
+                {
+                    assembliesTypes.AddRange(openModHostAssembly.GetTypes());
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    if (!missingOpenmodDepedencies)
+                    {
+                        missingOpenmodDepedencies = true;
+                        m_Logger.LogWarning("Some OpenMod dependencies are missing, OpenMod could not work properly.");
+                    }
+
+                    assembliesTypes.AddRange(ex.Types.Where(t => t != null));
+
+                    m_Logger.LogDebug(ex, "Missing dependencies");
+                    m_Logger.LogWarning("Some types from assembly {Assembly} couldn't be loaded.", openModHostAssembly.FullName);
+
+                    var missingDependencies = ex.GetMissingDependencies();
+                    m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies));
+                }
+            }
+
+            return assembliesTypes.FirstOrDefault(t => t.IsAssignableTo<IHostInformation>());
         }
 
         public async Task PerformSoftReloadAsync()
@@ -452,7 +476,7 @@ namespace OpenMod.Runtime
             startup.ConfigureConfiguration(builder);
         }
 
-        private void ConfigureAppConfiguration(HostBuilderContext? hostBuilderContext, IConfigurationBuilder builder, OpenModStartup? startup = null)
+        private void ConfigureAppConfiguration(HostBuilderContext? hostBuilderContext, IConfigurationBuilder builder, IOpenModStartup? startup = null)
         {
             var dateLogger = m_DateLogger ??= DateTime.Now;
 

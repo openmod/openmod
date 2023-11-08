@@ -5,14 +5,14 @@ using NuGet.Versioning;
 using OpenMod.API;
 using OpenMod.API.Plugins;
 using OpenMod.NuGet;
-using Semver;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using OpenMod.Common.Helpers;
+using OpenMod.Common.Hotloading;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -167,17 +167,28 @@ namespace OpenMod.Core.Plugins
                             providerAssembly.GetName().Name);
                     }
 
-                    var missingAssemblies = CheckRequiredDependencies(ex.LoaderExceptions);
+                    var missingAssemblies = ex.GetMissingDependencies().ToList();
+                    m_Logger.LogWarning(
+                        "Couldn't load plugin from {ProviderAssembly}: Failed to resolve required dependencies: {MissingAssemblies}",
+                        providerAssembly, string.Join(", ", missingAssemblies));
+
                     if (!TryInstallMissingDependencies)
                     {
-                        m_Logger.LogWarning(
-                            "Couldn't load plugin from {ProviderAssembly}: Failed to resolve required dependencies: {MissingAssemblies}",
-                            providerAssembly, string.Join(", ", missingAssemblies.Keys));
                         continue;
                     }
 
+                    m_Logger.LogWarning("Trying to install missing dependencies");
+
+                    var success = await TryInstallRequiredDependenciesAsync(providerAssembly, missingAssemblies);
+                    if (!Hotloader.Enabled)
+                        continue;
+
                     //todo check result and try reload lib
-                    await TryInstallRequiredDependenciesAsync(providerAssembly, missingAssemblies);
+                    //todo this implementation we will need a new API Interface with a collection of assemblies names
+                    //also it must have a method to try load an assembly individually
+                    //behaviour
+                    //fail to install dependencies -> ignore
+                    //success installing dependencies -> ask store our assembly source to load assembly again(hotloader needs to be on).
                     continue;
                 }
 
@@ -196,66 +207,18 @@ namespace OpenMod.Core.Plugins
             return providerAssemblies;
         }
 
-        private static readonly Regex s_MissingFileAssemblyVersionRegex =
-            new("'(?<assembly>.+?), Version=(?<version>.+?), ",
-                RegexOptions.Compiled); //TypeLoad detect to entriers for this regex and one is wrong
-
-        private static readonly Regex s_TypeLoadAssemblyVersionRegex =
-            new("assembly:(?<assembly>.+?), Version=(?<version>.+?), ",
-                RegexOptions.Compiled); //Missing file dont have assembly:
-
-        // ReSharper disable once MemberCanBeMadeStatic.Local
-        private Dictionary<string, SemVersion> CheckRequiredDependencies(IEnumerable<Exception> exLoaderExceptions)
-        {
-            var missingAssemblies = new Dictionary<string, SemVersion>(StringComparer.Ordinal);
-            foreach (var typeEx in exLoaderExceptions)
-            {
-                Match match;
-                switch (typeEx)
-                {
-                    case TypeLoadException:
-                        match = s_TypeLoadAssemblyVersionRegex.Match(typeEx.Message);
-                        break;
-
-                    case FileNotFoundException:
-                        match = s_MissingFileAssemblyVersionRegex.Match(typeEx.Message);
-                        break;
-
-                    default:
-                        continue;
-                }
-
-                if (!match.Success)
-                    continue;
-
-                var assemblyName = match.Groups["assembly"].Value;
-                var version = Version.Parse(match.Groups["version"].Value);
-
-                //Example: Version is 1.1.2.0 to SemVersion is 1.1.0+2 but we need 1.1.2 to install from nuget
-                var assemblyVersion = new SemVersion(version.Major, version.Minor, version.Build);
-                if (missingAssemblies.TryGetValue(assemblyName, out var versionToInstall) &&
-                    SemVersion.ComparePrecedence(versionToInstall, assemblyVersion) > 0)
-                    continue;
-
-                missingAssemblies[assemblyName] = assemblyVersion;
-            }
-
-            return missingAssemblies;
-        }
-
         // ReSharper disable once UnusedMethodReturnValue.Local
         private async Task<bool> TryInstallRequiredDependenciesAsync(Assembly providerAssembly,
-            Dictionary<string, SemVersion> missingAssemblies)
+            IEnumerable<AssemblyName> missingAssemblies)
         {
             foreach (var assembly in missingAssemblies)
             {
-                var packagetToInstall =
-                    await m_NuGetPackageManager.QueryPackageExactAsync(assembly.Key, assembly.Value.ToString());
+                var packagetToInstall = await m_NuGetPackageManager.QueryPackageExactAsync(assembly.Name, assembly.Version.ToString(3));
                 if (packagetToInstall == null)
                 {
                     m_Logger.LogWarning(
                         "Package not found: {AssemblyName}. Plugin \"{ProviderAssemblyName}\" can't load without it!",
-                        assembly.Key, providerAssembly.GetName().Name);
+                        assembly.Name, providerAssembly.GetName().Name);
                     return false;
                 }
 
@@ -265,7 +228,7 @@ namespace OpenMod.Core.Plugins
                 {
                     m_Logger.LogWarning(
                         "Failed to install \"{AssemblyName}\": {ResultCode}. Plugin \"{ProviderAssemblyName}\" can't load without it!",
-                        assembly.Key, result.Code, providerAssembly.GetName().Name);
+                        assembly.Name, result.Code, providerAssembly.GetName().Name);
                     return false;
                 }
             }

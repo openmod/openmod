@@ -70,6 +70,7 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 return;
             }
 
+            sb.Clear();
             foreach (var plugin in plugins)
             {
                 await PrintPluginInfoAsync(plugin, sb);

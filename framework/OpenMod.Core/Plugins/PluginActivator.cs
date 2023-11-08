@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using OpenMod.Common.Hotloading;
 
 namespace OpenMod.Core.Plugins
 {
@@ -81,6 +82,37 @@ namespace OpenMod.Core.Plugins
                     throw new ObjectDisposedException(nameof(PluginActivator));
                 }
 
+                var assemblyComparer = AssemblyNameEqualityComparer.Instance;
+                var dependencies = assembly.GetReferencedAssemblies();
+                var missingDependencies = new List<AssemblyName>();
+                foreach (var dependency in dependencies)
+                {
+                    if (Hotloader.Enabled && Hotloader.ContainsAssembly(dependency))
+                        continue;
+
+                    if (AppDomain.CurrentDomain.GetAssemblies().Any(s => assemblyComparer.Equals(s.GetName(), dependency)))
+                        continue;
+
+                    missingDependencies.Add(dependency);
+                }
+
+                if (missingDependencies.Any())
+                {
+                    m_Logger.LogWarning("Some dependencies for {Assembly} may be missing. Plugin will try to load anyways...", assembly.GetNameVersion());
+                    m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies.Select(s => s.GetNameVersion())));
+                }
+
+                Type[] assemblyTypes;
+                try
+                {
+                    assemblyTypes = assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    assemblyTypes = ex.Types.Where(t => t != null).ToArray();
+                    m_Logger.LogDebug(ex, "ReflectionTypeLoadException {Assembly}", assembly.GetNameVersion());
+                }
+
                 var pluginMetadata = assembly.GetCustomAttribute<PluginMetadataAttribute>();
                 if (pluginMetadata == null)
                 {
@@ -89,22 +121,21 @@ namespace OpenMod.Core.Plugins
                         assembly);
                     return null;
                 }
-
-                var pluginTypes = assembly.FindTypes<IOpenModPlugin>().ToList();
-                if (pluginTypes.Count == 0)
+                
+                var pluginTypes = assemblyTypes.FindTypes<IOpenModPlugin>().ToArray();
+                switch (pluginTypes.Length)
                 {
-                    m_Logger.LogError(
-                        "Failed to load plugin from assembly {Assembly}: couldn't find any IOpenModPlugin implementation",
-                        assembly);
-                    return null;
-                }
+                    case 0:
+                        m_Logger.LogError(
+                            "Failed to load plugin from assembly {Assembly}: couldn't find any IOpenModPlugin implementation",
+                            assembly);
+                        return null;
 
-                if (pluginTypes.Count > 1)
-                {
-                    m_Logger.LogError(
-                        "Failed to load plugin from assembly {Assembly}: assembly has multiple IOpenModPlugin instances",
-                        assembly);
-                    return null;
+                    case > 1:
+                        m_Logger.LogError(
+                            "Failed to load plugin from assembly {Assembly}: assembly has multiple IOpenModPlugin instances",
+                            assembly);
+                        return null;
                 }
 
                 var pluginType = pluginTypes.Single();
@@ -167,9 +198,7 @@ namespace OpenMod.Core.Plugins
                             .SingleInstance()
                             .OwnedByLifetimeScope();
 
-                        var services =
-                            ServiceRegistrationHelper.FindFromAssembly<PluginServiceImplementationAttribute>(assembly,
-                                m_Logger);
+                        var services = assemblyTypes.FindServicesFromTypes<PluginServiceImplementationAttribute>(m_Logger, assembly.FullName);
 
                         var servicesRegistrations = services.OrderBy(d => d.Priority,
                             new PriorityComparer(PriortyComparisonMode.LowestFirst));
@@ -191,7 +220,7 @@ namespace OpenMod.Core.Plugins
                             }
                         }
 
-                        foreach (var type in pluginType.Assembly.FindTypes<IPluginContainerConfigurator>())
+                        foreach (var type in assemblyTypes.FindTypes<IPluginContainerConfigurator>())
                         {
                             var configurator = (IPluginContainerConfigurator)ActivatorUtilitiesEx.CreateInstance(m_LifetimeScope, type);
                             configurator.ConfigureContainer(new PluginServiceConfigurationContext(m_LifetimeScope, configuration, containerBuilder, pluginWorkingDirectory));
