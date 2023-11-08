@@ -31,7 +31,7 @@ namespace OpenMod.Common.Hotloading
 
         static Hotloader()
         {
-            s_Assemblies = new(AssemblyNameEqualityComparer.Instance);
+            s_Assemblies = new Dictionary<AssemblyName, Assembly>(AssemblyNameEqualityComparer.Instance);
             s_IsMono = Type.GetType("Mono.Runtime") is not null;
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
         }
@@ -160,6 +160,15 @@ namespace OpenMod.Common.Hotloading
         public static Assembly? FindAssembly(AssemblyName name)
         {
             return s_Assemblies.TryGetValue(name, out var assembly) ? assembly : null;
+        }
+
+        /// <summary>
+        /// Checks if hotloader contains assembly.
+        /// </summary>
+        /// <param name="name">The assembly name to check.</param>
+        public static bool ContainsAssembly(AssemblyName name)
+        {
+            return s_Assemblies.ContainsKey(name);
         }
 
         /// <summary>

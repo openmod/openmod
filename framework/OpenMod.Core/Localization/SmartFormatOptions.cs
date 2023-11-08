@@ -162,9 +162,7 @@ public class SmartFormatOptions
 
     public SmartFormatter GetSmartFormatter()
     {
-#pragma warning disable CS0618 // Obsolete for other developers that uses this helper
         return SmartFormatterHelper.ObtainSmartFormatter(this);
-#pragma warning restore CS0618
     }
 
     internal SmartFormatter CreateSmartFormatter()

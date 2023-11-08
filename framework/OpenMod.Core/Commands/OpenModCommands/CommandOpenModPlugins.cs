@@ -40,9 +40,10 @@ namespace OpenMod.Core.Commands.OpenModCommands
                 await PrintAsync("No plugins found.", Color.Red);
             }
 
+            var sb = new StringBuilder();
             foreach (var plugin in plugins)
             {
-                var sb = new StringBuilder(); // lgtm [cs/stringbuilder-creation-in-loop]
+                sb.Clear();
                 sb.Append($"{plugin.DisplayName} v{plugin.Version}");
 
                 if (!string.IsNullOrEmpty(plugin.Author))

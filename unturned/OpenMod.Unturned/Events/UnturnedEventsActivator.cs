@@ -29,7 +29,7 @@ namespace OpenMod.Unturned.Events
         {
             m_Logger.LogTrace("Activating unturned events listeners");
 
-            var listenerTypes = GetType().Assembly.FindTypes<IUnturnedEventsListener>(false).ToList();
+            var listenerTypes = GetType().Assembly.FindTypes<IUnturnedEventsListener>();
             foreach (var type in listenerTypes)
             {
                 var eventsListener = (IUnturnedEventsListener)ActivatorUtilitiesEx.CreateInstance(m_LifetimeScope, type);
@@ -66,7 +66,7 @@ namespace OpenMod.Unturned.Events
 
         private void SubscribePlayer(SteamPlayer player)
         {
-            if (player == null || player.player == null) return;
+            if (player.player == null) return;
 
             foreach (var eventsListener in m_UnturnedEventsListeners.OfType<IUnturnedPlayerEventsListener>())
             {
@@ -76,7 +76,7 @@ namespace OpenMod.Unturned.Events
 
         private void UnsubscribePlayer(SteamPlayer player)
         {
-            if (player == null || player.player == null) return;
+            if (player.player == null) return;
 
             foreach (var eventsListener in m_UnturnedEventsListeners.OfType<IUnturnedPlayerEventsListener>())
             {

@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using NuGet.Packaging;
 using OpenMod.API;
@@ -169,17 +170,24 @@ namespace OpenMod.Runtime
 
         internal void SetupServices(IServiceCollection serviceCollection)
         {
-            var sortedSources = m_PluginAssembliesSources
-                .OrderBy(d =>
-                        d.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Priority ?? Priority.Normal
-                    , new PriorityComparer(PriortyComparisonMode.LowestFirst));
-
-            foreach (var source in sortedSources)
+            var sourceServices = new SortedSet<ServiceRegistration>(new PriorityComparer(PriortyComparisonMode.LowestFirst));
+            m_PluginAssembliesSources.ForEach(source =>
             {
-                var lifetime = source.GetType().GetCustomAttribute<ServiceImplementationAttribute>()?.Lifetime ??
-                               ServiceLifetime.Singleton;
-                serviceCollection.Add(new ServiceDescriptor(source.GetType(), source.GetType(), lifetime));
-            }
+                var sourceType = source.GetType();
+                var serviceImplementationAttribute = sourceType.GetCustomAttribute<ServiceImplementationAttribute>();
+
+                var priority = serviceImplementationAttribute?.Priority ?? Priority.Normal;
+                var serviceRegistration = new ServiceRegistration()
+                {
+                    ServiceImplementationType = sourceType,
+                    Priority = priority,
+                    Lifetime = serviceImplementationAttribute?.Lifetime ?? ServiceLifetime.Singleton
+                };
+
+                sourceServices.Add(serviceRegistration);
+            });
+
+            serviceCollection.Add(sourceServices.Select(s => new ServiceDescriptor(s.ServiceImplementationType, s.ServiceImplementationType, s.Lifetime)));
 
             serviceCollection.AddSingleton<IPluginAssemblyStore>(m_PluginAssemblyStore);
             var serviceConfiguratorTypes = m_Assemblies

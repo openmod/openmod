@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -30,8 +31,10 @@ namespace OpenMod.Core.Commands
 
         private void ScanAssemblyForCommmmands(Assembly assembly)
         {
-            var types = assembly.FindTypes<ICommand>();
-            foreach (var type in types)
+            var assemblyTypes = assembly.FindAllTypes().ToList();
+            var commandTypes = assemblyTypes.FindTypes<ICommand>();
+
+            foreach (var type in commandTypes)
             {
                 if (type.GetCustomAttribute<DontAutoRegister>(false) != null)
                 {
@@ -50,9 +53,10 @@ namespace OpenMod.Core.Commands
                 var registatration = new OpenModComponentBoundCommandRegistration(m_OpenModComponent, type);
 
                 m_Commands.Add(registatration);
+
             }
 
-            foreach (var type in assembly.GetLoadableTypes())
+            foreach (var type in assemblyTypes)
             {
                 ScanTypeForCommands(type);
             }

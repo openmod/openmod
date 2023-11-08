@@ -17,7 +17,7 @@ namespace OpenMod.API.Plugins
         /// Loads plugin assemblies from the given assembly source.
         /// </summary>
         /// <param name="source">The assemblies source.</param>
-        /// <returns>The loaded plugin asemblies.</returns>
+        /// <returns>The loaded plugin assemblies.</returns>
         [OpenModInternal]
         Task<ICollection<Assembly>> LoadPluginAssembliesAsync(IPluginAssembliesSource source);
 
