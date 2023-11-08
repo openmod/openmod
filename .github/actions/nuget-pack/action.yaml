@@ -18,7 +18,10 @@ runs:
       run: nuget pack ${{ inputs.nuspec_path }}
       shell: bash
     - name: Push to NuGet (Release)
-      run: if ${{ inputs.nuget_push == 'true' }}; then
+      if: inputs.nuget_push
+      run: if ${{ inputs.nuget_key }}; then
              dotnet nuget push *.nupkg --skip-duplicate --api-key ${{ inputs.nuget_key }} --source https://api.nuget.org/v3/index.json;
+           else
+             exit 1;
            fi
       shell: bash
