@@ -82,7 +82,7 @@ runs:
     # Push to GitHub packages on each commit and release
     - name: Push to NuGet (Nightly)
       if: |
-        inputs.nuget_push && (github.event_name == 'push' || 
+        inputs.nuget_push == 'true' && (github.event_name == 'push' || 
         github.event_name == 'create' && github.event.ref_type == 'tag')
       run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg --api-key ${{ inputs.github_token }} --skip-duplicate --source https://nuget.pkg.github.com/openmod/index.json;
       shell: bash
@@ -90,7 +90,7 @@ runs:
     # Push to NuGet on each tag, but only if the tag is not a pre-release version
     - name: Push to NuGet (Release)
       if: |
-        inputs.nuget_push && steps.check-prerelease.outputs.is_prerelease == 'false' &&  
+        inputs.nuget_push == 'true' && steps.check-prerelease.outputs.is_prerelease == 'false' &&  
         github.event_name == 'create' && github.event.ref_type == 'tag'
       run: dotnet nuget push ${{ inputs.project_path }}/bin/Release/*.nupkg --api-key ${{ inputs.nuget_key }} --skip-duplicate --source https://api.nuget.org/v3/index.json;
       shell: bash
