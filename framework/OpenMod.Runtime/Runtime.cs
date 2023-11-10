@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -18,7 +19,6 @@ using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
-using OpenMod.Common.Helpers;
 using OpenMod.Common.Hotloading;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
@@ -314,23 +314,64 @@ namespace OpenMod.Runtime
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
+                    assembliesTypes.AddRange(ex.Types.Where(t => t != null));
+
+                    var missingDependencies = GetMissingDependencies(ex);
+                    if (openModHostAssembly.GetName().Name.Equals("OpenMod.Unturned") && !missingDependencies.Any())
+                        continue;
+
                     if (!missingOpenmodDepedencies)
                     {
                         missingOpenmodDepedencies = true;
                         m_Logger.LogWarning("Some OpenMod dependencies are missing, OpenMod could not work properly.");
                     }
 
-                    assembliesTypes.AddRange(ex.Types.Where(t => t != null));
-
                     m_Logger.LogDebug(ex, "Missing dependencies");
                     m_Logger.LogWarning("Some types from assembly {Assembly} couldn't be loaded.", openModHostAssembly.FullName);
-
-                    var missingDependencies = ex.GetMissingDependencies();
                     m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies));
                 }
             }
 
             return assembliesTypes.FirstOrDefault(t => t.IsAssignableTo<IHostInformation>());
+        }
+
+        private static readonly Regex s_MissingFileAssemblyVersionRegex =
+            new("'(?<assembly>\\S+?), Version=(?<version>.+?), ",
+                RegexOptions.Compiled);
+
+        private static readonly Regex s_TypeLoadAssemblyVersionRegex =
+            new("assembly:(?<assembly>\\S+?), Version=(?<version>.+?), ",
+                RegexOptions.Compiled);
+        //Copy of AssemblyExtensions.GetMissingDependencies (not perfect copy)
+        private static ICollection<AssemblyName> GetMissingDependencies(ReflectionTypeLoadException reflectionTypeLoadException)
+        {
+            if (reflectionTypeLoadException == null)
+            {
+                throw new ArgumentNullException(nameof(reflectionTypeLoadException));
+            }
+
+            var missingAssemblies = new Dictionary<string, Version>();
+            var loaderExceptions = reflectionTypeLoadException.LoaderExceptions;
+            foreach (var loaderException in loaderExceptions)
+            {
+                //TypeLoadException is just matching with MissingFileAssemblyVersionRegex
+                var match = s_MissingFileAssemblyVersionRegex.Match(loaderException.Message);
+                if (!match.Success)
+                    match = s_TypeLoadAssemblyVersionRegex.Match(loaderException.Message);
+
+                if (!match.Success)
+                    continue;
+
+                var assemblyName = match.Groups["assembly"].Value;
+                var version = System.Version.Parse(match.Groups["version"].Value);
+
+                if (assemblyName.Equals("Rocket.API") || missingAssemblies.TryGetValue(assemblyName, out var currentVersion) && currentVersion >= version)
+                    continue;
+
+                missingAssemblies[assemblyName] = version;
+            }
+
+            return missingAssemblies.Select(s => new AssemblyName(s.Key) { Version = s.Value }).ToList();
         }
 
         public async Task PerformSoftReloadAsync()
