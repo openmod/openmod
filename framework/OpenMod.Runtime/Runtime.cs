@@ -314,18 +314,20 @@ namespace OpenMod.Runtime
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
+                    assembliesTypes.AddRange(ex.Types.Where(t => t != null));
+
+                    var missingDependencies = GetMissingDependencies(ex);
+                    if (openModHostAssembly.GetName().Name.Equals("OpenMod.Unturned") && !missingDependencies.Any())
+                        continue;
+
                     if (!missingOpenmodDepedencies)
                     {
                         missingOpenmodDepedencies = true;
                         m_Logger.LogWarning("Some OpenMod dependencies are missing, OpenMod could not work properly.");
                     }
 
-                    assembliesTypes.AddRange(ex.Types.Where(t => t != null));
-
                     m_Logger.LogDebug(ex, "Missing dependencies");
                     m_Logger.LogWarning("Some types from assembly {Assembly} couldn't be loaded.", openModHostAssembly.FullName);
-
-                    var missingDependencies = GetMissingDependencies(ex);
                     m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies));
                 }
             }
@@ -340,8 +342,8 @@ namespace OpenMod.Runtime
         private static readonly Regex s_TypeLoadAssemblyVersionRegex =
             new("assembly:(?<assembly>\\S+?), Version=(?<version>.+?), ",
                 RegexOptions.Compiled);
-        //Copy of AssemblyExtensions.GetMissingDependencies
-        private static IEnumerable<AssemblyName> GetMissingDependencies(ReflectionTypeLoadException reflectionTypeLoadException)
+        //Copy of AssemblyExtensions.GetMissingDependencies (not perfect copy)
+        private static ICollection<AssemblyName> GetMissingDependencies(ReflectionTypeLoadException reflectionTypeLoadException)
         {
             if (reflectionTypeLoadException == null)
             {
@@ -363,13 +365,13 @@ namespace OpenMod.Runtime
                 var assemblyName = match.Groups["assembly"].Value;
                 var version = System.Version.Parse(match.Groups["version"].Value);
 
-                if (missingAssemblies.TryGetValue(assemblyName, out var currentVersion) && currentVersion >= version)
+                if (assemblyName.Equals("Rocket.API") || missingAssemblies.TryGetValue(assemblyName, out var currentVersion) && currentVersion >= version))
                     continue;
 
                 missingAssemblies[assemblyName] = version;
             }
 
-            return missingAssemblies.Select(s => new AssemblyName(s.Key) { Version = s.Value });
+            return missingAssemblies.Select(s => new AssemblyName(s.Key) { Version = s.Value }).ToList();
         }
 
         public async Task PerformSoftReloadAsync()
