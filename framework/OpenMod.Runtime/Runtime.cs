@@ -365,7 +365,7 @@ namespace OpenMod.Runtime
                 var assemblyName = match.Groups["assembly"].Value;
                 var version = System.Version.Parse(match.Groups["version"].Value);
 
-                if (assemblyName.Equals("Rocket.API") || missingAssemblies.TryGetValue(assemblyName, out var currentVersion) && currentVersion >= version))
+                if (assemblyName.Equals("Rocket.API") || missingAssemblies.TryGetValue(assemblyName, out var currentVersion) && currentVersion >= version)
                     continue;
 
                 missingAssemblies[assemblyName] = version;
