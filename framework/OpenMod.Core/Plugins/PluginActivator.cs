@@ -87,6 +87,9 @@ namespace OpenMod.Core.Plugins
                 var missingDependencies = new List<AssemblyName>();
                 foreach (var dependency in dependencies)
                 {
+                    if (dependency.Name.Equals("System.Drawing"))
+                        continue;
+
                     if (Hotloader.Enabled && Hotloader.ContainsAssembly(dependency))
                         continue;
 
