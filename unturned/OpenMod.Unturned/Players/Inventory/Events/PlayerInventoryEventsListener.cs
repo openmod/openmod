@@ -15,7 +15,7 @@ namespace OpenMod.Unturned.Players.Inventory.Events
         {
             SubscribePlayer(
                 static player => ref player.inventory.onDropItemRequested,
-                player => OnDropItemRequested
+                _ => OnDropItemRequested
             );
             SubscribePlayer(
                 static player => ref player.inventory.onInventoryResized,

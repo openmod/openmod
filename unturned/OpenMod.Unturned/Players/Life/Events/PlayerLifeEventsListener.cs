@@ -21,13 +21,13 @@ namespace OpenMod.Unturned.Players.Life.Events
             SubscribePlayer<Hurt>(
                 static (player, handler) => player.life.onHurt += handler,
                 static (player, handler) => player.life.onHurt -= handler,
-                player => OnHurt
+                _ => OnHurt
             );
 
             SubscribePlayer<PlayerLife.FallDamageRequestHandler>(
                 static (player, handler) => player.life.OnFallDamageRequested += handler,
                 static (player, handler) => player.life.OnFallDamageRequested -= handler,
-                player => OnFallDamageRequested
+                _ => OnFallDamageRequested
             );
         }
 
