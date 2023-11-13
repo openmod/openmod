@@ -79,14 +79,8 @@ namespace OpenMod.Unturned.Players.Life.Events
             var @event = amount >= nativePlayer.life.health
                 ? new UnturnedPlayerDyingEvent(player, amount, cause, limb, killer,
                     source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding)
-                {
-                    IsCancelled = cancel
-                }
                 : new UnturnedPlayerDamagingEvent(player, amount, cause, limb, killer,
-                    source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding)
-                {
-                    IsCancelled = cancel
-                };
+                    source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding);
 
             @event.IsCancelled = cancel;
 
