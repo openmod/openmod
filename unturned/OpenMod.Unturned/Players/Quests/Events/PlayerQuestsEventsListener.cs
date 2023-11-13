@@ -17,22 +17,30 @@ namespace OpenMod.Unturned.Players.Quests.Events
             SubscribePlayer<GroupRankChangedHandler>(
                 static (player, handler) => player.quests.groupRankChanged += handler,
                 static (player, handler) => player.quests.groupRankChanged -= handler,
-                player => OnGroupRankChanged
+                _ => OnGroupRankChanged
+            );
+
+            SubscribePlayer<GroupIDChangedHandler>(
+                static (player, handler) => player.quests.groupIDChanged += handler,
+                static (player, handler) => player.quests.groupIDChanged -= handler,
+                _ => OnGroupIdChanged
             );
         }
 
         public override void Subscribe()
         {
-            PlayerQuests.onGroupChanged += OnGroupChanged;
+            PlayerQuests.onGroupChanged += OnGroupOrRankChanged;
             PlayerQuests.onAnyFlagChanged += OnAnyFlagChanged;
+
             OnPlayerJoiningGroup += Events_OnPlayerJoiningGroup;
             OnPlayerLeavingGroup += Events_OnPlayerLeavingGroup;
         }
 
         public override void Unsubscribe()
         {
-            PlayerQuests.onGroupChanged -= OnGroupChanged;
+            PlayerQuests.onGroupChanged -= OnGroupOrRankChanged;
             PlayerQuests.onAnyFlagChanged -= OnAnyFlagChanged;
+
             OnPlayerJoiningGroup -= Events_OnPlayerJoiningGroup;
             OnPlayerLeavingGroup -= Events_OnPlayerLeavingGroup;
         }
@@ -47,34 +55,42 @@ namespace OpenMod.Unturned.Players.Quests.Events
             Emit(@event);
         }
 
-        private void OnGroupChanged(PlayerQuests sender, CSteamID oldGroupId, EPlayerGroupRank oldGroupRank,
-            CSteamID newGroupId, EPlayerGroupRank newGroupRank)
+        private void OnGroupOrRankChanged(PlayerQuests sender, CSteamID oldGroupId, EPlayerGroupRank oldGroupRank, CSteamID newGroupId, EPlayerGroupRank newGroupRank)
         {
             var player = GetUnturnedPlayer(sender.player)!;
 
-            var @event =
-                new UnturnedPlayerGroupChangedEvent(player, oldGroupId, oldGroupRank, newGroupId, newGroupRank);
+            var @event = new UnturnedPlayerGroupOrRankChangedEvent(player, oldGroupId, oldGroupRank, newGroupId, newGroupRank);
 
             Emit(@event);
         }
 
-        private void OnGroupRankChanged(PlayerQuests sender, EPlayerGroupRank oldGroupRank,
-            EPlayerGroupRank newGroupRank)
+        private void OnGroupRankChanged(PlayerQuests sender, EPlayerGroupRank oldGroupRank, EPlayerGroupRank newGroupRank)
         {
             var player = GetUnturnedPlayer(sender.player)!;
 
-            var @event =
-                new UnturnedPlayerGroupRankChangedEvent(player, oldGroupRank, newGroupRank);
+            var @event = new UnturnedPlayerGroupRankChangedEvent(player, oldGroupRank, newGroupRank);
 
             Emit(@event);
         }
 
-        private void Events_OnPlayerJoiningGroup(PlayerQuests playerQuests, CSteamID newGroupID, EPlayerGroupRank newGroupRank, ref bool isCancelled)
+        private void OnGroupIdChanged(PlayerQuests sender, CSteamID oldGroupId, CSteamID newGroupId)
+        {
+            var player = GetUnturnedPlayer(sender.player)!;
+
+            var @event = new UnturnedPlayerGroupIdChangedEvent(player, oldGroupId, newGroupId);
+
+            Emit(@event);
+        }
+
+        private void Events_OnPlayerJoiningGroup(PlayerQuests playerQuests, CSteamID newGroupId, EPlayerGroupRank newGroupRank, ref bool isCancelled)
         {
             var player = GetUnturnedPlayer(playerQuests.player)!;
 
             var @event =
-                new UnturnedPlayerJoiningGroupEvent(player, newGroupID, newGroupRank);
+                new UnturnedPlayerJoiningGroupEvent(player, newGroupId, newGroupRank)
+                {
+                    IsCancelled = isCancelled
+                };
 
             Emit(@event);
 
@@ -85,15 +101,17 @@ namespace OpenMod.Unturned.Players.Quests.Events
         {
             var player = GetUnturnedPlayer(playerQuests.player)!;
 
-            var @event =
-                new UnturnedPlayerLeavingGroupEvent(player);
+            var @event = new UnturnedPlayerLeavingGroupEvent(player)
+                {
+                    IsCancelled = isCancelled
+            };
 
             Emit(@event);
 
             isCancelled = @event.IsCancelled;
         }
 
-        private delegate void PlayerJoiningGroup(PlayerQuests playerQuests, CSteamID newGroupID, EPlayerGroupRank newGroupRank, ref bool isCancelled);
+        private delegate void PlayerJoiningGroup(PlayerQuests playerQuests, CSteamID newGroupId, EPlayerGroupRank newGroupRank, ref bool isCancelled);
 
         private delegate void PlayerLeavingGroup(PlayerQuests playerQuests, ref bool isCancelled);
 
@@ -133,8 +151,9 @@ namespace OpenMod.Unturned.Players.Quests.Events
             [UsedImplicitly]
             [HarmonyPatch(typeof(PlayerQuests), nameof(PlayerQuests.ServerAssignToGroup))]
             [HarmonyPrefix]
-            // ReSharper disable once InconsistentNaming
+            // ReSharper disable InconsistentNaming
             public static bool ServerAssignToGroup(PlayerQuests __instance, CSteamID newGroupID, EPlayerGroupRank newRank, bool bypassMemberLimit)
+                // ReSharper restore InconsistentNaming
             {
                 var groupInfo = GroupManager.getGroupInfo(newGroupID);
 
@@ -157,10 +176,9 @@ namespace OpenMod.Unturned.Players.Quests.Events
             public static bool ServerAssignToMainGroup(PlayerQuests __instance)
             {
                 var isCancelled = false;
-                var newGroupID = __instance.channel.owner.playerID.group;
-                var newGroupRank = EPlayerGroupRank.MEMBER;
+                var newGroupId = __instance.channel.owner.playerID.group;
 
-                OnPlayerJoiningGroup?.Invoke(__instance, newGroupID, newGroupRank, ref isCancelled);
+                OnPlayerJoiningGroup?.Invoke(__instance, newGroupId, EPlayerGroupRank.MEMBER, ref isCancelled);
 
                 return !isCancelled;
             }
