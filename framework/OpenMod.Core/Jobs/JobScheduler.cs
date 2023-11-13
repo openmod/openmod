@@ -20,6 +20,7 @@ namespace OpenMod.Core.Jobs
     public class JobScheduler : IJobScheduler, IDisposable
     {
         private const string c_DataStoreKey = "autoexec";
+        private const string c_JobDelayDelimiter = ":";
         private readonly IRuntime m_Runtime;
         private readonly ILogger<JobScheduler> m_Logger;
         private readonly IDataStore m_DataStore;
@@ -237,19 +238,19 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Schedule.Equals("@reboot", StringComparison.OrdinalIgnoreCase))
+            if (execReboot && job.Schedule.Equals("@reboot", StringComparison.OrdinalIgnoreCase))
             {
-                if (execReboot)
-                {
-                    await ExecuteJobAsync(job);
-                }
-
+                await ExecuteJobAsync(job);
                 return;
             }
 
-            if (job.Schedule.Equals("@startup", StringComparison.OrdinalIgnoreCase))
+            if (execStartup && job.Schedule.StartsWith("@startup", StringComparison.OrdinalIgnoreCase))
             {
-                if (execStartup)
+                if (job.Schedule.Contains(c_JobDelayDelimiter))
+                {
+                    ScheduleDelayedJob(job);
+                }
+                else
                 {
                     await ExecuteJobAsync(job);
                 }
@@ -308,6 +309,43 @@ namespace OpenMod.Core.Jobs
 
                 await ExecuteJobAsync(job);
                 ScheduleCronJob(job);
+            });
+        }
+
+        private void ScheduleDelayedJob(ScheduledJob job)
+        {
+            if (job == null)
+            {
+                throw new ArgumentNullException(nameof(job));
+            }
+
+            var delimiterIndex = job.Schedule!.IndexOf(c_JobDelayDelimiter);
+            var delayFormat = job.Schedule[(delimiterIndex + 1)..];
+
+            TimeSpan delay;
+
+            try
+            {
+                delay = TimeSpanHelper.Parse(delayFormat);
+            }
+            catch (Exception ex)
+            {
+                m_Logger.LogError(ex, "Invalid timespan syntax \"{JobSchedule}\" for job: {JobName}",
+                    job.Schedule, job.Name);
+                return;
+            }
+
+            m_ScheduledJobs.Add(job);
+
+            AsyncHelper.Schedule($"Execution of job \"{job.Name}\"", async () => {
+                await Task.Delay(delay);
+
+                if (!(job.Enabled ?? true) || !m_ScheduledJobs.Contains(job) || !m_Runtime.IsComponentAlive)
+                {
+                    return;
+                }
+
+                await ExecuteJobAsync(job);
             });
         }
 
