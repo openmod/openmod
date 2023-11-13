@@ -337,8 +337,8 @@ namespace OpenMod.Core.Jobs
 
             m_ScheduledJobs.Add(job);
 
-            m_Logger.LogInformation("Delaying job \"{JobName}\" with delay of \"{JobSchedule}\"",
-                job.Name, delayFormat);
+            m_Logger.LogInformation("Delaying job \"{JobName}\" with delay of \"{JobDelay}\"",
+                job.Name, $"{delay:%d} days {delay:%h} hours {delay:%m} minutes {delay:%s} seconds");
 
             AsyncHelper.Schedule($"Execution of job \"{job.Name}\"", async () => {
                 await Task.Delay(delay);
