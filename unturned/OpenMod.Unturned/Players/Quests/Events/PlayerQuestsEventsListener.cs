@@ -113,27 +113,54 @@ namespace OpenMod.Unturned.Players.Quests.Events
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerQuests), nameof(PlayerQuests.ReceiveGroupState))]
+            [HarmonyPatch(typeof(PlayerQuests), nameof(PlayerQuests.leaveGroup))]
             [HarmonyPrefix]
             // ReSharper disable once InconsistentNaming
-            public static bool ReceiveGroupState(PlayerQuests __instance, CSteamID newGroupID, EPlayerGroupRank newGroupRank)
+            public static bool LeaveGroup(PlayerQuests __instance, bool force)
             {
+                if (!force && (!__instance.canChangeGroupMembership || !__instance.hasPermissionToLeaveGroup))
+                {
+                    return true;
+                }
+
                 var isCancelled = false;
 
-                OnPlayerJoiningGroup?.Invoke(__instance, newGroupID, newGroupRank, ref isCancelled);
+                OnPlayerLeavingGroup?.Invoke(__instance, ref isCancelled);
 
                 return !isCancelled;
             }
 
             [UsedImplicitly]
-            [HarmonyPatch(typeof(PlayerQuests), nameof(PlayerQuests.ReceiveLeaveGroupRequest))]
+            [HarmonyPatch(typeof(PlayerQuests), nameof(PlayerQuests.ServerAssignToGroup))]
             [HarmonyPrefix]
             // ReSharper disable once InconsistentNaming
-            public static bool ReceiveLeaveGroupRequest(PlayerQuests __instance)
+            public static bool ServerAssignToGroup(PlayerQuests __instance, CSteamID newGroupID, EPlayerGroupRank newRank, bool bypassMemberLimit)
             {
+                var groupInfo = GroupManager.getGroupInfo(newGroupID);
+
+                if (groupInfo == null || !(bypassMemberLimit || groupInfo.hasSpaceForMoreMembersInGroup))
+                {
+                    return true;
+                }
+
                 var isCancelled = false;
 
-                OnPlayerLeavingGroup?.Invoke(__instance, ref isCancelled);
+                OnPlayerJoiningGroup?.Invoke(__instance, newGroupID, newRank, ref isCancelled);
+
+                return !isCancelled;
+            }
+
+            [UsedImplicitly]
+            [HarmonyPatch(typeof(PlayerQuests), nameof(PlayerQuests.ServerAssignToMainGroup))]
+            [HarmonyPrefix]
+            // ReSharper disable once InconsistentNaming
+            public static bool ServerAssignToMainGroup(PlayerQuests __instance)
+            {
+                var isCancelled = false;
+                var newGroupID = __instance.channel.owner.playerID.group;
+                var newGroupRank = EPlayerGroupRank.MEMBER;
+
+                OnPlayerJoiningGroup?.Invoke(__instance, newGroupID, newGroupRank, ref isCancelled);
 
                 return !isCancelled;
             }
