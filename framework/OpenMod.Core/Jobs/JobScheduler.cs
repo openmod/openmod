@@ -81,7 +81,7 @@ namespace OpenMod.Core.Jobs
             {
                 foreach (var job in m_File.Jobs.ToList())
                 {
-                    await ScheduleJobInternalAsync(job, execStartup: !isFromFileChange, execReboot: s_RunRebootJobs);
+                    await ScheduleJobInternalAsync(job, isCalledFromStartup: !isFromFileChange, isCalledFromReboot: s_RunRebootJobs);
                 }
             }
 
@@ -113,7 +113,7 @@ namespace OpenMod.Core.Jobs
             m_File.Jobs.Add(job);
 
             await WriteJobsFileAsync();
-            await ScheduleJobInternalAsync(job, execStartup: false, execReboot: false);
+            await ScheduleJobInternalAsync(job, isCalledFromStartup: false, isCalledFromReboot: false);
             return job;
         }
 
@@ -201,7 +201,7 @@ namespace OpenMod.Core.Jobs
             await m_DataStore.SaveAsync(c_DataStoreKey, m_File);
         }
 
-        private async Task ScheduleJobInternalAsync(ScheduledJob job, bool execStartup, bool execReboot)
+        private async Task ScheduleJobInternalAsync(ScheduledJob job, bool isCalledFromStartup, bool isCalledFromReboot)
         {
             if (job == null)
             {
@@ -231,28 +231,27 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Schedule!.Equals("@single_exec", StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule!.StartsWith("@single_exec", StringComparison.OrdinalIgnoreCase))
             {
-                await ExecuteJobAsync(job);
-                await RemoveJobAsync(job);
+                await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: true);
                 return;
             }
 
-            if (execReboot && job.Schedule.Equals("@reboot", StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith("@reboot", StringComparison.OrdinalIgnoreCase))
             {
-                await ExecuteJobAsync(job);
-                return;
-            }
-
-            if (execStartup && job.Schedule.StartsWith("@startup", StringComparison.OrdinalIgnoreCase))
-            {
-                if (job.Schedule.Contains(c_JobDelayDelimiter))
+                if (isCalledFromReboot)
                 {
-                    ScheduleDelayedJob(job);
+                    await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: false);
                 }
-                else
+
+                return;
+            }
+
+            if (job.Schedule.StartsWith("@startup", StringComparison.OrdinalIgnoreCase))
+            {
+                if (isCalledFromStartup)
                 {
-                    await ExecuteJobAsync(job);
+                    await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: false);
                 }
 
                 return;
@@ -312,33 +311,47 @@ namespace OpenMod.Core.Jobs
             });
         }
 
-        private void ScheduleDelayedJob(ScheduledJob job)
+        private async Task ScheduleDelayedOrExecuteJob(ScheduledJob job, bool shouldBeRemovedAfterExecution)
         {
-            if (job == null)
+            if (job is null)
             {
                 throw new ArgumentNullException(nameof(job));
             }
 
-            var delimiterIndex = job.Schedule!.IndexOf(c_JobDelayDelimiter);
-            var delayFormat = job.Schedule[(delimiterIndex + 1)..];
+            var delayDelimiterIndex = job.Schedule!.IndexOf(c_JobDelayDelimiter);
+            var isNotDelayable = delayDelimiterIndex == -1;
+
+            if (isNotDelayable)
+            {
+                await ExecuteJobAsync(job);
+
+                if (shouldBeRemovedAfterExecution)
+                {
+                    await RemoveJobAsync(job);
+                }
+
+                return;
+            }
+
+            var unparsedDelay = job.Schedule[(delayDelimiterIndex + 1)..];
 
             TimeSpan delay;
 
             try
             {
-                delay = TimeSpanHelper.Parse(delayFormat);
+                delay = TimeSpanHelper.Parse(unparsedDelay);
             }
             catch (Exception ex)
             {
-                m_Logger.LogError(ex, "Invalid timespan syntax \"{JobSchedule}\" for job: {JobName}",
-                    job.Schedule, job.Name);
+                m_Logger.LogError(ex, "Invalid time span format \"{JobDelayUnparsed}\" for \"{JobName}\" job",
+                    unparsedDelay, job.Name);
                 return;
             }
 
             m_ScheduledJobs.Add(job);
 
             m_Logger.LogInformation("Delaying job \"{JobName}\" with delay of \"{JobDelay}\"",
-                job.Name, $"{delay:%d} days {delay:%h} hours {delay:%m} minutes {delay:%s} seconds");
+                job.Name, $"{delay:c}");
 
             AsyncHelper.Schedule($"Execution of job \"{job.Name}\"", async () => {
                 await Task.Delay(delay);
@@ -349,6 +362,11 @@ namespace OpenMod.Core.Jobs
                 }
 
                 await ExecuteJobAsync(job);
+
+                if (shouldBeRemovedAfterExecution)
+                {
+                    await RemoveJobAsync(job);
+                }
             });
         }
 
