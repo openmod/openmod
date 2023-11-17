@@ -42,7 +42,7 @@ Here are some examples of delayed job `schedule`.
 | @startup:20 seconds                         | Executes a job 20 seconds after OpenMod and all plugins have loaded, including reloads.                                      |
 | @reboot:30 days, 40 minutes, and 50 seconds | Executes a job 30 days, 40 minutes and 50 seconds after OpenMod and all plugins have loaded, excluding reloads.              |
 | @single_exec:10h20m30s                      | Executes a job a single time 10 hours, 20 minutes and 30 seconds after OpenMod has loaded and then removes it from the file. |
-| @start_up:3.5 days                          | Executes a job 3 days and 12 hours after OpenMod and all plugins have loaded, including reloads.                             |
+| @startup:3.5 days                          | Executes a job 3 days and 12 hours after OpenMod and all plugins have loaded, including reloads.                             |
 | @single_exec:1234.123     milliseconds      | Executes a job a single time 1234.123 milliseconds after OpenMod has loaded and then removes it from the file.               |
   
 ### Periodical schedule
