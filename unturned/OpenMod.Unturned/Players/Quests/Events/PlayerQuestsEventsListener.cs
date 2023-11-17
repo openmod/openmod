@@ -14,17 +14,6 @@ namespace OpenMod.Unturned.Players.Quests.Events
     {
         public PlayerQuestsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            SubscribePlayer<GroupRankChangedHandler>(
-                static (player, handler) => player.quests.groupRankChanged += handler,
-                static (player, handler) => player.quests.groupRankChanged -= handler,
-                _ => OnGroupRankChanged
-            );
-
-            SubscribePlayer<GroupIDChangedHandler>(
-                static (player, handler) => player.quests.groupIDChanged += handler,
-                static (player, handler) => player.quests.groupIDChanged -= handler,
-                _ => OnGroupIdChanged
-            );
         }
 
         public override void Subscribe()
@@ -59,27 +48,23 @@ namespace OpenMod.Unturned.Players.Quests.Events
         {
             var player = GetUnturnedPlayer(sender.player)!;
 
-            var @event = new UnturnedPlayerGroupOrRankChangedEvent(player, oldGroupId, oldGroupRank, newGroupId, newGroupRank);
+            if (oldGroupRank != newGroupRank)
+            {
+                var groupRankChangedEvent = new UnturnedPlayerGroupRankChangedEvent(player, oldGroupRank, newGroupRank);
 
-            Emit(@event);
-        }
+                Emit(groupRankChangedEvent);
+            }
 
-        private void OnGroupRankChanged(PlayerQuests sender, EPlayerGroupRank oldGroupRank, EPlayerGroupRank newGroupRank)
-        {
-            var player = GetUnturnedPlayer(sender.player)!;
+            if (newGroupId != oldGroupId)
+            {
+                var groupIdChangedEvent = new UnturnedPlayerGroupIdChangedEvent(player, oldGroupId, newGroupId);
 
-            var @event = new UnturnedPlayerGroupRankChangedEvent(player, oldGroupRank, newGroupRank);
+                Emit(groupIdChangedEvent);
+            }
 
-            Emit(@event);
-        }
+            var groupIdOrRankChangedEvent = new UnturnedPlayerGroupOrRankChangedEvent(player, oldGroupId, oldGroupRank, newGroupId, newGroupRank);
 
-        private void OnGroupIdChanged(PlayerQuests sender, CSteamID oldGroupId, CSteamID newGroupId)
-        {
-            var player = GetUnturnedPlayer(sender.player)!;
-
-            var @event = new UnturnedPlayerGroupIdChangedEvent(player, oldGroupId, newGroupId);
-
-            Emit(@event);
+            Emit(groupIdOrRankChangedEvent);
         }
 
         private void Events_OnPlayerJoiningGroup(PlayerQuests playerQuests, CSteamID newGroupId, EPlayerGroupRank newGroupRank, ref bool isCancelled)
