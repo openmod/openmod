@@ -28,7 +28,8 @@ Schedule defines when a job will run. There are several ways to do it.
 A one-time scheduling allows to define the conditions under which a job will be executed.
 
 Below are the `schedule` types that define required conditions.
-| Type         | Description                                                                          |
+
+| **Type**     | **Description**                                                                      |
 |--------------|------------------------------------------------------------------------------------- |
 | @startup     | Executes a job after OpenMod and all plugins have loaded, including reloads.         |
 | @reboot      | Executes a job after OpenMod and all plugins have loaded, excluding reloads.         |
@@ -37,28 +38,31 @@ Below are the `schedule` types that define required conditions.
 You can also delay execution of one-time scheduled job. Delayed job `schedule` template should look as further: `<schedule type>:<delay>`. 
 
 Here are some examples of delayed job `schedule`.
-| Example schedule template                   | Description                                                                                                                  |
+
+| **Example schedule template**               | **Description**                                                                                                              |
 |---------------------------------------------|----------------------------------------------------------------------------------------------------------------------------- |
 | @startup:20 seconds                         | Executes a job 20 seconds after OpenMod and all plugins have loaded, including reloads.                                      |
 | @reboot:30 days, 40 minutes, and 50 seconds | Executes a job 30 days, 40 minutes and 50 seconds after OpenMod and all plugins have loaded, excluding reloads.              |
 | @single_exec:10h20m30s                      | Executes a job a single time 10 hours, 20 minutes and 30 seconds after OpenMod has loaded and then removes it from the file. |
-| @startup:3.5 days                          | Executes a job 3 days and 12 hours after OpenMod and all plugins have loaded, including reloads.                             |
+| @startup:3.5 days                           | Executes a job 3 days and 12 hours after OpenMod and all plugins have loaded, including reloads.                             |
 | @single_exec:1234.123     milliseconds      | Executes a job a single time 1234.123 milliseconds after OpenMod has loaded and then removes it from the file.               |
   
 ### Periodical schedule
 For periodical scheduling OpenMod uses **crontab expressions**. It allows to execute a job at fixed intervals, like every minute, every Sunday, every third Monday, etc. Visit https://crontab.guru/ for more information. 
 
 Here are some example crontab expressions.
-| Expression  | Description                                 |
-|-------------|---------------------------------------------|
-| 0 0 * * 0   | Every Sunday at 0:00 AM.                    |
-| 0 3 * * *   | Everyday at 3 AM.                           |
-| */5 * * * * | Every 5 minutes.                            |
-| 0 0 1 * *   | At the first day of every month at 0:00 AM. |
+
+| **Expression** | **Description**                             |
+|----------------|---------------------------------------------|
+| 0 0 * * 0      | Every Sunday at 0:00 AM.                    |
+| 0 3 * * *      | Everyday at 3 AM.                           |
+| */5 * * * *    | Every 5 minutes.                            |
+| 0 0 1 * *      | At the first day of every month at 0:00 AM. |
 
 ## Task
-The task to execute. There are 2 built-in tasks:
-| Task type       | Description                                                               |
+The task to execute. There are 2 built-in tasks.
+
+| **Task type**   | **Description**                                                           |
 |-----------------|---------------------------------------------------------------------------|
 | openmod_command | Executes one or more OpenMod commands. Needs args.commands to be defined. |
 | system_command  | Executes one or more system commands. Needs args.commands to be defined.  |
