@@ -28,6 +28,7 @@ Schedule defines when a job will run. There are several ways to do it.
 A one-time scheduling allows to define the conditions under which a job will be executed.
 
 Below are the `schedule` types that define required conditions.
+
 | Type         | Description                                                                          |
 |--------------|------------------------------------------------------------------------------------- |
 | @startup     | Executes a job after OpenMod and all plugins have loaded, including reloads.         |
@@ -37,6 +38,7 @@ Below are the `schedule` types that define required conditions.
 You can also delay execution of one-time scheduled job. Delayed job `schedule` template should look as further: `<schedule type>:<delay>`. 
 
 Here are some examples of delayed job `schedule`.
+
 | Example schedule template                   | Description                                                                                                                  |
 |---------------------------------------------|----------------------------------------------------------------------------------------------------------------------------- |
 | @startup:20 seconds                         | Executes a job 20 seconds after OpenMod and all plugins have loaded, including reloads.                                      |
@@ -49,6 +51,7 @@ Here are some examples of delayed job `schedule`.
 For periodical scheduling OpenMod uses **crontab expressions**. It allows to execute a job at fixed intervals, like every minute, every Sunday, every third Monday, etc. Visit https://crontab.guru/ for more information. 
 
 Here are some example crontab expressions.
+
 | Expression  | Description                                 |
 |-------------|---------------------------------------------|
 | 0 0 * * 0   | Every Sunday at 0:00 AM.                    |
@@ -57,7 +60,8 @@ Here are some example crontab expressions.
 | 0 0 1 * *   | At the first day of every month at 0:00 AM. |
 
 ## Task
-The task to execute. There are 2 built-in tasks:
+The task to execute. There are 2 built-in tasks.
+
 | Task type       | Description                                                               |
 |-----------------|---------------------------------------------------------------------------|
 | openmod_command | Executes one or more OpenMod commands. Needs args.commands to be defined. |
