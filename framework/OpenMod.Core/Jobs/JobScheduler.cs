@@ -348,7 +348,7 @@ namespace OpenMod.Core.Jobs
             var eventName = job.Schedule![(eventNameDelimiterIndex + 1)..];
 
             m_EventBus.Subscribe(m_Runtime, eventName, async (_, _, @event) => {
-                await ExecuteJobAsync(job);
+                await ExecuteJobAsync(job, new { Event = @event });
             });
 
             m_Logger.LogInformation("Subscribed job \"{JobName}\" to \"{EventName}\" event", job.Name, eventName);
@@ -413,7 +413,7 @@ namespace OpenMod.Core.Jobs
             });
         }
 
-        private async Task ExecuteJobAsync(ScheduledJob job)
+        private async Task ExecuteJobAsync(ScheduledJob job, params object[] parameters)
         {
             if (job == null)
             {
@@ -431,7 +431,7 @@ namespace OpenMod.Core.Jobs
 
             try
             {
-                await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!, job.Args ?? new Dictionary<string, object?>()));
+                await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!, job.Args ?? new Dictionary<string, object?>(), parameters));
             }
             catch (Exception ex)
             {
