@@ -20,7 +20,11 @@ namespace OpenMod.Core.Jobs
     public class JobScheduler : IJobScheduler, IDisposable
     {
         private const string c_DataStoreKey = "autoexec";
-        private const string c_JobDelayDelimiter = ":";
+        private const string c_SingleExecutionJobPrefix = "@single_exec";
+        private const string c_RebootExecutionJobPrefix = "@reboot";
+        private const string c_StartupExecutionJobPrefix = "@startup";
+        private const string c_EventExecutionJobPrefix = "@event";
+        private const string c_JobDelimiter = ":";
         private readonly IRuntime m_Runtime;
         private readonly ILogger<JobScheduler> m_Logger;
         private readonly IDataStore m_DataStore;
@@ -231,13 +235,13 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Schedule!.StartsWith("@single_exec", StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule!.StartsWith(c_SingleExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: true);
                 return;
             }
 
-            if (job.Schedule.StartsWith("@reboot", StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith(c_RebootExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 if (isCalledFromReboot)
                 {
@@ -247,11 +251,21 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Schedule.StartsWith("@startup", StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith(c_StartupExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 if (isCalledFromStartup)
                 {
                     await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: false);
+                }
+
+                return;
+            }
+
+            if (job.Schedule.StartsWith(c_EventExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                if (isCalledFromStartup)
+                {
+                    
                 }
 
                 return;
@@ -318,7 +332,7 @@ namespace OpenMod.Core.Jobs
                 throw new ArgumentNullException(nameof(job));
             }
 
-            var delayDelimiterIndex = job.Schedule!.IndexOf(c_JobDelayDelimiter);
+            var delayDelimiterIndex = job.Schedule!.IndexOf(c_JobDelimiter);
             var isNotDelayable = delayDelimiterIndex == -1;
 
             if (isNotDelayable)
