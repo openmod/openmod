@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
 using OpenMod.API;
+using OpenMod.API.Eventing;
 using OpenMod.API.Ioc;
 using OpenMod.API.Jobs;
 using OpenMod.API.Persistence;
@@ -27,6 +28,7 @@ namespace OpenMod.Core.Jobs
         private const string c_JobDelimiter = ":";
         private readonly IRuntime m_Runtime;
         private readonly ILogger<JobScheduler> m_Logger;
+        private readonly IEventBus m_EventBus;
         private readonly IDataStore m_DataStore;
         private readonly List<ITaskExecutor> m_JobExecutors;
         private readonly List<ScheduledJob> m_ScheduledJobs;
@@ -37,11 +39,13 @@ namespace OpenMod.Core.Jobs
         public JobScheduler(
             IRuntime runtime,
             ILogger<JobScheduler> logger,
+            IEventBus eventBus,
             IDataStoreFactory dataStoreFactory,
             IOptions<JobExecutorOptions> options)
         {
             m_Runtime = runtime;
             m_Logger = logger;
+            m_EventBus = eventBus;
 
             m_DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters
             {
@@ -238,6 +242,7 @@ namespace OpenMod.Core.Jobs
             if (job.Schedule!.StartsWith(c_SingleExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: true);
+
                 return;
             }
 
@@ -265,7 +270,7 @@ namespace OpenMod.Core.Jobs
             {
                 if (isCalledFromStartup)
                 {
-                    
+                    SubscribeEventJob(job);
                 }
 
                 return;
@@ -323,6 +328,30 @@ namespace OpenMod.Core.Jobs
                 await ExecuteJobAsync(job);
                 ScheduleCronJob(job);
             });
+        }
+
+        private void SubscribeEventJob(ScheduledJob job)
+        {
+            if (job is null)
+            {
+                throw new ArgumentNullException(nameof(job));
+            }
+
+            var eventNameDelimiterIndex = job.Schedule!.IndexOf(c_JobDelimiter);
+
+            if (eventNameDelimiterIndex == -1)
+            {
+                m_Logger.LogError("Invalid event job format \"{JobSchedule}\" for \"{JobName}\" job", job.Schedule, job.Name);
+                return;
+            }
+
+            var eventName = job.Schedule![(eventNameDelimiterIndex + 1)..];
+
+            m_EventBus.Subscribe(m_Runtime, eventName, async (_, _, @event) => {
+                await ExecuteJobAsync(job);
+            });
+
+            m_Logger.LogInformation("Subscribed job \"{JobName}\" to \"{EventName}\" event", job.Name, eventName);
         }
 
         private async Task ScheduleDelayedOrExecuteJob(ScheduledJob job, bool shouldBeRemovedAfterExecution)
