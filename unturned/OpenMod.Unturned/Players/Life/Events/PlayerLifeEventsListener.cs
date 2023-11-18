@@ -21,13 +21,13 @@ namespace OpenMod.Unturned.Players.Life.Events
             SubscribePlayer<Hurt>(
                 static (player, handler) => player.life.onHurt += handler,
                 static (player, handler) => player.life.onHurt -= handler,
-                player => OnHurt
+                _ => OnHurt
             );
 
             SubscribePlayer<PlayerLife.FallDamageRequestHandler>(
                 static (player, handler) => player.life.OnFallDamageRequested += handler,
                 static (player, handler) => player.life.OnFallDamageRequested -= handler,
-                player => OnFallDamageRequested
+                _ => OnFallDamageRequested
             );
         }
 
@@ -79,14 +79,8 @@ namespace OpenMod.Unturned.Players.Life.Events
             var @event = amount >= nativePlayer.life.health
                 ? new UnturnedPlayerDyingEvent(player, amount, cause, limb, killer,
                     source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding)
-                {
-                    IsCancelled = cancel
-                }
                 : new UnturnedPlayerDamagingEvent(player, amount, cause, limb, killer,
-                    source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding)
-                {
-                    IsCancelled = cancel
-                };
+                    source, trackKill, ragdoll.ToSystemVector(), ragdollEffect, canCauseBleeding);
 
             @event.IsCancelled = cancel;
 
