@@ -52,7 +52,7 @@ namespace OpenMod.Core.Jobs
                 m_Logger.LogInformation("[{JobName}] Running OpenMod command: {Command}", task.JobName, command!);
 
                 var formatter = m_SmartFormatOptions.Value.GetSmartFormatter();
-                var formattedCommand = formatter.Format(command, task.Parameters);
+                var formattedCommand = formatter.Format(command!, task.Parameters);
                 var args = ArgumentsParser.ParseArguments(formattedCommand);
 
                 await m_CommandExecutor.ExecuteAsync(m_Actor, args, string.Empty);
