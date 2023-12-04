@@ -137,6 +137,7 @@ namespace OpenMod.Runtime
                 nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory!.CreateLogger("NuGet"));
 
                 await nugetPackageManager.RemoveOutdatedPackagesAsync();
+                nugetPackageManager.InstallAssemblyResolver();
                 nugetPackageManager.SetAssemblyLoader(Hotloader.LoadAssembly);
 
                 var startupContext = new OpenModStartupContext
