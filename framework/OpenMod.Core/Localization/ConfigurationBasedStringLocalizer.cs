@@ -63,13 +63,12 @@ namespace OpenMod.Core.Localization
             get
             {
                 var configValue = m_Configuration.GetSection(name);
-                if (!configValue.Exists() || string.IsNullOrEmpty(configValue.Value))
-                {
-                    return new LocalizedString(name, name, resourceNotFound: true);
-                }
-
                 var formatter = m_Options.Value.GetSmartFormatter();
-                return new LocalizedString(name, formatter.Format(configValue.Value ?? string.Empty, arguments));
+
+                var found = configValue.Exists() && !string.IsNullOrEmpty(configValue.Value);
+                var value = formatter.Format(found ? configValue.Value : name, arguments);
+
+                return new LocalizedString(name, value, resourceNotFound: !found);
             }
         }
 
