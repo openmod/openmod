@@ -31,7 +31,7 @@ namespace OpenMod.Unturned.Vehicles
         {
             get
             {
-                if (m_Vehicle.isAutoClearable || m_Vehicle.transform == null)
+                if (m_Vehicle.transform == null)
                 {
                     return null;
                 }
