@@ -4,6 +4,9 @@
       <ReferencePath Condition="'%(FileName)' == 'MonoMod.ILHelpers'">
         <Aliases>MonoModILHelpers</Aliases>
       </ReferencePath>
+      <ReferencePath Condition="'%(FileName)' == 'MonoMod.Backports'">
+        <Aliases>MonoModBackports</Aliases>
+      </ReferencePath>
     </ItemGroup>
   </Target>
 </Project>
