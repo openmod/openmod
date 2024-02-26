@@ -8,7 +8,7 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
 
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.3.0-prerelease.2" />
+    <PackageReference Include="Lib.Harmony" Version="2.3.0" />
     <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2021.3.28.1">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>

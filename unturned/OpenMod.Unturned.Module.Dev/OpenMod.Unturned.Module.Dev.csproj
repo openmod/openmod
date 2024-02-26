@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.3.0-prerelease.2" GeneratePathProperty="true" />
+    <PackageReference Include="Lib.Harmony" Version="2.3.0" GeneratePathProperty="true" />
     <PackageReference Include="Newtonsoft.Json" GeneratePathProperty="true" Version="13.0.3" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
       <PrivateAssets>all</PrivateAssets>

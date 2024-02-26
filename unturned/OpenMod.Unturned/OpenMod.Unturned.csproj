@@ -6,7 +6,6 @@
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
-  <Import Project="$(MSBuildThisFileDirectory)..\..\props\HarmonyDependentProjectProps.props" />
 
   <ItemGroup>
     <None Remove="openmod.unturned.translations.yaml" />
