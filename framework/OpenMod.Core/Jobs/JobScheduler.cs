@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
 using OpenMod.API;
+using OpenMod.API.Eventing;
 using OpenMod.API.Ioc;
 using OpenMod.API.Jobs;
 using OpenMod.API.Persistence;
@@ -20,9 +21,14 @@ namespace OpenMod.Core.Jobs
     public class JobScheduler : IJobScheduler, IDisposable
     {
         private const string c_DataStoreKey = "autoexec";
-        private const string c_JobDelayDelimiter = ":";
+        private const string c_SingleExecutionJobPrefix = "@single_exec";
+        private const string c_RebootExecutionJobPrefix = "@reboot";
+        private const string c_StartupExecutionJobPrefix = "@startup";
+        private const string c_EventExecutionJobPrefix = "@event";
+        private const string c_JobDelimiter = ":";
         private readonly IRuntime m_Runtime;
         private readonly ILogger<JobScheduler> m_Logger;
+        private readonly IEventBus m_EventBus;
         private readonly IDataStore m_DataStore;
         private readonly List<ITaskExecutor> m_JobExecutors;
         private readonly List<ScheduledJob> m_ScheduledJobs;
@@ -33,11 +39,13 @@ namespace OpenMod.Core.Jobs
         public JobScheduler(
             IRuntime runtime,
             ILogger<JobScheduler> logger,
+            IEventBus eventBus,
             IDataStoreFactory dataStoreFactory,
             IOptions<JobExecutorOptions> options)
         {
             m_Runtime = runtime;
             m_Logger = logger;
+            m_EventBus = eventBus;
 
             m_DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters
             {
@@ -231,13 +239,14 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Schedule!.StartsWith("@single_exec", StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule!.StartsWith(c_SingleExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: true);
+
                 return;
             }
 
-            if (job.Schedule.StartsWith("@reboot", StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith(c_RebootExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 if (isCalledFromReboot)
                 {
@@ -247,11 +256,21 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Schedule.StartsWith("@startup", StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith(c_StartupExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 if (isCalledFromStartup)
                 {
                     await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: false);
+                }
+
+                return;
+            }
+
+            if (job.Schedule.StartsWith(c_EventExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                if (isCalledFromStartup)
+                {
+                    SubscribeEventJob(job);
                 }
 
                 return;
@@ -311,6 +330,30 @@ namespace OpenMod.Core.Jobs
             });
         }
 
+        private void SubscribeEventJob(ScheduledJob job)
+        {
+            if (job is null)
+            {
+                throw new ArgumentNullException(nameof(job));
+            }
+
+            var eventNameDelimiterIndex = job.Schedule!.IndexOf(c_JobDelimiter);
+
+            if (eventNameDelimiterIndex == -1)
+            {
+                m_Logger.LogError("Invalid event job format \"{JobSchedule}\" for \"{JobName}\" job", job.Schedule, job.Name);
+                return;
+            }
+
+            var eventName = job.Schedule![(eventNameDelimiterIndex + 1)..];
+
+            m_EventBus.Subscribe(m_Runtime, eventName, async (_, _, @event) => {
+                await ExecuteJobAsync(job, new { Event = @event });
+            });
+
+            m_Logger.LogInformation("Subscribed job \"{JobName}\" to \"{EventName}\" event", job.Name, eventName);
+        }
+
         private async Task ScheduleDelayedOrExecuteJob(ScheduledJob job, bool shouldBeRemovedAfterExecution)
         {
             if (job is null)
@@ -318,7 +361,7 @@ namespace OpenMod.Core.Jobs
                 throw new ArgumentNullException(nameof(job));
             }
 
-            var delayDelimiterIndex = job.Schedule!.IndexOf(c_JobDelayDelimiter);
+            var delayDelimiterIndex = job.Schedule!.IndexOf(c_JobDelimiter);
             var isNotDelayable = delayDelimiterIndex == -1;
 
             if (isNotDelayable)
@@ -370,7 +413,7 @@ namespace OpenMod.Core.Jobs
             });
         }
 
-        private async Task ExecuteJobAsync(ScheduledJob job)
+        private async Task ExecuteJobAsync(ScheduledJob job, params object[] parameters)
         {
             if (job == null)
             {
@@ -388,7 +431,7 @@ namespace OpenMod.Core.Jobs
 
             try
             {
-                await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!, job.Args ?? new Dictionary<string, object?>()));
+                await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!, job.Args ?? new Dictionary<string, object?>(), parameters));
             }
             catch (Exception ex)
             {
