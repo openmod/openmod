@@ -2,6 +2,7 @@
 using OpenMod.API;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace OpenMod.Core.Localization
@@ -20,13 +21,6 @@ namespace OpenMod.Core.Localization
         {
             return m_StringLocalizer.GetAllStrings(includeParentCultures);
         }
-
-#pragma warning disable 618 // disable obsolete warning
-        public IStringLocalizer WithCulture(CultureInfo culture)
-        {
-            return m_StringLocalizer.WithCulture(culture);
-        }
-#pragma warning restore 618
 
         public LocalizedString this[string name]
         {

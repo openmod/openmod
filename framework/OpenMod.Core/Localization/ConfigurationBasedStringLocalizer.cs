@@ -42,11 +42,6 @@ namespace OpenMod.Core.Localization
             }
         }
 
-        public IStringLocalizer WithCulture(CultureInfo culture)
-        {
-            return this; // no culture support
-        }
-
         public LocalizedString this[string name]
         {
             get
@@ -66,7 +61,7 @@ namespace OpenMod.Core.Localization
                 var formatter = m_Options.Value.GetSmartFormatter();
 
                 var found = configValue.Exists() && !string.IsNullOrEmpty(configValue.Value);
-                var value = formatter.Format(found ? configValue.Value : name, arguments);
+                var value = formatter.Format(found ? configValue.Value! : name, arguments);
 
                 return new LocalizedString(name, value, resourceNotFound: !found);
             }

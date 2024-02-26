@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
+using JetBrains.Annotations;
 using OpenMod.Unturned.Patching;
 
 namespace OpenMod.Unturned.Mono;
@@ -15,13 +17,15 @@ namespace OpenMod.Unturned.Mono;
 /// to coping the memory array.
 /// https://github.com/Unity-Technologies/mono/blob/unity-main/mcs/class/System/System.Net.Sockets/SocketTaskExtensions.cs
 /// </summary>
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [HarmonyPatch]
-internal static class Patch_SocketTaskExtensions
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+internal static class PatchSocketTaskExtensions
 {
     [HarmonyCleanup]
     public static Exception? Cleanup(Exception ex, MethodBase original)
     {
-        HarmonyExceptionHandler.ReportCleanupException(typeof(Patch_SocketTaskExtensions), ex, original);
+        HarmonyExceptionHandler.ReportCleanupException(typeof(PatchSocketTaskExtensions), ex, original);
         return null;
     }
 
@@ -59,7 +63,7 @@ internal static class Patch_SocketTaskExtensions
             // Instead read into an ArrayPool array, then copy from that into the memory.
 
             var poolArray = ArrayPool<byte>.Shared.Rent(memory.Length);
-            
+
             socket.BeginReceive(poolArray, 0, memory.Length, socketFlags, static iar =>
             {
                 var state = (Tuple<TaskCompletionSource<int>, Memory<byte>, byte[], CancellationToken>)iar.AsyncState;

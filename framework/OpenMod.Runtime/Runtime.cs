@@ -324,12 +324,12 @@ namespace OpenMod.Runtime
                     if (!missingOpenmodDepedencies)
                     {
                         missingOpenmodDepedencies = true;
-                        m_Logger.LogWarning("Some OpenMod dependencies are missing, OpenMod could not work properly.");
+                        m_Logger!.LogWarning("Some OpenMod dependencies are missing, OpenMod could not work properly.");
                     }
 
-                    m_Logger.LogDebug(ex, "Missing dependencies");
-                    m_Logger.LogWarning("Some types from assembly {Assembly} couldn't be loaded.", openModHostAssembly.FullName);
-                    m_Logger.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies));
+                    m_Logger!.LogDebug(ex, "Missing dependencies");
+                    m_Logger!.LogWarning("Some types from assembly {Assembly} couldn't be loaded.", openModHostAssembly.FullName);
+                    m_Logger!.LogWarning("Missing dependencies: {MissingAssemblies}", string.Join(", ", missingDependencies));
                 }
             }
 
@@ -399,12 +399,12 @@ namespace OpenMod.Runtime
 
                 if (internalWatcherField == null)
                 {
-                    m_Logger.LogWarning("Fail to obtain file system watcher.");
+                    m_Logger!.LogWarning("Fail to obtain file system watcher.");
                     return;
                 }
 
                 var internalWatcher = internalWatcherField.GetValue(tempFileSystemWatcher);
-                m_Logger.LogInformation("Using watcher: {FileWatcherImplementation}", internalWatcher.GetType().Name);
+                m_Logger!.LogInformation("Using watcher: {FileWatcherImplementation}", internalWatcher.GetType().Name);
                 return;
             }
 
@@ -412,14 +412,14 @@ namespace OpenMod.Runtime
                 .GetType("System.IO.DefaultWatcher");
             if (defaultWatcherType == null)
             {
-                m_Logger.LogWarning("Fail to obtain default watcher type.");
+                m_Logger!.LogWarning("Fail to obtain default watcher type.");
                 return;
             }
 
             var watcherInstanceField = defaultWatcherType.GetField("instance", BindingFlags.Static | BindingFlags.NonPublic);
             if (watcherInstanceField == null)
             {
-                m_Logger.LogWarning("Fail to obtain watcher istance.");
+                m_Logger!.LogWarning("Fail to obtain watcher istance.");
                 return;
             }
 
@@ -429,20 +429,20 @@ namespace OpenMod.Runtime
 
             if (watchesField == null)
             {
-                m_Logger.LogWarning("Fail to obtain watches field.");
+                m_Logger!.LogWarning("Fail to obtain watches field.");
                 return;
             }
 
             if (watchesField.GetValue(watcherInstance) is not Hashtable watches)
             {
-                m_Logger.LogWarning("Watches is not Hashtable.");
+                m_Logger!.LogWarning("Watches is not Hashtable.");
                 return;
             }
 
             var createFileDataMethod = watcherType.GetMethod("CreateFileData", BindingFlags.Static | BindingFlags.NonPublic);
             if (createFileDataMethod == null)
             {
-                m_Logger.LogWarning("Watcher CreateFileData not found.");
+                m_Logger!.LogWarning("Watcher CreateFileData not found.");
                 return;
             }
 
@@ -510,7 +510,7 @@ namespace OpenMod.Runtime
                 .SetBasePath(WorkingDirectory)
                 .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables("OpenMod_")
-                .AddInMemoryCollection(new Dictionary<string, string>
+                .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     { HostDefaults.ContentRootKey, WorkingDirectory },
                     { HostDefaults.ApplicationKey, "OpenMod" },
@@ -648,7 +648,7 @@ namespace OpenMod.Runtime
             }
 
             IsDisposing = true;
-            m_Logger.LogInformation("OpenMod is shutting down...");
+            m_Logger!.LogInformation("OpenMod is shutting down...");
 
             if (Host is not null)
             {
@@ -661,7 +661,7 @@ namespace OpenMod.Runtime
             m_DateLogger = null;
             m_LoggerFactory = null;
             m_Logger = null;
-            
+
             Log.CloseAndFlush();
         }
     }

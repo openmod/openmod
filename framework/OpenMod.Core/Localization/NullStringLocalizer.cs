@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Localization;
@@ -22,11 +24,6 @@ namespace OpenMod.Core.Localization
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
         {
             return Enumerable.Empty<LocalizedString>();
-        }
-
-        public IStringLocalizer WithCulture(CultureInfo culture)
-        {
-            return this;
         }
 
         public LocalizedString this[string name]

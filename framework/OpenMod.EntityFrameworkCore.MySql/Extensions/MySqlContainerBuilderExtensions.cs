@@ -60,11 +60,6 @@ namespace OpenMod.EntityFrameworkCore.MySql.Extensions
                 .OwnedByLifetimeScope()
                 .InstancePerDependency();
 
-            containerBuilder.RegisterType<PomeloMySqlConnectorResolver>()
-                .AsSelf()
-                .SingleInstance()
-                .AutoActivate();
-
             containerBuilder.AddDbContext(dbContextType, optionsBuilder,
                 serviceLifetime ?? ServiceLifetime.Transient, new MySqlDbContextConfigurator());
 
