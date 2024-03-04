@@ -32,12 +32,12 @@ namespace OpenMod.API.Jobs
         public string? Task { get; set; }
 
         /// <summary>
-        ///     Checks if the job is enabled.
+        ///     Get the job type
         /// </summary>
         public string? Type { get; set; }
 
         /// <summary>
-        ///     Gets the schedule expression.
+        ///     Gets the schedule time.
         /// </summary>
         public string? Schedule
         {
