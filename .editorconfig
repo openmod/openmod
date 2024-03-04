@@ -2,6 +2,7 @@ root = true
 
 [*]
 trim_trailing_whitespace = true
+dotnet_style_namespace_match_folder = true:suggestion
 
 [*.{yaml,yml}]
 indent_style = space
@@ -130,3 +131,13 @@ dotnet_naming_style.camel_case.capitalization = camel_case
 
 # IDE1006: Naming Styles
 dotnet_diagnostic.IDE1006.severity = error
+csharp_style_expression_bodied_accessors = when_on_single_line:error
+csharp_style_expression_bodied_constructors = false:error
+csharp_style_expression_bodied_indexers = false:error
+csharp_style_expression_bodied_lambdas = when_on_single_line:error
+csharp_style_expression_bodied_methods = false:error
+csharp_style_expression_bodied_operators = false:error
+csharp_style_expression_bodied_properties = false:error
+csharp_style_expression_bodied_local_functions = false:error
+csharp_style_namespace_declarations = block_scoped:error
+csharp_prefer_braces = true:error
