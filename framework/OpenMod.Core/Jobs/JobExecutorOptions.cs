@@ -11,7 +11,11 @@ namespace OpenMod.Core.Jobs
         private readonly List<Type> m_JobExecutorTypes = new();
         private readonly PriorityComparer m_PriorityComparer = new(PriortyComparisonMode.HighestFirst);
 
-        [UsedImplicitly] public IReadOnlyCollection<Type> JobExecutorTypes => m_JobExecutorTypes;
+        [UsedImplicitly]
+        public IReadOnlyCollection<Type> JobExecutorTypes
+        {
+            get => m_JobExecutorTypes;
+        }
 
         public void AddJobExecutor<TProvider>() where TProvider : ITaskExecutor
         {
@@ -21,9 +25,14 @@ namespace OpenMod.Core.Jobs
         public void AddJobExecutor(Type type)
         {
             if (!typeof(ITaskExecutor).IsAssignableFrom(type))
+            {
                 throw new Exception($"Type {type} must be an instance of IJobExecutor!");
+            }
 
-            if (m_JobExecutorTypes.Contains(type)) return;
+            if (m_JobExecutorTypes.Contains(type))
+            {
+                return;
+            }
 
             m_JobExecutorTypes.Add(type);
             m_JobExecutorTypes.Sort((a, b) => m_PriorityComparer.Compare(a.GetPriority(), b.GetPriority()));

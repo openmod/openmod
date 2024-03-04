@@ -102,20 +102,37 @@ namespace OpenMod.API.Jobs
         public bool Equals(ScheduledJob? other)
         {
 #pragma warning disable IDE0041 // Use '== null' or 'is null'
-            if (ReferenceEquals(objA: null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(objA: null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Name == other.Name;
         }
 
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(objA: null, obj)) return false;
+            if (ReferenceEquals(objA: null, obj))
+            {
+                return false;
+            }
 #pragma warning restore IDE0041 // Use '== null' or 'is null'
 
-            if (ReferenceEquals(this, obj)) return true;
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
             // ReSharper disable once ConvertIfStatementToReturnStatement
             if (obj.GetType() != GetType())
+            {
                 return false;
+            }
 
             return Equals((ScheduledJob)obj);
         }

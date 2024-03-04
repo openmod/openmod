@@ -16,10 +16,14 @@ namespace OpenMod.API.Jobs
         public JobTask(string jobName, string task, Dictionary<string, object?> args, params object[] parameters)
         {
             if (string.IsNullOrEmpty(jobName))
+            {
                 throw new ArgumentException(nameof(jobName));
+            }
 
             if (string.IsNullOrEmpty(task))
+            {
                 throw new ArgumentException(nameof(task));
+            }
 
             JobName = jobName;
             Task = task;
