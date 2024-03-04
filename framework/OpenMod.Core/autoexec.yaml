@@ -33,7 +33,8 @@
 jobs:
   # Upgrade OpenMod every Sunday at 0:00 and then restart.
   - name: OpenMod Auto Update
-    schedule: '0 0 * * 0'
+    type: '@Repeat'
+    schedule: 0 0 * * 0
     task: openmod_command
     args:
       commands:
@@ -44,7 +45,8 @@ jobs:
 
   # Restart everyday at 3 AM.
   - name: Auto Restart
-    schedule: '0 3 * * *'
+    type: '@Repeat'
+    schedule: 0 3 * * *
     task: openmod_command
     args:
       commands:
@@ -53,6 +55,7 @@ jobs:
 
   # Save every 5 minutes.
   - name: Auto save
+    type: '@Repeat'
     schedule: '*/5 * * * *'
     task: openmod_command
     args:
@@ -62,7 +65,7 @@ jobs:
 
   # Purge packages on every startup (note: this is not recommended and just an example)
   - name: Package purge
-    schedule: '@startup'
+    type: '@startup'
     task: openmod_command
     args:
       commands:
@@ -73,7 +76,8 @@ jobs:
   # It works like terminal (Linux) or cmd (Windows),
   # so you can use scripts like sh or bat or directly run programs
   - name: Wipe
-    schedule: '0 0 1 * *'
+    type: '@Repeat'
+    schedule: 0 0 1 * *
     task: system_command
     args:
       commands:
@@ -82,7 +86,7 @@ jobs:
 
   # Migrate economy on startup (will only execute a single time)
   - name: Economy Migration
-    schedule: '@single_exec'
+    type: '@single_exec'
     task: openmod_command
     args:
       commands:

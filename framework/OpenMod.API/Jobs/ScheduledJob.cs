@@ -46,7 +46,7 @@ namespace OpenMod.API.Jobs
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    m_Schedule = value;
+                    m_Schedule = null;
                     return;
                 }
 
@@ -63,7 +63,7 @@ namespace OpenMod.API.Jobs
                 if (delimiterIndex != -1)
                 {
                     m_Schedule = value.Substring(delimiterIndex + 1);
-                    Type = value.Substring(startIndex: 0, delimiterIndex);
+                    Type = value.Substring(0, delimiterIndex);
                     return;
                 }
 #endif
@@ -75,6 +75,7 @@ namespace OpenMod.API.Jobs
                 }
                 else
                 {
+                    m_Schedule = null;
                     Type = value;
                 }
             }
