@@ -1,57 +1,122 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using OpenMod.API.Persistence;
 
 namespace OpenMod.API.Jobs
 {
     /// <summary>
-    /// Represents a job.
+    ///     Represents a job.
     /// </summary>
     [Serializable]
     public sealed class ScheduledJob : IEquatable<ScheduledJob>
     {
-        /// <summary>
-        /// Gets the unique name of the job.
-        /// </summary>
-        public string? Name { get; set; } 
+        private const string c_JobDelimiter = ":";
+
+        private string? m_Schedule;
 
         /// <summary>
-        /// Gets the job arguments.
+        ///     Gets the unique name of the job.
+        /// </summary>
+        public string? Name { get; set; }
+
+        /// <summary>
+        ///     Gets the job arguments.
         /// </summary>
         public Dictionary<string, object?>? Args { get; set; }
 
         /// <summary>
-        /// Gets the task type of the job.
+        ///     Gets the task type of the job.
         /// </summary>
         public string? Task { get; set; }
 
         /// <summary>
-        /// Gets the schedule expression.
+        ///     Checks if the job is enabled.
         /// </summary>
-        public string? Schedule { get; set; }
+        public string? Type { get; set; }
 
         /// <summary>
-        /// Checks if the job is enabled.
+        ///     Gets the schedule expression.
+        /// </summary>
+        public string? Schedule
+        {
+            get => m_Schedule;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    m_Schedule = value;
+                    return;
+                }
+
+#if NETSTANDARD2_1
+                var delimiterIndex = value.IndexOf(c_JobDelimiter, StringComparison.Ordinal);
+                if (delimiterIndex != -1)
+                {
+                    m_Schedule = value[(delimiterIndex + 1)..];
+                    Type = value[..delimiterIndex];
+                    return;
+                }
+#else
+                var delimiterIndex = value!.IndexOf(c_JobDelimiter, StringComparison.Ordinal);
+                if (delimiterIndex != -1)
+                {
+                    m_Schedule = value.Substring(delimiterIndex + 1);
+                    Type = value.Substring(startIndex: 0, delimiterIndex);
+                    return;
+                }
+#endif
+
+                if (!KnownJobTypes.JobTypes.Any(t => t.Equals(value, StringComparison.OrdinalIgnoreCase)))
+                {
+                    m_Schedule = value;
+                    Type = KnownJobTypes.Default;
+                }
+                else
+                {
+                    Type = value;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Checks if the job is enabled.
         /// </summary>
         public bool? Enabled { get; set; }
 
-        public bool Equals(ScheduledJob other)
+        /// <summary>
+        ///     Cancelling a job will always dispose the token source and remove it from schedule list
+        /// </summary>
+        [SerializeIgnore]
+        public CancellationTokenSource? CancellationTokenSource { get; set; }
+
+        public override int GetHashCode()
         {
-            if (ReferenceEquals(null, other)) return false;
+            // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
+            return Name?.GetHashCode() ?? base.GetHashCode();
+        }
+
+        public bool Equals(ScheduledJob? other)
+        {
+#pragma warning disable IDE0041 // Use '== null' or 'is null'
+            if (ReferenceEquals(objA: null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return Name == other.Name;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((ScheduledJob)obj);
-        }
+            if (ReferenceEquals(objA: null, obj)) return false;
+#pragma warning restore IDE0041 // Use '== null' or 'is null'
 
-        public override int GetHashCode()
-        {
-            return Name?.GetHashCode() ?? base.GetHashCode();
+            if (ReferenceEquals(this, obj)) return true;
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (obj.GetType() != GetType())
+                return false;
+
+            return Equals((ScheduledJob)obj);
         }
     }
 }
