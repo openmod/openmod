@@ -34,6 +34,7 @@ namespace OpenMod.Core.Jobs
         private readonly IOpenModComponent m_OpenModComponent;
         private readonly List<ScheduledJob> m_ScheduledJobs = new();
 
+        private IDisposable? m_FileChangeDisposable;
         private ScheduledJobsFile? m_File;
         private bool m_Started;
 
@@ -56,7 +57,8 @@ namespace OpenMod.Core.Jobs
             });
 
             AsyncHelper.RunSync(ReadJobsFileAsync);
-            m_DataStore.AddChangeWatcher(c_DataStoreKey, runtime, OnJobsFileChange);
+
+            WatchFileChanges();
 
             foreach (var provider in options.Value.JobExecutorTypes)
             {
@@ -68,11 +70,19 @@ namespace OpenMod.Core.Jobs
 
         public void Dispose()
         {
-            foreach (var job in m_ScheduledJobs)
-                DisposeCancellableJob(job, false);
+            m_FileChangeDisposable?.Dispose();
+
+            foreach (var job in m_ScheduledJobs.ToList())
+                DisposeCancellableJob(job);
 
             m_ScheduledJobs.Clear();
             m_JobExecutors.Clear();
+        }
+
+        private void WatchFileChanges()
+        {
+            m_FileChangeDisposable?.Dispose();
+            m_FileChangeDisposable = m_DataStore.AddChangeWatcher(c_DataStoreKey, m_OpenModComponent, OnJobsFileChange);
         }
 
         public Task StartAsync()
@@ -164,13 +174,17 @@ namespace OpenMod.Core.Jobs
         private async Task WriteJobsFileAsync()
         {
             m_File!.Jobs ??= new List<ScheduledJob>();
+
+            //Do not reload file when internal save
+            m_FileChangeDisposable?.Dispose();
             await m_DataStore.SaveAsync(c_DataStoreKey, m_File);
+            WatchFileChanges();
         }
 
         private void OnJobsFileChange()
         {
-            foreach (var job in m_ScheduledJobs)
-                DisposeCancellableJob(job, false);
+            foreach (var job in m_ScheduledJobs.ToList())
+                DisposeCancellableJob(job);
 
             m_ScheduledJobs.Clear();
             AsyncHelper.RunSync(() => StartAsync(isFromFileChange: true));
@@ -183,7 +197,7 @@ namespace OpenMod.Core.Jobs
 
             await ReadJobsFileAsync();
             if (m_File!.Jobs != null)
-                foreach (var job in m_File.Jobs)
+                foreach (var job in m_File.Jobs.ToList())
                     await ScheduleJobInternalAsync(job, !isFromFileChange);
 
             s_IsFirstStart = false;
@@ -251,12 +265,13 @@ namespace OpenMod.Core.Jobs
             }
 
             if (job.Type.Equals(KnownJobTypes.Repeat, StringComparison.OrdinalIgnoreCase))
+            {
                 await DelayedOrExecuteJob(job, shouldRepeat: true);
+                return;
+            }
 
             //Code should never reach this but fallback just in case
-            m_Logger.LogCritical(
-                "Job \"{JobName}\" over passed the checks. Type: \"{JobType}\" | Schedule: \"{JobSchedule}\"", job.Name,
-                job.Type, job.Schedule);
+            m_Logger.LogError("Job \"{JobName}\" over passed the checks. Type: \"{JobType}\" | Schedule: \"{JobSchedule}\"", job.Name, job.Type, job.Schedule);
             await DelayedOrExecuteJob(job, shouldRepeat: true);
         }
 
@@ -267,12 +282,12 @@ namespace OpenMod.Core.Jobs
             if (!shouldRepeat && string.IsNullOrEmpty(job.Schedule))
             {
                 if (await ExecuteJobAsync(job) && removeAfterExec)
-                    DisposeCancellableJob(job);
+                    await RemoveJobAsync(job);
                 return;
             }
 
             var delay = GetJobDelay(job);
-            if (delay == null || delay.Value.TotalMilliseconds < 0)
+            if (delay == null || delay.Value.TotalMilliseconds is < 0 or > int.MaxValue)
                 return;
 
             AddCancellableJob(job);
@@ -297,7 +312,7 @@ namespace OpenMod.Core.Jobs
 
                     do
                     {
-                        await Task.Delay(delay!.Value, token);
+                        await Task.Delay(delay.Value, token);
                         if (!Enabled())
                             break;
 
@@ -306,6 +321,9 @@ namespace OpenMod.Core.Jobs
                             break;
 
                         delay = GetJobDelay(job);
+                        if (delay!.Value.TotalMilliseconds is < 0 or > int.MaxValue)
+                            break;
+
                     } while (Enabled());
                 }
                 catch (TaskCanceledException)
@@ -358,14 +376,13 @@ namespace OpenMod.Core.Jobs
             m_ScheduledJobs.Add(job);
         }
 
-        private void DisposeCancellableJob(ScheduledJob job, bool remove = true)
+        private void DisposeCancellableJob(ScheduledJob job)
         {
             job.Enabled = false;
             job.CancellationTokenSource?.Cancel();
             job.CancellationTokenSource?.Dispose();
 
-            if (remove)
-                m_ScheduledJobs.Remove(job);
+            m_ScheduledJobs.Remove(job);
         }
 
         private async Task<bool> ExecuteJobAsync(ScheduledJob job, params object[] parameters)
