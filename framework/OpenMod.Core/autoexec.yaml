@@ -33,7 +33,7 @@
 jobs:
   # Upgrade OpenMod every Sunday at 0:00 and then restart.
   - name: OpenMod Auto Update
-    type: '@Repeat'
+    type: '@repeat'
     schedule: 0 0 * * 0
     task: openmod_command
     args:
@@ -45,7 +45,7 @@ jobs:
 
   # Restart everyday at 3 AM.
   - name: Auto Restart
-    type: '@Repeat'
+    type: '@repeat'
     schedule: 0 3 * * *
     task: openmod_command
     args:
@@ -55,7 +55,7 @@ jobs:
 
   # Save every 5 minutes.
   - name: Auto save
-    type: '@Repeat'
+    type: '@repeat'
     schedule: '*/5 * * * *'
     task: openmod_command
     args:
@@ -76,7 +76,7 @@ jobs:
   # It works like terminal (Linux) or cmd (Windows),
   # so you can use scripts like sh or bat or directly run programs
   - name: Wipe
-    type: '@Repeat'
+    type: '@repeat'
     schedule: 0 0 1 * *
     task: system_command
     args:
