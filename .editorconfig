@@ -131,7 +131,7 @@ dotnet_naming_style.camel_case.capitalization = camel_case
 
 # IDE1006: Naming Styles
 dotnet_diagnostic.IDE1006.severity = error
-csharp_style_expression_bodied_accessors = when_on_single_line:error
+csharp_style_expression_bodied_accessors = when_on_single_line:suggestion
 csharp_style_expression_bodied_constructors = false:error
 csharp_style_expression_bodied_indexers = false:error
 csharp_style_expression_bodied_lambdas = when_on_single_line:error
