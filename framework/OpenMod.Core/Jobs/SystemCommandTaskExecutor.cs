@@ -13,10 +13,11 @@ namespace OpenMod.Core.Jobs
         private readonly IOpenModComponent m_OpenModComponent;
 
         public SystemCommandTaskExecutor(
-            IOpenModComponent openModComponent,
+            // ReSharper disable once SuggestBaseTypeForParameterInConstructor
+            IRuntime runtime,
             ILogger<SystemCommandTaskExecutor> logger)
         {
-            m_OpenModComponent = openModComponent;
+            m_OpenModComponent = runtime;
             m_Logger = logger;
         }
 
