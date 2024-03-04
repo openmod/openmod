@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
@@ -9,49 +7,34 @@ using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Jobs
 {
-    public class SystemCommandTaskExecutor : ITaskExecutor
+    public class SystemCommandTaskExecutor : CommandTaskExecutor
     {
-        private readonly IRuntime m_Runtime;
         private readonly ILogger<SystemCommandTaskExecutor> m_Logger;
+        private readonly IOpenModComponent m_OpenModComponent;
 
         public SystemCommandTaskExecutor(
-            IRuntime runtime,
+            IOpenModComponent openModComponent,
             ILogger<SystemCommandTaskExecutor> logger)
         {
-            m_Runtime = runtime;
+            m_OpenModComponent = openModComponent;
             m_Logger = logger;
         }
-        public bool SupportsType(string taskType)
+
+        public override string TaskType => "system_command";
+
+        protected override Task ExecuteCommandTask(string command, JobTask task)
         {
-            return string.Equals(taskType, "system_command", StringComparison.OrdinalIgnoreCase);
-        }
+            m_Logger.LogInformation("[{JobName}] Running system command: {Command}", task.JobName, command);
 
-        public async Task ExecuteAsync(JobTask task)
-        {
-            if (!task.Args.ContainsKey("commands"))
+            var args = ArgumentsParser.ParseArguments(command);
+            var startInfo = new ProcessStartInfo(args[0], command.Replace(args[0] + " ", string.Empty))
             {
-                throw new Exception($"Job \"{task.JobName}\" is missing the command list in args.commands!");
-            }
+                UseShellExecute = false,
+                WorkingDirectory = m_OpenModComponent.WorkingDirectory
+            };
 
-            var commands = (IEnumerable<object?>)task.Args["commands"]!;
-            foreach (string? command in commands)
-            {
-                if (string.IsNullOrEmpty(command))
-                {
-                    continue;
-                }
-
-                m_Logger.LogInformation("[{JobName}] Running system command: {Command}", task.JobName, command!);
-                var args = ArgumentsParser.ParseArguments(command!);
-                var startInfo = new ProcessStartInfo(args[0], command!.Replace(args[0] + " ", string.Empty))
-                {
-                    UseShellExecute = false,
-                    WorkingDirectory = m_Runtime.WorkingDirectory
-                };
-
-                var process = Process.Start(startInfo);
-                await process!.WaitForExitAsync();
-            }
+            var process = Process.Start(startInfo);
+            return process!.WaitForExitAsync();
         }
     }
 }
