@@ -328,6 +328,7 @@ namespace OpenMod.Core.Jobs
                 }
                 catch (TaskCanceledException)
                 {
+                    // ignore it
                 }
 
                 if (removeAfterExec)

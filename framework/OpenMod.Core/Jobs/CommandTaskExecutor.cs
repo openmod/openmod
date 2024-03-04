@@ -17,14 +17,12 @@ namespace OpenMod.Core.Jobs
 
         public async Task ExecuteAsync(JobTask task)
         {
-            if (!task.Args.ContainsKey("commands"))
+            if (!task.Args.TryGetValue("commands", out var commands) || commands == null)
                 throw new Exception($"Job \"{task.JobName}\" is missing the command list in args.commands!");
 
-            var commands = (IEnumerable<object?>)task.Args["commands"]!;
-            foreach (var command in commands.Cast<string?>())
+            var cmds = ((IEnumerable<object?>)commands).Cast<string?>().Where(c => !string.IsNullOrEmpty(c));
+            foreach (var command in cmds)
             {
-                if (string.IsNullOrEmpty(command)) continue;
-
                 await ExecuteCommandTask(command!, task);
             }
         }
