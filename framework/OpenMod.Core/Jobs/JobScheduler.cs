@@ -31,20 +31,20 @@ namespace OpenMod.Core.Jobs
         private readonly List<ITaskExecutor> m_JobExecutors = new();
         private readonly ILogger<JobScheduler> m_Logger;
 
-        private readonly IOpenModComponent m_Runtime; //todo maybe change back to runtime
+        private readonly IOpenModComponent m_OpenModComponent;
         private readonly List<ScheduledJob> m_ScheduledJobs = new();
 
         private ScheduledJobsFile? m_File;
         private bool m_Started;
 
         public JobScheduler(
-            IOpenModComponent runtime,
+            IRuntime runtime,
             ILogger<JobScheduler> logger,
             IEventBus eventBus,
             IDataStoreFactory dataStoreFactory,
             IOptions<JobExecutorOptions> options)
         {
-            m_Runtime = runtime;
+            m_OpenModComponent = runtime;
             m_Logger = logger;
             m_EventBus = eventBus;
 
@@ -69,7 +69,7 @@ namespace OpenMod.Core.Jobs
         public void Dispose()
         {
             foreach (var job in m_ScheduledJobs)
-                job.CancellationTokenSource?.Dispose();
+                DisposeCancellableJob(job, false);
 
             m_ScheduledJobs.Clear();
             m_JobExecutors.Clear();
@@ -169,9 +169,10 @@ namespace OpenMod.Core.Jobs
 
         private void OnJobsFileChange()
         {
+            foreach (var job in m_ScheduledJobs)
+                DisposeCancellableJob(job, false);
+
             m_ScheduledJobs.Clear();
-            //todo add stop old jobs
-            //todo types when reload
             AsyncHelper.RunSync(() => StartAsync(isFromFileChange: true));
         }
 
@@ -210,10 +211,9 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (string.IsNullOrEmpty(job.Type) ||
-                !KnownJobTypes.JobTypes.Any(t => t.Equals(job.Type, StringComparison.OrdinalIgnoreCase)))
+            if (string.IsNullOrEmpty(job.Type) || !KnownJobTypes.JobTypes.Any(t => t.Equals(job.Type, StringComparison.OrdinalIgnoreCase)))
             {
-                m_Logger.LogError("Job \"{JobName}\" has no type set or an invalid one", job.Name); //todo change
+                m_Logger.LogError("Job \"{JobName}\" has no type set or an invalid one", job.Name);
                 return;
             }
 
@@ -244,7 +244,6 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            //todo verify this one
             if (job.Type.Equals(KnownJobTypes.Event, StringComparison.OrdinalIgnoreCase))
             {
                 SubscribeEventJob(job);
@@ -293,7 +292,7 @@ namespace OpenMod.Core.Jobs
 
                     bool Enabled()
                     {
-                        return (job.Enabled ?? true) && m_Runtime.IsComponentAlive && !token.IsCancellationRequested;
+                        return (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive && !token.IsCancellationRequested;
                     }
 
                     do
@@ -359,12 +358,14 @@ namespace OpenMod.Core.Jobs
             m_ScheduledJobs.Add(job);
         }
 
-        private void DisposeCancellableJob(ScheduledJob job)
+        private void DisposeCancellableJob(ScheduledJob job, bool remove = true)
         {
             job.Enabled = false;
             job.CancellationTokenSource?.Cancel();
             job.CancellationTokenSource?.Dispose();
-            m_ScheduledJobs.Remove(job);
+
+            if (remove)
+                m_ScheduledJobs.Remove(job);
         }
 
         private async Task<bool> ExecuteJobAsync(ScheduledJob job, params object[] parameters)
@@ -393,10 +394,10 @@ namespace OpenMod.Core.Jobs
         private void SubscribeEventJob(ScheduledJob job)
         {
             m_Logger.LogInformation("Subscribed job \"{JobName}\" to \"{JobSchedule}\" event", job.Name, job.Schedule);
-            var dispose = m_EventBus.Subscribe(m_Runtime, job.Schedule!, async (_, _, @event) =>
+            var dispose = m_EventBus.Subscribe(m_OpenModComponent, job.Schedule!, async (_, _, @event) =>
             {
                 var token = job.CancellationTokenSource!.Token;
-                if ((!job.Enabled ?? false) || !m_Runtime.IsComponentAlive || token.IsCancellationRequested)
+                if ((!job.Enabled ?? false) || !m_OpenModComponent.IsComponentAlive || token.IsCancellationRequested)
                     return;
 
                 await ExecuteJobAsync(job, new { Event = @event });
