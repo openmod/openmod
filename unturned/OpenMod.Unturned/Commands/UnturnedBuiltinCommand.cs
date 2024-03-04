@@ -37,7 +37,6 @@ namespace OpenMod.Unturned.Commands
             await UniTask.SwitchToMainThread();
             var argsLine = string.Join(" ", Context.Parameters);
             cmd.check(id, m_CommandRegistration.Name, argsLine);
-            await UniTask.SwitchToThreadPool();
         }
     }
 }
