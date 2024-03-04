@@ -33,9 +33,9 @@ namespace OpenMod.Core.Jobs
 
         private readonly IOpenModComponent m_OpenModComponent;
         private readonly List<ScheduledJob> m_ScheduledJobs = new();
+        private ScheduledJobsFile? m_File;
 
         private IDisposable? m_FileChangeDisposable;
-        private ScheduledJobsFile? m_File;
         private bool m_Started;
 
         public JobScheduler(
@@ -73,16 +73,12 @@ namespace OpenMod.Core.Jobs
             m_FileChangeDisposable?.Dispose();
 
             foreach (var job in m_ScheduledJobs.ToList())
+            {
                 DisposeCancellableJob(job);
+            }
 
             m_ScheduledJobs.Clear();
             m_JobExecutors.Clear();
-        }
-
-        private void WatchFileChanges()
-        {
-            m_FileChangeDisposable?.Dispose();
-            m_FileChangeDisposable = m_DataStore.AddChangeWatcher(c_DataStoreKey, m_OpenModComponent, OnJobsFileChange);
         }
 
         public Task StartAsync()
@@ -94,11 +90,15 @@ namespace OpenMod.Core.Jobs
         public async Task<ScheduledJob> ScheduleJobAsync(JobCreationParameters? @params)
         {
             if (@params == null)
+            {
                 throw new ArgumentNullException(nameof(@params));
+            }
 
             m_File!.Jobs ??= new List<ScheduledJob>();
             if (m_File.Jobs.Any(d => d.Name?.Equals(@params.Name, StringComparison.OrdinalIgnoreCase) ?? false))
+            {
                 throw new Exception($"A job with this name already exists: {@params.Name}");
+            }
 
             var job = new ScheduledJob
             {
@@ -125,7 +125,9 @@ namespace OpenMod.Core.Jobs
         {
             var job = await FindJobAsync(name);
             if (job == null)
+            {
                 return false;
+            }
 
             return await RemoveJobAsync(job);
         }
@@ -134,11 +136,15 @@ namespace OpenMod.Core.Jobs
         {
             DisposeCancellableJob(job);
             if (m_File!.Jobs == null)
+            {
                 return false;
+            }
 
             var foundInFile = m_File.Jobs.Remove(job);
             if (foundInFile)
+            {
                 await WriteJobsFileAsync();
+            }
 
             return foundInFile;
         }
@@ -146,11 +152,19 @@ namespace OpenMod.Core.Jobs
         public Task<ICollection<ScheduledJob>> GetScheduledJobsAsync(bool includeDisabled)
         {
             if (m_File!.Jobs == null)
+            {
                 return Task.FromResult<ICollection<ScheduledJob>>(new List<ScheduledJob>());
+            }
 
             return Task.FromResult<ICollection<ScheduledJob>>(m_File.Jobs
                 .Where(d => includeDisabled || (d.Enabled ?? true))
                 .ToList());
+        }
+
+        private void WatchFileChanges()
+        {
+            m_FileChangeDisposable?.Dispose();
+            m_FileChangeDisposable = m_DataStore.AddChangeWatcher(c_DataStoreKey, m_OpenModComponent, OnJobsFileChange);
         }
 
         private async Task ReadJobsFileAsync()
@@ -163,10 +177,14 @@ namespace OpenMod.Core.Jobs
 
             m_File = await m_DataStore.LoadAsync<ScheduledJobsFile>(c_DataStoreKey);
             if (m_File == null)
+            {
                 throw new InvalidOperationException("Failed to load jobs from autoexec.yaml!");
+            }
 
             if (m_File.Jobs != null)
+            {
                 m_File.Jobs = m_File.Jobs.DistinctBy(d => d.Name, StringComparer.OrdinalIgnoreCase).ToList();
+            }
 
             await WriteJobsFileAsync();
         }
@@ -184,7 +202,9 @@ namespace OpenMod.Core.Jobs
         private void OnJobsFileChange()
         {
             foreach (var job in m_ScheduledJobs.ToList())
+            {
                 DisposeCancellableJob(job);
+            }
 
             m_ScheduledJobs.Clear();
             AsyncHelper.RunSync(() => StartAsync(isFromFileChange: true));
@@ -193,12 +213,18 @@ namespace OpenMod.Core.Jobs
         private async Task StartAsync(bool isFromFileChange)
         {
             if (m_Started && !isFromFileChange)
+            {
                 return;
+            }
 
             await ReadJobsFileAsync();
             if (m_File!.Jobs != null)
+            {
                 foreach (var job in m_File.Jobs.ToList())
+                {
                     await ScheduleJobInternalAsync(job, !isFromFileChange);
+                }
+            }
 
             s_IsFirstStart = false;
             m_Started = true;
@@ -207,11 +233,15 @@ namespace OpenMod.Core.Jobs
         private async Task ScheduleJobInternalAsync(ScheduledJob? job, bool isFromStart)
         {
             if (job == null)
+            {
                 throw new ArgumentNullException(nameof(job));
+            }
 
             var enable = job.Enabled ?? true;
             if (!enable)
+            {
                 return;
+            }
 
             if (string.IsNullOrEmpty(job.Name))
             {
@@ -225,7 +255,8 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (string.IsNullOrEmpty(job.Type) || !KnownJobTypes.JobTypes.Any(t => t.Equals(job.Type, StringComparison.OrdinalIgnoreCase)))
+            if (string.IsNullOrEmpty(job.Type) ||
+                !KnownJobTypes.JobTypes.Any(t => t.Equals(job.Type, StringComparison.OrdinalIgnoreCase)))
             {
                 m_Logger.LogError("Job \"{JobName}\" has no type set or an invalid one", job.Name);
                 return;
@@ -246,15 +277,21 @@ namespace OpenMod.Core.Jobs
 
             if (job.Type.Equals(KnownJobTypes.Reboot, StringComparison.OrdinalIgnoreCase))
             {
-                if (s_IsFirstStart) //Same as reboot
+                if (s_IsFirstStart)
+                {
                     await DelayedOrExecuteJob(job);
+                }
+
                 return;
             }
 
             if (job.Type.Equals(KnownJobTypes.Startup, StringComparison.OrdinalIgnoreCase))
             {
                 if (isFromStart)
+                {
                     await DelayedOrExecuteJob(job);
+                }
+
                 return;
             }
 
@@ -271,7 +308,9 @@ namespace OpenMod.Core.Jobs
             }
 
             //Code should never reach this but fallback just in case
-            m_Logger.LogError("Job \"{JobName}\" over passed the checks. Type: \"{JobType}\" | Schedule: \"{JobSchedule}\"", job.Name, job.Type, job.Schedule);
+            m_Logger.LogError(
+                "Job \"{JobName}\" over passed the checks. Type: \"{JobType}\" | Schedule: \"{JobSchedule}\"", job.Name,
+                job.Type, job.Schedule);
             await DelayedOrExecuteJob(job, shouldRepeat: true);
         }
 
@@ -282,23 +321,33 @@ namespace OpenMod.Core.Jobs
             if (!shouldRepeat && string.IsNullOrEmpty(job.Schedule))
             {
                 if (await ExecuteJobAsync(job) && removeAfterExec)
+                {
                     await RemoveJobAsync(job);
+                }
+
                 return;
             }
 
             var delay = GetJobDelay(job);
             if (delay == null || delay.Value.TotalMilliseconds is < 0 or > int.MaxValue)
+            {
                 return;
+            }
 
             AddCancellableJob(job);
 
             if (shouldRepeat)
+            {
                 m_Logger.LogInformation(
                     "Scheduling job \"{JobName}\" type \"{JobType}\" with schedule \"{JobSchedule}\"", job.Name,
                     job.Type, job.Schedule);
+            }
             else
+            {
                 m_Logger.LogInformation("Delaying job \"{JobName}\" with delay of \"{JobDelay}\"", job.Name,
                     $"{delay:c}");
+            }
+
             AsyncHelper.Schedule($"Execution of job \"{job.Name}\"", async () =>
             {
                 try
@@ -307,23 +356,29 @@ namespace OpenMod.Core.Jobs
 
                     bool Enabled()
                     {
-                        return (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive && !token.IsCancellationRequested;
+                        return (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive &&
+                               !token.IsCancellationRequested;
                     }
 
                     do
                     {
                         await Task.Delay(delay.Value, token);
                         if (!Enabled())
+                        {
                             break;
+                        }
 
                         await ExecuteJobAsync(job);
                         if (!shouldRepeat)
+                        {
                             break;
+                        }
 
                         delay = GetJobDelay(job);
                         if (delay!.Value.TotalMilliseconds is < 0 or > int.MaxValue)
+                        {
                             break;
-
+                        }
                     } while (Enabled());
                 }
                 catch (TaskCanceledException)
@@ -332,9 +387,13 @@ namespace OpenMod.Core.Jobs
                 }
 
                 if (removeAfterExec)
+                {
                     await RemoveJobAsync(job);
+                }
                 else
+                {
                     DisposeCancellableJob(job);
+                }
             });
         }
 
@@ -347,7 +406,9 @@ namespace OpenMod.Core.Jobs
                 var expression = CronExpression.Parse(job.Schedule);
                 var nextOccurence = expression.GetNextOccurrence(DateTimeOffset.Now, TimeZoneInfo.Local);
                 if (nextOccurence == null)
+                {
                     return null;
+                }
 
                 return nextOccurence.Value - DateTimeOffset.Now;
             }
@@ -415,8 +476,12 @@ namespace OpenMod.Core.Jobs
             var dispose = m_EventBus.Subscribe(m_OpenModComponent, job.Schedule!, async (_, _, @event) =>
             {
                 var token = job.CancellationTokenSource!.Token;
-                if ((!job.Enabled ?? false) || !m_OpenModComponent.IsComponentAlive || token.IsCancellationRequested)
+                var enable = (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive &&
+                             !token.IsCancellationRequested;
+                if (enable)
+                {
                     return;
+                }
 
                 await ExecuteJobAsync(job, new { Event = @event });
             });
