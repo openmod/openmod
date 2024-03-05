@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using OpenMod.API.Persistence;
 
@@ -12,10 +11,6 @@ namespace OpenMod.API.Jobs
     [Serializable]
     public sealed class ScheduledJob : IEquatable<ScheduledJob>
     {
-        private const string c_JobDelimiter = ":";
-
-        private string? m_Schedule;
-
         /// <summary>
         ///     Gets the unique name of the job.
         /// </summary>
@@ -32,54 +27,9 @@ namespace OpenMod.API.Jobs
         public string? Task { get; set; }
 
         /// <summary>
-        ///     Get the job type
-        /// </summary>
-        public string? Type { get; set; }
-
-        /// <summary>
         ///     Gets the schedule time.
         /// </summary>
-        public string? Schedule
-        {
-            get => m_Schedule;
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    m_Schedule = null;
-                    return;
-                }
-
-#if NETSTANDARD2_1
-                var delimiterIndex = value.IndexOf(c_JobDelimiter, StringComparison.Ordinal);
-                if (delimiterIndex != -1)
-                {
-                    m_Schedule = value[(delimiterIndex + 1)..];
-                    Type = value[..delimiterIndex];
-                    return;
-                }
-#else
-                var delimiterIndex = value!.IndexOf(c_JobDelimiter, StringComparison.Ordinal);
-                if (delimiterIndex != -1)
-                {
-                    m_Schedule = value.Substring(delimiterIndex + 1);
-                    Type = value.Substring(0, delimiterIndex);
-                    return;
-                }
-#endif
-
-                if (!KnownJobTypes.JobTypes.Any(t => t.Equals(value, StringComparison.OrdinalIgnoreCase)))
-                {
-                    m_Schedule = value;
-                    Type = KnownJobTypes.Default;
-                }
-                else
-                {
-                    m_Schedule = null;
-                    Type = value;
-                }
-            }
-        }
+        public string? Schedule { get; set; }
 
         /// <summary>
         ///     Checks if the job is enabled.
