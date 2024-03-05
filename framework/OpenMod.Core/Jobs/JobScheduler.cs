@@ -21,11 +21,11 @@ namespace OpenMod.Core.Jobs
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton)]
     public class JobScheduler : IJobScheduler, IDisposable
     {
+        private const string c_JobDelimiter = ":";
         private const string c_DataStoreKey = "autoexec";
 
         private static bool s_IsFirstStart = true;
 
-        private static readonly string[] s_JobsWihSchedule = { KnownJobTypes.Event, KnownJobTypes.Repeat };
         private readonly IDataStore m_DataStore;
         private readonly IEventBus m_EventBus;
         private readonly List<ITaskExecutor> m_JobExecutors = new();
@@ -255,27 +255,19 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (string.IsNullOrEmpty(job.Type) ||
-                !KnownJobTypes.JobTypes.Any(t => t.Equals(job.Type, StringComparison.OrdinalIgnoreCase)))
-            {
-                m_Logger.LogError("Job \"{JobName}\" has no type set or an invalid one", job.Name);
-                return;
-            }
-
-            if (string.IsNullOrEmpty(job.Schedule) &&
-                s_JobsWihSchedule.Any(j => j.Equals(job.Type, StringComparison.OrdinalIgnoreCase)))
+            if (string.IsNullOrEmpty(job.Schedule))
             {
                 m_Logger.LogError("Job \"{JobName}\" has no schedule set", job.Name);
                 return;
             }
 
-            if (job.Type!.Equals(KnownJobTypes.SingleExec, StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule!.StartsWith(KnownJobTypes.SingleExec, StringComparison.OrdinalIgnoreCase))
             {
                 await DelayedOrExecuteJob(job, removeAfterExec: true);
                 return;
             }
 
-            if (job.Type.Equals(KnownJobTypes.Reboot, StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith(KnownJobTypes.Reboot, StringComparison.OrdinalIgnoreCase))
             {
                 if (s_IsFirstStart)
                 {
@@ -285,7 +277,7 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Type.Equals(KnownJobTypes.Startup, StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith(KnownJobTypes.Startup, StringComparison.OrdinalIgnoreCase))
             {
                 if (isFromStart)
                 {
@@ -295,40 +287,44 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Type.Equals(KnownJobTypes.Event, StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith(KnownJobTypes.Event, StringComparison.OrdinalIgnoreCase))
             {
                 SubscribeEventJob(job);
                 return;
             }
 
-            if (job.Type.Equals(KnownJobTypes.Repeat, StringComparison.OrdinalIgnoreCase))
+            /*if (job.Schedule.StartsWith(KnownJobTypes.Repeat, StringComparison.OrdinalIgnoreCase))
             {
                 await DelayedOrExecuteJob(job, shouldRepeat: true);
                 return;
-            }
+            }*/
 
-            //Code should never reach this but fallback just in case
-            m_Logger.LogError(
-                "Job \"{JobName}\" over passed the checks. Type: \"{JobType}\" | Schedule: \"{JobSchedule}\"", job.Name,
-                job.Type, job.Schedule);
             await DelayedOrExecuteJob(job, shouldRepeat: true);
         }
 
         private async Task DelayedOrExecuteJob(ScheduledJob job, bool removeAfterExec = false,
             bool shouldRepeat = false)
         {
-            //Note repeat commands should have delay
-            if (!shouldRepeat && string.IsNullOrEmpty(job.Schedule))
+            //If shouldRepeat schedule => time or type:time
+            //else schedule => type or type:time
+            var schedule = RetrieveSchedulerValue(job.Schedule!, !shouldRepeat); //!shouldRepeat
+            if (string.IsNullOrEmpty(schedule))
             {
-                if (await ExecuteJobAsync(job) && removeAfterExec)
+                if (!shouldRepeat)
                 {
-                    await RemoveJobAsync(job);
+                    if (await ExecuteJobAsync(job) && removeAfterExec)
+                    {
+                        await RemoveJobAsync(job);
+                    }
+
+                    return;
                 }
 
+                m_Logger.LogError("Job \"{JobName}\" has no valid schedule", job.Name);
                 return;
             }
 
-            var delay = GetJobDelay(job);
+            var delay = GetJobDelay(job.Name!, schedule!, !shouldRepeat);
             if (delay == null || delay.Value.TotalMilliseconds is < 0 or > int.MaxValue)
             {
                 return;
@@ -338,9 +334,8 @@ namespace OpenMod.Core.Jobs
 
             if (shouldRepeat)
             {
-                m_Logger.LogInformation(
-                    "Scheduling job \"{JobName}\" type \"{JobType}\" with schedule \"{JobSchedule}\"", job.Name,
-                    job.Type, job.Schedule);
+                m_Logger.LogInformation("Scheduling job \"{JobName}\" with schedule \"{JobSchedule}\"", job.Name,
+                    job.Schedule);
             }
             else
             {
@@ -374,7 +369,8 @@ namespace OpenMod.Core.Jobs
                             break;
                         }
 
-                        delay = GetJobDelay(job);
+                        //If repeat it means time can be time span or cron
+                        delay = GetJobDelay(job.Name!, schedule!, !shouldRepeat);
                         if (delay!.Value.TotalMilliseconds is < 0 or > int.MaxValue)
                         {
                             break;
@@ -397,36 +393,65 @@ namespace OpenMod.Core.Jobs
             });
         }
 
-        private TimeSpan? GetJobDelay(ScheduledJob job)
+        /// <summary>
+        ///     Separates schedule value from its original form type:time
+        ///     If shouldBePrefixed means it returns null when fail to separate
+        ///     else return schedule
+        /// </summary>
+        private string? RetrieveSchedulerValue(string schedule, bool shouldBePrefixed)
         {
-            Exception? cronEx;
+            var delimiterIndex = schedule.IndexOf(c_JobDelimiter, StringComparison.Ordinal);
+            if (delimiterIndex != -1)
+            {
+                return schedule[(delimiterIndex + 1)..];
+            }
+
+            return shouldBePrefixed ? null : schedule;
+        }
+
+        private TimeSpan? GetJobDelay(string jobName, string jobSchedule, bool onlyTimespan)
+        {
+            Exception? cronEx = null;
+
+            if (!onlyTimespan)
+            {
+                try
+                {
+                    var expression = CronExpression.Parse(jobSchedule);
+                    var nextOccurence = expression.GetNextOccurrence(DateTimeOffset.Now, TimeZoneInfo.Local);
+                    if (nextOccurence == null)
+                    {
+                        return null;
+                    }
+
+                    return nextOccurence.Value - DateTimeOffset.Now;
+                }
+                catch (Exception ex)
+                {
+                    cronEx = ex;
+                }
+            }
 
             try
             {
-                var expression = CronExpression.Parse(job.Schedule);
-                var nextOccurence = expression.GetNextOccurrence(DateTimeOffset.Now, TimeZoneInfo.Local);
-                if (nextOccurence == null)
+                return TimeSpanHelper.Parse(jobSchedule);
+            }
+            catch (Exception ex)
+            {
+                if (cronEx != null)
                 {
-                    return null;
+                    m_Logger.LogError(
+                        "Fail to parse Job \"{JobName}\" schedule \"{JobSchedule}\". The value is not a valid crontab or time span",
+                        jobName, jobSchedule);
+                    m_Logger.LogError(cronEx, "Crontab error");
+                }
+                else
+                {
+                    m_Logger.LogError(
+                        "Fail to parse Job \"{JobName}\" schedule \"{JobSchedule}\". The value is not a valid time span",
+                        jobName, jobSchedule);
                 }
 
-                return nextOccurence.Value - DateTimeOffset.Now;
-            }
-            catch (Exception ex)
-            {
-                cronEx = ex;
-            }
-
-            try
-            {
-                return TimeSpanHelper.Parse(job.Schedule!);
-            }
-            catch (Exception ex)
-            {
-                m_Logger.LogError(
-                    "Fail to parse Job \"{JobName}\" schedule \"{JobSchedule}\". The value is not a valid crontab or time span",
-                    job.Name, job.Schedule);
-                m_Logger.LogError(cronEx, "Crontab error");
                 m_Logger.LogError(ex, "Time span error");
                 return null;
             }
@@ -472,8 +497,16 @@ namespace OpenMod.Core.Jobs
 
         private void SubscribeEventJob(ScheduledJob job)
         {
-            m_Logger.LogInformation("Subscribed job \"{JobName}\" to \"{JobSchedule}\" event", job.Name, job.Schedule);
-            var dispose = m_EventBus.Subscribe(m_OpenModComponent, job.Schedule!, async (_, _, @event) =>
+            var schedule = RetrieveSchedulerValue(job.Schedule!, shouldBePrefixed: true);
+            if (string.IsNullOrEmpty(schedule))
+            {
+                m_Logger.LogError("Invalid event job format \"{JobSchedule}\" for \"{JobName}\" job", job.Schedule,
+                    job.Name);
+                return;
+            }
+
+            m_Logger.LogInformation("Subscribed job \"{JobName}\" to \"{JobSchedule}\" event", job.Name, schedule);
+            var dispose = m_EventBus.Subscribe(m_OpenModComponent, schedule!, async (_, _, @event) =>
             {
                 var token = job.CancellationTokenSource!.Token;
                 var enable = (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive &&
