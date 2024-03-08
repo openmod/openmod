@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Serilog;
@@ -70,6 +71,18 @@ namespace OpenMod.Core.Helpers
         /// <param name="exceptionHandler">The optional exception handler.</param>
         public static void Schedule(string name, Func<Task> task, Action<Exception>? exceptionHandler = null)
         {
+            Schedule(name, task, null, exceptionHandler);
+        }
+
+        /// <summary>
+        ///    Schedules a task on a different thread (fire and forget)
+        /// </summary>
+        /// <param name="name">The name of the task.</param>
+        /// <param name="task">The task to run.</param>
+        /// <param name="cancellationToken">The optional cancellation token.</param>
+        /// <param name="exceptionHandler">The optional exception handler.</param>
+        public static void Schedule(string name, Func<Task> task, CancellationToken? cancellationToken, Action<Exception>? exceptionHandler = null)
+        {
             Task.Run(async () =>
             {
                 try
@@ -87,7 +100,7 @@ namespace OpenMod.Core.Helpers
                         Log.Error(e, "Exception occured in task \"{TaskName}\"", name);
                     }
                 }
-            });
+            }, cancellationToken ?? CancellationToken.None);
         }
     }
 }

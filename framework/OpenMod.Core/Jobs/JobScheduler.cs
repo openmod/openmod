@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Cronos;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MoreLinq.Extensions;
+using MoreLinq;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Ioc;
@@ -20,20 +21,21 @@ namespace OpenMod.Core.Jobs
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton)]
     public class JobScheduler : IJobScheduler, IDisposable
     {
-        private const string c_DataStoreKey = "autoexec";
-        private const string c_SingleExecutionJobPrefix = "@single_exec";
-        private const string c_RebootExecutionJobPrefix = "@reboot";
-        private const string c_StartupExecutionJobPrefix = "@startup";
-        private const string c_EventExecutionJobPrefix = "@event";
         private const string c_JobDelimiter = ":";
-        private readonly IRuntime m_Runtime;
-        private readonly ILogger<JobScheduler> m_Logger;
-        private readonly IEventBus m_EventBus;
+        private const string c_DataStoreKey = "autoexec";
+
+        private static bool s_IsFirstStart = true;
+
         private readonly IDataStore m_DataStore;
-        private readonly List<ITaskExecutor> m_JobExecutors;
-        private readonly List<ScheduledJob> m_ScheduledJobs;
-        private static bool s_RunRebootJobs = true;
-        private ScheduledJobsFile m_File = null!;
+        private readonly IEventBus m_EventBus;
+        private readonly List<ITaskExecutor> m_JobExecutors = new();
+        private readonly ILogger<JobScheduler> m_Logger;
+
+        private readonly IOpenModComponent m_OpenModComponent;
+        private readonly List<ScheduledJob> m_ScheduledJobs = new();
+        private ScheduledJobsFile? m_File;
+
+        private IDisposable? m_FileChangeDisposable;
         private bool m_Started;
 
         public JobScheduler(
@@ -43,7 +45,7 @@ namespace OpenMod.Core.Jobs
             IDataStoreFactory dataStoreFactory,
             IOptions<JobExecutorOptions> options)
         {
-            m_Runtime = runtime;
+            m_OpenModComponent = runtime;
             m_Logger = logger;
             m_EventBus = eventBus;
 
@@ -56,19 +58,27 @@ namespace OpenMod.Core.Jobs
 
             AsyncHelper.RunSync(ReadJobsFileAsync);
 
-            m_ScheduledJobs = new List<ScheduledJob>();
-            m_DataStore.AddChangeWatcher(c_DataStoreKey, runtime, () =>
-            {
-                m_ScheduledJobs.Clear();
-                AsyncHelper.RunSync(() => StartAsync(isFromFileChange: true));
-            });
+            WatchFileChanges();
 
-            m_JobExecutors = new List<ITaskExecutor>();
             foreach (var provider in options.Value.JobExecutorTypes)
             {
-                m_JobExecutors.Add(
-                    (ITaskExecutor)ActivatorUtilitiesEx.CreateInstance(runtime.LifetimeScope, provider));
+                var jobExecutor = (ITaskExecutor)ActivatorUtilitiesEx.CreateInstance(runtime.LifetimeScope, provider);
+                m_JobExecutors.Add(jobExecutor);
             }
+        }
+
+
+        public void Dispose()
+        {
+            m_FileChangeDisposable?.Dispose();
+
+            foreach (var job in m_ScheduledJobs.ToList())
+            {
+                DisposeCancellableJob(job);
+            }
+
+            m_ScheduledJobs.Clear();
+            m_JobExecutors.Clear();
         }
 
         public Task StartAsync()
@@ -76,36 +86,16 @@ namespace OpenMod.Core.Jobs
             return StartAsync(isFromFileChange: false);
         }
 
-        private async Task StartAsync(bool isFromFileChange)
-        {
-            if (m_Started && !isFromFileChange)
-            {
-                return;
-            }
 
-            await ReadJobsFileAsync();
-
-            if (m_File.Jobs != null)
-            {
-                foreach (var job in m_File.Jobs.ToList())
-                {
-                    await ScheduleJobInternalAsync(job, isCalledFromStartup: !isFromFileChange, isCalledFromReboot: s_RunRebootJobs);
-                }
-            }
-
-            s_RunRebootJobs = false;
-            m_Started = true;
-        }
-
-        public async Task<ScheduledJob> ScheduleJobAsync(JobCreationParameters @params)
+        public async Task<ScheduledJob> ScheduleJobAsync(JobCreationParameters? @params)
         {
             if (@params == null)
             {
                 throw new ArgumentNullException(nameof(@params));
             }
 
-            m_File.Jobs ??= new();
-            if (m_File.Jobs.Any(d => d.Name?.Equals(@params.Name) ?? false))
+            m_File!.Jobs ??= new List<ScheduledJob>();
+            if (m_File.Jobs.Any(d => d.Name?.Equals(@params.Name, StringComparison.OrdinalIgnoreCase) ?? false))
             {
                 throw new Exception($"A job with this name already exists: {@params.Name}");
             }
@@ -116,23 +106,19 @@ namespace OpenMod.Core.Jobs
                 Task = @params.Task ?? throw new ArgumentException(nameof(@params)),
                 Args = @params.Args ?? throw new ArgumentException(nameof(@params)),
                 Schedule = @params.Schedule ?? throw new ArgumentException(nameof(@params)),
-                Enabled = true,
+                Enabled = true
             };
             m_File.Jobs.Add(job);
 
             await WriteJobsFileAsync();
-            await ScheduleJobInternalAsync(job, isCalledFromStartup: false, isCalledFromReboot: false);
+            await ScheduleJobInternalAsync(job, isFromStart: false);
             return job;
         }
 
         public Task<ScheduledJob?> FindJobAsync(string name)
         {
-            if (m_File.Jobs == null)
-            {
-                return Task.FromResult<ScheduledJob?>(null);
-            }
-
-            return Task.FromResult<ScheduledJob?>(m_File.Jobs.FirstOrDefault(d => d.Name?.Equals(name) ?? false));
+            return Task.FromResult(m_File?.Jobs?.FirstOrDefault(d =>
+                d.Name?.Equals(name, StringComparison.OrdinalIgnoreCase) ?? false));
         }
 
         public async Task<bool> RemoveJobAsync(string name)
@@ -148,28 +134,24 @@ namespace OpenMod.Core.Jobs
 
         public async Task<bool> RemoveJobAsync(ScheduledJob job)
         {
-            bool MatchJob(ScheduledJob d) => d.Name?.Equals(job.Name, StringComparison.Ordinal) ?? false;
-
-            m_ScheduledJobs.RemoveAll(MatchJob);
-            job.Enabled = false;
-
-            if (m_File.Jobs == null)
+            DisposeCancellableJob(job);
+            if (m_File!.Jobs == null)
             {
                 return false;
             }
 
-            var found = m_File.Jobs.RemoveAll(MatchJob) > 0;
-            if (found)
+            var foundInFile = m_File.Jobs.Remove(job);
+            if (foundInFile)
             {
                 await WriteJobsFileAsync();
             }
 
-            return found;
+            return foundInFile;
         }
 
         public Task<ICollection<ScheduledJob>> GetScheduledJobsAsync(bool includeDisabled)
         {
-            if (m_File.Jobs == null)
+            if (m_File!.Jobs == null)
             {
                 return Task.FromResult<ICollection<ScheduledJob>>(new List<ScheduledJob>());
             }
@@ -179,44 +161,84 @@ namespace OpenMod.Core.Jobs
                 .ToList());
         }
 
+        private void WatchFileChanges()
+        {
+            m_FileChangeDisposable?.Dispose();
+            m_FileChangeDisposable = m_DataStore.AddChangeWatcher(c_DataStoreKey, m_OpenModComponent, OnJobsFileChange);
+        }
+
         private async Task ReadJobsFileAsync()
         {
             if (!await m_DataStore.ExistsAsync(c_DataStoreKey))
             {
                 m_File = new ScheduledJobsFile();
+                return;
             }
-            else
+
+            m_File = await m_DataStore.LoadAsync<ScheduledJobsFile>(c_DataStoreKey);
+            if (m_File == null)
             {
-                m_File = await m_DataStore.LoadAsync<ScheduledJobsFile>(c_DataStoreKey)
-                         ?? throw new InvalidOperationException("Failed to load jobs from autoexec.yaml!");
-
-                m_File.Jobs ??= new();
-
-                var previousCount = m_File.Jobs.Count;
-                m_File.Jobs = m_File.Jobs.DistinctBy(d => d.Name).ToList();
-
-                // Duplicate jobs removed; save
-                if (m_File.Jobs.Count != previousCount)
-                {
-                    await WriteJobsFileAsync();
-                }
+                throw new InvalidOperationException("Failed to load jobs from autoexec.yaml!");
             }
+
+            if (m_File.Jobs != null)
+            {
+                m_File.Jobs = m_File.Jobs.DistinctBy(d => d.Name, StringComparer.OrdinalIgnoreCase).ToList();
+            }
+
+            await WriteJobsFileAsync();
         }
 
         private async Task WriteJobsFileAsync()
         {
-            m_File.Jobs ??= new();
+            m_File!.Jobs ??= new List<ScheduledJob>();
+
+            //Do not reload file when internal save
+            m_FileChangeDisposable?.Dispose();
             await m_DataStore.SaveAsync(c_DataStoreKey, m_File);
+            WatchFileChanges();
         }
 
-        private async Task ScheduleJobInternalAsync(ScheduledJob job, bool isCalledFromStartup, bool isCalledFromReboot)
+        private void OnJobsFileChange()
+        {
+            foreach (var job in m_ScheduledJobs.ToList())
+            {
+                DisposeCancellableJob(job);
+            }
+
+            m_ScheduledJobs.Clear();
+            AsyncHelper.RunSync(() => StartAsync(isFromFileChange: true));
+        }
+
+        private async Task StartAsync(bool isFromFileChange)
+        {
+            if (m_Started && !isFromFileChange)
+            {
+                return;
+            }
+
+            await ReadJobsFileAsync();
+            if (m_File!.Jobs != null)
+            {
+                foreach (var job in m_File.Jobs.ToList())
+                {
+                    await ScheduleJobInternalAsync(job, !isFromFileChange);
+                }
+            }
+
+            s_IsFirstStart = false;
+            m_Started = true;
+        }
+
+        private async Task ScheduleJobInternalAsync(ScheduledJob? job, bool isFromStart)
         {
             if (job == null)
             {
                 throw new ArgumentNullException(nameof(job));
             }
 
-            if (!(job.Enabled ?? true))
+            var enable = job.Enabled ?? true;
+            if (!enable)
             {
                 return;
             }
@@ -239,210 +261,270 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            if (job.Schedule!.StartsWith(c_SingleExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule!.StartsWith(KnownJobTypes.SingleExec, StringComparison.OrdinalIgnoreCase))
             {
-                await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: true);
-
+                await DelayedOrExecuteJob(job, removeAfterExec: true);
                 return;
             }
 
-            if (job.Schedule.StartsWith(c_RebootExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith(KnownJobTypes.Reboot, StringComparison.OrdinalIgnoreCase))
             {
-                if (isCalledFromReboot)
+                if (s_IsFirstStart)
                 {
-                    await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: false);
+                    await DelayedOrExecuteJob(job);
                 }
 
                 return;
             }
 
-            if (job.Schedule.StartsWith(c_StartupExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith(KnownJobTypes.Startup, StringComparison.OrdinalIgnoreCase))
             {
-                if (isCalledFromStartup)
+                if (isFromStart)
                 {
-                    await ScheduleDelayedOrExecuteJob(job, shouldBeRemovedAfterExecution: false);
+                    await DelayedOrExecuteJob(job);
                 }
 
                 return;
             }
 
-            if (job.Schedule.StartsWith(c_EventExecutionJobPrefix, StringComparison.OrdinalIgnoreCase))
+            if (job.Schedule.StartsWith(KnownJobTypes.Event, StringComparison.OrdinalIgnoreCase))
             {
-                if (isCalledFromStartup)
-                {
-                    SubscribeEventJob(job);
-                }
-
+                SubscribeEventJob(job);
                 return;
             }
 
-            m_Logger.LogInformation("Scheduling job \"{JobName}\" with schedule \"{JobSchedule}\"",
-                job.Name, job.Schedule);
-            ScheduleCronJob(job);
+            /*if (job.Schedule.StartsWith(KnownJobTypes.Repeat, StringComparison.OrdinalIgnoreCase))
+            {
+                await DelayedOrExecuteJob(job, shouldRepeat: true);
+                return;
+            }*/
+
+            await DelayedOrExecuteJob(job, shouldRepeat: true);
         }
 
-        private void ScheduleCronJob(ScheduledJob job)
+        private async Task DelayedOrExecuteJob(ScheduledJob job, bool removeAfterExec = false,
+            bool shouldRepeat = false)
         {
-            if (job == null)
+            //If shouldRepeat schedule => time or type:time
+            //else schedule => type or type:time
+            var schedule = RetrieveSchedulerValue(job.Schedule!, !shouldRepeat); //!shouldRepeat
+            if (string.IsNullOrEmpty(schedule))
             {
-                throw new ArgumentNullException(nameof(job));
-            }
+                if (!shouldRepeat)
+                {
+                    if (await ExecuteJobAsync(job) && removeAfterExec)
+                    {
+                        await RemoveJobAsync(job);
+                    }
 
-            var timezone = TimeZoneInfo.Local;
+                    return;
+                }
 
-            CronExpression expression;
-            try
-            {
-                expression = CronExpression.Parse(job.Schedule);
-            }
-            catch (Exception ex)
-            {
-                m_Logger.LogError(ex, "Invalid crontab syntax \"{JobSchedule}\" for job: {JobName}",
-                    job.Schedule, job.Name);
+                m_Logger.LogError("Job \"{JobName}\" has no valid schedule", job.Name);
                 return;
             }
 
-            var nextOccurence = expression.GetNextOccurrence(DateTimeOffset.Now, timezone);
-            if (nextOccurence == null)
-            {
-                return;
-            }
-
-            var delay = nextOccurence.Value - DateTimeOffset.Now;
-            if (delay.TotalMilliseconds <= 0)
+            var delay = GetJobDelay(job.Name!, schedule!, !shouldRepeat);
+            if (delay == null || delay.Value.TotalMilliseconds is < 0 or > int.MaxValue)
             {
                 return;
             }
 
-            m_ScheduledJobs.Add(job);
+            AddCancellableJob(job);
+
+            if (shouldRepeat)
+            {
+                m_Logger.LogInformation("Scheduling job \"{JobName}\" with schedule \"{JobSchedule}\"", job.Name,
+                    job.Schedule);
+            }
+            else
+            {
+                m_Logger.LogInformation("Delaying job \"{JobName}\" with delay of \"{JobDelay}\"", job.Name,
+                    $"{delay:c}");
+            }
 
             AsyncHelper.Schedule($"Execution of job \"{job.Name}\"", async () =>
             {
-                await Task.Delay(delay);
-
-                if (!(job.Enabled ?? true) || !m_ScheduledJobs.Contains(job) || !m_Runtime.IsComponentAlive)
+                try
                 {
-                    return;
+                    var token = job.CancellationTokenSource!.Token;
+
+                    bool Enabled()
+                    {
+                        return (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive &&
+                               !token.IsCancellationRequested;
+                    }
+
+                    do
+                    {
+                        await Task.Delay(delay.Value, token);
+                        if (!Enabled())
+                        {
+                            break;
+                        }
+
+                        await ExecuteJobAsync(job);
+                        if (!shouldRepeat)
+                        {
+                            break;
+                        }
+
+                        //If repeat it means time can be time span or cron
+                        delay = GetJobDelay(job.Name!, schedule!, !shouldRepeat);
+                        if (delay!.Value.TotalMilliseconds is < 0 or > int.MaxValue)
+                        {
+                            break;
+                        }
+                    } while (Enabled());
+                }
+                catch (TaskCanceledException)
+                {
+                    // ignore it
                 }
 
-                await ExecuteJobAsync(job);
-                ScheduleCronJob(job);
-            });
-        }
-
-        private void SubscribeEventJob(ScheduledJob job)
-        {
-            if (job is null)
-            {
-                throw new ArgumentNullException(nameof(job));
-            }
-
-            var eventNameDelimiterIndex = job.Schedule!.IndexOf(c_JobDelimiter);
-
-            if (eventNameDelimiterIndex == -1)
-            {
-                m_Logger.LogError("Invalid event job format \"{JobSchedule}\" for \"{JobName}\" job", job.Schedule, job.Name);
-                return;
-            }
-
-            var eventName = job.Schedule![(eventNameDelimiterIndex + 1)..];
-
-            m_EventBus.Subscribe(m_Runtime, eventName, async (_, _, @event) => {
-                await ExecuteJobAsync(job, new { Event = @event });
-            });
-
-            m_Logger.LogInformation("Subscribed job \"{JobName}\" to \"{EventName}\" event", job.Name, eventName);
-        }
-
-        private async Task ScheduleDelayedOrExecuteJob(ScheduledJob job, bool shouldBeRemovedAfterExecution)
-        {
-            if (job is null)
-            {
-                throw new ArgumentNullException(nameof(job));
-            }
-
-            var delayDelimiterIndex = job.Schedule!.IndexOf(c_JobDelimiter);
-            var isNotDelayable = delayDelimiterIndex == -1;
-
-            if (isNotDelayable)
-            {
-                await ExecuteJobAsync(job);
-
-                if (shouldBeRemovedAfterExecution)
+                if (removeAfterExec)
                 {
                     await RemoveJobAsync(job);
                 }
+                else
+                {
+                    DisposeCancellableJob(job);
+                }
+            });
+        }
 
-                return;
+        /// <summary>
+        ///     Separates schedule value from its original form type:time
+        ///     If shouldBePrefixed means it returns null when fail to separate
+        ///     else return schedule
+        /// </summary>
+        private string? RetrieveSchedulerValue(string schedule, bool shouldBePrefixed)
+        {
+            var delimiterIndex = schedule.IndexOf(c_JobDelimiter, StringComparison.Ordinal);
+            if (delimiterIndex != -1)
+            {
+                return schedule[(delimiterIndex + 1)..];
             }
 
-            var unparsedDelay = job.Schedule[(delayDelimiterIndex + 1)..];
+            return shouldBePrefixed ? null : schedule;
+        }
 
-            TimeSpan delay;
+        private TimeSpan? GetJobDelay(string jobName, string jobSchedule, bool onlyTimespan)
+        {
+            Exception? cronEx = null;
+
+            if (!onlyTimespan)
+            {
+                try
+                {
+                    var expression = CronExpression.Parse(jobSchedule);
+                    var nextOccurence = expression.GetNextOccurrence(DateTimeOffset.Now, TimeZoneInfo.Local);
+                    if (nextOccurence == null)
+                    {
+                        return null;
+                    }
+
+                    return nextOccurence.Value - DateTimeOffset.Now;
+                }
+                catch (Exception ex)
+                {
+                    cronEx = ex;
+                }
+            }
 
             try
             {
-                delay = TimeSpanHelper.Parse(unparsedDelay);
+                return TimeSpanHelper.Parse(jobSchedule);
             }
             catch (Exception ex)
             {
-                m_Logger.LogError(ex, "Invalid time span format \"{JobDelayUnparsed}\" for \"{JobName}\" job",
-                    unparsedDelay, job.Name);
-                return;
+                if (cronEx != null)
+                {
+                    m_Logger.LogError(
+                        "Fail to parse Job \"{JobName}\" schedule \"{JobSchedule}\". The value is not a valid crontab or time span",
+                        jobName, jobSchedule);
+                    m_Logger.LogError(cronEx, "Crontab error");
+                }
+                else
+                {
+                    m_Logger.LogError(
+                        "Fail to parse Job \"{JobName}\" schedule \"{JobSchedule}\". The value is not a valid time span",
+                        jobName, jobSchedule);
+                }
+
+                m_Logger.LogError(ex, "Time span error");
+                return null;
             }
-
-            m_ScheduledJobs.Add(job);
-
-            m_Logger.LogInformation("Delaying job \"{JobName}\" with delay of \"{JobDelay}\"",
-                job.Name, $"{delay:c}");
-
-            AsyncHelper.Schedule($"Execution of job \"{job.Name}\"", async () => {
-                await Task.Delay(delay);
-
-                if (!(job.Enabled ?? true) || !m_ScheduledJobs.Contains(job) || !m_Runtime.IsComponentAlive)
-                {
-                    return;
-                }
-
-                await ExecuteJobAsync(job);
-
-                if (shouldBeRemovedAfterExecution)
-                {
-                    await RemoveJobAsync(job);
-                }
-            });
         }
 
-        private async Task ExecuteJobAsync(ScheduledJob job, params object[] parameters)
+        private void AddCancellableJob(ScheduledJob job)
         {
-            if (job == null)
-            {
-                throw new ArgumentNullException(nameof(job));
-            }
+            job.CancellationTokenSource = new CancellationTokenSource();
+            m_ScheduledJobs.Add(job);
+        }
 
+        private void DisposeCancellableJob(ScheduledJob job)
+        {
+            job.Enabled = false;
+            job.CancellationTokenSource?.Cancel();
+            job.CancellationTokenSource?.Dispose();
+
+            m_ScheduledJobs.Remove(job);
+        }
+
+        private async Task<bool> ExecuteJobAsync(ScheduledJob job, params object[] parameters)
+        {
             var jobExecutor = m_JobExecutors.FirstOrDefault(d => d.SupportsType(job.Task!));
             if (jobExecutor == null)
             {
                 m_Logger.LogError("[{JobName}] Unknown job type: {TaskType}", job.Name, job.Task);
-                return;
+                return false;
             }
 
             m_Logger.LogInformation("Executing job \"{JobName}\"...", job.Name);
-
             try
             {
-                await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!, job.Args ?? new Dictionary<string, object?>(), parameters));
+                await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!,
+                    job.Args ?? new Dictionary<string, object?>(), parameters));
+                return true;
             }
             catch (Exception ex)
             {
                 m_Logger.LogError(ex, "Job \"{JobName}\" generated an exception", job.Name);
+                return false;
             }
         }
 
-        public void Dispose()
+        private void SubscribeEventJob(ScheduledJob job)
         {
-            m_ScheduledJobs.Clear();
-            m_JobExecutors.Clear();
+            var schedule = RetrieveSchedulerValue(job.Schedule!, shouldBePrefixed: true);
+            if (string.IsNullOrEmpty(schedule))
+            {
+                m_Logger.LogError("Invalid event job format \"{JobSchedule}\" for \"{JobName}\" job", job.Schedule,
+                    job.Name);
+                return;
+            }
+
+            m_Logger.LogInformation("Subscribed job \"{JobName}\" to \"{JobSchedule}\" event", job.Name, schedule);
+            var dispose = m_EventBus.Subscribe(m_OpenModComponent, schedule!, async (_, _, @event) =>
+            {
+                var token = job.CancellationTokenSource!.Token;
+                var enable = (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive &&
+                             !token.IsCancellationRequested;
+                if (enable)
+                {
+                    return;
+                }
+
+                await ExecuteJobAsync(job, new { Event = @event });
+            });
+
+            AddCancellableJob(job);
+            job.CancellationTokenSource!.Token.Register(() =>
+            {
+                dispose.Dispose();
+                DisposeCancellableJob(job);
+            });
         }
     }
 }

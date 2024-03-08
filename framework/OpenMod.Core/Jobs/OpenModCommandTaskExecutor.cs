@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenMod.API.Commands;
@@ -10,12 +8,12 @@ using OpenMod.Core.Localization;
 
 namespace OpenMod.Core.Jobs
 {
-    public class OpenModCommandTaskExecutor : ITaskExecutor
+    public class OpenModCommandTaskExecutor : CommandTaskExecutor
     {
+        private readonly OpenModCommandTaskActor m_Actor;
         private readonly ICommandExecutor m_CommandExecutor;
         private readonly ILogger<OpenModCommandTaskExecutor> m_Logger;
         private readonly IOptions<SmartFormatOptions> m_SmartFormatOptions;
-        private readonly OpenModCommandTaskActor m_Actor;
 
         public OpenModCommandTaskExecutor(
             ICommandExecutor commandExecutor,
@@ -28,35 +26,17 @@ namespace OpenMod.Core.Jobs
             m_SmartFormatOptions = smartFormatOptions;
         }
 
-        public bool SupportsType(string taskType)
+        public override string TaskType => "openmod_command";
+
+        protected override Task ExecuteCommandTask(string command, JobTask task)
         {
-            return string.Equals(taskType, "openmod_command", StringComparison.OrdinalIgnoreCase);
-        }
+            m_Logger.LogInformation("[{JobName}] Running OpenMod command: {Command}", task.JobName, command);
 
-        public async Task ExecuteAsync(JobTask task)
-        {
-            if (!task.Args.ContainsKey("commands"))
-            {
-                throw new Exception($"Job \"{task.JobName}\" is missing the command list in args.commands!");
-            }
+            var formatter = m_SmartFormatOptions.Value.GetSmartFormatter();
+            var formattedCommand = formatter.Format(command, task.Parameters);
 
-            var commands = (IEnumerable<object?>)task.Args["commands"]!;
-
-            foreach (string? command in commands)
-            {
-                if (string.IsNullOrEmpty(command))
-                {
-                    continue;
-                }
-
-                m_Logger.LogInformation("[{JobName}] Running OpenMod command: {Command}", task.JobName, command!);
-
-                var formatter = m_SmartFormatOptions.Value.GetSmartFormatter();
-                var formattedCommand = formatter.Format(command!, task.Parameters);
-                var args = ArgumentsParser.ParseArguments(formattedCommand);
-
-                await m_CommandExecutor.ExecuteAsync(m_Actor, args, string.Empty);
-            }
+            var args = ArgumentsParser.ParseArguments(formattedCommand);
+            return m_CommandExecutor.ExecuteAsync(m_Actor, args, string.Empty);
         }
     }
 }

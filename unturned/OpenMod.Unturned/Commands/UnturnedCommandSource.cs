@@ -11,7 +11,7 @@ namespace OpenMod.Unturned.Commands
     {
         private readonly List<ICommandRegistration> m_Commands;
 
-        // ReSharper disable once SuggestBaseTypeForParameter /* we don't want this because of DI */
+        // ReSharper disable once SuggestBaseTypeForParameterInConstructor
         public UnturnedCommandSource(IOpenModHost host)
         {
             m_Commands = new List<ICommandRegistration>();
