@@ -11,10 +11,6 @@ namespace OpenMod.Unturned.Players.Stats.Events
         public PlayerStatsEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
             SubscribePlayer(
-                static player => ref player.life.onLifeUpdated,
-                player => isDead => OnLifeUpdated(player, isDead)
-            );
-            SubscribePlayer(
                 static player => ref player.life.onOxygenUpdated,
                 player => oxygen => OnOxygenUpdated(player, oxygen)
             );
@@ -30,29 +26,30 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 static player => ref player.life.onVisionUpdated,
                 player => viewing => OnVisionUpdated(player, viewing)
             );
-            SubscribePlayer(
-                static player => ref player.life.onVirusUpdated,
-                player => virus => OnVirusUpdated(player, virus)
-            );
         }
 
         public override void Subscribe()
         {
             Player.onPlayerStatIncremented += OnPlayerStatIncremented;
+            PlayerLife.onPlayerLifeUpdated += OnPlayerLifeUpdated;
             PlayerLife.OnTellBleeding_Global += OnTellBleeding_Global;
             PlayerLife.OnTellBroken_Global += OnTellBroken_Global;
             PlayerLife.OnTellFood_Global += OnTellFood_Global;
             PlayerLife.OnTellHealth_Global += OnTellHealth_Global;
+            PlayerLife.OnTellVirus_Global += OnTellVirus_Global;
             PlayerLife.OnTellWater_Global += OnTellWater_Global;
+            
         }
 
         public override void Unsubscribe()
         {
             Player.onPlayerStatIncremented -= OnPlayerStatIncremented;
+            PlayerLife.onPlayerLifeUpdated -= OnPlayerLifeUpdated;
             PlayerLife.OnTellBleeding_Global -= OnTellBleeding_Global;
             PlayerLife.OnTellBroken_Global -= OnTellBroken_Global;
             PlayerLife.OnTellFood_Global -= OnTellFood_Global;
             PlayerLife.OnTellHealth_Global -= OnTellHealth_Global;
+            PlayerLife.OnTellVirus_Global -= OnTellVirus_Global;
             PlayerLife.OnTellWater_Global -= OnTellWater_Global;
         }
 
@@ -104,10 +101,10 @@ namespace OpenMod.Unturned.Players.Stats.Events
             Emit(@event);
         }
 
-        private void OnLifeUpdated(Player nativePlayer, bool isDead)
+        private void OnPlayerLifeUpdated(Player nativePlayer)
         {
             var player = GetUnturnedPlayer(nativePlayer)!;
-            var @event = new UnturnedPlayerLifeUpdatedEvent(player, isDead);
+            var @event = new UnturnedPlayerLifeUpdatedEvent(player, !player.IsAlive);
 
             Emit(@event);
         }
@@ -144,13 +141,10 @@ namespace OpenMod.Unturned.Players.Stats.Events
             Emit(@event);
         }
 
-        private void OnVirusUpdated(Player nativePlayer, byte virus)
+        private void OnTellVirus_Global(PlayerLife life)
         {
-            // PlayerLife.OnTellVirus_Global does not emit properly
-            // For more information: https://github.com/openmod/openmod/issues/747
-
-            var player = GetUnturnedPlayer(nativePlayer)!;
-            var @event = new UnturnedPlayerVirusUpdatedEvent(player, virus);
+            var player = GetUnturnedPlayer(life.player)!;
+            var @event = new UnturnedPlayerVirusUpdatedEvent(player, life.virus);
 
             Emit(@event);
         }
