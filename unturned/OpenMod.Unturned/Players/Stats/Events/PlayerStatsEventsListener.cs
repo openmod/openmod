@@ -23,10 +23,6 @@ namespace OpenMod.Unturned.Players.Stats.Events
                 player => temperature => OnTemperatureUpdated(player, temperature)
             );
             SubscribePlayer(
-                static player => ref player.life.onVirusUpdated,
-                player => virus => OnVirusUpdated(player, virus)
-            );
-            SubscribePlayer(
                 static player => ref player.life.onVisionUpdated,
                 player => viewing => OnVisionUpdated(player, viewing)
             );
@@ -145,17 +141,6 @@ namespace OpenMod.Unturned.Players.Stats.Events
             Emit(@event);
         }
 
-        //AskRadiate currently only emits OnVirusUpdated
-        private void OnVirusUpdated(Player nativePlayer, byte virus)
-        {
-            var player = GetUnturnedPlayer(nativePlayer)!;
-            var @event = new UnturnedPlayerVirusUpdatedEvent(player, virus);
-
-            Emit(@event);
-        }
-
-        //OnVirusUpdated is now client side for askDisinfect, askInfect
-        //so we need to use the global one
         private void OnTellVirus_Global(PlayerLife life)
         {
             var player = GetUnturnedPlayer(life.player)!;
