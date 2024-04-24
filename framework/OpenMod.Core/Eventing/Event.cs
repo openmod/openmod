@@ -9,12 +9,16 @@ namespace OpenMod.Core.Eventing
         {
             get
             {
-                Dictionary<string, object> args = new Dictionary<string, object>();
-                PropertyInfo[] props = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                foreach (PropertyInfo prop in props)
+                var args = new Dictionary<string, object>();
+                var props = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                // ReSharper disable once LoopCanBeConvertedToQuery
+                foreach (var prop in props)
                 {
-                    MethodInfo getter = prop.GetGetMethod(false);
-                    if (getter == null) continue;
+                    var getter = prop.GetGetMethod(false);
+                    if (getter == null)
+                    {
+                        continue;
+                    }
 
                     args.Add(prop.Name.ToLower(), this);
                 }

@@ -66,7 +66,10 @@ namespace OpenMod.Unturned.Events
 
         private void SubscribePlayer(SteamPlayer player)
         {
-            if (player.player == null) return;
+            if (player.player == null)
+            {
+                return;
+            }
 
             foreach (var eventsListener in m_UnturnedEventsListeners.OfType<IUnturnedPlayerEventsListener>())
             {
@@ -76,7 +79,10 @@ namespace OpenMod.Unturned.Events
 
         private void UnsubscribePlayer(SteamPlayer player)
         {
-            if (player.player == null) return;
+            if (player.player == null)
+            {
+                return;
+            }
 
             foreach (var eventsListener in m_UnturnedEventsListeners.OfType<IUnturnedPlayerEventsListener>())
             {

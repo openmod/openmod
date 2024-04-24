@@ -14,8 +14,8 @@ namespace OpenMod.Unturned.Players.Equipment.Events
     {
         public PlayerEquipmentEventsListener(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            SubscribePlayer(static player => ref player.equipment.onEquipRequested, player => OnEquipRequested);
-            SubscribePlayer(static player => ref player.equipment.onDequipRequested, player => OnDequipRequested);
+            SubscribePlayer(static player => ref player.equipment.onEquipRequested, _ => OnEquipRequested);
+            SubscribePlayer(static player => ref player.equipment.onDequipRequested, _ => OnDequipRequested);
         }
 
         public override void Subscribe()
@@ -52,7 +52,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
             }
 
             var inventoryItem =
-                new UnturnedInventoryItem(player!.Inventory, item);
+                new UnturnedInventoryItem(player.Inventory, item);
 
             var @event = new UnturnedPlayerItemEquippedEvent(player, inventoryItem.Item);
             Emit(@event);
@@ -105,7 +105,9 @@ namespace OpenMod.Unturned.Players.Equipment.Events
             var jar = inv.getItem(page, index);
 
             if (jar?.item == null)
+            {
                 return;
+            }
 
             var inventoryItem = new UnturnedInventoryItem(player.Inventory, jar);
 
@@ -132,6 +134,7 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         private static class Patches
         {
             [HarmonyCleanup]
+            [UsedImplicitly]
             public static Exception? Cleanup(Exception ex, MethodBase original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
@@ -153,7 +156,9 @@ namespace OpenMod.Unturned.Players.Equipment.Events
             public static void PostTellEquip(PlayerEquipment __instance, ushort __state)
             {
                 if (__state == 0 && __instance.itemID == 0)
+                {
                     return;
+                }
 
                 if (__state != 0)
                 {

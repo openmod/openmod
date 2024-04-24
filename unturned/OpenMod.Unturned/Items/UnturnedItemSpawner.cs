@@ -27,7 +27,9 @@ namespace OpenMod.Unturned.Items
                 }
 
                 if (inventory is not UnturnedPlayerInventory playerInventory)
+                {
                     throw new NotSupportedException($"Inventory type not supported: {inventory.GetType().FullName}");
+                }
 
                 var item = CreateItem(parsedItemId, state, out var itemAsset);
                 if (item == null || itemAsset == null)
@@ -102,49 +104,63 @@ namespace OpenMod.Unturned.Items
             {
                 case EItemType.BACKPACK:
                     if (player.clothing.backpack != 0)
+                    {
                         break;
+                    }
 
                     player.clothing.askWearBackpack(item.id, item.quality, item.state, playEffect: true);
                     return true;
 
                 case EItemType.GLASSES:
                     if (player.clothing.glasses != 0)
+                    {
                         break;
+                    }
 
                     player.clothing.askWearGlasses(item.id, item.quality, item.state, playEffect: true);
                     return true;
 
                 case EItemType.HAT:
                     if (player.clothing.hat != 0)
+                    {
                         break;
+                    }
 
                     player.clothing.askWearHat(item.id, item.quality, item.state, playEffect: true);
                     return true;
 
                case EItemType.MASK:
                     if (player.clothing.mask != 0)
+                    {
                         break;
+                    }
 
                     player.clothing.askWearMask(item.id, item.quality, item.state, playEffect: true);
                     return true;
 
                 case EItemType.PANTS:
                     if (player.clothing.pants != 0)
+                    {
                         break;
+                    }
 
                     player.clothing.askWearPants(item.id, item.quality, item.state, playEffect: true);
                     return true;
 
                 case EItemType.SHIRT:
                     if (player.clothing.shirt != 0)
+                    {
                         break;
+                    }
 
                     player.clothing.askWearShirt(item.id, item.quality, item.state, playEffect: true);
                     return true;
 
                 case EItemType.VEST:
                     if (player.clothing.vest != 0)
+                    {
                         break;
+                    }
 
                     player.clothing.askWearVest(item.id, item.quality, item.state, playEffect: true);
                     return true;
@@ -253,7 +269,9 @@ namespace OpenMod.Unturned.Items
 
             var item = new Item(itemAsset.id, EItemOrigin.ADMIN);
             if (state is null or NullItemState)
+            {
                 return item;
+            }
 
             item.state = state.StateData ?? itemAsset.getState(EItemOrigin.ADMIN); /* item.state must not be null */
             item.amount = (byte)state.ItemAmount;

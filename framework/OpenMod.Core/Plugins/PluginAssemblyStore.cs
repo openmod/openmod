@@ -64,7 +64,9 @@ namespace OpenMod.Core.Plugins
                 var packagesResourceName = assembly.GetManifestResourceNames()
                     .FirstOrDefault(x => x.EndsWith("packages.yaml"));
                 if (packagesResourceName == null)
+                {
                     return newPlugins;
+                }
 
                 var packagesRosourceInfo = assembly.GetManifestResourceInfo(packagesResourceName);
                 m_Logger.LogDebug("Found packages.yaml with name {PackagesResourceName}.", packagesResourceName);
@@ -75,7 +77,10 @@ namespace OpenMod.Core.Plugins
 #else
                 using var stream = assembly.GetManifestResourceStream(packagesResourceName);
 #endif
-                if (stream == null) return newPlugins;
+                if (stream == null)
+                {
+                    return newPlugins;
+                }
 
                 using var reader = new StreamReader(stream);
                 var packagesContent = await reader.ReadToEndAsync();
@@ -88,7 +93,10 @@ namespace OpenMod.Core.Plugins
                             : new NuGetVersion(d.Version)))
                     .ToList();
 
-                if (packages == null || packages.Count == 0) return newPlugins;
+                if (packages == null || packages.Count == 0)
+                {
+                    return newPlugins;
+                }
 
                 m_Logger.LogInformation(
                     "Found and installing embedded NuGet packages for plugin assembly: {AssemblyName}",
@@ -103,13 +111,25 @@ namespace OpenMod.Core.Plugins
                 // ReSharper disable once LoopCanBeConvertedToQuery
                 foreach (var newAssembly in newAssemblies.Select(x => (Assembly)x.Assembly.Target))
                 {
-                    if (newAssembly == null) continue;
+                    if (newAssembly == null)
+                    {
+                        continue;
+                    }
 
-                    if (newAssembly.GetCustomAttribute<PluginMetadataAttribute>() == null) continue;
+                    if (newAssembly.GetCustomAttribute<PluginMetadataAttribute>() == null)
+                    {
+                        continue;
+                    }
 
-                    if (ignoredAssemblies.Contains(newAssembly)) continue;
+                    if (ignoredAssemblies.Contains(newAssembly))
+                    {
+                        continue;
+                    }
 
-                    if (m_LoadedPluginAssemblies.Select(x => x.Target).Cast<Assembly>().Contains(newAssembly)) continue;
+                    if (m_LoadedPluginAssemblies.Select(x => x.Target).Cast<Assembly>().Contains(newAssembly))
+                    {
+                        continue;
+                    }
 
                     newPlugins.Add(newAssembly);
                 }
@@ -179,9 +199,11 @@ namespace OpenMod.Core.Plugins
 
                     m_Logger.LogWarning("Trying to install missing dependencies");
 
-                    var success = await TryInstallRequiredDependenciesAsync(providerAssembly, missingAssemblies);
+                    var _ = await TryInstallRequiredDependenciesAsync(providerAssembly, missingAssemblies);
                     if (!Hotloader.Enabled)
+                    {
                         continue;
+                    }
 
                     //todo check result and try reload lib
                     //todo this implementation we will need a new API Interface with a collection of assemblies names

@@ -11,22 +11,34 @@ namespace OpenMod.Extensions.Games.Abstractions.Transforms
         private static void CleanUpAngles(this ref Vector3 vector)
         {
             while (vector.X >= 360)
+            {
                 vector.X -= 360;
+            }
 
             while (vector.X < 0)
+            {
                 vector.X += 360;
+            }
 
             while (vector.Y >= 360)
+            {
                 vector.Y -= 360;
+            }
 
             while (vector.Y < 0)
+            {
                 vector.Y += 360;
+            }
 
             while (vector.Z >= 360)
+            {
                 vector.Z -= 360;
+            }
 
             while (vector.Z < 0)
+            {
                 vector.Z += 360;
+            }
         }
 
         /// <summary>
@@ -88,7 +100,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Transforms
             var cosYOver2 = (float)Math.Cos(yOver2);
             var sinZOver2 = (float)Math.Sin(zOver2);
             var cosZOver2 = (float)Math.Cos(zOver2);
-            
+
             return new Quaternion()
             {
                 X = cosYOver2 * sinXOver2 * cosZOver2 + sinYOver2 * cosXOver2 * sinZOver2,

@@ -10,6 +10,9 @@ namespace OpenMod.Core.Cooldowns
 
         public string? Cooldown { get; set; }
 
-        public TimeSpan ToTimeSpan() => TimeSpanHelper.Parse(Cooldown!);
+        public TimeSpan ToTimeSpan()
+        {
+            return TimeSpanHelper.Parse(Cooldown!);
+        }
     }
 }

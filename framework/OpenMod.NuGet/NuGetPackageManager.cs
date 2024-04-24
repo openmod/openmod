@@ -359,10 +359,14 @@ namespace OpenMod.NuGet
             return matches.Where(a =>
             {
                 if (s_PackageBlacklist.Any(p => p.Equals(a.Identity?.Id, StringComparison.OrdinalIgnoreCase)))
+                {
                     return false;
+                }
 
                 if (s_PublisherBlacklist.Any(p => a.Owners.IndexOf(p, StringComparison.OrdinalIgnoreCase) >= 0))
+                {
                     return false;
+                }
 
                 return true;
             });

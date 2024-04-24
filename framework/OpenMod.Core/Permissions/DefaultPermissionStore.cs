@@ -46,7 +46,9 @@ namespace OpenMod.Core.Permissions
                 var trimmedPermission = permission.TrimStart('!');
 
                 if (grantedPerms.Contains(trimmedPermission) || deniedPerms.Contains(trimmedPermission)) //if already added or if is denied by priority
+                {
                     continue;
+                }
 
                 if (isDeny)
                 {
@@ -61,6 +63,7 @@ namespace OpenMod.Core.Permissions
             return isGrant ? grantedPerms : deniedPerms;
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         protected async Task<HashSet<string>> GetPermissionsAsync(IPermissionActor actor, bool inherit = true) //order by descending priority
         {
             var permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);

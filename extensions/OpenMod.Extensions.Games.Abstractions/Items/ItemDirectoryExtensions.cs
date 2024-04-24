@@ -30,8 +30,10 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
         public static async Task<IItemAsset?> FindByNameAsync(this IItemDirectory directory, string itemName, bool exact = true)
         {
             if (exact)
+            {
                 return (await directory.GetItemAssetsAsync()).FirstOrDefault(d =>
                     d.ItemName.Equals(itemName, StringComparison.OrdinalIgnoreCase));
+            }
 
             return (await directory.GetItemAssetsAsync())
                 .Where(x => x.ItemName.IndexOf(itemName, StringComparison.OrdinalIgnoreCase) >= 0)

@@ -5,7 +5,7 @@ namespace OpenMod.Core.Helpers
 {
     public class AssemblyEqualityComparer : IEqualityComparer<Assembly>
     {
-        public bool Equals(Assembly x, Assembly y)
+        public bool Equals(Assembly? x, Assembly? y)
         {
             return string.Equals(x?.FullName, y?.FullName);
         }

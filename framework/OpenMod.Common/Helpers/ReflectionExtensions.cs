@@ -25,7 +25,9 @@ namespace OpenMod.Common.Helpers
                 var frame = st.GetFrame(i);
                 var frameMethod = frame.GetMethod();
                 if (frameMethod == null)
+                {
                     continue;
+                }
 
                 // Hot fix for async Task methods:
                 // If current frame method is called "MoveNext" and parent frame is from "AsyncMethodBuilderCore" type
@@ -56,10 +58,14 @@ namespace OpenMod.Common.Helpers
                 }
 
                 if (skipList.Any(c => c == frameMethod?.DeclaringType))
+                {
                     continue;
+                }
 
                 if (skipMethods?.Any(c => c == frameMethod) ?? false)
+                {
                     continue;
+                }
 
                 frameTarget = frame;
                 break;
@@ -77,7 +83,9 @@ namespace OpenMod.Common.Helpers
             {
                 var frame = st.GetFrame(i);
                 if (skipAssemblies.Any(c => Equals(c, frame.GetMethod()?.DeclaringType?.Assembly)))
+                {
                     continue;
+                }
 
                 frameTarget = frame;
             }
@@ -227,7 +235,11 @@ namespace OpenMod.Common.Helpers
                 throw new ArgumentNullException(nameof(to));
             }
 
-            UnaryExpression BodyFunction(Expression body) => Expression.Convert(body, to);
+            UnaryExpression BodyFunction(Expression body)
+            {
+                return Expression.Convert(body, to);
+            }
+
             var inp = Expression.Parameter(from, "inp");
             try
             {
