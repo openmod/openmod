@@ -28,27 +28,28 @@ namespace OpenMod.Core.Helpers
         public static TimeSpan Parse(string unparsed)
         {
             var matches = s_RegexPattern.Matches(unparsed);
-
-            TimeSpan total = new TimeSpan();
-
             if (matches.Count == 0)
             {
                 throw new UserFriendlyException("Invalid time span format");
             }
 
+            var total = new TimeSpan();
             foreach (Match match in matches)
             {
-                string value = match.Value;
+                var value = match.Value;
 
                 int i;
 
                 for (i = 0; i < value.Length; i++)
                 {
-                    if ((value[i] < '0' || value[i] > '9') && value[i] != '.') break;
+                    if ((value[i] < '0' || value[i] > '9') && value[i] != '.')
+                    {
+                        break;
+                    }
                 }
 
-                double num = double.Parse(value.Substring(0, i));
-                string suffix = value.Substring(i).Trim();
+                var num = double.Parse(value[..i]);
+                var suffix = value[i..].Trim();
 
                 switch (suffix.ToLower())
                 {

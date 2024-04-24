@@ -18,7 +18,7 @@ namespace OpenMod.Unturned.Users
         /// </summary>
         public override string Id
         {
-            get { return SteamId.ToString(); }
+            get => SteamId.ToString();
         }
 
         /// <summary>
@@ -51,34 +51,39 @@ namespace OpenMod.Unturned.Users
             return Task.CompletedTask;
         }
 
-        public bool Equals(UnturnedPendingUser other)
+        public bool Equals(UnturnedPendingUser? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return SteamId.Equals(other.SteamId);
+            if (other is null)
+            {
+                return false;
+            }
+
+            return ReferenceEquals(this, other) || SteamId.Equals(other.SteamId);
         }
 
-        public bool Equals(UnturnedUser other)
+        public bool Equals(UnturnedUser? other)
         {
             return other?.SteamId == SteamId;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-
-            if (obj is UnturnedUser user)
+            if (obj is null)
             {
-                return Equals(user);
+                return false;
             }
 
-            if (obj is UnturnedPendingUser pendingUser)
+            if (ReferenceEquals(this, obj))
             {
-                return Equals(pendingUser);
+                return true;
             }
 
-            return false;
+            return obj switch
+            {
+                UnturnedUser user => Equals(user),
+                UnturnedPendingUser pendingUser => Equals(pendingUser),
+                _ => false
+            };
         }
 
         public override int GetHashCode()
