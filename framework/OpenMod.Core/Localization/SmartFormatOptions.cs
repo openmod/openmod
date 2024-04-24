@@ -28,39 +28,41 @@ namespace OpenMod.Core.Localization
 
             // copy formatters and sources
             m_Formatters = new List<FormatterFactory<IFormatter>>();
-            foreach (var formatter in defaultFormatter.GetFormatterExtensions())
+            foreach (var formatterFactory in defaultFormatter.GetFormatterExtensions().Select(f =>
+                     {
+                         return new FormatterFactory<IFormatter>(f.GetType(), factory =>
+                         {
+                             try
+                             {
+                                 return Activator.CreateInstance(factory.Type) as IFormatter;
+                             }
+                             catch
+                             {
+                                 return null;
+                             }
+                         });
+                     }))
             {
-                var formatterType = formatter.GetType();
-
-                m_Formatters.Add(new FormatterFactory<IFormatter>(formatterType, factory =>
-                {
-                    try
-                    {
-                        return Activator.CreateInstance(factory.Type) as IFormatter;
-                    }
-                    catch
-                    {
-                        return null;
-                    }
-                }));
+                m_Formatters.Add(formatterFactory);
             }
 
             m_Sources = new List<FormatterFactory<ISource>>();
-            foreach (var source in defaultFormatter.GetSourceExtensions())
+            foreach (var sourceFactory in defaultFormatter.GetSourceExtensions().Select(s =>
+                     {
+                         return new FormatterFactory<ISource>(s.GetType(), factory =>
+                         {
+                             try
+                             {
+                                 return Activator.CreateInstance(factory.Type) as ISource;
+                             }
+                             catch
+                             {
+                                 return null;
+                             }
+                         });
+                     }))
             {
-                var sourceType = source.GetType();
-
-                m_Sources.Add(new FormatterFactory<ISource>(sourceType, factory =>
-                {
-                    try
-                    {
-                        return Activator.CreateInstance(factory.Type) as ISource;
-                    }
-                    catch
-                    {
-                        return null;
-                    }
-                }));
+                m_Sources.Add(sourceFactory);
             }
 
             // Smartformatter will be used in threading, so make sure it is thread safe mode is set
