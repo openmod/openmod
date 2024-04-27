@@ -19,6 +19,7 @@ using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Vector3 = System.Numerics.Vector3;
 
 namespace OpenMod.Unturned.Players
@@ -54,10 +55,12 @@ namespace OpenMod.Unturned.Players
             return ReferenceEquals(this, other) || other.SteamId.Equals(SteamId);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is UnturnedPlayer other)
+            {
                 return Equals(other);
+            }
 
             return false;
         }
@@ -75,22 +78,30 @@ namespace OpenMod.Unturned.Players
 
         public string EntityInstanceId { get; }
 
-        public bool IsAlive => !PlayerLife.isDead;
+        public bool IsAlive
+        {
+            get => !PlayerLife.isDead;
+        }
 
-        public double MaxHealth => 100;//Unturned Max health
+        public double MaxHealth
+        {
+            get => 100; //Unturned Max health
+        }
 
-        public double Health => PlayerLife.health;
+        public double Health
+        {
+            get => PlayerLife.health;
+        }
 
         public IPAddress? Address
         {
-            get
-            {
-                return SteamPlayer.getAddress();
-            }
+            get => SteamPlayer.getAddress();
         }
 
         public Task SetFullHealthAsync()
         {
+            return SetFullHealthTask().AsTask();
+
             async UniTask SetFullHealthTask()
             {
                 await UniTask.SwitchToMainThread();
@@ -101,12 +112,12 @@ namespace OpenMod.Unturned.Players
                 PlayerLife.askEat((byte)MaxHunger);
                 PlayerLife.askDrink((byte)MaxThirst);
             }
-
-            return SetFullHealthTask().AsTask();
         }
 
         public Task SetHealthAsync(double health)//This is a Set and NOT a incremental
         {
+            return SetHealthTask().AsTask();
+
             async UniTask SetHealthTask()
             {
                 if (health < 0 || health > MaxHealth)
@@ -124,8 +135,6 @@ namespace OpenMod.Unturned.Players
 
                 PlayerLife.serverModifyHealth(amount);
             }
-
-            return SetHealthTask().AsTask();
         }
 
         public Task DamageAsync(double amount)
@@ -176,16 +185,25 @@ namespace OpenMod.Unturned.Players
             return TeleportationTask().AsTask();
         }
 
-        public string Stance => Player.stance.stance.ToString().ToLower(CultureInfo.InvariantCulture);
+        public string Stance
+        {
+            get => Player.stance.stance.ToString().ToLower(CultureInfo.InvariantCulture);
+        }
 
-        IInventory IHasInventory.Inventory => Inventory;
+        IInventory IHasInventory.Inventory
+        {
+            get => Inventory;
+        }
 
         /// <summary>
         /// Gets the inventory of the player.
         /// </summary>
         public UnturnedPlayerInventory Inventory { get; }
 
-        IVehicle? ICanEnterVehicle.CurrentVehicle => CurrentVehicle;
+        IVehicle? ICanEnterVehicle.CurrentVehicle
+        {
+            get => CurrentVehicle;
+        }
 
         /// <summary>
         /// Gets the current vehicle. Returns null if the player is not a passenger.
@@ -201,37 +219,36 @@ namespace OpenMod.Unturned.Players
 
         public string DamageSourceName
         {
-            get
-            {
-                return SteamPlayer.playerID.characterName;
-            }
+            get => SteamPlayer.playerID.characterName;
         }
 
-        public double MaxHunger => 100;//Unturned Max hunger
+        public double MaxHunger
+        {
+            get => 100; //Unturned Max hunger
+        }
 
         public double Hunger
         {
-            get
-            {
-                return PlayerLife.food;
-            }
+            get => PlayerLife.food;
         }
 
-        public double MaxThirst => 100;//Unturned Max Thirst
+        public double MaxThirst
+        {
+            get => 100; //Unturned Max Thirst
+        }
 
         public double Thirst
         {
-            get
-            {
-                return PlayerLife.water;
-            }
+            get => PlayerLife.water;
         }
 
+        [UsedImplicitly]
         public Task PrintMessageAsync(string message)
         {
             return PrintMessageAsync(message, Color.White);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public Task PrintMessageAsync(string message, Color color)
         {
             return PrintMessageAsync(message, color, isRich: true, iconUrl: Provider.configData.Browser.Icon);
@@ -243,6 +260,8 @@ namespace OpenMod.Unturned.Players
             {
                 throw new ArgumentNullException(nameof(message));
             }
+
+            return PrintMessageTask().AsTask();
 
             async UniTask PrintMessageTask()
             {
@@ -264,8 +283,6 @@ namespace OpenMod.Unturned.Players
                         useRichTextFormatting: isRich);
                 }
             }
-
-            return PrintMessageTask().AsTask();
         }
 
         public Task SetHungerAsync(double hunger)//This is a Set and NOT a incremental

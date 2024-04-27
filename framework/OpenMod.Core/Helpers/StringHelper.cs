@@ -44,8 +44,15 @@ namespace OpenMod.Core.Helpers
             var lengthB = b.Length;
             var distances = new int[lengthA + 1, lengthB + 1];
 
-            for (var i = 0; i <= lengthA; distances[i, 0] = i++) ;
-            for (var j = 0; j <= lengthB; distances[0, j] = j++) ;
+            for (var i = 0; i <= lengthA; i++)
+            {
+                distances[i, 0] = i;
+            }
+
+            for (var j = 0; j <= lengthB; j++)
+            {
+                distances[0, j] = j;
+            }
 
             for (var i = 1; i <= lengthA; i++)
             for (var j = 1; j <= lengthB; j++)

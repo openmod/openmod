@@ -69,7 +69,10 @@ namespace OpenMod.Core.Eventing
 
         public virtual IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback)
         {
-            if (callback == null) throw new ArgumentNullException(nameof(callback));
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
 
             var attribute = GetEventListenerAttribute(callback.Method);
 
@@ -79,13 +82,25 @@ namespace OpenMod.Core.Eventing
         public virtual IDisposable Subscribe(IOpenModComponent component, string eventName, EventCallback callback,
             IEventListenerOptions options)
         {
-            if (component == null) throw new ArgumentNullException(nameof(component));
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
-            if (callback == null) throw new ArgumentNullException(nameof(callback));
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
 
-            if (string.IsNullOrEmpty(eventName)) throw new ArgumentException(eventName);
+            if (string.IsNullOrEmpty(eventName))
+            {
+                throw new ArgumentException(eventName);
+            }
 
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
 
             if (!component.IsComponentAlive)
             {
@@ -103,7 +118,10 @@ namespace OpenMod.Core.Eventing
         public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback)
             where TEvent : IEvent
         {
-            if (callback == null) throw new ArgumentNullException(nameof(callback));
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
 
             var attribute = GetEventListenerAttribute(callback.Method);
 
@@ -113,11 +131,20 @@ namespace OpenMod.Core.Eventing
         public virtual IDisposable Subscribe<TEvent>(IOpenModComponent component, EventCallback<TEvent> callback,
             IEventListenerOptions options) where TEvent : IEvent
         {
-            if (component == null) throw new ArgumentNullException(nameof(component));
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
-            if (callback == null) throw new ArgumentNullException(nameof(callback));
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
 
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
 
             if (!component.IsComponentAlive)
             {
@@ -135,7 +162,10 @@ namespace OpenMod.Core.Eventing
 
         public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback)
         {
-            if (callback == null) throw new ArgumentNullException(nameof(callback));
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
 
             var attribute = GetEventListenerAttribute(callback.Method);
 
@@ -145,11 +175,20 @@ namespace OpenMod.Core.Eventing
         public virtual IDisposable Subscribe(IOpenModComponent component, Type eventType, EventCallback callback,
             IEventListenerOptions options)
         {
-            if (component == null) throw new ArgumentNullException(nameof(component));
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
-            if (callback == null) throw new ArgumentNullException(nameof(callback));
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
 
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
 
             if (!component.IsComponentAlive)
             {
@@ -166,9 +205,15 @@ namespace OpenMod.Core.Eventing
 
         public virtual IDisposable Subscribe(IOpenModComponent component, Assembly assembly)
         {
-            if (component == null) throw new ArgumentNullException(nameof(component));
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
-            if (assembly == null) throw new ArgumentNullException(nameof(assembly));
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
 
             if (!component.IsComponentAlive)
             {
@@ -240,7 +285,10 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Unsubscribe(IOpenModComponent component)
         {
-            if (component == null) throw new ArgumentNullException(nameof(component));
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
             lock (m_Lock)
             {
@@ -250,7 +298,10 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Unsubscribe(IOpenModComponent component, string eventName)
         {
-            if (component == null) throw new ArgumentNullException(nameof(component));
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
             lock (m_Lock)
             {
@@ -262,7 +313,10 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Unsubscribe<TEvent>(IOpenModComponent component) where TEvent : IEvent
         {
-            if (component == null) throw new ArgumentNullException(nameof(component));
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
             lock (m_Lock)
             {
@@ -275,7 +329,10 @@ namespace OpenMod.Core.Eventing
 
         public virtual void Unsubscribe(IOpenModComponent component, Type eventType)
         {
-            if (component == null) throw new ArgumentNullException(nameof(component));
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
             lock (m_Lock)
             {
@@ -289,9 +346,15 @@ namespace OpenMod.Core.Eventing
         public virtual async Task EmitAsync(IOpenModComponent component, object? sender, IEvent @event,
             EventExecutedCallback? callback = null)
         {
-            if (component == null) throw new ArgumentNullException(nameof(component));
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
-            if (@event == null) throw new ArgumentNullException(nameof(@event));
+            if (@event == null)
+            {
+                throw new ArgumentNullException(nameof(@event));
+            }
 
             if (!component.IsComponentAlive)
             {

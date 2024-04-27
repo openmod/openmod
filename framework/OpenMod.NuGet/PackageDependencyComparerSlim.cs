@@ -2,23 +2,21 @@
 using System.Collections.Generic;
 using NuGet.Packaging.Core;
 
-namespace OpenMod.NuGet;
-internal sealed class PackageDependencyComparerSlim : IEqualityComparer<PackageDependency>
+namespace OpenMod.NuGet
 {
-    public static PackageDependencyComparerSlim Default { get; } = new();
-
-    public bool Equals(PackageDependency x, PackageDependency y)
+    internal sealed class PackageDependencyComparerSlim : IEqualityComparer<PackageDependency>
     {
-        if (x == y)
+        public static PackageDependencyComparerSlim Default { get; } = new();
+
+        /// <inheritdoc />
+        public bool Equals(PackageDependency? x, PackageDependency? y)
         {
-            return true;
+            return string.Equals(x?.Id, y?.Id, StringComparison.OrdinalIgnoreCase);
         }
 
-        return x != null && y != null && x.Id.Equals(y.Id, StringComparison.OrdinalIgnoreCase);
-    }
-
-    public int GetHashCode(PackageDependency obj)
-    {
-        return obj?.Id.GetHashCode() ?? 0;
+        public int GetHashCode(PackageDependency? obj)
+        {
+            return obj?.Id.GetHashCode() ?? 0;
+        }
     }
 }

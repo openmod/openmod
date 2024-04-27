@@ -85,16 +85,23 @@ namespace OpenMod.Core.Plugins
                 var assemblyComparer = AssemblyNameEqualityComparer.Instance;
                 var dependencies = assembly.GetReferencedAssemblies();
                 var missingDependencies = new List<AssemblyName>();
+                // ReSharper disable once LoopCanBeConvertedToQuery
                 foreach (var dependency in dependencies)
                 {
                     if (dependency.Name.Equals("System.Drawing"))
+                    {
                         continue;
+                    }
 
                     if (Hotloader.Enabled && Hotloader.ContainsAssembly(dependency))
+                    {
                         continue;
+                    }
 
                     if (AppDomain.CurrentDomain.GetAssemblies().Any(s => assemblyComparer.Equals(s.GetName(), dependency)))
+                    {
                         continue;
+                    }
 
                     missingDependencies.Add(dependency);
                 }
@@ -124,7 +131,7 @@ namespace OpenMod.Core.Plugins
                         assembly);
                     return null;
                 }
-                
+
                 var pluginTypes = assemblyTypes.FindTypes<IOpenModPlugin>().ToArray();
                 switch (pluginTypes.Length)
                 {

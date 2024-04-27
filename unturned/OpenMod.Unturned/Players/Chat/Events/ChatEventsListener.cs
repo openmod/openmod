@@ -45,7 +45,10 @@ namespace OpenMod.Unturned.Players.Chat.Events
         private void OnServerSendingMessage(ref string text, ref Color color, SteamPlayer? nativeFromPlayer, SteamPlayer? nativeToPlayer, EChatMode mode, ref string iconURL, ref bool useRichTextFormatting) // lgtm [cs/too-many-ref-parameters]
         {
             // If nativeToPlayer is null, this event will be called again for each player
-            if (nativeToPlayer == null) return;
+            if (nativeToPlayer == null)
+            {
+                return;
+            }
 
             var fromPlayer = GetUnturnedPlayer(nativeFromPlayer);
             var toPlayer = GetUnturnedPlayer(nativeToPlayer);

@@ -29,13 +29,22 @@ namespace OpenMod.Core.Commands
         protected ICollection<string> RawParameters { get; }
 
         /// <inheritdoc />
-        public string this[int index] => ToArray()[index];
+        public string this[int index]
+        {
+            get => ToArray()[index];
+        }
 
         /// <inheritdoc />
-        public int Length => ToArray().Length;
+        public int Length
+        {
+            get => ToArray().Length;
+        }
 
         /// <inheritdoc />
-        public async Task<T> GetAsync<T>(int index) => (T)await GetAsync(index, typeof(T));
+        public async Task<T> GetAsync<T>(int index)
+        {
+            return (T)await GetAsync(index, typeof(T));
+        }
 
         /// <inheritdoc />
         public async Task<object> GetAsync(int index, Type type)
@@ -156,21 +165,33 @@ namespace OpenMod.Core.Commands
         }
 
         /// <inheritdoc />
-        public string[] ToArray() => RawParameters.ToArray();
+        public string[] ToArray()
+        {
+            return RawParameters.ToArray();
+        }
 
         /// <inheritdoc />
-        public List<string> ToList() => ToArray().ToList();
+        public List<string> ToList()
+        {
+            return ToArray().ToList();
+        }
 
         /// <inheritdoc />
-        public IEnumerator<string> GetEnumerator() => ToList().GetEnumerator();
+        public IEnumerator<string> GetEnumerator()
+        {
+            return ToList().GetEnumerator();
+        }
 
         /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         /// <inheritdoc />
         public int Count
         {
-            get { return RawParameters.Count; }
+            get => RawParameters.Count;
         }
     }
 }

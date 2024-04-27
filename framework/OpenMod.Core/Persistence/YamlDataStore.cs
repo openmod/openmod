@@ -383,7 +383,9 @@ namespace OpenMod.Core.Persistence
             m_KnownKeys.Add(key);
 
             if (!m_LogOnChange || m_WatchedFiles.Contains(key) || m_Runtime == null)
+            {
                 return;
+            }
 
             m_WatchedFiles.Add(key);
             AddChangeWatcher(key, m_Runtime!, () =>
@@ -467,6 +469,7 @@ namespace OpenMod.Core.Persistence
 
         //Note we could try use AttributeOverride, but they are processed after YamlIgnoreAttribute
         //So if we add YamlIgnoreAttribute they will be ignored
+        // ReSharper disable once MemberCanBePrivate.Global
         public class SerializableIgnoreInspector : TypeInspectorSkeleton
         {
             private readonly ITypeInspector m_InnerTypeDescriptor;

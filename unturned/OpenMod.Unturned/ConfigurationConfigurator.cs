@@ -1,11 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
 using OpenMod.API.Ioc;
 
-namespace OpenMod.Unturned;
-internal class ConfigurationConfigurator : IConfigurationConfigurator
+namespace OpenMod.Unturned
 {
-    public void ConfigureConfiguration(IOpenModServiceConfigurationContext openModStartupContext, IConfigurationBuilder configurationBuilder)
+    internal class ConfigurationConfigurator : IConfigurationConfigurator
     {
-        configurationBuilder.AddYamlFile("openmod.unturned.yaml", optional: false, reloadOnChange: true);
+        public void ConfigureConfiguration(IOpenModServiceConfigurationContext openModStartupContext, IConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder.AddYamlFile("openmod.unturned.yaml", optional: false, reloadOnChange: true);
+        }
     }
 }

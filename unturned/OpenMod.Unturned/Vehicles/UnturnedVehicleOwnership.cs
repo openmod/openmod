@@ -46,18 +46,17 @@ namespace OpenMod.Unturned.Vehicles
         public Task<bool> HasAccessAsync(IPlayer player)
         {
             if (player is not UnturnedPlayer unturnedPlayer)
+            {
                 return Task.FromResult(false);
+            }
 
             if (!HasOwner)
-                return Task.FromResult(true);
-
-            //Explanation at UnturnedBuildableOwnership
-            if (PlayerId == unturnedPlayer.SteamId.m_SteamID)
             {
                 return Task.FromResult(true);
             }
 
-            return Task.FromResult(GroupId != 0 && GroupId == unturnedPlayer.Player.quests.groupID.m_SteamID);
+            //Explanation at UnturnedBuildableOwnership
+            return PlayerId == unturnedPlayer.SteamId.m_SteamID ? Task.FromResult(true) : Task.FromResult(GroupId != 0 && GroupId == unturnedPlayer.Player.quests.groupID.m_SteamID);
         }
     }
 }

@@ -1,13 +1,14 @@
 ﻿using OpenMod.Unturned.Events;
 
-namespace OpenMod.Unturned.Players.BattlEye.Events;
-
-public class UnturnedBattlEyeKickedEvent : UnturnedPlayerEvent
+namespace OpenMod.Unturned.Players.BattlEye.Events
 {
-    public string Reason { get; }
-
-    public UnturnedBattlEyeKickedEvent(UnturnedPlayer player, string reason) : base(player)
+    public class UnturnedBattlEyeKickedEvent : UnturnedPlayerEvent
     {
-        Reason = reason;
+        public string Reason { get; }
+
+        public UnturnedBattlEyeKickedEvent(UnturnedPlayer player, string reason) : base(player)
+        {
+            Reason = reason;
+        }
     }
 }

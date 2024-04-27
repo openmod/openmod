@@ -10,6 +10,7 @@ namespace OpenMod.Unturned.Items
 
         private readonly DestroyItem m_DestroyItem;
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public Item Item { get; }
 
         public UnturnedItem(Item item, DestroyItem destroyItem)
@@ -20,7 +21,10 @@ namespace OpenMod.Unturned.Items
             State = new UnturnedItemState(item);
         }
 
-        public string ItemInstanceId => Item.GetHashCode().ToString();
+        public string ItemInstanceId
+        {
+            get => Item.GetHashCode().ToString();
+        }
 
         public IItemAsset Asset { get; }
 
@@ -40,8 +44,14 @@ namespace OpenMod.Unturned.Items
             return Task.CompletedTask;
         }
 
-        public Task SetItemDurabilityAsync(double durability) => SetItemQualityAsync(durability);
+        public Task SetItemDurabilityAsync(double durability)
+        {
+            return SetItemQualityAsync(durability);
+        }
 
-        public Task<bool> DestroyAsync() => m_DestroyItem();
+        public Task<bool> DestroyAsync()
+        {
+            return m_DestroyItem();
+        }
     }
 }

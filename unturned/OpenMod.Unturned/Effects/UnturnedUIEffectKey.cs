@@ -1,4 +1,5 @@
 using System;
+using JetBrains.Annotations;
 
 namespace OpenMod.Unturned.Effects
 {
@@ -15,34 +16,69 @@ namespace OpenMod.Unturned.Effects
         /// <summary>
         /// The value of the effect key
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public readonly short Value;
 
         /// <summary>
         /// Checks if this effect key is valid
         /// </summary>
-        public bool IsValid => Value != Invalid.Value;
+        [UsedImplicitly]
+        public bool IsValid
+        {
+            get => Value != Invalid.Value;
+        }
 
-        public UnturnedUIEffectKey(short value) => Value = value;
+        public UnturnedUIEffectKey(short value)
+        {
+            Value = value;
+        }
 
         #region Equality, Comparable, ToString, conversions
 
-        public bool Equals(UnturnedUIEffectKey other) => Value == other.Value;
+        public bool Equals(UnturnedUIEffectKey other)
+        {
+            return Value == other.Value;
+        }
 
-        public override bool Equals(object? obj) => obj is UnturnedUIEffectKey other && Equals(other);
+        public override bool Equals(object? obj)
+        {
+            return obj is UnturnedUIEffectKey other && Equals(other);
+        }
 
-        public override int GetHashCode() => Value.GetHashCode();
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
 
-        public static bool operator ==(UnturnedUIEffectKey left, UnturnedUIEffectKey right) => left.Equals(right);
+        public static bool operator ==(UnturnedUIEffectKey left, UnturnedUIEffectKey right)
+        {
+            return left.Equals(right);
+        }
 
-        public static bool operator !=(UnturnedUIEffectKey left, UnturnedUIEffectKey right) => !left.Equals(right);
+        public static bool operator !=(UnturnedUIEffectKey left, UnturnedUIEffectKey right)
+        {
+            return !left.Equals(right);
+        }
 
-        public int CompareTo(UnturnedUIEffectKey other) => Value.CompareTo(other.Value);
+        public int CompareTo(UnturnedUIEffectKey other)
+        {
+            return Value.CompareTo(other.Value);
+        }
 
-        public override string ToString() => Value.ToString();
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
 
-        public static explicit operator short(UnturnedUIEffectKey key) => key.Value;
+        public static explicit operator short(UnturnedUIEffectKey key)
+        {
+            return key.Value;
+        }
 
-        public static explicit operator UnturnedUIEffectKey(short value) => new(value);
+        public static explicit operator UnturnedUIEffectKey(short value)
+        {
+            return new UnturnedUIEffectKey(value);
+        }
 
         #endregion
     }

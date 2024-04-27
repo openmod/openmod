@@ -111,22 +111,41 @@ namespace OpenMod.Core.Cooldowns
 
         private async Task LoadPersistedRecords(bool force = false)
         {
-            if (m_LoadedPersistedRecords && !force) return;
+            if (m_LoadedPersistedRecords && !force)
+            {
+                return;
+            }
+
             m_LoadedPersistedRecords = true;
 
-            if (m_DataStore == null) return;
+            if (m_DataStore == null)
+            {
+                return;
+            }
 
-            if (!m_Configuration.GetValue("cooldowns:reloadPersistence", true)) return;
+            if (!m_Configuration.GetValue("cooldowns:reloadPersistence", true))
+            {
+                return;
+            }
 
-            if (!await m_DataStore.ExistsAsync("cooldowns")) return;
+            if (!await m_DataStore.ExistsAsync("cooldowns"))
+            {
+                return;
+            }
 
             var persistedRecords = (await m_DataStore.LoadAsync<CooldownRecords>(c_DataStoreKey))?.Records;
 
-            if (persistedRecords == null || persistedRecords.Count == 0) return;
+            if (persistedRecords == null || persistedRecords.Count == 0)
+            {
+                return;
+            }
 
             foreach (var pair in persistedRecords)
             {
-                if (pair.Value == null || pair.Value.Count == 0) continue;
+                if (pair.Value == null || pair.Value.Count == 0)
+                {
+                    continue;
+                }
 
                 if (!m_Records.TryGetValue(pair.Key, out var records))
                 {
@@ -135,18 +154,21 @@ namespace OpenMod.Core.Cooldowns
                     m_Records.Add(pair.Key, records);
                 }
 
-                foreach (var record in pair.Value)
-                {
-                    records.Add(record);
-                }
+                records.AddRange(pair.Value);
             }
         }
 
         private async Task SavePersistedRecords()
         {
-            if (m_DataStore == null) return;
+            if (m_DataStore == null)
+            {
+                return;
+            }
 
-            if (!m_Configuration.GetValue("cooldowns:reloadPersistence", true)) return;
+            if (!m_Configuration.GetValue("cooldowns:reloadPersistence", true))
+            {
+                return;
+            }
 
             var persistedRecords = new CooldownRecords(m_Records);
 
@@ -168,22 +190,21 @@ namespace OpenMod.Core.Cooldowns
             await LoadPersistedRecords();
 
             var actorId = GetActorFullId(actor);
-            if (m_Records.TryGetValue(actorId, out List<CooldownRecord> records))
+            if (!m_Records.TryGetValue(actorId, out var records))
             {
-                var record = records.FirstOrDefault(x => x.Command == command);
-
-                if (record != null)
-                {
-                    return record.Executed;
-                }
+                return null;
             }
 
-            return null;
+            var record = records.FirstOrDefault(x => x.Command == command);
+            return record?.Executed;
         }
 
         public async Task RecordExecutionAsync(ICommandActor actor, string command, DateTime time)
         {
-            if (actor.Type == KnownActorTypes.Console) return;
+            if (actor.Type == KnownActorTypes.Console)
+            {
+                return;
+            }
 
             var actorId = GetActorFullId(actor);
             if (m_Records.TryGetValue(actorId, out var records))

@@ -81,10 +81,14 @@ namespace OpenMod.Core.Helpers
             }
 
             if (inQuote || inApostrophes) //command: 'command "player    ' -> args: 'command', 'player'
+            {
                 currentArg = TrimEnd(currentArg);
+            }
 
             if (currentArg.Length != 0)
+            {
                 args.Add(currentArg.ToString());
+            }
 
             return args.ToArray();
         }
@@ -97,7 +101,9 @@ namespace OpenMod.Core.Helpers
                 if (!IsSpace(currentArg[i]))
                 {
                     if (lenght != 0)
+                    {
                         currentArg.Remove(i + 1, lenght);
+                    }
 
                     break;
                 }

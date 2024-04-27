@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Localization;
 using OpenMod.API.Localization;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
@@ -66,7 +65,9 @@ namespace OpenMod.Core.Users
         public async Task<bool> BanAsync(IUser user, IUser? instigator = null, string? reason = null, DateTime? expireDate = null)
         {
             if (expireDate.HasValue && expireDate.Value < DateTime.Now)
+            {
                 return false;
+            }
 
             var data = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);
             if (data == null)

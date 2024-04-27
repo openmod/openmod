@@ -105,11 +105,15 @@ namespace OpenMod.Core.Commands
             foreach (var registration in baseQuery)
             {
                 if (registration.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
                     return registration;
+                }
 
                 if (registration.Aliases != null &&
                     registration.Aliases.Any(e => e.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                {
                     aliasMatch = registration;
+                }
             }
 
             return aliasMatch;

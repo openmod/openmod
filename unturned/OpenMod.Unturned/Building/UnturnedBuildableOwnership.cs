@@ -13,22 +13,22 @@ namespace OpenMod.Unturned.Building
 
         public bool HasOwner
         {
-            get { return PlayerId != 0 || GroupId != 0; }
+            get => PlayerId != 0 || GroupId != 0;
         }
 
         public string OwnerPlayerId
         {
-            get { return PlayerId.ToString(); }
+            get => PlayerId.ToString();
         }
 
         public string OwnerGroupId
         {
-            get { return GroupId.ToString(); }
+            get => GroupId.ToString();
         }
 
         private ulong PlayerId
         {
-            get { return m_Barricade?.owner ?? m_Structure!.owner; }
+            get => m_Barricade?.owner ?? m_Structure!.owner;
         }
 
         private ulong GroupId
@@ -49,10 +49,14 @@ namespace OpenMod.Unturned.Building
         public Task<bool> HasAccessAsync(IPlayer player)
         {
             if (player is not UnturnedPlayer unturnedPlayer)
+            {
                 return Task.FromResult(false);
+            }
 
             if (!HasOwner)
+            {
                 return Task.FromResult(true);
+            }
 
             //Unturned Code to check access
 
@@ -61,12 +65,7 @@ namespace OpenMod.Unturned.Building
             //EnemyGroup => Always quests.Group (there is not group for steam and other for quests)
             //This -> barricade obj in example case
 
-            if (PlayerId == unturnedPlayer.SteamId.m_SteamID)
-            {
-                return Task.FromResult(true);
-            }
-
-            return Task.FromResult(GroupId != 0 && GroupId == unturnedPlayer.Player.quests.groupID.m_SteamID);
+            return Task.FromResult(PlayerId == unturnedPlayer.SteamId.m_SteamID || GroupId != 0 && GroupId == unturnedPlayer.Player.quests.groupID.m_SteamID);
         }
     }
 }
