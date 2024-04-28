@@ -62,7 +62,8 @@ namespace OpenMod.UnityEngine
             // Do not switch thread
             UniTaskScheduler.DispatchUnityMainThread = false;
 
-            TlsWorkaround.Install();
+            TlsCertValidationWorkaround.Install();
+            TlsHandshakeWorkaround.Install();
 
             Application.quitting += OnApplicationQuitting;
             Console.CancelKeyPress += OnCancelKeyPress;
@@ -106,7 +107,8 @@ namespace OpenMod.UnityEngine
         {
             m_ShutdownBlock.Set();
 
-            TlsWorkaround.Uninstall();
+            TlsCertValidationWorkaround.Uninstall();
+            TlsHandshakeWorkaround.Uninstall();
 
             UniTaskScheduler.UnobservedTaskException -= UniTaskExceptionHandler;
             UniTaskScheduler.DispatchUnityMainThread = true;
