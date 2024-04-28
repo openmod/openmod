@@ -5,8 +5,10 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace OpenMod.UnityEngine.Helpers
 {
-    // http://answers.unity.com/answers/1089592/view.html
-    internal static class TlsWorkaround
+    /// <summary>
+    /// Fixes <c>TlsException: Invalid certificate received from server</c>.
+    /// </summary>
+    internal static class TlsCertValidationWorkaround
     {
         public static void Install()
         {
@@ -33,17 +35,17 @@ namespace OpenMod.UnityEngine.Helpers
                     continue;
                 }
 
-
                 chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
                 chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
                 chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
                 chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
 
-                if (!chain.Build((X509Certificate2)certificate))
+                if (!chain.Build((X509Certificate2) certificate))
                 {
                     return false;
                 }
             }
+
             return true;
         }
     }
