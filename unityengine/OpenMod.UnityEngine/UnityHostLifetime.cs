@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.Core.Helpers;
-using OpenMod.UnityEngine.Helpers;
 using UnityEngine;
 using UnityEngine.LowLevel;
 
@@ -62,8 +61,6 @@ namespace OpenMod.UnityEngine
             // Do not switch thread
             UniTaskScheduler.DispatchUnityMainThread = false;
 
-            TlsCertValidationWorkaround.Install();
-
             Application.quitting += OnApplicationQuitting;
             Console.CancelKeyPress += OnCancelKeyPress;
             return Task.CompletedTask;
@@ -105,8 +102,6 @@ namespace OpenMod.UnityEngine
         public void Dispose()
         {
             m_ShutdownBlock.Set();
-
-            TlsCertValidationWorkaround.Uninstall();
 
             UniTaskScheduler.UnobservedTaskException -= UniTaskExceptionHandler;
             UniTaskScheduler.DispatchUnityMainThread = true;

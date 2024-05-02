@@ -10,6 +10,7 @@ namespace OpenMod.UnityEngine
         public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<IHostLifetime, UnityHostLifetime>();
+            serviceCollection.AddHostedService<TlsCertValidationWorkaround>();
             serviceCollection.AddHostedService<TlsHandshakeWorkaround>();
         }
     }
