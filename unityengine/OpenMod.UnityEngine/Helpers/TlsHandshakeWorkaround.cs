@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Threading;
+using System.Threading.Tasks;
 using HarmonyLib;
+using Microsoft.Extensions.Hosting;
 
 namespace OpenMod.UnityEngine.Helpers
 {
@@ -26,13 +29,15 @@ namespace OpenMod.UnityEngine.Helpers
     // stream.AuthenticateAsClient("localhost:4443",
     //     new X509CertificateCollection(new X509Certificate[] { certificate }),
     //     SslProtocols.Tls12, false);
-    internal static class TlsHandshakeWorkaround
+    internal sealed class TlsHandshakeWorkaround : IHostedService
     {
-        private static Harmony? s_Harmony;
+        private Harmony? m_Harmony;
 
         private static readonly MethodInfo? s_ProcessHandshakeMethod;
         private static readonly HarmonyMethod? s_ProcessHandshakeTranspilerMethod;
         private static readonly MethodInfo? s_IsServerGetter;
+
+        private const string c_HarmonyId = "OpenMod.UnityEngine.TlsHandshakeWorkaround";
 
         static TlsHandshakeWorkaround()
         {
@@ -51,26 +56,30 @@ namespace OpenMod.UnityEngine.Helpers
             s_IsServerGetter = AccessTools.PropertyGetter(type, "IsServer");
         }
 
-        public static void Install()
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            if (s_Harmony is not null || s_ProcessHandshakeMethod is null)
+            if (m_Harmony is not null || s_ProcessHandshakeMethod is null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
-            s_Harmony = new Harmony("OpenMod.UnityEngine.TlsHandshakeWorkaround");
-            s_Harmony.Patch(s_ProcessHandshakeMethod, transpiler: s_ProcessHandshakeTranspilerMethod!);
+            m_Harmony = new Harmony(c_HarmonyId);
+            m_Harmony.Patch(s_ProcessHandshakeMethod, transpiler: s_ProcessHandshakeTranspilerMethod!);
+
+            return Task.CompletedTask;
         }
 
-        public static void Uninstall()
+        public Task StopAsync(CancellationToken cancellationToken)
         {
-            if (s_Harmony is null)
+            if (m_Harmony is null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
-            s_Harmony.UnpatchAll();
-            s_Harmony = null;
+            m_Harmony.UnpatchAll(m_Harmony.Id);
+            m_Harmony = null;
+
+            return Task.CompletedTask;
         }
 
         // Transpiles this method:
