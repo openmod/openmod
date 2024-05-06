@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using HarmonyLib;
+using JetBrains.Annotations;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Module.Shared.Patches
@@ -8,7 +9,7 @@ namespace OpenMod.Unturned.Module.Shared.Patches
     [HarmonyPatch("onApplicationQuitting")]
     public static class UnturnedBroadcastCommenceShutdownPatch
     {
-        private static readonly MethodInfo s_BroadcastCommenceShutdown = typeof(Provider).GetMethod("broadcastCommenceShutdown", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo s_BroadcastCommenceShutdown = AccessTools.Method(typeof(Provider), "broadcastCommenceShutdown");
         private static bool s_ShutdownCommenced;
 
         static UnturnedBroadcastCommenceShutdownPatch()
@@ -22,10 +23,13 @@ namespace OpenMod.Unturned.Module.Shared.Patches
         }
 
         [HarmonyPrefix]
+        [UsedImplicitly]
         public static void BeforeDisconnect()
         {
             if (!Provider.isInitialized || s_ShutdownCommenced)
+            {
                 return;
+            }
 
             s_BroadcastCommenceShutdown.Invoke(null, null);
         }

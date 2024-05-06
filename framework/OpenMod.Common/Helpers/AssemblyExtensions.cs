@@ -67,16 +67,22 @@ namespace OpenMod.Common.Helpers
                 //TypeLoadException is just matching with MissingFileAssemblyVersionRegex
                 var match = s_MissingFileAssemblyVersionRegex.Match(loaderException.Message);
                 if (!match.Success)
+                {
                     match = s_TypeLoadAssemblyVersionRegex.Match(loaderException.Message);
+                }
 
                 if (!match.Success)
+                {
                     continue;
-                
+                }
+
                 var assemblyName = match.Groups["assembly"].Value;
                 var version = Version.Parse(match.Groups["version"].Value);
 
                 if (missingAssemblies.TryGetValue(assemblyName, out var currentVersion) && currentVersion >= version)
+                {
                     continue;
+                }
 
                 missingAssemblies[assemblyName] = version;
             }

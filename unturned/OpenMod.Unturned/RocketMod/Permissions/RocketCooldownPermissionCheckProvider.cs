@@ -61,12 +61,16 @@ namespace OpenMod.Unturned.RocketMod.Permissions
             }
 
             if (permissions.All(pm => !string.Equals(pm.Name?.Trim(), permission, StringComparison.OrdinalIgnoreCase)))
+            {
                 return Task.FromResult(PermissionGrantResult.Default);
+            }
 
             var rocketPermission = permissions.Find(knownPermission =>
                 string.Equals(knownPermission.Name?.Trim(), permission, StringComparison.OrdinalIgnoreCase));
             if (rocketPermission == null)
+            {
                 return Task.FromResult(PermissionGrantResult.Default);
+            }
 
             permissionCooldown[permission] = DateTime.UtcNow.AddSeconds(rocketPermission.Cooldown);
             m_Cooldowns[actor.Id] = permissionCooldown;

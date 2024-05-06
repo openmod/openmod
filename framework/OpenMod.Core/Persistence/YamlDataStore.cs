@@ -13,6 +13,7 @@ using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization.TypeInspectors;
 
 namespace OpenMod.Core.Persistence
 {
@@ -63,9 +64,11 @@ namespace OpenMod.Core.Persistence
 
             var serializerBuilder = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithTypeInspector(i => new SerializableIgnoreInspector(i))
                 .DisableAliases();
             var deserializerBuilder = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithTypeInspector(i => new SerializableIgnoreInspector(i))
                 .IgnoreUnmatchedProperties();
 
             foreach(var converter in options.Value.Converters)
@@ -198,7 +201,7 @@ namespace OpenMod.Core.Persistence
                     var fileHash = BitConverter.ToString(sha.ComputeHash(fileStream));
 
                     // Ensure that we are actually writing different data
-                    // otherwise the file change watcher won't trigger and result in desycned write counter state
+                    // otherwise the file change watcher won't trigger and result in desynced write counter state
                     if (string.Equals(fileHash, contentHash, StringComparison.Ordinal))
                     {
                         return Task.CompletedTask;
@@ -270,7 +273,7 @@ namespace OpenMod.Core.Persistence
             // when reading from a FileSystemWatcher's event.
             //
             // Similar: https://stackoverflow.com/q/49551278
-            var encodedData = await Retry.DoAsync(() => File.ReadAllBytes((filePath)), TimeSpan.FromMilliseconds(1), 5);
+            var encodedData = await Retry.DoAsync(() => File.ReadAllBytes(filePath), TimeSpan.FromMilliseconds(1), 5);
 
             using var sha = new SHA256Managed();
             var contentHash = BitConverter.ToString(sha.ComputeHash(encodedData));
@@ -379,16 +382,17 @@ namespace OpenMod.Core.Persistence
             // Will add a change watcher that logs detected file changes
             m_KnownKeys.Add(key);
 
-            if (m_LogOnChange && !m_WatchedFiles.Contains(key) && m_Runtime != null)
+            if (!m_LogOnChange || m_WatchedFiles.Contains(key) || m_Runtime == null)
             {
-                m_WatchedFiles.Add(key);
-
-                AddChangeWatcher(key, m_Runtime!, () =>
-                {
-                    m_Logger!.LogInformation("Reloaded {Prefix}{Key}{Suffix}.yaml",
-                        m_Prefix ?? string.Empty, key, m_Suffix ?? string.Empty);
-                });
+                return;
             }
+
+            m_WatchedFiles.Add(key);
+            AddChangeWatcher(key, m_Runtime!, () =>
+            {
+                m_Logger.LogInformation("Reloaded {Prefix}{Key}{Suffix}.yaml",
+                    m_Prefix ?? string.Empty, key, m_Suffix ?? string.Empty);
+            });
         }
 
         protected virtual string GetFilePathForKey(string key)
@@ -398,6 +402,12 @@ namespace OpenMod.Core.Persistence
 
         private void IncrementWriteCounter(string key)
         {
+#if NETSTANDARD2_1
+            if (!m_WriteCounter.TryAdd(key, 1))
+            {
+                m_WriteCounter[key]++;
+            }
+#else
             if (!m_WriteCounter.ContainsKey(key))
             {
                 m_WriteCounter.Add(key, 1);
@@ -406,6 +416,7 @@ namespace OpenMod.Core.Persistence
             {
                 m_WriteCounter[key]++;
             }
+#endif
         }
 
         private bool DecrementWriteCounter(string key)
@@ -415,18 +426,19 @@ namespace OpenMod.Core.Persistence
                 return true;
             }
 
-            if (m_WriteCounter[key] == 0)
+#pragma warning disable IDE0066 // Convert switch to expression
+            // ReSharper disable once ConvertSwitchStatementToSwitchExpression
+            switch (m_WriteCounter[key])
             {
-                return true;
+                case 0:
+                    return true;
+                case < 0:
+                    // race condition? can only happen if called outside lock
+                    throw new InvalidOperationException("DecrementWriteCounter has become negative");
+                default:
+                    return m_WriteCounter[key]-- == 0;
             }
-
-            if (m_WriteCounter[key] < 0)
-            {
-                // race condition? can only happen if called outside lock
-                throw new InvalidOperationException("DecrementWriteCounter has become negative");
-            }
-
-            return m_WriteCounter[key]-- == 0;
+#pragma warning restore IDE0066 // Convert switch to expression
         }
 
         public void Dispose()
@@ -453,6 +465,25 @@ namespace OpenMod.Core.Persistence
             public string Key { get; }
 
             public Action Callback { get; }
+        }
+
+        //Note we could try use AttributeOverride, but they are processed after YamlIgnoreAttribute
+        //So if we add YamlIgnoreAttribute they will be ignored
+        // ReSharper disable once MemberCanBePrivate.Global
+        public class SerializableIgnoreInspector : TypeInspectorSkeleton
+        {
+            private readonly ITypeInspector m_InnerTypeDescriptor;
+
+            public SerializableIgnoreInspector(ITypeInspector typeInspector)
+            {
+                m_InnerTypeDescriptor = typeInspector;
+            }
+
+            public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
+            {
+                var inspectorProps = m_InnerTypeDescriptor.GetProperties(type, container);
+                return inspectorProps.Where(inspectProp => inspectProp.GetCustomAttribute<SerializeIgnoreAttribute>() == null);
+            }
         }
     }
 }

@@ -11,10 +11,7 @@ namespace OpenMod.UnityEngine.Helpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValid(float f)
         {
-            return !float.IsInfinity(f)
-                   && !float.IsNaN(f) 
-                   && !float.IsPositiveInfinity(f) 
-                   && !float.IsNegativeInfinity(f);
+            return !float.IsInfinity(f) && !float.IsNaN(f);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

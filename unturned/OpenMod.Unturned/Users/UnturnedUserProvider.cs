@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using JetBrains.Annotations;
 using OpenMod.API;
 using OpenMod.API.Eventing;
 using OpenMod.API.Localization;
@@ -19,6 +20,7 @@ using Nito.AsyncEx;
 namespace OpenMod.Unturned.Users
 {
     [Priority(Priority = Priority.Low)]
+    [UsedImplicitly]
     public class UnturnedUserProvider : IUserProvider, IDisposable
     {
         private readonly HashSet<UnturnedUser> m_Users;
@@ -122,11 +124,13 @@ namespace OpenMod.Unturned.Users
             return GetUser(player.channel.owner);
         }
 
+        // ReSharper disable once MemberCanBeProtected.Global
         public virtual UnturnedUser GetUser(SteamPlayer player)
         {
             return GetUser(player.playerID.steamID)!;
         }
 
+        // ReSharper disable once MemberCanBeProtected.Global
         public virtual UnturnedUser? GetUser(CSteamID id)
         {
             return m_Users.FirstOrDefault(d => d.SteamId == id);
@@ -254,10 +258,15 @@ namespace OpenMod.Unturned.Users
                     case UserSearchMode.FindByNameOrId:
                     case UserSearchMode.FindById:
                         if (user.Id.Equals(searchString, StringComparison.OrdinalIgnoreCase))
+                        {
                             return Task.FromResult((IUser?)user);
+                        }
 
                         if (searchMode == UserSearchMode.FindByNameOrId)
+                        {
                             goto case UserSearchMode.FindByName;
+                        }
+
                         break;
 
                     case UserSearchMode.FindByName:
@@ -284,17 +293,26 @@ namespace OpenMod.Unturned.Users
             {
                 case 2:
                     if (userName.Equals(searchName, StringComparison.OrdinalIgnoreCase))
+                    {
                         return 3;
+                    }
+
                     goto case 1;
 
                 case 1:
                     if (userName.StartsWith(searchName, StringComparison.OrdinalIgnoreCase))
+                    {
                         return 2;
+                    }
+
                     goto case 0;
 
                 case 0:
                     if (userName.IndexOf(searchName, StringComparison.OrdinalIgnoreCase) != -1)
+                    {
                         return 1;
+                    }
+
                     break;
 
                 default:
@@ -325,8 +343,12 @@ namespace OpenMod.Unturned.Users
             return BroadcastAsync(message, color, isRich: true, iconUrl: Provider.configData.Browser.Icon);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
+        // ReSharper disable once MemberCanBeMadeStatic.Global
         public Task BroadcastAsync(string message, System.Drawing.Color? color, bool isRich, string iconUrl)
         {
+            return BroadcastTask().AsTask();
+
             async UniTask BroadcastTask()
             {
                 await UniTask.SwitchToMainThread();
@@ -335,8 +357,6 @@ namespace OpenMod.Unturned.Users
 
                 ChatManager.serverSendMessage(text: message, color: color.Value.ToUnityColor(), useRichTextFormatting: isRich, iconURL: iconUrl);
             }
-
-            return BroadcastTask().AsTask();
         }
 
         public Task<bool> BanAsync(IUser user, string? reason = null, DateTime? expireDate = null)
@@ -350,7 +370,9 @@ namespace OpenMod.Unturned.Users
 
             var duration = (expireDate.Value - DateTime.Now).TotalSeconds;
             if (duration <= 0)
+            {
                 return false;
+            }
 
             reason ??= m_StringLocalizer["ban_default"];
             var data = await m_UserDataStore.GetUserDataAsync(user.Id, user.Type);

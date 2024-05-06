@@ -127,12 +127,17 @@ namespace OpenMod.Unturned.RocketMod.Rcon
         {
             try
             {
-                if (string.IsNullOrEmpty(packet.Body)) return Task.CompletedTask;
+                if (string.IsNullOrEmpty(packet.Body))
+                {
+                    return Task.CompletedTask;
+                }
 
                 var arguments = packet.Body!.Split(' ');
                 var command = arguments.Length == 1 ? packet.Body : arguments.First();
                 if (command.Equals("login", StringComparison.InvariantCulture) && !IsAuthenticated)
+                {
                     return ProcessLoginAsync(packet);
+                }
 
                 return OnExecuteCommandAsync(packet.Body!);
             }
@@ -182,7 +187,10 @@ namespace OpenMod.Unturned.RocketMod.Rcon
             var password = string.Join(" ", packet.Body!.Split(' ').Skip(count: 1));
             var rocketPassword = R.Settings.Instance.RCON.Password.Trim();
 
-            if (rocketPassword.Equals("changeme", StringComparison.Ordinal)) return false;
+            if (rocketPassword.Equals("changeme", StringComparison.Ordinal))
+            {
+                return false;
+            }
 
             return string.Equals(password, rocketPassword, StringComparison.InvariantCulture);
         }

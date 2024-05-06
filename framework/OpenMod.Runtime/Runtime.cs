@@ -48,9 +48,12 @@ namespace OpenMod.Runtime
 
         public SemVersion Version { get; }
 
-        public string OpenModComponentId { get; } = "OpenMod.Core";
+        public string OpenModComponentId { get => "OpenMod.Core"; }
 
-        public bool IsComponentAlive => Status is not RuntimeStatus.Unloaded and not RuntimeStatus.Crashed;
+        public bool IsComponentAlive
+        {
+            get => Status is not RuntimeStatus.Unloaded and not RuntimeStatus.Crashed;
+        }
 
         public ILifetimeScope LifetimeScope { get; private set; } = null!;
 
@@ -319,7 +322,9 @@ namespace OpenMod.Runtime
 
                     var missingDependencies = GetMissingDependencies(ex);
                     if (openModHostAssembly.GetName().Name.Equals("OpenMod.Unturned") && !missingDependencies.Any())
+                    {
                         continue;
+                    }
 
                     if (!missingOpenmodDepedencies)
                     {
@@ -358,16 +363,22 @@ namespace OpenMod.Runtime
                 //TypeLoadException is just matching with MissingFileAssemblyVersionRegex
                 var match = s_MissingFileAssemblyVersionRegex.Match(loaderException.Message);
                 if (!match.Success)
+                {
                     match = s_TypeLoadAssemblyVersionRegex.Match(loaderException.Message);
+                }
 
                 if (!match.Success)
+                {
                     continue;
+                }
 
                 var assemblyName = match.Groups["assembly"].Value;
                 var version = System.Version.Parse(match.Groups["version"].Value);
 
                 if (assemblyName.Equals("Rocket.API") || missingAssemblies.TryGetValue(assemblyName, out var currentVersion) && currentVersion >= version)
+                {
                     continue;
+                }
 
                 missingAssemblies[assemblyName] = version;
             }

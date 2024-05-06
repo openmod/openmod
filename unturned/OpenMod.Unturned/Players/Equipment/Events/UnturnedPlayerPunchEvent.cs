@@ -10,7 +10,8 @@ namespace OpenMod.Unturned.Players.Equipment.Events
         public EPlayerPunch Punch { get; }
 
         public UnturnedPlayerPunchEvent(UnturnedPlayer player, EPlayerPunch punch) : base(player)
-            => Punch = punch;
-
+        {
+            Punch = punch;
+        }
     }
 }

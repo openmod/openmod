@@ -14,11 +14,16 @@ namespace OpenMod.Unturned.Items
             Item = new UnturnedItem(itemJar.item, DestroyAsync);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public UnturnedPlayerInventory Inventory { get; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public ItemJar ItemJar { get; }
 
-        IItem IItemInstance.Item => Item;
+        IItem IItemInstance.Item
+        {
+            get => Item;
+        }
 
         public UnturnedItem Item { get; }
 
@@ -45,23 +50,33 @@ namespace OpenMod.Unturned.Items
                 {
                     var itemJars = Inventory.Inventory.items[p].items;
 
-                    if (itemJars == null) continue;
+                    if (itemJars == null)
+                    {
+                        continue;
+                    }
 
                     index = itemJars.IndexOf(ItemJar);
 
-                    if (index < 0) continue;
+                    if (index < 0)
+                    {
+                        continue;
+                    }
 
                     page = p;
                     break;
                 }
 
                 if (page == null)
+                {
                     return true;
+                }
 
                 Inventory.Inventory.removeItem(page.Value, (byte)index);
 
                 if (page.Value < PlayerInventory.SLOTS)
+                {
                     Inventory.Player.equipment.sendSlot(page.Value);
+                }
 
                 return true;
             }

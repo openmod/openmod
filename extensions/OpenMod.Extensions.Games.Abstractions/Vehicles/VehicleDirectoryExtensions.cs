@@ -30,8 +30,10 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
         public static async Task<IVehicleAsset?> FindByNameAsync(this IVehicleDirectory directory, string vehicleName, bool exact = true)
         {
             if (exact)
+            {
                 return (await directory.GetVehicleAssetsAsync()).FirstOrDefault(d =>
                     d.VehicleName.Equals(vehicleName, StringComparison.OrdinalIgnoreCase));
+            }
 
             return (await directory.GetVehicleAssetsAsync())
                 .Where(x => x.VehicleName.IndexOf(vehicleName, StringComparison.OrdinalIgnoreCase) >= 0)

@@ -36,21 +36,33 @@ namespace OpenMod.Unturned.Level.Events
 
         private void OnPreLevelLoaded(int level)
         {
-            if (level != SDG.Unturned.Level.BUILD_INDEX_GAME) return;
+            if (level != SDG.Unturned.Level.BUILD_INDEX_GAME)
+            {
+                return;
+            }
+
             var @event = new UnturnedPreLevelLoadedEvent();
             Emit(@event);
         }
 
         private void OnPrePreLevelLoaded(int level)
         {
-            if (level != SDG.Unturned.Level.BUILD_INDEX_GAME) return;
+            if (level != SDG.Unturned.Level.BUILD_INDEX_GAME)
+            {
+                return;
+            }
+
             var @event = new UnturnedPrePreLevelLoadedEvent();
             Emit(@event);
         }
 
         private void OnLevelLoaded(int level)
         {
-            if (level != SDG.Unturned.Level.BUILD_INDEX_GAME) return;
+            if (level != SDG.Unturned.Level.BUILD_INDEX_GAME)
+            {
+                return;
+            }
+
             var @event = new UnturnedLevelLoadedEvent();
             Emit(@event);
         }

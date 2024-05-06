@@ -51,19 +51,28 @@ namespace OpenMod.Core.Permissions
                 roleIds.Add(role.Id);
 
                 if (!inherit)
+                {
                     return roles;
+                }
 
                 // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var parentRoleId in role.Parents)
                 {
-                    if (string.IsNullOrEmpty(parentRoleId)) continue;
+                    if (string.IsNullOrEmpty(parentRoleId))
+                    {
+                        continue;
+                    }
 
                     if (roleIds.Contains(parentRoleId))
+                    {
                         continue;
+                    }
 
                     var parentRole = await GetRoleAsync(parentRoleId);
                     if (parentRole == null)
+                    {
                         continue;
+                    }
 
                     roles.Add(parentRole);
                     roleIds.Add(parentRoleId);
@@ -81,7 +90,10 @@ namespace OpenMod.Core.Permissions
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var roleId in userData.Roles)
             {
-                if (string.IsNullOrEmpty(roleId)) continue;
+                if (string.IsNullOrEmpty(roleId))
+                {
+                    continue;
+                }
 
                 if (roleIds.Contains(roleId))
                 {
@@ -90,25 +102,36 @@ namespace OpenMod.Core.Permissions
 
                 var userRole = await GetRoleAsync(roleId);
                 if (userRole == null)
+                {
                     continue;
+                }
 
                 roles.Add(userRole);
                 roleIds.Add(roleId);
 
                 if (!inherit)
+                {
                     continue;
+                }
 
                 // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var parentRoleId in userRole.Parents)
                 {
-                    if (string.IsNullOrEmpty(parentRoleId)) continue;
+                    if (string.IsNullOrEmpty(parentRoleId))
+                    {
+                        continue;
+                    }
 
                     if (roleIds.Contains(parentRoleId))
+                    {
                         continue;
+                    }
 
                     var parentRole = await GetRoleAsync(parentRoleId);
                     if (parentRole == null)
+                    {
                         continue;
+                    }
 
                     roles.Add(parentRole);
                     roleIds.Add(parentRoleId);
@@ -193,15 +216,12 @@ namespace OpenMod.Core.Permissions
             }
 
             userData.Roles ??= new HashSet<string>();
-            if (userData.Roles.Contains(roleId))
+            if (!userData.Roles.Add(roleId))
             {
                 return true;
             }
 
-            userData.Roles.Add(roleId);
-
             await m_UserDataStore.SetUserDataAsync(userData);
-
             await m_EventBus.EmitAsync(m_Runtime, this, new PermissionActorRoleAddedEvent(actor, roleId));
 
             return true;
@@ -310,19 +330,8 @@ namespace OpenMod.Core.Permissions
                 throw new Exception($"Role does not exist: {roleId}");
             }
 
-            if(roleData.Data == null)
-            {
-                roleData.Data = new Dictionary<string, object?>();
-            }
-
-            if (roleData.Data.ContainsKey(key))
-            {
-                roleData.Data[key] = data;
-            }
-            else
-            {
-                roleData.Data.Add(key, data);
-            }
+            roleData.Data ??= new Dictionary<string, object?>();
+            roleData.Data[key] = data;
 
             await m_PermissionRolesDataStore.SaveChangesAsync();
         }
@@ -342,6 +351,7 @@ namespace OpenMod.Core.Permissions
             return m_PermissionRolesDataStore.GetRoleDataAsync<T>(roleId, key);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         protected IEnumerable<IPermissionRole> GetAutoAssignRoles()
         {
             // cast is necessary, OfType<> or Cast<> does not work with cast operators

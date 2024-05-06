@@ -26,6 +26,9 @@ namespace OpenMod.Core.Permissions
 
         public string FullActorName { get; }
 
-        public static implicit operator UserDataPermissionActor(UserData d) => new(d);
+        public static implicit operator UserDataPermissionActor(UserData d)
+        {
+            return new UserDataPermissionActor(d);
+        }
     }
 }

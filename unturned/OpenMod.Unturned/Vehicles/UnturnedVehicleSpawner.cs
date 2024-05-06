@@ -49,7 +49,9 @@ namespace OpenMod.Unturned.Vehicles
                         false, fuel, health, batteryCharge, owner, group, locked, turrets, tireAliveMask);
 
                     if (iVehicle == null)
+                    {
                         return vehicle;
+                    }
 
                     vehicle = new UnturnedVehicle(iVehicle);
                     if (itemBatteryId != Guid.Empty)
@@ -58,7 +60,9 @@ namespace OpenMod.Unturned.Vehicles
                     }
 
                     if (items == null)
+                    {
                         return vehicle;
+                    }
 
                     foreach (var item in items)
                     {
@@ -91,7 +95,7 @@ namespace OpenMod.Unturned.Vehicles
             var forward = (Vector3.UnitZ * 6).Rotate(rotation);
 
             position += forward;
-            
+
             Physics.Raycast((position + Vector3.UnitY * 16f).ToUnityVector(), UVector3.down, out var raycastHit, 32f, RayMasks.BLOCK_VEHICLE);
             if (raycastHit.collider != null)
             {
@@ -127,7 +131,7 @@ namespace OpenMod.Unturned.Vehicles
             fuel = reader.ReadUInt16();
             health = reader.ReadUInt16();
             batteryCharge = reader.ReadUInt16();
-            
+
             if (version >= UnturnedVehicleState.SaveDataVersionBatteryGuid)
             {
                 var guidBuffer = new byte[16];
@@ -177,7 +181,9 @@ namespace OpenMod.Unturned.Vehicles
                 _ = reader.Read(state, 0, stateLength);
 
                 if (Assets.find(EAssetType.ITEM, id) is not ItemAsset)
+                {
                     continue;
+                }
 
                 var item = new Item(id, amount, quality, state);
                 items[b] = new ItemJar(x, y, rot, item);
