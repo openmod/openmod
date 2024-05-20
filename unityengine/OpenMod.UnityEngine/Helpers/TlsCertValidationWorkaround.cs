@@ -2,25 +2,33 @@
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 
 namespace OpenMod.UnityEngine.Helpers
 {
     /// <summary>
     /// Fixes <c>TlsException: Invalid certificate received from server</c>.
     /// </summary>
-    internal static class TlsCertValidationWorkaround
+    internal sealed class TlsCertValidationWorkaround : IHostedService
     {
-        public static void Install()
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            ServicePointManager.ServerCertificateValidationCallback = CertificateValidationWorkaroundCallback;
+            ServicePointManager.ServerCertificateValidationCallback += CertificateValidationWorkaroundCallback;
+
+            return Task.CompletedTask;
         }
 
-        public static void Uninstall()
+        public Task StopAsync(CancellationToken cancellationToken)
         {
-            ServicePointManager.ServerCertificateValidationCallback = null;
+            ServicePointManager.ServerCertificateValidationCallback -= CertificateValidationWorkaroundCallback;
+
+            return Task.CompletedTask;
         }
 
-        private static bool CertificateValidationWorkaroundCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        // Should be an instance method for event unsubscription to work correctly.
+        private bool CertificateValidationWorkaroundCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
             {
