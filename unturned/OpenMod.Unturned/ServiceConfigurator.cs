@@ -80,6 +80,9 @@ namespace OpenMod.Unturned
 
             if (RocketModIntegration.IsRocketModInstalled())
             {
+                var logger = openModStartupContext.LoggerFactory.CreateLogger<RocketModIntegration>();
+                logger.LogDebug("Rocketmod is installed");
+
                 serviceCollection.AddSingleton<IRocketModComponent, RocketModComponent>();
 
                 var permissionSystem = unturnedConfiguration.Configuration
@@ -88,6 +91,7 @@ namespace OpenMod.Unturned
 
                 if (permissionSystem.Equals("RocketMod", StringComparison.OrdinalIgnoreCase))
                 {
+                    logger.LogDebug("Using Rocketmod permissions system");
                     serviceCollection.Configure<PermissionCheckerOptions>(options =>
                     {
                         options.RemovePermissionSource<DefaultPermissionStore>();
@@ -96,6 +100,10 @@ namespace OpenMod.Unturned
                     });
 
                     serviceCollection.AddTransient<IPermissionRoleStore, RocketPermissionRoleStore>();
+                }
+                else
+                {
+                    logger.LogDebug("Using OpenMod permissions system");
                 }
 
                 var economySystem = unturnedConfiguration.Configuration
@@ -106,14 +114,18 @@ namespace OpenMod.Unturned
                 {
                     if (UconomyIntegration.IsUconomyInstalled())
                     {
+                        logger.LogDebug("Using Rocketmod uconomy system");
                         serviceCollection.AddSingleton<IEconomyProvider, UconomyEconomyProvider>();
                     }
                     else
                     {
-                        var logger = openModStartupContext.LoggerFactory.CreateLogger<RocketModIntegration>();
                         logger.LogWarning(
                             "Economy system was set to RocketMod_Uconomy but Uconomy is not installed. Defaulting to Separate");
                     }
+                }
+                else
+                {
+                    logger.LogDebug("Using OpenMod economy system");
                 }
             }
 
