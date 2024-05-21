@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MonoMod.ILHelpers" Version="1.0.1" Aliases="MonoMod" />
     <PackageReference Include="OpenMod.Unturned.Redist" Version="3.23.12.3">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>

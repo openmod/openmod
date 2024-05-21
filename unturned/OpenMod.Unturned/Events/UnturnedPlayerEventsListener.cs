@@ -1,4 +1,6 @@
-﻿using SDG.Unturned;
+﻿extern alias MonoMod;
+
+using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
