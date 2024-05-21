@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PackageDescription>CSharp Analyzers for OpenMod.</PackageDescription>
     <MinClientVersion>3.6</MinClientVersion>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
 	<!--Fixes RS1036 to ban some API in analyzers, more info here https://github.com/dotnet/roslyn/issues/63290-->
 	<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>

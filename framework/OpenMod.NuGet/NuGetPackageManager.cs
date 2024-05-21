@@ -115,13 +115,15 @@ namespace OpenMod.NuGet
                 var net481 = new NuGetFramework(".NETFramework", new Version(4, 8, 1, 0));
                 m_CurrentFramework = new FallbackFramework(FrameworkConstants.CommonFrameworks.NetStandard21, new List<NuGetFramework>
                 {
-                    FrameworkConstants.CommonFrameworks.Net461,
+                    FrameworkConstants.CommonFrameworks.NetStandard20,
+                    net481,
+                    net48,
+                    FrameworkConstants.CommonFrameworks.Net472,
+                    FrameworkConstants.CommonFrameworks.Net471,
                     FrameworkConstants.CommonFrameworks.Net462,
                     FrameworkConstants.CommonFrameworks.Net47,
-                    FrameworkConstants.CommonFrameworks.Net471,
-                    FrameworkConstants.CommonFrameworks.Net472,
-                    net48,
-                    net481
+                    FrameworkConstants.CommonFrameworks.Net461,
+                    FrameworkConstants.CommonFrameworks.Net46
                 });
             }
             else

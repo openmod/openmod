@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageDescription>Rust integration for OpenMod</PackageDescription>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />

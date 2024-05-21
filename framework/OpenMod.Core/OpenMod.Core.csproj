@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net472</TargetFrameworks>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <PackageDescription>Core service implementations for OpenMod</PackageDescription>
   </PropertyGroup>
 
@@ -36,7 +36,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="morelinq" Version="3.4.2" />
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="3.1.32" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.32" />
@@ -49,10 +48,6 @@
     <PackageReference Include="ReadLine" Version="2.0.1" />
     <PackageReference Include="SmartFormat" Version="3.3.0" />
     <PackageReference Include="SmartFormat.Extensions.Time" Version="3.3.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
-  	<PackageReference Include="Contrib.Bcl.Ranges" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

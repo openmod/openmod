@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
 $if$ ($packageid$ != "")    <PackageId>$packageid$</PackageId>$endif$
 $if$ ($description$ != "")    <PackageDescription>$description$</PackageDescription>$endif$
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -26,10 +26,6 @@ $if$ ($author$ != "")    <PackageAuthor>$author$</PackageAuthor>
     <PackageReference Include="OpenMod.Unturned" Version="3.0.17" />
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 

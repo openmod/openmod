@@ -7,9 +7,6 @@ using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Permissions;
 using OpenMod.API.Plugins;
-#if !NETSTANDARD2_1_OR_GREATER
-using MoreLinq;
-#endif
 
 namespace OpenMod.Core.Permissions
 {
@@ -51,10 +48,10 @@ namespace OpenMod.Core.Permissions
                     var permission = commandPermissionBuilder.GetPermission(c, commands);
 
                     var permissionRegistrations = c.PermissionRegistrations?
-                        .Select(r => permission + '.' + r.Permission) ?? Enumerable.Empty<string>();
+                        .Select(r => permission + '.' + r.Permission) ?? [];
 
                     // ReSharper disable once InvokeAsExtensionMethod
-                    return MoreLinq.MoreEnumerable.Append(permissionRegistrations, permission);
+                    return (List<string>)[..permissionRegistrations, permission];
                 })
                 .SelectMany(DefaultPermissionCheckProvider.BuildPermissionTree)
                 .ToHashSet();
