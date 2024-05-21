@@ -3,10 +3,11 @@
   <PropertyGroup>
     <PackageDescription>CSharp Analyzers for OpenMod.</PackageDescription>
     <MinClientVersion>3.6</MinClientVersion>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <!--Must be always kept as netstandard2.0 -->
+    <TargetFramework>netstandard2.0</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-	<!--Fixes RS1036 to ban some API in analyzers, more info here https://github.com/dotnet/roslyn/issues/63290-->
-	<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+	  <!--Fixes RS1036 to ban some API in analyzers, more info here https://github.com/dotnet/roslyn/issues/63290-->
+	  <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
