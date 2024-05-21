@@ -1,8 +1,8 @@
-﻿using MoreLinq;
-using OpenMod.Core.Helpers;
+﻿using OpenMod.Core.Helpers;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using MoreLinq;
 
 namespace OpenMod.Extensions.Games.Abstractions.Vehicles
 {
@@ -37,7 +37,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Vehicles
 
             return (await directory.GetVehicleAssetsAsync())
                 .Where(x => x.VehicleName.IndexOf(vehicleName, StringComparison.OrdinalIgnoreCase) >= 0)
-                .MinBy(asset => StringHelper.LevenshteinDistance(vehicleName, asset.VehicleName))
+                .Minima(asset => StringHelper.LevenshteinDistance(vehicleName, asset.VehicleName))
                 .FirstOrDefault();
         }
     }

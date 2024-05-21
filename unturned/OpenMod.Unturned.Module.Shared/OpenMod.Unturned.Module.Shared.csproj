@@ -8,14 +8,14 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
   
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.2.2" />
-    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2021.3.28.1">
+    <PackageReference Include="Lib.Harmony" Version="2.3.3" />
+    <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2021.3.29.1">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
     <PackageReference Include="OpenMod.Unturned.Redist" Version="3.23.12.3">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

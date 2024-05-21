@@ -1,12 +1,12 @@
 using Autofac.Core.Lifetime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MoreLinq;
 using OpenMod.API;
 using OpenMod.API.Ioc;
 using OpenMod.API.Prioritization;
 using System.Collections.Generic;
 using System.Linq;
+using MoreLinq;
 
 namespace OpenMod.Unturned.Effects
 {
@@ -208,7 +208,7 @@ namespace OpenMod.Unturned.Effects
 
         private void LogBiggestOffender(string callerComponentId)
         {
-            KeyValuePair<IOpenModComponent, List<UnturnedUIEffectKey>> maxValueBinding = m_Bindings.MaxBy(x => x.Value.Count).First();
+            var maxValueBinding = m_Bindings.Maxima(x => x.Value.Count).First();
             m_Logger.LogWarning(
                 "{CallingComponentId} tried to bind a UI effect key but there are none available. Component {MostKeysComponent} has {MostKeysCount} keys, consider disabling it",
                 callerComponentId, maxValueBinding.Key, maxValueBinding.Value.Count.ToString()

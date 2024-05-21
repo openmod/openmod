@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using MoreLinq;
 
 namespace OpenMod.Unturned.Locations
 {
@@ -28,14 +29,14 @@ namespace OpenMod.Unturned.Locations
 
             return GetLocations()
                 .Where(location => location.Name.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0)
-                .MinBy(location => StringHelper.LevenshteinDistance(name, location.Name))
+                .Minima(location => StringHelper.LevenshteinDistance(name, location.Name))
                 .FirstOrDefault();
         }
 
         public UnturnedLocation? GetNearestLocation(Vector3 position)
         {
             return GetLocations()
-                .MinBy(location => (location.Position - position).LengthSquared())
+                .Minima(location => (location.Position - position).LengthSquared())
                 .FirstOrDefault();
         }
     }

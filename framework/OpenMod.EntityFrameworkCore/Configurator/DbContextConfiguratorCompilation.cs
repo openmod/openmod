@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MoreLinq;
 using System.Collections.Generic;
+using System.Linq;
+using MoreLinq;
 
 namespace OpenMod.EntityFrameworkCore.Configurator
 {

@@ -44,6 +44,7 @@ namespace OpenMod.Runtime
         {
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
             HostAssemblies = new List<Assembly>();
+            m_Logger = null!;
         }
 
         public SemVersion Version { get; }
@@ -75,7 +76,7 @@ namespace OpenMod.Runtime
 
         private DateTime? m_DateLogger;
         private ILoggerFactory? m_LoggerFactory;
-        private ILogger<Runtime>? m_Logger;
+        private ILogger<Runtime> m_Logger;
 
         // these variables are used for soft reloads
         private List<Assembly>? m_OpenModHostAssemblies;
@@ -521,7 +522,7 @@ namespace OpenMod.Runtime
                 .SetBasePath(WorkingDirectory)
                 .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables("OpenMod_")
-                .AddInMemoryCollection(new Dictionary<string, string>
+                .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     { HostDefaults.ContentRootKey, WorkingDirectory },
                     { HostDefaults.ApplicationKey, "OpenMod" },
@@ -671,9 +672,8 @@ namespace OpenMod.Runtime
 
             m_DateLogger = null;
             m_LoggerFactory = null;
-            m_Logger = null;
 
-            Log.CloseAndFlush();
+            await Log.CloseAndFlushAsync();
         }
     }
 }

@@ -390,7 +390,7 @@ namespace OpenMod.Core.Persistence
             m_WatchedFiles.Add(key);
             AddChangeWatcher(key, m_Runtime!, () =>
             {
-                m_Logger.LogInformation("Reloaded {Prefix}{Key}{Suffix}.yaml",
+                m_Logger?.LogInformation("Reloaded {Prefix}{Key}{Suffix}.yaml",
                     m_Prefix ?? string.Empty, key, m_Suffix ?? string.Empty);
             });
         }
