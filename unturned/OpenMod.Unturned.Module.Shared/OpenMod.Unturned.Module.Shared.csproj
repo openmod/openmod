@@ -6,9 +6,12 @@
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
-  
+
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony.Thin" Version="2.3.3" />
+    <PackageReference Include="Lib.Harmony.Thin" Version="2.3.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2021.3.29.1">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
