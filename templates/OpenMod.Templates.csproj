@@ -15,7 +15,7 @@
         <IncludeContentInPack>true</IncludeContentInPack>
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <NoPackageAnalysis>true</NoPackageAnalysis>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>net472</TargetFramework>
         <Version>0.0.0</Version>
         <PackageVersion>0.0.0</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

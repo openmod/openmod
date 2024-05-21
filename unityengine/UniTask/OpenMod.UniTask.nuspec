@@ -11,9 +11,8 @@
   </metadata>
   <files>
     <file src="netstandard2.1\*.dll" target="lib\netstandard2.1"/>
-    <file src="netstandard2.0\*.dll" target="lib\net461"/>
-    <file src="netstandard2.0\*.dll" target="lib\net472"/>
-    <file src="netstandard2.0\*.dll" target="lib\net48"/>
+    <file src="netstandard2.1\*.dll" target="lib\net472"/>
+    <file src="netstandard2.1\*.dll" target="lib\net48"/>
     <file src="*.xml" target="lib\netstandard2.1"/>
     <file src="*.xml" target="lib\net461"/>
     <file src="*.xml" target="lib\net472"/>

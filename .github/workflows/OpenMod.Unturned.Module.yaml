@@ -47,7 +47,7 @@ jobs:
       run: sudo apt-get install zip
     - name: Zip artifacts
       if: github.event_name == 'release'
-      run: "mkdir ./release && mkdir ./release/OpenMod.Unturned/ && mv ./unturned/OpenMod.Unturned.Module/bin/Release/netstandard2.1/linux-x64/* ./release/OpenMod.Unturned/ && mv ./release/OpenMod.Unturned/Readme.txt ./release && cd ./release && zip -qq -r ./release.zip *"
+      run: "mkdir ./release && mkdir ./release/OpenMod.Unturned/ && mv ./unturned/OpenMod.Unturned.Module/bin/Release/net472/linux-x64/* ./release/OpenMod.Unturned/ && mv ./release/OpenMod.Unturned/Readme.txt ./release && cd ./release && zip -qq -r ./release.zip *"
     - name: Upload release asset
       if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
