@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageDescription>OpenMod permission link for OxideMod</PackageDescription>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\props\SharedProjectProps.props" />

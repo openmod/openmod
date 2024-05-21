@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageDescription>Rust OxideMod integration for OpenMod</PackageDescription>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

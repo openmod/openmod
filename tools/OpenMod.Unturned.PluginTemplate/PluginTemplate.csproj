@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
 $if$ ($packageid$ != "")    <PackageId>$packageid$</PackageId>$endif$
 $if$ ($description$ != "")    <PackageDescription>$description$</PackageDescription>$endif$
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -27,7 +27,7 @@ $if$ ($author$ != "")    <PackageAuthor>$author$</PackageAuthor>
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net461" Version="1.0.0">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

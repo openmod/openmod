@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net472</TargetFrameworks>
     <PackageDescription>Core service implementations for OpenMod</PackageDescription>
   </PropertyGroup>
 
@@ -51,7 +51,7 @@
     <PackageReference Include="SmartFormat.Extensions.Time" Version="3.3.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net472'">
   	<PackageReference Include="Contrib.Bcl.Ranges" Version="1.0.0" />
   </ItemGroup>
 

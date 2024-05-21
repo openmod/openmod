@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Oxide.Ext.OpenMod.Rust</AssemblyName>
     <PackageDescription>OpenMod Rust extension</PackageDescription>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\props\SharedProjectProps.props" />
