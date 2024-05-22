@@ -28,11 +28,11 @@ namespace OpenMod.Core.Jobs
 
         private readonly IDataStore m_DataStore;
         private readonly IEventBus m_EventBus;
-        private readonly List<ITaskExecutor> m_JobExecutors = new();
+        private readonly List<ITaskExecutor> m_JobExecutors = [];
         private readonly ILogger<JobScheduler> m_Logger;
 
         private readonly IOpenModComponent m_OpenModComponent;
-        private readonly List<ScheduledJob> m_ScheduledJobs = new();
+        private readonly List<ScheduledJob> m_ScheduledJobs = [];
         private ScheduledJobsFile? m_File;
 
         private IDisposable? m_FileChangeDisposable;
@@ -94,7 +94,7 @@ namespace OpenMod.Core.Jobs
                 throw new ArgumentNullException(nameof(@params));
             }
 
-            m_File!.Jobs ??= new List<ScheduledJob>();
+            m_File!.Jobs ??= [];
             if (m_File.Jobs.Any(d => d.Name?.Equals(@params.Name, StringComparison.OrdinalIgnoreCase) ?? false))
             {
                 throw new Exception($"A job with this name already exists: {@params.Name}");
@@ -153,7 +153,7 @@ namespace OpenMod.Core.Jobs
         {
             if (m_File!.Jobs == null)
             {
-                return Task.FromResult<ICollection<ScheduledJob>>(new List<ScheduledJob>());
+                return Task.FromResult<ICollection<ScheduledJob>>([]);
             }
 
             return Task.FromResult<ICollection<ScheduledJob>>(m_File.Jobs
@@ -191,7 +191,7 @@ namespace OpenMod.Core.Jobs
 
         private async Task WriteJobsFileAsync()
         {
-            m_File!.Jobs ??= new List<ScheduledJob>();
+            m_File!.Jobs ??= [];
 
             //Do not reload file when internal save
             m_FileChangeDisposable?.Dispose();
@@ -347,12 +347,11 @@ namespace OpenMod.Core.Jobs
             {
                 try
                 {
-                    var token = job.CancellationTokenSource!.Token;
+                    var token = job.CancellationTokenSource?.Token ?? CancellationToken.None;
 
                     bool Enabled()
                     {
-                        return (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive &&
-                               !token.IsCancellationRequested;
+                        return (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive && !token.IsCancellationRequested;
                     }
 
                     do
@@ -466,8 +465,12 @@ namespace OpenMod.Core.Jobs
         private void DisposeCancellableJob(ScheduledJob job)
         {
             job.Enabled = false;
-            job.CancellationTokenSource?.Cancel();
-            job.CancellationTokenSource?.Dispose();
+
+            var ctc = job.CancellationTokenSource;
+            job.CancellationTokenSource = null;
+
+            ctc?.Cancel();
+            ctc?.Dispose();
 
             m_ScheduledJobs.Remove(job);
         }
@@ -485,7 +488,7 @@ namespace OpenMod.Core.Jobs
             try
             {
                 await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!,
-                    job.Args ?? new Dictionary<string, object?>(), parameters));
+                    job.Args ?? [], parameters));
                 return true;
             }
             catch (Exception ex)
@@ -508,10 +511,9 @@ namespace OpenMod.Core.Jobs
             m_Logger.LogInformation("Subscribed job \"{JobName}\" to \"{JobSchedule}\" event", job.Name, schedule);
             var dispose = m_EventBus.Subscribe(m_OpenModComponent, schedule!, async (_, _, @event) =>
             {
-                var token = job.CancellationTokenSource!.Token;
-                var enable = (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive &&
-                             !token.IsCancellationRequested;
-                if (enable)
+                var token = job.CancellationTokenSource?.Token ?? CancellationToken.None;
+                var enable = (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive && !token.IsCancellationRequested;
+                if (!enable)
                 {
                     return;
                 }
