@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Lib.Harmony.Thin" Version="2.3.3">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>all</IncludeAssets>
     </PackageReference>
     <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2021.3.29.1">
       <IncludeAssets>compile</IncludeAssets>
