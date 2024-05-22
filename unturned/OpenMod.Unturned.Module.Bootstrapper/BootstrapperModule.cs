@@ -54,7 +54,7 @@ namespace OpenMod.Unturned.Module.Bootstrapper
             }
 
             m_LoadedAssemblies = new ConcurrentDictionary<string, Assembly>();
-            ModuleHook.PreVanillaAssemblyResolvePostRedirects += UnturnedPreVanillaAssemblyResolve;
+            ModuleHook.PreVanillaAssemblyResolve += UnturnedPreVanillaAssemblyResolve;
 
             Assembly? moduleAssembly = null;
 
@@ -209,7 +209,7 @@ namespace OpenMod.Unturned.Module.Bootstrapper
 
             m_LoadedAssemblies?.Clear();
             m_LoadedAssemblies = null;
-            ModuleHook.PreVanillaAssemblyResolvePostRedirects -= UnturnedPreVanillaAssemblyResolve;
+            ModuleHook.PreVanillaAssemblyResolve -= UnturnedPreVanillaAssemblyResolve;
 
             Instance = null;
         }
