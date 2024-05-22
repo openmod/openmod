@@ -80,7 +80,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		props\UnityEngineDependentProjectProps.props = props\UnityEngineDependentProjectProps.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMod.EntityFrameworkCore.MySql", "framework\OpenMod.EntityFrameworkCore.MySql\OpenMod.EntityFrameworkCore.MySql.csproj", "{2D901FA0-D969-42D4-B730-1BD073553DC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMod.EntityFrameworkCore.MySql", "framework\OpenMod.EntityFrameworkCore.MySql\OpenMod.EntityFrameworkCore.MySql.csproj", "{2D901FA0-D969-42D4-B730-1BD073553DC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -153,33 +153,21 @@ Global
 		{CCCD5AFF-D258-497F-987F-5905CD81D2C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCCD5AFF-D258-497F-987F-5905CD81D2C3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1D9EC6F4-DF3C-4DE4-B605-E2C1E8F200B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1D9EC6F4-DF3C-4DE4-B605-E2C1E8F200B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D9EC6F4-DF3C-4DE4-B605-E2C1E8F200B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1D9EC6F4-DF3C-4DE4-B605-E2C1E8F200B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{866EB7F0-C323-4817-B0D1-AAF0A7CA886E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{866EB7F0-C323-4817-B0D1-AAF0A7CA886E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{866EB7F0-C323-4817-B0D1-AAF0A7CA886E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{866EB7F0-C323-4817-B0D1-AAF0A7CA886E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{97D0A0FF-D8DB-4D39-A419-A9741DAE0FCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{97D0A0FF-D8DB-4D39-A419-A9741DAE0FCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97D0A0FF-D8DB-4D39-A419-A9741DAE0FCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{97D0A0FF-D8DB-4D39-A419-A9741DAE0FCB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B0B13E02-8147-43DC-A7E2-D896C357D79A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B0B13E02-8147-43DC-A7E2-D896C357D79A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0B13E02-8147-43DC-A7E2-D896C357D79A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B0B13E02-8147-43DC-A7E2-D896C357D79A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1023EB73-C8EF-4F68-BC50-CAA466E36140}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1023EB73-C8EF-4F68-BC50-CAA466E36140}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1023EB73-C8EF-4F68-BC50-CAA466E36140}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1023EB73-C8EF-4F68-BC50-CAA466E36140}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5E00B168-A765-407B-BC88-2ACA7E458CBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5E00B168-A765-407B-BC88-2ACA7E458CBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E00B168-A765-407B-BC88-2ACA7E458CBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E00B168-A765-407B-BC88-2ACA7E458CBD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4953870C-FA45-460C-B7AC-90AF8CBD9865}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4953870C-FA45-460C-B7AC-90AF8CBD9865}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4953870C-FA45-460C-B7AC-90AF8CBD9865}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4953870C-FA45-460C-B7AC-90AF8CBD9865}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ABD8C0E6-6DD7-413A-BDDD-7E55927B7F84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ABD8C0E6-6DD7-413A-BDDD-7E55927B7F84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABD8C0E6-6DD7-413A-BDDD-7E55927B7F84}.Release|Any CPU.ActiveCfg = Release|Any CPU
