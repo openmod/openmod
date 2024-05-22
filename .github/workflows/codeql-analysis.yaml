@@ -36,7 +36,7 @@ jobs:
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
-         build-mode: ${{ matrix.build-mode }}
+        build-mode: ${{ matrix.build-mode }}
         queries: +security-and-quality
         languages: ${{ matrix.language }}
 
