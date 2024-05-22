@@ -8,7 +8,7 @@ namespace OpenMod.Unturned.Module.Shared
     {
         public static void Install()
         {
-            ModuleHook.PreVanillaAssemblyResolve += OnAssemblyResolve;
+            ModuleHook.PostVanillaAssemblyResolve += OnAssemblyResolve;
         }
 
         private static Assembly? OnAssemblyResolve(object sender, ResolveEventArgs args)
@@ -23,7 +23,7 @@ namespace OpenMod.Unturned.Module.Shared
 
         public static void Uninstall()
         {
-            ModuleHook.PreVanillaAssemblyResolve -= OnAssemblyResolve;
+            ModuleHook.PostVanillaAssemblyResolve -= OnAssemblyResolve;
         }
     }
 }
