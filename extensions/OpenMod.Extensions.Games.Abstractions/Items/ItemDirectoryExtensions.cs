@@ -37,7 +37,7 @@ namespace OpenMod.Extensions.Games.Abstractions.Items
 
             return (await directory.GetItemAssetsAsync())
                 .Where(x => x.ItemName.IndexOf(itemName, StringComparison.OrdinalIgnoreCase) >= 0)
-                .MinBy(asset => StringHelper.LevenshteinDistance(itemName, asset.ItemName))
+                .Minima(asset => StringHelper.LevenshteinDistance(itemName, asset.ItemName))
                 .FirstOrDefault();
         }
     }
