@@ -11,7 +11,7 @@ using OpenMod.Unturned.Patching;
 namespace OpenMod.Unturned.Mono
 {
     /// <summary>
-    /// Fixes <see cref="SocketTaskExtensions.ReceiveAsync(Socket, Memory&lt;byte&gt;, SocketFlags, CancellationToken)"/>, that <see cref="Memory&lt;byte&gt;"/> is always empty due
+    /// Fixes <see cref="SocketTaskExtensions.ReceiveAsync(Socket, Memory{byte}, SocketFlags, CancellationToken)"/>, that <see cref="Memory{byte}"/> of is always empty due
     /// to coping the memory array.
     /// https://github.com/Unity-Technologies/mono/blob/unity-main/mcs/class/System/System.Net.Sockets/SocketTaskExtensions.cs
     /// </summary>
