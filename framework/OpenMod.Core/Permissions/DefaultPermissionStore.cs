@@ -8,7 +8,7 @@ using OpenMod.API.Users;
 
 namespace OpenMod.Core.Permissions
 {
-    [Priority(Priority = Priority.Lowest)]
+    [Priority(Priority = Priority.Normal)]
     public class DefaultPermissionStore : IPermissionStore
     {
         private readonly IUserDataStore m_UserDataStore;
