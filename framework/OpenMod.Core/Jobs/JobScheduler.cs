@@ -140,7 +140,7 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            foreach (var job in m_FileData.Jobs!)
+            foreach (var job in m_FileData.Jobs!.ToList())
             {
                 await ScheduleJobInternalAsync(job, !isFromFileChange);
             }
