@@ -75,7 +75,6 @@ namespace OpenMod.Core.Eventing
             }
 
             var attribute = GetEventListenerAttribute(callback.Method);
-
             return Subscribe(component, eventName, callback, attribute);
         }
 
@@ -292,7 +291,7 @@ namespace OpenMod.Core.Eventing
 
             lock (m_Lock)
             {
-                m_EventSubscriptions.RemoveAll(c => !c.Owner.IsAlive || c.Owner.Target == component);
+                m_EventSubscriptions.RemoveAll(c => !c.Owner.TryGetTarget(out var refe) || refe == component);
             }
         }
 
@@ -305,9 +304,7 @@ namespace OpenMod.Core.Eventing
 
             lock (m_Lock)
             {
-                m_EventSubscriptions.RemoveAll(c =>
-                    (!c.Owner.IsAlive || c.Owner.Target == component) &&
-                    c.EventName.Equals(eventName, StringComparison.OrdinalIgnoreCase));
+                m_EventSubscriptions.RemoveAll(c => (!c.Owner.TryGetTarget(out var refe) || refe == component) && c.EventName.Equals(eventName, StringComparison.OrdinalIgnoreCase));
             }
         }
 
@@ -320,10 +317,7 @@ namespace OpenMod.Core.Eventing
 
             lock (m_Lock)
             {
-                m_EventSubscriptions.RemoveAll(c =>
-                    (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == typeof(TEvent) ||
-                                                                          c.EventName.Equals(typeof(TEvent).Name,
-                                                                              StringComparison.OrdinalIgnoreCase)));
+                m_EventSubscriptions.RemoveAll(c => (!c.Owner.TryGetTarget(out var refe) || refe == component) && (c.EventType == typeof(TEvent) || c.EventName.Equals(typeof(TEvent).Name, StringComparison.OrdinalIgnoreCase)));
             }
         }
 
@@ -336,10 +330,7 @@ namespace OpenMod.Core.Eventing
 
             lock (m_Lock)
             {
-                m_EventSubscriptions.RemoveAll(c =>
-                    (!c.Owner.IsAlive || c.Owner.Target == component) && (c.EventType == eventType ||
-                                                                          c.EventName.Equals(eventType.Name,
-                                                                              StringComparison.OrdinalIgnoreCase)));
+                m_EventSubscriptions.RemoveAll(c => (!c.Owner.TryGetTarget(out var refe) || refe == component) && (c.EventType == eventType || c.EventName.Equals(eventType.Name, StringComparison.OrdinalIgnoreCase)));
             }
         }
 
@@ -372,7 +363,7 @@ namespace OpenMod.Core.Eventing
                 currentType = currentType.BaseType;
             }
 
-            eventTypes.AddRange(@event.GetType().GetInterfaces().Where(d => typeof(IEvent).IsAssignableFrom(d)) );
+            eventTypes.AddRange(@event.GetType().GetInterfaces().Where(d => typeof(IEvent).IsAssignableFrom(d)));
 
             var cancellableEvent = @event as ICancellableEvent;
 
@@ -389,8 +380,8 @@ namespace OpenMod.Core.Eventing
                         .Where(c => c is not null && ((c.EventType != null && c.EventType == eventType)
                                                       || (eventName.Equals(c.EventName,
                                                               StringComparison.OrdinalIgnoreCase)
-                                                          && c.Owner.IsAlive &&
-                                                          ((IOpenModComponent)c.Owner.Target).IsComponentAlive)))
+                                                          && c.Owner.TryGetTarget(out var refe) &&
+                                                          refe.IsComponentAlive)))
                         .ToList();
                 }
 
@@ -448,7 +439,7 @@ namespace OpenMod.Core.Eventing
                                         cancellableEvent.IsCancelled = wasCancelled;
                                         m_Logger.LogWarning(
                                             "{ComponentId} changed {EventName} cancellation status with Monitor priority which is not permitted",
-                                            ((IOpenModComponent)subscription.Owner.Target).OpenModComponentId,
+                                            (subscription.Owner.TryGetTarget(out var taget) ? taget.OpenModComponentId : "???"),
                                             eventName);
                                     }
                                 }

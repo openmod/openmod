@@ -37,15 +37,14 @@ namespace OpenMod.Core.Plugins
             m_NuGetPackageManager = nuGetPackageManager;
         }
 
-        private readonly List<WeakReference> m_LoadedPluginAssemblies = new();
+        private readonly List<WeakReference<Assembly>> m_LoadedPluginAssemblies = [];
         public IReadOnlyCollection<Assembly> LoadedPluginAssemblies
         {
             get
             {
                 return m_LoadedPluginAssemblies
-                    .Where(d => d.IsAlive)
-                    .Select(d => d.Target)
-                    .Cast<Assembly>()
+                    .Select(d => d.TryGetTarget(out var refer) ? refer : null)
+                    .OfType<Assembly>()
                     .ToList();
             }
         }
@@ -126,7 +125,7 @@ namespace OpenMod.Core.Plugins
                         continue;
                     }
 
-                    if (m_LoadedPluginAssemblies.Select(x => x.Target).Cast<Assembly>().Contains(newAssembly))
+                    if (m_LoadedPluginAssemblies.Any(x => x.TryGetTarget(out var refe) && refe == newAssembly))
                     {
                         continue;
                     }
@@ -225,7 +224,7 @@ namespace OpenMod.Core.Plugins
                 providerAssemblies.Remove(providerAssembly);
             }
 
-            m_LoadedPluginAssemblies.AddRange(providerAssemblies.Select(d => new WeakReference(d)));
+            m_LoadedPluginAssemblies.AddRange(providerAssemblies.Select(d => new WeakReference<Assembly>(d)));
             return providerAssemblies;
         }
 
