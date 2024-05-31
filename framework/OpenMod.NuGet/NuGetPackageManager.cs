@@ -107,12 +107,8 @@ namespace OpenMod.NuGet
 
             m_FrameworkReducer = new FrameworkReducer();
 
-#if NETSTANDARD2_1_OR_GREATER
             // checking if running under Mono
             if (RuntimeEnvironmentHelper.IsMono)
-#else
-            if (false)
-#endif
             {
                 // Using Mono that supports .netstandard2.1 and .net4.8.0
                 var net48 = new NuGetFramework(".NETFramework", new Version(4, 8, 0, 0));

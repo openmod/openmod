@@ -31,8 +31,6 @@ using Semver;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace OpenMod.Runtime
 {

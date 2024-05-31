@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Microsoft.Extensions.Configuration;
-using NetEscapades.Configuration.Yaml;
 using OpenMod.API;
-using YamlDotNet.Core;
+using OpenMod.Common.Helpers;
+using VYaml.Serialization;
 
 namespace OpenMod.Core.Configuration
 {
@@ -16,21 +15,8 @@ namespace OpenMod.Core.Configuration
     [OpenModInternal]
     public class YamlConfigurationProviderEx : FileConfigurationProvider
     {
-        private readonly YamlConfigurationSourceEx m_Source;
-        private static readonly Type s_ParserType;
-        private static readonly MethodInfo s_ParseMethod;
-
-        static YamlConfigurationProviderEx()
-        {
-            var assembly = typeof(YamlConfigurationProvider).Assembly;
-            s_ParserType = assembly.GetType("NetEscapades.Configuration.Yaml.YamlConfigurationStreamParser");
-            s_ParseMethod = s_ParserType.GetMethod("Parse", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
-        }
-
         public YamlConfigurationProviderEx(YamlConfigurationSourceEx source) : base(source)
-        {
-            m_Source = source;
-        }
+        { }
 
         public override void Load(Stream stream)
         {
@@ -45,14 +31,11 @@ namespace OpenMod.Core.Configuration
             writer.Flush();
             outStream.Seek(0, SeekOrigin.Begin);
 
-            var parser = Activator.CreateInstance(s_ParserType);
-
             try
             {
-                var invokeResult = s_ParseMethod.Invoke(parser, new object[] { outStream })!;
-                Data = (IDictionary<string, string?>)invokeResult;
+                Data = YamlSerializer.Deserialize<IDictionary<string, string?>>(outStream.ReadAllBytes());
             }
-            catch (YamlException e)
+            catch (YamlSerializerException e)
             {
                 throw new FormatException($"Could not parse the YAML file: {e.Message}.", e);
             }
@@ -60,12 +43,12 @@ namespace OpenMod.Core.Configuration
 
         private void PreProcessYaml(ref string yaml)
         {
-            if (m_Source.Variables == null)
+            if (Source is not YamlConfigurationSourceEx sourceEx || sourceEx.Variables == null)
             {
                 return;
             }
 
-            foreach (var variable in m_Source.Variables)
+            foreach (var variable in sourceEx.Variables)
             {
                 yaml = yaml.Replace("{{" + variable.Key + "}}", variable.Value);
             }

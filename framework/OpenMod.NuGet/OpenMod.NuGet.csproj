@@ -16,7 +16,7 @@
     <PackageReference Include="NuGet.Packaging" Version="6.10.0" />
     <PackageReference Include="NuGet.Protocol" Version="6.10.0" />
     <PackageReference Include="NuGet.Resolver" Version="6.10.0" />
-    <PackageReference Include="YamlDotNet" Version="15.1.4" />
+    <PackageReference Include="VYaml" Version="0.26.0" />
   </ItemGroup>
 
   <ItemGroup>

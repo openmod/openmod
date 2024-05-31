@@ -13,8 +13,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using OpenMod.Common.Helpers;
 using OpenMod.Common.Hotloading;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace OpenMod.Core.Plugins
 {
@@ -72,11 +70,7 @@ namespace OpenMod.Core.Plugins
                 m_Logger.LogDebug("Found packages.yaml with name {PackagesResourceName}.", packagesResourceName);
                 m_Logger.LogDebug("Package resource info {PackagesRosourceInfo}.", packagesRosourceInfo);
 
-#if NETSTANDARD2_1_OR_GREATER
                 await using var stream = assembly.GetManifestResourceStream(packagesResourceName);
-#else
-                using var stream = assembly.GetManifestResourceStream(packagesResourceName);
-#endif
                 if (stream == null)
                 {
                     return newPlugins;
