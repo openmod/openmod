@@ -4,29 +4,28 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Common;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using OpenMod.NuGet.Persistence;
+using VYaml.Parser;
+using VYaml.Serialization;
 
 namespace OpenMod.NuGet
 {
     public class PackagesDataStore
     {
         private readonly string m_Path;
-        private readonly ISerializer m_Serializer;
-        private readonly IDeserializer m_Deserializer;
+        private readonly YamlSerializerOptions m_YamlOptions;
+        public ILogger? Logger { get; set; }
 
         public PackagesDataStore(string path)
         {
             m_Path = path;
-            m_Serializer = new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
-            m_Deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
+            m_YamlOptions = new YamlSerializerOptions
+            {
+                Resolver = CompositeResolver.Create([SerializedNuGetPackageTypeFormatter.Instance], StandardResolver.DefaultResolvers)
+            };
         }
 
         public async Task AddOrUpdatePackageIdentity(PackageIdentity id)
@@ -48,7 +47,7 @@ namespace OpenMod.NuGet
                     Version = ConvertNugetVersion(id.Version)
                 };
 
-                file.Packages ??= new HashSet<SerializedNuGetPackage>();
+                file.Packages ??= [];
                 file.Packages.Add(package);
             }
 
@@ -99,7 +98,7 @@ namespace OpenMod.NuGet
             var file = await ReadPackagesFiles();
             if (file.Packages == null)
             {
-                return new List<PackageIdentity>();
+                return [];
             }
 
             return file.Packages
@@ -111,35 +110,50 @@ namespace OpenMod.NuGet
         {
             await EnsureExistsAsync();
 
-            var yaml = File.ReadAllText(m_Path);
-            var result = m_Deserializer.Deserialize<SerializedPackagesFile>(yaml);
-            result.Packages ??= new HashSet<SerializedNuGetPackage>();
-            return result;
+            await using var fileStream = File.OpenRead(m_Path);
+            if (fileStream.Length == 0)
+            {
+                return GetDefaultFile();
+            }
+
+            try
+            {
+                var result = await YamlSerializer.DeserializeAsync<SerializedPackagesFile>(fileStream, m_YamlOptions);
+                result.Packages ??= [];
+                return result;
+            }
+            catch(YamlParserException ex)
+            {
+                Logger?.LogError($"Fail to deserialize packages.yaml: {ex}");
+                var file = GetDefaultFile();
+                await WritePackagesFile(file);
+                return file;
+            }
         }
 
         private Task WritePackagesFile(SerializedPackagesFile file)
         {
-            var yaml = m_Serializer.Serialize(file);
+            var yaml = YamlSerializer.SerializeToString(file, m_YamlOptions);
             File.WriteAllText(m_Path, yaml, Encoding.UTF8);
             return Task.CompletedTask;
         }
 
-        private SerializedPackagesFile GetDefaultFile()
+        private static SerializedPackagesFile GetDefaultFile()
         {
             return new()
             {
-                Packages = new HashSet<SerializedNuGetPackage>()
+                Packages = []
             };
         }
 
-        private NuGetVersion? ConvertOpenModVersion(string version)
+        private static NuGetVersion? ConvertOpenModVersion(string version)
         {
             return !version.Equals("latest", StringComparison.OrdinalIgnoreCase)
                 ? new NuGetVersion(version)
                 : null;
         }
 
-        private string ConvertNugetVersion(NuGetVersion? version)
+        private static string ConvertNugetVersion(NuGetVersion? version)
         {
             return version?.OriginalVersion ?? "latest";
         }

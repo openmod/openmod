@@ -25,7 +25,19 @@ namespace OpenMod.NuGet
     {
         public delegate Assembly AssemblyLoader(byte[] assemblyData, byte[]? assemblySymbols);
 
-        public ILogger Logger { get; set; }
+        private ILogger? m_Logger;
+        public ILogger Logger
+        {
+            get => m_Logger!;
+            set
+            {
+                m_Logger = value;
+                if (m_PackagesDataStore != null)
+                {
+                    m_PackagesDataStore.Logger = value;
+                }
+            }
+        }
         public string PackagesDirectory { get; }
 
         private readonly ISettings m_NugetSettings;
@@ -49,12 +61,12 @@ namespace OpenMod.NuGet
             "F.ItemRestrictions"
         };
 
-        private static readonly string[] s_PublisherBlacklist = new string[] { };
+        private static readonly string[] s_PublisherBlacklist = [];
 
         private static readonly ConcurrentDictionary<string, List<Assembly>> s_LoadedPackages = new();
         public bool AssemblyResolverInstalled
         {
-            get { return m_AssemblyResolverInstalled; }
+            get => m_AssemblyResolverInstalled;
         }
 
         private bool m_AssemblyResolverInstalled;
