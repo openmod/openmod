@@ -24,7 +24,7 @@ namespace OpenMod.NuGet
             m_Path = path;
             m_YamlOptions = new YamlSerializerOptions
             {
-                Resolver = CompositeResolver.Create([SerializedNuGetPackageTypeFormatter.Instance], StandardResolver.DefaultResolvers)
+                Resolver = CompositeResolver.Create([YamlHashSetTypeFormatter<SerializedNuGetPackage>.Instance], StandardResolver.DefaultResolvers)
             };
         }
 

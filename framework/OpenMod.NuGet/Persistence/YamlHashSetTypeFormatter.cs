@@ -5,10 +5,10 @@ using VYaml.Serialization;
 
 namespace OpenMod.NuGet.Persistence
 {
-    public class SerializedNuGetPackageTypeFormatter : IYamlFormatter<HashSet<SerializedNuGetPackage>?>, IYamlFormatter
+    public class YamlHashSetTypeFormatter<T> : IYamlFormatter<HashSet<T>?>, IYamlFormatter
     {
-        public static SerializedNuGetPackageTypeFormatter Instance = new();
-        public void Serialize(ref Utf8YamlEmitter emitter, HashSet<SerializedNuGetPackage>? value, YamlSerializationContext context)
+        public static YamlHashSetTypeFormatter<T> Instance = new();
+        public void Serialize(ref Utf8YamlEmitter emitter, HashSet<T>? value, YamlSerializationContext context)
         {
             if (value == null)
             {
@@ -19,7 +19,7 @@ namespace OpenMod.NuGet.Persistence
             emitter.BeginSequence();
             if (value.Count > 0)
             {
-                var formatterWithVerify = context.Resolver.GetFormatterWithVerify<SerializedNuGetPackage>();
+                var formatterWithVerify = context.Resolver.GetFormatterWithVerify<T>();
                 foreach (var item in value)
                 {
                     formatterWithVerify.Serialize(ref emitter, item, context);
@@ -29,7 +29,7 @@ namespace OpenMod.NuGet.Persistence
             emitter.EndSequence();
         }
 
-        public HashSet<SerializedNuGetPackage>? Deserialize(ref YamlParser parser, YamlDeserializationContext context)
+        public HashSet<T>? Deserialize(ref YamlParser parser, YamlDeserializationContext context)
         {
             if (parser.IsNullScalar())
             {
@@ -38,8 +38,8 @@ namespace OpenMod.NuGet.Persistence
             }
 
             parser.ReadWithVerify(ParseEventType.SequenceStart);
-            var hashSet = new HashSet<SerializedNuGetPackage>();
-            IYamlFormatter<SerializedNuGetPackage> formatterWithVerify = context.Resolver.GetFormatterWithVerify<SerializedNuGetPackage>();
+            var hashSet = new HashSet<T>();
+            IYamlFormatter<T> formatterWithVerify = context.Resolver.GetFormatterWithVerify<T>();
             while (!parser.End && parser.CurrentEventType != ParseEventType.SequenceEnd)
             {
                 var item = context.DeserializeWithAlias(formatterWithVerify, ref parser);
