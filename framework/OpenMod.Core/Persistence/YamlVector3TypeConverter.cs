@@ -8,6 +8,7 @@ using YamlDotNet.Serialization;
 namespace OpenMod.Core.Persistence
 {
     [OpenModInternal]
+    [Obsolete("Moving from YamlDotNet to VYaml, this is kept for compatibility reasons")]
     public class YamlVector3TypeConverter : IYamlTypeConverter
     {
         private const string c_YamlKeyOfX = "x";

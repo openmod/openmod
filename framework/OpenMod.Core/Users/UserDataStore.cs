@@ -6,14 +6,16 @@ using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
 using OpenMod.API.Users;
 using OpenMod.Core.Helpers;
-using OpenMod.Core.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.Core.Configuration;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using System.Reflection;
+using VYaml.Annotations;
+using VYaml.Serialization;
+using Microsoft.Extensions.Logging;
+using OpenMod.Core.Persistence;
 
 namespace OpenMod.Core.Users
 {
@@ -21,41 +23,33 @@ namespace OpenMod.Core.Users
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class UserDataStore : IUserDataStore, IAsyncDisposable
     {
+        private readonly ILogger<UserDataStore> m_Logger;
         private readonly IRuntime m_Runtime;
         private readonly IDataStore m_DataStore;
+        private readonly YamlSerializerOptions m_YamlOptions;
         private UsersData m_CachedUsersData;
         private IDisposable m_FileChangeWatcher;
         private bool m_IsUpdating;
 
-        private readonly ISerializer m_Serializer;
-        private readonly IDeserializer m_Deserializer;
-
         public const string UsersKey = "users";
 
         public UserDataStore(
+            ILogger<UserDataStore> logger,
             IOpenModDataStoreAccessor dataStoreAccessor,
             IRuntime runtime)
         {
+            m_Logger = logger;
             m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
 
-            m_Serializer = new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeConverter(new YamlNullableEnumTypeConverter())
-                .DisableAliases()
-                .Build();
-
-            m_Deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .IgnoreUnmatchedProperties()
-                .WithTypeConverter(new YamlNullableEnumTypeConverter())
-                .Build();
+            //todo
+            m_YamlOptions = new YamlSerializerOptions();
 
             // suppress errors because the compiler can't analyze that the values are set from the statements below
             m_CachedUsersData = null!;
             m_FileChangeWatcher = null!;
 
-            AsyncHelper.RunSync(async () => { m_CachedUsersData = await EnsureUserDataCreatedAsync(); });
+            AsyncHelper.RunSync(async () => m_CachedUsersData = await EnsureUserDataCreatedAsync());
         }
 
         private async Task<UsersData> EnsureUserDataCreatedAsync()
@@ -144,9 +138,8 @@ namespace OpenMod.Core.Users
                 return default;
             }
 
-            var serialized = m_Serializer.Serialize(dataObject);
-
-            return m_Deserializer.Deserialize<T>(serialized);
+            var serialized = YamlSerializer.Serialize(dataObject, m_YamlOptions);
+            return YamlSerializer.Deserialize<T?>(serialized, m_YamlOptions);
         }
 
         public async Task SetUserDataAsync<T>(string userId, string userType, string key, T? value)
@@ -167,7 +160,7 @@ namespace OpenMod.Core.Users
             }
 
             var userData = await GetUserDataAsync(userId, userType) ?? new UserData(userId, userType);
-            userData.Data ??= new();
+            userData.Data ??= [];
 
             if (userData.Data.ContainsKey(key))
             {
@@ -189,7 +182,7 @@ namespace OpenMod.Core.Users
             return usersData?
                        .Where(d => d.Type?.Equals(type, StringComparison.OrdinalIgnoreCase) ?? false)
                        .ToList()
-                   ?? new List<UserData>();
+                   ?? [];
         }
 
         public async Task SetUserDataAsync(UserData userData)
@@ -239,8 +232,8 @@ namespace OpenMod.Core.Users
 
         private List<UserData> GetDefaultUsersData()
         {
-            return new()
-            {
+            return
+            [
                 new UserData
                 {
                     FirstSeen = null,
@@ -249,11 +242,11 @@ namespace OpenMod.Core.Users
                     LastDisplayName = "root",
                     Id = "root",
                     Type = KnownActorTypes.Rcon,
-                    Data = new Dictionary<string, object?>(),
-                    Permissions = new HashSet<string> { "*" },
-                    Roles = new HashSet<string>()
+                    Data = [],
+                    Permissions = ["*"],
+                    Roles = []
                 }
-            };
+            ];
         }
 
         private Task<List<UserData>?> GetUsersDataAsync()

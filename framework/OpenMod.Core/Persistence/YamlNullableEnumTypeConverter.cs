@@ -9,6 +9,7 @@ namespace OpenMod.Core.Persistence
     /// Fixes an issue introduced in YamlDotNet 9.1
     /// https://github.com/aaubry/YamlDotNet/issues/544
     [OpenModInternal]
+    [Obsolete("Moving from YamlDotNet to VYaml, this is kept for compatibility reasons")]
     public class YamlNullableEnumTypeConverter : IYamlTypeConverter
     {
         public bool Accepts(Type type)
@@ -30,7 +31,7 @@ namespace OpenMod.Core.Persistence
             {
                 return Enum.Parse(type, scalar.Value);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception($"Invalid value: \"{scalar.Value}\" for {type.Name}", ex);
             }
