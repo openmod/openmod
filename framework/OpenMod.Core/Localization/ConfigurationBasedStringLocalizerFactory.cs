@@ -34,7 +34,7 @@ namespace OpenMod.Core.Localization
 
             var translations = new ConfigurationBuilder()
                 .SetBasePath(location)
-                .AddYamlFile(baseName + ".yaml", true, reloadOnChange: true)
+                .AddYamlFileEx(baseName + ".yaml", true, reloadOnChange: true)
                 .Build();
 
             void ReloadToken()
