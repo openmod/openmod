@@ -94,7 +94,7 @@ namespace OpenMod.NuGet
             if (usePackagesFiles)
             {
                 m_PackagesDataStore = new PackagesDataStore(Path.Combine(packagesDirectory, "packages.yaml"));
-                m_PackagesDataStore.EnsureExistsAsync().GetAwaiter().GetResult();
+                Task.WaitAll(m_PackagesDataStore.EnsureExistsAsync());
             }
 
             Logger = new NullLogger();

@@ -84,7 +84,7 @@ namespace OpenMod.NuGet
         {
             if (!await ExistsAsync())
             {
-                await WritePackagesFile(GetDefaultFile());
+                await WritePackagesFile(GetDefaultFile()).ConfigureAwait(false);
             }
         }
 
@@ -131,11 +131,10 @@ namespace OpenMod.NuGet
             }
         }
 
-        private Task WritePackagesFile(SerializedPackagesFile file)
+        private async Task WritePackagesFile(SerializedPackagesFile file)
         {
             var yaml = YamlSerializer.SerializeToString(file, m_YamlOptions);
-            File.WriteAllText(m_Path, yaml, Encoding.UTF8);
-            return Task.CompletedTask;
+            await File.WriteAllTextAsync(m_Path, yaml, Encoding.UTF8).ConfigureAwait(false);
         }
 
         private static SerializedPackagesFile GetDefaultFile()
