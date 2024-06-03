@@ -49,6 +49,7 @@
     <PackageReference Include="ReadLine" Version="2.0.1" />
     <PackageReference Include="SmartFormat" Version="3.4.0" />
     <PackageReference Include="SmartFormat.Extensions.Time" Version="3.4.0" />
+    <PackageReference Include="YamlDotNet" Version="15.1.6" />
   </ItemGroup>
 
   <ItemGroup>
