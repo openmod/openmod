@@ -11,9 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using OpenMod.Core.Configuration;
-using VYaml.Serialization;
-using System.Reflection;
-using VYaml.Annotations;
 using OpenMod.Core.Persistence;
 
 namespace OpenMod.Core.Permissions

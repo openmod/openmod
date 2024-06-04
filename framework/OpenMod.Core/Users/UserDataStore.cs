@@ -11,9 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using OpenMod.Core.Configuration;
-using System.Reflection;
-using VYaml.Annotations;
-using VYaml.Serialization;
 using Microsoft.Extensions.Logging;
 using OpenMod.Core.Persistence;
 
@@ -24,9 +21,9 @@ namespace OpenMod.Core.Users
     public class UserDataStore : IUserDataStore, IAsyncDisposable
     {
         private readonly ILogger<UserDataStore> m_Logger;
+        private readonly IOpenModSerializer m_Serializer;
         private readonly IRuntime m_Runtime;
         private readonly IDataStore m_DataStore;
-        private readonly YamlSerializerOptions m_YamlOptions;
         private UsersData m_CachedUsersData;
         private IDisposable m_FileChangeWatcher;
         private bool m_IsUpdating;
@@ -36,14 +33,13 @@ namespace OpenMod.Core.Users
         public UserDataStore(
             ILogger<UserDataStore> logger,
             IOpenModDataStoreAccessor dataStoreAccessor,
+            IOpenModSerializer serializer,
             IRuntime runtime)
         {
             m_Logger = logger;
+            m_Serializer = serializer;
             m_Runtime = runtime;
             m_DataStore = dataStoreAccessor.DataStore;
-
-            //todo
-            m_YamlOptions = new YamlSerializerOptions();
 
             // suppress errors because the compiler can't analyze that the values are set from the statements below
             m_CachedUsersData = null!;
@@ -138,8 +134,8 @@ namespace OpenMod.Core.Users
                 return default;
             }
 
-            var serialized = YamlSerializer.Serialize(dataObject, m_YamlOptions);
-            return YamlSerializer.Deserialize<T?>(serialized, m_YamlOptions);
+            var serialized = await m_Serializer.SerializeAsync(dataObject);
+            return await m_Serializer.DeserializeAsync<T?>(serialized);
         }
 
         public async Task SetUserDataAsync<T>(string userId, string userType, string key, T? value)

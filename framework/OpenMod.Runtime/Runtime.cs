@@ -31,6 +31,7 @@ using Semver;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using VYaml.Serialization;
 
 namespace OpenMod.Runtime
 {
@@ -41,7 +42,7 @@ namespace OpenMod.Runtime
         public Runtime()
         {
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
-            HostAssemblies = new List<Assembly>();
+            HostAssemblies = [];
             m_Logger = null!;
         }
 
@@ -60,7 +61,7 @@ namespace OpenMod.Runtime
 
         public string WorkingDirectory { get; private set; } = null!;
 
-        public string[] CommandlineArgs { get; private set; } = Array.Empty<string>();
+        public string[] CommandlineArgs { get; private set; } = [];
 
         public IDataStore DataStore { get; private set; } = null!;
 
@@ -147,7 +148,7 @@ namespace OpenMod.Runtime
                     Runtime = this,
                     LoggerFactory = m_LoggerFactory!,
                     NuGetPackageManager = nugetPackageManager,
-                    DataStore = new Dictionary<string, object>()
+                    DataStore = []
                 };
 
                 var startup = new OpenModStartup(startupContext);
@@ -161,13 +162,8 @@ namespace OpenMod.Runtime
                 var configFile = Path.Combine(WorkingDirectory, "openmod.yaml");
                 if (File.Exists(configFile))
                 {
-                    var yaml = File.ReadAllText(configFile);
-                    var deserializer = new DeserializerBuilder()
-                        .WithTypeConverter(new YamlNullableEnumTypeConverter())
-                        .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                        .Build();
-
-                    var config = deserializer.Deserialize<Dictionary<string, object>>(yaml);
+                    var yaml = await File.ReadAllBytesAsync(configFile);
+                    var config = YamlSerializer.Deserialize<Dictionary<string, object>>(yaml);
 
                     var hotReloadingEnabled = true;
                     if (config.TryGetValue("hotreloading", out var unparsed))
@@ -249,7 +245,7 @@ namespace OpenMod.Runtime
                 nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
 
                 var applicationLifetime = Host.Services.GetRequiredService<IHostApplicationLifetime>();
-                applicationLifetime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
+                applicationLifetime.ApplicationStopping.Register(() => AsyncHelper.RunSync(ShutdownAsync));
 
                 Status = RuntimeStatus.Initialized;
                 LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>().BeginLifetimeScopeEx(
@@ -507,7 +503,7 @@ namespace OpenMod.Runtime
                         var path = Path.GetFullPath(fsw.Path);
                         foreach (var fileName in Directory.GetFileSystemEntries(path, "*"))
                         {
-                            hashtable.Add(fileName, createFileDataMethod.Invoke(null, new object[] { path, fileName }));
+                            hashtable.Add(fileName, createFileDataMethod.Invoke(null, [path, fileName]));
                         }
                     }
                 }
@@ -518,7 +514,7 @@ namespace OpenMod.Runtime
         {
             builder
                 .SetBasePath(WorkingDirectory)
-                .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
+                .AddYamlFileEx("openmod.yaml", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables("OpenMod_")
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -671,7 +667,11 @@ namespace OpenMod.Runtime
             m_DateLogger = null;
             m_LoggerFactory = null;
 
+#if FEATURE_ASYNCDISPOSABLE
             await Log.CloseAndFlushAsync();
+#else
+            Log.CloseAndFlush();
+#endif
         }
     }
 }

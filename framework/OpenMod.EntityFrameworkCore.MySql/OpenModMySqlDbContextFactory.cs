@@ -30,7 +30,7 @@ namespace OpenMod.EntityFrameworkCore.MySql
 
             var config = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
-                .AddYamlFile("config.yaml", optional: false)
+                .AddYamlFileEx("config.yaml", optional: false)
                 .Build();
 
             var serviceCollection = new ServiceCollection();

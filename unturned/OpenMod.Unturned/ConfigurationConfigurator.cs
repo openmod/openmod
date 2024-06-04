@@ -7,7 +7,7 @@ namespace OpenMod.Unturned
     {
         public void ConfigureConfiguration(IOpenModServiceConfigurationContext openModStartupContext, IConfigurationBuilder configurationBuilder)
         {
-            configurationBuilder.AddYamlFile("openmod.unturned.yaml", optional: false, reloadOnChange: true);
+            configurationBuilder.AddYamlFileEx("openmod.unturned.yaml", optional: false, reloadOnChange: true);
         }
     }
 }

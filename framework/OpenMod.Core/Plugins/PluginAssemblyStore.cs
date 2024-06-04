@@ -7,15 +7,14 @@ using OpenMod.API.Plugins;
 using OpenMod.NuGet;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using OpenMod.Common.Helpers;
 using OpenMod.Common.Hotloading;
-using OpenMod.NuGet.Persistence;
-using VYaml.Serialization;
 using OpenMod.API.Persistence;
+using VYaml.Serialization;
+using OpenMod.NuGet.Persistence;
 
 namespace OpenMod.Core.Plugins
 {
@@ -23,8 +22,8 @@ namespace OpenMod.Core.Plugins
     public class PluginAssemblyStore : IPluginAssemblyStore, IDisposable
     {
         private readonly ILogger<PluginAssemblyStore> m_Logger;
-        private readonly IOpenModSerializer m_Serializer;
         private readonly NuGetPackageManager m_NuGetPackageManager;
+        private readonly YamlSerializerOptions m_YamlOptions;
 
         /// <summary>
         /// Defines if OpenMod would try to install missing dependencies.
@@ -33,12 +32,15 @@ namespace OpenMod.Core.Plugins
 
         public PluginAssemblyStore(
             ILogger<PluginAssemblyStore> logger,
-            IOpenModSerializer serializer,
             NuGetPackageManager nuGetPackageManager)
         {
             m_Logger = logger;
-            m_Serializer = serializer;
             m_NuGetPackageManager = nuGetPackageManager;
+
+            m_YamlOptions = new YamlSerializerOptions
+            {
+                Resolver = CompositeResolver.Create([YamlHashSetTypeFormatter<SerializedNuGetPackage>.Instance], StandardResolver.DefaultResolvers)
+            };
         }
 
         private readonly List<WeakReference> m_LoadedPluginAssemblies = new();
@@ -79,7 +81,7 @@ namespace OpenMod.Core.Plugins
                 }
 
                 var packagesData = stream.ReadAllBytes();
-                var deserialized = await m_Serializer.DeserializeAsync<SerializedPackagesFile>(packagesData);
+                var deserialized = YamlSerializer.Deserialize<SerializedPackagesFile>(packagesData, m_YamlOptions);
                 var packages = deserialized?.Packages.Select(d => new PackageIdentity(d.Id,
                         d.Version.Equals("latest", StringComparison.OrdinalIgnoreCase)
                             ? null
