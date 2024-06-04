@@ -8,9 +8,9 @@ using JetBrainsAnnotations::JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Nito.AsyncEx;
 using OpenMod.API.Users;
+using OpenMod.Core.Patching;
 using OpenMod.Core.Users;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using Steamworks;
 

@@ -2,15 +2,17 @@
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
+using OpenMod.API;
 
-namespace OpenMod.Unturned.Patching
+namespace OpenMod.Core.Patching
 {
-    internal static class HarmonyExceptionHandler
+    [OpenModInternal]
+    public static class HarmonyExceptionHandler
     {
-        internal delegate ILoggerFactory LoggerFactoryGetter();
-        internal static event LoggerFactoryGetter? LoggerFactoryGetterEvent;
+        public delegate ILoggerFactory LoggerFactoryGetter();
+        public static event LoggerFactoryGetter? LoggerFactoryGetterEvent;
 
-        internal static void ReportCleanupException(Type type, Exception? exception, MethodBase originalMethod)
+        public static void ReportCleanupException(Type type, Exception? exception, MethodBase originalMethod)
         {
             if (exception == null)
             {

@@ -4,9 +4,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using JetBrains.Annotations;
+using OpenMod.Core.Patching;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using UnityEngine;
 

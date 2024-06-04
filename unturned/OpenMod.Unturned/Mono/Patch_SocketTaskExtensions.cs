@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
-using OpenMod.Unturned.Patching;
+using OpenMod.Core.Patching;
 
 namespace OpenMod.Unturned.Mono
 {

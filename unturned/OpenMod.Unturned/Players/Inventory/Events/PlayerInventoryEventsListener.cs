@@ -2,8 +2,8 @@
 using System.Reflection;
 using HarmonyLib;
 using JetBrains.Annotations;
+using OpenMod.Core.Patching;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Players.Inventory.Events

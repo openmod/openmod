@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ using OpenMod.API.Plugins;
 using OpenMod.Core.Events;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Localization;
+using OpenMod.Core.Patching;
 using SmartFormat;
 
 namespace OpenMod.Runtime
@@ -28,6 +30,7 @@ namespace OpenMod.Runtime
         private readonly IJobScheduler m_JobScheduler;
         private readonly IRuntime m_Runtime;
         private readonly IOptions<SmartFormatOptions> m_SmartFormatOptions;
+        private readonly ILoggerFactory m_LoggerFactory;
 
         public OpenModHostedService(
             ILogger<OpenModHostedService> logger,
@@ -39,7 +42,8 @@ namespace OpenMod.Runtime
             IEventBus eventBus,
             IJobScheduler jobScheduler,
             IRuntime runtime,
-            IOptions<SmartFormatOptions> smartFormatOptions)
+            IOptions<SmartFormatOptions> smartFormatOptions,
+            ILoggerFactory loggerFactory)
         {
             m_Logger = logger;
             m_PermissionChecker = permissionChecker;
@@ -51,6 +55,7 @@ namespace OpenMod.Runtime
             m_JobScheduler = jobScheduler;
             m_Runtime = runtime;
             m_SmartFormatOptions = smartFormatOptions;
+            m_LoggerFactory = loggerFactory;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -60,6 +65,8 @@ namespace OpenMod.Runtime
 
             m_Logger.LogInformation("Initializing for host: {HostName} v{HostVersion}",
                 m_HostInformation.HostName, m_HostInformation.HostVersion);
+
+            HarmonyExceptionHandler.LoggerFactoryGetterEvent += LoggerFactoryGetter;
             await m_Host.InitAsync();
 
             foreach (var assembly in m_Runtime.HostAssemblies)
@@ -84,8 +91,14 @@ namespace OpenMod.Runtime
             await m_JobScheduler.StartAsync();
         }
 
+        private ILoggerFactory LoggerFactoryGetter()
+        {
+            return m_LoggerFactory;
+        }
+
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            HarmonyExceptionHandler.LoggerFactoryGetterEvent -= LoggerFactoryGetter;
             return m_EventBus.EmitAsync(m_Host, this, new OpenModShutdownEvent());
         }
     }

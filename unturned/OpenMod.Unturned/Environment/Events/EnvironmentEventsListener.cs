@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using OpenMod.API;
+using OpenMod.Core.Patching;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using System;
 using System.Diagnostics.CodeAnalysis;
