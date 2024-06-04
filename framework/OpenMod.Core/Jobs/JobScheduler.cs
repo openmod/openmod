@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
 using Cronos;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -21,144 +23,92 @@ namespace OpenMod.Core.Jobs
     [ServiceImplementation(Lifetime = ServiceLifetime.Singleton)]
     public class JobScheduler : IJobScheduler, IDisposable
     {
-        private const string c_JobDelimiter = ":";
         private const string c_DataStoreKey = "autoexec";
+        private const string c_JobDelimiter = ":";
 
         private static bool s_IsFirstStart = true;
 
         private readonly IDataStore m_DataStore;
         private readonly IEventBus m_EventBus;
-        private readonly List<ITaskExecutor> m_JobExecutors = [];
         private readonly ILogger<JobScheduler> m_Logger;
-
         private readonly IOpenModComponent m_OpenModComponent;
-        private readonly List<ScheduledJob> m_ScheduledJobs = [];
-        private ScheduledJobsFile? m_File;
+
+        private readonly List<ITaskExecutor> m_JobExecutors = [];
+        private readonly ConcurrentDictionary<string, ScheduledJob> m_ScheduledJobs = [];
 
         private IDisposable? m_FileChangeDisposable;
+        private readonly ScheduledJobsFile m_FileData = new();
         private bool m_Started;
 
-        public JobScheduler(
-            IRuntime runtime,
-            ILogger<JobScheduler> logger,
-            IEventBus eventBus,
-            IDataStoreFactory dataStoreFactory,
-            IOptions<JobExecutorOptions> options)
-        {
-            m_OpenModComponent = runtime;
-            m_Logger = logger;
-            m_EventBus = eventBus;
 
-            m_DataStore = dataStoreFactory.CreateDataStore(new DataStoreCreationParameters
+        public JobScheduler(IRuntime runtime)
+        {
+            m_EventBus = runtime.LifetimeScope.Resolve<IEventBus>();
+            m_Logger = runtime.LifetimeScope.Resolve<ILogger<JobScheduler>>();
+            m_OpenModComponent = runtime;
+
+            var dataStoreFactory = runtime.LifetimeScope.Resolve<IDataStoreFactory>();
+            var dataStoreParameters = new DataStoreCreationParameters
             {
                 Component = runtime,
                 LogOnChange = true,
                 WorkingDirectory = runtime.WorkingDirectory
-            });
+            };
+            m_DataStore = dataStoreFactory.CreateDataStore(dataStoreParameters);
 
             AsyncHelper.RunSync(ReadJobsFileAsync);
-
             WatchFileChanges();
 
+            var options = runtime.LifetimeScope.Resolve<IOptions<JobExecutorOptions>>();
             foreach (var provider in options.Value.JobExecutorTypes)
             {
-                var jobExecutor = (ITaskExecutor)ActivatorUtilitiesEx.CreateInstance(runtime.LifetimeScope, provider);
-                m_JobExecutors.Add(jobExecutor);
+                var jobExecutor = ActivatorUtilitiesEx.CreateInstance(runtime.LifetimeScope, provider);
+                m_JobExecutors.Add((ITaskExecutor)jobExecutor);
             }
         }
-
 
         public void Dispose()
         {
             m_FileChangeDisposable?.Dispose();
 
-            foreach (var job in m_ScheduledJobs.ToList())
+            foreach (var jobName in m_ScheduledJobs.Keys)
             {
-                DisposeCancellableJob(job);
+                DisposeCancellableJob(jobName);
             }
 
-            m_ScheduledJobs.Clear();
             m_JobExecutors.Clear();
         }
 
-        public Task StartAsync()
-        {
-            return StartAsync(isFromFileChange: false);
-        }
 
-
-        public async Task<ScheduledJob> ScheduleJobAsync(JobCreationParameters? @params)
+        private async Task ReadJobsFileAsync()
         {
-            if (@params == null)
+            if (!await m_DataStore.ExistsAsync(c_DataStoreKey))
             {
-                throw new ArgumentNullException(nameof(@params));
+                return;
             }
 
-            m_File!.Jobs ??= [];
-            if (m_File.Jobs.Any(d => d.Name?.Equals(@params.Name, StringComparison.OrdinalIgnoreCase) ?? false))
-            {
-                throw new Exception($"A job with this name already exists: {@params.Name}");
-            }
+            var fileData = await m_DataStore.LoadAsync<ScheduledJobsFile>(c_DataStoreKey) ?? throw new InvalidOperationException("Failed to load jobs from autoexec.yaml!");
+            m_FileData.Jobs = fileData.Jobs ??= [];
 
-            var job = new ScheduledJob
+            var oldFileLen = m_FileData.Jobs.Count;
+            m_FileData.Jobs = m_FileData.Jobs.DistinctBy(d => d.Name, StringComparer.OrdinalIgnoreCase).ToList();
+
+            if (oldFileLen ==  m_FileData.Jobs.Count)
             {
-                Name = @params.Name ?? throw new ArgumentException(nameof(@params)),
-                Task = @params.Task ?? throw new ArgumentException(nameof(@params)),
-                Args = @params.Args ?? throw new ArgumentException(nameof(@params)),
-                Schedule = @params.Schedule ?? throw new ArgumentException(nameof(@params)),
-                Enabled = true
-            };
-            m_File.Jobs.Add(job);
+                return;
+            }
 
             await WriteJobsFileAsync();
-            await ScheduleJobInternalAsync(job, isFromStart: false);
-            return job;
         }
 
-        public Task<ScheduledJob?> FindJobAsync(string name)
+        private async Task WriteJobsFileAsync()
         {
-            return Task.FromResult(m_File?.Jobs?.FirstOrDefault(d =>
-                d.Name?.Equals(name, StringComparison.OrdinalIgnoreCase) ?? false));
-        }
+            m_FileData.Jobs ??= [];
 
-        public async Task<bool> RemoveJobAsync(string name)
-        {
-            var job = await FindJobAsync(name);
-            if (job == null)
-            {
-                return false;
-            }
-
-            return await RemoveJobAsync(job);
-        }
-
-        public async Task<bool> RemoveJobAsync(ScheduledJob job)
-        {
-            DisposeCancellableJob(job);
-            if (m_File!.Jobs == null)
-            {
-                return false;
-            }
-
-            var foundInFile = m_File.Jobs.Remove(job);
-            if (foundInFile)
-            {
-                await WriteJobsFileAsync();
-            }
-
-            return foundInFile;
-        }
-
-        public Task<ICollection<ScheduledJob>> GetScheduledJobsAsync(bool includeDisabled)
-        {
-            if (m_File!.Jobs == null)
-            {
-                return Task.FromResult<ICollection<ScheduledJob>>([]);
-            }
-
-            return Task.FromResult<ICollection<ScheduledJob>>(m_File.Jobs
-                .Where(d => includeDisabled || (d.Enabled ?? true))
-                .ToList());
+            //Do not reload file when internal save
+            m_FileChangeDisposable?.Dispose();
+            await m_DataStore.SaveAsync(c_DataStoreKey, m_FileData);
+            WatchFileChanges();
         }
 
         private void WatchFileChanges()
@@ -167,47 +117,20 @@ namespace OpenMod.Core.Jobs
             m_FileChangeDisposable = m_DataStore.AddChangeWatcher(c_DataStoreKey, m_OpenModComponent, OnJobsFileChange);
         }
 
-        private async Task ReadJobsFileAsync()
-        {
-            if (!await m_DataStore.ExistsAsync(c_DataStoreKey))
-            {
-                m_File = new ScheduledJobsFile();
-                return;
-            }
-
-            m_File = await m_DataStore.LoadAsync<ScheduledJobsFile>(c_DataStoreKey);
-            if (m_File == null)
-            {
-                throw new InvalidOperationException("Failed to load jobs from autoexec.yaml!");
-            }
-
-            if (m_File.Jobs != null)
-            {
-                m_File.Jobs = m_File.Jobs.DistinctBy(d => d.Name, StringComparer.OrdinalIgnoreCase).ToList();
-            }
-
-            await WriteJobsFileAsync();
-        }
-
-        private async Task WriteJobsFileAsync()
-        {
-            m_File!.Jobs ??= [];
-
-            //Do not reload file when internal save
-            m_FileChangeDisposable?.Dispose();
-            await m_DataStore.SaveAsync(c_DataStoreKey, m_File);
-            WatchFileChanges();
-        }
-
         private void OnJobsFileChange()
         {
-            foreach (var job in m_ScheduledJobs.ToList())
+            foreach (var jobName in m_ScheduledJobs.Keys)
             {
-                DisposeCancellableJob(job);
+                DisposeCancellableJob(jobName);
             }
 
-            m_ScheduledJobs.Clear();
             AsyncHelper.RunSync(() => StartAsync(isFromFileChange: true));
+        }
+
+
+        public Task StartAsync()
+        {
+            return StartAsync(isFromFileChange: false);
         }
 
         private async Task StartAsync(bool isFromFileChange)
@@ -217,13 +140,9 @@ namespace OpenMod.Core.Jobs
                 return;
             }
 
-            await ReadJobsFileAsync();
-            if (m_File!.Jobs != null)
+            foreach (var job in m_FileData.Jobs!.ToList())
             {
-                foreach (var job in m_File.Jobs.ToList())
-                {
-                    await ScheduleJobInternalAsync(job, !isFromFileChange);
-                }
+                await ScheduleJobInternalAsync(job, !isFromFileChange);
             }
 
             s_IsFirstStart = false;
@@ -302,8 +221,7 @@ namespace OpenMod.Core.Jobs
             await DelayedOrExecuteJob(job, shouldRepeat: true);
         }
 
-        private async Task DelayedOrExecuteJob(ScheduledJob job, bool removeAfterExec = false,
-            bool shouldRepeat = false)
+        private async Task DelayedOrExecuteJob(ScheduledJob job, bool removeAfterExec = false, bool shouldRepeat = false)
         {
             //If shouldRepeat schedule => time or type:time
             //else schedule => type or type:time
@@ -347,34 +265,7 @@ namespace OpenMod.Core.Jobs
             {
                 try
                 {
-                    var token = job.CancellationTokenSource?.Token ?? CancellationToken.None;
-
-                    bool Enabled()
-                    {
-                        return (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive && !token.IsCancellationRequested;
-                    }
-
-                    do
-                    {
-                        await Task.Delay(delay.Value, token);
-                        if (!Enabled())
-                        {
-                            break;
-                        }
-
-                        await ExecuteJobAsync(job);
-                        if (!shouldRepeat)
-                        {
-                            break;
-                        }
-
-                        //If repeat it means time can be time span or cron
-                        delay = GetJobDelay(job.Name!, schedule!, !shouldRepeat);
-                        if (delay!.Value.TotalMilliseconds is < 0 or > int.MaxValue)
-                        {
-                            break;
-                        }
-                    } while (Enabled());
+                    await StartDelayedJob(job, delay.Value, schedule, shouldRepeat);
                 }
                 catch (TaskCanceledException)
                 {
@@ -387,7 +278,7 @@ namespace OpenMod.Core.Jobs
                 }
                 else
                 {
-                    DisposeCancellableJob(job);
+                    DisposeCancellableJob(job.Name!);
                 }
             });
         }
@@ -408,6 +299,42 @@ namespace OpenMod.Core.Jobs
             return shouldBePrefixed ? null : schedule;
         }
 
+        private async Task<bool> ExecuteJobAsync(ScheduledJob job, params object[] parameters)
+        {
+            var jobExecutor = m_JobExecutors.FirstOrDefault(d => d.SupportsType(job.Task!));
+            if (jobExecutor == null)
+            {
+                m_Logger.LogError("[{JobName}] Unknown job type: {TaskType}", job.Name, job.Task);
+                return false;
+            }
+
+            m_Logger.LogInformation("Executing job \"{JobName}\"...", job.Name);
+            try
+            {
+                var jobTask = new JobTask(job.Name!, job.Task!, job.Args ?? [], parameters);
+                await jobExecutor.ExecuteAsync(jobTask);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                m_Logger.LogError(ex, "Job \"{JobName}\" generated an exception", job.Name);
+                return false;
+            }
+        }
+
+        public async Task<bool> RemoveJobAsync(ScheduledJob job)
+        {
+            DisposeCancellableJob(job.Name!);
+            
+            var foundInFile = m_FileData.Jobs!.Remove(job);
+            if (foundInFile)
+            {
+                await WriteJobsFileAsync();
+            }
+
+            return foundInFile;
+        }
+
         private TimeSpan? GetJobDelay(string jobName, string jobSchedule, bool onlyTimespan)
         {
             Exception? cronEx = null;
@@ -420,6 +347,7 @@ namespace OpenMod.Core.Jobs
                     var nextOccurence = expression.GetNextOccurrence(DateTimeOffset.Now, TimeZoneInfo.Local);
                     if (nextOccurence == null)
                     {
+                        m_Logger.LogError("Fail to parse Job \"{JobName}\" schedule \"{JobSchedule}\". The value is not a valid crontab", jobName, jobSchedule);
                         return null;
                     }
 
@@ -458,49 +386,68 @@ namespace OpenMod.Core.Jobs
 
         private void AddCancellableJob(ScheduledJob job)
         {
-            job.CancellationTokenSource = new CancellationTokenSource();
-            m_ScheduledJobs.Add(job);
-        }
-
-        private void DisposeCancellableJob(ScheduledJob job)
-        {
-            job.Enabled = false;
-
-            var ctc = job.CancellationTokenSource;
-            job.CancellationTokenSource = null;
-
-            ctc?.Cancel();
-            ctc?.Dispose();
-
-            m_ScheduledJobs.Remove(job);
-        }
-
-        private async Task<bool> ExecuteJobAsync(ScheduledJob job, params object[] parameters)
-        {
-            var jobExecutor = m_JobExecutors.FirstOrDefault(d => d.SupportsType(job.Task!));
-            if (jobExecutor == null)
+            lock (job)
             {
-                m_Logger.LogError("[{JobName}] Unknown job type: {TaskType}", job.Name, job.Task);
-                return false;
+                job.CancellationTokenSource?.Cancel();
+                job.CancellationTokenSource?.Dispose();
+                job.CancellationTokenSource = null;
+
+                job.CancellationTokenSource = new CancellationTokenSource();
             }
 
-            m_Logger.LogInformation("Executing job \"{JobName}\"...", job.Name);
-            try
+            m_ScheduledJobs.TryAdd(job.Name!, job);
+        }
+
+        private async Task StartDelayedJob(ScheduledJob job, TimeSpan? delay, string schedule, bool shouldRepeat)
+        {
+            var token = job.CancellationTokenSource?.Token ?? CancellationToken.None;
+
+            bool Enabled()
             {
-                await jobExecutor.ExecuteAsync(new JobTask(job.Name!, job.Task!,
-                    job.Args ?? [], parameters));
-                return true;
+                return (job.Enabled ?? true) && m_OpenModComponent.IsComponentAlive && !token.IsCancellationRequested;
             }
-            catch (Exception ex)
+
+            do
             {
-                m_Logger.LogError(ex, "Job \"{JobName}\" generated an exception", job.Name);
-                return false;
+                await Task.Delay(delay!.Value, token);
+                if (!Enabled())
+                {
+                    break;
+                }
+
+                await ExecuteJobAsync(job);
+                if (!shouldRepeat)
+                {
+                    break;
+                }
+
+                //If repeat it means time can be time span or cron
+                delay = GetJobDelay(job.Name!, schedule, !shouldRepeat);
+                if (delay!.Value.TotalMilliseconds is < 0 or > int.MaxValue)
+                {
+                    break;
+                }
+            } while (Enabled());
+        }
+
+        private void DisposeCancellableJob(string jobName)
+        {
+            if (!m_ScheduledJobs.TryRemove(jobName!, out var job))
+            {
+                return;
+            }
+
+            lock (job)
+            {
+                job.CancellationTokenSource?.Cancel();
+                job.CancellationTokenSource?.Dispose();
+                job.CancellationTokenSource = null;
             }
         }
 
         private void SubscribeEventJob(ScheduledJob job)
         {
-            var schedule = RetrieveSchedulerValue(job.Schedule!, shouldBePrefixed: true);
+            var schedule = RetrieveSchedulerValue(job.Schedule!, true);
             if (string.IsNullOrEmpty(schedule))
             {
                 m_Logger.LogError("Invalid event job format \"{JobSchedule}\" for \"{JobName}\" job", job.Schedule,
@@ -522,11 +469,64 @@ namespace OpenMod.Core.Jobs
             });
 
             AddCancellableJob(job);
-            job.CancellationTokenSource!.Token.Register(() =>
+            job.CancellationTokenSource!.Token.Register(dispose.Dispose);
+        }
+
+        public Task<ScheduledJob?> FindJobAsync(string name)
+        {
+            return Task.FromResult(m_FileData.Jobs?.FirstOrDefault(d =>
+                d.Name?.Equals(name, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        public Task<ICollection<ScheduledJob>> GetScheduledJobsAsync(bool includeDisabled = false)
+        {
+            if (m_FileData.Jobs == null)
             {
-                dispose.Dispose();
-                DisposeCancellableJob(job);
-            });
+                return Task.FromResult<ICollection<ScheduledJob>>([]);
+            }
+
+            return Task.FromResult<ICollection<ScheduledJob>>(m_FileData.Jobs
+                .Where(d => includeDisabled || (d.Enabled ?? true))
+                .ToList());
+        }
+
+        public async Task<bool> RemoveJobAsync(string name)
+        {
+            var job = await FindJobAsync(name);
+            if (job == null)
+            {
+                return false;
+            }
+
+            return await RemoveJobAsync(job);
+        }
+
+        public async Task<ScheduledJob> ScheduleJobAsync(JobCreationParameters parameters)
+        {
+            if (parameters == null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            m_FileData.Jobs ??= [];
+            if (m_FileData.Jobs.Any(d => d.Name?.Equals(parameters.Name, StringComparison.OrdinalIgnoreCase) ?? false))
+            {
+                throw new Exception($"A job with this name already exists: {parameters.Name}");
+            }
+
+            var job = new ScheduledJob
+            {
+                Name = parameters.Name ?? throw new ArgumentException(nameof(parameters)),
+                Task = parameters.Task ?? throw new ArgumentException(nameof(parameters)),
+                Args = parameters.Args ?? throw new ArgumentException(nameof(parameters)),
+                Schedule = parameters.Schedule ?? throw new ArgumentException(nameof(parameters)),
+                Enabled = true
+            };
+            m_FileData.Jobs.Add(job);
+
+            await WriteJobsFileAsync();
+            await ScheduleJobInternalAsync(job, isFromStart: false);
+            return job;
         }
     }
 }

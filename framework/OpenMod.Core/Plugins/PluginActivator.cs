@@ -39,7 +39,7 @@ namespace OpenMod.Core.Plugins
         private readonly IStringLocalizerFactory m_StringLocalizerFactory;
         private readonly ILifetimeScope m_LifetimeScope;
         private readonly IDataStoreFactory m_DataStoreFactory;
-        private readonly List<WeakReference> m_ActivatedPlugins;
+        private readonly List<WeakReference<IOpenModPlugin>> m_ActivatedPlugins;
         private readonly IEventBus m_EventBus;
 
         private bool m_IsDisposing;
@@ -57,7 +57,7 @@ namespace OpenMod.Core.Plugins
             m_LifetimeScope = lifetimeScope;
             m_DataStoreFactory = dataStoreFactory;
             m_EventBus = eventBus;
-            m_ActivatedPlugins = new List<WeakReference>();
+            m_ActivatedPlugins = [];
         }
 
         public IReadOnlyCollection<IOpenModPlugin> ActivatedPlugins
@@ -69,7 +69,7 @@ namespace OpenMod.Core.Plugins
                     throw new ObjectDisposedException(nameof(PluginActivator));
                 }
 
-                return m_ActivatedPlugins.Where(d => d.IsAlive).Select(d => d.Target).Cast<IOpenModPlugin>().ToList();
+                return m_ActivatedPlugins.Select(d => d.TryGetTarget(out var target) ? target : null).OfType<IOpenModPlugin>().ToList();
             }
         }
 
@@ -288,7 +288,7 @@ namespace OpenMod.Core.Plugins
                     return null;
                 }
 
-                m_ActivatedPlugins.Add(new WeakReference(pluginInstance));
+                m_ActivatedPlugins.Add(new WeakReference<IOpenModPlugin>(pluginInstance));
                 return pluginInstance;
             }
             catch (Exception ex)
@@ -333,10 +333,13 @@ namespace OpenMod.Core.Plugins
             m_Logger.LogInformation("Unloading all plugins...");
 
             var i = 0;
-            foreach (var instance in from plugin in m_ActivatedPlugins
-                                     where plugin.IsAlive
-                                     select (IOpenModPlugin)plugin.Target)
+            foreach (var pluginRef in m_ActivatedPlugins)
             {
+                if (!pluginRef.TryGetTarget(out var instance))
+                {
+                    continue;
+                }
+
                 try
                 {
                     await instance.LifetimeScope.DisposeAsync();
