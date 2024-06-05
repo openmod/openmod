@@ -51,7 +51,7 @@ namespace OpenMod.Core.Persistence.Yaml
             if (typeof(T).GetCustomAttribute<YamlObjectAttribute>() == null)
             {
                 m_Logger.LogWarning("OpenMod is moving from YamlDotNet to VYaml");
-                m_Logger.LogWarning("To migrate you can annotate your class with YamlObjectAttribute or create your own IYamlFormatter");
+                m_Logger.LogWarning($"Annotate your class({typeof(T)}) with YamlObjectAttribute or create your own IYamlFormatter");
 
                 var data = UTF8Encoding.UTF8.GetString(memory.Span);
                 return Task.FromResult<T?>(m_OldYamlDeserializer.Deserialize<T>(data));
@@ -70,7 +70,7 @@ namespace OpenMod.Core.Persistence.Yaml
             if (typeof(T).GetCustomAttribute<YamlObjectAttribute>() == null)
             {
                 m_Logger.LogWarning("OpenMod is moving from YamlDotNet to VYaml");
-                m_Logger.LogWarning("To migrate you can annotate your class with YamlObjectAttribute or create your own IYamlFormatter");
+                m_Logger.LogWarning($"Annotate your class({typeof(T)} with YamlObjectAttribute or create your own IYamlFormatter");
 
                 var yamlContent = m_OldYamlSerializer.Serialize(dataObject);
                 var encodedData = Encoding.UTF8.GetBytes(yamlContent);
