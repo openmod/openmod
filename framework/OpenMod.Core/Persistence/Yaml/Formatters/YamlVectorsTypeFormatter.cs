@@ -8,7 +8,7 @@ using VYaml.Serialization;
 namespace OpenMod.Core.Persistence.Yaml.Formatters
 {
     [OpenModInternal]
-    public class YamlVectorsTypeFormatter : IYamlFormatter<Vector2>, IYamlFormatter<Vector2?>, IYamlFormatter<Vector3>, IYamlFormatter<Vector3?>, IYamlFormatter<Vector4>, IYamlFormatter<Vector4?>, IYamlFormatter<Quaternion>, IYamlFormatter<Quaternion?>
+    public class YamlVectorsTypeFormatter : IYamlFormatter<Vector2?>, IYamlFormatter<Vector3?>, IYamlFormatter<Vector4?>, IYamlFormatter<Quaternion?>
     {
         private const string c_YamlKeyOfX = "x";
         private const string c_YamlKeyOfY = "y";
@@ -16,34 +16,6 @@ namespace OpenMod.Core.Persistence.Yaml.Formatters
         private const string c_YamlKeyOfW = "w";
 
         #region Vector2
-        Vector2 IYamlFormatter<Vector2>.Deserialize(ref YamlParser parser, YamlDeserializationContext context)
-        {
-            float x = 0, y = 0;
-            parser.ReadWithVerify(ParseEventType.MappingStart);
-
-            while (!parser.End && parser.CurrentEventType != ParseEventType.MappingEnd)
-            {
-                var key = parser.ReadScalarAsString();
-                var value = parser.ReadScalarAsFloat();
-
-                switch (key)
-                {
-                    case c_YamlKeyOfX:
-                        x = value;
-                        break;
-
-                    case c_YamlKeyOfY:
-                        y = value;
-                        break;
-
-                    default:
-                        throw new ArgumentNullException(nameof(key), "Fail to parse Vector2");
-                }
-            }
-
-            parser.ReadWithVerify(ParseEventType.MappingEnd);
-            return new Vector2(x, y);
-        }
         Vector2? IYamlFormatter<Vector2?>.Deserialize(ref YamlParser parser, YamlDeserializationContext context)
         {
             if (parser.IsNullScalar())
@@ -52,21 +24,33 @@ namespace OpenMod.Core.Persistence.Yaml.Formatters
                 return default;
             }
 
-            return ((IYamlFormatter<Vector2>)this).Deserialize(ref parser, context);
-        }
+            float x = 0, y = 0;
+            parser.ReadWithVerify(ParseEventType.MappingStart);
 
-        public void Serialize(ref Utf8YamlEmitter emitter, Vector2 value, YamlSerializationContext context)
-        {
-            emitter.BeginMapping();
+            while (!parser.End && parser.CurrentEventType != ParseEventType.MappingEnd)
             {
-                emitter.WriteString(c_YamlKeyOfX);
-                emitter.WriteFloat(value.X);
+                var key = parser.ReadScalarAsString()?.ToLower();
+                var value = context.DeserializeWithAlias<float>(ref parser);
 
-                emitter.WriteString(c_YamlKeyOfY);
-                emitter.WriteFloat(value.Y);
+                switch (key)
+                {
+                    case c_YamlKeyOfX:
+                        x = value;
+                        break;
+
+                    case c_YamlKeyOfY:
+                        y = value;
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(key), key, "Fail to parse Vector2");
+                }
             }
-            emitter.EndMapping();
+
+            parser.ReadWithVerify(ParseEventType.MappingEnd);
+            return new Vector2(x, y);
         }
+
         public void Serialize(ref Utf8YamlEmitter emitter, Vector2? value, YamlSerializationContext context)
         {
             if (!value.HasValue)
@@ -75,43 +59,16 @@ namespace OpenMod.Core.Persistence.Yaml.Formatters
                 return;
             }
 
-            Serialize(ref emitter, value.Value, context);
+            emitter.BeginMapping();
+            emitter.WriteString(c_YamlKeyOfX, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.X);
+            emitter.WriteString(c_YamlKeyOfY, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.Y);
+            emitter.EndMapping();
         }
         #endregion Vector2
 
         #region Vector3
-        Vector3 IYamlFormatter<Vector3>.Deserialize(ref YamlParser parser, YamlDeserializationContext context)
-        {
-            float x = 0, y = 0, z = 0;
-            parser.ReadWithVerify(ParseEventType.MappingStart);
-
-            while (!parser.End && parser.CurrentEventType != ParseEventType.MappingEnd)
-            {
-                var key = parser.ReadScalarAsString();
-                var value = parser.ReadScalarAsFloat();
-
-                switch (key)
-                {
-                    case c_YamlKeyOfX:
-                        x = value;
-                        break;
-
-                    case c_YamlKeyOfY:
-                        y = value;
-                        break;
-
-                    case c_YamlKeyOfZ:
-                        z = value;
-                        break;
-
-                    default:
-                        throw new ArgumentNullException(nameof(key), "Fail to parse Vector3");
-                }
-            }
-
-            parser.ReadWithVerify(ParseEventType.MappingEnd);
-            return new Vector3(x, y, z);
-        }
         Vector3? IYamlFormatter<Vector3?>.Deserialize(ref YamlParser parser, YamlDeserializationContext context)
         {
             if (parser.IsNullScalar())
@@ -120,24 +77,37 @@ namespace OpenMod.Core.Persistence.Yaml.Formatters
                 return default;
             }
 
-            return ((IYamlFormatter<Vector3>)this).Deserialize(ref parser, context);
-        }
+            float x = 0, y = 0, z = 0;
+            parser.ReadWithVerify(ParseEventType.MappingStart);
 
-        public void Serialize(ref Utf8YamlEmitter emitter, Vector3 value, YamlSerializationContext context)
-        {
-            emitter.BeginMapping();
+            while (!parser.End && parser.CurrentEventType != ParseEventType.MappingEnd)
             {
-                emitter.WriteString(c_YamlKeyOfX);
-                emitter.WriteFloat(value.X);
+                var key = parser.ReadScalarAsString()?.ToLower();
+                var value = context.DeserializeWithAlias<float>(ref parser);
 
-                emitter.WriteString(c_YamlKeyOfY);
-                emitter.WriteFloat(value.Y);
+                switch (key)
+                {
+                    case c_YamlKeyOfX:
+                        x = value;
+                        break;
 
-                emitter.WriteString(c_YamlKeyOfZ);
-                emitter.WriteFloat(value.Z);
+                    case c_YamlKeyOfY:
+                        y = value;
+                        break;
+
+                    case c_YamlKeyOfZ:
+                        z = value;
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(key), key, "Fail to parse Vector3");
+                }
             }
-            emitter.EndMapping();
+
+            parser.ReadWithVerify(ParseEventType.MappingEnd);
+            return new Vector3(x, y, z);
         }
+
         public void Serialize(ref Utf8YamlEmitter emitter, Vector3? value, YamlSerializationContext context)
         {
             if (!value.HasValue)
@@ -146,47 +116,18 @@ namespace OpenMod.Core.Persistence.Yaml.Formatters
                 return;
             }
 
-            Serialize(ref emitter, value.Value, context);
+            emitter.BeginMapping();
+            emitter.WriteString(c_YamlKeyOfX, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.X);
+            emitter.WriteString(c_YamlKeyOfY, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.Y);
+            emitter.WriteString(c_YamlKeyOfZ, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.Z);
+            emitter.EndMapping();
         }
         #endregion Vector3
 
         #region Vector4
-        Vector4 IYamlFormatter<Vector4>.Deserialize(ref YamlParser parser, YamlDeserializationContext context)
-        {
-            float x = 0, y = 0, z = 0, w = 0;
-            parser.ReadWithVerify(ParseEventType.MappingStart);
-
-            while (!parser.End && parser.CurrentEventType != ParseEventType.MappingEnd)
-            {
-                var key = parser.ReadScalarAsString();
-                var value = parser.ReadScalarAsFloat();
-
-                switch (key)
-                {
-                    case c_YamlKeyOfX:
-                        x = value;
-                        break;
-
-                    case c_YamlKeyOfY:
-                        y = value;
-                        break;
-
-                    case c_YamlKeyOfZ:
-                        z = value;
-                        break;
-
-                    case c_YamlKeyOfW:
-                        w = value;
-                        break;
-
-                    default:
-                        throw new ArgumentNullException(nameof(key), "Fail to parse Vector2");
-                }
-            }
-
-            parser.ReadWithVerify(ParseEventType.MappingEnd);
-            return new Vector4(x, y, z, w);
-        }
         Vector4? IYamlFormatter<Vector4?>.Deserialize(ref YamlParser parser, YamlDeserializationContext context)
         {
             if (parser.IsNullScalar())
@@ -195,43 +136,13 @@ namespace OpenMod.Core.Persistence.Yaml.Formatters
                 return default;
             }
 
-            return ((IYamlFormatter<Vector4>)this).Deserialize(ref parser, context);
-        }
-
-        public void Serialize(ref Utf8YamlEmitter emitter, Vector4 value, YamlSerializationContext context)
-        {
-            emitter.BeginMapping();
-            {
-                emitter.WriteString(c_YamlKeyOfX);
-                emitter.WriteFloat(value.X);
-
-                emitter.WriteString(c_YamlKeyOfY);
-                emitter.WriteFloat(value.Y);
-            }
-            emitter.EndMapping();
-        }
-        public void Serialize(ref Utf8YamlEmitter emitter, Vector4? value, YamlSerializationContext context)
-        {
-            if (!value.HasValue)
-            {
-                emitter.WriteNull();
-                return;
-            }
-
-            Serialize(ref emitter, value.Value, context);
-        }
-        #endregion Vector4
-
-        #region Quaternion
-        Quaternion IYamlFormatter<Quaternion>.Deserialize(ref YamlParser parser, YamlDeserializationContext context)
-        {
             float x = 0, y = 0, z = 0, w = 0;
             parser.ReadWithVerify(ParseEventType.MappingStart);
 
             while (!parser.End && parser.CurrentEventType != ParseEventType.MappingEnd)
             {
-                var key = parser.ReadScalarAsString();
-                var value = parser.ReadScalarAsFloat();
+                var key = parser.ReadScalarAsString()?.ToLower();
+                var value = context.DeserializeWithAlias<float>(ref parser);
 
                 switch (key)
                 {
@@ -252,13 +163,36 @@ namespace OpenMod.Core.Persistence.Yaml.Formatters
                         break;
 
                     default:
-                        throw new ArgumentNullException(nameof(key), "Fail to parse Vector2");
+                        throw new ArgumentOutOfRangeException(nameof(key), key, "Fail to parse Vector4");
                 }
             }
 
             parser.ReadWithVerify(ParseEventType.MappingEnd);
-            return new Quaternion(x, y, z, w);
+            return new Vector4(x, y, z, w);
         }
+
+        public void Serialize(ref Utf8YamlEmitter emitter, Vector4? value, YamlSerializationContext context)
+        {
+            if (!value.HasValue)
+            {
+                emitter.WriteNull();
+                return;
+            }
+
+            emitter.BeginMapping();
+            emitter.WriteString(c_YamlKeyOfX, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.X);
+            emitter.WriteString(c_YamlKeyOfY, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.Y);
+            emitter.WriteString(c_YamlKeyOfZ, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.Z);
+            emitter.WriteString(c_YamlKeyOfW, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.W);
+            emitter.EndMapping();
+        }
+        #endregion Vector4
+
+        #region Quaternion
         Quaternion? IYamlFormatter<Quaternion?>.Deserialize(ref YamlParser parser, YamlDeserializationContext context)
         {
             if (parser.IsNullScalar())
@@ -267,21 +201,41 @@ namespace OpenMod.Core.Persistence.Yaml.Formatters
                 return default;
             }
 
-            return ((IYamlFormatter<Quaternion>)this).Deserialize(ref parser, context);
-        }
+            float x = 0, y = 0, z = 0, w = 0;
+            parser.ReadWithVerify(ParseEventType.MappingStart);
 
-        public void Serialize(ref Utf8YamlEmitter emitter, Quaternion value, YamlSerializationContext context)
-        {
-            emitter.BeginMapping();
+            while (!parser.End && parser.CurrentEventType != ParseEventType.MappingEnd)
             {
-                emitter.WriteString(c_YamlKeyOfX);
-                emitter.WriteFloat(value.X);
+                var key = parser.ReadScalarAsString()?.ToLower();
+                var value = context.DeserializeWithAlias<float>(ref parser);
 
-                emitter.WriteString(c_YamlKeyOfY);
-                emitter.WriteFloat(value.Y);
+                switch (key)
+                {
+                    case c_YamlKeyOfX:
+                        x = value;
+                        break;
+
+                    case c_YamlKeyOfY:
+                        y = value;
+                        break;
+
+                    case c_YamlKeyOfZ:
+                        z = value;
+                        break;
+
+                    case c_YamlKeyOfW:
+                        w = value;
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(key), key, "Fail to parse Quaternion");
+                }
             }
-            emitter.EndMapping();
+
+            parser.ReadWithVerify(ParseEventType.MappingEnd);
+            return new Quaternion(x, y, z, w);
         }
+
         public void Serialize(ref Utf8YamlEmitter emitter, Quaternion? value, YamlSerializationContext context)
         {
             if (!value.HasValue)
@@ -290,7 +244,16 @@ namespace OpenMod.Core.Persistence.Yaml.Formatters
                 return;
             }
 
-            Serialize(ref emitter, value.Value, context);
+            emitter.BeginMapping();
+            emitter.WriteString(c_YamlKeyOfX, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.X);
+            emitter.WriteString(c_YamlKeyOfY, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.Y);
+            emitter.WriteString(c_YamlKeyOfZ, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.Z);
+            emitter.WriteString(c_YamlKeyOfW, ScalarStyle.Plain);
+            context.Serialize(ref emitter, value.Value.W);
+            emitter.EndMapping();
         }
         #endregion Quaternion
     }
