@@ -10,6 +10,7 @@ using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization;
 using Microsoft.Extensions.Options;
 using System.Text;
+using System.Linq;
 
 namespace OpenMod.Core.Persistence.Yaml
 {
@@ -19,6 +20,7 @@ namespace OpenMod.Core.Persistence.Yaml
         private readonly ILogger<OpenModYamlSerializer> m_Logger;
         private readonly ISerializer m_OldYamlSerializer;
         private readonly IDeserializer m_OldYamlDeserializer;
+        private readonly YamlSerializerOptions m_YamlOptions;
 
         public OpenModYamlSerializer(
             ILogger<OpenModYamlSerializer> logger,
@@ -44,6 +46,11 @@ namespace OpenMod.Core.Persistence.Yaml
 
             m_OldYamlSerializer = serializerBuilder.Build();
             m_OldYamlDeserializer = deserializerBuilder.Build();
+
+            m_YamlOptions = new YamlSerializerOptions
+            {
+                Resolver = CompositeResolver.Create(options.Value.Formatters, options.Value.FormatterResolvers.Append(StandardResolver.Instance))
+            };
         }
 
         public Task<T?> DeserializeAsync<T>(ReadOnlyMemory<byte> memory)
@@ -57,7 +64,7 @@ namespace OpenMod.Core.Persistence.Yaml
                 return Task.FromResult<T?>(m_OldYamlDeserializer.Deserialize<T>(data));
             }
 
-            return Task.FromResult<T?>(YamlSerializer.Deserialize<T>(memory));
+            return Task.FromResult<T?>(YamlSerializer.Deserialize<T>(memory, m_YamlOptions));
         }
 
         public Task<ReadOnlyMemory<byte>> SerializeAsync<T>(T dataObject)
@@ -77,7 +84,7 @@ namespace OpenMod.Core.Persistence.Yaml
                 return Task.FromResult(new ReadOnlyMemory<byte>(encodedData));
             }
 
-            return Task.FromResult(YamlSerializer.Serialize(dataObject));
+            return Task.FromResult(YamlSerializer.Serialize(dataObject, m_YamlOptions));
         }
     }
 }
