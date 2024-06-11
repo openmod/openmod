@@ -1,0 +1,267 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SDG.NetPak.Runtime</name>
+    </assembly>
+    <members>
+        <member name="T:SDG.NetPak.NetEnumAttribute">
+            <summary>
+            Indicates net reader/writer implementation should be generated.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakWriterEx.WriteQuaternion(SDG.NetPak.NetPakWriter,UnityEngine.Quaternion,System.Int32)">
+            <summary>
+            Uses "smallest three" optimization described by Glenn Fiedler: https://gafferongames.com/post/snapshot_compression/
+            Quoting here in case the link moves: "Since we know the quaternion represents a rotation its length must
+            be 1, so x^2+y^2+z^2+w^2 = 1. We can use this identity to drop one component and reconstruct it on the
+            other side. For example, if you send x,y,z you can reconstruct w = sqrt(1 - x^2 - y^2 - z^2). You might
+            think you need to send a sign bit for w in case it is negative, but you don’t, because you can make w always
+            positive by negating the entire quaternion if w is negative (in quaternion space (x,y,z,w) and (-x,-y,-z,-w)
+            represent the same rotation.) Don’t always drop the same component due to numerical precision issues.
+            Instead, find the component with the largest absolute value and encode its index using two bits [0, 3]
+            (0=x, 1=y, 2=z, 3=w), then send the index of the largest component and the smallest three components over
+            the network (hence the name). On the other side use the index of the largest bit to know which component
+            you have to reconstruct from the other three."
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakWriterEx.WriteNormalVector3(SDG.NetPak.NetPakWriter,UnityEngine.Vector3,System.Int32)">
+            <summary>
+            Similar to the quaternion optimization, but needs a sign bit for the largest value.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakWriterEx.WriteClampedVector3(SDG.NetPak.NetPakWriter,UnityEngine.Vector3,System.Int32,System.Int32)">
+            <summary>
+            Default intBitCount of 13 allows a range of [-4096, +4096).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakWriterEx.WriteColor32RGB(SDG.NetPak.NetPakWriter,UnityEngine.Color32)">
+            <summary>
+            Write 8-bit per channel color excluding alpha.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakWriterEx.WriteColor32RGBA(SDG.NetPak.NetPakWriter,UnityEngine.Color32)">
+            <summary>
+            Write 8-bit per channel color including alpha.
+            </summary>
+        </member>
+        <member name="T:SDG.NetPak.NetPakWriter">
+            <summary>
+            Packs bits into a 32-bit buffer value, and from there into a byte array. GafferOnGames recommends this approach
+            rather than "farting across a buffer at byte level like it's 1985".
+            </summary>
+        </member>
+        <member name="T:SDG.NetPak.NetPakWriter.EErrorFlags">
+            <summary>
+            Lightweight error when exceptions are disabled. Bitwise OR to prevent different errors from clobbering each other. 
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakReaderEx.ReadQuaternion(SDG.NetPak.NetPakReader,UnityEngine.Quaternion@,System.Int32)">
+            <summary>
+            Uses "smallest three" optimization described by Glenn Fiedler: https://gafferongames.com/post/snapshot_compression/
+            Quoting here in case the link moves: "Since we know the quaternion represents a rotation its length must
+            be 1, so x^2+y^2+z^2+w^2 = 1. We can use this identity to drop one component and reconstruct it on the
+            other side. For example, if you send x,y,z you can reconstruct w = sqrt(1 - x^2 - y^2 - z^2). You might
+            think you need to send a sign bit for w in case it is negative, but you don’t, because you can make w always
+            positive by negating the entire quaternion if w is negative (in quaternion space (x,y,z,w) and (-x,-y,-z,-w)
+            represent the same rotation.) Don’t always drop the same component due to numerical precision issues.
+            Instead, find the component with the largest absolute value and encode its index using two bits [0, 3]
+            (0=x, 1=y, 2=z, 3=w), then send the index of the largest component and the smallest three components over
+            the network (hence the name). On the other side use the index of the largest bit to know which component
+            you have to reconstruct from the other three."
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakReaderEx.ReadNormalVector3(SDG.NetPak.NetPakReader,UnityEngine.Vector3@,System.Int32)">
+            <summary>
+            Similar to the quaternion optimization, but needs a sign bit for the largest value.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakReaderEx.ReadClampedVector3(SDG.NetPak.NetPakReader,UnityEngine.Vector3@,System.Int32,System.Int32)">
+            <summary>
+            Default intBitCount of 13 allows a range of [-4096, +4096).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakReaderEx.ReadColor32RGB(SDG.NetPak.NetPakReader,UnityEngine.Color32@)">
+            <summary>
+            Read 8-bit per channel color excluding alpha.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakReaderEx.ReadColor32RGB(SDG.NetPak.NetPakReader,UnityEngine.Color@)">
+            <summary>
+            Read 8-bit per channel color excluding alpha.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakReaderEx.ReadColor32RGBA(SDG.NetPak.NetPakReader,UnityEngine.Color32@)">
+            <summary>
+            Read 8-bit per channel color including alpha.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.UnityNetPakReaderEx.ReadColor32RGBA(SDG.NetPak.NetPakReader,UnityEngine.Color@)">
+            <summary>
+            Read 8-bit per channel color including alpha.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteSignedInt(SDG.NetPak.NetPakWriter,System.Int32,System.Int32)">
+            <summary>
+            For example bitCount of 7 allows range [-64, +64).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteClampedFloat(SDG.NetPak.NetPakWriter,System.Single,System.Int32,System.Int32)">
+            <summary>
+            Values outside the range are clamped into range.
+            For example intBitCount of 7 allows range [-64, +64).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteUnsignedNormalizedFloat(SDG.NetPak.NetPakWriter,System.Single,System.Int32)">
+            <summary>
+            Encode a float in the range [0.0, 1.0]. Endpoints are encoded exactly, but not the midpoint (0.5).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteSignedNormalizedFloat(SDG.NetPak.NetPakWriter,System.Single,System.Int32)">
+            <summary>
+            Encode a float in the range [-1.0, +1.0]. Endpoints and midpoint (0.0) are encoded exactly.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteRadians(SDG.NetPak.NetPakWriter,System.Single,System.Int32)">
+            <summary>
+            Encode radians wrapped into the range [0, TWO_PI).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteDegrees(SDG.NetPak.NetPakWriter,System.Single,System.Int32)">
+            <summary>
+            Encode degrees wrapped into the range [0, 360).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteEnum``1(SDG.NetPak.NetPakWriter,``0)">
+            <summary>
+            Placeholder allowing user assembly to compile before specialized implementation is generated.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteStateArray(SDG.NetPak.NetPakWriter,System.Byte[])">
+            <summary>
+            Ideally should not be used by new code.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakReaderEx.ReadSignedInt(SDG.NetPak.NetPakReader,System.Int32,System.Int32@)">
+            <summary>
+            For example bitCount of 7 allows range [-64, +64).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakReaderEx.ReadClampedFloat(SDG.NetPak.NetPakReader,System.Int32,System.Int32,System.Single@)">
+            <summary>
+            Values outside the range are clamped into range.
+            For example intBitCount of 7 allows range [-64, +64).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakReaderEx.ReadUnsignedNormalizedFloat(SDG.NetPak.NetPakReader,System.Int32,System.Single@)">
+            <summary>
+            Decode a float in the range [0.0, 1.0]. Endpoints are encoded exactly, but not the midpoint (0.5).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakReaderEx.ReadSignedNormalizedFloat(SDG.NetPak.NetPakReader,System.Int32,System.Single@)">
+            <summary>
+            Decode a float in the range [-1.0, +1.0]. Endpoints and midpoint (0.0) are encoded exactly.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakReaderEx.ReadEnum``1(SDG.NetPak.NetPakReader,``0@)">
+            <summary>
+            Placeholder allowing user assembly to compile before specialized implementation is generated.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakReaderEx.ReadStateArray(SDG.NetPak.NetPakReader,System.Byte[]@)">
+            <summary>
+            Ideally should not be used by new code.
+            </summary>
+        </member>
+        <member name="T:SDG.NetPak.NetPakReader">
+            <summary>
+            Unpacks bits from a byte array into a 32-bit buffer value. GafferOnGames recommends this approach rather than
+            "farting across a buffer at byte level like it's 1985".
+            </summary>
+        </member>
+        <member name="T:SDG.NetPak.NetPakReader.EErrorFlags">
+            <summary>
+            Lightweight error when exceptions are disabled. Bitwise OR to prevent different errors from clobbering each other. 
+            </summary>
+        </member>
+        <member name="F:SDG.NetPak.NetPakReader.EErrorFlags.SourceBufferOverflow">
+            <summary>
+            Call to ReadBits or ReadBytes would have overflowed our buffer.
+            </summary>
+        </member>
+        <member name="F:SDG.NetPak.NetPakReader.EErrorFlags.DestinationBufferOverflow">
+            <summary>
+            Buffer passed into ReadBytes would have overflowed.
+            </summary>
+        </member>
+        <member name="F:SDG.NetPak.NetPakReader.EErrorFlags.AlignmentPadding">
+            <summary>
+            AlignToByte bits should be zero.
+            </summary>
+        </member>
+        <member name="F:SDG.NetPak.NetPakReader.EErrorFlags.SaveStateBufferOverflow">
+            <summary>
+            Buffer passed into SaveState would have overflowed.
+            </summary>
+        </member>
+        <member name="P:SDG.NetPak.NetPakReader.ReachedEndOfSegment">
+            <summary>
+            Imprecise because sent byte length is rounded up from bit length, but should help find particularly
+            egregious reading errors.
+            </summary>
+        </member>
+        <member name="P:SDG.NetPak.NetPakReader.RemainingSegmentLength">
+            <summary>
+            Number of bytes until end of segment is reached.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.NetPakReader.SaveState(System.UInt32@,System.Int32@,System.Byte[])">
+            <summary>
+            Save remaining data to resume reading later. Used by net invokables to defer invocation.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.NetPakReader.ResetErrors">
+            <summary>
+            Used by invocation messages to show more error context rather than the default.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.NetPakReader.SetBufferSegmentCopy(System.Byte[],System.Byte[],System.Int32)">
+            <summary>
+            Used by NetInvokable loopback to copy buffer from writer to reader.
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.NetPakReader.ReadBytesPtr(System.Int32,System.Byte[]@,System.Int32@)">
+            <summary>
+            Assumes length is greater than zero!
+            Moves reader forward according to length.
+            </summary>
+        </member>
+        <member name="F:SDG.NetPak.NetPakConst.INV_SQRT_OF_TWO">
+            <summary>
+            Uses "smallest three" optimization described by Glenn Fiedler: https://gafferongames.com/post/snapshot_compression/
+            Quoting here in case the link moves: "If v is the absolute value of the largest quaternion component,
+            the next largest possible component value occurs when two components have the same absolute value and the
+            other two components are zero. The length of that quaternion (v,v,0,0) is 1, therefore v^2 + v^2 = 1,
+            2v^2 = 1, v = 1/sqrt(2). This means you can encode the smallest three components in [-0.707107,+0.707107]
+            instead of [-1,+1] giving you more precision with the same number of bits."
+            </summary>
+        </member>
+        <member name="F:SDG.NetPak.NetPakConst.MAX_STRING_BYTE_COUNT_BITS">
+            <summary>
+            Maximum number of bits to read/write for string byte count without overflowing the string buffer.
+            </summary>
+        </member>
+        <member name="F:SDG.NetPak.NetPakConst.MAX_STRING_BYTE_COUNT">
+            <summary>
+            Maximum number of UTF8 bytes for string.
+            Before the "null or empty" flag was added the length had to be able to represent 0, but now the receiver
+            can infer that the byte count is at least 1.
+            </summary>
+        </member>
+        <member name="F:SDG.NetPak.NetPakConst.stringEncoding">
+            <summary>
+            encoderShouldEmitUTF8Identifier enables byte order mark (BOM) which is unnecessary for UTF8.
+            throwOnInvalidBytes allows reader to discard bad string packets.
+            </summary>
+        </member>
+    </members>
+</doc>
