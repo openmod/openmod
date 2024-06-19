@@ -15,6 +15,7 @@ using System;
 using OpenMod.Core.Jobs;
 using SmartFormat.Extensions;
 using OpenMod.Core.Persistence;
+using OpenMod.Core.Persistence.Yaml.Formatters;
 
 namespace OpenMod.Core
 {
@@ -63,6 +64,8 @@ namespace OpenMod.Core
             {
                 options.TryAddConverter<YamlNullableEnumTypeConverter>();
                 options.TryAddConverter<YamlVector3TypeConverter>();
+                //todo finish
+                options.TryAddFormatter<YamlScheduledJobFormatter>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
