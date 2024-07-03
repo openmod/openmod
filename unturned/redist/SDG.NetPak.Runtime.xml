@@ -44,6 +44,13 @@
             Write 8-bit per channel color including alpha.
             </summary>
         </member>
+        <member name="M:SDG.NetPak.UnityNetPakWriterEx.WriteSpecialYawOrQuaternion(SDG.NetPak.NetPakWriter,UnityEngine.Quaternion,System.Int32,System.Int32)">
+            <summary>
+            Note: "Special" here refers to the -90 rotation on the X axis. :)
+            If quaternion is only a rotation around the Y axis (yaw) which is common for barricades and structures,
+            write only yaw. Otherwise, write full quaternion.
+            </summary>
+        </member>
         <member name="T:SDG.NetPak.NetPakWriter">
             <summary>
             Packs bits into a 32-bit buffer value, and from there into a byte array. GafferOnGames recommends this approach
@@ -100,9 +107,21 @@
             Read 8-bit per channel color including alpha.
             </summary>
         </member>
+        <member name="M:SDG.NetPak.UnityNetPakReaderEx.ReadSpecialYawOrQuaternion(SDG.NetPak.NetPakReader,UnityEngine.Quaternion@,System.Int32,System.Int32)">
+            <summary>
+            Note: "Special" here refers to the -90 rotation on the X axis. :)
+            Read only yaw if quaternion was flat, full quaternion otherwise.
+            </summary>
+        </member>
         <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteSignedInt(SDG.NetPak.NetPakWriter,System.Int32,System.Int32)">
             <summary>
             For example bitCount of 7 allows range [-64, +64).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteUnsignedClampedFloat(SDG.NetPak.NetPakWriter,System.Single,System.Int32,System.Int32)">
+            <summary>
+            Values outside the range are clamped into range.
+            For example intBitCount of 7 allows range [0, 128).
             </summary>
         </member>
         <member name="M:SDG.NetPak.SystemNetPakWriterEx.WriteClampedFloat(SDG.NetPak.NetPakWriter,System.Single,System.Int32,System.Int32)">
@@ -144,6 +163,12 @@
         <member name="M:SDG.NetPak.SystemNetPakReaderEx.ReadSignedInt(SDG.NetPak.NetPakReader,System.Int32,System.Int32@)">
             <summary>
             For example bitCount of 7 allows range [-64, +64).
+            </summary>
+        </member>
+        <member name="M:SDG.NetPak.SystemNetPakReaderEx.ReadUnsignedClampedFloat(SDG.NetPak.NetPakReader,System.Int32,System.Int32,System.Single@)">
+            <summary>
+            Values outside the range are clamped into range.
+            For example intBitCount of 7 allows range [0, 128).
             </summary>
         </member>
         <member name="M:SDG.NetPak.SystemNetPakReaderEx.ReadClampedFloat(SDG.NetPak.NetPakReader,System.Int32,System.Int32,System.Single@)">
