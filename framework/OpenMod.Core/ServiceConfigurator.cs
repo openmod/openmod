@@ -62,9 +62,11 @@ namespace OpenMod.Core
 
             serviceCollection.Configure<YamlDataStoreOptions>(options =>
             {
-                options.TryAddConverter<YamlNullableEnumTypeConverter>();
+#pragma warning disable CS0618 // Obsolete
+                options.TryAddConverter<YamlNullableEnumTypeConverter>(); 
                 options.TryAddConverter<YamlVector3TypeConverter>();
-                //todo finish
+#pragma warning restore CS0618
+
                 options.TryAddFormatter<YamlScheduledJobFormatter>();
             });
 

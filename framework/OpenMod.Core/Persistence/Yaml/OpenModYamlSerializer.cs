@@ -28,6 +28,7 @@ namespace OpenMod.Core.Persistence.Yaml
         {
             m_Logger = logger;
 
+#pragma warning disable CS0618 // Obsolete
             var serializerBuilder = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .WithTypeInspector(i => new SerializableIgnoreInspector(i))
@@ -37,6 +38,7 @@ namespace OpenMod.Core.Persistence.Yaml
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .WithTypeInspector(i => new SerializableIgnoreInspector(i))
                 .IgnoreUnmatchedProperties();
+#pragma warning restore CS0618
 
             foreach (var converter in options.Value.Converters)
             {
