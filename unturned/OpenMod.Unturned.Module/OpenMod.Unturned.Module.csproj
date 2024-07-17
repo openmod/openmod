@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" GeneratePathProperty="true" />
     <PackageReference Include="Lib.Harmony.Thin" Version="2.3.3" GeneratePathProperty="true" />
-    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.23.12.3">
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.24.4">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
