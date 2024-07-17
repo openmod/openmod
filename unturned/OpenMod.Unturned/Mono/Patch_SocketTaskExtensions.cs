@@ -11,7 +11,7 @@ using OpenMod.Core.Patching;
 namespace OpenMod.Unturned.Mono
 {
     /// <summary>
-    /// Fixes <see cref="SocketTaskExtensions.ReceiveAsync(Socket, Memory{byte}, SocketFlags, CancellationToken)"/>, that <see cref="Memory{byte}"/> is always empty due
+    /// Fixes <see cref="SocketTaskExtensions.ReceiveAsync(Socket, Memory{byte}, SocketFlags, CancellationToken)"/>, that <see cref="Memory{byte}"/> of is always empty due
     /// to coping the memory array.
     /// https://github.com/Unity-Technologies/mono/blob/unity-main/mcs/class/System/System.Net.Sockets/SocketTaskExtensions.cs
     /// </summary>
@@ -26,7 +26,7 @@ namespace OpenMod.Unturned.Mono
         }
 
         [HarmonyPatch(typeof(SocketTaskExtensions), nameof(SocketTaskExtensions.ReceiveAsync),
-            new[] { typeof(Socket), typeof(Memory<byte>), typeof(SocketFlags), typeof(CancellationToken) })]
+            [typeof(Socket), typeof(Memory<byte>), typeof(SocketFlags), typeof(CancellationToken)])]
         [HarmonyPrefix]
         public static bool SocketTaskExtensionsReceiveAsync(Socket socket, Memory<byte> memory, SocketFlags socketFlags, CancellationToken cancellationToken,
             // ReSharper disable once InconsistentNaming

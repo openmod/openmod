@@ -14,14 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="libs\MySqlConnector.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="libs\MySqlConnector.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="MySqlConnector" Version="2.3.7" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.4" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>

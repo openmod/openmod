@@ -11,7 +11,7 @@ using SmartFormat.ZString;
 
 namespace OpenMod.Core.Permissions
 {
-    [Priority(Priority = Priority.Lowest)]
+    [Priority(Priority = Priority.Normal)]
     public class DefaultPermissionCheckProvider : IPermissionCheckProvider
     {
         private readonly IPermissionChecker m_PermissionChecker;

@@ -14,7 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" GeneratePathProperty="true" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" GeneratePathProperty="true" />
+    <PackageReference Include="Lib.Harmony.Thin" Version="2.3.3" GeneratePathProperty="true" />
     <PackageReference Include="OpenMod.Unturned.Redist" Version="3.23.12.3">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
@@ -45,6 +46,10 @@
   <!--https://duanenewman.net/blog/post/a-better-way-to-override-references-with-packagereference/-->
   <Target Name="CopyNewtonsoftJson" AfterTargets="AfterBuild">
     <Copy SourceFiles="$(PkgNewtonsoft_Json)\lib\net45\Newtonsoft.Json.dll" DestinationFolder="$(OutDir)" />
+  </Target>
+
+  <Target Name="CopyHarmonyThin" AfterTargets="AfterBuild">
+    <Copy SourceFiles="$(PkgLib_Harmony_Thin)\lib\net48\0Harmony.dll" DestinationFolder="$(OutDir)" />
   </Target>
 
   <ItemGroup>

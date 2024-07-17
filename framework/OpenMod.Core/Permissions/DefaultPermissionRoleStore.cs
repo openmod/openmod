@@ -18,7 +18,7 @@ namespace OpenMod.Core.Permissions
 {
     [OpenModInternal]
     [UsedImplicitly]
-    [ServiceImplementation(Priority = Priority.Lowest, Lifetime = ServiceLifetime.Singleton)]
+    [ServiceImplementation(Priority = Priority.Normal, Lifetime = ServiceLifetime.Singleton)]
     public class DefaultPermissionRoleStore : IPermissionRoleStore
     {
         private readonly IPermissionRolesDataStore m_PermissionRolesDataStore;

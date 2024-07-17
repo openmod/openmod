@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>OpenMod.Unturned.Redist</id>
-    <version>3.24.2.0</version>
+    <version>3.24.3.2</version>
     <description>Unturned 3 redistributables for OpenMod. Does not require OpenMod and can be used standalone.</description>
     <authors>SmartlyDressedGames;OpenMod</authors>
     <license type="file">LICENSE.txt</license>
@@ -10,6 +10,7 @@
   </metadata>
   <files>
     <file src="*.dll" target="lib\netstandard2.1" />
+    <file src="*.xml" target="lib\netstandard2.1" />
     <file src="LICENSE.txt" target="" />
   </files>
 </package>

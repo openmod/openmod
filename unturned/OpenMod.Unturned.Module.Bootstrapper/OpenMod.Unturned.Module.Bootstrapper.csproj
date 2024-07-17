@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <!--If set to .netstandard2.1 Unturned will load assembly but via LoadFile, meaning that the file will be locked.-->
+    <!--So instead use netFW to not load any addictional assemblies.-->
+    <!--Can be switched back if Unturned will use .NS2.1 by default-->
+    <TargetFramework>net48</TargetFramework>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />

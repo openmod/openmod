@@ -19,7 +19,7 @@ namespace OpenMod.Core.Eventing
             string eventName,
             ILifetimeScope scope)
         {
-            Owner = new WeakReference(ownerComponent);
+            Owner = new WeakReference<IOpenModComponent>(ownerComponent);
             Callback = callback;
             EventListenerOptions = options;
             EventName = eventName;
@@ -34,7 +34,7 @@ namespace OpenMod.Core.Eventing
             Type eventType,
             ILifetimeScope scope)
         {
-            Owner = new WeakReference(ownerComponent);
+            Owner = new WeakReference<IOpenModComponent>(ownerComponent);
             EventListener = eventListener;
             Callback = (serviceProvider, sender, @event) =>
             {
@@ -54,7 +54,7 @@ namespace OpenMod.Core.Eventing
             Type eventType,
             ILifetimeScope scope)
         {
-            Owner = new WeakReference(ownerComponent);
+            Owner = new WeakReference<IOpenModComponent>(ownerComponent);
             Callback = callback;
             EventListenerOptions = options;
             EventName = eventType.Name;
@@ -68,7 +68,7 @@ namespace OpenMod.Core.Eventing
 
         public Type? EventType { get; set; }
 
-        public WeakReference Owner { get; set; }
+        public WeakReference<IOpenModComponent> Owner { get; set; }
 
         public EventCallback Callback { get; }
 

@@ -3,6 +3,7 @@ using Autofac;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
@@ -98,6 +99,23 @@ namespace OpenMod.Unturned
                         options.AddPermissionSource<RocketPermissionStore>();
                         options.AddPermissionCheckProvider<RocketCooldownPermissionCheckProvider>();
                     });
+
+
+                    for (int i = 0; i < serviceCollection.Count; i++)
+                    {
+                        var serviceDescriptor = serviceCollection[i];
+                        if (serviceDescriptor.ServiceType != typeof(IPermissionRoleStore))
+                        {
+                            continue;
+                        }
+
+                        if (serviceDescriptor.ImplementationType != typeof(DefaultPermissionRoleStore))
+                        {
+                            continue;
+                        }
+
+                        serviceCollection.RemoveAt(i);
+                    }
 
                     serviceCollection.AddTransient<IPermissionRoleStore, RocketPermissionRoleStore>();
                 }

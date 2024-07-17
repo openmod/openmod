@@ -20,7 +20,7 @@ namespace OpenMod.Core.Eventing
                         continue;
                     }
 
-                    args.Add(prop.Name.ToLower(), this);
+                    args.Add(prop.Name.ToLower(), prop.GetValue(this));
                 }
 
                 return args;
