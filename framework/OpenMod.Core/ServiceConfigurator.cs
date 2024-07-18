@@ -67,7 +67,9 @@ namespace OpenMod.Core
                 options.TryAddConverter<YamlVector3TypeConverter>();
 #pragma warning restore CS0618
 
+                options.TryAddFormatter<YamlBanDataFormatter>();
                 options.TryAddFormatter<YamlScheduledJobFormatter>();
+                options.TryAddFormatter<YamlUserDataFormatter>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();

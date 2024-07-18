@@ -35,19 +35,19 @@ namespace OpenMod.Core.Persistence.Yaml.Formatters
                 switch (key)
                 {
                     case c_YamlKeyOfName:
-                        name = context.DeserializeWithAlias<string>(ref parser);
+                        name = context.DeserializeWithAlias<string?>(ref parser);
                         break;
 
                     case c_YamlKeyOfArgs:
-                        args = context.DeserializeWithAlias<Dictionary<string, object?>>(ref parser);
+                        args = context.DeserializeWithAlias<Dictionary<string, object?>?>(ref parser);
                         break;
 
                     case c_YamlKeyOfTask:
-                        task = context.DeserializeWithAlias<string>(ref parser);
+                        task = context.DeserializeWithAlias<string?>(ref parser);
                         break;
 
                     case c_YamlKeyOfSchedule:
-                        schedule = context.DeserializeWithAlias<string>(ref parser);
+                        schedule = context.DeserializeWithAlias<string?>(ref parser);
                         break;
 
                     case c_YamlKeyOfEnabled:
