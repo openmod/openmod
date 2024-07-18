@@ -351,7 +351,8 @@ namespace OpenMod.Unturned.Vehicles.Events
                 return !cancel;
             }
 
-            [HarmonyPatch(typeof(VehicleManager), nameof(VehicleManager.SpawnVehicleV3))]
+            [HarmonyPatch(typeof(VehicleManager), nameof(VehicleManager.SpawnVehicleV3),
+                typeof(VehicleAsset), typeof(ushort), typeof(ushort), typeof(float), typeof(Vector3), typeof(Quaternion), typeof(bool), typeof(bool), typeof(bool), typeof(bool), typeof(ushort), typeof(ushort), typeof(ushort), typeof(CSteamID), typeof(CSteamID), typeof(bool), typeof(byte[][]), typeof(byte), typeof(Color32))]
             [HarmonyPostfix]
             [UsedImplicitly]
             public static void VehicleSpawned(InteractableVehicle __result)
