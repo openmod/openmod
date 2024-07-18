@@ -12,7 +12,7 @@ namespace OpenMod.Core.Patching
         public delegate ILoggerFactory LoggerFactoryGetter();
         public static event LoggerFactoryGetter? LoggerFactoryGetterEvent;
 
-        public static void ReportCleanupException(Type type, Exception? exception, MethodBase originalMethod)
+        public static void ReportCleanupException(Type type, Exception? exception, MethodBase? originalMethod)
         {
             if (exception == null)
             {
@@ -26,8 +26,7 @@ namespace OpenMod.Core.Patching
             }
 
             var logger = loggerFactory.CreateLogger("OpenMod.Harmony");
-            logger.LogError(exception, "Failed to patch original method {MethodName} from patching type {TypeName}",
-                originalMethod.FullDescription(), type.FullDescription());
+            logger.LogError(exception, "Failed to patch original method {MethodName} from patching type {TypeName}", originalMethod?.FullDescription(), type.FullDescription());
         }
     }
 }
