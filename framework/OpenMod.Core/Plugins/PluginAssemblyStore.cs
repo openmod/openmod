@@ -14,7 +14,6 @@ using OpenMod.Common.Helpers;
 using OpenMod.Common.Hotloading;
 using OpenMod.API.Persistence;
 using VYaml.Serialization;
-using OpenMod.NuGet.Persistence;
 
 namespace OpenMod.Core.Plugins
 {
@@ -23,7 +22,6 @@ namespace OpenMod.Core.Plugins
     {
         private readonly ILogger<PluginAssemblyStore> m_Logger;
         private readonly NuGetPackageManager m_NuGetPackageManager;
-        private readonly YamlSerializerOptions m_YamlOptions;
 
         /// <summary>
         /// Defines if OpenMod would try to install missing dependencies.
@@ -36,11 +34,6 @@ namespace OpenMod.Core.Plugins
         {
             m_Logger = logger;
             m_NuGetPackageManager = nuGetPackageManager;
-
-            m_YamlOptions = new YamlSerializerOptions
-            {
-                Resolver = CompositeResolver.Create([YamlHashSetTypeFormatter<SerializedNuGetPackage>.Instance], StandardResolver.DefaultResolvers)
-            };
         }
 
         private readonly List<WeakReference<Assembly>> m_LoadedPluginAssemblies = [];
@@ -80,7 +73,7 @@ namespace OpenMod.Core.Plugins
                 }
 
                 var packagesData = stream.ReadAllBytes();
-                var deserialized = YamlSerializer.Deserialize<SerializedPackagesFile>(packagesData, m_YamlOptions);
+                var deserialized = YamlSerializer.Deserialize<SerializedPackagesFile>(packagesData);
                 var packages = deserialized?.Packages.Select(d => new PackageIdentity(d.Id,
                         d.Version.Equals("latest", StringComparison.OrdinalIgnoreCase)
                             ? null

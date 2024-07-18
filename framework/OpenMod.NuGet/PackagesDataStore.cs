@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using NuGet.Common;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using OpenMod.NuGet.Persistence;
 using VYaml.Parser;
 using VYaml.Serialization;
 
@@ -16,16 +15,11 @@ namespace OpenMod.NuGet
     public class PackagesDataStore
     {
         private readonly string m_Path;
-        private readonly YamlSerializerOptions m_YamlOptions;
         public ILogger? Logger { get; set; }
 
         public PackagesDataStore(string path)
         {
             m_Path = path;
-            m_YamlOptions = new YamlSerializerOptions
-            {
-                Resolver = CompositeResolver.Create([YamlHashSetTypeFormatter<SerializedNuGetPackage>.Instance], StandardResolver.DefaultResolvers)
-            };
         }
 
         public async Task AddOrUpdatePackageIdentity(PackageIdentity id)
@@ -118,7 +112,7 @@ namespace OpenMod.NuGet
 
             try
             {
-                var result = await YamlSerializer.DeserializeAsync<SerializedPackagesFile>(fileStream, m_YamlOptions);
+                var result = await YamlSerializer.DeserializeAsync<SerializedPackagesFile>(fileStream);
                 result.Packages ??= [];
                 return result;
             }
@@ -133,7 +127,7 @@ namespace OpenMod.NuGet
 
         private async Task WritePackagesFile(SerializedPackagesFile file)
         {
-            var yaml = YamlSerializer.SerializeToString(file, m_YamlOptions);
+            var yaml = YamlSerializer.SerializeToString(file);
             await File.WriteAllTextAsync(m_Path, yaml, Encoding.UTF8).ConfigureAwait(false);
         }
 
