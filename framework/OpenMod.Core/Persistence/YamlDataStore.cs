@@ -225,7 +225,8 @@ namespace OpenMod.Core.Persistence
             CheckKeyValid(key);
 
             var filePath = GetFilePathForKey(key);
-            return Task.FromResult(File.Exists(filePath));
+            var fileInfo = new FileInfo(filePath);
+            return Task.FromResult(fileInfo.Exists && fileInfo.Length != 0);
         }
 
         public virtual async Task<T?> LoadAsync<T>(string key) where T : class

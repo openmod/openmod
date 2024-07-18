@@ -57,6 +57,11 @@ namespace OpenMod.Core.Persistence.Yaml
 
         public Task<T?> DeserializeAsync<T>(ReadOnlyMemory<byte> memory)
         {
+            if (memory.IsEmpty)
+            {
+                return Task.FromResult<T?>(default);
+            }
+
             if (typeof(T).GetCustomAttribute<YamlObjectAttribute>() == null)
             {
                 m_Logger.LogWarning("OpenMod is moving from YamlDotNet to VYaml");
