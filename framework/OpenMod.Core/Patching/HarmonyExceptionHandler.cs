@@ -9,7 +9,7 @@ namespace OpenMod.Core.Patching
     [OpenModInternal]
     public static class HarmonyExceptionHandler
     {
-        public delegate ILoggerFactory LoggerFactoryGetter();
+        public delegate ILoggerFactory? LoggerFactoryGetter();
         public static event LoggerFactoryGetter? LoggerFactoryGetterEvent;
 
         public static void ReportCleanupException(Type type, Exception? exception, MethodBase? originalMethod)

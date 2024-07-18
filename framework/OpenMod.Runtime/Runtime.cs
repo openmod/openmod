@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using HarmonyLib;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,10 +21,11 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.Common.Hotloading;
+using OpenMod.Core;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
+using OpenMod.Core.Patching;
 using OpenMod.Core.Permissions;
-using OpenMod.Core.Persistence;
 using OpenMod.Core.Plugins;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
@@ -39,8 +41,11 @@ namespace OpenMod.Runtime
     [OpenModInternal]
     public sealed class Runtime : IRuntime
     {
+        private readonly Harmony m_Harmony;
+
         public Runtime()
         {
+            m_Harmony = new(OpenModComponentId);
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
             HostAssemblies = [];
             m_Logger = null!;
@@ -159,10 +164,17 @@ namespace OpenMod.Runtime
                     startup.RegisterIocAssemblyAndCopyResources(assembly, string.Empty);
                 }
 
+                HarmonyExceptionHandler.LoggerFactoryGetterEvent += LoggerFactoryGetter;
+                m_Harmony.PatchAll(typeof(HarmonyUnpatchAllPatch).Assembly);
+
                 var configFile = Path.Combine(WorkingDirectory, "openmod.yaml");
                 if (File.Exists(configFile))
                 {
                     var yaml = await File.ReadAllBytesAsync(configFile);
+                    if (yaml.Length == 0)
+                    {
+                        throw new Exception("openmod.yaml is corrupted, please delete the file and restart the server.");
+                    }
                     var config = YamlSerializer.Deserialize<Dictionary<string, object>>(yaml);
 
                     var hotReloadingEnabled = true;
@@ -298,6 +310,11 @@ namespace OpenMod.Runtime
                 Console.WriteLine(ex);
                 throw;
             }
+        }
+
+        private ILoggerFactory? LoggerFactoryGetter()
+        {
+            return m_LoggerFactory;
         }
 
         private Type? GetOpenmodHostInformation(IEnumerable<Assembly> openModHostAssemblies)
@@ -514,7 +531,7 @@ namespace OpenMod.Runtime
         {
             builder
                 .SetBasePath(WorkingDirectory)
-                .AddYamlFileEx("openmod.yaml", optional: false, reloadOnChange: true)
+                .AddYamlFileEx("openmod.yaml", false, true)
                 .AddEnvironmentVariables("OpenMod_")
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -663,6 +680,9 @@ namespace OpenMod.Runtime
             }
 
             Status = RuntimeStatus.Unloaded;
+
+            m_Harmony.UnpatchAll(m_Harmony.Id);
+            HarmonyExceptionHandler.LoggerFactoryGetterEvent -= LoggerFactoryGetter;
 
             m_DateLogger = null;
             m_LoggerFactory = null;

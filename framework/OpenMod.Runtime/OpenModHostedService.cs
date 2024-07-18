@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -12,7 +11,6 @@ using OpenMod.API.Plugins;
 using OpenMod.Core.Events;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Localization;
-using OpenMod.Core.Patching;
 using SmartFormat;
 
 namespace OpenMod.Runtime
@@ -66,7 +64,6 @@ namespace OpenMod.Runtime
             m_Logger.LogInformation("Initializing for host: {HostName} v{HostVersion}",
                 m_HostInformation.HostName, m_HostInformation.HostVersion);
 
-            HarmonyExceptionHandler.LoggerFactoryGetterEvent += LoggerFactoryGetter;
             await m_Host.InitAsync();
 
             foreach (var assembly in m_Runtime.HostAssemblies)
@@ -91,14 +88,8 @@ namespace OpenMod.Runtime
             await m_JobScheduler.StartAsync();
         }
 
-        private ILoggerFactory LoggerFactoryGetter()
-        {
-            return m_LoggerFactory;
-        }
-
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            HarmonyExceptionHandler.LoggerFactoryGetterEvent -= LoggerFactoryGetter;
             return m_EventBus.EmitAsync(m_Host, this, new OpenModShutdownEvent());
         }
     }
