@@ -41,10 +41,10 @@ namespace OpenMod.Core.Persistence
             m_Logger = logger;
             m_Serializer = serializer;
             m_Runtime = runtime;
-            m_WriteCounter = new Dictionary<string, int>();
-            m_WatchedFiles = new List<string>();
-            m_KnownKeys = new HashSet<string>();
-            m_ContentHash = new Dictionary<string, string>();
+            m_WriteCounter = [];
+            m_WatchedFiles = [];
+            m_KnownKeys = [];
+            m_ContentHash = [];
 
             if (!string.IsNullOrEmpty(parameters.Prefix))
             {
@@ -58,7 +58,7 @@ namespace OpenMod.Core.Persistence
                 m_Suffix = $".{parameters.Suffix}";
             }
 
-            m_ChangeListeners = new List<RegisteredChangeListener>();
+            m_ChangeListeners = [];
             m_Locks = new ConcurrentDictionary<string, object>();
 
             EnsureFileSystemWatcherCreated(false);
@@ -150,22 +150,27 @@ namespace OpenMod.Core.Persistence
             CheckKeyValid(key);
 
             var headerData = Encoding.UTF8.GetBytes(header);//exception only if null
-            var encodedData = data != null ? await m_Serializer.SerializeAsync(data) : ReadOnlyMemory<byte>.Empty;
+            var dataToMemory = data != null ? await m_Serializer.SerializeAsync(data) : ReadOnlyMemory<byte>.Empty;
 
-            await using var memoryStream = new MemoryStream(headerData.Length + encodedData.Length);
-            if (headerData.Length > 0)
+            byte[] dataToSave;
+            await using (var memoryStream = new MemoryStream(headerData.Length + dataToMemory.Length))
             {
-                await memoryStream.WriteAsync(headerData);
+                if (headerData.Length > 0)
+                {
+                    await memoryStream.WriteAsync(headerData);
+                }
+
+                await memoryStream.WriteAsync(dataToMemory);
+                dataToSave = memoryStream.ToArray();
             }
-            await memoryStream.WriteAsync(encodedData);
-            
+
             var filePath = GetFilePathForKey(key);
             RegisterKnownKey(key);
 
             lock (GetLock(key))
             {
                 using var sha = new SHA256Managed();
-                var contentHash = BitConverter.ToString(sha.ComputeHash(memoryStream));
+                var contentHash = BitConverter.ToString(sha.ComputeHash(dataToSave));
 
                 var directory = Path.GetDirectoryName(filePath);
                 if (directory != null && !Directory.Exists(directory))
@@ -196,8 +201,7 @@ namespace OpenMod.Core.Persistence
 
                 try
                 {
-                    File.WriteAllBytes(filePath, memoryStream.ToArray());
-
+                    File.WriteAllBytes(filePath, dataToSave);
                     m_ContentHash[key] = contentHash;
                 }
                 catch
@@ -214,7 +218,6 @@ namespace OpenMod.Core.Persistence
                 }
             }
 
-
             //bug: the follow lines work on .NET Core / Framework but not on mono
             //using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
             //return fileStream.WriteAsync(encodedData, 0, encodedData.Length);
@@ -226,7 +229,7 @@ namespace OpenMod.Core.Persistence
 
             var filePath = GetFilePathForKey(key);
             var fileInfo = new FileInfo(filePath);
-            return Task.FromResult(fileInfo.Exists && fileInfo.Length != 0);
+            return Task.FromResult(fileInfo.Exists && fileInfo.Length > 0);
         }
 
         public virtual async Task<T?> LoadAsync<T>(string key) where T : class
@@ -276,12 +279,7 @@ namespace OpenMod.Core.Persistence
             RegisterKnownKey(key);
 
             var filePath = GetFilePathForKey(key);
-            var directory = Path.GetDirectoryName(filePath);
-
-            if (directory == null)
-            {
-                throw new Exception($"Unable to retrieve directory info for file: {filePath}");
-            }
+            var directory = Path.GetDirectoryName(filePath) ?? throw new Exception($"Unable to retrieve directory info for file: {filePath}");
 
             if (m_FileSystemWatcher is not null)
             {
@@ -417,20 +415,13 @@ namespace OpenMod.Core.Persistence
             m_ContentHash.Clear();
         }
 
-        private class RegisteredChangeListener
+        private class RegisteredChangeListener(IOpenModComponent component, string key, Action callback)
         {
-            public RegisteredChangeListener(IOpenModComponent component, string key, Action callback)
-            {
-                Component = component;
-                Key = key;
-                Callback = callback;
-            }
+            public IOpenModComponent Component { get => component; }
 
-            public IOpenModComponent Component { get; }
+            public string Key { get => key; }
 
-            public string Key { get; }
-
-            public Action Callback { get; }
+            public Action Callback { get => callback; }
         }
     }
 }
