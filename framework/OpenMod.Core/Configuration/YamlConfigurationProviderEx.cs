@@ -30,7 +30,7 @@ namespace OpenMod.Core.Configuration
                 var processedNode = GetKeyValuesFromNode(nodes);
                 Data = processedNode.ToImmutableSortedDictionary();
             }
-            catch (YamlSerializerException e)
+            catch (Exception e)
             {
                 throw new FormatException($"Could not parse the YAML file: {e.Message}.", e);
             }
@@ -119,12 +119,12 @@ namespace OpenMod.Core.Configuration
 
         private void PreProcessYaml(ref string yaml)
         {
-            if (Source is not YamlConfigurationSourceEx sourceEx || sourceEx.Variables == null)
+            if (source.Variables == null)
             {
                 return;
             }
 
-            foreach (var variable in sourceEx.Variables)
+            foreach (var variable in source.Variables)
             {
                 yaml = yaml.Replace("{{" + variable.Key + "}}", variable.Value);
             }
