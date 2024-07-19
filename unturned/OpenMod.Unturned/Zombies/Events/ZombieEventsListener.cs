@@ -166,7 +166,7 @@ namespace OpenMod.Unturned.Zombies.Events
         internal static class ZombiePatches
         {
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex, MethodBase original)
+            public static Exception? Cleanup(Exception? ex, MethodBase? original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(ZombiePatches), ex, original);
                 return null;

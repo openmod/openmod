@@ -424,7 +424,7 @@ namespace OpenMod.Unturned.Building.Events
         private static class Patches
         {
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex, MethodBase original)
+            public static Exception? Cleanup(Exception? ex, MethodBase? original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;

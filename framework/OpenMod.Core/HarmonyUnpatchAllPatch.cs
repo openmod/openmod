@@ -9,7 +9,7 @@ namespace OpenMod.Core
     public static class HarmonyUnpatchAllPatch
     {
         [HarmonyCleanup]
-        public static Exception? Cleanup(Exception ex, MethodBase original)
+        public static Exception? Cleanup(Exception? ex, MethodBase? original)
         {
             HarmonyExceptionHandler.ReportCleanupException(typeof(HarmonyUnpatchAllPatch), ex, original);
             return null;

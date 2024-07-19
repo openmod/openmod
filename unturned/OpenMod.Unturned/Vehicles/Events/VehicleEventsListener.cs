@@ -332,7 +332,7 @@ namespace OpenMod.Unturned.Vehicles.Events
         internal static class VehiclePatches
         {
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex, MethodBase original)
+            public static Exception? Cleanup(Exception? ex, MethodBase? original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(VehiclePatches), ex, original);
                 return null;

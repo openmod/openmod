@@ -59,7 +59,7 @@ namespace OpenMod.Unturned.Environment.Events
         private static class Patch_LightingManager
         {
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex, MethodBase original)
+            public static Exception? Cleanup(Exception? ex, MethodBase? original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(Patch_LightingManager), ex, original);
                 return null;
