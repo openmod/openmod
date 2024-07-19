@@ -1,8 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore.Design;
+﻿extern alias DI_A;
+
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.EntityFrameworkCore.MySql.Configurator;
 using System;
+
+using DI_A.Microsoft.Extensions.DependencyInjection;
+using ServiceCollection = DI_A.Microsoft.Extensions.DependencyInjection.ServiceCollection;
 
 namespace OpenMod.EntityFrameworkCore.MySql
 {

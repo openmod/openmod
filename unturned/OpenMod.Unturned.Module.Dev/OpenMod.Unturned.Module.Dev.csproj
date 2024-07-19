@@ -8,6 +8,7 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\UnityEngineDependentProjectProps.props" />
 
   <ItemGroup>
+    <ProjectReference Include="..\..\framework\OpenMod.Runtime\OpenMod.Runtime.csproj" />
     <ProjectReference Include="..\OpenMod.Unturned.Module.Bootstrapper\OpenMod.Unturned.Module.Bootstrapper.csproj" />
     <ProjectReference Include="..\OpenMod.Unturned.Module.Shared\OpenMod.Unturned.Module.Shared.csproj" />
     <ProjectReference Include="..\OpenMod.Unturned\OpenMod.Unturned.csproj" />
