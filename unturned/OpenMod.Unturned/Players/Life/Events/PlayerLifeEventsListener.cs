@@ -1,9 +1,9 @@
 ﻿using HarmonyLib;
 using JetBrains.Annotations;
+using OpenMod.Core.Patching;
 using OpenMod.Extensions.Games.Abstractions.Entities;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using Steamworks;
 using System;
@@ -163,7 +163,7 @@ namespace OpenMod.Unturned.Players.Life.Events
         internal static class Patches
         {
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex, MethodBase original)
+            public static Exception? Cleanup(Exception? ex, MethodBase? original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;

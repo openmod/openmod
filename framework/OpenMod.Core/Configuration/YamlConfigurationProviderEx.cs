@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
-using System.Reflection;
+using System.Text;
 using Microsoft.Extensions.Configuration;
-using NetEscapades.Configuration.Yaml;
 using OpenMod.API;
-using YamlDotNet.Core;
+using OpenMod.Common.Helpers;
+using VYaml.Serialization;
 
 namespace OpenMod.Core.Configuration
 {
@@ -14,58 +15,120 @@ namespace OpenMod.Core.Configuration
     /// Ex: Supports variables.
     /// </summary>
     [OpenModInternal]
-    public class YamlConfigurationProviderEx : FileConfigurationProvider
+    public class YamlConfigurationProviderEx(YamlConfigurationSourceEx source) : FileConfigurationProvider(source)
     {
-        private readonly YamlConfigurationSourceEx m_Source;
-        private static readonly Type s_ParserType;
-        private static readonly MethodInfo s_ParseMethod;
-
-        static YamlConfigurationProviderEx()
-        {
-            var assembly = typeof(YamlConfigurationProvider).Assembly;
-            s_ParserType = assembly.GetType("NetEscapades.Configuration.Yaml.YamlConfigurationStreamParser");
-            s_ParseMethod = s_ParserType.GetMethod("Parse", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
-        }
-
-        public YamlConfigurationProviderEx(YamlConfigurationSourceEx source) : base(source)
-        {
-            m_Source = source;
-        }
-
         public override void Load(Stream stream)
         {
-            using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
-            var yaml = reader.ReadToEnd();
-
-            PreProcessYaml(ref yaml);
-
-            using var outStream = new MemoryStream();
-            using var writer = new StreamWriter(outStream, reader.CurrentEncoding);
-            writer.Write(yaml);
-            writer.Flush();
-            outStream.Seek(0, SeekOrigin.Begin);
-
-            var parser = Activator.CreateInstance(s_ParserType);
+            var binData = stream.ReadAllBytes();
+            var decodedData = UTF8Encoding.UTF8.GetString(binData);
+            PreProcessYaml(ref decodedData);
+            binData = UTF8Encoding.UTF8.GetBytes(decodedData);
 
             try
             {
-                var invokeResult = s_ParseMethod.Invoke(parser, new object[] { outStream })!;
-                Data = (IDictionary<string, string?>)invokeResult;
+                var nodes = YamlSerializer.Deserialize<IDictionary<string, object>>(binData);
+                var processedNode = GetKeyValuesFromNode(nodes);
+                Data = processedNode.ToImmutableSortedDictionary();
             }
-            catch (YamlException e)
+            catch (Exception e)
             {
                 throw new FormatException($"Could not parse the YAML file: {e.Message}.", e);
             }
         }
 
+        private IEnumerable<KeyValuePair<string, string?>> GetKeyValuesFromNode(IEnumerable<KeyValuePair<string, object>> nodes)
+        {
+            foreach (var node in nodes)
+            {
+                var nodeData = GetKeyValuesFromNode(node.Value);
+                foreach (var item in nodeData)
+                {
+                    yield return KeyValuePair.Create($"{node.Key}:{item.Key}", item.Value);
+                }
+            }
+        }
+
+        private IEnumerable<KeyValuePair<string, string?>> GetKeyValuesFromNode(object node)
+        {
+            switch (node)
+            {
+                case IDictionary<object, object> dict:
+                    foreach (var item in GetKeyValuesFromNode(dict))
+                    {
+                        yield return item;
+                    }
+                    break;
+
+                case IList<object> list:
+                    foreach (var item in GetKeyValuesFromNode(list))
+                    {
+                        yield return item;
+                    }
+                    break;
+
+                default:
+                    var v = node.ToString();
+                    //YamlDotNet set all bool to lower case
+                    if (node is bool)
+                    {
+                        v = v.ToLower();
+                    }
+
+                    yield return KeyValuePair.Create<string, string?>(string.Empty, v);
+                    break;
+            }
+        }
+
+        private IEnumerable<KeyValuePair<string, string?>> GetKeyValuesFromNode(IDictionary<object, object> node)
+        {
+            var strBuilder = new StringBuilder();
+            foreach (var nodeItem in node)
+            {
+                var itemData = GetKeyValuesFromNode(nodeItem.Value);
+                foreach (var entry in itemData)
+                {
+                    strBuilder.Clear();
+                    strBuilder.Append(nodeItem.Key);
+                    if (!string.IsNullOrEmpty(entry.Key))
+                    {
+                        strBuilder.Append(":");
+                        strBuilder.Append(entry.Key);
+                    }
+
+                    yield return KeyValuePair.Create(strBuilder.ToString(), entry.Value);
+                }
+            }
+        }
+
+        private IEnumerable<KeyValuePair<string, string?>> GetKeyValuesFromNode(IList<object> node)
+        {
+            var strBuilder = new StringBuilder();
+            for (int i = 0; i < node.Count; i++)
+            {
+                var item = node[i];
+                var itemData = GetKeyValuesFromNode(item);
+                foreach (var entry in itemData)
+                {
+                    strBuilder.Clear();
+                    strBuilder.Append(i);
+                    if (!string.IsNullOrEmpty(entry.Key))
+                    {
+                        strBuilder.Append(":");
+                        strBuilder.Append(entry.Key);
+                    }
+                    yield return KeyValuePair.Create(strBuilder.ToString(), entry.Value);
+                }
+            }
+        }
+
         private void PreProcessYaml(ref string yaml)
         {
-            if (m_Source.Variables == null)
+            if (source.Variables == null)
             {
                 return;
             }
 
-            foreach (var variable in m_Source.Variables)
+            foreach (var variable in source.Variables)
             {
                 yaml = yaml.Replace("{{" + variable.Key + "}}", variable.Value);
             }

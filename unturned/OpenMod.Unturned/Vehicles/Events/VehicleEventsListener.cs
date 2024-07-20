@@ -2,9 +2,9 @@
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
 using OpenMod.API;
+using OpenMod.Core.Patching;
 using OpenMod.UnityEngine.Extensions;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using Steamworks;
 using System;
@@ -332,7 +332,7 @@ namespace OpenMod.Unturned.Vehicles.Events
         internal static class VehiclePatches
         {
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex, MethodBase original)
+            public static Exception? Cleanup(Exception? ex, MethodBase? original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(VehiclePatches), ex, original);
                 return null;

@@ -7,13 +7,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OpenMod.API;
 using OpenMod.API.Persistence;
 using OpenMod.Core.Helpers;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization.TypeInspectors;
 
 namespace OpenMod.Core.Persistence
 {
@@ -24,10 +20,9 @@ namespace OpenMod.Core.Persistence
         private readonly string? m_Suffix;
         private readonly string m_BasePath;
 
-        private readonly ISerializer m_Serializer;
-        private readonly IDeserializer m_Deserializer;
         private readonly List<RegisteredChangeListener> m_ChangeListeners;
         private readonly ILogger<YamlDataStore>? m_Logger;
+        private readonly IOpenModSerializer m_Serializer;
         private readonly IRuntime? m_Runtime;
         private readonly List<string> m_WatchedFiles;
         private readonly ConcurrentDictionary<string, object> m_Locks;
@@ -39,16 +34,17 @@ namespace OpenMod.Core.Persistence
 
         public YamlDataStore(DataStoreCreationParameters parameters,
             ILogger<YamlDataStore>? logger,
-            IRuntime? runtime,
-            IOptions<YamlDataStoreOptions> options)
+            IOpenModSerializer serializer,
+            IRuntime? runtime)
         {
             m_LogOnChange = parameters.LogOnChange;
             m_Logger = logger;
+            m_Serializer = serializer;
             m_Runtime = runtime;
-            m_WriteCounter = new Dictionary<string, int>();
-            m_WatchedFiles = new List<string>();
-            m_KnownKeys = new HashSet<string>();
-            m_ContentHash = new Dictionary<string, string>();
+            m_WriteCounter = [];
+            m_WatchedFiles = [];
+            m_KnownKeys = [];
+            m_ContentHash = [];
 
             if (!string.IsNullOrEmpty(parameters.Prefix))
             {
@@ -62,25 +58,7 @@ namespace OpenMod.Core.Persistence
                 m_Suffix = $".{parameters.Suffix}";
             }
 
-            var serializerBuilder = new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeInspector(i => new SerializableIgnoreInspector(i))
-                .DisableAliases();
-            var deserializerBuilder = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeInspector(i => new SerializableIgnoreInspector(i))
-                .IgnoreUnmatchedProperties();
-
-            foreach(var converter in options.Value.Converters)
-            {
-                serializerBuilder.WithTypeConverter(converter);
-                deserializerBuilder.WithTypeConverter(converter);
-            }
-
-            m_Serializer = serializerBuilder.Build();
-            m_Deserializer = deserializerBuilder.Build();
-
-            m_ChangeListeners = new List<RegisteredChangeListener>();
+            m_ChangeListeners = [];
             m_Locks = new ConcurrentDictionary<string, object>();
 
             EnsureFileSystemWatcherCreated(false);
@@ -164,31 +142,35 @@ namespace OpenMod.Core.Persistence
 
         public virtual async Task SaveAsync<T>(string key, T? data) where T : class
         {
-            await SaveAsync(key, data, "");
+            await SaveAsync(key, data, string.Empty);
         }
 
-        internal Task SaveAsync<T>(string key, T? data, string header) where T : class
+        internal async Task SaveAsync<T>(string key, T? data, string header) where T : class
         {
             CheckKeyValid(key);
 
-            var serializedYaml =
-                data == null
-                    ? string.Empty
-                    : m_Serializer.Serialize(data);
+            var headerData = Encoding.UTF8.GetBytes(header);//exception only if null
+            var dataToMemory = data != null ? await m_Serializer.SerializeAsync(data) : ReadOnlyMemory<byte>.Empty;
 
-            if (header != "")
+            byte[] dataToSave;
+            await using (var memoryStream = new MemoryStream(headerData.Length + dataToMemory.Length))
             {
-                serializedYaml = header + serializedYaml;
+                if (headerData.Length > 0)
+                {
+                    await memoryStream.WriteAsync(headerData);
+                }
+
+                await memoryStream.WriteAsync(dataToMemory);
+                dataToSave = memoryStream.ToArray();
             }
 
-            var encodedData = Encoding.UTF8.GetBytes(serializedYaml);
             var filePath = GetFilePathForKey(key);
             RegisterKnownKey(key);
 
             lock (GetLock(key))
             {
                 using var sha = new SHA256Managed();
-                var contentHash = BitConverter.ToString(sha.ComputeHash(encodedData));
+                var contentHash = BitConverter.ToString(sha.ComputeHash(dataToSave));
 
                 var directory = Path.GetDirectoryName(filePath);
                 if (directory != null && !Directory.Exists(directory))
@@ -204,7 +186,7 @@ namespace OpenMod.Core.Persistence
                     // otherwise the file change watcher won't trigger and result in desynced write counter state
                     if (string.Equals(fileHash, contentHash, StringComparison.Ordinal))
                     {
-                        return Task.CompletedTask;
+                        return;
                     }
                 }
 
@@ -219,8 +201,7 @@ namespace OpenMod.Core.Persistence
 
                 try
                 {
-                    File.WriteAllBytes(filePath, encodedData);
-
+                    File.WriteAllBytes(filePath, dataToSave);
                     m_ContentHash[key] = contentHash;
                 }
                 catch
@@ -237,8 +218,6 @@ namespace OpenMod.Core.Persistence
                 }
             }
 
-            return Task.CompletedTask;
-
             //bug: the follow lines work on .NET Core / Framework but not on mono
             //using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
             //return fileStream.WriteAsync(encodedData, 0, encodedData.Length);
@@ -249,7 +228,8 @@ namespace OpenMod.Core.Persistence
             CheckKeyValid(key);
 
             var filePath = GetFilePathForKey(key);
-            return Task.FromResult(File.Exists(filePath));
+            var fileInfo = new FileInfo(filePath);
+            return Task.FromResult(fileInfo.Exists && fileInfo.Length > 0);
         }
 
         public virtual async Task<T?> LoadAsync<T>(string key) where T : class
@@ -280,7 +260,7 @@ namespace OpenMod.Core.Persistence
             m_ContentHash[key] = contentHash;
 
             var serializedYaml = Encoding.UTF8.GetString(encodedData);
-            return m_Deserializer.Deserialize<T>(serializedYaml);
+            return await m_Serializer.DeserializeAsync<T>(encodedData);
         }
 
         public IDisposable AddChangeWatcher(string key, IOpenModComponent component, Action onChange)
@@ -297,14 +277,6 @@ namespace OpenMod.Core.Persistence
 
             CheckKeyValid(key);
             RegisterKnownKey(key);
-
-            var filePath = GetFilePathForKey(key);
-            var directory = Path.GetDirectoryName(filePath);
-
-            if (directory == null)
-            {
-                throw new Exception($"Unable to retrieve directory info for file: {filePath}");
-            }
 
             if (m_FileSystemWatcher is not null)
             {
@@ -402,21 +374,10 @@ namespace OpenMod.Core.Persistence
 
         private void IncrementWriteCounter(string key)
         {
-#if NETSTANDARD2_1
             if (!m_WriteCounter.TryAdd(key, 1))
             {
                 m_WriteCounter[key]++;
             }
-#else
-            if (!m_WriteCounter.ContainsKey(key))
-            {
-                m_WriteCounter.Add(key, 1);
-            }
-            else
-            {
-                m_WriteCounter[key]++;
-            }
-#endif
         }
 
         private bool DecrementWriteCounter(string key)
@@ -451,39 +412,13 @@ namespace OpenMod.Core.Persistence
             m_ContentHash.Clear();
         }
 
-        private class RegisteredChangeListener
+        private class RegisteredChangeListener(IOpenModComponent component, string key, Action callback)
         {
-            public RegisteredChangeListener(IOpenModComponent component, string key, Action callback)
-            {
-                Component = component;
-                Key = key;
-                Callback = callback;
-            }
+            public IOpenModComponent Component { get => component; }
 
-            public IOpenModComponent Component { get; }
+            public string Key { get => key; }
 
-            public string Key { get; }
-
-            public Action Callback { get; }
-        }
-
-        //Note we could try use AttributeOverride, but they are processed after YamlIgnoreAttribute
-        //So if we add YamlIgnoreAttribute they will be ignored
-        // ReSharper disable once MemberCanBePrivate.Global
-        public class SerializableIgnoreInspector : TypeInspectorSkeleton
-        {
-            private readonly ITypeInspector m_InnerTypeDescriptor;
-
-            public SerializableIgnoreInspector(ITypeInspector typeInspector)
-            {
-                m_InnerTypeDescriptor = typeInspector;
-            }
-
-            public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
-            {
-                var inspectorProps = m_InnerTypeDescriptor.GetProperties(type, container);
-                return inspectorProps.Where(inspectProp => inspectProp.GetCustomAttribute<SerializeIgnoreAttribute>() == null);
-            }
+            public Action Callback { get => callback; }
         }
     }
 }

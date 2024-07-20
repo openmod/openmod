@@ -2,8 +2,8 @@
 using System.Reflection;
 using HarmonyLib;
 using JetBrains.Annotations;
+using OpenMod.Core.Patching;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 
 namespace OpenMod.Unturned.Players.Inventory.Events
@@ -152,7 +152,7 @@ namespace OpenMod.Unturned.Players.Inventory.Events
         internal static class Patches
         {
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex, MethodBase original)
+            public static Exception? Cleanup(Exception? ex, MethodBase? original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;

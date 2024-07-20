@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenMod.API.Users;
+using VYaml.Annotations;
 
 namespace OpenMod.Core.Users
 {
     [Serializable]
-    public sealed class UsersData
+    [YamlObject]
+    public sealed partial class UsersData
     {
         public List<UserData>? Users { get; set; }
     }

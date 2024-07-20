@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using OpenMod.API.Jobs;
+using VYaml.Annotations;
 
 namespace OpenMod.Core.Jobs
 {
-    public class ScheduledJobsFile
+    [YamlObject]
+    public partial class ScheduledJobsFile
     {
-        public List<ScheduledJob>? Jobs { get; set; } = new();
+        public List<ScheduledJob>? Jobs { get; set; } = [];
     }
 }

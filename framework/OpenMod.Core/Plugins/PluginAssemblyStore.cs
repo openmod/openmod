@@ -7,14 +7,13 @@ using OpenMod.API.Plugins;
 using OpenMod.NuGet;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using OpenMod.Common.Helpers;
 using OpenMod.Common.Hotloading;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using OpenMod.API.Persistence;
+using VYaml.Serialization;
 
 namespace OpenMod.Core.Plugins
 {
@@ -52,10 +51,6 @@ namespace OpenMod.Core.Plugins
         private async Task<ICollection<Assembly>> InstallPackagesInEmbeddedFile(Assembly assembly,
             ICollection<Assembly> ignoredAssemblies)
         {
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
             var newPlugins = new List<Assembly>();
 
             try
@@ -71,22 +66,15 @@ namespace OpenMod.Core.Plugins
                 m_Logger.LogDebug("Found packages.yaml with name {PackagesResourceName}.", packagesResourceName);
                 m_Logger.LogDebug("Package resource info {PackagesRosourceInfo}.", packagesRosourceInfo);
 
-#if NETSTANDARD2_1_OR_GREATER
                 await using var stream = assembly.GetManifestResourceStream(packagesResourceName);
-#else
-                using var stream = assembly.GetManifestResourceStream(packagesResourceName);
-#endif
                 if (stream == null)
                 {
                     return newPlugins;
                 }
 
-                using var reader = new StreamReader(stream);
-                var packagesContent = await reader.ReadToEndAsync();
-
-                var deserialized = deserializer.Deserialize<SerializedPackagesFile>(packagesContent).Packages;
-
-                var packages = deserialized?.Select(d => new PackageIdentity(d.Id,
+                var packagesData = stream.ReadAllBytes();
+                var deserialized = YamlSerializer.Deserialize<SerializedPackagesFile>(packagesData);
+                var packages = deserialized?.Packages.Select(d => new PackageIdentity(d.Id,
                         d.Version.Equals("latest", StringComparison.OrdinalIgnoreCase)
                             ? null
                             : new NuGetVersion(d.Version)))
