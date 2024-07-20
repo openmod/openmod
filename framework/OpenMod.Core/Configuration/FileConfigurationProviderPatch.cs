@@ -10,7 +10,7 @@ using System.Reflection.Emit;
 namespace OpenMod.Core.Configuration
 {
     [HarmonyPatch]
-    internal class FileConfigurationProviderPatch
+    internal static class FileConfigurationProviderPatch
     {
         [HarmonyCleanup]
         public static Exception? Cleanup(Exception? ex, MethodBase? original)
@@ -25,7 +25,7 @@ namespace OpenMod.Core.Configuration
         //if (file == null || !file.Exists) -> if (file == null || !file.Exists || file.Length == 0)
         [HarmonyPatch(typeof(FileConfigurationProvider), "Load", typeof(bool))]
         [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> GetSerializeMembersPatch(IEnumerable<CodeInstruction> insts, ILGenerator generator)
+        private static IEnumerable<CodeInstruction> GetSerializeMembersPatch(IEnumerable<CodeInstruction> insts, ILGenerator generator)
         {
             var instructions = new List<CodeInstruction>(insts);
             for (int i = 0; i < instructions.Count; i++)
@@ -46,10 +46,8 @@ namespace OpenMod.Core.Configuration
 
                 var ldArgInst = instructions[i + 5];
                 ldArgInst.WithLabels(label);
-
                 break;
             }
-
             return instructions;
         }
     }
