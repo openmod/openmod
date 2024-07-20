@@ -79,7 +79,22 @@ namespace OpenMod.Core.Persistence.Yaml
         {
             return type
                 .GetMembers(BindingFlags.Instance | BindingFlags.Public)
-                .Where(m => (m is FieldInfo || (m is PropertyInfo p && (p.CanRead || !p.CanWrite))) && Attribute.IsDefined(m, typeof(SerializeIgnoreAttribute)));
+                .Where(m =>
+                {
+                    if (m is PropertyInfo p)
+                    {
+                        if (!p.CanRead && p.CanWrite)
+                        {
+                            return false;
+                        }
+                    }
+                    else if (m is not FieldInfo)
+                    {
+                        return true;
+                    }
+
+                    return Attribute.IsDefined(m, typeof(SerializeIgnoreAttribute));
+                });
         }
         /*
          * This can be used to create a second fallback if needed

@@ -81,38 +81,42 @@ namespace OpenMod.Core.Configuration
 
         private IEnumerable<KeyValuePair<string, string?>> GetKeyValuesFromNode(IDictionary<object, object> node)
         {
+            var strBuilder = new StringBuilder();
             foreach (var nodeItem in node)
             {
                 var itemData = GetKeyValuesFromNode(nodeItem.Value);
                 foreach (var entry in itemData)
                 {
-                    var key = new StringBuilder(nodeItem.Key.ToString());
+                    strBuilder.Clear();
+                    strBuilder.Append(nodeItem.Key);
                     if (!string.IsNullOrEmpty(entry.Key))
                     {
-                        key.Append(":");
-                        key.Append(entry.Key);
+                        strBuilder.Append(":");
+                        strBuilder.Append(entry.Key);
                     }
 
-                    yield return KeyValuePair.Create(key.ToString(), entry.Value);
+                    yield return KeyValuePair.Create(strBuilder.ToString(), entry.Value);
                 }
             }
         }
 
         private IEnumerable<KeyValuePair<string, string?>> GetKeyValuesFromNode(IList<object> node)
         {
+            var strBuilder = new StringBuilder();
             for (int i = 0; i < node.Count; i++)
             {
                 var item = node[i];
                 var itemData = GetKeyValuesFromNode(item);
                 foreach (var entry in itemData)
                 {
-                    var key = new StringBuilder(i.ToString());
+                    strBuilder.Clear();
+                    strBuilder.Append(i);
                     if (!string.IsNullOrEmpty(entry.Key))
                     {
-                        key.Append(":");
-                        key.Append(entry.Key);
+                        strBuilder.Append(":");
+                        strBuilder.Append(entry.Key);
                     }
-                    yield return KeyValuePair.Create(key.ToString(), entry.Value);
+                    yield return KeyValuePair.Create(strBuilder.ToString(), entry.Value);
                 }
             }
         }

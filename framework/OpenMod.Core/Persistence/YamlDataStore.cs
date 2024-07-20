@@ -278,9 +278,6 @@ namespace OpenMod.Core.Persistence
             CheckKeyValid(key);
             RegisterKnownKey(key);
 
-            var filePath = GetFilePathForKey(key);
-            var directory = Path.GetDirectoryName(filePath) ?? throw new Exception($"Unable to retrieve directory info for file: {filePath}");
-
             if (m_FileSystemWatcher is not null)
             {
                 m_FileSystemWatcher.EnableRaisingEvents = true;
