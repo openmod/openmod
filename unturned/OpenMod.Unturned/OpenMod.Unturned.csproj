@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageDescription>Unturned integration for OpenMod</PackageDescription>
-    <TargetFrameworks>netstandard2.1</TargetFrameworks>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\props\SharedProjectProps.props" />
@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="MonoMod.ILHelpers" Version="1.0.1" Aliases="MonoMod" />
-    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.23.12.3">
+    <PackageReference Include="OpenMod.Unturned.Redist" Version="3.24.6.1">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
