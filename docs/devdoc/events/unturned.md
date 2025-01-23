@@ -113,7 +113,7 @@ These events are stored within the `OpenMod.Unturned.Players.Inventory.Events` n
 | UnturnedPlayerOpenedStorageEvent    | After a player opens a storage                     | No              |
 | UnturnedPlayerClosedStorageEvent    | After a player closes a storage                    | No              |
 | UnturnedPlayerTakingItemEvent       | Before a player takes an item from the ground      | Yes             |
-| UnturnedPlayerDroppedItemEvent      | After a player drops an item                       | No              |
+| UnturnedPlayerDroppedItemEvent      | After a player drops an item                       | Yes             |
 | UnturnedPlayerInventoryResizedEvent | After a player's inventory is resized              | No              |
 | UnturnedPlayerInventoryUpdatedEvent | After a player's inventory updates                 | No              |
 | UnturnedPlayerItemAddedEvent        | After an item is added to a player's inventory     | No              |
