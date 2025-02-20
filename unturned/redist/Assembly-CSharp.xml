@@ -188,6 +188,17 @@
             whereas most only need the collider for general-purpose selection in the level editor.
             </summary>
         </member>
+        <member name="M:SDG.Unturned.Items.checkSpaceEmpty(System.Byte,System.Byte,System.Byte,System.Byte,System.Byte)">
+            checks whether a space contains any filled slots
+        </member>
+        <member name="M:SDG.Unturned.Items.checkSpaceDrag(System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Boolean)">
+            checks whether an item can be dragged and takes into account if the item overlaps its old self
+        </member>
+        <member name="M:SDG.Unturned.Items.checkSpaceSwap(System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte)">
+            <summary>
+            checks whether the spot currently used by the old item is big enough to fit the new item
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.EVehicleThirdPersonCameraMode.RotationDetached">
             <summary>
             Camera does not rotate when the car rotates.
@@ -296,17 +307,6 @@
         <member name="F:SDG.Unturned.OptionsSettings.didProceedThroughOnlineSafetyMenuThisSession">
             <summary>
             Prevents menu from being shown twice without a restart.
-            </summary>
-        </member>
-        <member name="M:SDG.Unturned.Items.checkSpaceEmpty(System.Byte,System.Byte,System.Byte,System.Byte,System.Byte)">
-            checks whether a space contains any filled slots
-        </member>
-        <member name="M:SDG.Unturned.Items.checkSpaceDrag(System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Boolean)">
-            checks whether an item can be dragged and takes into account if the item overlaps its old self
-        </member>
-        <member name="M:SDG.Unturned.Items.checkSpaceSwap(System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte)">
-            <summary>
-            checks whether the spot currently used by the old item is big enough to fit the new item
             </summary>
         </member>
         <member name="E:SDG.Unturned.PlayerSkills.OnExperienceChanged_Global">
@@ -997,6 +997,7 @@
             </summary>
             <returns></returns>
         </member>
+        <!-- Badly formed XML comment ignored for member "M:SDG.Unturned.Skill.NormalizeLevel(System.Int32)" -->
         <member name="T:SDG.Unturned.IDialogueTarget">
             <summary>
             Implemented by components the player can talk with using DialogeAssets. (e.g., InteractableObjectNPC)
@@ -1743,6 +1744,47 @@
             Editor-only helper to read all text/dialogue.
             </summary>
         </member>
+        <member name="P:SDG.Unturned.SkinAsset.lightingTime">
+            <summary>
+            Used by dawn and dusk skins which pull per-level lighting colors.
+            </summary>
+        </member>
+        <member name="M:SDG.Unturned.SkinAsset.SetMaterialProperties(UnityEngine.Material)">
+            <summary>
+            Note: unfortunately it appears the stupid skin system always instantiated materials, but never destroys
+            them... will need to clean this up, but it will be tricky because the game does not hold a reference to them.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.SkinAsset.specialAudioOverride">
+            <summary>
+            Used by melee skins to override impact sound.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.CraftingBlacklistAsset">
+            <summary>
+            Restricts which items can be crafted.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.CraftingBlacklistAsset.inputItems">
+            <summary>
+            Restrict blueprints that consume these items.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.CraftingBlacklistAsset.outputItems">
+            <summary>
+            Restrict blueprints that generate these items.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.CraftingBlacklistAsset.allowCoreBlueprints">
+            <summary>
+            If false, blueprints on vanilla/core/built-in items are not allowed. Defaults to true.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.CraftingBlacklistAsset.blueprints">
+            <summary>
+            Restrict specific blueprints.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.LightingManager.SAVEDATA_VERSION_INITIAL">
             <summary>
             Version before named version constants were introduced. (2023-11-07)
@@ -1848,42 +1890,6 @@
         </member>
         <member name="M:SDG.Unturned.LightingManager.InitPerpetualWeather">
             <returns>True if perpetual weather was enabled, false otherwise.</returns>
-        </member>
-        <member name="P:SDG.Unturned.SkinAsset.lightingTime">
-            <summary>
-            Used by dawn and dusk skins which pull per-level lighting colors.
-            </summary>
-        </member>
-        <member name="M:SDG.Unturned.SkinAsset.SetMaterialProperties(UnityEngine.Material)">
-            <summary>
-            Note: unfortunately it appears the stupid skin system always instantiated materials, but never destroys
-            them... will need to clean this up, but it will be tricky because the game does not hold a reference to them.
-            </summary>
-        </member>
-        <member name="T:SDG.Unturned.CraftingBlacklistAsset">
-            <summary>
-            Restricts which items can be crafted.
-            </summary>
-        </member>
-        <member name="F:SDG.Unturned.CraftingBlacklistAsset.inputItems">
-            <summary>
-            Restrict blueprints that consume these items.
-            </summary>
-        </member>
-        <member name="F:SDG.Unturned.CraftingBlacklistAsset.outputItems">
-            <summary>
-            Restrict blueprints that generate these items.
-            </summary>
-        </member>
-        <member name="F:SDG.Unturned.CraftingBlacklistAsset.allowCoreBlueprints">
-            <summary>
-            If false, blueprints on vanilla/core/built-in items are not allowed. Defaults to true.
-            </summary>
-        </member>
-        <member name="F:SDG.Unturned.CraftingBlacklistAsset.blueprints">
-            <summary>
-            Restrict specific blueprints.
-            </summary>
         </member>
         <member name="T:SDG.Unturned.Rk4Spring2">
             <summary>
@@ -2070,6 +2076,11 @@
             If true, set sharedMaterial. If false, set material.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.CrawlerTrackTilingMaterialInstance.speed">
+            <summary>
+            Calculated speed of this track. Used by some wheels.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.InteractableVehicle.tempCollidersArray">
             <summary>
             Temporary array for use with physics queries.
@@ -2146,6 +2157,17 @@
             Doesn't imply the vehicle *uses* batteries, only that it contains a (potentially uncharged) battery item.
             </summary>
         </member>
+        <member name="P:SDG.Unturned.InteractableVehicle.WasNaturallySpawned">
+             <summary>
+             Nelson 2024-11-13: Adding this primarily to indicate whether a vehicle was spawned by the level versus
+             placed by a player or bought from a vendor. This way if the number of "naturally"-spawned vehicles is below
+             a certain threshold the level can spawn more. (e.g., a server where players have hoarded a bunch of
+             vendor-purchased vehicles and no default vehicles are left for new players.)
+            
+             Only available on the server.
+             Defaults to true for old saves to prevent suddenly spawning a bunch more vehicles.
+             </summary>
+        </member>
         <member name="P:SDG.Unturned.InteractableVehicle.canUseTurret">
             <summary>
             Whether the player can shoot their equipped turret.
@@ -2200,6 +2222,8 @@
         <member name="P:SDG.Unturned.InteractableVehicle.AnimatedSteeringAngle">
             <summary>
             Animated towards replicated steering angle. Used for steering wheel and front steering column.
+            Non-simulating wheels (e.g., car driven by remote client) use this as steering angle multiplied by their
+            per-wheel <see cref="F:SDG.Unturned.VehicleWheelConfiguration.steeringAngleMultiplier"/>.
             </summary>
         </member>
         <member name="F:SDG.Unturned.InteractableVehicle.frontModelTransform">
@@ -2282,6 +2306,12 @@
         <member name="M:SDG.Unturned.InteractableVehicle.checkEnter(SDG.Unturned.Player)">
             <summary>
             Is a given player allowed access to this vehicle?
+            </summary>
+        </member>
+        <member name="M:SDG.Unturned.InteractableVehicle.IsFriendlyToSentry(SDG.Unturned.InteractableSentry)">
+            <summary>
+            If true, sentry ignores this vehicle early in target scanning.
+            Friendly if locked by owner/group of sentry, or driven by owner/group of sentry.
             </summary>
         </member>
         <member name="M:SDG.Unturned.InteractableVehicle.calculateAverageLocalTireContactPosition">
@@ -2464,6 +2494,11 @@
         <member name="F:SDG.Unturned.InteractableVehicle.paintableMaterials">
             <summary>
             Materials to set _PaintColor on.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.InteractableVehicle.crawlerTrackMaterials">
+            <summary>
+            Materials to move UVs in sync with wheels.
             </summary>
         </member>
         <member name="F:SDG.Unturned.InteractableVehicle.decayLastUpdateTime">
@@ -2733,10 +2768,10 @@
         </member>
         <member name="F:SDG.Unturned.PlayerAnimator.viewmodelCameraLocalPositionOffset">
             <summary>
-            Constant (non-animated) offset. Used by gun to center the 3D sights on screen, and by chainsaw to shake the viewmodel.
+            Used by gun to hide viewmodel arms while aiming 2D scope, and by chainsaw to shake the viewmodel.
             </summary>
         </member>
-        <member name="F:SDG.Unturned.PlayerAnimator.turretViewmodelCameraLocalPositionOffset">
+        <member name="F:SDG.Unturned.PlayerAnimator.drivingViewmodelCameraLocalPositionOffset">
             <summary>
             Used to hide viewmodel arms while using a vehicle turret gun.
             </summary>
@@ -2898,6 +2933,18 @@
             Prior to 2022-04-11 this was the target field of view. (90/fov)
             </summary>
         </member>
+        <member name="P:SDG.Unturned.ItemSentryAsset.AmmoConsumptionProbability">
+            <summary>
+            [0, 1] percentage whether a shot decreases ammo count. Defaults to 100%.
+            For example, 0.25 means 25% of shots will use a bullet, while the remaining 75% will be free.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ItemSentryAsset.QualityConsumptionProbability">
+            <summary>
+            [0, 1] percentage whether a shot decreases quality. Defaults to 100%.
+            Combined with the gun's chance of decreasing quality.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.ItemSentryAsset.detectionRadius">
             <summary>
             Players/zombies within this range are treated as potential targets while scanning.
@@ -2946,6 +2993,12 @@
             Optional alternative barricade prefab specifically for the client preview spawned.
             </summary>
         </member>
+        <member name="P:SDG.Unturned.ItemBarricadeAsset.CanParentVehicleBePickedUp">
+            <summary>
+            By default, vehicles with "hooks" (such as the Skycrane) cannot pick up vehicles with barricades attached.
+            If all barricades on the vehicle set this to true then the vehicle *can* be picked up. Defaults to false.
+            </summary>
+        </member>
         <member name="P:SDG.Unturned.ItemBarricadeAsset.VehicleGuid">
             <summary>
             Vehicle to place.
@@ -2992,6 +3045,12 @@
             <summary>
             Invoked when last player exits the trigger.
             Called after OnPlayerExit.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.EWorkshopMenuSubmissionMode">
+            <summary>
+            Nelson 2024-12-16: This menu and ESteamUGCType are far from ideal, but I'm just trying to hack in a new tag for
+            server browser curation assets before the update. :P
             </summary>
         </member>
         <member name="E:SDG.Unturned.PlayerClothing.VisualToggleChanged">
@@ -3085,6 +3144,11 @@
             Index in renderer's materials array.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.PaintableVehicleSection.allMaterials">
+            <summary>
+            If true, apply to every item in renderer's materials array.
+            </summary>
+        </member>
         <member name="T:SDG.Unturned.EVehicleDefaultPaintColorMode">
             <summary>
             Controls how vehicle's default paint color (if applicable) is chosen.
@@ -3105,6 +3169,67 @@
             Pick a random HSV using VehicleRandomPaintColorConfiguration.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.EWheelSteeringMode.None">
+            <summary>
+            Wheel does not affect steering.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EWheelSteeringMode.SteeringAngle">
+            <summary>
+            Set steering angle according to <see cref="P:SDG.Unturned.VehicleAsset.steerMin"/> and <see cref="P:SDG.Unturned.VehicleAsset.steerMax"/>.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EWheelSteeringMode.CrawlerTrack">
+            <summary>
+            Increase or decrease motor torque to rotate vehicle in-place. (Tanks)
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.ECrawlerTrackForwardMode">
+            <summary>
+            For <see cref="F:SDG.Unturned.EWheelSteeringMode.CrawlerTrack"/>, indicates how a positive motor torque (forward) rotates
+            the vehicle.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ECrawlerTrackForwardMode.Auto">
+            <summary>
+            Wheels on the left side are Clockwise and wheels on the right side are Counter-Clockwise.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ECrawlerTrackForwardMode.Clockwise">
+            <summary>
+            Positive motor torque on this wheel rotates the vehicle clockwise.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ECrawlerTrackForwardMode.CounterClockwise">
+            <summary>
+            Positive motor torque on this wheel rotates the vehicle counter-clockwise.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.EWheelMotionEffectsMode">
+            <summary>
+            Controls whether wheel creates particle kickup effects for the ground surface material underneath.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EWheelMotionEffectsMode.None">
+            <summary>
+            Turn off motion effects. Default for wheels not using collider pose.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EWheelMotionEffectsMode.BothDirections">
+            <summary>
+            Enable motion effects. Default for wheels using collider pose.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EWheelMotionEffectsMode.ForwardOnly">
+            <summary>
+            Enable motion effects, but turn them off while moving backward.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EWheelMotionEffectsMode.BackwardOnly">
+            <summary>
+            Enable motion effects, but turn them off while moving forward.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.VehicleRandomPaintColorConfiguration.grayscaleChance">
             <summary>
             [0, 1] color will have zero saturation if random value is less than this. For example, 0.2 means 20% of
@@ -3120,11 +3245,6 @@
         <member name="F:SDG.Unturned.VehicleWheelConfiguration.wheelColliderPath">
             <summary>
             Transform path relative to Vehicle prefab with WheelCollider component.
-            </summary>
-        </member>
-        <member name="F:SDG.Unturned.VehicleWheelConfiguration.isColliderSteered">
-            <summary>
-            If true, WheelCollider's steerAngle is set according to steering wheel.
             </summary>
         </member>
         <member name="F:SDG.Unturned.VehicleWheelConfiguration.isColliderPowered">
@@ -3163,6 +3283,42 @@
             a wheel that does have a collider. Requires modelRadius to also be set.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.VehicleWheelConfiguration.copyCrawlerTrackSpeedIndex">
+            <summary>
+            If set, wheel model uses this crawler track's speed (average RPM of wheels). Prevents wheel model from
+            spinning out of sync with overall track.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.VehicleWheelConfiguration.steeringAngleMultiplier">
+            <summary>
+            Target steering angle is multiplied by this value. For example, can be set to a negative number for
+            rear-wheel steering. Defaults to 1.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.VehicleWheelConfiguration.modelSuspensionOffset">
+            <summary>
+            Vertical offset of model from simulated suspension position.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.VehicleWheelConfiguration.modelSuspensionSpeed">
+            <summary>
+            How quickly to interpolate model toward suspension position in meters per second.
+            If negative, position teleports immediately.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.VehicleWheelConfiguration.motionEffectsMode">
+            <summary>
+            Nelson 2024-12-06: Initially implemented as a minimum and maximum percentage of normalized forward velocity,
+            but think this is more practical. I can't think of why we would use values other than -1, 0, +1 for that,
+            and if we did we'd probably want some tuning for the angle particles are emitted at.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.VehicleWheelConfiguration.canExplode">
+            <summary>
+            If true, wheel should fly off when vehicle explodes. Defaults to true.
+            Used to simplify destroying vehicles with crawler tracks.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.EVehicleEngineSoundType.Legacy">
             <summary>
             Default.
@@ -3171,6 +3327,40 @@
         <member name="F:SDG.Unturned.EVehicleEngineSoundType.EngineRPMSimple">
             <summary>
             Set pitch and volume of a single clip according to engine RPM.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.CrawlerTrackTilingMaterial">
+            <summary>
+            Offsets a crawler track's material UV offset in sync with wheels rolling.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.CrawlerTrackTilingMaterial.path">
+            <summary>
+            Scene hierarchy path relative to vehicle root.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.CrawlerTrackTilingMaterial.materialIndex">
+            <summary>
+            Index in renderer's materials array.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.CrawlerTrackTilingMaterial.wheelIndices">
+            <summary>
+            Indices of wheels to copy RPM from.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.CrawlerTrackTilingMaterial.repeatDistance">
+             <summary>
+             How far to travel to offset UV 1x. (1/x)
+            
+             You can calculate RepeatDistance by selecting an edge parallel to the crawler track and dividing the UV
+             distance by the physical 3D distance. For example, if the UV length is 2 and the 3D length is 1.5 m then
+             the texture repeats 1.33 UV/m.
+             </summary>
+        </member>
+        <member name="F:SDG.Unturned.CrawlerTrackTilingMaterial.uvDirection">
+            <summary>
+            UV mainTextureOffset per distance traveled.
             </summary>
         </member>
         <member name="P:SDG.Unturned.VehicleAsset.SharedSkinLookupGuid">
@@ -3184,15 +3374,15 @@
             </summary>
         </member>
         <member name="M:SDG.Unturned.VehicleAsset.FindSharedSkinVehicleAsset">
-            <summary>
-            Supports redirects by VehicleRedirectorAsset.
+             <summary>
+             Supports redirects by VehicleRedirectorAsset.
             
-            "Shared Skins" were implemented when there were several asset variants of each vehicle. For example,
-            Off_Roader_Orange, Off_Roader_Purple, Off_Roader_Green, etc. Each vehicle had their "shared skin" set to
-            the same ID, and the skin asset had its target ID set to the shared ID. This isn't as necessary after
-            merging vanilla vehicle variants, but some mods may rely on it, and it needed GUID support now that the
-            target vehicle might not have a legacy ID.
-            </summary>
+             "Shared Skins" were implemented when there were several asset variants of each vehicle. For example,
+             Off_Roader_Orange, Off_Roader_Purple, Off_Roader_Green, etc. Each vehicle had their "shared skin" set to
+             the same ID, and the skin asset had its target ID set to the shared ID. This isn't as necessary after
+             merging vanilla vehicle variants, but some mods may rely on it, and it needed GUID support now that the
+             target vehicle might not have a legacy ID.
+             </summary>
         </member>
         <member name="F:SDG.Unturned.VehicleAsset.hasLoadedModel">
             <summary>
@@ -3255,14 +3445,49 @@
             Steering angle rotation change in degrees per second.
             </summary>
         </member>
+        <member name="P:SDG.Unturned.VehicleAsset.CrawlerTrackSteeringTorque">
+            <summary>
+            Added or subtracted from wheel motor torque in <see cref="F:SDG.Unturned.EWheelSteeringMode.CrawlerTrack"/> mode.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.VehicleAsset.CrawlerTrackSteeringSidewaysFrictionMultiplier">
+            <summary>
+            When a wheel is in <see cref="F:SDG.Unturned.EWheelSteeringMode.CrawlerTrack"/> mode and a steering input is applied the
+            <see cref="P:UnityEngine.WheelCollider.sidewaysFriction"/> stiffness is multiplied by this factor. This allows the vehicle
+            to rotate in-place with a lower steering torque, which helps prevent the vehicle from going out of control
+            while turning and accelerating.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.VehicleAsset.CrawlerTrackSteeringMaxSpeedScale">
+            <summary>
+            Multiplier for <see cref="P:SDG.Unturned.VehicleAsset.CrawlerTrackSteeringTorque"/> and <see cref="P:SDG.Unturned.VehicleAsset.CrawlerTrackSteeringSidewaysFrictionMultiplier"/>
+            while at target maximum speed (for the current forward/backward direction).
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.VehicleAsset.steeringLeaningForceMultiplier">
             <summary>
             Torque on Z axis applied according to steering input for bikes and motorcycles.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.VehicleAsset.steeringLeaningForceShouldScaleWithSpeed">
+            <summary>
+            If true, leaning force is multiplied by normalized speed to the power of steeringLeaningForceSpeedExponent.
+            Defaults to false.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.VehicleAsset.steeringLeaningForceSpeedExponent">
+            <summary>
+            Refer to steeringLeaningForceShouldScaleWithSpeed.
+            </summary>
+        </member>
         <member name="P:SDG.Unturned.VehicleAsset.ShouldExplosionCauseDamage">
             <summary>
             If true, explosion will damage nearby entities and kill passengers.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.VehicleAsset.explosionBurnMaterialSections">
+            <summary>
+            Only used if ShouldExplosionBurnMaterials. Optional. Allows specifying which renderers to burn.
             </summary>
         </member>
         <member name="P:SDG.Unturned.VehicleAsset.hasBicycle">
@@ -3513,13 +3738,13 @@
             </summary>
         </member>
         <member name="P:SDG.Unturned.VehicleAsset.IsPaintable">
-            <summary>
-            If true, Vehicle Paint items can be used on this vehicle.
-            Always false if <see cref="P:SDG.Unturned.VehicleAsset.SupportsPaintColor"/> is false.
+             <summary>
+             If true, Vehicle Paint items can be used on this vehicle.
+             Always false if <see cref="P:SDG.Unturned.VehicleAsset.SupportsPaintColor"/> is false.
             
-            Certain vehicles may support paint colors without also being paintable by players. For example, the creator
-            of a vehicle may want to use color variants without also allowing players to make it bright pink.
-            </summary>
+             Certain vehicles may support paint colors without also being paintable by players. For example, the creator
+             of a vehicle may want to use color variants without also allowing players to make it bright pink.
+             </summary>
         </member>
         <member name="M:SDG.Unturned.VehicleAsset.GetEngineGearRatio(System.Int32)">
             <summary>
@@ -3760,6 +3985,14 @@
         <member name="F:SDG.Unturned.VehiclesConfigData.Decay_Damage_Per_Second">
             <summary>
             After vehicle has been neglected for more than Decay_Time seconds it will begin taking this much damage per second.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.VehiclesConfigData.Min_Natural_Vehicles">
+            <summary>
+            Vehicles are considered "natural" if they were spawned by the level as opposed to players or vendors.
+            If less than this many natural vehicles exist in the level, more will be spawned. The minimum of this or
+            Max_Instances is used. (i.e., if this value is higher than max instances the max instances value is used
+            instead.)
             </summary>
         </member>
         <member name="F:SDG.Unturned.ZombiesConfigData.Quest_Boss_Respawn_Interval">
@@ -4385,6 +4618,36 @@
             Replacement for isAssociatedWithFlag to fix quest conditions and somewhat improve perf.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.EObjectInteractabilityNav.NONE">
+            <summary>
+            State doesn't affect AI collision.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EObjectInteractabilityNav.ON">
+            <summary>
+            AI collision is blocked when object state is ON.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EObjectInteractabilityNav.OFF">
+            <summary>
+            AI collision is blocked when object state is OFF.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.EObjectRubbleNavMode">
+            <summary>
+            Controls how rubble affects Nav game object.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EObjectRubbleNavMode.Unaffected">
+            <summary>
+            Default. Destruction of rubble sections does not affect whether Nav game object is active or not.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EObjectRubbleNavMode.DeactivateIfAllDead">
+            <summary>
+            AI collision is blocked when any sections are alive. Once all sections are dead AI collision is unblocked.
+            </summary>
+        </member>
         <member name="M:SDG.Unturned.WebUtils.ParseThirdPartyUrl(System.String,System.String@,System.Boolean,System.Boolean)">
             <summary>
             The game uses Process.Start to open web links when the Steam overlay is unavailable, which could be exploited
@@ -4692,6 +4955,13 @@
             Defaults to true.
             </summary>
         </member>
+        <member name="P:SDG.Unturned.ItemAsset.item">
+            <summary>
+            Nelson 2024-12-11: This can now be null for cosmetic items (<see cref="F:SDG.Unturned.ItemAsset.isPro"/>). For those items it wasn't
+            used outside of the main menu 3D item preview, in which case the clothing prefab is typically a better
+            visualization.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.ItemAsset.equipablePrefab">
             <summary>
             Optional alternative item prefab specifically for the PlayerEquipment prefab spawned.
@@ -4780,7 +5050,7 @@
             Skips checking for base textures if item cannot have skins.
             </summary>
         </member>
-        <member name="M:SDG.Unturned.ItemAsset.updateUseableType">
+        <member name="M:SDG.Unturned.ItemAsset.updateUseableType(SDG.Unturned.DatDictionary)">
             <summary>
             Find useableType by useable name.
             </summary>
@@ -5755,6 +6025,12 @@
             <summary>
             If true, the value of <see cref="F:SDG.Unturned.ItemClothingAsset.priorityOverCosmeticOverride"/> is used rather than <see cref="M:SDG.Unturned.ItemClothingAsset.GetDefaultTakesPriorityOverCosmetic"/>.
             Defaults to false. True if <see cref="F:SDG.Unturned.ItemClothingAsset.priorityOverCosmeticOverride"/> is set.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ItemClothingAsset.ClothingPrefab">
+            <summary>
+            For 3D clothes. Ideally, this wouldn't be type specific, but we have a separate prefab property for each
+            type of clothing at the moment.
             </summary>
         </member>
         <member name="M:SDG.Unturned.ItemClothingAsset.GetDefaultTakesPriorityOverCosmetic">
@@ -6828,6 +7104,12 @@
             Hacky replacement for Start() that runs after net ids are assigned but before sending player state.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.Player.isExpectingDestroy">
+            <summary>
+            Nelson 2024-11-11: Added to help narrow down if player is destroyed outside of Provider.removePlayer.
+            (public issue #4760)
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.CullingVolume.isManagedByLevelObject">
             <summary>
             Flag in case levelObject is destroyed.
@@ -6896,6 +7178,33 @@
         <member name="F:SDG.Unturned.EPlayerMessage.NOT_PAINTABLE">
             <summary>
             Vehicle doesn't support spray paints.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.GunStatsExporter">
+            <summary>
+            Nelson 2024-11-29: Curious to put all the gun stats in one place for easier comparison. Rather rudimentary at
+            the moment so not including in the update.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.EDriverTurretViewmodelMode">
+            <summary>
+            Controls how first-person arms are moved for turrets operated from the driver's seat.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EDriverTurretViewmodelMode.OffscreenWhileAiming">
+            <summary>
+            Default. Pushes first-person arms off-screen while aiming. Originally implemented for the Fighter Jet where
+            it looks weird if your arms are still visible when the camera zooms in while "aiming."
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EDriverTurretViewmodelMode.AlwaysOffscreen">
+            <summary>
+            Push first-person arms off-screen when equipped.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EDriverTurretViewmodelMode.AlwaysOnscreen">
+            <summary>
+            No particular use in mind, but included for completeness.
             </summary>
         </member>
         <member name="P:SDG.Unturned.ItemGunAsset.fireDelaySound">
@@ -7102,6 +7411,12 @@
             <summary>
             Common base for barricades and structures.
             2023-01-16: not ideal to be adding this so late in development, but at least it is a step in the right direction.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ItemPlaceableAsset.CanZombiesTarget">
+            <summary>
+            If true, this item is eligible for zombies to detect and attack when stuck.
+            Defaults to true.
             </summary>
         </member>
         <member name="P:SDG.Unturned.ItemPlaceableAsset.salvageItemRef">
@@ -7780,6 +8095,46 @@
             Uses hardcoded size of 4 x 4 x 4.
             </summary>
         </member>
+        <member name="T:SDG.Unturned.EServerListCurationAction">
+            <summary>
+            Determines how to handle a server if it matches a rule.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EServerListCurationAction.Label">
+            <summary>
+            Apply label and continue processing rules. 
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EServerListCurationAction.Allow">
+            <summary>
+            Show the server in the list.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EServerListCurationAction.Deny">
+            <summary>
+            Hide the server from the list.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCurationRule.action">
+            <summary>
+            Note: Port (if set) refers to the Steam query port.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCurationRule.inverted">
+            <summary>
+            If true, negate whether this rule matches. i.e., binary NOT.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCurationRule.latestBlockedServerCount">
+            <summary>
+            Incremented during server list refresh for each server blocked by this rule.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ServerListCurationAsset.Icon">
+            <summary>
+            Optional image bundled alongside the asset file.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.DestroyEventHook.AuthorityOnly">
             <summary>
             If true the event will only be invoked in offline mode and on the server.
@@ -8071,6 +8426,21 @@
             <summary>
             2023-01-25: fixing killing self with explosive to track kill under
             the assumption that this is only used for tracking stats. (public issue #2692)
+            </summary>
+        </member>
+        <member name="M:SDG.Unturned.CargoBuilder.GetOrAddDeclaration(System.String)">
+            <summary>
+            Finds an existing "{{Cargo/name" (if any), otherwise adds a new one.
+            </summary>
+        </member>
+        <member name="M:SDG.Unturned.CargoBuilder.AddDeclaration(System.String)">
+            <summary>
+            Adds a new "{{Cargo/name" even if one already exists.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.CargoExporter">
+            <summary>
+            Helper for wiki writers to dump game data into a useful format.
             </summary>
         </member>
         <member name="P:SDG.Unturned.InteractableSign.text">
@@ -8802,6 +9172,11 @@
             Parses value between two keys <stuff>thing</stuff> would parse thing
             </summary>
         </member>
+        <member name="F:SDG.Unturned.SteamServerAdvertisement.deniedByRule">
+            <summary>
+            If set, this server was denied by a server curation list.
+            </summary>
+        </member>
         <member name="T:SDG.Unturned.UnturnedPlayerLoop">
             <summary>
             Disables Unity native systems unused by Unturned.
@@ -9079,6 +9454,11 @@
             [0.0, 1.0] normalized position animated toward replicatedSuspensionState.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.Wheel.animatedModelSuspension">
+            <summary>
+            Model position interpolated toward animatedSuspensionState according to modelSuspensionSpeed.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.Wheel.rollAngleDegrees">
             <summary>
             [0, 360] angle of rotation around wheel axle. Measured in degrees because Quaternion.AngleAxis takes degrees.
@@ -9134,6 +9514,11 @@
             Set replicated suspension state AND animated suspension state when vehicle is first received.
             </summary>
             <param name="state"></param>
+        </member>
+        <member name="M:SDG.Unturned.Wheel.CalculateWheelSpeed">
+            <summary>
+            Supported when locally simulated and on remote clients.
+            </summary>
         </member>
         <member name="M:SDG.Unturned.Wheel.UpdateModel(System.Single)">
             <summary>
@@ -9479,6 +9864,20 @@
             Defaults to true if <see cref="P:SDG.Unturned.ObjectAsset.holidayRestriction"/> is set.
             </summary>
         </member>
+        <member name="P:SDG.Unturned.ObjectAsset.ShouldLoadNavOnServer">
+            <summary>
+            If true, Nav game object will be instantiated in singleplayer and on dedicated server. Useful for objects
+            which need to affect navmesh baking without colliding with zombies during gameplay.
+            Defaults to true for "medium" and "large" objects.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ObjectAsset.ShouldLoadNavInEditor">
+            <summary>
+            If true, Nav game object will be instantiated in the level editor. Useful for objects which need collision
+            with zombies during gameplay without affecting navmesh baking.
+            Defaults to true for "medium" and "large" objects.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.ObjectAsset.causesFallDamage">
             <summary>
             Should landing on this object inflict fall damage?
@@ -9488,6 +9887,11 @@
             <summary>
             Property is not exposed at the moment because interactability properties should really be moved into some
             sort of sub-asset.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ObjectAsset.interactabilityChildPathOverride">
+            <summary>
+            Same as interactabilityDialogueRef, not public because it really needs to be cleaned up. :(
             </summary>
         </member>
         <member name="F:SDG.Unturned.ObjectAsset.rubbleEffectGuid">
@@ -9509,6 +9913,21 @@
         <member name="F:SDG.Unturned.ObjectAsset.rubbleRewardProbability">
             <summary>
             [0, 1] probability of dropping any rewards.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ObjectAsset.RubbleCanZombiesDamage">
+            <summary>
+            If true, zombies can attack this object if it's blocking them. Defaults to false.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ObjectAsset.RubbleZombieDamageMultiplier">
+            <summary>
+            Multiplier for damage from zombies if RubbleCanZombiesDamage is true.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ObjectAsset.RubbleNavMode">
+            <summary>
+            Controls how rubble affects Nav game object.
             </summary>
         </member>
         <member name="F:SDG.Unturned.ObjectAsset.shouldAddKillTriggers">
@@ -9684,10 +10103,11 @@
             </summary>
             <returns>True if bounds were determined, false otherwise.</returns>
         </member>
-        <member name="M:SDG.Unturned.CollisionUtil.ClosestPoint(UnityEngine.GameObject,UnityEngine.Vector3,System.Boolean)">
+        <member name="M:SDG.Unturned.CollisionUtil.ClosestPoint(UnityEngine.GameObject,UnityEngine.Vector3,System.Boolean,System.Int32)">
             <summary>
             Find colliders in gameObject and the point closest to position, otherwise use gameObject position.
             </summary>
+            <param name="layerMask">Collider is only included if its layer is enabled in layer mask.</param>
         </member>
         <member name="M:SDG.Unturned.CollisionUtil.OverlapSphere(UnityEngine.Vector3,System.Single,System.Int32,UnityEngine.QueryTriggerInteraction)">
             <summary>
@@ -10376,6 +10796,11 @@
             Invoked from tellEquip after change.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.PlayerEquipment.useableSkin">
+            <summary>
+            Skin applied to the currently equipped useable.
+            </summary>
+        </member>
         <member name="P:SDG.Unturned.PlayerEquipment.isUseableShowingMenu">
             <summary>
             Does equipped useable have a menu open?
@@ -10637,6 +11062,9 @@
             Multiplier for the maximum distance the gunshot can be heard.
             </summary>
         </member>
+        <member name="M:SDG.Unturned.IConvenientSavedata.DeleteBool(System.String)">
+            <returns>true if key existed and was removed.</returns>
+        </member>
         <member name="T:SDG.Unturned.ConvenientSavedata">
             <summary>
             Unturned equivalent of unity's PlayerPrefs.
@@ -10677,6 +11105,33 @@
             Number of bits needed to replicate PhysicsMaterialNetId.
             </summary>
         </member>
+        <member name="T:SDG.Unturned.IExplosionDamageable">
+            <summary>
+            Implemented by components to support taking damage from explosions.
+            Not intended for external use (yet?) and may need to change. 
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.IExplosionDamageable.IsEligibleForExplosionDamage">
+            <summary>
+            Used to exclude dead entities from further evaluation.
+            </summary>
+        </member>
+        <member name="M:SDG.Unturned.IExplosionDamageable.GetClosestPointToExplosion(UnityEngine.Vector3)">
+            <summary>
+            Used to sort damage from nearest to furthest.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.ExplosionDamageParameters">
+            <summary>
+            Intended for internal use only.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.ExplosionPoolData">
+            <summary>
+            Data that we pool to reduce allocations, but needs to be separate per-invocation of explosion in case it's
+            invoked recursively. (for example, by blowing up a vehicle)
+            </summary>
+        </member>
         <member name="E:SDG.Unturned.DamageTool.damagePlayerRequested">
             <summary>
             Replacement for playerDamaged.
@@ -10690,6 +11145,11 @@
         <member name="E:SDG.Unturned.DamageTool.damageAnimalRequested">
             <summary>
             Replacement for animalDamaged.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.DamageTool.explosionDataPool">
+            <summary>
+            Refer to ExplosionPoolData for pooling explanation.
             </summary>
         </member>
         <member name="M:SDG.Unturned.DamageTool.getStructureRootTransform(UnityEngine.Transform)">
@@ -10747,6 +11207,11 @@
             This unwieldy mess is the original explode function, but should be maintained for backwards compatibility with plugins.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.DamageTool.emptyKillsList">
+            <summary>
+            Used if explosion won't damage anything.
+            </summary>
+        </member>
         <member name="M:SDG.Unturned.DamageTool.explode(SDG.Unturned.ExplosionParameters,System.Collections.Generic.List{SDG.Unturned.EPlayerKill}@)">
             <summary>
             Do radial damage.
@@ -10775,6 +11240,13 @@
         <member name="M:SDG.Unturned.DamageTool.LocalSpawnBulletImpactEffect(UnityEngine.Vector3,UnityEngine.Vector3,System.String,UnityEngine.Transform)">
             <summary>
             parent should only be set if that system also calls ClearAttachments, otherwise attachedEffects will leak memory.
+            </summary>
+        </member>
+        <member name="M:SDG.Unturned.Attachments.SelectAttachmentParent(UnityEngine.Transform,SDG.Unturned.ItemCaliberAsset)">
+            <summary>
+            Nelson 2024-11-15: By default, attachments use their corresponding "hook" transform. For example, magazines
+            use the "Magazine" transform as their parent. If a child of the hook transform matches a caliber in the
+            attachment's caliber list that is used instead.
             </summary>
         </member>
         <member name="P:SDG.Unturned.VendorAsset.enableSorting">
@@ -11073,6 +11545,21 @@
             instigatingPlayer can be null. For example, if instigated by NpcGlobalEventMessenger.
             </summary>
         </member>
+        <member name="T:SDG.Unturned.ServerListCurationFile">
+            <summary>
+            Data in common between list downloaded from a GET request and a ServerListCurationAsset.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ServerListCurationFile.IconUrl">
+            <summary>
+            Optional web image path if icon isn't included.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCurationFile.latestBlockedServerCount">
+            <summary>
+            Incremented during server list refresh for each server blocked by this rule.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.BulletInfo.origin">
             <summary>
             Starting position when the bullet was fired.
@@ -11090,6 +11577,11 @@
             to account for bullet drop and that aim spread is relative to this direction. (For example, a shotgun may
             fire ~8 pellets in a cone around this direction.) Note also that in third-person the bullet can turn up to
             90 degrees from the aim direction if the camera is up against a wall.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.BulletInfo.gravityMultiplier">
+            <summary>
+            Combination of gun and attachments' bullet gravity multipliers.
             </summary>
         </member>
         <member name="M:SDG.Unturned.UseableGun.changeAttachmentRequested(SDG.Unturned.UseableGun.ChangeAttachmentRequestHandler,SDG.Unturned.Item,SDG.Unturned.ItemJar)">
@@ -11180,6 +11672,11 @@
             Since client can't predict chamber jams we fixup the predicted ammo count.
             </summary>
         </member>
+        <member name="M:SDG.Unturned.UseableGun.CalculateBulletGravity">
+            <summary>
+            Note: This is the m/s² acceleration, not the multiplier.
+            </summary>
+        </member>
         <member name="M:SDG.Unturned.UseableGun.GetInterpolatedAimAlpha">
             <summary>
             This is a bit of a hack... aimAccuracy is [0, maxAimingAccuracy] and changed during each FixedUpdate call,
@@ -11191,6 +11688,11 @@
         <member name="M:SDG.Unturned.UseableGun.UpdateHolographicReticulePosition">
             <summary>
             Holographic sights follow the true aiming direction regardless of viewmodel animation.
+            </summary>
+        </member>
+        <member name="M:SDG.Unturned.UseableGun.CalculateBulletGravityMultiplier">
+            <summary>
+            Note: This is the multiplier, not the m/s² acceleration.
             </summary>
         </member>
         <member name="M:SDG.Unturned.UseableGun.DetonateExplosiveMagazine(SDG.Unturned.ItemMagazineAsset,UnityEngine.Vector3,SDG.Unturned.Player,SDG.Unturned.ERagdollEffect)">
@@ -11330,6 +11832,37 @@
         <member name="F:SDG.Unturned.EClientMessage.InvokeMethod">
             <summary>
             Server calling an RPC.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.ExplosionSpawner">
+            <summary>
+            Allow Unity events to apply damage in a sphere. (doesn't have any visual effects)
+            Intended to replace unsupported/unintentional use of "Grenade.cs" and "Rocket.cs" scripts.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ExplosionSpawner.DamageType">
+            <summary>
+            Zombie explosion types have slight variations e.g. lighting zombies on fire.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ExplosionSpawner.AlertRadiusOverride">
+            <summary>
+            If greater than -0.5, overrides default radius zombies and animals will be alerted within.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ExplosionSpawner.PlayImpactEffects">
+            <summary>
+            If true, per-surface effects like blood splatter are created.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ExplosionSpawner.PenetrateBuildables">
+            <summary>
+            If true, explosion damage passes through Barricades and Structures.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ExplosionSpawner.LaunchSpeed">
+            <summary>
+            Speed to launch players away from blast position.
             </summary>
         </member>
         <member name="T:SDG.Unturned.FallDamageOverride">
@@ -12245,6 +12778,16 @@
             If target player is passenger in a vehicle this is their vehicle.
             </summary>
         </member>
+        <member name="F:SDG.Unturned.Zombie.targetObject">
+            <summary>
+            If zombie is stuck this was a nearby object potentially blocking our path.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.Zombie.stuckSearchTimer">
+            <summary>
+            Incremented while stuck. Prevents doing overlap test too frequently.
+            </summary>
+        </member>
         <member name="M:SDG.Unturned.Zombie.setTicking(System.Boolean)">
             <summary>
             Add or remove from ticking list if needed.
@@ -12325,6 +12868,18 @@
             If true, item has 100% quality. If false, item has a random quality.
             </summary>
         </member>
+        <member name="P:SDG.Unturned.ResourceAsset.DebrisVerticalOffset">
+            <summary>
+            Distance along tree's local up axis to offset debris spawn position. Defaults to 1.0.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ResourceAsset.MaxRandomAngleDeviation">
+            <summary>
+            Before <see cref="!:FoliageResourceInfoAsset"/> had randomization properties (which trees don't currently use
+            as of 2024-12-11 because rotation/scale aren't saved) each tree has some random rotation and scale variation
+            based on its position. This property controls the rotation away from upright.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.ResourceAsset.forageRewardExperience">
             <summary>
             Amount of experience to reward foraging player.
@@ -12339,6 +12894,12 @@
             <summary>
             Weapon must have matching blade ID to damage tree.
             Both weapons and trees default to zero so they can be damaged by default.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ResourceAsset.ShouldIgnoreCollisionBetweenStumpAndDebris">
+            <summary>
+            If true, prevent collisions between falling tree and the stump. (i.e., debris can fall through stump)
+            Defaults to true.
             </summary>
         </member>
         <member name="P:SDG.Unturned.ResourceAsset.holidayRestriction">
@@ -12590,6 +13151,11 @@
         <member name="T:SDG.Unturned.EDamageOrigin">
             <summary>
             Currently used by plugins to identify what damaged a buildable.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.EDamageOrigin.ExplosionSpawnerComponent">
+            <summary>
+            Explosion instigated by <see cref="T:SDG.Unturned.ExplosionSpawner"/>.
             </summary>
         </member>
         <member name="F:SDG.Unturned.INPCReward.grantDelaySeconds">
@@ -12962,6 +13528,26 @@
             Should setup of the default *.log file be disabled?
             </summary>
         </member>
+        <member name="P:SDG.Unturned.Logs.ShouldRedactLogs">
+            <summary>
+            If true, information like IP addresses and login tokens should be censored in vanilla logs.
+            Nelson 2024-11-11: Special thanks to Jdance and asineth0 in public issue #4740!
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.Logs.RedactionReplacement">
+            <summary>
+            Text to replace with if <see cref="F:SDG.Unturned.Logs.shouldRedactLogs"/> is enabled.
+            </summary>
+        </member>
+        <member name="M:SDG.Unturned.Logs.RedactIPv4Addresses(System.String@)">
+            <summary>
+            *ATTEMPTS* to replace IPv4 address(es) with <see cref="P:SDG.Unturned.Logs.RedactionReplacement"/>.
+            Should only be called if <see cref="P:SDG.Unturned.Logs.ShouldRedactLogs"/> is enabled.
+            Case-by-case redaction should be preferred for performance reasons over using this function. This function
+            is intended for third-party messages (e.g., BattlEye) that we don't have control over.
+            </summary>
+            <returns>True if message was modified.</returns>
+        </member>
         <member name="M:SDG.Unturned.Logs.getLogFilePath">
             <summary>
             Get logging to path.
@@ -13239,6 +13825,11 @@
         <member name="F:SDG.Unturned.UseableEventHook.OnInspectStarted">
             <summary>
             Invoked when item begins inspect animation.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.SleekServerCurationItem">
+            <summary>
+            Entry in the MenuPlayServerCurationUI list.
             </summary>
         </member>
         <member name="M:SDG.Unturned.SteamBBCodeUtils.removeYouTubePreviews(System.String@)">
@@ -13927,6 +14518,18 @@
             Defaults to true because most objects are not inside a culling volume. 
             </summary>
         </member>
+        <member name="M:SDG.Unturned.LevelObject.SetInteractableWantsNavActive(System.Boolean)">
+            <summary>
+            Used by InteractableObjectBinaryState to indicate whether it wants navGameObject to be active. It's only
+            active if both IOBS and Rubble want it active.
+            </summary>
+        </member>
+        <member name="M:SDG.Unturned.LevelObject.SetRubbleWantsNavActive(System.Boolean)">
+            <summary>
+            Used by InteractableObjectRubble to indicate whether it wants navGameObject to be active. It's only
+            active if both IOBS and Rubble want it active.
+            </summary>
+        </member>
         <member name="M:SDG.Unturned.LevelObject.OnWeatherBlendAlphaChanged(SDG.Unturned.WeatherAssetBase,System.Single)">
             <summary>
             Used if the object asset has weather blend alpha conditions.
@@ -14612,6 +15215,18 @@
             Find materials in finished ragdoll and replace them with the appropriate effect.
             </summary>
         </member>
+        <member name="T:SDG.Unturned.IAssetErrorContext">
+            <summary>
+            Context for the Assets.ReportError methods.
+            Nelson 2024-11-20: Converted from directly using asset to this interface so that asset-related features can
+            more easily log warnings to the in-game menu.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.IAssetErrorContext.AssetErrorPrefix">
+            <summary>
+            Format text to prefix any errors reported in this context. (e.g., this asset's name and ID)
+            </summary>
+        </member>
         <member name="M:SDG.Unturned.AlertTool.alert(SDG.Unturned.Player,UnityEngine.Vector3,System.Single,System.Boolean,UnityEngine.Vector3,System.Boolean)">
             <summary>
             Alerts any agents in the area to the player if needed.
@@ -14643,6 +15258,11 @@
             <summary>
             Call when the server encounters any error.
             Ignored if not running in CI mode, otherwise exits the server with error code 1.
+            </summary>
+        </member>
+        <member name="T:SDG.Unturned.SleekServerCurationRule">
+            <summary>
+            Entry in the MenuPlayServerCurationRulesUI list.
             </summary>
         </member>
         <member name="P:SDG.Unturned.ItemGeneratorAsset.burn">
@@ -14772,6 +15392,56 @@
             Called by owner and server when using consumeable on self.
             </summary>
         </member>
+        <member name="E:SDG.Unturned.ServerCurationItem.OnDataChanged">
+            <summary>
+            Invoked when web item is first loaded or reloaded.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCurationOutput.allowed">
+            <summary>
+            If false, a deny rule matched the input.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCurationOutput.matchedAnyRules">
+            <summary>
+            If true, at least one rule matched the input.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCurationOutput.allowOrDenyRule">
+            <summary>
+            If set, this was the final match.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCurationOutput.matchedRules">
+            <summary>
+            Optional. If set, filled with any rules that matched.
+            </summary>
+        </member>
+        <member name="M:SDG.Unturned.ServerListCuration.StartupLoadWebUrls">
+            <summary>
+            Called earlier during startup to try and have web lists ready by the time server browser is opened.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCuration.assetListChangeCounter">
+            <summary>
+            Used to detect asset refresh.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCuration.isListDirty">
+            <summary>
+            If true, list needs to be sorted.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCuration.areMergedRulesDirty">
+            <summary>
+            If true, MergeRules should be called before doing any filtering.
+            </summary>
+        </member>
+        <member name="F:SDG.Unturned.ServerListCuration.hasLoadedWebUrls">
+            <summary>
+            If false, LoadWebUrls still needs to be called.
+            </summary>
+        </member>
         <member name="F:SDG.Unturned.UseableMelee.playUseSoundTime">
             <summary>
             For non-repeat weapons the "Use" audio clip is played once time reaches this point.
@@ -14832,6 +15502,11 @@
         <member name="P:SDG.Unturned.ItemCaliberAsset.ballisticDamageMultiplier">
             <summary>
             Multiplier for normal bullet damage.
+            </summary>
+        </member>
+        <member name="P:SDG.Unturned.ItemCaliberAsset.BallisticGravityMultiplier">
+            <summary>
+            Multiplier for bullet acceleration due to gravity.
             </summary>
         </member>
         <member name="F:SDG.Unturned.ItemCaliberAsset.aimingMovementSpeedMultiplier">
@@ -15549,6 +16224,12 @@
             Surface square meters area.
             </summary>
         </member>
+        <member name="P:SDG.Framework.Foliage.FoliageSurfaceComponent.IsValidFoliageSurface">
+            <summary>
+            Nelson 2024-11-11: Collider may have been destroyed by an unexpected mod script configuration (or perhaps
+            simply missing in the first place). Should fix/prevent public issue #4749.
+            </summary>
+        </member>
         <member name="T:SDG.Framework.Foliage.FoliageStorageV2">
             <summary>
             Replacement foliage storage with all tiles in a single file.
@@ -15705,6 +16386,9 @@
             <summary>
             Legacy implementation of foliage storage, with one file per tile.
             </summary>
+        </member>
+        <member name="P:SDG.Framework.Foliage.IFoliageSurface.IsValidFoliageSurface">
+            <returns>True if other IFoliageSurface methods can be called.</returns>
         </member>
         <member name="P:SDG.Framework.Foliage.FoliageSystem.bakeSettings">
             <summary>
@@ -16141,6 +16825,11 @@
             Shutdown this service's external API. Should be called before closing the program.
             </summary>
         </member>
+        <member name="P:SDG.Provider.TempSteamworksMatchmaking.CuratorBlockedServerCount">
+            <summary>
+            Used to show a warning when a lot of servers are blocked by curation list.
+            </summary>
+        </member>
         <member name="F:SDG.Provider.TempSteamworksMatchmaking.autoJoinServerQuery">
             <summary>
             Reset after starting connection attempt, so set to true afterwards to auto join the server.
@@ -16149,6 +16838,11 @@
         <member name="F:SDG.Provider.UnturnedEconInfo.econ_type">
             <summary>
             EItemType
+            </summary>
+        </member>
+        <member name="F:SDG.Provider.UnturnedEconInfo.creationTimeUtc">
+            <summary>
+            Nelson 2024-12-06: This was added 2023-06-19, so unfortunately it will be inaccurate for older items.
             </summary>
         </member>
         <member name="T:SDG.Provider.UnturnedEconInfo.ERarity">
