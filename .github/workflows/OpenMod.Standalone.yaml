@@ -22,15 +22,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target-framework: [net7.0]
+        target-framework: [net8.0]
         runtime: [linux-x64, win-x64]
     steps:
-    - uses: actions/checkout@v3
-      name: Checkout Repository
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - uses: actions/setup-dotnet@v3
-      name: Setup .NET
+    - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.x
     - uses: ./.github/actions/project-build
@@ -43,12 +41,9 @@ jobs:
     - name: Get Release
       if: github.event_name == 'release'
       id: get-release
-      uses: bruceadams/get-release@v1.2.0
+      uses: bruceadams/get-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Install zip
-      if: github.event_name == 'release'
-      run: sudo apt-get install zip
     - name: Zip artifacts
       if: github.event_name == 'release'
       run: "cd ./standalone/OpenMod.Standalone/bin/Release/${{ matrix.target-framework }}/${{ matrix.runtime }} && zip -qq -r ./release.zip *"

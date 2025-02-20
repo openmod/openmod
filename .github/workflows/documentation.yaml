@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     name: GitHub Pages Deployment
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       name: Checkout Repository
       with:
         fetch-depth: 0
@@ -20,7 +20,7 @@ jobs:
       name: Build Documentation
       with:
         args: docs/docfx.json
-    - uses: peaceiris/actions-gh-pages@v3
+    - uses: peaceiris/actions-gh-pages@v4
       name: Publish Documentation on GitHub Pages
       with:
         publish_dir: docs/_site
