@@ -23,11 +23,10 @@ jobs:
     name: "OpenMod.Unturned.Module Build"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - uses: actions/setup-dotnet@v3
-      name: Setup .NET
+    - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.x
     - uses: ./.github/actions/project-build
@@ -39,12 +38,9 @@ jobs:
     - name: Get Release
       if: github.event_name == 'release'
       id: get-release
-      uses: bruceadams/get-release@v1.2.0
+      uses: bruceadams/get-release@v1.3.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Install zip
-      if: github.event_name == 'release'
-      run: sudo apt-get install zip
     - name: Zip artifacts
       if: github.event_name == 'release'
       run: "mkdir ./release && mkdir ./release/OpenMod.Unturned/ && mv ./unturned/OpenMod.Unturned.Module/bin/Release/netstandard2.1/linux-x64/* ./release/OpenMod.Unturned/ && mv ./release/OpenMod.Unturned/Readme.txt ./release && cd ./release && zip -qq -r ./release.zip *"
