@@ -18,6 +18,6 @@ jobs:
     - uses: ./.github/actions/nuget-pack
       id: nuget-pack
       with:
-        nuspec_path: rust/redist/OpenMod.Rust.Redist.nuspec
+        nuspec_path: rust/redist/OpenMod.Rust.Redist.csproj
         nuget_key: ${{ secrets.NUGET_DEPLOY_KEY }}
         nuget_push: true

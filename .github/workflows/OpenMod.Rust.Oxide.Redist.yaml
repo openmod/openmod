@@ -18,6 +18,6 @@ jobs:
     - uses: ./.github/actions/nuget-pack
       id: nuget-pack
       with:
-        nuspec_path: rust/oxide/redist/OpenMod.Rust.Oxide.Redist.nuspec
+        nuspec_path: rust/oxide/redist/OpenMod.Rust.Oxide.Redist.csproj
         nuget_key: ${{ secrets.NUGET_DEPLOY_KEY }}
         nuget_push: true
