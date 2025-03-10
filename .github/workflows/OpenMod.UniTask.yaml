@@ -15,11 +15,6 @@ jobs:
     - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.x
-    - uses: nuget/setup-nuget@v2
-      name: Setup NuGet
-      with:
-        nuget-api-key: ${{ secrets.NUGET_DEPLOY_KEY }}
-        nuget-version: '5.x'
     - uses: ./.github/actions/nuget-pack
       id: nuget-pack
       with:
