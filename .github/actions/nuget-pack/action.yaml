@@ -15,7 +15,7 @@ runs:
   using: "composite"
   steps:
     - name: Pack
-      run: dotnet pack ${{ inputs.nuspec_path }}
+      run: dotnet pack "${{ inputs.nuspec_path }}" --no-build
       shell: bash
     - name: Push to NuGet (Release)
       if: inputs.nuget_push == 'true'
