@@ -14,8 +14,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - id: get_nuspec_filename
+      run: |
+        echo "nuspec_filename=$(basename '${{ inputs.nuspec_path }}' .csproj)" >> $GITHUB_OUTPUT
+      shell: bash
     - name: Pack
-      run: nuget pack ${{ inputs.nuspec_path }}
+      run: dotnet pack "${{ inputs.nuspec_path }}" --output .
       shell: bash
     - name: Push to NuGet (Release)
       if: inputs.nuget_push == 'true'

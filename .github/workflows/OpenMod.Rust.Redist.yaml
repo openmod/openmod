@@ -11,19 +11,13 @@ jobs:
     name: "OpenMod.Rust.Redist Pack"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-dotnet@v3
-      name: Setup .NET
+    - uses: actions/checkout@v4
+    - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.x
-    - uses: nuget/setup-nuget@v1
-      name: Setup NuGet
-      with:
-        nuget-api-key: ${{ secrets.NUGET_DEPLOY_KEY }}
-        nuget-version: '5.x'
     - uses: ./.github/actions/nuget-pack
       id: nuget-pack
       with:
-        nuspec_path: rust/redist/OpenMod.Rust.Redist.nuspec
+        nuspec_path: rust/redist/OpenMod.Rust.Redist.csproj
         nuget_key: ${{ secrets.NUGET_DEPLOY_KEY }}
         nuget_push: true
