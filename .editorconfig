@@ -3,6 +3,19 @@ root = true
 [*]
 trim_trailing_whitespace = true
 dotnet_style_namespace_match_folder = true:suggestion
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
+tab_width = 4
+indent_size = 4
+end_of_line = crlf
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_prefer_auto_properties = true:silent
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = true:silent
+dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
+dotnet_style_prefer_conditional_expression_over_return = true:silent
 
 [*.{yaml,yml}]
 indent_style = space
@@ -137,7 +150,14 @@ csharp_style_expression_bodied_indexers = false:error
 csharp_style_expression_bodied_lambdas = when_on_single_line:error
 csharp_style_expression_bodied_methods = false:error
 csharp_style_expression_bodied_operators = false:error
-csharp_style_expression_bodied_properties = false:error
+csharp_style_expression_bodied_properties = when_on_single_line:error
 csharp_style_expression_bodied_local_functions = false:error
 csharp_style_namespace_declarations = block_scoped:error
 csharp_prefer_braces = true:error
+csharp_indent_labels = one_less_than_current
+csharp_using_directive_placement = outside_namespace:silent
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_prefer_method_group_conversion = true:silent
+csharp_style_prefer_top_level_statements = true:silent
+csharp_style_prefer_primary_constructors = true:suggestion
+csharp_prefer_system_threading_lock = true:suggestion
