@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenMod.API;
 using OpenMod.API.Commands;
 using OpenMod.API.Localization;
+using OpenMod.Core.Helpers;
 
 namespace OpenMod.Core.Commands
 {
@@ -155,7 +156,7 @@ namespace OpenMod.Core.Commands
             value = null;
             try
             {
-                value = GetAsync(index, type).GetAwaiter().GetResult();
+                value = AsyncHelper.RunSync(() => GetAsync(index, type));
                 return true;
             }
             catch

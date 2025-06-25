@@ -77,7 +77,7 @@ namespace OpenMod.Core.Commands
                     m_Commands.Add(new OpenModComponentBoundCommandRegistration(m_OpenModComponent, method));
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 m_Logger.LogDebug(ex, "Exception in ScanTypeForCommands for type: {Type}", type);
             }

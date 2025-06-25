@@ -16,11 +16,11 @@ using OpenMod.API.Persistence;
 using OpenMod.Core.Console;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
+using OpenMod.Core.Patching;
 using OpenMod.Extensions.Games.Abstractions;
 using OpenMod.NuGet;
 using OpenMod.Unturned.Events;
 using OpenMod.Unturned.Logging;
-using OpenMod.Unturned.Patching;
 using OpenMod.Unturned.RocketMod;
 using OpenMod.Unturned.Users;
 using SDG.Unturned;
@@ -39,7 +39,6 @@ namespace OpenMod.Unturned
         private readonly ILogger<OpenModUnturnedHost> m_Logger;
         private readonly NuGetPackageManager m_NuGetPackageManager;
         private readonly Lazy<UnturnedCommandHandler> m_UnturnedCommandHandler;
-        private readonly ILoggerFactory m_LoggerFactory;
         private readonly HashSet<string> m_Capabilities;
         private OpenModConsoleInputOutput? m_OpenModIoHandler;
         private List<ICommandInputOutput>? m_IoHandlers;
@@ -67,8 +66,7 @@ namespace OpenMod.Unturned
             ILogger<OpenModUnturnedHost> logger,
             NuGetPackageManager nuGetPackageManager,
             Lazy<ICommandExecutor> commandExecutor,
-            Lazy<UnturnedCommandHandler> unturnedCommandHandler,
-            ILoggerFactory loggerFactory)
+            Lazy<UnturnedCommandHandler> unturnedCommandHandler)
         {
             m_Runtime = runtime;
             m_HostInformation = hostInformation;
@@ -78,7 +76,6 @@ namespace OpenMod.Unturned
             m_Logger = logger;
             m_NuGetPackageManager = nuGetPackageManager;
             m_UnturnedCommandHandler = unturnedCommandHandler;
-            m_LoggerFactory = loggerFactory;
             WorkingDirectory = runtime.WorkingDirectory;
             LifetimeScope = lifetimeScope;
 
@@ -126,7 +123,6 @@ namespace OpenMod.Unturned
 
             try
             {
-                HarmonyExceptionHandler.LoggerFactoryGetterEvent += LoggerFactoryGetter;
                 m_Harmony = new Harmony(OpenModComponentId);
                 m_Harmony.PatchAll(GetType().Assembly);
             }
@@ -263,11 +259,6 @@ namespace OpenMod.Unturned
             return ShutdownTask().AsTask();
         }
 
-        private ILoggerFactory LoggerFactoryGetter()
-        {
-            return m_LoggerFactory;
-        }
-
         public void Dispose()
         {
             if (m_IsDisposing)
@@ -293,7 +284,6 @@ namespace OpenMod.Unturned
 
             try
             {
-                HarmonyExceptionHandler.LoggerFactoryGetterEvent -= LoggerFactoryGetter;
                 m_Harmony?.UnpatchAll(OpenModComponentId);
             }
             catch

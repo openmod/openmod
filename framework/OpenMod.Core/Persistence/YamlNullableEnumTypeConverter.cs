@@ -9,6 +9,7 @@ namespace OpenMod.Core.Persistence
     /// Fixes an issue introduced in YamlDotNet 9.1
     /// https://github.com/aaubry/YamlDotNet/issues/544
     [OpenModInternal]
+    [Obsolete("Moving from YamlDotNet to VYaml, this is kept for compatibility reasons")]
     public class YamlNullableEnumTypeConverter : IYamlTypeConverter
     {
         public bool Accepts(Type type)
@@ -16,7 +17,7 @@ namespace OpenMod.Core.Persistence
             return Nullable.GetUnderlyingType(type)?.IsEnum ?? false;
         }
 
-        public object? ReadYaml(IParser parser, Type type)
+        public object? ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             type = Nullable.GetUnderlyingType(type) ?? throw new ArgumentException("Expected nullable enum type for ReadYaml");
             var scalar = parser.Consume<Scalar>();
@@ -30,13 +31,13 @@ namespace OpenMod.Core.Persistence
             {
                 return Enum.Parse(type, scalar.Value);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception($"Invalid value: \"{scalar.Value}\" for {type.Name}", ex);
             }
         }
 
-        public void WriteYaml(IEmitter emitter, object? value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
             type = Nullable.GetUnderlyingType(type) ?? throw new ArgumentException("Expected nullable enum type for WriteYaml");
 

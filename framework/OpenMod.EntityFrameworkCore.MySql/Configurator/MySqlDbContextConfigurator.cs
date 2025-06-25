@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿extern alias DI_A;
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MySqlConnector;
 using OpenMod.EntityFrameworkCore.Configurator;
-using Pomelo.EntityFrameworkCore.MySql.Storage;
+
+using DI_A.Microsoft.Extensions.DependencyInjection;
 
 namespace OpenMod.EntityFrameworkCore.MySql.Configurator
 {

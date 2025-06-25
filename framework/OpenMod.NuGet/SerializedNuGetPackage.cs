@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using VYaml.Annotations;
 
 namespace OpenMod.NuGet
 {
-    public class SerializedNuGetPackage
+    [YamlObject]
+    public partial class SerializedNuGetPackage
     {
         public string Id { get; set; } = null!;
         public string Version { get; set; } = null!;

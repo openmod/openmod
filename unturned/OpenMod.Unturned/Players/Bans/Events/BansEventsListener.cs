@@ -8,9 +8,9 @@ using JetBrainsAnnotations::JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Nito.AsyncEx;
 using OpenMod.API.Users;
+using OpenMod.Core.Patching;
 using OpenMod.Core.Users;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using Steamworks;
 
@@ -149,7 +149,7 @@ namespace OpenMod.Unturned.Players.Bans.Events
         internal static class Patches
         {
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex, MethodBase original)
+            public static Exception? Cleanup(Exception? ex, MethodBase? original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;

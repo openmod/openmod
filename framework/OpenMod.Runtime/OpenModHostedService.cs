@@ -28,6 +28,7 @@ namespace OpenMod.Runtime
         private readonly IJobScheduler m_JobScheduler;
         private readonly IRuntime m_Runtime;
         private readonly IOptions<SmartFormatOptions> m_SmartFormatOptions;
+        private readonly ILoggerFactory m_LoggerFactory;
 
         public OpenModHostedService(
             ILogger<OpenModHostedService> logger,
@@ -39,7 +40,8 @@ namespace OpenMod.Runtime
             IEventBus eventBus,
             IJobScheduler jobScheduler,
             IRuntime runtime,
-            IOptions<SmartFormatOptions> smartFormatOptions)
+            IOptions<SmartFormatOptions> smartFormatOptions,
+            ILoggerFactory loggerFactory)
         {
             m_Logger = logger;
             m_PermissionChecker = permissionChecker;
@@ -51,6 +53,7 @@ namespace OpenMod.Runtime
             m_JobScheduler = jobScheduler;
             m_Runtime = runtime;
             m_SmartFormatOptions = smartFormatOptions;
+            m_LoggerFactory = loggerFactory;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -60,6 +63,7 @@ namespace OpenMod.Runtime
 
             m_Logger.LogInformation("Initializing for host: {HostName} v{HostVersion}",
                 m_HostInformation.HostName, m_HostInformation.HostVersion);
+
             await m_Host.InitAsync();
 
             foreach (var assembly in m_Runtime.HostAssemblies)

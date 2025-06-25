@@ -15,6 +15,7 @@ using System;
 using OpenMod.Core.Jobs;
 using SmartFormat.Extensions;
 using OpenMod.Core.Persistence;
+using OpenMod.Core.Persistence.Yaml.Formatters;
 
 namespace OpenMod.Core
 {
@@ -61,8 +62,14 @@ namespace OpenMod.Core
 
             serviceCollection.Configure<YamlDataStoreOptions>(options =>
             {
-                options.TryAddConverter<YamlNullableEnumTypeConverter>();
+#pragma warning disable CS0618 // Obsolete
+                options.TryAddConverter<YamlNullableEnumTypeConverter>(); 
                 options.TryAddConverter<YamlVector3TypeConverter>();
+#pragma warning restore CS0618
+
+                options.TryAddFormatter<YamlBanDataFormatter>();
+                options.TryAddFormatter<YamlScheduledJobFormatter>();
+                options.TryAddFormatter<YamlUserDataFormatter>();
             });
 
             serviceCollection.AddTransient<IStringLocalizerFactory, ConfigurationBasedStringLocalizerFactory>();
