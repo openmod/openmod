@@ -11,10 +11,7 @@ namespace OpenMod.Standalone
     {
         public void ConfigureServices(IOpenModServiceConfigurationContext openModStartupContext, IServiceCollection serviceCollection)
         {
-            serviceCollection.Configure<PermissionCheckerOptions>(options =>
-            {
-                options.AddPermissionCheckProvider<ConsolePermissionProvider>();
-            });
+            serviceCollection.Configure<PermissionCheckerOptions>(options => options.AddPermissionCheckProvider<ConsolePermissionProvider>());
         }
     }
 }
