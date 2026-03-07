@@ -76,7 +76,6 @@ namespace OpenMod.Unturned.Animals.Events
             var damageAmount = (ushort)Mathf.Min(ushort.MaxValue, Mathf.FloorToInt(parameters.damage * parameters.times));
 
             CSteamID instigator;
-            Player? savedPlayer = null;
             switch (parameters.instigator)
             {
                 case KillVolume or Barrier or InteractableTrap or InteractableSentry:
@@ -85,25 +84,11 @@ namespace OpenMod.Unturned.Animals.Events
                 case Bumper bumper:
                     var rootVehicle = bumper.transform.root;
 
-                    // Trains are linked with VehicleRef
-                    InteractableVehicle? vehicle;
-                    if (rootVehicle == null)
-                    {
-                        vehicle = null;
-                    }
-                    else if (rootVehicle.TryGetComponent<VehicleRef>(out var vehicleRef))
-                    {
-                        vehicle = vehicleRef.vehicle;
-                    }
-                    else if (!rootVehicle.TryGetComponent(out vehicle))
-                    {
-                        vehicle = null;
-                    }
+                    var vehicle = DamageTool.getVehicle(rootVehicle);
 
                     if (vehicle != null && vehicle.isDriven)
                     {
-                        savedPlayer = vehicle.passengers[0].player.player;
-                        instigator = savedPlayer.channel.owner.playerID.steamID;
+                        instigator = vehicle.passengers[0].player.playerID.steamID;
                     }
                     else
                     {
@@ -111,12 +96,9 @@ namespace OpenMod.Unturned.Animals.Events
                     }
 
                     break;
-
                 case Player player:
-                    savedPlayer = player;
                     instigator = player.channel.owner.playerID.steamID;
                     break;
-
                 default:
                     instigator = CSteamID.Nil;
                     break;
@@ -136,13 +118,9 @@ namespace OpenMod.Unturned.Animals.Events
             parameters.ragdollEffect = @event.RagdollEffect;
             parameters.limb = @event.Limb;
 
-            if (savedPlayer != null && (parameters.instigator as Player) != savedPlayer)
+            if (@event.Instigator != instigator)
             {
                 parameters.instigator = PlayerTool.getPlayer(@event.Instigator);
-            }
-            else if (instigator != Provider.server)
-            {
-                parameters.instigator = null;
             }
         }
 
