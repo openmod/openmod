@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
-using OpenMod.Unturned.Patching;
+using OpenMod.Core.Patching;
 
 namespace OpenMod.Unturned.Mono
 {
@@ -19,7 +19,7 @@ namespace OpenMod.Unturned.Mono
     internal static class PatchSocketTaskExtensions
     {
         [HarmonyCleanup]
-        public static Exception? Cleanup(Exception ex, MethodBase original)
+        public static Exception? Cleanup(Exception? ex, MethodBase? original)
         {
             HarmonyExceptionHandler.ReportCleanupException(typeof(PatchSocketTaskExtensions), ex, original);
             return null;

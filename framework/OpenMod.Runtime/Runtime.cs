@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using HarmonyLib;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,10 +21,11 @@ using OpenMod.API.Ioc;
 using OpenMod.API.Permissions;
 using OpenMod.API.Persistence;
 using OpenMod.Common.Hotloading;
+using OpenMod.Core;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Ioc;
+using OpenMod.Core.Patching;
 using OpenMod.Core.Permissions;
-using OpenMod.Core.Persistence;
 using OpenMod.Core.Plugins;
 using OpenMod.Core.Plugins.NuGet;
 using OpenMod.NuGet;
@@ -31,8 +33,7 @@ using Semver;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using VYaml.Serialization;
 
 namespace OpenMod.Runtime
 {
@@ -40,10 +41,13 @@ namespace OpenMod.Runtime
     [OpenModInternal]
     public sealed class Runtime : IRuntime
     {
+        private readonly Harmony m_Harmony;
+
         public Runtime()
         {
+            m_Harmony = new(OpenModComponentId);
             Version = VersionHelper.ParseAssemblyVersion(GetType().Assembly);
-            HostAssemblies = new List<Assembly>();
+            HostAssemblies = [];
             m_Logger = null!;
         }
 
@@ -62,7 +66,7 @@ namespace OpenMod.Runtime
 
         public string WorkingDirectory { get; private set; } = null!;
 
-        public string[] CommandlineArgs { get; private set; } = Array.Empty<string>();
+        public string[] CommandlineArgs { get; private set; } = [];
 
         public IDataStore DataStore { get; private set; } = null!;
 
@@ -149,7 +153,7 @@ namespace OpenMod.Runtime
                     Runtime = this,
                     LoggerFactory = m_LoggerFactory!,
                     NuGetPackageManager = nugetPackageManager,
-                    DataStore = new Dictionary<string, object>()
+                    DataStore = []
                 };
 
                 var startup = new OpenModStartup(startupContext);
@@ -160,16 +164,18 @@ namespace OpenMod.Runtime
                     startup.RegisterIocAssemblyAndCopyResources(assembly, string.Empty);
                 }
 
+                HarmonyExceptionHandler.LoggerFactoryGetterEvent += LoggerFactoryGetter;
+                m_Harmony.PatchAll(typeof(HarmonyUnpatchAllPatch).Assembly);
+
                 var configFile = Path.Combine(WorkingDirectory, "openmod.yaml");
                 if (File.Exists(configFile))
                 {
-                    var yaml = File.ReadAllText(configFile);
-                    var deserializer = new DeserializerBuilder()
-                        .WithTypeConverter(new YamlNullableEnumTypeConverter())
-                        .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                        .Build();
-
-                    var config = deserializer.Deserialize<Dictionary<string, object>>(yaml);
+                    var yaml = await File.ReadAllBytesAsync(configFile);
+                    if (yaml.Length == 0)
+                    {
+                        throw new Exception("openmod.yaml is corrupted, please delete the file and restart the server.");
+                    }
+                    var config = YamlSerializer.Deserialize<Dictionary<string, object>>(yaml);
 
                     var hotReloadingEnabled = true;
                     if (config.TryGetValue("hotreloading", out var unparsed))
@@ -251,7 +257,7 @@ namespace OpenMod.Runtime
                 nugetPackageManager.Logger = new OpenModNuGetLogger(m_LoggerFactory.CreateLogger("NuGet"));
 
                 var applicationLifetime = Host.Services.GetRequiredService<IHostApplicationLifetime>();
-                applicationLifetime.ApplicationStopping.Register(() => { AsyncHelper.RunSync(ShutdownAsync); });
+                applicationLifetime.ApplicationStopping.Register(() => AsyncHelper.RunSync(ShutdownAsync));
 
                 Status = RuntimeStatus.Initialized;
                 LifetimeScope = Host.Services.GetRequiredService<ILifetimeScope>().BeginLifetimeScopeEx(
@@ -304,6 +310,11 @@ namespace OpenMod.Runtime
                 Console.WriteLine(ex);
                 throw;
             }
+        }
+
+        private ILoggerFactory? LoggerFactoryGetter()
+        {
+            return m_LoggerFactory;
         }
 
         private Type? GetOpenmodHostInformation(IEnumerable<Assembly> openModHostAssemblies)
@@ -509,7 +520,7 @@ namespace OpenMod.Runtime
                         var path = Path.GetFullPath(fsw.Path);
                         foreach (var fileName in Directory.GetFileSystemEntries(path, "*"))
                         {
-                            hashtable.Add(fileName, createFileDataMethod.Invoke(null, new object[] { path, fileName }));
+                            hashtable.Add(fileName, createFileDataMethod.Invoke(null, [path, fileName]));
                         }
                     }
                 }
@@ -520,7 +531,7 @@ namespace OpenMod.Runtime
         {
             builder
                 .SetBasePath(WorkingDirectory)
-                .AddYamlFile("openmod.yaml", optional: false, reloadOnChange: true)
+                .AddYamlFileEx("openmod.yaml", false, true)
                 .AddEnvironmentVariables("OpenMod_")
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -670,10 +681,17 @@ namespace OpenMod.Runtime
 
             Status = RuntimeStatus.Unloaded;
 
+            m_Harmony.UnpatchAll(m_Harmony.Id);
+            HarmonyExceptionHandler.LoggerFactoryGetterEvent -= LoggerFactoryGetter;
+
             m_DateLogger = null;
             m_LoggerFactory = null;
 
+#if FEATURE_ASYNCDISPOSABLE
             await Log.CloseAndFlushAsync();
+#else
+            Log.CloseAndFlush();
+#endif
         }
     }
 }

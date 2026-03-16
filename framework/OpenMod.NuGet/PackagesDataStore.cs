@@ -4,29 +4,22 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Common;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using VYaml.Parser;
+using VYaml.Serialization;
 
 namespace OpenMod.NuGet
 {
     public class PackagesDataStore
     {
         private readonly string m_Path;
-        private readonly ISerializer m_Serializer;
-        private readonly IDeserializer m_Deserializer;
+        public ILogger? Logger { get; set; }
 
         public PackagesDataStore(string path)
         {
             m_Path = path;
-            m_Serializer = new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
-            m_Deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
         }
 
         public async Task AddOrUpdatePackageIdentity(PackageIdentity id)
@@ -48,7 +41,7 @@ namespace OpenMod.NuGet
                     Version = ConvertNugetVersion(id.Version)
                 };
 
-                file.Packages ??= new HashSet<SerializedNuGetPackage>();
+                file.Packages ??= [];
                 file.Packages.Add(package);
             }
 
@@ -85,7 +78,7 @@ namespace OpenMod.NuGet
         {
             if (!await ExistsAsync())
             {
-                await WritePackagesFile(GetDefaultFile());
+                await WritePackagesFile(GetDefaultFile()).ConfigureAwait(false);
             }
         }
 
@@ -99,7 +92,7 @@ namespace OpenMod.NuGet
             var file = await ReadPackagesFiles();
             if (file.Packages == null)
             {
-                return new List<PackageIdentity>();
+                return [];
             }
 
             return file.Packages
@@ -111,35 +104,49 @@ namespace OpenMod.NuGet
         {
             await EnsureExistsAsync();
 
-            var yaml = File.ReadAllText(m_Path);
-            var result = m_Deserializer.Deserialize<SerializedPackagesFile>(yaml);
-            result.Packages ??= new HashSet<SerializedNuGetPackage>();
-            return result;
+            await using var fileStream = File.OpenRead(m_Path);
+            if (fileStream.Length == 0)
+            {
+                return GetDefaultFile();
+            }
+
+            try
+            {
+                var result = await YamlSerializer.DeserializeAsync<SerializedPackagesFile>(fileStream);
+                result.Packages ??= [];
+                return result;
+            }
+            catch(YamlParserException ex)
+            {
+                Logger?.LogError($"Fail to deserialize packages.yaml: {ex}");
+                var file = GetDefaultFile();
+                await WritePackagesFile(file);
+                return file;
+            }
         }
 
-        private Task WritePackagesFile(SerializedPackagesFile file)
+        private async Task WritePackagesFile(SerializedPackagesFile file)
         {
-            var yaml = m_Serializer.Serialize(file);
-            File.WriteAllText(m_Path, yaml, Encoding.UTF8);
-            return Task.CompletedTask;
+            var yaml = YamlSerializer.SerializeToString(file);
+            await File.WriteAllTextAsync(m_Path, yaml, Encoding.UTF8).ConfigureAwait(false);
         }
 
-        private SerializedPackagesFile GetDefaultFile()
+        private static SerializedPackagesFile GetDefaultFile()
         {
             return new()
             {
-                Packages = new HashSet<SerializedNuGetPackage>()
+                Packages = []
             };
         }
 
-        private NuGetVersion? ConvertOpenModVersion(string version)
+        private static NuGetVersion? ConvertOpenModVersion(string version)
         {
             return !version.Equals("latest", StringComparison.OrdinalIgnoreCase)
                 ? new NuGetVersion(version)
                 : null;
         }
 
-        private string ConvertNugetVersion(NuGetVersion? version)
+        private static string ConvertNugetVersion(NuGetVersion? version)
         {
             return version?.OriginalVersion ?? "latest";
         }

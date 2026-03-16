@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using OpenMod.Core.Configuration;
 
 // ReSharper disable once CheckNamespace
@@ -25,7 +26,7 @@ namespace Microsoft.Extensions.Configuration
         /// <returns>The <see cref="IConfigurationBuilder"/>.</returns>
         public static IConfigurationBuilder AddYamlFileEx(this IConfigurationBuilder builder, string path)
         {
-            return AddYamlFileEx(builder, provider: null, variables: null, path: path, optional: false, reloadOnChange: false);
+            return AddYamlFileEx(builder, null, path, null, false, false);
         }
 
         /// <summary>
@@ -34,12 +35,12 @@ namespace Microsoft.Extensions.Configuration
         /// </summary>
         /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
         /// <param name="path">Path relative to the base path stored in
-        /// <see cref="IConfigurationBuilder.Properties"/> of <paramref name="builder"/>.</param>
         /// <param name="optional">Whether the file is optional.</param>
+        /// <see cref="IConfigurationBuilder.Properties"/> of <paramref name="builder"/>.</param>
         /// <returns>The <see cref="IConfigurationBuilder"/>.</returns>
         public static IConfigurationBuilder AddYamlFileEx(this IConfigurationBuilder builder, string path, bool optional)
         {
-            return AddYamlFileEx(builder, provider: null, variables: null, path: path, optional: optional, reloadOnChange: false);
+            return AddYamlFileEx(builder, null, path, null, optional, false);
         }
 
         /// <summary>
@@ -48,13 +49,13 @@ namespace Microsoft.Extensions.Configuration
         /// </summary>
         /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
         /// <param name="path">Path relative to the base path stored in
-        /// <see cref="IConfigurationBuilder.Properties"/> of <paramref name="builder"/>.</param>
         /// <param name="optional">Whether the file is optional.</param>
         /// <param name="reloadOnChange">Whether the configuration should be reloaded if the file changes.</param>
+        /// <see cref="IConfigurationBuilder.Properties"/> of <paramref name="builder"/>.</param>
         /// <returns>The <see cref="IConfigurationBuilder"/>.</returns>
         public static IConfigurationBuilder AddYamlFileEx(this IConfigurationBuilder builder, string path, bool optional, bool reloadOnChange)
         {
-            return AddYamlFileEx(builder, provider: null, variables: null, path: path, optional: optional, reloadOnChange: reloadOnChange);
+            return AddYamlFileEx(builder, null, path, null, optional, reloadOnChange);
         }
 
         /// <summary>
@@ -63,14 +64,14 @@ namespace Microsoft.Extensions.Configuration
         /// </summary>
         /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
         /// <param name="path">Path relative to the base path stored in
-        /// <see cref="IConfigurationBuilder.Properties"/> of <paramref name="builder"/>.</param>
         /// <param name="variables">Variables to replace.</param>
         /// <param name="optional">Whether the file is optional.</param>
         /// <param name="reloadOnChange">Whether the configuration should be reloaded if the file changes.</param>
+        /// <see cref="IConfigurationBuilder.Properties"/> of <paramref name="builder"/>.</param>
         /// <returns>The <see cref="IConfigurationBuilder"/>.</returns>
         public static IConfigurationBuilder AddYamlFileEx(this IConfigurationBuilder builder, string path, IDictionary<string, string> variables, bool optional, bool reloadOnChange)
         {
-            return AddYamlFileEx(builder, provider: null, path: path, variables: variables, optional: optional, reloadOnChange: reloadOnChange);
+            return AddYamlFileEx(builder, null, path, variables, optional, reloadOnChange);
         }
 
         /// <summary>

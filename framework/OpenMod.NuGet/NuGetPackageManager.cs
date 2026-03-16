@@ -25,7 +25,19 @@ namespace OpenMod.NuGet
     {
         public delegate Assembly AssemblyLoader(byte[] assemblyData, byte[]? assemblySymbols);
 
-        public ILogger Logger { get; set; }
+        private ILogger? m_Logger;
+        public ILogger Logger
+        {
+            get => m_Logger!;
+            set
+            {
+                m_Logger = value;
+                if (m_PackagesDataStore != null)
+                {
+                    m_PackagesDataStore.Logger = value;
+                }
+            }
+        }
         public string PackagesDirectory { get; }
 
         private readonly ISettings m_NugetSettings;
@@ -49,12 +61,12 @@ namespace OpenMod.NuGet
             "F.ItemRestrictions"
         };
 
-        private static readonly string[] s_PublisherBlacklist = new string[] { };
+        private static readonly string[] s_PublisherBlacklist = [];
 
         private static readonly ConcurrentDictionary<string, List<Assembly>> s_LoadedPackages = new();
         public bool AssemblyResolverInstalled
         {
-            get { return m_AssemblyResolverInstalled; }
+            get => m_AssemblyResolverInstalled;
         }
 
         private bool m_AssemblyResolverInstalled;
@@ -82,7 +94,7 @@ namespace OpenMod.NuGet
             if (usePackagesFiles)
             {
                 m_PackagesDataStore = new PackagesDataStore(Path.Combine(packagesDirectory, "packages.yaml"));
-                m_PackagesDataStore.EnsureExistsAsync().GetAwaiter().GetResult();
+                Task.WaitAll(m_PackagesDataStore.EnsureExistsAsync());
             }
 
             Logger = new NullLogger();
@@ -107,12 +119,8 @@ namespace OpenMod.NuGet
 
             m_FrameworkReducer = new FrameworkReducer();
 
-#if NETSTANDARD2_1_OR_GREATER
             // checking if running under Mono
             if (RuntimeEnvironmentHelper.IsMono)
-#else
-            if (false)
-#endif
             {
                 // Using Mono that supports .netstandard2.1 and .net4.8.0
                 var net48 = new NuGetFramework(".NETFramework", new Version(4, 8, 0, 0));

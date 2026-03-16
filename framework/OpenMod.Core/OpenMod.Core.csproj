@@ -27,34 +27,30 @@
       <PrivateAssets>all</PrivateAssets>
   	</PackageReference>
   	<PackageReference Include="Lib.Harmony.Thin" Version="2.3.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="8.0.1" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="morelinq" Version="4.2.0" />
-    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
+    <PackageReference Include="morelinq" Version="4.3.0" />
     <PackageReference Include="Nito.AsyncEx.Context" Version="5.1.2" />
-    <PackageReference Include="Nito.AsyncEx.Tasks" Version="5.1.2" />
-    <PackageReference Include="RuntimeNullables.Fody" Version="1.0.6">
-	  <PrivateAssets>all</PrivateAssets>
-	</PackageReference>
-    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog" Version="4.0.0" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
+    <PackageReference Include="RuntimeNullables.Fody" Version="1.0.6">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="SmartFormat" Version="3.4.0" />
     <PackageReference Include="SmartFormat.Extensions.Time" Version="3.4.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
+    <PackageReference Include="YamlDotNet" Version="16.0.0" />
   </ItemGroup>
 
   <ItemGroup>
 	  <ProjectReference Include="..\OpenMod.Analyzers\OpenMod.Analyzers.csproj">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </ProjectReference>
     <ProjectReference Include="..\OpenMod.API\OpenMod.API.csproj" />
     <ProjectReference Include="..\OpenMod.Common\OpenMod.Common.csproj" />

@@ -161,7 +161,7 @@ namespace OpenMod.Core.Plugins
                         {
                             configurationBuilder
                                 .SetBasePath(pluginWorkingDirectory)
-                                .AddYamlFile("config.yaml", optional: true, reloadOnChange: true);
+                                .AddYamlFileEx("config.yaml", optional: true, reloadOnChange: true);
                         }
 
                         var configuration = configurationBuilder

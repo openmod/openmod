@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MonoMod.ILHelpers" Version="1.0.1" Aliases="MonoMod" />
+    <PackageReference Include="MonoMod.ILHelpers" Version="1.1.0" Aliases="MonoMod" />
     <PackageReference Include="OpenMod.Unturned.Redist" Version="3.24.6.1">
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
@@ -35,7 +35,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\extensions\OpenMod.Extensions.Economy.Abstractions\OpenMod.Extensions.Economy.Abstractions.csproj" />
     <ProjectReference Include="..\..\extensions\OpenMod.Extensions.Games.Abstractions\OpenMod.Extensions.Games.Abstractions.csproj" />
-    <ProjectReference Include="..\..\framework\OpenMod.Runtime\OpenMod.Runtime.csproj" />
     <ProjectReference Include="..\..\unityengine\OpenMod.UnityEngine\OpenMod.UnityEngine.csproj" />
   </ItemGroup>
 

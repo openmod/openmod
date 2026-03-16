@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using VYaml.Annotations;
 
 namespace OpenMod.Core.Permissions.Data
 {
-    [Serializable]
-    public sealed class PermissionRoleData
+    [Serializable, YamlObject]
+    public sealed partial class PermissionRoleData
     {
         public string? Id { get; set; }
         public int Priority { get; set; }
@@ -16,7 +17,7 @@ namespace OpenMod.Core.Permissions.Data
 
         public PermissionRoleData()
         {
-            Data = new Dictionary<string, object?>();
+            Data = [];
             Parents = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             Permissions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
         }

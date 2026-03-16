@@ -1,9 +1,13 @@
-﻿using Autofac;
+﻿extern alias DI_A;
+
+using Autofac;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OpenMod.EntityFrameworkCore.Extensions;
 using OpenMod.EntityFrameworkCore.MySql.Configurator;
 using System;
+
+using ServiceLifetime = DI_A.Microsoft.Extensions.DependencyInjection.ServiceLifetime;
 
 namespace OpenMod.EntityFrameworkCore.MySql.Extensions
 {

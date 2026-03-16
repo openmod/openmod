@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenMod.API.Prioritization;
+using VYaml.Annotations;
 
 namespace OpenMod.Core.Commands
 {
-    [Serializable]
-    public sealed class RegisteredCommandData
+    [Serializable, YamlObject]
+    public sealed partial class RegisteredCommandData
     {
         public string? Id { get; set; } = null!;
 

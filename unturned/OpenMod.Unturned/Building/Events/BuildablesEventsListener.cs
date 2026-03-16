@@ -3,8 +3,8 @@ using System;
 using System.Reflection;
 using HarmonyLib;
 using JetBrainsAnnotations::JetBrains.Annotations;
+using OpenMod.Core.Patching;
 using OpenMod.Unturned.Events;
-using OpenMod.Unturned.Patching;
 using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
@@ -424,7 +424,7 @@ namespace OpenMod.Unturned.Building.Events
         private static class Patches
         {
             [HarmonyCleanup]
-            public static Exception? Cleanup(Exception ex, MethodBase original)
+            public static Exception? Cleanup(Exception? ex, MethodBase? original)
             {
                 HarmonyExceptionHandler.ReportCleanupException(typeof(Patches), ex, original);
                 return null;

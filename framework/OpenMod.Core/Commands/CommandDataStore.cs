@@ -70,7 +70,7 @@ namespace OpenMod.Core.Commands
             var commandData = await GetRegisteredCommandAsync(commandId) ?? new RegisteredCommandData();
             if (commandData.Data == null)
             {
-                commandData.Data = new Dictionary<string, object?>();
+                commandData.Data = [];
             }
             else if (commandData.Data.ContainsKey(key))
             {
@@ -89,7 +89,7 @@ namespace OpenMod.Core.Commands
             }
 
             var commandsData = await GetRegisteredCommandsAsync();
-            var commands = commandsData.Commands ?? new List<RegisteredCommandData>();
+            var commands = commandsData.Commands ?? [];
 
             var idx = commands.FindIndex(c =>
                 c.Id?.Equals(commandData.Id, StringComparison.OrdinalIgnoreCase) ?? false);
@@ -159,7 +159,7 @@ namespace OpenMod.Core.Commands
         {
             return new()
             {
-                Commands = new List<RegisteredCommandData>()
+                Commands = []
             };
         }
 

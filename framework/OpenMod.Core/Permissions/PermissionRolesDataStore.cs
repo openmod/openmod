@@ -2,19 +2,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenMod.API;
-using OpenMod.API.Eventing;
 using OpenMod.API.Ioc;
 using OpenMod.API.Persistence;
 using OpenMod.API.Prioritization;
 using OpenMod.Core.Helpers;
 using OpenMod.Core.Permissions.Data;
-using OpenMod.Core.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using OpenMod.Core.Configuration;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using OpenMod.Core.Persistence;
 
 namespace OpenMod.Core.Permissions
 {
@@ -27,36 +24,23 @@ namespace OpenMod.Core.Permissions
 
         private readonly IDataStore m_DataStore;
         private readonly ILogger<PermissionRolesDataStore> m_Logger;
+        private readonly IOpenModSerializer m_Serializer;
         private readonly IRuntime m_Runtime;
         private IDisposable? m_FileChangeWatcher;
         private PermissionRolesData? m_CachedPermissionRolesData;
 
-        private readonly ISerializer m_Serializer;
-        private readonly IDeserializer m_Deserializer;
-
-        public List<PermissionRoleData> Roles { get => m_CachedPermissionRolesData!.Roles ?? new List<PermissionRoleData>(); }
+        public List<PermissionRoleData> Roles { get => m_CachedPermissionRolesData!.Roles ?? []; }
 
         public PermissionRolesDataStore(
             ILogger<PermissionRolesDataStore> logger,
             IOpenModDataStoreAccessor dataStoreAccessor,
-            IRuntime runtime,
-            IEventBus eventBus)
+            IOpenModSerializer serializer,
+            IRuntime runtime)
         {
             m_DataStore = dataStoreAccessor.DataStore;
             m_Logger = logger;
+            m_Serializer = serializer;
             m_Runtime = runtime;
-
-            m_Serializer = new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .WithTypeConverter(new YamlNullableEnumTypeConverter())
-                .DisableAliases()
-                .Build();
-
-            m_Deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .IgnoreUnmatchedProperties()
-                .WithTypeConverter(new YamlNullableEnumTypeConverter())
-                .Build();
 
             AsyncHelper.RunSync(InitAsync);
         }
@@ -122,7 +106,7 @@ namespace OpenMod.Core.Permissions
             return Task.FromResult<PermissionRoleData?>(role);
         }
 
-        public Task<T?> GetRoleDataAsync<T>(string roleId, string key)
+        public async Task<T?> GetRoleDataAsync<T>(string roleId, string key)
         {
             if (string.IsNullOrEmpty(roleId))
             {
@@ -137,28 +121,27 @@ namespace OpenMod.Core.Permissions
             var role = Roles.Find(d => d.Id?.Equals(roleId, StringComparison.OrdinalIgnoreCase) ?? false);
             if (role == null)
             {
-                return Task.FromException<T?>(new Exception($"Role does not exist: {roleId}"));
+                throw new Exception($"Role does not exist: {roleId}");
             }
 
             if (role.Data == null || !role.Data.ContainsKey(key))
             {
-                return Task.FromResult<T?>(default);
+                return default;
             }
 
             var dataObject = role.Data[key];
             if (dataObject is T obj)
             {
-                return Task.FromResult<T?>(obj);
+                return obj;
             }
 
             if (dataObject == default)
             {
-                return Task.FromResult<T?>(default);
+                return default;
             }
 
-            var serialized = m_Serializer.Serialize(dataObject);
-
-            return Task.FromResult<T?>(m_Deserializer.Deserialize<T>(serialized));
+            var serialized = await m_Serializer.SerializeAsync(dataObject);
+            return await m_Serializer.DeserializeAsync<T?>(serialized);
         }
 
         public virtual async Task ReloadAsync()

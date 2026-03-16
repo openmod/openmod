@@ -8,6 +8,7 @@ using YamlDotNet.Serialization;
 namespace OpenMod.Core.Persistence
 {
     [OpenModInternal]
+    [Obsolete("Moving from YamlDotNet to VYaml, this is kept for compatibility reasons")]
     public class YamlVector3TypeConverter : IYamlTypeConverter
     {
         private const string c_YamlKeyOfX = "x";
@@ -21,7 +22,7 @@ namespace OpenMod.Core.Persistence
             return type == typeof(Vector3);
         }
 
-        public object ReadYaml(IParser parser, Type type)
+        public object ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
         {
             parser.Consume<MappingStart>();
 
@@ -54,7 +55,7 @@ namespace OpenMod.Core.Persistence
             }
         }
 
-        public void WriteYaml(IEmitter emitter, object? value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer rootSerializer)
         {
             if (value == null)
             {

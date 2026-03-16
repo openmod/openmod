@@ -7,8 +7,6 @@ namespace OpenMod.Core.Users
 {
     public class OfflineUser : UserBase
     {
-        private readonly UserData m_Data;//todo
-
         public OfflineUser(IUserProvider userProvider, IUserDataStore userDataStore,  UserData data) : base(userProvider, userDataStore)
         {
             if (data == null)
@@ -19,7 +17,6 @@ namespace OpenMod.Core.Users
             Id = data.Id ?? throw new InvalidOperationException("UserData.Id was null");
             Type = data.Type ?? throw new InvalidOperationException("UserData.Type was null");
             DisplayName = data.LastDisplayName ?? Id;
-            m_Data = data;
         }
 
         public override Task PrintMessageAsync(string message)
