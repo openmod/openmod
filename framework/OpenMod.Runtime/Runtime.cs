@@ -664,6 +664,13 @@ namespace OpenMod.Runtime
 
             if (Host is not null)
             {
+                IOpenModHost openModHost = LifetimeScope.Resolve<IOpenModHost>();
+
+                if (openModHost is not null)
+                {
+                    await openModHost.DisposeSyncOrAsync();
+                }
+
                 await Host.DisposeSyncOrAsync();
                 Host = null;
             }

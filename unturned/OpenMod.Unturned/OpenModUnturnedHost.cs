@@ -302,6 +302,7 @@ namespace OpenMod.Unturned
             }
 
             UnbindUnturnedEvents();
+            m_UnturnedCommandHandler.Value.Unsubscribe();
         }
     }
 }
